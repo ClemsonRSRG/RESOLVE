@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.parsing;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
@@ -2077,27 +2078,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a math
+     * type theorem declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterMathTypeTheoremDecl(
-            ResolveParser.MathTypeTheoremDeclContext ctx) {
-        super.enterMathTypeTheoremDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Type theorem declaration node in ANTLR4 AST.
      */
     @Override
     public void exitMathTypeTheoremDecl(
             ResolveParser.MathTypeTheoremDeclContext ctx) {
-        super.exitMathTypeTheoremDecl(ctx);
+        List<MathVarDec> varDecls =
+                Utilities.collect(MathVarDec.class,
+                        ctx.mathVariableDeclGroup(), myNodes);
+        Exp assertionExp = (Exp) myNodes.removeFrom(ctx.mathImpliesExp());
+
+        myNodes.put(ctx, new MathTypeTheoremDec(createPosSymbol(ctx.name),
+                varDecls, assertionExp));
     }
 
     // -----------------------------------------------------------

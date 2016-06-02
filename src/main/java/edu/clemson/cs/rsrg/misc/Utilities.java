@@ -63,7 +63,7 @@ public class Utilities {
             ParseTreeProperty<? extends E> annotations) {
         List<T> result = new ArrayList<>();
         for (ParseTree node : nodes) {
-            result.add(expectedType.cast(annotations.get(node)));
+            result.add(expectedType.cast(annotations.removeFrom(node)));
         }
         return result;
     }
