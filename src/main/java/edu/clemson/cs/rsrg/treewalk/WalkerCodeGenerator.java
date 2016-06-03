@@ -29,6 +29,7 @@ import java.util.Set;
  * @author Blair Durkee
  * @author Yu-Shan Sun
  * @author Daniel Welch
+ *
  * @version 2.0
  */
 public class WalkerCodeGenerator {
