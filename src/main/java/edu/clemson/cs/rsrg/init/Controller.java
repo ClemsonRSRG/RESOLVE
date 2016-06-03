@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.errorhandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.pipeline.DebugOutputPipeline;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.parsing.ResolveLexer;
@@ -137,12 +138,17 @@ public class Controller {
             // Begin analyzing the file
             //AnalysisPipeline analysisPipe =
             //        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
+            DebugOutputPipeline debugPipe = new DebugOutputPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
-                // DEBUG: Print the entire ModuleDec.
+                // DEBUG: Print the entire ModuleDec and generate output files
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                    ModuleDec dec = myCompileEnvironment.getModuleAST(m);
                     myErrorHandler.info(null, "\n-----------------------------\n");
-                    myErrorHandler.info(null, myCompileEnvironment.getModuleAST(m).asString(0, 4));
+                    myErrorHandler.info(null, dec.asString(0, 4));
                     myErrorHandler.info(null, "\n-----------------------------\n");
+
+                    // Generate output files.
+                    debugPipe.process(m);
                 }
 
                 //analysisPipe.process(m);
