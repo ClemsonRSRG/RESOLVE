@@ -32,9 +32,21 @@ import edu.clemson.cs.rsrg.absyn.expressions.*;
 
 public abstract class TreeWalkerVisitor {
 
+    // ===========================================================
+    // Visitor Methods
+    // ===========================================================
+
+    // -----------------------------------------------------------
+    // All objects
+    // -----------------------------------------------------------
+
     public void preAny(ResolveConceptualElement e) {}
 
     public void postAny(ResolveConceptualElement e) {}
+
+    // -----------------------------------------------------------
+    // Each object
+    // -----------------------------------------------------------
 
     public boolean walkEqualsExp(EqualsExp e) {
         return false;
