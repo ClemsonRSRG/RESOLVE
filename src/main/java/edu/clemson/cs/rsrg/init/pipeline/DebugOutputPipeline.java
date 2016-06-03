@@ -97,7 +97,9 @@ public class DebugOutputPipeline extends AbstractPipeline {
         sb.append("}\n");
 
         writeToFile(outputFileName, sb.toString());
-        System.out.println("Exported ModuleDec to dot file: " + outputFileName);
+
+        myCompileEnvironment.getErrorHandler().info(null,
+                "Exported ModuleDec to dot file: " + outputFileName);
     }
 
     /**
@@ -129,7 +131,9 @@ public class DebugOutputPipeline extends AbstractPipeline {
         sb.append("}\n");
 
         writeToFile(outputFileName, sb.toString());
-        System.out.println("Exported ModuleDec to svg file: " + outputFileName);
+
+        myCompileEnvironment.getErrorHandler().info(null,
+                "Exported ModuleDec to svg file: " + outputFileName);
     }
 
     /**

@@ -14,11 +14,13 @@ package edu.clemson.cs.rsrg.treewalk;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.VirtualListNode;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * <p>The {@code TreeWalker} is used to apply the visitor pattern to the
@@ -77,9 +79,7 @@ public class TreeWalker {
                 // invoke the "pre" visitor method(s)
                 invokeVisitorMethods("pre", e);
 
-                java.util.List<ResolveConceptualElement> children =
-                        e.getChildren();
-
+                List<ResolveConceptualElement> children = e.getChildren();
                 if (children.size() > 0) {
                     Iterator<ResolveConceptualElement> iter =
                             children.iterator();
@@ -123,7 +123,7 @@ public class TreeWalker {
         // Get the heirarchy of classes from which this node inherits
         // e.g., [ConceptModuleDec, ModuleDec, Dec, ResolveConceptualElement]
         Class<?> elementClass = e[0].getClass();
-        ArrayList<Class<?>> classHierarchy = new ArrayList<Class<?>>();
+        List<Class<?>> classHierarchy = new ArrayList<>();
 
         if (list) {
             classHierarchy.add(((VirtualListNode) e[0]).getParent().getClass());
@@ -187,20 +187,14 @@ public class TreeWalker {
                 //This is fine if we're dealing with a virtual node, otherwise
                 //it shouldn't be possible
                 if (!list) {
-                    throw new RuntimeException(nsme);
+                    throw new MiscErrorException("Cannot locate method", nsme);
                 }
             }
             catch (IllegalAccessException iae) {
-                throw new RuntimeException(iae);
+                throw new MiscErrorException("Error accessing class: " + currentClass.getSimpleName(), iae);
             }
             catch (InvocationTargetException ite) {
-                Throwable iteCause = ite.getCause();
-
-                if (iteCause instanceof RuntimeException) {
-                    throw (RuntimeException) iteCause;
-                }
-
-                throw new RuntimeException(iteCause);
+                throw new MiscErrorException("Target invocation error for class: " + currentClass.getSimpleName(), ite);
             }
         }
 
@@ -219,7 +213,7 @@ public class TreeWalker {
      */
     private boolean walkOverride(ResolveConceptualElement e) {
         Class<?> elementClass = e.getClass();
-        ArrayList<Class<?>> classHierarchy = new ArrayList<Class<?>>();
+        List<Class<?>> classHierarchy = new ArrayList<>();
         while (elementClass != ResolveConceptualElement.class) {
             classHierarchy.add(0, elementClass);
             elementClass = elementClass.getSuperclass();
@@ -241,26 +235,19 @@ public class TreeWalker {
                 }
                 catch (NoSuchMethodException nsme) {
                     //Shouldn't be possible
-                    throw new RuntimeException(nsme);
+                    throw new MiscErrorException("Cannot locate method", nsme);
                 }
                 catch (IllegalAccessException iae) {
                     //Shouldn't be possible
-                    throw new RuntimeException(iae);
+                    throw new MiscErrorException("Error accessing class: " + c.getSimpleName(), iae);
                 }
                 catch (InvocationTargetException ite) {
                     //An exception was thrown inside the corresponding walk method
-                    Throwable iteCause = ite.getCause();
-
-                    if (iteCause instanceof RuntimeException) {
-                        throw (RuntimeException) iteCause;
-                    }
-
-                    throw new RuntimeException(iteCause);
+                    throw new MiscErrorException("Target invocation error for class: " + c.getSimpleName(), ite);
                 }
             }
         }
 
         return foundOverride;
     }
-
 }

@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn;
 
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import java.util.*;
 
 /**
@@ -47,7 +48,7 @@ public class VirtualListNode extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This object is used by the {@link Treewalker} class to create
+     * <p>This object is used by the {@link TreeWalker} class to create
      * virtual list nodes for all the children objects inside the current
      * traversing object.</p>
      *
@@ -89,6 +90,7 @@ public class VirtualListNode extends ResolveConceptualElement {
     public VirtualListNode clone() {
         List<ResolveConceptualElement> listCopy = new ArrayList<>(myList.size());
         Collections.copy(listCopy, myList);
+
         return new VirtualListNode(myLoc, myParent.clone(), myName, listCopy, myListType);
     }
 
@@ -102,8 +104,23 @@ public class VirtualListNode extends ResolveConceptualElement {
      */
     @Override
     public boolean equals(Object o) {
-        throw new MiscErrorException("Not supported yet.",
-                new UnsupportedOperationException());
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        VirtualListNode that = (VirtualListNode) o;
+
+        if (myList != null ? !myList.equals(that.myList) : that.myList != null)
+            return false;
+        if (myListType != null ? !myListType.equals(that.myListType)
+                : that.myListType != null)
+            return false;
+        if (myName != null ? !myName.equals(that.myName) : that.myName != null)
+            return false;
+
+        return myParent != null ? myParent.equals(that.myParent)
+                : that.myParent == null;
     }
 
     /**
@@ -160,10 +177,20 @@ public class VirtualListNode extends ResolveConceptualElement {
         return myParent;
     }
 
+    /**
+     * <p>This method overrides the default hashCode method implementation
+     * for the {@link VirtualListNode} class.</p>
+     *
+     * @return The hash code associated with the object.
+     */
     @Override
     public int hashCode() {
-        throw new MiscErrorException("Not supported yet.",
-                new UnsupportedOperationException());
+        int result = myList != null ? myList.hashCode() : 0;
+        result = 31 * result + (myListType != null ? myListType.hashCode() : 0);
+        result = 31 * result + (myName != null ? myName.hashCode() : 0);
+        result = 31 * result + (myParent != null ? myParent.hashCode() : 0);
+
+        return result;
     }
 
     // ===========================================================

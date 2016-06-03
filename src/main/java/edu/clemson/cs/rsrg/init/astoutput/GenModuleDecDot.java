@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.init.astoutput;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.VirtualListNode;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
@@ -78,32 +79,34 @@ public class GenModuleDecDot extends TreeWalkerStackVisitor {
      */
     @Override
     public void preAnyStack(ResolveConceptualElement data) {
-        ResolveConceptualElement parent = getParent();
-        String className = data.getClass().getSimpleName();
+        if (!(data instanceof VirtualListNode)) {
+            ResolveConceptualElement parent = getParent();
+            String className = data.getClass().getSimpleName();
 
-        if (parent != null) {
-            myParentList.add(myNodeNum, parent);
-            int p = myParentList.indexOf(parent) - 1;
-            myArrowList.append("n" + p + " -> n" + myNodeNum + " //"
-                    + className + "\n");
-        }
-        else {
-            myParentList.add(0, null);
-        }
+            if (parent != null) {
+                myParentList.add(myNodeNum, parent);
+                int p = myParentList.indexOf(parent) - 1;
+                myArrowList.append("n" + p + " -> n" + myNodeNum + " //"
+                        + className + "\n");
+            }
+            else {
+                myParentList.add(0, null);
+            }
 
-        myNodeList.append("n" + (myNodeNum++) + " [label=\"" + className);
-        if (data instanceof VarExp) {
-            myNodeList.append("\\n(" + ((VarExp) data).getName().toString()
-                    + ")");
+            myNodeList.append("n" + (myNodeNum++) + " [label=\"" + className);
+            if (data instanceof VarExp) {
+                myNodeList.append("\\n(" + ((VarExp) data).getName().toString()
+                        + ")");
+            }
+            else if (data instanceof NameTy) {
+                myNodeList.append("\\n(" + ((NameTy) data).getName().toString()
+                        + ")");
+            }
+            else if (data instanceof ResolveConceptualElement) {
+                myNodeList.append("\\n(" + data.toString() + ")");
+            }
+            myNodeList.append("\"]; //" + className + "\n");
         }
-        else if (data instanceof NameTy) {
-            myNodeList.append("\\n(" + ((NameTy) data).getName().toString()
-                    + ")");
-        }
-        else if (data instanceof ResolveConceptualElement) {
-            myNodeList.append("\\n(" + data.toString() + ")");
-        }
-        myNodeList.append("\"]; //" + className + "\n");
     }
 
     // ===========================================================

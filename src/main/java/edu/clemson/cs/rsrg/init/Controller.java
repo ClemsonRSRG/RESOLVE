@@ -144,11 +144,14 @@ public class Controller {
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                     ModuleDec dec = myCompileEnvironment.getModuleAST(m);
                     myErrorHandler.info(null, "\n-----------------------------\n");
-                    myErrorHandler.info(null, dec.asString(0, 4));
-                    myErrorHandler.info(null, "\n-----------------------------\n");
+
+                    // Print the dec using asString.
+                    myErrorHandler.info(null, dec.asString(0, 4) + "\n");
 
                     // Generate output files.
                     debugPipe.process(m);
+
+                    myErrorHandler.info(null, "\n-----------------------------\n");
                 }
 
                 //analysisPipe.process(m);
