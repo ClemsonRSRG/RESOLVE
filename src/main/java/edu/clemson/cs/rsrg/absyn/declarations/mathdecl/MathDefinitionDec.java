@@ -88,7 +88,7 @@ public class MathDefinitionDec extends Dec {
 
         // any parameters
         if (myParameters.size() > 0) {
-            sb.append("( ");
+            sb.append("(");
             Iterator<MathVarDec> it = myParameters.iterator();
             while (it.hasNext()) {
                 sb.append(it.next().asString(0, innerIndentInc));
@@ -97,7 +97,7 @@ public class MathDefinitionDec extends Dec {
                     sb.append(", ");
                 }
             }
-            sb.append(" )");
+            sb.append(")");
         }
 
         // return type
@@ -106,7 +106,8 @@ public class MathDefinitionDec extends Dec {
 
         // any definition body
         if (myBodyItem != null) {
-            sb.append(myBodyItem.asString(indentSize + innerIndentInc, innerIndentInc));
+            sb.append(myBodyItem.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
         sb.append(";");
 

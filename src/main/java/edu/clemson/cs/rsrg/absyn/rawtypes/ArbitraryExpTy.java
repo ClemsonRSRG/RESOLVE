@@ -62,9 +62,7 @@ public class ArbitraryExpTy extends Ty {
         StringBuffer sb = new StringBuffer();
 
         printSpace(indentSize, sb);
-        if (myArbitraryExp != null) {
-            sb.append(myArbitraryExp.asString(0, innerIndentInc));
-        }
+        sb.append(myArbitraryExp.asString(0, innerIndentInc));
 
         return sb.toString();
     }
@@ -115,12 +113,7 @@ public class ArbitraryExpTy extends Ty {
      */
     @Override
     protected final Ty copy() {
-        Exp newArbitraryExp = null;
-        if (myArbitraryExp != null) {
-            newArbitraryExp = myArbitraryExp.clone();
-        }
-
-        return new ArbitraryExpTy(newArbitraryExp);
+        return new ArbitraryExpTy(myArbitraryExp.clone());
     }
 
 }

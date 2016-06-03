@@ -64,7 +64,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "AXIOM ";
+                return "Axiom";
             }
 
         },
@@ -72,7 +72,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "THEOREM ";
+                return "Theorem";
             }
 
         },
@@ -80,7 +80,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "PROPERTY ";
+                return "Property";
             }
 
         },
@@ -88,7 +88,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "LEMMA ";
+                return "Lemma";
             }
 
         },
@@ -96,7 +96,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "COROLLARY ";
+                return "Corollary";
             }
 
         }

@@ -85,7 +85,7 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
             sb.append(" is\n");
 
             // base case
-            printSpace(indentSize + innerIndentInc, sb);
+            printSpace(indentSize, sb);
             sb.append("(i) ");
             sb.append(myBase.asString(0, innerIndentInc));
             sb.append("\n");
@@ -94,13 +94,10 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
             printSpace(indentSize + innerIndentInc, sb);
             sb.append("(ii) ");
             sb.append(myHypothesis.asString(0, innerIndentInc));
-            sb.append("\n");
         }
         else {
             sb.append(" =\n");
-            sb.append(myDefinition.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-            sb.append("\n");
+            sb.append(myDefinition.asString(indentSize, innerIndentInc));
         }
 
         return sb.toString();

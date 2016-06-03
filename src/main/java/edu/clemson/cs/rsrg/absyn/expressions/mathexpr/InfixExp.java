@@ -74,6 +74,7 @@ public class InfixExp extends AbstractFunctionExp {
         StringBuffer sb = new StringBuffer();
 
         printSpace(indentSize, sb);
+        sb.append("(");
         sb.append(myLeftHandSide.asString(0, innerIndentInc));
 
         sb.append(" ");
@@ -85,6 +86,7 @@ public class InfixExp extends AbstractFunctionExp {
         sb.append(" ");
 
         sb.append(myRightHandSide.asString(0, innerIndentInc));
+        sb.append(")");
 
         return sb.toString();
     }

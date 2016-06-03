@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
@@ -25,17 +26,17 @@ import java.util.Map;
  * asserted as belonging to some type.  It is permitted only in two places:
  * 
  * <ul>
- *      <li>Inside the hierarchy of an {@link ArbitraryExpTy ArbitraryExpTy}
+ *      <li>Inside the hierarchy of an {@link ArbitraryExpTy}
  *          when that ty appears in the context of the type of a formal 
  *          parameter to a mathematical definition.</li>
- *      <li>Inside a {@link TypeTheoremDec TypeTheoremDec}, either at the top
+ *      <li>Inside a {@link MathTypeTheoremDec}, either at the top
  *          level of the overall assertion, or at the top level of the 
  *          consequent of a top-level <em>implies</em> expression.</li>
  * </ul>
  * 
  * <p>In the first case, it defines a slot to be bound implicitly by some 
  * component of the type of the actual parameter.  In this case, the expression
- * must be a {@link VarExp VarExp}.  Some examples:</p>
+ * must be a {@link VarExp}.  Some examples:</p>
  * 
  * <pre>
  * Definition Foo(S : Str(T : Powerset(Z)) : T;
@@ -102,9 +103,13 @@ public class TypeAssertionExp extends MathExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        sb.append(myExp.asString(indentSize, innerIndentInc));
+
+        printSpace(indentSize, sb);
+        sb.append("(");
+        sb.append(myExp.asString(0, innerIndentInc));
         sb.append(" : ");
         sb.append(myAssertedTy.asString(0, innerIndentInc));
+        sb.append(")");
 
         return sb.toString();
     }
