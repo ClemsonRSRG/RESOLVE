@@ -165,7 +165,7 @@ public abstract class ModuleDec extends Dec {
         StringBuffer sb = new StringBuffer();
         for (Dec d : myDecs) {
             sb.append(d.asString(indentSize + innerIndentInc, innerIndentInc));
-            sb.append("\n");
+            sb.append("\n\n");
         }
         sb.append("\nend ");
         sb.append(myName.asString(0, innerIndentInc));

@@ -108,8 +108,7 @@ public class FunctionExp extends AbstractFunctionExp {
         sb.append("(");
         Iterator<Exp> it = myArguments.iterator();
         while (it.hasNext()) {
-            sb.append(it.next().asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(it.next().asString(0, innerIndentInc));
 
             if (it.hasNext()) {
                 sb.append(", ");

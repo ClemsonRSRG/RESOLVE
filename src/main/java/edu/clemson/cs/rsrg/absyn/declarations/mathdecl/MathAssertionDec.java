@@ -177,7 +177,7 @@ public class MathAssertionDec extends Dec {
 
         sb.append(myAssertion.asString(indentSize + innerIndentInc,
                 innerIndentInc));
-        sb.append(";\n");
+        sb.append(";");
 
         return sb.toString();
     }

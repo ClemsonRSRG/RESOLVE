@@ -106,8 +106,9 @@ public class MathDefinitionDec extends Dec {
 
         // any definition body
         if (myBodyItem != null) {
-            myBodyItem.asString(0, innerIndentInc);
+            sb.append(myBodyItem.asString(indentSize + innerIndentInc, innerIndentInc));
         }
+        sb.append(";");
 
         return sb.toString();
     }

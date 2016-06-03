@@ -98,7 +98,7 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
         }
         else {
             sb.append(" =\n");
-            sb.append(myHypothesis.asString(indentSize + innerIndentInc,
+            sb.append(myDefinition.asString(indentSize + innerIndentInc,
                     innerIndentInc));
             sb.append("\n");
         }

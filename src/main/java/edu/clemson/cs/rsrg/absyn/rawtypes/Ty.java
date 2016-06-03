@@ -16,8 +16,6 @@ import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.errorhandling.exception.NullMathTypeException;
-import edu.clemson.cs.rsrg.errorhandling.exception.NullProgramTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
@@ -159,12 +157,6 @@ public abstract class Ty extends ResolveConceptualElement {
      * @param mathType The {@link MTType} type object.
      */
     public final void setMathType(MTType mathType) {
-        if (mathType == null) {
-            throw new NullMathTypeException("Null Math Type on: "
-                    + this.getClass() + ". The causing raw type is: "
-                    + this.toString());
-        }
-
         myMathType = mathType;
     }
 
@@ -185,11 +177,6 @@ public abstract class Ty extends ResolveConceptualElement {
      * @param progType The {@link PTType} type object.
      */
     public final void setProgramType(PTType progType) {
-        if (progType == null) {
-            throw new NullProgramTypeException("Null Program Type on: "
-                    + this.getClass());
-        }
-
         myProgramTypeValue = progType;
     }
 

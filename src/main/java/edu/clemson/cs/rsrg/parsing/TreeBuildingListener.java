@@ -22,9 +22,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
@@ -150,16 +150,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitPrecisModule(ResolveParser.PrecisModuleContext ctx) {
-        /*List<Dec> decls =
+        List<Dec> decls =
                 Utilities.collect(Dec.class,
                         ctx.precisItems() != null ? ctx.precisItems().precisItem() : new ArrayList<ParseTree>(),
-                        myNodes);*/
+                        myNodes);
         List<ModuleParameterDec> parameterDecls = new ArrayList<>();
         List<UsesItem> uses = Utilities.collect(UsesItem.class,
                 ctx.usesList() != null ? ctx.usesList().usesItem() : new ArrayList<ParseTree>(),
                 myNodes);
-        PrecisModuleDec precis = new PrecisModuleDec(createLocation(ctx),
-                createPosSymbol(ctx.name), parameterDecls, uses, new ArrayList<Dec>());
+        PrecisModuleDec precis = new PrecisModuleDec(createLocation(ctx), createPosSymbol(ctx.name), parameterDecls, uses, decls);
 
         myNodes.put(ctx, precis);
     }
@@ -167,13 +166,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the generated precis item.</p>
      *
-     * @param ctx
+     * @param ctx Precis item node in ANTLR4 AST.
      */
     @Override
     public void exitPrecisItem(ResolveParser.PrecisItemContext ctx) {
-        super.exitPrecisItem(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     /**
@@ -1697,8 +1696,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         Ty rawType = (Ty) myNodes.removeFrom(ctx.mathTypeExp());
         List<TerminalNode> varNames = ctx.IDENTIFIER();
         for (TerminalNode varName : varNames) {
-            myNodes.put(ctx, new MathVarDec(
-                    createPosSymbol(varName.getSymbol()), rawType.clone()));
+            myNodes.put(varName, new MathVarDec(createPosSymbol(varName
+                    .getSymbol()), rawType.clone()));
         }
     }
 
@@ -2226,7 +2225,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitMathDefinitionDecl(
             ResolveParser.MathDefinitionDeclContext ctx) {
-        myNodes.put(ctx, myNodes.get(ctx.getChild(0)));
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     /**
@@ -2253,40 +2252,68 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates an implicit definition declaration.</p>
      *
-     * @param ctx
+     * @param ctx Implicit definition declaration node in ANTLR4 AST.
      */
     @Override
     public void exitMathImplicitDefinitionDecl(
             ResolveParser.MathImplicitDefinitionDeclContext ctx) {
-        super.exitMathImplicitDefinitionDecl(ctx);
+        DefinitionMembers members = myDefinitionMemberList.remove(0);
+        MathDefinitionDec definitionDec =
+                new MathDefinitionDec(members.name, members.params,
+                        members.rawType, new DefinitionBodyItem((Exp) myNodes
+                                .removeFrom(ctx.mathExp())), true);
+        myDefinitionMemberList = null;
+
+        myNodes.put(ctx, definitionDec);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates an inductive definition declaration.</p>
      *
-     * @param ctx
+     * @param ctx Inductive definition declaration node in ANTLR4 AST.
      */
     @Override
     public void exitMathInductiveDefinitionDecl(
             ResolveParser.MathInductiveDefinitionDeclContext ctx) {
-        super.exitMathInductiveDefinitionDecl(ctx);
+        DefinitionMembers members = myDefinitionMemberList.remove(0);
+        MathDefinitionDec definitionDec =
+                new MathDefinitionDec(members.name, members.params,
+                        members.rawType, new DefinitionBodyItem((Exp) myNodes
+                                .removeFrom(ctx.mathExp(0)), (Exp) myNodes
+                                .removeFrom(ctx.mathExp(1))), false);
+        myDefinitionMemberList = null;
+
+        myNodes.put(ctx, definitionDec);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a standard definition declaration.</p>
      *
-     * @param ctx
+     * @param ctx Standard definition declaration node in ANTLR4 AST.
      */
     @Override
     public void exitMathStandardDefinitionDecl(
             ResolveParser.MathStandardDefinitionDeclContext ctx) {
-        super.exitMathStandardDefinitionDecl(ctx);
+        DefinitionBodyItem bodyItem = null;
+        if (ctx.mathExp() != null) {
+            bodyItem =
+                    new DefinitionBodyItem((Exp) myNodes.removeFrom(ctx
+                            .mathExp()));
+        }
+
+        DefinitionMembers members = myDefinitionMemberList.remove(0);
+        MathDefinitionDec definitionDec =
+                new MathDefinitionDec(members.name, members.params,
+                        members.rawType, bodyItem, false);
+        myDefinitionMemberList = null;
+
+        myNodes.put(ctx, definitionDec);
     }
 
     // -----------------------------------------------------------
@@ -2366,6 +2393,27 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         myDefinitionMemberList.add(new DefinitionMembers(name, varDecls,
                 (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>This method stores the math expression representation
+     * generated by its child rules.</p>
+     *
+     * @param ctx Definition parameter list node in ANTLR4 AST.
+     */
+    @Override
+    public void exitDefinitionParameterList(
+            ResolveParser.DefinitionParameterListContext ctx) {
+        List<ResolveParser.MathVariableDeclGroupContext> variableDeclGroups =
+                ctx.mathVariableDeclGroup();
+        for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroups) {
+            List<TerminalNode> identifiers = context.IDENTIFIER();
+            for (TerminalNode id : identifiers) {
+                myNodes.put(context, myNodes.removeFrom(id));
+            }
+        }
     }
 
     // -----------------------------------------------------------
@@ -2811,13 +2859,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     new IfExp(createLocation(ctx), testExp, thenExp, elseExp);
         }
         // iff and implies expressions
-        else {
+        else if (ctx.op != null) {
             Exp leftExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(0));
             Exp rightExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(1));
 
             newElement =
                     new InfixExp(createLocation(ctx), leftExp, null,
                             createPosSymbol(ctx.op), rightExp);
+        }
+        else {
+            newElement = myNodes.removeFrom(ctx.mathLogicalExp(0));
         }
 
         myNodes.put(ctx, newElement);
@@ -2835,7 +2886,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitMathLogicalExp(ResolveParser.MathLogicalExpContext ctx) {
         ResolveConceptualElement newElement;
-        List<ResolveParser.MathRelationalExpContext> relationalExpContexts = ctx.mathRelationalExp();
+        List<ResolveParser.MathRelationalExpContext> relationalExpContexts =
+                ctx.mathRelationalExp();
 
         // relational expressions
         if (relationalExpContexts.size() == 1) {
@@ -2843,19 +2895,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
         // build logical expressions
         else {
-            List<Exp> exps = new ArrayList<>();
-            for (ResolveParser.MathRelationalExpContext context : relationalExpContexts) {
-                exps.add((Exp) myNodes.removeFrom(context));
-            }
+            // Obtain the 2 expressions
+            Exp leftExp = (Exp) myNodes.removeFrom(ctx.mathRelationalExp(0));
+            Exp rightExp = (Exp) myNodes.removeFrom(ctx.mathRelationalExp(1));
 
-            while (exps.size() != 1) {
-                int lastIndex = exps.size() - 1;
-                Exp leftExp = exps.remove(lastIndex - 1);
-                Exp rightExp = exps.remove(lastIndex);
-                exps.add(new InfixExp(leftExp.getLocation(), leftExp, null, createPosSymbol(ctx.op), rightExp));
-            }
-
-            newElement = exps.get(0);
+            newElement =
+                    new InfixExp(leftExp.getLocation(), leftExp, null,
+                            createPosSymbol(ctx.op), rightExp);
         }
 
         myNodes.put(ctx, newElement);
@@ -3027,11 +3073,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 qualifier = createPosSymbol(ctx.qualifier);
             }
 
+            // Obtain the 2 expressions
+            Exp exp1 = (Exp) myNodes.removeFrom(mathExps.get(0));
+            Exp exp2 = (Exp) myNodes.removeFrom(mathExps.get(1));
+
             newElement =
-                    new InfixExp(createLocation(ctx), (Exp) myNodes
-                            .removeFrom(mathExps.remove(0)), qualifier,
-                            createPosSymbol(ctx.op), (Exp) myNodes
-                                    .removeFrom(mathExps.remove(1)));
+                    new InfixExp(createLocation(ctx), exp1, qualifier,
+                            createPosSymbol(ctx.op), exp2);
         }
         else {
             newElement = myNodes.removeFrom(mathExps.remove(0));
@@ -3056,17 +3104,19 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Create a multiplication expression if needed
         List<ResolveParser.MathExponentialExpContext> mathExps =
                 ctx.mathExponentialExp();
-        if (mathExps.size() > 1) {
+        if (mathExps.size() != 1) {
             PosSymbol qualifier = null;
             if (ctx.qualifier != null) {
                 qualifier = createPosSymbol(ctx.qualifier);
             }
 
+            // Obtain the 2 expressions
+            Exp exp1 = (Exp) myNodes.removeFrom(mathExps.get(0));
+            Exp exp2 = (Exp) myNodes.removeFrom(mathExps.get(1));
+
             newElement =
-                    new InfixExp(createLocation(ctx), (Exp) myNodes
-                            .removeFrom(mathExps.remove(0)), qualifier,
-                            createPosSymbol(ctx.op), (Exp) myNodes
-                                    .removeFrom(mathExps.remove(1)));
+                    new InfixExp(createLocation(ctx), exp1, qualifier,
+                            createPosSymbol(ctx.op), exp2);
         }
         else {
             newElement = myNodes.removeFrom(mathExps.remove(0));

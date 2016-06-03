@@ -80,8 +80,17 @@ public class QuantExp extends MathExp {
 
         printSpace(indentSize, sb);
         if (myQuantification != SymbolTableEntry.Quantification.NONE) {
-            sb.append(myQuantification);
-            sb.append(" ");
+            String quantificationAsString;
+            if (myQuantification == SymbolTableEntry.Quantification.UNIVERSAL) {
+                quantificationAsString = "For all ";
+            }
+            else if (myQuantification == SymbolTableEntry.Quantification.UNIVERSAL) {
+                quantificationAsString = "There exist ";
+            }
+            else {
+                quantificationAsString = "There exist unique ";
+            }
+            sb.append(quantificationAsString);
         }
 
         Iterator<MathVarDec> i = myVars.iterator();
