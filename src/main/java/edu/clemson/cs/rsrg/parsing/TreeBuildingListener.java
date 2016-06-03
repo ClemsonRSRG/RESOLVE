@@ -3320,9 +3320,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         ResolveConceptualElement newElement;
 
         // Create a dot expression if needed
-        if (ctx.DOT() != null) {
+        List<ResolveParser.MathCleanFunctionExpContext> mathExps = ctx.mathCleanFunctionExp();
+        if (mathExps.size() > 0) {
             // dotted expressions
-            List<ResolveParser.MathCleanFunctionExpContext> mathExps = ctx.mathCleanFunctionExp();
             List<Exp> dotExps = new ArrayList<>();
 
             dotExps.add((Exp) myNodes.removeFrom(ctx.mathFunctionApplicationExp()));
