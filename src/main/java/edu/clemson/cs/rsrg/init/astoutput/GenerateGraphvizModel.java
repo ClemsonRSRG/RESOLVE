@@ -1,5 +1,5 @@
 /**
- * GenModuleDecDot.java
+ * GenerateGraphvizModel.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This class generates a dot file object using the provided
+ * <p>This class generates a Graphviz model file object using the provided
  * RESOLVE abstract syntax tree. This visitor logic is implemented as a
  * a {@link TreeWalkerStackVisitor}.</p>
  *
@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @version 2.0
  */
-public class GenModuleDecDot extends TreeWalkerStackVisitor {
+public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
 
     // ===========================================================
     // Member Fields
@@ -54,9 +54,9 @@ public class GenModuleDecDot extends TreeWalkerStackVisitor {
 
     /**
      * <p>This creates an object that overrides methods to generate
-     * a dot file.</p>
+     * a Graphviz model file.</p>
      */
-    public GenModuleDecDot() {
+    public GenerateGraphvizModel() {
         myParentList = new ArrayList<>();
         myNodeList = new StringBuffer();
         myNodeNum = 0;

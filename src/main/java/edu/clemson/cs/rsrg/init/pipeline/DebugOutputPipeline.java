@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.init.pipeline;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
-import edu.clemson.cs.rsrg.init.astoutput.GenModuleDecDot;
+import edu.clemson.cs.rsrg.init.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import java.io.*;
@@ -49,7 +49,7 @@ public class DebugOutputPipeline extends AbstractPipeline {
     public final void process(ModuleIdentifier currentTarget) {
         // Walk the module
         ModuleDec dec = myCompileEnvironment.getModuleAST(currentTarget);
-        GenModuleDecDot twv = new GenModuleDecDot();
+        GenerateGraphvizModel twv = new GenerateGraphvizModel();
         TreeWalker tw = new TreeWalker(twv);
         tw.visit(dec);
 
@@ -61,8 +61,8 @@ public class DebugOutputPipeline extends AbstractPipeline {
         genModuleDecSVGFile(dec.getName().getName() + "_ModuleDec.svg", nodes,
                 arrows);
 
-        // Generate DOT File
-        genModuleDecDotFile(dec.getName().getName() + "_ModuleDec.dot", nodes,
+        // Generate DOT File (GV extension)
+        genModuleDecDotFile(dec.getName().getName() + "_ModuleDec.gv", nodes,
                 arrows);
     }
 

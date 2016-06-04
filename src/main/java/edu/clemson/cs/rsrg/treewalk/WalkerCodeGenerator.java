@@ -40,7 +40,7 @@ public class WalkerCodeGenerator {
 
     /** <p>String template for generating the tree.</p> */
     private static final STGroup GROUP =
-            new STGroupFile("templates/walker.stg");
+            new STGroupFile("templates/Walker.stg");
 
     // ===========================================================
     // Public Methods

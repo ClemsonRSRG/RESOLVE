@@ -30,7 +30,7 @@ import java.util.Set;
 public class WalkerCodeGenerator {
 
     private static final STGroup GROUP =
-            new STGroupFile("templates/walker.stg");
+            new STGroupFile("templates/Walker.stg");
     private static final String OUT_DIR = "edu/clemson/cs/r2jt/absynnew";
 
     public static void main(String[] args) {
