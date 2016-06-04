@@ -40,7 +40,7 @@ public class WalkerCodeGenerator {
 
     /** <p>String template for generating the tree.</p> */
     private static final STGroup GROUP =
-            new STGroupFile("templates/Walker.stg");
+            new STGroupFile("templates/Treewalker.stg");
 
     // ===========================================================
     // Public Methods
@@ -181,8 +181,8 @@ public class WalkerCodeGenerator {
     }
 
     /**
-     * <p>This method uses {@code StringTemplate} to generate a stack-based
-     * tree walker that inherits from the default walker.</p>
+     * <p>This method uses {@code StringTemplate} to generate a
+     * stack-based tree walker that inherits from the default walker.</p>
      *
      * @param className Name for the new stack tree walker.
      * @param parentWalkerName Name for the default walker.
