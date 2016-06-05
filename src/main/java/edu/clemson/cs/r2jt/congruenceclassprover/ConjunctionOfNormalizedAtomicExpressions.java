@@ -107,7 +107,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                                 .getTopLevelOperation());
             }
             NormalizedAtomicExpression na =
-                    new NormalizedAtomicExpression(this, ia);
+                    new NormalizedAtomicExpression(getRegistry(), ia);
             if (m_expSet.containsKey(na) && m_expSet.get(na).readRoot() >= 0) {
                 int r = m_expSet.get(na).readRoot();
                 String rs = m_registry.getSymbolForIndex(r);
@@ -215,7 +215,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // insert =(lhs,rhs) = someNewRoot
             int questEq = m_registry.getIndexForSymbol("=B");
             NormalizedAtomicExpression pred =
-                    new NormalizedAtomicExpression(this, new int[] { questEq,
+                    new NormalizedAtomicExpression(getRegistry(), new int[] { questEq,
                             lhs, rhs });
             return addAtomicFormula(pred);
             // }
@@ -244,7 +244,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             ne[pos++] = root;
         }
         NormalizedAtomicExpression newExpr =
-                new NormalizedAtomicExpression(this, ne);
+                new NormalizedAtomicExpression(getRegistry(), ne);
         if (m_evaluates_to_false) {
             return -1;
         }

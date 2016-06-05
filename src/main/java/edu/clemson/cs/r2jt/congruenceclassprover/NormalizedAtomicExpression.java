@@ -24,16 +24,14 @@ public class NormalizedAtomicExpression {
     private final int[] m_expression;
     private int m_classConstant;
     private int arity; // number of arguments
-    private final ConjunctionOfNormalizedAtomicExpressions m_conj;
     private final Registry m_registry;
     private Map<String, Integer> m_opMmap;
     private Set<Integer> m_opIdSet;
     private Map<String, Integer> m_argMmap;
 
     public NormalizedAtomicExpression(
-            ConjunctionOfNormalizedAtomicExpressions conj, int[] intArray) {
-        m_conj = conj;
-        m_registry = m_conj.getRegistry();
+            Registry registry, int[] intArray) {
+        m_registry = registry;
         arity = intArray.length - 1;
         if (!m_registry.isCommutative(intArray[0])) {
             m_expression = intArray;
@@ -220,7 +218,7 @@ public class NormalizedAtomicExpression {
         }
         NormalizedAtomicExpression rNa = this;
         if (changed) {
-            rNa = new NormalizedAtomicExpression(m_conj, na);
+            rNa = new NormalizedAtomicExpression(m_registry, na);
             rNa.writeToRoot(readRoot());
         }
         assert (changed == (rNa != this));
@@ -244,7 +242,7 @@ public class NormalizedAtomicExpression {
             roots[i] = m_registry.findAndCompress(m_expression[i]);
         }
         NormalizedAtomicExpression rn =
-                new NormalizedAtomicExpression(m_conj, roots);
+                new NormalizedAtomicExpression(m_registry, roots);
         return rn;
     }
 
