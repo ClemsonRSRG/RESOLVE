@@ -20,7 +20,7 @@ outputGraphvizSVGFile(nodes, arrows) ::= <<
 >>
 
 outputGraphvizNodes(nodeNum, nodeName, hasNodeData, nodeData) ::= <<
-n<nodeNum> [label="{ <nodeName> <if(hasNodeData)>| (<nodeData>) <endif>}"]; // <nodeName>
+n<nodeNum> [label="{ <nodeName> <if(hasNodeData)>| [ <nodeData> ] <endif>}"]; // <nodeName>
 >>
 
 outputGraphvizEdges(parentNodeNum, nodeNum) ::= <<
