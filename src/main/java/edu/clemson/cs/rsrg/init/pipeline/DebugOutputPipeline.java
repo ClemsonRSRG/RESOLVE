@@ -18,6 +18,8 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 import java.io.*;
 
 public class DebugOutputPipeline extends AbstractPipeline {
@@ -47,23 +49,11 @@ public class DebugOutputPipeline extends AbstractPipeline {
      */
     @Override
     public final void process(ModuleIdentifier currentTarget) {
-        // Walk the module
         ModuleDec dec = myCompileEnvironment.getModuleAST(currentTarget);
-        GenerateGraphvizModel twv = new GenerateGraphvizModel();
-        TreeWalker tw = new TreeWalker(twv);
-        tw.visit(dec);
-
-        // Nodes and Strings
-        String nodes = twv.getNodeList().toString();
-        String arrows = twv.getArrowList().toString();
-
-        // Generate SVG File
-        genModuleDecSVGFile(dec.getName().getName() + "_ModuleDec.svg", nodes,
-                arrows);
+        STGroup group = new STGroupFile("templates/DebugOutput.stg");
 
         // Generate DOT File (GV extension)
-        genModuleDecDotFile(dec.getName().getName() + "_ModuleDec.gv", nodes,
-                arrows);
+        genModuleDecDotFile(dec, group);
     }
 
     // ===========================================================
@@ -73,31 +63,22 @@ public class DebugOutputPipeline extends AbstractPipeline {
     /**
      * <p>This generates a .dot file representation.</p>
      *
-     * @param outputFileName The output file name.
-     * @param nodes The different nodes in the module as a string.
-     * @param arrows The arrows connecting the nodes as a string.
+     * @param moduleDec A {@link ModuleDec} node.
+     * @param group A string template containing groups for
+     *              generating the Graphviz model.
      */
-    private void genModuleDecDotFile(String outputFileName, String nodes,
-            String arrows) {
-        StringBuffer sb = new StringBuffer();
+    private void genModuleDecDotFile(ModuleDec moduleDec, STGroup group) {
+        // Add all the nodes and edges
+        String moduleName = moduleDec.getName().getName();
+        GenerateGraphvizModel twv =
+                new GenerateGraphvizModel(group, group.getInstanceOf(
+                        "outputGraphvizGVFile").add("moduleName", moduleName));
+        TreeWalker tw = new TreeWalker(twv);
+        tw.visit(moduleDec);
 
-        // Header
-        sb.append("digraph {\n\n");
-        sb.append("\tordering=out;\n");
-        sb.append("\tranksep=.4;\n");
-        sb
-                .append("\tbgcolor=\"lightgrey\"; node [shape=box, fixedsize=false, fontsize=12, fontname=\"Helvetica-bold\", fontcolor=\"blue\"\n");
-        sb
-                .append("\t\twidth=.25, height=.25, color=\"black\", fillcolor=\"white\", style=\"filled, solid, bold\"];\n");
-        sb.append("\tedge [arrowsize=.5, color=\"black\", style=\"bold\"]\n");
-        sb.append("\n");
-        sb.append(nodes);
-        sb.append(arrows);
-        sb.append("\n");
-        sb.append("}\n");
-
-        writeToFile(outputFileName, sb.toString());
-
+        // Write the contents to file
+        String outputFileName = moduleName + "_ModuleDec.gv";
+        writeToFile(outputFileName, twv.getCompleteModel());
         myCompileEnvironment.getErrorHandler().info(null,
                 "Exported ModuleDec to dot file: " + outputFileName);
     }
@@ -130,7 +111,7 @@ public class DebugOutputPipeline extends AbstractPipeline {
         sb.append("\n");
         sb.append("}\n");
 
-        writeToFile(outputFileName, sb.toString());
+        //writeToFile(outputFileName, sb.toString());
 
         myCompileEnvironment.getErrorHandler().info(null,
                 "Exported ModuleDec to svg file: " + outputFileName);

@@ -1,7 +1,28 @@
-outputGraphvizGVFile(nodes, arrows) ::= <<
+outputGraphvizGVFile(moduleName, nodes, edges) ::= <<
+digraph <moduleName> {
+    ordering=out;
+    ranksep=".5 equally";
+    bgcolor="lightgrey";
 
+    node [shape=record, fixedsize=false, fontsize=12, fontname="Helvetica-bold", fontcolor="blue"
+          margin=".25,.05", width=.25, height=.25, color="black", fillcolor="white", style="rounded"];
+
+    edge [arrowsize=.5, color="black", style="bold"];
+
+    <nodes; separator = "\n">
+
+    <edges; separator = "\n">
+}
 >>
 
 outputGraphvizSVGFile(nodes, arrows) ::= <<
 
+>>
+
+outputGraphvizNodes(nodeNum, nodeName, hasNodeData, nodeData) ::= <<
+n<nodeNum> [label="{ <nodeName> <if(hasNodeData)>| (<nodeData>) <endif>}"]; // <nodeName>
+>>
+
+outputGraphvizEdges(parentNodeNum, nodeNum) ::= <<
+n<parentNodeNum> -> n<nodeNum>
 >>
