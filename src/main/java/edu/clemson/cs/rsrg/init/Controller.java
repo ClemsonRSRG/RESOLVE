@@ -21,7 +21,7 @@ import edu.clemson.cs.rsrg.errorhandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.init.pipeline.DebugOutputPipeline;
+import edu.clemson.cs.rsrg.init.pipeline.ASTOutputPipeline;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.parsing.ResolveLexer;
@@ -138,20 +138,20 @@ public class Controller {
             // Begin analyzing the file
             //AnalysisPipeline analysisPipe =
             //        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
-            DebugOutputPipeline debugPipe = new DebugOutputPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
-                // DEBUG: Print the entire ModuleDec and generate output files
+                // DEBUG: Print the entire ModuleDec
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                     ModuleDec dec = myCompileEnvironment.getModuleAST(m);
                     myErrorHandler.info(null, "\n-----------------------------\n");
-
-                    // Print the dec using asString.
                     myErrorHandler.info(null, dec.asString(0, 4) + "\n");
-
-                    // Generate output files.
-                    debugPipe.process(m);
-
                     myErrorHandler.info(null, "\n-----------------------------\n");
+                }
+
+                // Output AST to Graphviz dot file.
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_EXPORT_AST)) {
+                    ASTOutputPipeline astOutputPipe =
+                            new ASTOutputPipeline(myCompileEnvironment, mySymbolTable);
+                    astOutputPipe.process(m);
                 }
 
                 //analysisPipe.process(m);

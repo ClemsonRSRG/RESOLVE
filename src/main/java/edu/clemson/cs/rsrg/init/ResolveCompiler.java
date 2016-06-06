@@ -74,6 +74,8 @@ public class ResolveCompiler {
 
     private static final String FLAG_DESC_DEBUG =
             "Print debugging statements from the compiler output.";
+    private static final String FLAG_DESC_EXPORT_AST =
+            "exports the AST for the target file as a .dot file that can be viewed in Graphviz";
     private static final String FLAG_DESC_WORKSPACE_DIR =
             "Changes the workspace directory path.";
     private static final String FLAG_SECTION_GENERAL = "General";
@@ -120,6 +122,14 @@ public class ResolveCompiler {
      */
     public static final Flag FLAG_DEBUG_STACK_TRACE =
             new Flag(FLAG_SECTION_NAME, "stacktrace", FLAG_DESC_DEBUG);
+
+    /**
+     * <p>The main web interface flag.  Tells the compiler to modify
+     * some of the output to be more user-friendly for the web.</p>
+     */
+    public static final Flag FLAG_EXPORT_AST =
+            new Flag(FLAG_SECTION_NAME, "exportAST", FLAG_DESC_EXPORT_AST,
+                    Flag.Type.HIDDEN);
 
     /**
      * <p>Tells the compiler the RESOLVE workspace directory path.</p>
