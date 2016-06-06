@@ -14,12 +14,14 @@ package edu.clemson.cs.rsrg.parsing;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathCategoricalDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -175,6 +177,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
+    // -----------------------------------------------------------
+    // Facility Module
+    // -----------------------------------------------------------
+
     /**
      * {@inheritDoc}
      * <p>
@@ -247,31 +253,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitFacilityItem(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterShortFacilityModule(
-            ResolveParser.ShortFacilityModuleContext ctx) {
-        super.enterShortFacilityModule(ctx);
-    }
+    // -----------------------------------------------------------
+    // Short Facility Module
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a {@code ShortFacility}
+     * module declaration.</p>
      *
-     * @param ctx
+     * @param ctx Short facility module node in ANTLR4 AST.
      */
     @Override
     public void exitShortFacilityModule(
             ResolveParser.ShortFacilityModuleContext ctx) {
-        super.exitShortFacilityModule(ctx);
+        FacilityDec facilityDec =
+                (FacilityDec) myNodes.removeFrom(ctx.facilityDecl());
+        ShortFacilityModuleDec shortFacility =
+                new ShortFacilityModuleDec(createLocation(ctx), facilityDec
+                        .getName(), facilityDec);
+
+        myNodes.put(ctx, shortFacility);
     }
+
+    // -----------------------------------------------------------
+    // Concept Module
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -1552,6 +1560,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             ResolveParser.PerformanceOperationDeclContext ctx) {
         super.exitPerformanceOperationDecl(ctx);
     }
+
+    // -----------------------------------------------------------
+    // Facility declarations
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
