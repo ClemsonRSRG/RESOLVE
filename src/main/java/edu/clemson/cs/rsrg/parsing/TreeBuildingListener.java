@@ -4018,7 +4018,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     // ===========================================================
-    // Temporary Definition Construct
+    // Temporary Constructs
     // ===========================================================
 
     /**
@@ -4027,9 +4027,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private class DefinitionMembers {
 
-        public PosSymbol name;
-        public List<MathVarDec> params;
-        public Ty rawType;
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        /** <p>Definition name</p> */
+        PosSymbol name;
+
+        /** <p>Definition parameters</p> */
+        List<MathVarDec> params;
+
+        /** <p>Definition return type</p> */
+        Ty rawType;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
 
         /**
          * <p>This constructs a temporary structure to store all the relevant
@@ -4039,7 +4052,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          * @param params Definition parameters.
          * @param rawType Definition return type.
          */
-        public DefinitionMembers(PosSymbol name, List<MathVarDec> params,
+        DefinitionMembers(PosSymbol name, List<MathVarDec> params,
                 Ty rawType) {
             this.name = name;
             this.params = params;
