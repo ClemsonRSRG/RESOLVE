@@ -947,6 +947,8 @@ progNamedExp
     :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
     ;
 
+// Real numbers are currently not supported. Should add this
+// to the grammar when we do.
 progLiteralExp
     :   INTEGER_LITERAL      #progIntegerExp
     |   CHARACTER_LITERAL    #progCharacterExp

@@ -26,6 +26,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramCharExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramIntegerExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramStringExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
@@ -3783,73 +3786,44 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the program integer literal.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterProgIntegerExp(ResolveParser.ProgIntegerExpContext ctx) {
-        super.enterProgIntegerExp(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Program integer literal node in ANTLR4 AST.
      */
     @Override
     public void exitProgIntegerExp(ResolveParser.ProgIntegerExpContext ctx) {
-        super.exitProgIntegerExp(ctx);
+        myNodes.put(ctx, new ProgramIntegerExp(createLocation(ctx
+                .INTEGER_LITERAL().getSymbol()), Integer.valueOf(ctx
+                .INTEGER_LITERAL().getText())));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the program character literal.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterProgCharacterExp(ResolveParser.ProgCharacterExpContext ctx) {
-        super.enterProgCharacterExp(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Program character literal node in ANTLR4 AST.
      */
     @Override
     public void exitProgCharacterExp(ResolveParser.ProgCharacterExpContext ctx) {
-        super.exitProgCharacterExp(ctx);
+        myNodes.put(ctx, new ProgramCharExp(createLocation(ctx
+                .CHARACTER_LITERAL().getSymbol()), ctx.CHARACTER_LITERAL()
+                .getText().charAt(1)));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the program string literal.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterProgStringExp(ResolveParser.ProgStringExpContext ctx) {
-        super.enterProgStringExp(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Program string literal node in ANTLR4 AST.
      */
     @Override
     public void exitProgStringExp(ResolveParser.ProgStringExpContext ctx) {
-        super.exitProgStringExp(ctx);
+        myNodes
+                .put(ctx, new ProgramStringExp(createLocation(ctx
+                        .STRING_LITERAL().getSymbol()), ctx.STRING_LITERAL()
+                        .getText()));
     }
 
     // ===========================================================
