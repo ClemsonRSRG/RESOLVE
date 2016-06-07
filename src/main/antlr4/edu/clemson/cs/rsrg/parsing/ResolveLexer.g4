@@ -612,6 +612,10 @@ LPAREN
     :   '('
     ;
 
+LSQBRACK
+    :   '['
+    ;
+
 LT
     :   '<'
     ;
@@ -650,6 +654,10 @@ RBRACE
 
 RPAREN
     :   ')'
+    ;
+
+RSQBRACK
+    :   ']'
     ;
 
 SEMICOLON

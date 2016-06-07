@@ -930,8 +930,29 @@ progUnary
 progPrimary
     :   progLiteral             #progLiteralExp
     |   progVariableExp         #progNamedVariableExp
+    |   progVariableArrayExp    #progArrayExp
     |   progParamExp            #progFunctionExp
     |   LPAREN progExp RPAREN   #progNestedExp
+    ;
+
+// Real numbers are currently not supported. Should add this
+// to the grammar when we do.
+progLiteral
+    :   INTEGER_LITERAL      #progIntegerExp
+    |   CHARACTER_LITERAL    #progCharacterExp
+    |   STRING_LITERAL       #progStringExp
+    ;
+
+progParamExp
+    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
+        LPAREN (progExp (COMMA progExp)*)? RPAREN
+    ;
+
+//Arrays are simply syntactic sugar. We should convert these
+//to the corresponding calls when building the RESOLVE AST.
+//Note that variable array expressions cannot be in a changing clause.
+progVariableArrayExp
+    :   progVariableExp LSQBRACK progExp RSQBRACK
     ;
 
 //This intermediate rule is really only needed to help make
@@ -946,19 +967,6 @@ progDotExp
     :   progNamedExp (DOT progNamedExp)+
     ;
 
-progParamExp
-    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
-        LPAREN (progExp (COMMA progExp)*)? RPAREN
-    ;
-
 progNamedExp
     :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
-    ;
-
-// Real numbers are currently not supported. Should add this
-// to the grammar when we do.
-progLiteral
-    :   INTEGER_LITERAL      #progIntegerExp
-    |   CHARACTER_LITERAL    #progCharacterExp
-    |   STRING_LITERAL       #progStringExp
     ;
