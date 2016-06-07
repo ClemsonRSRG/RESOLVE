@@ -911,19 +911,27 @@ mathNestedExp
 // program expressions
 
 progExp
-    :   op=(NOT|MINUS) progExp                      #progApplicationExp
-    |   progExp op=(MULTIPLY|DIVIDE) progExp        #progApplicationExp
-    |   progExp op=(PLUS|MINUS) progExp             #progApplicationExp
-    |   progExp op=(LT_EQL|GT_EQL|GT|LT) progExp    #progApplicationExp
-    |   progExp op=(EQL|NOT_EQL) progExp            #progApplicationExp
-    |   LPAREN progExp RPAREN                       #progNestedExp
+    :   progExp
+        op=(AND|OR|EQL|NOT_EQL|LT_EQL|GT_EQL|GT|LT|
+        PLUS|MINUS|MULTIPLY|DIVIDE|MOD|REM|DIV)
+        progExp                                     #progApplicationExp
+    |   progExponential                             #progExponentialExp
+    ;
+
+progExponential
+    :   progUnary (EXP progExponential)?
+    ;
+
+progUnary
+    :   op=(NOT|MINUS) progExp                      #progUnaryExp
     |   progPrimary                                 #progPrimaryExp
     ;
 
 progPrimary
-    :   progLiteralExp
-    |   progVariableExp
-    |   progParamExp
+    :   progLiteral             #progLiteralExp
+    |   progVariableExp         #progNamedVariableExp
+    |   progParamExp            #progFunctionExp
+    |   LPAREN progExp RPAREN   #progNestedExp
     ;
 
 //This intermediate rule is really only needed to help make
@@ -949,7 +957,7 @@ progNamedExp
 
 // Real numbers are currently not supported. Should add this
 // to the grammar when we do.
-progLiteralExp
+progLiteral
     :   INTEGER_LITERAL      #progIntegerExp
     |   CHARACTER_LITERAL    #progCharacterExp
     |   STRING_LITERAL       #progStringExp

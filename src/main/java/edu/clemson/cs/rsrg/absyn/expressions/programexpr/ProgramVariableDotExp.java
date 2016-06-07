@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.programexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -44,12 +43,10 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
      * of all the inner expressions.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param qual A {@link PosSymbol} representing the expression's qualifier.
      * @param segments A list of {@link Exp} object.
      */
-    public ProgramVariableDotExp(Location l, PosSymbol qual,
-            List<ProgramVariableExp> segments) {
-        super(l, qual);
+    public ProgramVariableDotExp(Location l, List<ProgramVariableExp> segments) {
+        super(l, null);
         mySegmentExps = segments;
     }
 
@@ -65,16 +62,12 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
 
-        if (getQualifier() != null) {
-            sb.append(getQualifier().asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-            sb.append("::");
-        }
+        Iterator<ProgramVariableExp> it = mySegmentExps.iterator();
+        while (it.hasNext()) {
+            sb.append(it.next().asString(0, innerIndentInc));
 
-        if (mySegmentExps != null) {
-            for (ProgramVariableExp e : mySegmentExps) {
-                sb.append(e.asString(indentSize + innerIndentInc,
-                        innerIndentInc));
+            if (it.hasNext()) {
+                sb.append(".");
             }
         }
 
@@ -179,13 +172,7 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
      */
     @Override
     protected final Exp copy() {
-        PosSymbol newQualifier = null;
-        if (getQualifier() != null) {
-            newQualifier = getQualifier().clone();
-        }
-
-        return new ProgramVariableDotExp(new Location(myLoc), newQualifier,
-                copyExps());
+        return new ProgramVariableDotExp(new Location(myLoc), copyExps());
     }
 
     /**
@@ -193,17 +180,12 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        PosSymbol newQualifier = null;
-        if (getQualifier() != null) {
-            newQualifier = getQualifier().clone();
-        }
-
         List<ProgramVariableExp> newSegments = new ArrayList<>();
         for (ProgramVariableExp e : mySegmentExps) {
             newSegments.add((ProgramVariableExp) substitute(e, substitutions));
         }
 
-        return new ProgramVariableDotExp(new Location(myLoc), newQualifier, newSegments);
+        return new ProgramVariableDotExp(new Location(myLoc), newSegments);
     }
 
     // ===========================================================

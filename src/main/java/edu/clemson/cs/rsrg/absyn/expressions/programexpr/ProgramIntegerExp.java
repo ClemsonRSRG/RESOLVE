@@ -57,10 +57,7 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-
-        printSpace(indentSize + innerIndentInc, sb);
         sb.append(myInteger);
-        sb.append("\n");
 
         return sb.toString();
     }

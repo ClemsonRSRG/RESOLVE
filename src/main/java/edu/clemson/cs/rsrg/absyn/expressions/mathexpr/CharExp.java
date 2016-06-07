@@ -57,12 +57,7 @@ public class CharExp extends LiteralExp {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-
-        if (myCharacter != null) {
-            printSpace(indentSize + innerIndentInc, sb);
-            sb.append(myCharacter.toString());
-            sb.append("\n");
-        }
+        sb.append(myCharacter.toString());
 
         return sb.toString();
     }

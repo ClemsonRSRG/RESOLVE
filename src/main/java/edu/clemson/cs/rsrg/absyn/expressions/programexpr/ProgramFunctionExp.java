@@ -73,24 +73,18 @@ public class ProgramFunctionExp extends ProgramExp {
         printSpace(indentSize, sb);
 
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(myQualifier.asString(0, innerIndentInc));
             sb.append("::");
         }
 
-        if (myOperationName != null) {
-            sb.append(myOperationName.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
+        sb.append(myOperationName.asString(0, innerIndentInc));
 
-        if (myExpressionArgs != null) {
-            sb.append("(");
-            for (ProgramExp exp : myExpressionArgs) {
-                sb.append(exp.asString(indentSize + innerIndentInc,
-                        innerIndentInc));
-            }
-            sb.append(")");
+        // Args
+        sb.append("(");
+        for (ProgramExp exp : myExpressionArgs) {
+            sb.append(exp.asString(0, innerIndentInc));
         }
+        sb.append(")");
 
         return sb.toString();
     }
