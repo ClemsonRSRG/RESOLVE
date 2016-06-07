@@ -27,6 +27,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
@@ -67,6 +68,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private List<DefinitionMembers> myDefinitionMemberList;
 
+    /** <p>Boolean that indicates that we are processing a module argument.</p> */
+    private boolean myIsProcessingModuleArgument;
+
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
 
@@ -93,6 +97,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myFinalModule = null;
         myNodes = new ParseTreeProperty<>();
         myDefinitionMemberList = null;
+        myIsProcessingModuleArgument = false;
     }
 
     // ===========================================================
@@ -260,7 +265,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method generates a representation of a {@code ShortFacility}
+     * <p>This method generates a representation of a short facility
      * module declaration.</p>
      *
      * @param ctx Short facility module node in ANTLR4 AST.
@@ -268,11 +273,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitShortFacilityModule(
             ResolveParser.ShortFacilityModuleContext ctx) {
-        FacilityDec facilityDec =
-                (FacilityDec) myNodes.removeFrom(ctx.facilityDecl());
+        //FacilityDec facilityDec = (FacilityDec) myNodes.removeFrom(ctx.facilityDecl());
         ShortFacilityModuleDec shortFacility =
-                new ShortFacilityModuleDec(createLocation(ctx), facilityDec
-                        .getName(), facilityDec);
+                new ShortFacilityModuleDec(createLocation(ctx),
+                        createPosSymbol(ctx.facilityDecl().name), null);
 
         myNodes.put(ctx, shortFacility);
     }
@@ -1568,25 +1572,23 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a facility
+     * declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
-        super.enterFacilityDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Facility declaration node in ANTLR4 AST.
      */
     @Override
     public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
-        super.exitFacilityDecl(ctx);
+        // Concept arguments
+        List<ModuleArgumentItem> conceptArgs = new ArrayList<>();
+        if (ctx.specArgs != null) {
+            List<ResolveParser.ModuleArgumentContext> conceptArgContext = ctx.specArgs.moduleArgument();
+            for (ResolveParser.ModuleArgumentContext context : conceptArgContext) {
+                //conceptArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
+            }
+        }
+
+        //myNodes.put(ctx, new FacilityDec());
     }
 
     /**
@@ -1641,54 +1643,36 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitEnhancementPairDecl(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterModuleArgumentList(
-            ResolveParser.ModuleArgumentListContext ctx) {
-        super.enterModuleArgumentList(ctx);
-    }
+    // -----------------------------------------------------------
+    // Module arguments
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Since programming array expressions are simply syntactic sugar
+     * that gets converted to call statements, they are not allowed to be
+     * passed as module argument. This method stores a boolean that indicates
+     * we are in a module argument.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void exitModuleArgumentList(
-            ResolveParser.ModuleArgumentListContext ctx) {
-        super.exitModuleArgumentList(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Module argument node in ANTLR4 AST.
      */
     @Override
     public void enterModuleArgument(ResolveParser.ModuleArgumentContext ctx) {
-        super.enterModuleArgument(ctx);
+        myIsProcessingModuleArgument = true;
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a module
+     * argument.</p>
      *
-     * @param ctx
+     * @param ctx Module argument node in ANTLR4 AST.
      */
     @Override
     public void exitModuleArgument(ResolveParser.ModuleArgumentContext ctx) {
-        super.exitModuleArgument(ctx);
+        myIsProcessingModuleArgument = false;
     }
 
     // -----------------------------------------------------------
