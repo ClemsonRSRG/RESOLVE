@@ -34,6 +34,7 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
@@ -76,25 +77,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /** <p>Stack of current syntactic sugar conversions</p> */
     private Stack<ProgramExpAdapter> myCurrentProgExpAdapterStack;
 
-    /**
-     * <p>Map from {@link ParserRuleContext}s that can contain facility declarations
-     * to the list of new facility declaration objects.</p>
-     *
-     * <p><strong>Note:</strong> The only facilities generated at the moment are
-     * new {@code Static_Array_Template} facilities.</p>
-     */
-    private Map<ParserRuleContext, List<FacilityDec>> myNewFacilityDecsMap;
-
-    /**
-     * <p>Map from {@link ParserRuleContext}s that can contain variable declarations
-     * to the list of new variable declaration objects.</p>
-     *
-     * <p><strong>Note:</strong> The only variables generated at the moment are
-     * new integer variables to store the indexes resulting from program array
-     * conversions.</p>
-     */
-    private Map<ParserRuleContext, List<VarDec>> myNewVarDecsMap;
-
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
 
@@ -123,8 +105,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myDefinitionMemberList = null;
         myIsProcessingModuleArgument = false;
         myCurrentProgExpAdapterStack = new Stack<>();
-        myNewFacilityDecsMap = new HashMap<>();
-        myNewVarDecsMap = new HashMap<>();
     }
 
     // ===========================================================
@@ -4089,6 +4069,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * <p>This holds items related to syntactic sugar conversions for
      * {@link ProgramExp}s.</p>
+     *
+     * <p><strong>Note:</strong> The only conversions we do right now are program
+     * array conversions.</p>
      */
     private class ProgramExpAdapter {
 
@@ -4096,28 +4079,61 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Member Fields
         // ===========================================================
 
-        /** <p>The parent context that instantiated this object</p> */
-        ParserRuleContext parentContext;
+        /** <p>The context that instantiated this object</p> */
+        ParserRuleContext instantiatingContext;
 
         /**
-         * <p>A map from the program expression context to a list
-         * containing the new RESOLVE AST nodes.</p>
+         * <p>List of new facility declaration objects.</p>
+         *
+         * <p><strong>Note:</strong> The only facilities generated at the moment are
+         * new {@code Static_Array_Template} facilities.</p>
          */
-        Map<ResolveParser.ProgExpContext, List<ResolveConceptualElement>> progExpAdapterMap;
+        List<FacilityDec> newFacilityDecs;
+
+        /**
+         * <p>List of new variable declaration objects.</p>
+         *
+         * <p><strong>Note:</strong> The only variables generated at the moment are
+         * new integer variables to store the indexes resulting from program array
+         * conversions.</p>
+         */
+        List<VarDec> newVarDecs;
+
+        /**
+         * <p>List of new statements that needs to be inserted before the code
+         * that contains a program array expression.</p>
+         *
+         * <p><strong>Note:</strong> The only statements generated at the moment are
+         * either new function assignment statements that stores the indexes in
+         * program array expressions or call statements to swap elements in the array(s).</p>
+         */
+        List<Statement> newPreStmts;
+
+        /**
+         * <p>List of new statements that needs to be inserted after the code
+         * that contains a program array expression.</p>
+         *
+         * <p><strong>Note:</strong> The only statements generated at the moment are
+         * call statements to swap elements in the array(s).</p>
+         */
+        List<Statement> newPostStmts;
 
         // ===========================================================
         // Constructors
         // ===========================================================
 
         /**
-         * <p>This constructs a temporary structure to store all the relevant
-         * items to provide syntactic sugar conversions for {@link ProgramExp}s.</p>
+         * <p>This constructs a temporary structure to store all the newly declared
+         * items that resulted from syntactic sugar conversions for {@link ProgramExp}s.</p>
          *
-         * @param parentContext The parent context that instantiated this object.
+         * @param instantiatingContext The context that instantiated this object.
          */
-        ProgramExpAdapter(ParserRuleContext parentContext) {
-            this.parentContext = parentContext;
-            progExpAdapterMap = new HashMap<>();
+        ProgramExpAdapter(ParserRuleContext instantiatingContext) {
+            this.instantiatingContext = instantiatingContext;
+            newFacilityDecs = new ArrayList<>();
+            newVarDecs = new ArrayList<>();
+            newPreStmts = new ArrayList<>();
+            newPostStmts = new ArrayList<>();
         }
     }
 
