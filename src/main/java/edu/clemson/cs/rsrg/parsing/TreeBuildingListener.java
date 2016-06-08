@@ -72,6 +72,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /** <p>Boolean that indicates that we are processing a module argument.</p> */
     private boolean myIsProcessingModuleArgument;
 
+    /** <p>Stack of current syntactic sugar conversions</p> */
+    private Stack<ProgramExpAdapter> myCurrentProgExpAdapterStack;
+
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
 
@@ -99,6 +102,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myNodes = new ParseTreeProperty<>();
         myDefinitionMemberList = null;
         myIsProcessingModuleArgument = false;
+        myCurrentProgExpAdapterStack = new Stack<>();
     }
 
     // ===========================================================
@@ -4058,6 +4062,41 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             this.rawType = rawType;
         }
 
+    }
+
+    /**
+     * <p>This holds items related to syntactic sugar conversions for
+     * {@link ProgramExp}s.</p>
+     */
+    private class ProgramExpAdapter {
+
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        /** <p>The parent context that instantiated this object</p> */
+        ParserRuleContext parentContext;
+
+        /**
+         * <p>A map from the program expression context to a list
+         * containing the new RESOLVE AST nodes.</p>
+         */
+        Map<ResolveParser.ProgExpContext, List<ResolveConceptualElement>> progExpAdapterMap;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This constructs a temporary structure to store all the relevant
+         * items to provide syntactic sugar conversions for {@link ProgramExp}s.</p>
+         *
+         * @param parentContext The parent context that instantiated this object.
+         */
+        ProgramExpAdapter(ParserRuleContext parentContext) {
+            this.parentContext = parentContext;
+            progExpAdapterMap = new HashMap<>();
+        }
     }
 
 }
