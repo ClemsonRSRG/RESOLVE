@@ -24,6 +24,7 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
@@ -75,6 +76,25 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /** <p>Stack of current syntactic sugar conversions</p> */
     private Stack<ProgramExpAdapter> myCurrentProgExpAdapterStack;
 
+    /**
+     * <p>Map from {@link ParserRuleContext}s that can contain facility declarations
+     * to the list of new facility declaration objects.</p>
+     *
+     * <p><strong>Note:</strong> The only facilities generated at the moment are
+     * new {@code Static_Array_Template} facilities.</p>
+     */
+    private Map<ParserRuleContext, List<FacilityDec>> myNewFacilityDecsMap;
+
+    /**
+     * <p>Map from {@link ParserRuleContext}s that can contain variable declarations
+     * to the list of new variable declaration objects.</p>
+     *
+     * <p><strong>Note:</strong> The only variables generated at the moment are
+     * new integer variables to store the indexes resulting from program array
+     * conversions.</p>
+     */
+    private Map<ParserRuleContext, List<VarDec>> myNewVarDecsMap;
+
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
 
@@ -103,6 +123,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myDefinitionMemberList = null;
         myIsProcessingModuleArgument = false;
         myCurrentProgExpAdapterStack = new Stack<>();
+        myNewFacilityDecsMap = new HashMap<>();
+        myNewVarDecsMap = new HashMap<>();
     }
 
     // ===========================================================
