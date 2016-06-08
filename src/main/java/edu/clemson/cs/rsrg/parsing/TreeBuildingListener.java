@@ -4052,8 +4052,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          * @param params Definition parameters.
          * @param rawType Definition return type.
          */
-        DefinitionMembers(PosSymbol name, List<MathVarDec> params,
-                Ty rawType) {
+        DefinitionMembers(PosSymbol name, List<MathVarDec> params, Ty rawType) {
             this.name = name;
             this.params = params;
             this.rawType = rawType;
