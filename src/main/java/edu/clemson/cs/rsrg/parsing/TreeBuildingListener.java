@@ -75,7 +75,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private boolean myIsProcessingModuleArgument;
 
     /** <p>Stack of current syntactic sugar conversions</p> */
-    private Stack<ProgramExpAdapter> myCurrentProgExpAdapterStack;
+    //private Stack<ProgramExpAdapter> myCurrentProgExpAdapterStack;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -104,7 +104,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myNodes = new ParseTreeProperty<>();
         myDefinitionMemberList = null;
         myIsProcessingModuleArgument = false;
-        myCurrentProgExpAdapterStack = new Stack<>();
+        //myCurrentProgExpAdapterStack = new Stack<>();
     }
 
     // ===========================================================
@@ -4024,7 +4024,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     // ===========================================================
-    // Temporary Constructs
+    // Helper Constructs
     // ===========================================================
 
     /**
@@ -4083,14 +4083,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         ParserRuleContext instantiatingContext;
 
         /**
-         * <p>List of new facility declaration objects.</p>
-         *
-         * <p><strong>Note:</strong> The only facilities generated at the moment are
-         * new {@code Static_Array_Template} facilities.</p>
-         */
-        List<FacilityDec> newFacilityDecs;
-
-        /**
          * <p>List of new variable declaration objects.</p>
          *
          * <p><strong>Note:</strong> The only variables generated at the moment are
@@ -4130,10 +4122,49 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          */
         ProgramExpAdapter(ParserRuleContext instantiatingContext) {
             this.instantiatingContext = instantiatingContext;
-            newFacilityDecs = new ArrayList<>();
             newVarDecs = new ArrayList<>();
             newPreStmts = new ArrayList<>();
             newPostStmts = new ArrayList<>();
+        }
+    }
+
+    /**
+     * <p>This holds items related to syntactic sugar conversions for
+     * {@link Ty}s.</p>
+     *
+     * <p><strong>Note:</strong> The only conversions we do right now are
+     * raw array types.</p>
+     */
+    private class RawTypeAdapter {
+
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        /** <p>The context that instantiated this object</p> */
+        ParserRuleContext instantiatingContext;
+
+        /**
+         * <p>List of new facility declaration objects.</p>
+         *
+         * <p><strong>Note:</strong> The only facilities generated at the moment are
+         * new {@code Static_Array_Template} facilities.</p>
+         */
+        List<FacilityDec> newFacilityDecs;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This constructs a temporary structure to store all the newly facility
+         * declarations that resulted from syntactic sugar conversions for {@link Ty}s.</p>
+         *
+         * @param instantiatingContext The context that instantiated this object.
+         */
+        RawTypeAdapter(ParserRuleContext instantiatingContext) {
+            this.instantiatingContext = instantiatingContext;
+            newFacilityDecs = new ArrayList<>();
         }
     }
 
