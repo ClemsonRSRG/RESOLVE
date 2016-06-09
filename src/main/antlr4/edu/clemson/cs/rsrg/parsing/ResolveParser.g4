@@ -127,7 +127,6 @@ enhancementItems
 
 enhancementItem
     :   operationDecl
-    |   typeModelDecl
     |   mathDefinitionDecl
     |   mathDefinesDecl
     ;
