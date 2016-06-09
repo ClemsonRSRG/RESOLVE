@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.VirtualListNode;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
@@ -173,6 +174,9 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
             }
 
             data = sb.toString();
+        }
+        else if (e instanceof AbstractVarDec) {
+            data = e.asString(0, 0);
         }
         else {
             data = e.getName().getName();

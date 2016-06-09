@@ -59,9 +59,8 @@ public class ParameterVarDec extends AbstractVarDec {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-
-        printSpace(indentSize + innerIndentInc, sb);
-        sb.append(myMode.toString());
+        sb.append(myMode.name());
+        sb.append(" ");
         sb.append(super.asStringVarDec(indentSize, innerIndentInc));
 
         return sb.toString();
