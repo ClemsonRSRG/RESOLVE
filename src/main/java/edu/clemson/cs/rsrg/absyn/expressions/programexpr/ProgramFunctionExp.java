@@ -81,8 +81,13 @@ public class ProgramFunctionExp extends ProgramExp {
 
         // Args
         sb.append("(");
-        for (ProgramExp exp : myExpressionArgs) {
-            sb.append(exp.asString(0, innerIndentInc));
+        Iterator<ProgramExp> it = myExpressionArgs.iterator();
+        while (it.hasNext()) {
+            sb.append(it.next().asString(0, innerIndentInc));
+
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
         }
         sb.append(")");
 
