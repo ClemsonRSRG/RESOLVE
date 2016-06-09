@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.parsing;
 
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
@@ -26,6 +27,7 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
@@ -727,31 +729,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myNodes.put(ctx, new UsesItem(createPosSymbol(ctx.getStart())));
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterOperationParameterList(
-            ResolveParser.OperationParameterListContext ctx) {
-        super.enterOperationParameterList(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitOperationParameterList(
-            ResolveParser.OperationParameterListContext ctx) {
-        super.exitOperationParameterList(ctx);
-    }
+    // -----------------------------------------------------------
+    // Parameter-related declarations
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -937,49 +917,46 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if this parameter declaration has a programming array type.
+     * If yes, then this is an error, because there is no way the caller can pass
+     * a variable of the same type to the calling statement.</p>
      *
-     * @param ctx
+     * @param ctx Parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void enterParameterDecl(ResolveParser.ParameterDeclContext ctx) {
-        super.enterParameterDecl(ctx);
+        if (ctx.variableDeclGroup().programArrayType() != null) {
+            myErrorHandler
+                    .error(createLocation(ctx.variableDeclGroup()
+                            .programArrayType()),
+                            "Array types cannot be used as a type for the parameter variables");
+        }
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the parameter declaration(s).</p>
      *
-     * @param ctx
+     * @param ctx Parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void exitParameterDecl(ResolveParser.ParameterDeclContext ctx) {
-        super.exitParameterDecl(ctx);
-    }
+        // Since we have ruled out array types, this should be a NameTy
+        ResolveParser.VariableDeclGroupContext variableDeclGroupContext =
+                ctx.variableDeclGroup();
+        NameTy rawType =
+                (NameTy) myNodes.removeFrom(variableDeclGroupContext
+                        .programNamedType());
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterParameterMode(ResolveParser.ParameterModeContext ctx) {
-        super.enterParameterMode(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitParameterMode(ResolveParser.ParameterModeContext ctx) {
-        super.exitParameterMode(ctx);
+        // Generate a new parameter declaration for each of the
+        // variables in the variable group.
+        List<TerminalNode> variableIndents =
+                variableDeclGroupContext.IDENTIFIER();
+        for (TerminalNode node : variableIndents) {
+            myNodes.put(node, new ParameterVarDec(getMode(ctx.parameterMode()),
+                    createPosSymbol(node.getSymbol()), rawType.clone()));
+        }
     }
 
     // -----------------------------------------------------------
@@ -1783,31 +1760,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         Ty rawType = (Ty) myNodes.removeFrom(ctx.mathTypeExp());
         myNodes.put(ctx, new MathVarDec(createPosSymbol(ctx.IDENTIFIER()
                 .getSymbol()), rawType));
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterVariableDeclGroup(
-            ResolveParser.VariableDeclGroupContext ctx) {
-        super.enterVariableDeclGroup(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitVariableDeclGroup(ResolveParser.VariableDeclGroupContext ctx) {
-        super.exitVariableDeclGroup(ctx);
     }
 
     /**
@@ -4082,6 +4034,44 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private PosSymbol createPosSymbol(Token t) {
         return new PosSymbol(createLocation(t), t.getText());
+    }
+
+    /**
+     * <p>Obtain the correct parameter mode based on the given
+     * context.</p>
+     *
+     * @param ctx The ANTLR4 parser rule for parameter modes.
+     *
+     * @return The corresponding {@link ProgramParameterEntry.ParameterMode}.
+     */
+    private ProgramParameterEntry.ParameterMode getMode(
+            ResolveParser.ParameterModeContext ctx) {
+        ProgramParameterEntry.ParameterMode mode;
+        switch (ctx.getStart().getType()) {
+        case ResolveLexer.ALTERS:
+            mode = ProgramParameterEntry.ParameterMode.ALTERS;
+            break;
+        case ResolveLexer.UPDATES:
+            mode = ProgramParameterEntry.ParameterMode.UPDATES;
+            break;
+        case ResolveLexer.CLEARS:
+            mode = ProgramParameterEntry.ParameterMode.CLEARS;
+            break;
+        case ResolveLexer.RESTORES:
+            mode = ProgramParameterEntry.ParameterMode.RESTORES;
+            break;
+        case ResolveLexer.PRESERVES:
+            mode = ProgramParameterEntry.ParameterMode.PRESERVES;
+            break;
+        case ResolveLexer.REPLACES:
+            mode = ProgramParameterEntry.ParameterMode.REPLACES;
+            break;
+        default:
+            mode = ProgramParameterEntry.ParameterMode.EVALUATES;
+            break;
+        }
+
+        return mode;
     }
 
     // ===========================================================
