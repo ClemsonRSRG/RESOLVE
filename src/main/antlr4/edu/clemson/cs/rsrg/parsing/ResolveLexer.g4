@@ -514,6 +514,10 @@ WHERE
     :   'where'
     ;
 
+WHICH_ENTAILS
+    :   'which_entails'
+    ;
+
 WHILE
     :   'While'
     ;

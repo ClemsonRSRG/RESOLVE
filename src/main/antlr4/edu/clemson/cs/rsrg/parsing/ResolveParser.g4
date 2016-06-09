@@ -701,15 +701,15 @@ affectsClause
     ;
 
 requiresClause
-    :   REQUIRES mathExp SEMICOLON
+    :   REQUIRES mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 ensuresClause
-    :   ENSURES mathExp SEMICOLON
+    :   ENSURES mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 constraintClause
-    :   CONSTRAINT mathExp SEMICOLON
+    :   CONSTRAINT mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 changingClause
@@ -717,11 +717,11 @@ changingClause
     ;
 
 maintainingClause
-    :   MAINTAINING mathExp SEMICOLON
+    :   MAINTAINING mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 decreasingClause
-    :   DECREASING mathAddingExp SEMICOLON
+    :   DECREASING mathAddingExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 whereClause
@@ -729,19 +729,19 @@ whereClause
     ;
 
 correspondenceClause
-    :   CORR mathExp SEMICOLON
+    :   CORR mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 conventionClause
-    :   CONVENTION mathExp SEMICOLON
+    :   CONVENTION mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 durationClause
-    :   DURATION mathAddingExp SEMICOLON
+    :   DURATION mathAddingExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 manipulationDispClause
-    :   MAINP_DISP mathAddingExp SEMICOLON
+    :   MAINP_DISP mathAddingExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 // mathematical expressions
