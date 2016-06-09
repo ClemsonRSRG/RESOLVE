@@ -987,8 +987,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterType(ResolveParser.TypeContext ctx) {
-        super.enterType(ctx);
+    public void enterProgramNamedType(ResolveParser.ProgramNamedTypeContext ctx) {
+        super.enterProgramNamedType(ctx);
     }
 
     /**
@@ -999,8 +999,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void exitType(ResolveParser.TypeContext ctx) {
-        super.exitType(ctx);
+    public void exitProgramNamedType(ResolveParser.ProgramNamedTypeContext ctx) {
+        super.exitProgramNamedType(ctx);
     }
 
     /**
@@ -1011,8 +1011,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterRecord(ResolveParser.RecordContext ctx) {
-        super.enterRecord(ctx);
+    public void enterProgramArrayType(ResolveParser.ProgramArrayTypeContext ctx) {
+        super.enterProgramArrayType(ctx);
     }
 
     /**
@@ -1023,8 +1023,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void exitRecord(ResolveParser.RecordContext ctx) {
-        super.exitRecord(ctx);
+    public void exitProgramArrayType(ResolveParser.ProgramArrayTypeContext ctx) {
+        super.exitProgramArrayType(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param ctx
+     */
+    @Override
+    public void enterProgramRecordType(
+            ResolveParser.ProgramRecordTypeContext ctx) {
+        super.enterProgramRecordType(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param ctx
+     */
+    @Override
+    public void exitProgramRecordType(ResolveParser.ProgramRecordTypeContext ctx) {
+        super.exitProgramRecordType(ctx);
     }
 
     /**

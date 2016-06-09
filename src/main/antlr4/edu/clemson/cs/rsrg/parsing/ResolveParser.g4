@@ -270,16 +270,20 @@ parameterMode
 
 // type and record related rules
 
-type
+programNamedType
     :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
     ;
 
-record
+programArrayType
+    :   ARRAY progExp RANGE progExp OF programNamedType
+    ;
+
+programRecordType
     :   RECORD (recordVariableDeclGroup)+ END
     ;
 
 recordVariableDeclGroup
-    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type SEMICOLON
+    :   IDENTIFIER (COMMA IDENTIFIER)* COLON (programNamedType|programArrayType) SEMICOLON
     ;
 
 typeModelDecl
@@ -292,7 +296,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (record|type) SEMICOLON
+    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (programNamedType|programRecordType) SEMICOLON
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
@@ -301,7 +305,7 @@ typeRepresentationDecl
     ;
 
 facilityTypeRepresentationDecl
-    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (record|type) SEMICOLON
+    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (programNamedType|programRecordType) SEMICOLON
         (conventionClause)?
         (facilityRepresentationInit)?
         (facilityRepresentationFinal)?
@@ -424,7 +428,7 @@ performanceSpecModelFinal
 
 procedureDecl
     :   PROCEDURE name=IDENTIFIER
-        operationParameterList (COLON type)? SEMICOLON
+        operationParameterList (COLON programNamedType)? SEMICOLON
         (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
@@ -435,7 +439,7 @@ procedureDecl
 
 recursiveProcedureDecl
     :   RECURSIVE PROCEDURE name=IDENTIFIER
-        operationParameterList (COLON type)? SEMICOLON
+        operationParameterList (COLON programNamedType)? SEMICOLON
         (affectsClause)?
         decreasingClause
         (facilityDecl)*
@@ -475,14 +479,14 @@ recursiveOperationProcedureDecl
     ;
 
 operationDecl
-    :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
+    :   OPERATION name=IDENTIFIER operationParameterList (COLON programNamedType)? SEMICOLON
         (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
     ;
 
 performanceOperationDecl
-    :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
+    :   OPERATION name=IDENTIFIER operationParameterList (COLON programNamedType)? SEMICOLON
         (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
@@ -531,7 +535,7 @@ mathVariableDecl
     ;
 
 variableDeclGroup
-    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type
+    :   IDENTIFIER (COMMA IDENTIFIER)* COLON (programNamedType|programArrayType)
     ;
 
 variableDecl
@@ -539,7 +543,7 @@ variableDecl
     ;
 
 auxVariableDeclGroup
-    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type
+    :   IDENTIFIER (COMMA IDENTIFIER)* COLON programNamedType
     ;
 
 auxVariableDecl
