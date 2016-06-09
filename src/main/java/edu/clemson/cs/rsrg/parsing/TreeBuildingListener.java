@@ -400,6 +400,18 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
+    public void exitConceptImplItem(ResolveParser.ConceptImplItemContext ctx) {
+        super.exitConceptImplItem(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param ctx
+     */
+    @Override
     public void enterEnhancementModule(
             ResolveParser.EnhancementModuleContext ctx) {
         super.enterEnhancementModule(ctx);
