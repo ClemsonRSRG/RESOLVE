@@ -292,7 +292,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (programNamedType|programRecordType) SEMICOLON
+    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (programNamedType|programArrayType|programRecordType) SEMICOLON
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
@@ -301,7 +301,7 @@ typeRepresentationDecl
     ;
 
 facilityTypeRepresentationDecl
-    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (programNamedType|programRecordType) SEMICOLON
+    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (programNamedType|programArrayType|programRecordType) SEMICOLON
         (conventionClause)?
         (facilityRepresentationInit)?
         (facilityRepresentationFinal)?
