@@ -1060,32 +1060,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterRecordVariableDeclGroup(
-            ResolveParser.RecordVariableDeclGroupContext ctx) {
-        super.enterRecordVariableDeclGroup(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitRecordVariableDeclGroup(
-            ResolveParser.RecordVariableDeclGroupContext ctx) {
-        super.exitRecordVariableDeclGroup(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
     public void enterTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
         super.enterTypeModelDecl(ctx);
     }

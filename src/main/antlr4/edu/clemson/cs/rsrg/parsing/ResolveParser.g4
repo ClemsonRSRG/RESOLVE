@@ -279,11 +279,7 @@ programArrayType
     ;
 
 programRecordType
-    :   RECORD (recordVariableDeclGroup)+ END
-    ;
-
-recordVariableDeclGroup
-    :   IDENTIFIER (COMMA IDENTIFIER)* COLON (programNamedType|programArrayType) SEMICOLON
+    :   RECORD (variableDeclGroup SEMICOLON)+ END
     ;
 
 typeModelDecl
