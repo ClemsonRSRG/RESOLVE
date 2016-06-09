@@ -35,6 +35,7 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
+import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
@@ -979,28 +980,26 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitParameterMode(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterProgramNamedType(ResolveParser.ProgramNamedTypeContext ctx) {
-        super.enterProgramNamedType(ctx);
-    }
+    // -----------------------------------------------------------
+    // Programming raw types
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new program named type.</p>
      *
-     * @param ctx
+     * @param ctx Program named type node in ANTLR4 AST.
      */
     @Override
     public void exitProgramNamedType(ResolveParser.ProgramNamedTypeContext ctx) {
-        super.exitProgramNamedType(ctx);
+        PosSymbol qualifier = null;
+        if (ctx.qualifier != null) {
+            qualifier = createPosSymbol(ctx.qualifier);
+        }
+
+        myNodes.put(ctx, new NameTy(createLocation(ctx), qualifier,
+                createPosSymbol(ctx.name)));
     }
 
     /**
