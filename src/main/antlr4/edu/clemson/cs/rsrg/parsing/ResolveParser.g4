@@ -329,7 +329,7 @@ sharedStateDecl
 
 sharedStateRepresentationDecl
     :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
-        (stateVariableDecl)+
+        (variableDecl)+
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
@@ -339,7 +339,7 @@ sharedStateRepresentationDecl
 
 facilitySharedStateRepresentationDecl
     :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
-        (stateVariableDecl)+
+        (variableDecl)+
         (conventionClause)?
         (facilityRepresentationInit)?
         (facilityRepresentationFinal)?
@@ -550,10 +550,6 @@ auxVariableDecl
 
 moduleStateVariableDecl
     :   ABSTRACT_VAR mathVariableDeclGroup SEMICOLON
-    ;
-
-stateVariableDecl
-    :   VAR variableDeclGroup SEMICOLON
     ;
 
 // statements

@@ -1914,31 +1914,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterStateVariableDecl(
-            ResolveParser.StateVariableDeclContext ctx) {
-        super.enterStateVariableDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitStateVariableDecl(ResolveParser.StateVariableDeclContext ctx) {
-        super.exitStateVariableDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
     public void enterStmt(ResolveParser.StmtContext ctx) {
         super.enterStmt(ctx);
     }
