@@ -2487,49 +2487,27 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new requires clause.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterRequiresClause(ResolveParser.RequiresClauseContext ctx) {
-        super.enterRequiresClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Requires clause node in ANTLR4 AST.
      */
     @Override
     public void exitRequiresClause(ResolveParser.RequiresClauseContext ctx) {
-        super.exitRequiresClause(ctx);
+        myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.REQUIRES, ctx.mathExp()));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new ensures clause.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterEnsuresClause(ResolveParser.EnsuresClauseContext ctx) {
-        super.enterEnsuresClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Ensures clause node in ANTLR4 AST.
      */
     @Override
     public void exitEnsuresClause(ResolveParser.EnsuresClauseContext ctx) {
-        super.exitEnsuresClause(ctx);
+        myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.ENSURES, ctx.mathExp()));
     }
 
     /**
@@ -4046,6 +4024,28 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>Create an {@link AssertionClause} for the current parser rule
+     * we are visiting.</p>
+     *
+     * @param l Location for the clause.
+     * @param clauseType The type of clause.
+     * @param mathExps List of mathematical expressions in the clause.
+     *
+     * @return A {@link AssertionClause} for the rule.
+     */
+    private AssertionClause createAssertionClause(Location l,
+            AssertionClause.ClauseType clauseType,
+            List<ResolveParser.MathExpContext> mathExps) {
+        Exp whichEntailsExp = null;
+        if (mathExps.size() > 1) {
+            whichEntailsExp = (Exp) myNodes.removeFrom(mathExps.get(1));
+        }
+        Exp assertionExp = (Exp) myNodes.removeFrom(mathExps.get(0));
+
+        return new AssertionClause(l, clauseType, assertionExp, whichEntailsExp);
+    }
 
     /**
      * <p>Create a location for the current parser rule

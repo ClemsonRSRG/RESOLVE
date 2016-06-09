@@ -178,8 +178,6 @@ public class AssertionClause extends ResolveConceptualElement {
             sb.append(myWhichEntailsExp.asString(0, innerIndentInc));
         }
 
-        sb.append("\n");
-
         return sb.toString();
     }
 
