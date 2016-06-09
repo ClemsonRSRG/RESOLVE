@@ -96,8 +96,18 @@ conceptImplModule
         (ENHANCED BY enhancement=IDENTIFIER)* SEMICOLON
         (usesList)?
         (requiresClause)?
-        (implItems)?
+        (conceptImplItems)?
         END closename=IDENTIFIER SEMICOLON EOF
+    ;
+
+conceptImplItems
+    :   (conceptImplItem)+
+    ;
+
+conceptImplItem
+    :   implItem
+    |   sharedStateRepresentationDecl
+    |   typeRepresentationDecl
     ;
 
 // enhancement module
@@ -148,8 +158,6 @@ implItem
     |   procedureDecl
     |   recursiveProcedureDecl
     |   mathDefinitionDecl
-    |   sharedStateRepresentationDecl
-    |   typeRepresentationDecl
     ;
 
 // concept performance module
