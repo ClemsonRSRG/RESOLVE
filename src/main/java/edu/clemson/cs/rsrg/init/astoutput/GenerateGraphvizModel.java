@@ -15,9 +15,14 @@ package edu.clemson.cs.rsrg.init.astoutput;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.VirtualListNode;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
@@ -120,7 +125,10 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
         if (data instanceof VirtualListNode) {
             ST node =
                     createNode(myElementToNodeNumMap.get(data), data.getClass()
-                            .getSimpleName(), false);
+                            .getSimpleName(), true);
+
+            node.add("nodeData", ((VirtualListNode) data).getListType()
+                    .getSimpleName());
             myModel.add("nodes", node);
         }
     }
@@ -147,6 +155,24 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
             data =
                     ((MathAssertionDec) e).getAssertionType().name() + " "
                             + e.getName().getName();
+        }
+        else if (e instanceof FacilityDec) {
+            FacilityDec dec = (FacilityDec) e;
+            StringBuffer sb = new StringBuffer();
+            sb.append(dec.getName().getName());
+            sb.append(", Concept: ");
+            sb.append(dec.getConceptName().getName());
+            sb.append(", Concept Realization: ");
+            sb.append(dec.getConceptRealizName().getName());
+            if (dec.getExternallyRealizedFlag()) {
+                sb.append(" (EXTERNAL)");
+            }
+            if (dec.getProfileName() != null) {
+                sb.append(", Profile: ");
+                sb.append(dec.getProfileName().getName());
+            }
+
+            data = sb.toString();
         }
         else {
             data = e.getName().getName();
@@ -196,6 +222,66 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
 
         // Add the imported module name
         node.add("nodeData", e.getName().getName());
+
+        myModel.add("nodes", node);
+    }
+
+    // -----------------------------------------------------------
+    // Facility Declaration's Items
+    // -----------------------------------------------------------
+
+    /**
+     * <p>For all {@link ModuleArgumentItem} nodes, we create a new node
+     * with its simple class name.</p>
+     *
+     * @param e Current {@link ModuleArgumentItem} we are visiting.
+     */
+    @Override
+    public void postModuleArgumentItem(ModuleArgumentItem e) {
+        myModel.add("nodes", createNode(myElementToNodeNumMap.get(e), e
+                .getClass().getSimpleName(), false));
+    }
+
+    /**
+     * <p>For all {@link EnhancementSpecItem} nodes, we create a new node
+     * with its simple class name and the name of the concept enhancement.</p>
+     *
+     * @param e Current {@link EnhancementSpecItem} we are visiting.
+     */
+    @Override
+    public void postEnhancementSpecItem(EnhancementSpecItem e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("Concept Enhancement: ");
+        sb.append(e.getName().getName());
+        node.add("nodeData", sb.toString());
+
+        myModel.add("nodes", node);
+    }
+
+    /**
+     * <p>For all {@link EnhancementSpecRealizItem} nodes, we create a new node
+     * with its simple class name, the name of the enhancement/realization.</p>
+     *
+     * @param e Current {@link EnhancementSpecItem} we are visiting.
+     */
+    @Override
+    public void postEnhancementSpecRealizItem(EnhancementSpecRealizItem e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("Enhancement: ");
+        sb.append(e.getEnhancementName().getName());
+        sb.append(", Realization: ");
+        sb.append(e.getEnhancementRealizName().getName());
+        node.add("nodeData", sb.toString());
 
         myModel.add("nodes", node);
     }
@@ -343,41 +429,46 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link VarExp} nodes, create a new node and
-     * add the name (with qualifier if it is not {@code null}).</p>
-     *
-     * @param e Current {@link VarExp} we are visiting.
-     */
-    @Override
-    public void postVarExp(VarExp e) {
-        // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
-        String data = e.getName().getName();
-
-        if (e.getQualifier() != null) {
-            data = e.getQualifier() + "::" + data;
-        }
-
-        node.add("nodeData", data);
-        myModel.add("nodes", node);
-    }
-
-    /**
      * <p>For all {@link MathExp} nodes that we didn't add special
-     * override logic, we create a new node with its simple class name.</p>
+     * override logic, we create a new node with its simple class name
+     * and the string retrieved from {@link MathExp#asString}.</p>
      *
      * @param e Current {@link MathExp} we are visiting.
      */
     @Override
     public void postMathExp(MathExp e) {
-        if (!(e instanceof VarExp) && !(e instanceof InfixExp)
-                && !(e instanceof TypeAssertionExp) && !(e instanceof QuantExp)
-                && !(e instanceof FunctionExp)) {
-            myModel.add("nodes", createNode(myElementToNodeNumMap.get(e), e
-                    .getClass().getSimpleName(), false));
+        if (!(e instanceof InfixExp) && !(e instanceof TypeAssertionExp)
+                && !(e instanceof QuantExp) && !(e instanceof FunctionExp)) {
+            // Create the new node
+            ST node =
+                    createNode(myElementToNodeNumMap.get(e), e.getClass()
+                            .getSimpleName(), true);
+
+            node.add("nodeData", e.asString(0, 0));
+            myModel.add("nodes", node);
         }
+    }
+
+    // -----------------------------------------------------------
+    // Program Expressions
+    // -----------------------------------------------------------
+
+    /**
+     * <p>For all {@link ProgramExp} nodes, we create a new node
+     * with its simple class name and the string retrieved from
+     * {@link ProgramExp#asString}.</p>
+     *
+     * @param e Current {@link ProgramExp} we are visiting.
+     */
+    @Override
+    public void postProgramExp(ProgramExp e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        node.add("nodeData", e.asString(0, 0));
+        myModel.add("nodes", node);
     }
 
     // ===========================================================

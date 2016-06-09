@@ -29,12 +29,6 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /**
-     * <p>If this argument names a program type, this will be set by the 
-     * populator to point to the correct type.</p>
-     */
-    private PTType myTypeValue;
-
     /** <p>The argument expression in this module argument.</p> */
     private final ProgramExp myArgumentExp;
 
@@ -62,7 +56,7 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        sb.append(myArgumentExp.asString(0, innerIndentInc));
+        sb.append(myArgumentExp.asString(indentSize, innerIndentInc));
 
         return sb.toString();
     }
@@ -74,7 +68,6 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     public final ModuleArgumentItem clone() {
         ModuleArgumentItem newItem =
                 new ModuleArgumentItem(myArgumentExp.clone());
-        newItem.setProgramTypeValue(myTypeValue);
 
         return newItem;
     }
@@ -91,9 +84,6 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
 
         ModuleArgumentItem that = (ModuleArgumentItem) o;
 
-        if (myTypeValue != null ? !myTypeValue.equals(that.myTypeValue)
-                : that.myTypeValue != null)
-            return false;
         return myArgumentExp.equals(that.myArgumentExp);
 
     }
@@ -114,7 +104,7 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
      * @return A {@link PTType} type representation.
      */
     public final PTType getProgramTypeValue() {
-        return myTypeValue;
+        return myArgumentExp.getProgramType();
     }
 
     /**
@@ -122,18 +112,7 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
      */
     @Override
     public final int hashCode() {
-        int result = myTypeValue != null ? myTypeValue.hashCode() : 0;
-        result = 31 * result + myArgumentExp.hashCode();
-        return result;
-    }
-
-    /**
-     * <p>Sets the variable expression's program type.</p>
-     *
-     * @param type A {@link PTType} type representation.
-     */
-    public final void setProgramTypeValue(PTType type) {
-        myTypeValue = type;
+        return myArgumentExp.hashCode();
     }
 
 }

@@ -150,42 +150,30 @@ public class FacilityDec extends Dec {
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(" is ");
 
-        sb.append(myConceptName.asString(0, 0));
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> cArgIt = myConceptParams.iterator();
-        while (cArgIt.hasNext()) {
-            sb.append(cArgIt.next().asString(0, 0));
-
-            if (cArgIt.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(" )\n");
+        sb.append(myConceptName.asString(0, innerIndentInc));
+        sb.append(formArgumentString(myConceptParams));
+        sb.append("\n");
 
         for (EnhancementSpecItem eItem : myEnhancements) {
             sb.append(eItem.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         printSpace(indentSize + innerIndentInc, sb);
-        sb.append(myConceptRealizName.asString(0, 0));
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> cRealizArgIt =
-                myConceptRealizParams.iterator();
-        while (cRealizArgIt.hasNext()) {
-            sb.append(cRealizArgIt.next().asString(0, 0));
-
-            if (cRealizArgIt.hasNext()) {
-                sb.append(", ");
-            }
+        if (myExternallyRealizedFlag) {
+            sb.append("externally ");
         }
-        sb.append(") ");
+        sb.append("realized by ");
+        sb.append(myConceptRealizName.asString(0, innerIndentInc));
+        sb.append(formArgumentString(myConceptRealizParams));
 
         for (EnhancementSpecRealizItem bodyItem : myEnhancementRealizPairs) {
+            sb.append("\n");
             sb.append(bodyItem.asString(indentSize + innerIndentInc,
                     innerIndentInc));
         }
-        sb.append("\n");
+        sb.append(";");
 
         return sb.toString();
     }
@@ -400,5 +388,31 @@ public class FacilityDec extends Dec {
         }
 
         return copyArgs;
+    }
+
+    /**
+     * <p>An helper method to generate a string for the argument list.</p>
+     *
+     * @param argumentItems A list containing {@link ModuleArgumentItem}s.
+     *
+     * @return String containing all module argument strings.
+     */
+    private String formArgumentString(List<ModuleArgumentItem> argumentItems) {
+        StringBuffer sb = new StringBuffer();
+
+        if (argumentItems.size() > 0) {
+            sb.append("(");
+            Iterator<ModuleArgumentItem> cArgIt = argumentItems.iterator();
+            while (cArgIt.hasNext()) {
+                sb.append(cArgIt.next().asString(0, 0));
+
+                if (cArgIt.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(")");
+        }
+
+        return sb.toString();
     }
 }

@@ -29,6 +29,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
@@ -280,10 +282,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitShortFacilityModule(
             ResolveParser.ShortFacilityModuleContext ctx) {
-        //FacilityDec facilityDec = (FacilityDec) myNodes.removeFrom(ctx.facilityDecl());
+        FacilityDec facilityDec =
+                (FacilityDec) myNodes.removeFrom(ctx.facilityDecl());
         ShortFacilityModuleDec shortFacility =
-                new ShortFacilityModuleDec(createLocation(ctx),
-                        createPosSymbol(ctx.facilityDecl().name), null);
+                new ShortFacilityModuleDec(createLocation(ctx), facilityDec
+                        .getName(), facilityDec);
 
         myNodes.put(ctx, shortFacility);
     }
@@ -1595,71 +1598,105 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
         }
 
+        // EnhacementSpec items
+        List<EnhancementSpecItem> enhancements =
+                Utilities.collect(EnhancementSpecItem.class, ctx.conceptEnhancementDecl(), myNodes);
+
         // Externally realized flag
         boolean externallyRealized = false;
         if (ctx.externally != null) {
             externallyRealized = true;
         }
 
-        System.out.println(conceptArgs);
-
         // Concept realization arguments
-        //List<ModuleArgumentItem> conceptRealizArgs = new ArrayList<>();
-        //if (ctx)
+        List<ModuleArgumentItem> conceptRealizArgs = new ArrayList<>();
+        if (ctx.implArgs != null) {
+            List<ResolveParser.ModuleArgumentContext> conceptRealizArgContext = ctx.implArgs.moduleArgument();
+            for (ResolveParser.ModuleArgumentContext context : conceptRealizArgContext) {
+                conceptRealizArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
+            }
+        }
 
-        //myNodes.put(ctx, new FacilityDec());
+        // EnhacementSpecRealiz items
+        List<EnhancementSpecRealizItem> enhancementBodies =
+                Utilities.collect(EnhancementSpecRealizItem.class, ctx.enhancementPairDecl(), myNodes);
+
+        // Profile name (if any)
+        PosSymbol profileName = null;
+        if (ctx.profile != null) {
+            profileName = createPosSymbol(ctx.profile);
+        }
+
+        myNodes.put(ctx, new FacilityDec(createPosSymbol(ctx.name),
+                createPosSymbol(ctx.concept), conceptArgs,
+                enhancements,
+                createPosSymbol(ctx.impl), conceptRealizArgs,
+                enhancementBodies,
+                profileName,
+                externallyRealized));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a concept
+     * enhancement declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterConceptEnhancementDecl(
-            ResolveParser.ConceptEnhancementDeclContext ctx) {
-        super.enterConceptEnhancementDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Concept enhancement declaration node in ANTLR4 AST.
      */
     @Override
     public void exitConceptEnhancementDecl(
             ResolveParser.ConceptEnhancementDeclContext ctx) {
-        super.exitConceptEnhancementDecl(ctx);
+        // Enhancement arguments
+        List<ModuleArgumentItem> enhancementArgs = new ArrayList<>();
+        if (ctx.specArgs != null) {
+            List<ResolveParser.ModuleArgumentContext> enhancementArgContext = ctx.specArgs.moduleArgument();
+            for (ResolveParser.ModuleArgumentContext context : enhancementArgContext) {
+                enhancementArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
+            }
+        }
+
+        myNodes.put(ctx, new EnhancementSpecItem(createPosSymbol(ctx.spec), enhancementArgs));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for an
+     * enhancement/enhancement realization pair declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterEnhancementPairDecl(
-            ResolveParser.EnhancementPairDeclContext ctx) {
-        super.enterEnhancementPairDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Enhancement pair declaration node in ANTLR4 AST.
      */
     @Override
     public void exitEnhancementPairDecl(
             ResolveParser.EnhancementPairDeclContext ctx) {
-        super.exitEnhancementPairDecl(ctx);
+        // Enhancement arguments
+        List<ModuleArgumentItem> enhancementArgs = new ArrayList<>();
+        if (ctx.specArgs != null) {
+            List<ResolveParser.ModuleArgumentContext> enhancementArgContext = ctx.specArgs.moduleArgument();
+            for (ResolveParser.ModuleArgumentContext context : enhancementArgContext) {
+                enhancementArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
+            }
+        }
+
+        // Profile name (if any)
+        PosSymbol profileName = null;
+        if (ctx.profile != null) {
+            profileName = createPosSymbol(ctx.profile);
+        }
+
+        // Enhancement realization arguments
+        List<ModuleArgumentItem> enhancementRealizArgs = new ArrayList<>();
+        if (ctx.implArgs != null) {
+            List<ResolveParser.ModuleArgumentContext> enhancementRealizArgContext = ctx.implArgs.moduleArgument();
+            for (ResolveParser.ModuleArgumentContext context : enhancementRealizArgContext) {
+                enhancementRealizArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
+            }
+        }
+
+        myNodes.put(ctx, new EnhancementSpecRealizItem(createPosSymbol(ctx.spec), enhancementArgs,
+                createPosSymbol(ctx.impl), enhancementRealizArgs,
+                profileName));
     }
 
     // -----------------------------------------------------------

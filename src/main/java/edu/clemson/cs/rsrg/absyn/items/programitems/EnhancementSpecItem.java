@@ -63,21 +63,23 @@ public class EnhancementSpecItem extends ResolveConceptualElement {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
+        printSpace(indentSize + innerIndentInc, sb);
         sb.append("enhanced by ");
         sb.append(myName.asString(0, innerIndentInc));
 
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> it = myParams.iterator();
-        while (it.hasNext()) {
-            ModuleArgumentItem m = it.next();
-            sb.append(m.asString(0, innerIndentInc));
+        if (myParams.size() > 0) {
+            sb.append("(");
+            Iterator<ModuleArgumentItem> it = myParams.iterator();
+            while (it.hasNext()) {
+                ModuleArgumentItem m = it.next();
+                sb.append(m.asString(0, 0));
 
-            if (it.hasNext()) {
-                sb.append(", ");
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
             }
+            sb.append(")");
         }
-        sb.append(" )\n");
 
         return sb.toString();
     }

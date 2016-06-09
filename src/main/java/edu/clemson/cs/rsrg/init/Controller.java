@@ -142,9 +142,12 @@ public class Controller {
                 // DEBUG: Print the entire ModuleDec
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                     ModuleDec dec = myCompileEnvironment.getModuleAST(m);
-                    myErrorHandler.info(null, "\n-----------------------------\n");
-                    myErrorHandler.info(null, dec.asString(0, 4) + "\n");
-                    myErrorHandler.info(null, "\n-----------------------------\n");
+
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("\n---------------Print Module---------------\n\n");
+                    sb.append(dec.asString(0, 4));
+                    sb.append("\n---------------Print Module---------------\n");
+                    myErrorHandler.info(null, sb.toString());
                 }
 
                 // Output AST to Graphviz dot file.

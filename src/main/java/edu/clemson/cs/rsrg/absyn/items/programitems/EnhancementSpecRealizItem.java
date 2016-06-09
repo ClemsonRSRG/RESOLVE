@@ -84,33 +84,14 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
         printSpace(indentSize, sb);
         sb.append("enhanced by ");
         sb.append(myEnhancementName.asString(0, innerIndentInc));
+        sb.append(formArgumentString(myEnhancementParams));
+        sb.append("\n");
 
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> it = myEnhancementParams.iterator();
-        while (it.hasNext()) {
-            ModuleArgumentItem m = it.next();
-            sb.append(m.asString(0, innerIndentInc));
-
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(" )\n");
-
-        printSpace(indentSize, sb);
+        printSpace(indentSize + innerIndentInc, sb);
         sb.append("realized by ");
         sb.append(myEnhancementRealizName.asString(0, innerIndentInc));
         sb.append("(");
-        Iterator<ModuleArgumentItem> it2 = myEnhancementRealizParams.iterator();
-        while (it.hasNext()) {
-            ModuleArgumentItem m = it.next();
-            sb.append(m.asString(0, innerIndentInc));
-
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(" )\n");
+        sb.append(formArgumentString(myEnhancementRealizParams));
 
         return sb.toString();
     }
@@ -250,5 +231,31 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
         }
 
         return copyArgs;
+    }
+
+    /**
+     * <p>An helper method to generate a string for the argument list.</p>
+     *
+     * @param argumentItems A list containing {@link ModuleArgumentItem}s.
+     *
+     * @return String containing all module argument strings.
+     */
+    private String formArgumentString(List<ModuleArgumentItem> argumentItems) {
+        StringBuffer sb = new StringBuffer();
+
+        if (argumentItems.size() > 0) {
+            sb.append("(");
+            Iterator<ModuleArgumentItem> cArgIt = argumentItems.iterator();
+            while (cArgIt.hasNext()) {
+                sb.append(cArgIt.next().asString(0, 0));
+
+                if (cArgIt.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(")");
+        }
+
+        return sb.toString();
     }
 }

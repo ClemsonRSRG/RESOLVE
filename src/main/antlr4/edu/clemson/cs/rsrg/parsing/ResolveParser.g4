@@ -500,7 +500,7 @@ conceptEnhancementDecl
 
 enhancementPairDecl
     :   ENHANCED BY spec=IDENTIFIER (specArgs=moduleArgumentList)?
-        (externally=EXTERNALLY)? REALIZED BY impl=IDENTIFIER
+        REALIZED BY impl=IDENTIFIER
         (WITH_PROFILE profile=IDENTIFIER)?
         (implArgs=moduleArgumentList)?
     ;

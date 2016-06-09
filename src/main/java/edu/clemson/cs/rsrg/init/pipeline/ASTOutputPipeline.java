@@ -89,12 +89,13 @@ public class ASTOutputPipeline extends AbstractPipeline {
         writeToFile(outputFileName, twv.getCompleteModel());
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myCompileEnvironment.getErrorHandler().info(null,
-                    "\n-----------------------------\n");
-            myCompileEnvironment.getErrorHandler().info(null,
-                    "Exported ModuleDec to dot file: " + outputFileName);
-            myCompileEnvironment.getErrorHandler().info(null,
-                    "\n-----------------------------\n");
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n---------------Output Module AST---------------\n\n");
+            sb.append("Exported ModuleDec to dot file: " + outputFileName
+                    + "\n");
+            sb.append("\n---------------Output Module AST---------------\n");
+
+            myCompileEnvironment.getErrorHandler().info(null, sb.toString());
         }
     }
 
