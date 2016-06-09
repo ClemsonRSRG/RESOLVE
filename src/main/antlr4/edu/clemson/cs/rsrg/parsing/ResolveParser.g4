@@ -697,7 +697,7 @@ definitionParameterList
 // mathematical clauses
 
 affectsClause
-    :   AFFECTS progNamedExp (COMMA progNamedExp)* SEMICOLON
+    :   AFFECTS mathVarNameExp (COMMA mathVarNameExp)* SEMICOLON
     ;
 
 requiresClause
@@ -875,9 +875,13 @@ mathCleanFunctionExp
     :   (qualifier=IDENTIFIER QUALIFIER)?
         name=IDENTIFIER (CARAT mathNestedExp)?
         LPAREN mathExp (COMMA mathExp)* RPAREN                  #mathFunctionExp
-    |   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER       #mathVarExp
+    |   mathVarNameExp                                          #mathVarExp
     |   OP (qualifier=IDENTIFIER QUALIFIER)?
         (infixOp | op=NOT | op=ABS | op=COMPLEMENT)             #mathOpNameExp
+    ;
+
+mathVarNameExp
+    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
     ;
 
 mathOutfixExp

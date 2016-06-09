@@ -72,8 +72,6 @@ public class AffectsClause extends ResolveConceptualElement {
             }
         }
 
-        sb.append("\n");
-
         return sb.toString();
     }
 
