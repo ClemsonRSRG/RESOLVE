@@ -267,7 +267,9 @@ public class Controller {
         }
 
         // Build the intermediate representation
-        TreeBuildingListener v = new TreeBuildingListener(file, myErrorHandler);
+        TreeBuildingListener v =
+                new TreeBuildingListener(file, myCompileEnvironment
+                        .getTypeGraph(), myErrorHandler);
         ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
         ModuleDec result = v.getModule();
 

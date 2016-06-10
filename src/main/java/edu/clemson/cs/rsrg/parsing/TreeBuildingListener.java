@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.parsing;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
@@ -25,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -90,6 +92,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /** <p>The current file we are compiling.</p> */
     private final ResolveFile myFile;
 
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
     /** <p>The error listener.</p> */
     private final ErrorHandler myErrorHandler;
 
@@ -103,8 +111,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * objects used by the subsequent modules.</p>
      *
      * @param file The current file we are compiling.
+     * @param errorHandler An error handler to display debug or error messages.
+     * @param typeGraph Type graph that indicates relationship between different mathematical types.
      */
-    public TreeBuildingListener(ResolveFile file, ErrorHandler errorHandler) {
+    public TreeBuildingListener(ResolveFile file, TypeGraph typeGraph, ErrorHandler errorHandler) {
+        myTypeGraph = typeGraph;
         myErrorHandler = errorHandler;
         myFile = file;
         myFinalModule = null;
@@ -1521,25 +1532,59 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for an operation
+     * declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterOperationDecl(ResolveParser.OperationDeclContext ctx) {
-        super.enterOperationDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Operation declaration node in ANTLR4 AST.
      */
     @Override
     public void exitOperationDecl(ResolveParser.OperationDeclContext ctx) {
-        super.exitOperationDecl(ctx);
+        // Parameters
+        List<ResolveParser.ParameterDeclContext> parameterDeclContexts =
+                ctx.operationParameterList().parameterDecl();
+        List<ParameterVarDec> varDecs = new ArrayList<>();
+        for (ResolveParser.ParameterDeclContext context : parameterDeclContexts) {
+            List<TerminalNode> varNames = context.variableDeclGroup().IDENTIFIER();
+            for (TerminalNode ident : varNames) {
+                varDecs.add((ParameterVarDec) myNodes.removeFrom(ident));
+            }
+        }
+
+        // Return type (if any)
+        Ty returnTy = null;
+        if (ctx.programNamedType() != null) {
+            returnTy = (Ty) myNodes.removeFrom(ctx.programNamedType());
+        }
+
+        // Affects clause (if any)
+        AffectsClause affectsClause = null;
+        if (ctx.affectsClause() != null) {
+            affectsClause = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        // Requires and ensures
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires = (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires = new AssertionClause(createLocation(ctx),
+                    AssertionClause.ClauseType.REQUIRES,
+                    VarExp.getTrueVarExp(createLocation(ctx.stop), myTypeGraph));
+        }
+
+        AssertionClause ensures;
+        if (ctx.requiresClause() != null) {
+            ensures = (AssertionClause) myNodes.removeFrom(ctx.ensuresClause());
+        }
+        else {
+            ensures = new AssertionClause(createLocation(ctx),
+                    AssertionClause.ClauseType.ENSURES,
+                    VarExp.getTrueVarExp(createLocation(ctx.stop), myTypeGraph));
+        }
+
+        myNodes.put(ctx, new OperationDec(createPosSymbol(ctx.name),
+                varDecs, returnTy, affectsClause, requires, ensures));
     }
 
     /**

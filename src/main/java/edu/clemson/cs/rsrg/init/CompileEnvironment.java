@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init;
 
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
@@ -23,7 +24,6 @@ import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;

@@ -371,10 +371,11 @@ public class ResolveCompiler {
                     }
                 }
 
-                // Store the symbol table
+                // Store the symbol table and type graph
                 MathSymbolTableBuilder symbolTable =
                         new MathSymbolTableBuilder();
                 compileEnvironment.setSymbolTable(symbolTable);
+                compileEnvironment.setTypeGraph(symbolTable.getTypeGraph());
             }
         }
         catch (FlagDependencyException | IOException e) {
