@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.init.astoutput;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.VirtualListNode;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
@@ -329,6 +330,34 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
+    // Clauses
+    // -----------------------------------------------------------
+
+    /**
+     * <p>For all {@link AssertionClause} nodes, we create a new node
+     * with its simple class name and indicates what type of clause
+     * this is and if it has an {@code which_entails}.</p>
+     *
+     * @param e Current {@link AssertionClause} we are visiting.
+     */
+    @Override
+    public void postAssertionClause(AssertionClause e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(e.getClauseType().name());
+        if (e.getWhichEntailsExp() != null) {
+            sb.append(" (WHICH_ENTAILS)");
+        }
+
+        node.add("nodeData", sb.toString());
+        myModel.add("nodes", node);
+    }
+
+    // -----------------------------------------------------------
     // Math Expressions
     // -----------------------------------------------------------
 
@@ -372,29 +401,34 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
                 createNode(myElementToNodeNumMap.get(e), e.getClass()
                         .getSimpleName(), true);
 
-        // Need to replace special characters
-        StringBuilder sb = new StringBuilder();
-        char[] stringArray = e.getOperatorAsString().toCharArray();
-        for (char c : stringArray) {
-            switch (c) {
-            case '<':
-                sb.append("&lt;");
-                break;
-            case '>':
-                sb.append("&gt;");
-                break;
-            default:
-                sb.append(c);
-                break;
-            }
-        }
-
-        String data = sb.toString();
+        String data = escapeSpecialChars(e.getOperatorAsString().toCharArray());
         if (e.getQualifier() != null) {
             data = e.getQualifier() + "::" + data;
         }
 
         node.add("nodeData", data);
+        myModel.add("nodes", node);
+    }
+
+    /**
+     * <p>For all {@link OutfixExp} nodes, create a new node and
+     * add the operator as a string.</p>
+     *
+     * @param e Current {@link OutfixExp} we are visiting.
+     */
+    @Override
+    public void postOutfixExp(OutfixExp e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("&nbsp;");
+        sb.append(escapeSpecialChars(e.getOperatorAsString().toCharArray()));
+        sb.append("&nbsp;");
+
+        node.add("nodeData", sb.toString());
         myModel.add("nodes", node);
     }
 
@@ -442,7 +476,8 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     @Override
     public void postMathExp(MathExp e) {
         if (!(e instanceof InfixExp) && !(e instanceof TypeAssertionExp)
-                && !(e instanceof QuantExp) && !(e instanceof FunctionExp)) {
+                && !(e instanceof QuantExp) && !(e instanceof FunctionExp)
+                && !(e instanceof OutfixExp)) {
             // Create the new node
             ST node =
                     createNode(myElementToNodeNumMap.get(e), e.getClass()
@@ -504,6 +539,48 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     private ST createNode(int nodeNum, String nodeName, boolean hasData) {
         return mySTGroup.getInstanceOf("outputGraphvizNodes").add("nodeNum",
                 nodeNum).add("nodeName", nodeName).add("hasNodeData", hasData);
+    }
+
+    /**
+     * <p>An helper method to escape special characters.</p>
+     *
+     * @param stringArray Original text.
+     *
+     * @return Modified text.
+     */
+    private String escapeSpecialChars(char[] stringArray) {
+        // Need to replace special characters
+        StringBuilder sb = new StringBuilder();
+        for (char c : stringArray) {
+            switch (c) {
+            case '<':
+                sb.append("&lt;");
+                break;
+            case '>':
+                sb.append("&gt;");
+                break;
+            case '{':
+                sb.append("&#123;");
+                break;
+            case '}':
+                sb.append("&#125;");
+                break;
+            case '[':
+                sb.append("&#91;");
+                break;
+            case ']':
+                sb.append("&#93;");
+                break;
+            case '|':
+                sb.append("&#124;");
+                break;
+            default:
+                sb.append(c);
+                break;
+            }
+        }
+
+        return sb.toString();
     }
 
 }

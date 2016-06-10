@@ -12,8 +12,10 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.paramdecl;
 
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
@@ -22,7 +24,14 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
  *
  * @version 2.0
  */
-public class ConstantParamDec extends AbstractVarDec implements ModuleParameter {
+public class ConstantParamDec extends Dec implements ModuleParameter {
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>The parameter variable.</p> */
+    private final ParameterVarDec myParameterDec;
 
     // ===========================================================
     // Constructors
@@ -36,7 +45,10 @@ public class ConstantParamDec extends AbstractVarDec implements ModuleParameter 
      * @param ty A {@link Ty} representing the variable's raw type.
      */
     public ConstantParamDec(PosSymbol name, Ty ty) {
-        super(name.getLocation(), name, ty);
+        super(name.getLocation(), name);
+        myParameterDec =
+                new ParameterVarDec(
+                        ProgramParameterEntry.ParameterMode.EVALUATES, name, ty);
     }
 
     // ===========================================================
@@ -48,11 +60,7 @@ public class ConstantParamDec extends AbstractVarDec implements ModuleParameter 
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append(super.asStringVarDec(indentSize, innerIndentInc));
-
-        return sb.toString();
+        return myParameterDec.asString(indentSize, innerIndentInc);
     }
 
     // ===========================================================
@@ -64,7 +72,8 @@ public class ConstantParamDec extends AbstractVarDec implements ModuleParameter 
      */
     @Override
     protected final ConstantParamDec copy() {
-        return new ConstantParamDec(myName.clone(), myTy.clone());
+        return new ConstantParamDec(myName.clone(), myParameterDec.getTy()
+                .clone());
     }
 
 }

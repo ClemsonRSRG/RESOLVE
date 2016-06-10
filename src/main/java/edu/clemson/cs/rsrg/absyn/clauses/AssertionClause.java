@@ -177,6 +177,7 @@ public class AssertionClause extends ResolveConceptualElement {
             sb.append(" which_entails ");
             sb.append(myWhichEntailsExp.asString(0, innerIndentInc));
         }
+        sb.append(";");
 
         return sb.toString();
     }

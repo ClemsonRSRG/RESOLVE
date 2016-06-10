@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.declarations.mathdecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameter;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
@@ -28,7 +29,7 @@ import java.util.List;
  *
  * @version 2.0
  */
-public class MathDefinitionDec extends Dec {
+public class MathDefinitionDec extends Dec implements ModuleParameter {
 
     // ===========================================================
     // Member Fields

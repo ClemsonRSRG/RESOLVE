@@ -133,7 +133,8 @@ public class Controller {
                     new DefaultDirectedGraph<>(
                             DefaultEdge.class);
             g.addVertex(new ModuleIdentifier(targetModule));
-            findDependencies(g, targetModule);
+            // TODO: Uncomment this line when we can build all decs.
+            //findDependencies(g, targetModule);
 
             // Begin analyzing the file
             //AnalysisPipeline analysisPipe =

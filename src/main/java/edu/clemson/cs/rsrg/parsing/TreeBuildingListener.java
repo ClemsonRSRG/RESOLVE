@@ -23,11 +23,15 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathCategoricalDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.EnhancementModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -163,12 +167,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void enterPrecisModule(ResolveParser.PrecisModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
             myErrorHandler.error(createLocation(ctx.name),
-                    "Module name does not match filename.");
+                    "Precis name does not match filename.");
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
             myErrorHandler.error(createLocation(ctx.closename),
-                    "End module name does not match the filename.");
+                    "End name does not match the filename.");
         }
     }
 
@@ -182,15 +186,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitPrecisModule(ResolveParser.PrecisModuleContext ctx) {
-        List<Dec> decls =
-                Utilities.collect(Dec.class,
-                        ctx.precisItems() != null ? ctx.precisItems().precisItem() : new ArrayList<ParseTree>(),
-                        myNodes);
         List<ModuleParameterDec> parameterDecls = new ArrayList<>();
         List<UsesItem> uses = Utilities.collect(UsesItem.class,
-                ctx.usesList() != null ? ctx.usesList().usesItem() : new ArrayList<ParseTree>(),
-                myNodes);
-        PrecisModuleDec precis = new PrecisModuleDec(createLocation(ctx), createPosSymbol(ctx.name), parameterDecls, uses, decls);
+                ctx.usesList() != null ? ctx.usesList().usesItem() : new ArrayList<ParseTree>(), myNodes);
+        List<Dec> decls = Utilities.collect(Dec.class,
+                ctx.precisItems() != null ? ctx.precisItems().precisItem() : new ArrayList<ParseTree>(), myNodes);
+
+        PrecisModuleDec precis = new PrecisModuleDec(createLocation(ctx),
+                createPosSymbol(ctx.name), parameterDecls, uses, decls);
 
         myNodes.put(ctx, precis);
     }
@@ -383,6 +386,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitConceptItem(ctx);
     }
 
+    // -----------------------------------------------------------
+    // Concept Realization Module
+    // -----------------------------------------------------------
+
     /**
      * {@inheritDoc}
      * <p>
@@ -420,78 +427,110 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitConceptImplItem(ctx);
     }
 
+    // -----------------------------------------------------------
+    // Enhancement Module
+    // -----------------------------------------------------------
+
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if the {@link ResolveFile} name matches the
+     * open and close names given in the file.</p>
      *
-     * @param ctx
+     * @param ctx Enhancement module node in ANTLR4 AST.
      */
     @Override
     public void enterEnhancementModule(
             ResolveParser.EnhancementModuleContext ctx) {
-        super.enterEnhancementModule(ctx);
+        if (!myFile.getName().equals(ctx.name.getText())) {
+            myErrorHandler.error(createLocation(ctx.name),
+                    "Enhancement name does not match filename.");
+        }
+
+        if (!myFile.getName().equals(ctx.closename.getText())) {
+            myErrorHandler.error(createLocation(ctx.closename),
+                    "End name does not match the filename.");
+        }
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a {@code Enhancement}
+     * module declaration.</p>
      *
-     * @param ctx
+     * @param ctx Enhancement module node in ANTLR4 AST.
      */
     @Override
     public void exitEnhancementModule(ResolveParser.EnhancementModuleContext ctx) {
-        super.exitEnhancementModule(ctx);
+        // Module parameters (if any)
+        List<ModuleParameterDec> parameterDecls = new ArrayList<>();
+        if (ctx.moduleParameterList() != null) {
+            List<ResolveParser.ModuleParameterDeclContext> parameterDeclContexts =
+                    ctx.moduleParameterList().moduleParameterDecl();
+            for (ResolveParser.ModuleParameterDeclContext context : parameterDeclContexts) {
+                if (context.constantParameterDecl() != null) {
+                    List<TerminalNode> varNames = context.constantParameterDecl().variableDeclGroup().IDENTIFIER();
+                    for (TerminalNode ident : varNames) {
+                        parameterDecls.add((ModuleParameterDec) myNodes.removeFrom(ident));
+                    }
+                }
+                else {
+                    parameterDecls.add((ModuleParameterDec) myNodes.removeFrom(context));
+                }
+            }
+        }
+
+        // Uses items (if any)
+        List<UsesItem> uses =
+                Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
+                        .usesList().usesItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+
+        // Module requires (if any)
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    new AssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES, VarExp
+                                    .getTrueVarExp(createLocation(ctx),
+                                            myTypeGraph));
+        }
+
+        List<Dec> decls =
+                Utilities
+                        .collect(Dec.class,
+                                ctx.enhancementItems() != null ? ctx
+                                        .enhancementItems().enhancementItem()
+                                        : new ArrayList<ParseTree>(), myNodes);
+
+        EnhancementModuleDec enhancement =
+                new EnhancementModuleDec(createLocation(ctx),
+                        createPosSymbol(ctx.name), parameterDecls,
+                        createPosSymbol(ctx.concept), uses, requires, decls);
+
+        myNodes.put(ctx, enhancement);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the generated enhancement item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterEnhancementItems(ResolveParser.EnhancementItemsContext ctx) {
-        super.enterEnhancementItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitEnhancementItems(ResolveParser.EnhancementItemsContext ctx) {
-        super.exitEnhancementItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterEnhancementItem(ResolveParser.EnhancementItemContext ctx) {
-        super.enterEnhancementItem(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Enhancement item node in ANTLR4 AST.
      */
     @Override
     public void exitEnhancementItem(ResolveParser.EnhancementItemContext ctx) {
-        super.exitEnhancementItem(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
+
+    // -----------------------------------------------------------
+    // Enhancement Realization Module
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -741,189 +780,163 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     // -----------------------------------------------------------
-    // Parameter-related declarations
+    // Module parameter declarations
     // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a module parameter declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterModuleParameterList(
-            ResolveParser.ModuleParameterListContext ctx) {
-        super.enterModuleParameterList(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitModuleParameterList(
-            ResolveParser.ModuleParameterListContext ctx) {
-        super.exitModuleParameterList(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterModuleParameterDecl(
-            ResolveParser.ModuleParameterDeclContext ctx) {
-        super.enterModuleParameterDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Module parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void exitModuleParameterDecl(
             ResolveParser.ModuleParameterDeclContext ctx) {
-        super.exitModuleParameterDecl(ctx);
+        if (ctx.definitionParameterDecl() != null) {
+            myNodes.put(ctx, new ModuleParameterDec<>((MathDefinitionDec) myNodes.removeFrom(ctx.getChild(0))));
+        }
+        else if (ctx.typeParameterDecl() != null) {
+            myNodes.put(ctx, new ModuleParameterDec<>((ConceptTypeParamDec) myNodes.removeFrom(ctx.getChild(0))));
+        }
+        else if (ctx.constantParameterDecl() != null) {
+            // Could have multiple variables declared as a group
+            List<TerminalNode> varNames = ctx.constantParameterDecl().variableDeclGroup().IDENTIFIER();
+            for (TerminalNode ident : varNames) {
+                myNodes.put(ident, new ModuleParameterDec<>((ConstantParamDec) myNodes.removeFrom(ident)));
+            }
+        }
+        else if (ctx.operationParameterDecl() != null) {
+            myNodes.put(ctx, new ModuleParameterDec<>((OperationDec) myNodes.removeFrom(ctx.getChild(0))));
+        }
+        else {
+            myNodes.put(ctx, new ModuleParameterDec<>((RealizationParamDec) myNodes.removeFrom(ctx.getChild(0))));
+        }
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method creates a temporary list to store all the
+     * temporary definition members</p>
      *
-     * @param ctx
+     * @param ctx Definition parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void enterDefinitionParameterDecl(
             ResolveParser.DefinitionParameterDeclContext ctx) {
-        super.enterDefinitionParameterDecl(ctx);
+        myDefinitionMemberList = new ArrayList<>();
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a definition parameter declaration.</p>
      *
-     * @param ctx
+     * @param ctx Definition parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void exitDefinitionParameterDecl(
             ResolveParser.DefinitionParameterDeclContext ctx) {
-        super.exitDefinitionParameterDecl(ctx);
+        DefinitionMembers members = myDefinitionMemberList.remove(0);
+        MathDefinitionDec definitionDec =
+                new MathDefinitionDec(members.name, members.params,
+                        members.rawType, null, false);
+        myDefinitionMemberList = null;
+
+        myNodes.put(ctx, definitionDec);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a concept type parameter declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterTypeParameterDecl(
-            ResolveParser.TypeParameterDeclContext ctx) {
-        super.enterTypeParameterDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Type parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void exitTypeParameterDecl(ResolveParser.TypeParameterDeclContext ctx) {
-        super.exitTypeParameterDecl(ctx);
+        myNodes.put(ctx, new ConceptTypeParamDec(createPosSymbol(ctx.name)));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if this parameter declaration has a programming array type.
+     * If yes, then this is an error, because there is no way the caller can pass
+     * a variable of the same type to the calling statement.</p>
      *
-     * @param ctx
+     * @param ctx Constant parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void enterConstantParameterDecl(
             ResolveParser.ConstantParameterDeclContext ctx) {
-        super.enterConstantParameterDecl(ctx);
+        if (ctx.variableDeclGroup().programArrayType() != null) {
+            myErrorHandler
+                    .error(createLocation(ctx.variableDeclGroup()
+                            .programArrayType()),
+                            "Array types cannot be used as a type for the parameter variables");
+        }
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a constant parameter declaration
+     * for each of the variables in the variable group.</p>
      *
-     * @param ctx
+     * @param ctx Constant parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void exitConstantParameterDecl(
             ResolveParser.ConstantParameterDeclContext ctx) {
-        super.exitConstantParameterDecl(ctx);
+        // Since we have ruled out array types, this should be a NameTy
+        ResolveParser.VariableDeclGroupContext variableDeclGroupContext =
+                ctx.variableDeclGroup();
+        NameTy rawType =
+                (NameTy) myNodes.removeFrom(variableDeclGroupContext
+                        .programNamedType());
+
+        // Generate a new parameter declaration for each of the
+        // variables in the variable group.
+        List<TerminalNode> variableIndents =
+                variableDeclGroupContext.IDENTIFIER();
+        for (TerminalNode node : variableIndents) {
+            myNodes.put(node, new ConstantParamDec(createPosSymbol(node
+                    .getSymbol()), rawType.clone()));
+        }
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates an operation parameter declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterOperationParameterDecl(
-            ResolveParser.OperationParameterDeclContext ctx) {
-        super.enterOperationParameterDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Operation parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void exitOperationParameterDecl(
             ResolveParser.OperationParameterDeclContext ctx) {
-        super.exitOperationParameterDecl(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.operationDecl()));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a realization parameter declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterConceptImplParameterDecl(
-            ResolveParser.ConceptImplParameterDeclContext ctx) {
-        super.enterConceptImplParameterDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Concept implementation parameter declaration node in ANTLR4 AST.
      */
     @Override
     public void exitConceptImplParameterDecl(
             ResolveParser.ConceptImplParameterDeclContext ctx) {
-        super.exitConceptImplParameterDecl(ctx);
+        myNodes.put(ctx, new RealizationParamDec(createPosSymbol(ctx.name),
+                createPosSymbol(ctx.concept)));
     }
+
+    // -----------------------------------------------------------
+    // Operation parameter declarations
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -1574,7 +1587,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         AssertionClause ensures;
-        if (ctx.requiresClause() != null) {
+        if (ctx.ensuresClause() != null) {
             ensures = (AssertionClause) myNodes.removeFrom(ctx.ensuresClause());
         }
         else {

@@ -124,6 +124,7 @@ public class OperationDec extends Dec implements ModuleParameter {
         // requires clause
         sb.append(myRequires.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // ensures clause
         sb.append(myEnsures.asString(indentSize + innerIndentInc,

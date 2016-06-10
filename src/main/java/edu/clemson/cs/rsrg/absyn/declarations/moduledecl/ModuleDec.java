@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.moduledecl;
 
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
@@ -167,7 +168,7 @@ public abstract class ModuleDec extends Dec {
             sb.append(d.asString(indentSize + innerIndentInc, innerIndentInc));
             sb.append("\n\n");
         }
-        sb.append("\nend ");
+        sb.append("end ");
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(";");
 
@@ -197,7 +198,10 @@ public abstract class ModuleDec extends Dec {
                 sb.append(m.asString(indentSize, innerIndentInc));
 
                 if (it.hasNext()) {
-                    sb.append(", ");
+                    if (!(m.getWrappedDec() instanceof MathDefinitionDec)) {
+                        sb.append(";");
+                    }
+                    sb.append(" ");
                 }
             }
             sb.append(" )");
@@ -232,7 +236,7 @@ public abstract class ModuleDec extends Dec {
                     sb.append(", ");
                 }
             }
-            sb.append(";");
+            sb.append(";\n");
         }
 
         return sb.toString();
