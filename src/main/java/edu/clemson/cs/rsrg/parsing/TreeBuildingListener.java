@@ -2523,25 +2523,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new ensures clause.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterConstraintClause(ResolveParser.ConstraintClauseContext ctx) {
-        super.enterConstraintClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Constraint clause node in ANTLR4 AST.
      */
     @Override
     public void exitConstraintClause(ResolveParser.ConstraintClauseContext ctx) {
-        super.exitConstraintClause(ctx);
+        myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.CONSTRAINT, ctx.mathExp()));
     }
 
     /**
