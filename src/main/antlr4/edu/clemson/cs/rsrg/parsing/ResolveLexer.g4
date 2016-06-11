@@ -738,7 +738,7 @@ IDENTIFIER
     ;
 
 LETTER
-    :   [a-zA-Z$_]
+    :   [a-zA-Z]
     ;
 
 LETTER_OR_DIGIT
