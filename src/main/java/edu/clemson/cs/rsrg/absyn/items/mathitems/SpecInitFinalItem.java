@@ -1,5 +1,5 @@
 /**
- * TypeInitFinalSpecItem.java
+ * SpecInitFinalItem.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -18,12 +18,12 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the type initialization/finalization
- * spec block objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>This is the class for all the specification initialization/finalization
+ * block objects that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class TypeInitFinalSpecItem extends ResolveConceptualElement {
+public class SpecInitFinalItem extends ResolveConceptualElement {
 
     // ===========================================================
     // ItemType
@@ -66,8 +66,7 @@ public class TypeInitFinalSpecItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a type initialization/finalization block that happens
-     * when a variable of this type is initialized/finalized.</p>
+     * <p>This constructs a specification initialization/finalization block.</p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates if it is an initialization or finalization block.
@@ -76,8 +75,8 @@ public class TypeInitFinalSpecItem extends ResolveConceptualElement {
      * @param ensures A {@link AssertionClause} representing the initialization's/finalization's
      *                ensures clause.
      */
-    public TypeInitFinalSpecItem(Location l, ItemType type,
-            AffectsClause affects, AssertionClause ensures) {
+    public SpecInitFinalItem(Location l, ItemType type, AffectsClause affects,
+            AssertionClause ensures) {
         super(l);
         myAffects = affects;
         myItemType = type;
@@ -115,13 +114,13 @@ public class TypeInitFinalSpecItem extends ResolveConceptualElement {
      * {@inheritDoc}
      */
     @Override
-    public final TypeInitFinalSpecItem clone() {
+    public final SpecInitFinalItem clone() {
         AffectsClause newAffects = null;
         if (myAffects != null) {
             newAffects = myAffects.clone();
         }
 
-        return new TypeInitFinalSpecItem(new Location(myLoc), myItemType,
+        return new SpecInitFinalItem(new Location(myLoc), myItemType,
                 newAffects, myEnsures.clone());
     }
 
@@ -135,7 +134,7 @@ public class TypeInitFinalSpecItem extends ResolveConceptualElement {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        TypeInitFinalSpecItem that = (TypeInitFinalSpecItem) o;
+        SpecInitFinalItem that = (SpecInitFinalItem) o;
 
         if (myAffects != null ? !myAffects.equals(that.myAffects)
                 : that.myAffects != null)

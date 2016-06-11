@@ -525,16 +525,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postPrefixExp(PrefixExp e) {}
 
-    public boolean walkTypeInitFinalVerificationItem(TypeInitFinalSpecItem e) {
+    public boolean walkTypeInitFinalVerificationItem(SpecInitFinalItem e) {
         return false;
     }
 
-    public void preTypeInitFinalVerificationItem(TypeInitFinalSpecItem e) {}
+    public void preTypeInitFinalVerificationItem(SpecInitFinalItem e) {}
 
-    public void midTypeInitFinalVerificationItem(TypeInitFinalSpecItem e,
+    public void midTypeInitFinalVerificationItem(SpecInitFinalItem e,
             ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
-    public void postTypeInitFinalVerificationItem(TypeInitFinalSpecItem e) {}
+    public void postTypeInitFinalVerificationItem(SpecInitFinalItem e) {}
 
     public boolean walkProgramVariableNameExp(ProgramVariableNameExp e) {
         return false;

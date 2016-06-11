@@ -32,6 +32,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -40,7 +41,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.TypeInitFinalSpecItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
@@ -1080,31 +1081,29 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.CONSTRAINT);
         }
 
-        TypeInitFinalSpecItem initItem;
+        SpecInitFinalItem initItem;
         if (ctx.specModelInit() != null) {
             initItem =
-                    (TypeInitFinalSpecItem) myNodes.removeFrom(ctx
-                            .specModelInit());
+                    (SpecInitFinalItem) myNodes.removeFrom(ctx.specModelInit());
         }
         else {
             initItem =
-                    new TypeInitFinalSpecItem(createLocation(ctx),
-                            TypeInitFinalSpecItem.ItemType.INITIALIZATION,
-                            null, createTrueAssertionClause(
-                                    createLocation(ctx),
+                    new SpecInitFinalItem(createLocation(ctx),
+                            SpecInitFinalItem.ItemType.INITIALIZATION, null,
+                            createTrueAssertionClause(createLocation(ctx),
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        TypeInitFinalSpecItem finalItem;
+        SpecInitFinalItem finalItem;
         if (ctx.specModelFinal() != null) {
             finalItem =
-                    (TypeInitFinalSpecItem) myNodes.removeFrom(ctx
-                            .specModelFinal());
+                    (SpecInitFinalItem) myNodes
+                            .removeFrom(ctx.specModelFinal());
         }
         else {
             finalItem =
-                    new TypeInitFinalSpecItem(createLocation(ctx),
-                            TypeInitFinalSpecItem.ItemType.FINALIZATION, null,
+                    new SpecInitFinalItem(createLocation(ctx),
+                            SpecInitFinalItem.ItemType.FINALIZATION, null,
                             createTrueAssertionClause(createLocation(ctx),
                                     AssertionClause.ClauseType.ENSURES));
         }
@@ -1193,28 +1192,69 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitPerformanceTypeModelDecl(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterSharedStateDecl(ResolveParser.SharedStateDeclContext ctx) {
-        super.enterSharedStateDecl(ctx);
-    }
+    // -----------------------------------------------------------
+    // Shared State Spec/Realization Declarations
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a shared state
+     * declaration.</p>
      *
-     * @param ctx
+     * @param ctx Shared state declaration node in ANTLR4 AST.
      */
     @Override
     public void exitSharedStateDecl(ResolveParser.SharedStateDeclContext ctx) {
-        super.exitSharedStateDecl(ctx);
+        List<ResolveParser.ModuleStateVariableDeclContext> stateVariableDeclContexts = ctx.moduleStateVariableDecl();
+        List<MathVarDec> abstractStateVars = new ArrayList<>();
+        for (ResolveParser.ModuleStateVariableDeclContext stateVariableDeclContext : stateVariableDeclContexts) {
+            List<TerminalNode> idents = stateVariableDeclContext.mathVariableDeclGroup().IDENTIFIER();
+            for (TerminalNode ident : idents) {
+                abstractStateVars.add((MathVarDec) myNodes.removeFrom(ident));
+            }
+        }
+
+        AssertionClause constraint;
+        if (ctx.constraintClause() != null) {
+            constraint =
+                    (AssertionClause) myNodes
+                            .removeFrom(ctx.constraintClause());
+        }
+        else {
+            constraint =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CONSTRAINT);
+        }
+
+        SpecInitFinalItem initItem;
+        if (ctx.specModelInit() != null) {
+            initItem =
+                    (SpecInitFinalItem) myNodes.removeFrom(ctx.specModelInit());
+        }
+        else {
+            initItem =
+                    new SpecInitFinalItem(createLocation(ctx),
+                            SpecInitFinalItem.ItemType.INITIALIZATION, null,
+                            createTrueAssertionClause(createLocation(ctx),
+                                    AssertionClause.ClauseType.ENSURES));
+        }
+
+        SpecInitFinalItem finalItem;
+        if (ctx.specModelFinal() != null) {
+            finalItem =
+                    (SpecInitFinalItem) myNodes
+                            .removeFrom(ctx.specModelFinal());
+        }
+        else {
+            finalItem =
+                    new SpecInitFinalItem(createLocation(ctx),
+                            SpecInitFinalItem.ItemType.FINALIZATION, null,
+                            createTrueAssertionClause(createLocation(ctx),
+                                    AssertionClause.ClauseType.ENSURES));
+        }
+
+        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.name), abstractStateVars, constraint, initItem, finalItem));
     }
 
     /**
@@ -1298,10 +1338,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.ENSURES);
         }
 
-        myNodes.put(ctx,
-                new TypeInitFinalSpecItem(createLocation(ctx),
-                        TypeInitFinalSpecItem.ItemType.INITIALIZATION, affects,
-                        ensures));
+        myNodes.put(ctx, new SpecInitFinalItem(createLocation(ctx),
+                SpecInitFinalItem.ItemType.INITIALIZATION, affects, ensures));
     }
 
     /**
@@ -1329,8 +1367,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.ENSURES);
         }
 
-        myNodes.put(ctx, new TypeInitFinalSpecItem(createLocation(ctx),
-                TypeInitFinalSpecItem.ItemType.FINALIZATION, affects, ensures));
+        myNodes.put(ctx, new SpecInitFinalItem(createLocation(ctx),
+                SpecInitFinalItem.ItemType.FINALIZATION, affects, ensures));
     }
 
     /**
@@ -1941,32 +1979,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitAuxVariableDecl(ResolveParser.AuxVariableDeclContext ctx) {
         super.exitAuxVariableDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterModuleStateVariableDecl(
-            ResolveParser.ModuleStateVariableDeclContext ctx) {
-        super.enterModuleStateVariableDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitModuleStateVariableDecl(
-            ResolveParser.ModuleStateVariableDeclContext ctx) {
-        super.exitModuleStateVariableDecl(ctx);
     }
 
     /**
