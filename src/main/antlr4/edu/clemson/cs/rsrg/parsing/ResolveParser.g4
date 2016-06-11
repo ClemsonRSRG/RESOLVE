@@ -351,14 +351,12 @@ facilitySharedStateRepresentationDecl
 specModelInit
     :   INITIALIZATION
         (affectsClause)?
-        (requiresClause)?
         (ensuresClause)?
     ;
 
 specModelFinal
     :   FINALIZATION
         (affectsClause)?
-        (requiresClause)?
         (ensuresClause)?
     ;
 

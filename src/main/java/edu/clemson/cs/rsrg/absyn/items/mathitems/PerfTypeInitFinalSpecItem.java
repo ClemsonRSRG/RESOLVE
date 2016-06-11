@@ -1,5 +1,5 @@
 /**
- * PerfTypeInitFinalVerificationItem.java
+ * PerfTypeInitFinalSpecItem.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -22,7 +22,7 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
  *
  * @version 2.0
  */
-public class PerfTypeInitFinalVerificationItem extends ResolveConceptualElement {
+public class PerfTypeInitFinalSpecItem extends ResolveConceptualElement {
 
     // ===========================================================
     // ItemType
@@ -75,7 +75,7 @@ public class PerfTypeInitFinalVerificationItem extends ResolveConceptualElement 
      * @param manip_disp A {@link AssertionClause} representing the initialization's/finalization's
      *                   manipulative displacement clause.
      */
-    public PerfTypeInitFinalVerificationItem(Location l, ItemType type,
+    public PerfTypeInitFinalSpecItem(Location l, ItemType type,
             AssertionClause duration, AssertionClause manip_disp) {
         super(l);
         myItemType = type;
@@ -114,14 +114,14 @@ public class PerfTypeInitFinalVerificationItem extends ResolveConceptualElement 
      * {@inheritDoc}
      */
     @Override
-    public final PerfTypeInitFinalVerificationItem clone() {
+    public final PerfTypeInitFinalSpecItem clone() {
         AssertionClause newManipDisp = null;
         if (myManipDisp != null) {
             newManipDisp = myManipDisp.clone();
         }
 
-        return new PerfTypeInitFinalVerificationItem(new Location(myLoc),
-                myItemType, myDuration.clone(), newManipDisp);
+        return new PerfTypeInitFinalSpecItem(new Location(myLoc), myItemType,
+                myDuration.clone(), newManipDisp);
     }
 
     /**
@@ -134,8 +134,7 @@ public class PerfTypeInitFinalVerificationItem extends ResolveConceptualElement 
         if (o == null || getClass() != o.getClass())
             return false;
 
-        PerfTypeInitFinalVerificationItem that =
-                (PerfTypeInitFinalVerificationItem) o;
+        PerfTypeInitFinalSpecItem that = (PerfTypeInitFinalSpecItem) o;
 
         if (myItemType != that.myItemType)
             return false;

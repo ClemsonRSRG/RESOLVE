@@ -39,6 +39,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.TypeInitFinalSpecItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
@@ -1232,52 +1233,72 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitFacilitySharedStateRepresentationDecl(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterSpecModelInit(ResolveParser.SpecModelInitContext ctx) {
-        super.enterSpecModelInit(ctx);
-    }
+    // -----------------------------------------------------------
+    // Initialization/Finalization Items
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a type model
+     * initialization item.</p>
      *
-     * @param ctx
+     * @param ctx Spec model init item node in ANTLR4 AST.
      */
     @Override
     public void exitSpecModelInit(ResolveParser.SpecModelInitContext ctx) {
-        super.exitSpecModelInit(ctx);
+        AffectsClause affects = null;
+        if (ctx.affectsClause() != null) {
+            affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        AssertionClause ensures;
+        if (ctx.ensuresClause() != null) {
+            ensures = (AssertionClause) myNodes.removeFrom(ctx.ensuresClause());
+        }
+        else {
+            ensures =
+                    new AssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.ENSURES, VarExp
+                                    .getTrueVarExp(createLocation(ctx),
+                                            myTypeGraph));
+        }
+
+        myNodes.put(ctx,
+                new TypeInitFinalSpecItem(createLocation(ctx),
+                        TypeInitFinalSpecItem.ItemType.INITIALIZATION, affects,
+                        ensures));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a type model
+     * finalization item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterSpecModelFinal(ResolveParser.SpecModelFinalContext ctx) {
-        super.enterSpecModelFinal(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Spec model final item node in ANTLR4 AST.
      */
     @Override
     public void exitSpecModelFinal(ResolveParser.SpecModelFinalContext ctx) {
-        super.exitSpecModelFinal(ctx);
+        AffectsClause affects = null;
+        if (ctx.affectsClause() != null) {
+            affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        AssertionClause ensures;
+        if (ctx.ensuresClause() != null) {
+            ensures = (AssertionClause) myNodes.removeFrom(ctx.ensuresClause());
+        }
+        else {
+            ensures =
+                    new AssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.ENSURES, VarExp
+                                    .getTrueVarExp(createLocation(ctx),
+                                            myTypeGraph));
+        }
+
+        myNodes.put(ctx, new TypeInitFinalSpecItem(createLocation(ctx),
+                TypeInitFinalSpecItem.ItemType.FINALIZATION, affects, ensures));
     }
 
     /**

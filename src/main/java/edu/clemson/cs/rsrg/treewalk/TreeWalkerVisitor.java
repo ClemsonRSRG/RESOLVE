@@ -314,19 +314,18 @@ public abstract class TreeWalkerVisitor {
     public void postAuxVarDec(AuxVarDec e) {}
 
     public boolean walkPerfTypeInitFinalVerificationItem(
-            PerfTypeInitFinalVerificationItem e) {
+            PerfTypeInitFinalSpecItem e) {
         return false;
     }
 
-    public void prePerfTypeInitFinalVerificationItem(
-            PerfTypeInitFinalVerificationItem e) {}
+    public void prePerfTypeInitFinalVerificationItem(PerfTypeInitFinalSpecItem e) {}
 
     public void midPerfTypeInitFinalVerificationItem(
-            PerfTypeInitFinalVerificationItem e,
-            ResolveConceptualElement previous, ResolveConceptualElement next) {}
+            PerfTypeInitFinalSpecItem e, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postPerfTypeInitFinalVerificationItem(
-            PerfTypeInitFinalVerificationItem e) {}
+            PerfTypeInitFinalSpecItem e) {}
 
     public boolean walkDec(Dec e) {
         return false;
@@ -526,19 +525,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postPrefixExp(PrefixExp e) {}
 
-    public boolean walkTypeInitFinalVerificationItem(
-            TypeInitFinalVerificationItem e) {
+    public boolean walkTypeInitFinalVerificationItem(TypeInitFinalSpecItem e) {
         return false;
     }
 
-    public void preTypeInitFinalVerificationItem(TypeInitFinalVerificationItem e) {}
+    public void preTypeInitFinalVerificationItem(TypeInitFinalSpecItem e) {}
 
-    public void midTypeInitFinalVerificationItem(
-            TypeInitFinalVerificationItem e, ResolveConceptualElement previous,
-            ResolveConceptualElement next) {}
+    public void midTypeInitFinalVerificationItem(TypeInitFinalSpecItem e,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
-    public void postTypeInitFinalVerificationItem(
-            TypeInitFinalVerificationItem e) {}
+    public void postTypeInitFinalVerificationItem(TypeInitFinalSpecItem e) {}
 
     public boolean walkProgramVariableNameExp(ProgramVariableNameExp e) {
         return false;

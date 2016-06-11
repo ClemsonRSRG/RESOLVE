@@ -1,5 +1,5 @@
 /**
- * TypeInitFinalVerificationItem.java
+ * TypeInitFinalSpecItem.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -19,11 +19,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
  * <p>This is the class for all the type initialization/finalization
- * verification block objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * spec block objects that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
+public class TypeInitFinalSpecItem extends ResolveConceptualElement {
 
     // ===========================================================
     // ItemType
@@ -76,7 +76,7 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
      * @param ensures A {@link AssertionClause} representing the initialization's/finalization's
      *                ensures clause.
      */
-    public TypeInitFinalVerificationItem(Location l, ItemType type,
+    public TypeInitFinalSpecItem(Location l, ItemType type,
             AffectsClause affects, AssertionClause ensures) {
         super(l);
         myAffects = affects;
@@ -115,14 +115,14 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
      * {@inheritDoc}
      */
     @Override
-    public final TypeInitFinalVerificationItem clone() {
+    public final TypeInitFinalSpecItem clone() {
         AffectsClause newAffects = null;
         if (myAffects != null) {
             newAffects = myAffects.clone();
         }
 
-        return new TypeInitFinalVerificationItem(new Location(myLoc),
-                myItemType, newAffects, myEnsures.clone());
+        return new TypeInitFinalSpecItem(new Location(myLoc), myItemType,
+                newAffects, myEnsures.clone());
     }
 
     /**
@@ -135,7 +135,7 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        TypeInitFinalVerificationItem that = (TypeInitFinalVerificationItem) o;
+        TypeInitFinalSpecItem that = (TypeInitFinalSpecItem) o;
 
         if (myAffects != null ? !myAffects.equals(that.myAffects)
                 : that.myAffects != null)

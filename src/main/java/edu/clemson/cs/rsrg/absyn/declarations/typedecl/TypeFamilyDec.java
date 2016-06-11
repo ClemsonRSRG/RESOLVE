@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
-import edu.clemson.cs.rsrg.absyn.items.mathitems.TypeInitFinalVerificationItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.TypeInitFinalSpecItem;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
@@ -40,10 +40,10 @@ public class TypeFamilyDec extends Dec {
     private final AssertionClause myConstraint;
 
     /** <p>The initialization block for the new type family.</p> */
-    private final TypeInitFinalVerificationItem myTypeInitItem;
+    private final TypeInitFinalSpecItem myTypeInitItem;
 
     /** <p>The finalization block for the new type family.</p> */
-    private final TypeInitFinalVerificationItem myTypeFinalItem;
+    private final TypeInitFinalSpecItem myTypeFinalItem;
 
     // ===========================================================
     // Constructors
@@ -60,8 +60,8 @@ public class TypeFamilyDec extends Dec {
      * @param finalItem Finalization information for verification.
      */
     public TypeFamilyDec(PosSymbol name, Ty ty, PosSymbol exemplar,
-            AssertionClause constraint, TypeInitFinalVerificationItem initItem,
-            TypeInitFinalVerificationItem finalItem) {
+            AssertionClause constraint, TypeInitFinalSpecItem initItem,
+            TypeInitFinalSpecItem finalItem) {
         super(name.getLocation(), name);
         myConstraint = constraint;
         myExemplar = exemplar;
@@ -146,9 +146,9 @@ public class TypeFamilyDec extends Dec {
      * <p>Returns the finalization block for this type family.</p>
      *
      * @return All relevant verification for finalization
-     * in {@link TypeInitFinalVerificationItem} format.
+     * in {@link TypeInitFinalSpecItem} format.
      */
-    public final TypeInitFinalVerificationItem getFinalization() {
+    public final TypeInitFinalSpecItem getFinalization() {
         return myTypeFinalItem;
     }
 
@@ -156,9 +156,9 @@ public class TypeFamilyDec extends Dec {
      * <p>Returns the initialization block for this type family.</p>
      *
      * @return All relevant verification for initialization
-     * in {@link TypeInitFinalVerificationItem} format.
+     * in {@link TypeInitFinalSpecItem} format.
      */
-    public final TypeInitFinalVerificationItem getInitialization() {
+    public final TypeInitFinalSpecItem getInitialization() {
         return myTypeInitItem;
     }
 
