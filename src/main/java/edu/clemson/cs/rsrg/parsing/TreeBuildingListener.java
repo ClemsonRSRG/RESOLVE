@@ -23,10 +23,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathCategoricalDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.EnhancementModuleDec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
@@ -46,7 +44,6 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
@@ -320,73 +317,88 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if the {@link ResolveFile} name matches the
+     * open and close names given in the file.</p>
      *
-     * @param ctx
+     * @param ctx Precis module node in ANTLR4 AST.
      */
     @Override
     public void enterConceptModule(ResolveParser.ConceptModuleContext ctx) {
-        super.enterConceptModule(ctx);
+        if (!myFile.getName().equals(ctx.name.getText())) {
+            myErrorHandler.error(createLocation(ctx.name),
+                    "Concept name does not match filename.");
+        }
+
+        if (!myFile.getName().equals(ctx.closename.getText())) {
+            myErrorHandler.error(createLocation(ctx.closename),
+                    "End name does not match the filename.");
+        }
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a {@code Concept}
+     * module declaration.</p>
      *
-     * @param ctx
+     * @param ctx Precis module node in ANTLR4 AST.
      */
     @Override
     public void exitConceptModule(ResolveParser.ConceptModuleContext ctx) {
-        super.exitConceptModule(ctx);
+        // Module parameters (if any)
+        List<ModuleParameterDec> parameterDecls =
+                getModuleArguments(ctx.moduleParameterList());
+
+        // Uses items (if any)
+        List<UsesItem> uses =
+                Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
+                        .usesList().usesItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+
+        // Module requires (if any)
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
+        }
+
+        // Add any Constraints or Decs (if any)
+        List<AssertionClause> constraints = new ArrayList<>();
+        List<Dec> decls = new ArrayList<>();
+        if (ctx.conceptItems() != null) {
+            List<ResolveParser.ConceptItemContext> itemContexts = ctx.conceptItems().conceptItem();
+            for (ResolveParser.ConceptItemContext item : itemContexts) {
+                if (item.constraintClause() != null) {
+                    constraints.add((AssertionClause) myNodes.removeFrom(item));
+                }
+                else {
+                    decls.add((Dec) myNodes.removeFrom(item));
+                }
+            }
+        }
+
+        ConceptModuleDec concept =
+                new ConceptModuleDec(createLocation(ctx),
+                        createPosSymbol(ctx.name), parameterDecls, uses,
+                        requires, constraints, decls);
+        myNodes.put(ctx, concept);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the generated concept item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterConceptItems(ResolveParser.ConceptItemsContext ctx) {
-        super.enterConceptItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitConceptItems(ResolveParser.ConceptItemsContext ctx) {
-        super.exitConceptItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterConceptItem(ResolveParser.ConceptItemContext ctx) {
-        super.enterConceptItem(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Concept item node in ANTLR4 AST.
      */
     @Override
     public void exitConceptItem(ResolveParser.ConceptItemContext ctx) {
-        super.exitConceptItem(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     // -----------------------------------------------------------
@@ -467,22 +479,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitEnhancementModule(ResolveParser.EnhancementModuleContext ctx) {
         // Module parameters (if any)
-        List<ModuleParameterDec> parameterDecls = new ArrayList<>();
-        if (ctx.moduleParameterList() != null) {
-            List<ResolveParser.ModuleParameterDeclContext> parameterDeclContexts =
-                    ctx.moduleParameterList().moduleParameterDecl();
-            for (ResolveParser.ModuleParameterDeclContext context : parameterDeclContexts) {
-                if (context.constantParameterDecl() != null) {
-                    List<TerminalNode> varNames = context.constantParameterDecl().variableDeclGroup().IDENTIFIER();
-                    for (TerminalNode ident : varNames) {
-                        parameterDecls.add((ModuleParameterDec) myNodes.removeFrom(ident));
-                    }
-                }
-                else {
-                    parameterDecls.add((ModuleParameterDec) myNodes.removeFrom(context));
-                }
-            }
-        }
+        List<ModuleParameterDec> parameterDecls =
+                getModuleArguments(ctx.moduleParameterList());
 
         // Uses items (if any)
         List<UsesItem> uses =
@@ -497,9 +495,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
         }
         else {
-            requires = createTrueAssertionClause(createLocation(ctx), AssertionClause.ClauseType.REQUIRES);
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
         }
 
+        // Decs (if any)
         List<Dec> decls =
                 Utilities
                         .collect(Dec.class,
@@ -511,7 +512,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 new EnhancementModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
                         createPosSymbol(ctx.concept), uses, requires, decls);
-
         myNodes.put(ctx, enhancement);
     }
 
@@ -4184,6 +4184,35 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         return mode;
+    }
+
+    /**
+     * <p>An helper method to retrieve the module arguments (if any).</p>
+     *
+     * @param moduleParameterListContext The ANTLR4 parser rule for list of module parameters.
+     *
+     * @return List of {@link ModuleParameterDec}.
+     */
+    private List<ModuleParameterDec> getModuleArguments(
+            ResolveParser.ModuleParameterListContext moduleParameterListContext) {
+        List<ModuleParameterDec> parameterDecls = new ArrayList<>();
+        if (moduleParameterListContext != null) {
+            List<ResolveParser.ModuleParameterDeclContext> parameterDeclContexts =
+                    moduleParameterListContext.moduleParameterDecl();
+            for (ResolveParser.ModuleParameterDeclContext context : parameterDeclContexts) {
+                if (context.constantParameterDecl() != null) {
+                    List<TerminalNode> varNames = context.constantParameterDecl().variableDeclGroup().IDENTIFIER();
+                    for (TerminalNode ident : varNames) {
+                        parameterDecls.add((ModuleParameterDec) myNodes.removeFrom(ident));
+                    }
+                }
+                else {
+                    parameterDecls.add((ModuleParameterDec) myNodes.removeFrom(context));
+                }
+            }
+        }
+
+        return parameterDecls;
     }
 
     // ===========================================================

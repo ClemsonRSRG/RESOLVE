@@ -22,6 +22,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
@@ -227,6 +228,29 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
 
         // Add the imported module name
         node.add("nodeData", e.getName().getName());
+
+        myModel.add("nodes", node);
+    }
+
+    // -----------------------------------------------------------
+    // Specification Init/Final Items
+    // -----------------------------------------------------------
+
+    /**
+     * <p>For all {@link SpecInitFinalItem} nodes, create a new node and
+     * add the item type.</p>
+     *
+     * @param e Current {@link SpecInitFinalItem} we are visiting.
+     */
+    @Override
+    public void postSpecInitFinalItem(SpecInitFinalItem e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        // Add the item type
+        node.add("nodeData", e.getClauseType().name());
 
         myModel.add("nodes", node);
     }
@@ -483,7 +507,8 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
                     createNode(myElementToNodeNumMap.get(e), e.getClass()
                             .getSimpleName(), true);
 
-            node.add("nodeData", e.asString(0, 0));
+            node.add("nodeData", escapeSpecialChars(e.asString(0, 0)
+                    .toCharArray()));
             myModel.add("nodes", node);
         }
     }
@@ -506,7 +531,9 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
                 createNode(myElementToNodeNumMap.get(e), e.getClass()
                         .getSimpleName(), true);
 
-        node.add("nodeData", e.asString(0, 0));
+        node
+                .add("nodeData", escapeSpecialChars(e.asString(0, 0)
+                        .toCharArray()));
         myModel.add("nodes", node);
     }
 
@@ -570,6 +597,9 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
                 break;
             case ']':
                 sb.append("&#93;");
+                break;
+            case '_':
+                sb.append("&#95;");
                 break;
             case '|':
                 sb.append("&#124;");

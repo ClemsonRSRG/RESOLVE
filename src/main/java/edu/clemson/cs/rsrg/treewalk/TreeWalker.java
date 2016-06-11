@@ -235,7 +235,7 @@ public class TreeWalker {
                 }
                 catch (NoSuchMethodException nsme) {
                     //Shouldn't be possible
-                    throw new MiscErrorException("Cannot locate method", nsme);
+                    throw new MiscErrorException("Cannot locate method: " + walkMethodName, nsme);
                 }
                 catch (IllegalAccessException iae) {
                     //Shouldn't be possible

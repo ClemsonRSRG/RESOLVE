@@ -47,23 +47,23 @@ BASECASE
     ;
 
 BIG_CONCAT
-    :   'Concatenation'
+    :   'Big_Concatenation'
     ;
 
 BIG_INTERSECT
-    :   'Intersection'
+    :   'Big_Intersection'
     ;
 
 BIG_PRODUCT
-    :   'Product'
+    :   'Big_Product'
     ;
 
 BIG_SUM
-    :   'Sum'
+    :   'Big_Sum'
     ;
 
 BIG_UNION
-    :   'Union'
+    :   'Big_Union'
     ;
 
 BY
@@ -156,6 +156,7 @@ ELAPSED_TIME
 
 ELSE
     :   'Else'
+    |   'else'
     ;
 
 END
@@ -233,6 +234,7 @@ FROM
 
 IF
     :   'If'
+    |   'if'
     ;
 
 IFF
@@ -256,11 +258,11 @@ INDUCTIVE
     ;
 
 INDUCTIVE_BASE_NUM
-    :   '(i)'
+    :   '(i).'
     ;
 
 INDUCTIVE_HYP_NUM
-    :   '(ii)'
+    :   '(ii).'
     ;
 
 INITIALIZATION
