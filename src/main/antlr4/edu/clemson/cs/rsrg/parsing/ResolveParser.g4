@@ -724,10 +724,6 @@ decreasingClause
     :   DECREASING mathAddingExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
-whereClause
-    :   WHERE mathExp
-    ;
-
 correspondenceClause
     :   CORR mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
@@ -758,17 +754,17 @@ mathExp
 mathIteratedExp
     :   op=(BIG_CONCAT | BIG_INTERSECT | BIG_PRODUCT | BIG_SUM | BIG_UNION)
         mathVariableDecl
-        (whereClause)?
+        (mathWhereExp)?
         (COMMA | OF) LBRACE mathExp RBRACE
     ;
 
 mathQuantifiedExp
     :   mathImpliesExp
-    |   FORALL mathVariableDeclGroup (whereClause)? (SUCHTHAT | COMMA)
+    |   FORALL mathVariableDeclGroup (mathWhereExp)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
-    |   EXISTS_UNIQUE mathVariableDeclGroup (whereClause)? (SUCHTHAT | COMMA)
+    |   EXISTS_UNIQUE mathVariableDeclGroup (mathWhereExp)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
-    |   EXISTS mathVariableDeclGroup (whereClause)? (SUCHTHAT | COMMA)
+    |   EXISTS mathVariableDeclGroup (mathWhereExp)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
     ;
 
@@ -892,7 +888,7 @@ mathOutfixExp
     ;
 
 mathSetExp
-    :   LBRACE mathVariableDecl (whereClause)? BAR mathExp RBRACE       #mathSetBuilderExp
+    :   LBRACE mathVariableDecl (mathWhereExp)? BAR mathExp RBRACE       #mathSetBuilderExp
     |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE                       #mathSetCollectionExp
     ;
 
@@ -913,6 +909,10 @@ mathTaggedCartProdTypeExp
 
 mathNestedExp
     :   LPAREN mathExp RPAREN
+    ;
+
+mathWhereExp
+    :   WHERE mathExp
     ;
 
 // program expressions
