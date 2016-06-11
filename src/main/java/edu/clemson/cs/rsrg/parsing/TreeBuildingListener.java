@@ -32,6 +32,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -495,11 +496,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
         }
         else {
-            requires =
-                    new AssertionClause(createLocation(ctx),
-                            AssertionClause.ClauseType.REQUIRES, VarExp
-                                    .getTrueVarExp(createLocation(ctx),
-                                            myTypeGraph));
+            requires = createTrueAssertionClause(createLocation(ctx), AssertionClause.ClauseType.REQUIRES);
         }
 
         List<Dec> decls =
@@ -1055,28 +1052,67 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitProgramRecordType(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
-        super.enterTypeModelDecl(ctx);
-    }
+    // -----------------------------------------------------------
+    // Type Spec/Realization Declarations
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a type model
+     * declaration.</p>
      *
-     * @param ctx
+     * @param ctx Type model declaration node in ANTLR4 AST.
      */
     @Override
     public void exitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
-        super.exitTypeModelDecl(ctx);
+        Ty mathTy = (Ty) myNodes.removeFrom(ctx.mathTypeExp());
+
+        AssertionClause constraint;
+        if (ctx.constraintClause() != null) {
+            constraint =
+                    (AssertionClause) myNodes
+                            .removeFrom(ctx.constraintClause());
+        }
+        else {
+            constraint =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CONSTRAINT);
+        }
+
+        TypeInitFinalSpecItem initItem;
+        if (ctx.specModelInit() != null) {
+            initItem =
+                    (TypeInitFinalSpecItem) myNodes.removeFrom(ctx
+                            .specModelInit());
+        }
+        else {
+            initItem =
+                    new TypeInitFinalSpecItem(createLocation(ctx),
+                            TypeInitFinalSpecItem.ItemType.INITIALIZATION,
+                            null, createTrueAssertionClause(
+                                    createLocation(ctx),
+                                    AssertionClause.ClauseType.ENSURES));
+        }
+
+        TypeInitFinalSpecItem finalItem;
+        if (ctx.specModelFinal() != null) {
+            finalItem =
+                    (TypeInitFinalSpecItem) myNodes.removeFrom(ctx
+                            .specModelFinal());
+        }
+        else {
+            finalItem =
+                    new TypeInitFinalSpecItem(createLocation(ctx),
+                            TypeInitFinalSpecItem.ItemType.FINALIZATION, null,
+                            createTrueAssertionClause(createLocation(ctx),
+                                    AssertionClause.ClauseType.ENSURES));
+        }
+
+        myNodes
+                .put(ctx, new TypeFamilyDec(createPosSymbol(ctx.name), mathTy,
+                        createPosSymbol(ctx.exemplar), constraint, initItem,
+                        finalItem));
     }
 
     /**
@@ -1258,10 +1294,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
         else {
             ensures =
-                    new AssertionClause(createLocation(ctx),
-                            AssertionClause.ClauseType.ENSURES, VarExp
-                                    .getTrueVarExp(createLocation(ctx),
-                                            myTypeGraph));
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.ENSURES);
         }
 
         myNodes.put(ctx,
@@ -1291,10 +1325,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
         else {
             ensures =
-                    new AssertionClause(createLocation(ctx),
-                            AssertionClause.ClauseType.ENSURES, VarExp
-                                    .getTrueVarExp(createLocation(ctx),
-                                            myTypeGraph));
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.ENSURES);
         }
 
         myNodes.put(ctx, new TypeInitFinalSpecItem(createLocation(ctx),
@@ -1602,9 +1634,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             requires = (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
         }
         else {
-            requires = new AssertionClause(createLocation(ctx),
-                    AssertionClause.ClauseType.REQUIRES,
-                    VarExp.getTrueVarExp(createLocation(ctx.stop), myTypeGraph));
+            requires = createTrueAssertionClause(createLocation(ctx), AssertionClause.ClauseType.REQUIRES);
         }
 
         AssertionClause ensures;
@@ -1612,9 +1642,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             ensures = (AssertionClause) myNodes.removeFrom(ctx.ensuresClause());
         }
         else {
-            ensures = new AssertionClause(createLocation(ctx),
-                    AssertionClause.ClauseType.ENSURES,
-                    VarExp.getTrueVarExp(createLocation(ctx.stop), myTypeGraph));
+            ensures = createTrueAssertionClause(createLocation(ctx), AssertionClause.ClauseType.ENSURES);
         }
 
         myNodes.put(ctx, new OperationDec(createPosSymbol(ctx.name),
@@ -4042,7 +4070,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param clauseType The type of clause.
      * @param mathExps List of mathematical expressions in the clause.
      *
-     * @return A {@link AssertionClause} for the rule.
+     * @return An {@link AssertionClause} for the rule.
      */
     private AssertionClause createAssertionClause(Location l,
             AssertionClause.ClauseType clauseType,
@@ -4091,6 +4119,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private PosSymbol createPosSymbol(Token t) {
         return new PosSymbol(createLocation(t), t.getText());
+    }
+
+    /**
+     * <p>Create an {@link AssertionClause} with {@code true} as the assertion expression
+     * for the current parser rule we are visiting.</p>
+     *
+     * @param l Location for the clause.
+     * @param clauseType The type of clause.
+     *
+     * @return An {@link AssertionClause} for the rule.
+     */
+    private AssertionClause createTrueAssertionClause(Location l,
+            AssertionClause.ClauseType clauseType) {
+        return new AssertionClause(l, clauseType, VarExp.getTrueVarExp(
+                new Location(l), myTypeGraph));
     }
 
     /**
