@@ -29,6 +29,9 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
+import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
+import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -378,6 +381,48 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
         }
 
         node.add("nodeData", sb.toString());
+        myModel.add("nodes", node);
+    }
+
+    // -----------------------------------------------------------
+    // Statements
+    // -----------------------------------------------------------
+
+    /**
+     * <p>For all {@link Statement} nodes, create a new node and add the simple name.
+     * If this node is a {@link ConfirmStmt}, we add the simplify flag ({code true}/{code false})
+     * to the data. If this node is a {@link MemoryStmt}, we add the statement type
+     * to the data.</p>
+     *
+     * @param e Current {@link Statement} we are visiting.
+     */
+    @Override
+    public void postStatement(Statement e) {
+        // Create the new node
+        ST node;
+
+        if (e instanceof ConfirmStmt) {
+            node =
+                    createNode(myElementToNodeNumMap.get(e), e.getClass()
+                            .getSimpleName(), true);
+
+            node
+                    .add("nodeData", "SIMPLIFY: "
+                            + ((ConfirmStmt) e).getSimplify());
+        }
+        else if (e instanceof MemoryStmt) {
+            node =
+                    createNode(myElementToNodeNumMap.get(e), e.getClass()
+                            .getSimpleName(), true);
+
+            node.add("nodeData", ((MemoryStmt) e).getStatementType().name());
+        }
+        else {
+            node =
+                    createNode(myElementToNodeNumMap.get(e), e.getClass()
+                            .getSimpleName(), false);
+        }
+
         myModel.add("nodes", node);
     }
 
