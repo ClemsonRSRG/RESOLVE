@@ -558,6 +558,7 @@ stmt
     |   callStmt
     |	presumeStmt
     |   confirmStmt
+    |   memoryStmt
     |   ifStmt
     |   whileStmt
     ;
@@ -580,6 +581,10 @@ presumeStmt
 
 confirmStmt
     :   CONFIRM mathExp SEMICOLON
+    ;
+
+memoryStmt
+    :   (REMEMBER | FORGET) SEMICOLON
     ;
 
 ifStmt

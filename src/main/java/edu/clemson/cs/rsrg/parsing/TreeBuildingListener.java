@@ -2116,6 +2116,18 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
+    public void exitMemoryStmt(ResolveParser.MemoryStmtContext ctx) {
+        super.exitMemoryStmt(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param ctx
+     */
+    @Override
     public void enterIfStmt(ResolveParser.IfStmtContext ctx) {
         super.enterIfStmt(ctx);
     }

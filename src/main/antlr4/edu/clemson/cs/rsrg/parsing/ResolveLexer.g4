@@ -228,6 +228,10 @@ FORALL
     |   'for all'
     ;
 
+FORGET
+    :   'Forget'
+    ;
+
 FROM
     :   'from'
     ;
