@@ -47,6 +47,7 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
 import edu.clemson.cs.rsrg.absyn.statements.PresumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
@@ -2111,13 +2112,26 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates either a {@code Remember} or a {@code Forget}
+     * statement.</p>
      *
-     * @param ctx
+     * @param ctx Memory statement node in ANTLR4 AST.
      */
     @Override
     public void exitMemoryStmt(ResolveParser.MemoryStmtContext ctx) {
-        super.exitMemoryStmt(ctx);
+        ResolveConceptualElement element;
+        if (ctx.FORGET() != null) {
+            element =
+                    new MemoryStmt(createLocation(ctx),
+                            MemoryStmt.StatementType.FORGET);
+        }
+        else {
+            element =
+                    new MemoryStmt(createLocation(ctx),
+                            MemoryStmt.StatementType.REMEMBER);
+        }
+
+        myNodes.put(ctx, element);
     }
 
     /**
