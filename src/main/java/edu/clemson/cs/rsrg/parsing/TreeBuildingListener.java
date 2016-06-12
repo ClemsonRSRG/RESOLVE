@@ -47,6 +47,7 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
 import edu.clemson.cs.rsrg.absyn.statements.PresumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
@@ -2088,25 +2089,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a confirm statement with {@code false}
+     * as its simplify flag.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterConfirmStmt(ResolveParser.ConfirmStmtContext ctx) {
-        super.enterConfirmStmt(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Confirm statement node in ANTLR4 AST.
      */
     @Override
     public void exitConfirmStmt(ResolveParser.ConfirmStmtContext ctx) {
-        super.exitConfirmStmt(ctx);
+        myNodes.put(ctx, new ConfirmStmt(createLocation(ctx), (Exp) myNodes
+                .removeFrom(ctx.mathExp()), false));
     }
 
     /**
