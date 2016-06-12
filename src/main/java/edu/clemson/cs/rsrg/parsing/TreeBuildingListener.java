@@ -47,6 +47,7 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.statements.PresumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
@@ -2073,25 +2074,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a presume statement.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterPresumeStmt(ResolveParser.PresumeStmtContext ctx) {
-        super.enterPresumeStmt(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Presume statement node in ANTLR4 AST.
      */
     @Override
     public void exitPresumeStmt(ResolveParser.PresumeStmtContext ctx) {
-        super.exitPresumeStmt(ctx);
+        myNodes.put(ctx, new PresumeStmt(createLocation(ctx), (Exp) myNodes
+                .removeFrom(ctx.mathExp())));
     }
 
     /**
