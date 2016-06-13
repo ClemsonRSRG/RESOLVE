@@ -3128,13 +3128,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 qualifier = createPosSymbol(ctx.qualifier);
             }
 
-            // Obtain the 2 expressions
-            Exp exp1 = (Exp) myNodes.removeFrom(mathExps.get(0));
-            Exp exp2 = (Exp) myNodes.removeFrom(mathExps.get(1));
-
             newElement =
-                    new InfixExp(createLocation(ctx), exp1, qualifier,
-                            createPosSymbol(ctx.op), exp2);
+                    new InfixExp(createLocation(ctx), (Exp) myNodes
+                            .removeFrom(mathExps.get(0)), qualifier,
+                            createPosSymbol(ctx.op), (Exp) myNodes
+                                    .removeFrom(mathExps.get(1)));
         }
         else {
             newElement = myNodes.removeFrom(mathExps.remove(0));
@@ -3165,13 +3163,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 qualifier = createPosSymbol(ctx.qualifier);
             }
 
-            // Obtain the 2 expressions
-            Exp exp1 = (Exp) myNodes.removeFrom(mathExps.get(0));
-            Exp exp2 = (Exp) myNodes.removeFrom(mathExps.get(1));
-
             newElement =
-                    new InfixExp(createLocation(ctx), exp1, qualifier,
-                            createPosSymbol(ctx.op), exp2);
+                    new InfixExp(createLocation(ctx), (Exp) myNodes
+                            .removeFrom(mathExps.get(0)), qualifier,
+                            createPosSymbol(ctx.op), (Exp) myNodes
+                                    .removeFrom(mathExps.get(1)));
         }
         else {
             newElement = myNodes.removeFrom(mathExps.remove(0));
