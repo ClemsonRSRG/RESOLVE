@@ -716,7 +716,7 @@ constraintClause
     ;
 
 changingClause
-    :   CHANGING progVariableExp (COMMA progVariableExp)*
+    :   CHANGING progNamedExp (COMMA progNamedExp)*
     ;
 
 maintainingClause
@@ -939,9 +939,11 @@ progUnary
 
 progPrimary
     :   progLiteral             #progLiteralExp
-    |   progVariableExp         #progNamedVariableExp
-    |   progVariableArrayExp    #progArrayExp
     |   progParamExp            #progFunctionExp
+    |   progDotExp              #progVarDotNameExp
+    |   progDotArrayExp         #progVarDotArrayExp
+    |   progArrayExp            #progVarArrayExp
+    |   progNamedExp            #progVarNameExp
     |   LPAREN progExp RPAREN   #progNestedExp
     ;
 
@@ -958,23 +960,25 @@ progParamExp
         LPAREN (progExp (COMMA progExp)*)? RPAREN
     ;
 
-//Arrays are simply syntactic sugar. We should convert these
-//to the corresponding calls when building the RESOLVE AST.
-//Note that variable array expressions cannot be in a changing clause.
-progVariableArrayExp
-    :   progVariableExp LSQBRACK progExp RSQBRACK
-    ;
-
-//This intermediate rule is really only needed to help make
-//the 'changingClause' rule a little more strict about what it accepts.
-//A root VariableExp class is no longer reflected in the ast.
-progVariableExp
-    :   progDotExp
-    |   progNamedExp
-    ;
-
+// This is a progamming dotted expression that contains only
+// program variable names.
 progDotExp
     :   progNamedExp (DOT progNamedExp)+
+    ;
+
+// This is a programming dotted expression that contains all
+// program variable names except the last expression, which is a
+// program array expression.
+// Note: Arrays are simply syntactic sugar. We should convert these
+// to the corresponding calls when building the RESOLVE AST.
+progDotArrayExp
+    :   progNamedExp (DOT progNamedExp)* (DOT progArrayExp)
+    ;
+
+// Note: Arrays are simply syntactic sugar. We should convert these
+// to the corresponding calls when building the RESOLVE AST.
+progArrayExp
+    :   progNamedExp LSQBRACK progExp RSQBRACK
     ;
 
 progNamedExp
