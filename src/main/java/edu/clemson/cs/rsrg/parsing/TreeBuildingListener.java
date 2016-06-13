@@ -54,7 +54,6 @@ import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
-import edu.clemson.cs.rsrg.parsing.utilities.ProgramArrayExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.parsing.utilities.SwapStmtGenerator;
@@ -4032,7 +4031,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitProgVarArrayExp(ResolveParser.ProgVarArrayExpContext ctx) {
-        myNodes.put(ctx, new ProgramArrayExp(createLocation(ctx),
+        myNodes.put(ctx, new ProgramVariableArrayExp(createLocation(ctx),
                 (ProgramVariableExp) myNodes.removeFrom(ctx.progVarNameExp()),
                 (ProgramExp) myNodes.removeFrom(ctx.progExp())));
     }

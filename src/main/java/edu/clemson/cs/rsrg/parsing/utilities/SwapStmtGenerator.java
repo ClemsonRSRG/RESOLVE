@@ -82,35 +82,35 @@ public class SwapStmtGenerator {
         // TODO: Build an statement for each of the cases.
         Statement newStatement = null;
 
-        // Case #1: ProgramVariableExp :=: ProgramArrayExp or
+        // Case #1: ProgramVariableNameExp :=: ProgramVariableArrayExp or
         // Same if the left and right are exchanged.
         // (ie: x :=: A[i], where "A" is an array, "i" is
         // index and "x" is a variable.)
 
-        // Case #2: ProgramVariableExp :=: ProgramArrayExp
+        // Case #2: ProgramVariableNameExp :=: ProgramVariableArrayExp
         // but the array is inside a ProgramVariableDotExp.
         // Same if the left and right are exchanged.
         // (ie: x :=: S.A[i], where "S" is a record,
         // "A" is an array, "i" is index and
         // "x" is a variable.)
 
-        // Case #3: ProgramArrayExp :=: ProgramArrayExp
+        // Case #3: ProgramVariableArrayExp :=: ProgramVariableArrayExp
         // (ie: A[i] :=: A[j], where "A" is an array and
         // "i" and "j" are indexes)
 
-        // Case #4: ProgramArrayExp :=: ProgramVariableDotExp
+        // Case #4: ProgramVariableArrayExp :=: ProgramVariableDotExp
         // Same if the left and right are exchanged.
         // (ie: A[i] :=: S.x, where "S" is a record,
         // "A" is an array, "i" is index and "x" is a variable.)
 
         // Case #5: Both left and right are ProgramVariableDotExp
 
-        // Case #5a: ProgramArrayExp :=: ProgramArrayExp,
+        // Case #5a: ProgramVariableArrayExp :=: ProgramVariableArrayExp,
         // but the arrays are inside a ProgramVariableDotExp.
         // (ie: S.A[i] :=: S.A[j], where "S" is a record,
         // "A" is an array and "i" and "j" are indexes)
 
-        // Case #5b: ProgramVariableExp :=: ProgramArrayExp,
+        // Case #5b: ProgramVariableNameExp :=: ProgramVariableArrayExp,
         // but the variable and arrays are inside a ProgramVariableDotExp.
         // Same if the left and right are exchanged.
         // (ie: S.x :=: S.A[i], where "S" is a record,

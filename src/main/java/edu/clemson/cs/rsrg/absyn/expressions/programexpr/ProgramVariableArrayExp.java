@@ -1,5 +1,5 @@
 /**
- * ProgramArrayExp.java
+ * ProgramVariableArrayExp.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,11 +10,9 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.parsing.utilities;
+package edu.clemson.cs.rsrg.absyn.expressions.programexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -40,10 +38,9 @@ import java.util.Map;
  * <p>When we are done building the RESOLVE AST, there should not be any instances
  * of this class left.</p>
  *
- * @author Yu-Shan Sun
- * @version 1.0
+ * @version 2.0
  */
-public class ProgramArrayExp extends ProgramVariableExp {
+public class ProgramVariableArrayExp extends ProgramVariableExp {
 
     // ===========================================================
     // Member Fields
@@ -66,7 +63,7 @@ public class ProgramArrayExp extends ProgramVariableExp {
      * @param nameExp A {@link ProgramVariableExp} representing the expression's name expression.
      * @param indexExp A {@link ProgramExp} representing the expression's index expression.
      */
-    public ProgramArrayExp(Location l, ProgramVariableExp nameExp,
+    public ProgramVariableArrayExp(Location l, ProgramVariableExp nameExp,
             ProgramExp indexExp) {
         super(l, null);
         myProgramNameExp = nameExp;
@@ -103,7 +100,7 @@ public class ProgramArrayExp extends ProgramVariableExp {
         if (!super.equals(o))
             return false;
 
-        ProgramArrayExp that = (ProgramArrayExp) o;
+        ProgramVariableArrayExp that = (ProgramVariableArrayExp) o;
 
         if (!myProgramIndexExp.equals(that.myProgramIndexExp))
             return false;
@@ -116,10 +113,11 @@ public class ProgramArrayExp extends ProgramVariableExp {
      */
     @Override
     public final boolean equivalent(Exp e) {
-        boolean retval = e instanceof ProgramArrayExp;
+        boolean retval = e instanceof ProgramVariableArrayExp;
 
         if (retval) {
-            ProgramArrayExp eAsProgramVariableNameExp = (ProgramArrayExp) e;
+            ProgramVariableArrayExp eAsProgramVariableNameExp =
+                    (ProgramVariableArrayExp) e;
 
             retval =
                     myProgramNameExp
@@ -177,7 +175,7 @@ public class ProgramArrayExp extends ProgramVariableExp {
      */
     @Override
     protected final Exp copy() {
-        return new ProgramArrayExp(new Location(myLoc),
+        return new ProgramVariableArrayExp(new Location(myLoc),
                 (ProgramVariableExp) myProgramNameExp.clone(),
                 myProgramIndexExp.clone());
     }
