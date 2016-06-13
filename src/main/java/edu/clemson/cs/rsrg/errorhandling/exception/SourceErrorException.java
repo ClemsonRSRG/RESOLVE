@@ -41,7 +41,7 @@ public class SourceErrorException extends CompilerException {
      * @param symbol Offending symbol
      * @param cause Cause of the exception.
      */
-    protected SourceErrorException(String message, PosSymbol symbol,
+    public SourceErrorException(String message, PosSymbol symbol,
             Throwable cause) {
         super(message, symbol, cause);
     }
@@ -53,7 +53,7 @@ public class SourceErrorException extends CompilerException {
      * @param message Message to be displayed when the exception is thrown.
      * @param symbol Offending symbol
      */
-    protected SourceErrorException(String message, PosSymbol symbol) {
+    public SourceErrorException(String message, PosSymbol symbol) {
         super(message, symbol, null);
     }
 

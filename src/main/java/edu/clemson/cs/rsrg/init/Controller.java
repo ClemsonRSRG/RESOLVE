@@ -240,6 +240,7 @@ public class Controller {
      * @return The inner representation for a module. See {link ModuleDec}.
      *
      * @throws MiscErrorException
+     * @throws SourceErrorException
      */
     private ModuleDec createModuleAST(ResolveFile file) {
         ANTLRInputStream input = file.getInputStream();
@@ -270,7 +271,7 @@ public class Controller {
         // Build the intermediate representation
         TreeBuildingListener v =
                 new TreeBuildingListener(file, myCompileEnvironment
-                        .getTypeGraph(), myErrorHandler);
+                        .getTypeGraph());
         ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
         ModuleDec result = v.getModule();
 
@@ -286,6 +287,7 @@ public class Controller {
      *
      * @throws CircularDependencyException
      * @throws ImportException
+     * @throws SourceErrorException
      */
     private void findDependencies(DefaultDirectedGraph g, ModuleDec root) {
         List<UsesItem> allUsesItems = root.getUsesItems();

@@ -51,15 +51,16 @@ import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
 import edu.clemson.cs.rsrg.absyn.statements.PresumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
-import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
+import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.utilities.ProgramArrayExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
+
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.InputMismatchException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -106,9 +107,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private final TypeGraph myTypeGraph;
 
-    /** <p>The error listener.</p> */
-    private final ErrorHandler myErrorHandler;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -119,12 +117,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * objects used by the subsequent modules.</p>
      *
      * @param file The current file we are compiling.
-     * @param errorHandler An error handler to display debug or error messages.
      * @param typeGraph Type graph that indicates relationship between different mathematical types.
      */
-    public TreeBuildingListener(ResolveFile file, TypeGraph typeGraph, ErrorHandler errorHandler) {
+    public TreeBuildingListener(ResolveFile file, TypeGraph typeGraph) {
         myTypeGraph = typeGraph;
-        myErrorHandler = errorHandler;
         myFile = file;
         myFinalModule = null;
         myNodes = new ParseTreeProperty<>();
@@ -170,13 +166,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterPrecisModule(ResolveParser.PrecisModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            myErrorHandler.error(createLocation(ctx.name),
-                    "Precis name does not match filename.");
+            throw new SourceErrorException(
+                    "Precis name does not match filename.",
+                    createPosSymbol(ctx.name), new IllegalArgumentException());
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            myErrorHandler.error(createLocation(ctx.closename),
-                    "End name does not match the filename.");
+            throw new SourceErrorException(
+                    "End name does not match the filename.",
+                    createPosSymbol(ctx.closename),
+                    new IllegalArgumentException());
         }
     }
 
@@ -329,13 +328,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterConceptModule(ResolveParser.ConceptModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            myErrorHandler.error(createLocation(ctx.name),
-                    "Concept name does not match filename.");
+            throw new SourceErrorException(
+                    "Concept name does not match filename.",
+                    createPosSymbol(ctx.name), new IllegalArgumentException());
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            myErrorHandler.error(createLocation(ctx.closename),
-                    "End name does not match the filename.");
+            throw new SourceErrorException(
+                    "End name does not match the filename.",
+                    createPosSymbol(ctx.closename),
+                    new IllegalArgumentException());
         }
     }
 
@@ -462,13 +464,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void enterEnhancementModule(
             ResolveParser.EnhancementModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            myErrorHandler.error(createLocation(ctx.name),
-                    "Enhancement name does not match filename.");
+            throw new SourceErrorException(
+                    "Enhancement name does not match filename.",
+                    createPosSymbol(ctx.name), new IllegalArgumentException());
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            myErrorHandler.error(createLocation(ctx.closename),
-                    "End name does not match the filename.");
+            throw new SourceErrorException(
+                    "End name does not match the filename.",
+                    createPosSymbol(ctx.closename),
+                    new IllegalArgumentException());
         }
     }
 
@@ -875,10 +880,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void enterConstantParameterDecl(
             ResolveParser.ConstantParameterDeclContext ctx) {
         if (ctx.variableDeclGroup().programArrayType() != null) {
-            myErrorHandler
-                    .error(createLocation(ctx.variableDeclGroup()
-                            .programArrayType()),
-                            "Array types cannot be used as a type for the parameter variables");
+            throw new SourceErrorException(
+                    "Array types cannot be used as a type for the parameter variables",
+                    createPosSymbol(ctx.start), new IllegalArgumentException());
         }
     }
 
@@ -953,10 +957,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterParameterDecl(ResolveParser.ParameterDeclContext ctx) {
         if (ctx.variableDeclGroup().programArrayType() != null) {
-            myErrorHandler
-                    .error(createLocation(ctx.variableDeclGroup()
-                            .programArrayType()),
-                            "Array types cannot be used as a type for the parameter variables");
+            throw new SourceErrorException(
+                    "Array types cannot be used as a type for the parameter variables",
+                    createPosSymbol(ctx.variableDeclGroup().start),
+                    new IllegalArgumentException());
         }
     }
 
@@ -2024,18 +2028,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
         super.exitAssignStmt(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterSwapStmt(ResolveParser.SwapStmtContext ctx) {
-        super.enterSwapStmt(ctx);
     }
 
     /**
@@ -4014,9 +4006,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterProgVarArrayExp(ResolveParser.ProgVarArrayExpContext ctx) {
         if (myIsProcessingModuleArgument) {
-            myErrorHandler
-                    .error(createLocation(ctx),
-                            "Variable array expressions cannot be passed as module arguments.");
+            throw new SourceErrorException(
+                    "Variable array expressions cannot be passed as module arguments.",
+                    createPosSymbol(ctx.start), new IllegalArgumentException());
         }
     }
 
