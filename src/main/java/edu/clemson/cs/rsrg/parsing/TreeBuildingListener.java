@@ -57,10 +57,9 @@ import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.utilities.ProgramArrayExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.parsing.utilities.SwapStmtGenerator;
 import java.util.*;
-
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.InputMismatchException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -2033,13 +2032,23 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates either a regular swap statement
+     * or an operation call to one of the swap-operations in
+     * {@code Static_Array_Template}.</p>
      *
-     * @param ctx
+     * @param ctx Swap statement node in ANTLR4 AST.
      */
     @Override
     public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
-        super.exitSwapStmt(ctx);
+        // TODO:
+        // If either side contains an array expression, its index could contain another array expression.
+        // In this case, we will generate extra variable declarations and statements that will need to be
+        // inserted appropriately.
+        SwapStmtGenerator generator =
+                new SwapStmtGenerator(createLocation(ctx),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));
+        myNodes.put(ctx, generator.buildStatement());
     }
 
     /**
