@@ -716,7 +716,7 @@ constraintClause
     ;
 
 changingClause
-    :   CHANGING progNamedExp (COMMA progNamedExp)*
+    :   CHANGING progNamedExp (COMMA progNamedExp)* SEMICOLON
     ;
 
 maintainingClause
