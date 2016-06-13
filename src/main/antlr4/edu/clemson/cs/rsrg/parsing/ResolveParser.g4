@@ -564,11 +564,11 @@ stmt
     ;
 
 assignStmt
-    :   left=progExp ASSIGN_OP right=progExp SEMICOLON
+    :   left=progVariableExp ASSIGN_OP right=progExp SEMICOLON
     ;
 
 swapStmt
-    :   left=progExp SWAP_OP right=progExp SEMICOLON
+    :   left=progVariableExp SWAP_OP right=progVariableExp SEMICOLON
     ;
 
 callStmt
@@ -716,7 +716,7 @@ constraintClause
     ;
 
 changingClause
-    :   CHANGING progNamedExp (COMMA progNamedExp)* SEMICOLON
+    :   CHANGING progVarNameExp (COMMA progVarNameExp)* SEMICOLON
     ;
 
 maintainingClause
@@ -940,10 +940,7 @@ progUnary
 progPrimary
     :   progLiteral             #progLiteralExp
     |   progParamExp            #progFunctionExp
-    |   progDotExp              #progVarDotNameExp
-    |   progDotArrayExp         #progVarDotArrayExp
-    |   progArrayExp            #progVarArrayExp
-    |   progNamedExp            #progVarNameExp
+    |   progVariableExp         #progVarExp
     |   LPAREN progExp RPAREN   #progNestedExp
     ;
 
@@ -960,10 +957,20 @@ progParamExp
         LPAREN (progExp (COMMA progExp)*)? RPAREN
     ;
 
+// This intermediate rule is really only needed to help make
+// 'swapStmt' and 'assignStmt' rules a little more strict about
+// what they accept.
+progVariableExp
+    :   progVarDotExp
+    |   progVarDotArrayExp
+    |   progVarArrayExp
+    |   progVarNameExp
+    ;
+
 // This is a progamming dotted expression that contains only
 // program variable names.
-progDotExp
-    :   progNamedExp (DOT progNamedExp)+
+progVarDotExp
+    :   progVarNameExp (DOT progVarNameExp)+
     ;
 
 // This is a programming dotted expression that contains all
@@ -971,16 +978,16 @@ progDotExp
 // program array expression.
 // Note: Arrays are simply syntactic sugar. We should convert these
 // to the corresponding calls when building the RESOLVE AST.
-progDotArrayExp
-    :   progNamedExp (DOT progNamedExp)* (DOT progArrayExp)
+progVarDotArrayExp
+    :   progVarNameExp (DOT progVarNameExp)* (DOT progVarArrayExp)
     ;
 
 // Note: Arrays are simply syntactic sugar. We should convert these
 // to the corresponding calls when building the RESOLVE AST.
-progArrayExp
-    :   progNamedExp LSQBRACK progExp RSQBRACK
+progVarArrayExp
+    :   progVarNameExp LSQBRACK progExp RSQBRACK
     ;
 
-progNamedExp
+progVarNameExp
     :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
     ;
