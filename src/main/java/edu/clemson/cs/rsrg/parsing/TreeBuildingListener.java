@@ -819,7 +819,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         if (ctx.variableDeclGroup().programArrayType() != null) {
             throw new SourceErrorException(
                     "Array types cannot be used as a type for the parameter variables",
-                    createPosSymbol(ctx.start), new IllegalArgumentException());
+                    createPosSymbol(ctx.variableDeclGroup().programArrayType().start),
+                    new IllegalArgumentException());
         }
     }
 
@@ -896,7 +897,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         if (ctx.variableDeclGroup().programArrayType() != null) {
             throw new SourceErrorException(
                     "Array types cannot be used as a type for the parameter variables",
-                    createPosSymbol(ctx.variableDeclGroup().start),
+                    createPosSymbol(ctx.variableDeclGroup().programArrayType().start),
                     new IllegalArgumentException());
         }
     }
