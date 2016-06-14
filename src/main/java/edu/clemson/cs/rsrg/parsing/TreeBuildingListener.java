@@ -957,30 +957,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterProgramArrayType(ResolveParser.ProgramArrayTypeContext ctx) {
-        super.enterProgramArrayType(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitProgramArrayType(ResolveParser.ProgramArrayTypeContext ctx) {
-        super.exitProgramArrayType(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
     public void enterProgramRecordType(
             ResolveParser.ProgramRecordTypeContext ctx) {
         super.enterProgramRecordType(ctx);
