@@ -90,8 +90,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /** <p>Boolean that indicates that we are processing a module argument.</p> */
     private boolean myIsProcessingModuleArgument;
 
-    /** <p>Stack of current syntactic sugar conversions</p> */
-    //private Stack<ProgramExpAdapter> myCurrentProgExpAdapterStack;
+    /** <p>This contains all the new items created by some sort of syntactic conversion.</p> */
+    private NewResolveConceptualElementContainer myNewRCEContainer;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -124,7 +124,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myNodes = new ParseTreeProperty<>();
         myDefinitionMemberList = null;
         myIsProcessingModuleArgument = false;
-        //myCurrentProgExpAdapterStack = new Stack<>();
+        myNewRCEContainer = null;
     }
 
     // ===========================================================
@@ -218,13 +218,32 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if the {@link ResolveFile} name matches the
+     * open and close names given in the file.</p>
      *
-     * @param ctx
+     * <p>If everything checks out, we create a new object to store
+     * all the elements that can be created by the syntatic sugar
+     * conversions.</p>
+     *
+     * @param ctx Facility module node in ANTLR4 AST.
      */
     @Override
     public void enterFacilityModule(ResolveParser.FacilityModuleContext ctx) {
-        super.enterFacilityModule(ctx);
+        if (!myFile.getName().equals(ctx.name.getText())) {
+            throw new SourceErrorException(
+                    "Facility name does not match filename.",
+                    createPosSymbol(ctx.name), new IllegalArgumentException());
+        }
+
+        if (!myFile.getName().equals(ctx.closename.getText())) {
+            throw new SourceErrorException(
+                    "End name does not match the filename.",
+                    createPosSymbol(ctx.closename),
+                    new IllegalArgumentException());
+        }
+
+        // Create a new container
+        myNewRCEContainer = new NewResolveConceptualElementContainer(ctx);
     }
 
     /**
@@ -237,42 +256,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitFacilityModule(ResolveParser.FacilityModuleContext ctx) {
         super.exitFacilityModule(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterFacilityItems(ResolveParser.FacilityItemsContext ctx) {
-        super.enterFacilityItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitFacilityItems(ResolveParser.FacilityItemsContext ctx) {
-        super.exitFacilityItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterFacilityItem(ResolveParser.FacilityItemContext ctx) {
-        super.enterFacilityItem(ctx);
     }
 
     /**
@@ -321,7 +304,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
-     * @param ctx Precis module node in ANTLR4 AST.
+     * @param ctx Concept module node in ANTLR4 AST.
      */
     @Override
     public void enterConceptModule(ResolveParser.ConceptModuleContext ctx) {
@@ -345,7 +328,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>This method generates a representation of a {@code Concept}
      * module declaration.</p>
      *
-     * @param ctx Precis module node in ANTLR4 AST.
+     * @param ctx Concept module node in ANTLR4 AST.
      */
     @Override
     public void exitConceptModule(ResolveParser.ConceptModuleContext ctx) {
@@ -412,14 +395,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if the {@link ResolveFile} name matches the
+     * open and close names given in the file.</p>
      *
-     * @param ctx
+     * <p>If everything checks out, we create a new object to store
+     * all the elements that can be created by the syntatic sugar
+     * conversions.</p>
+     *
+     * @param ctx Concept impl module node in ANTLR4 AST.
      */
     @Override
     public void enterConceptImplModule(
             ResolveParser.ConceptImplModuleContext ctx) {
-        super.enterConceptImplModule(ctx);
+        if (!myFile.getName().equals(ctx.name.getText())) {
+            throw new SourceErrorException(
+                    "Concept realization name does not match filename.",
+                    createPosSymbol(ctx.name), new IllegalArgumentException());
+        }
+
+        if (!myFile.getName().equals(ctx.closename.getText())) {
+            throw new SourceErrorException(
+                    "End name does not match the filename.",
+                    createPosSymbol(ctx.closename),
+                    new IllegalArgumentException());
+        }
+
+        // Create a new container
+        myNewRCEContainer = new NewResolveConceptualElementContainer(ctx);
     }
 
     /**
@@ -541,14 +543,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if the {@link ResolveFile} name matches the
+     * open and close names given in the file.</p>
      *
-     * @param ctx
+     * <p>If everything checks out, we create a new object to store
+     * all the elements that can be created by the syntatic sugar
+     * conversions.</p>
+     *
+     * @param ctx Enhancement impl module node in ANTLR4 AST.
      */
     @Override
     public void enterEnhancementImplModule(
             ResolveParser.EnhancementImplModuleContext ctx) {
-        super.enterEnhancementImplModule(ctx);
+        if (!myFile.getName().equals(ctx.name.getText())) {
+            throw new SourceErrorException(
+                    "Enhancement realization name does not match filename.",
+                    createPosSymbol(ctx.name), new IllegalArgumentException());
+        }
+
+        if (!myFile.getName().equals(ctx.closename.getText())) {
+            throw new SourceErrorException(
+                    "End name does not match the filename.",
+                    createPosSymbol(ctx.closename),
+                    new IllegalArgumentException());
+        }
+
+        // Create a new container
+        myNewRCEContainer = new NewResolveConceptualElementContainer(ctx);
     }
 
     /**
@@ -572,57 +593,37 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterImplItems(ResolveParser.ImplItemsContext ctx) {
-        super.enterImplItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitImplItems(ResolveParser.ImplItemsContext ctx) {
-        super.exitImplItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterImplItem(ResolveParser.ImplItemContext ctx) {
-        super.enterImplItem(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
     public void exitImplItem(ResolveParser.ImplItemContext ctx) {
         super.exitImplItem(ctx);
     }
 
+    // -----------------------------------------------------------
+    // Performance Profile Module for Concepts
+    // -----------------------------------------------------------
+
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if the {@link ResolveFile} name matches the
+     * open and close names given in the file.</p>
      *
-     * @param ctx
+     * @param ctx Concept performance module node in ANTLR4 AST.
      */
     @Override
     public void enterConceptPerformanceModule(
             ResolveParser.ConceptPerformanceModuleContext ctx) {
-        super.enterConceptPerformanceModule(ctx);
+        if (!myFile.getName().equals(ctx.name.getText())) {
+            throw new SourceErrorException(
+                    "Concept profile name does not match filename.",
+                    createPosSymbol(ctx.name), new IllegalArgumentException());
+        }
+
+        if (!myFile.getName().equals(ctx.closename.getText())) {
+            throw new SourceErrorException(
+                    "End name does not match the filename.",
+                    createPosSymbol(ctx.closename),
+                    new IllegalArgumentException());
+        }
     }
 
     /**
@@ -646,61 +647,38 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterConceptPerformanceItems(
-            ResolveParser.ConceptPerformanceItemsContext ctx) {
-        super.enterConceptPerformanceItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitConceptPerformanceItems(
-            ResolveParser.ConceptPerformanceItemsContext ctx) {
-        super.exitConceptPerformanceItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterConceptPerformanceItem(
-            ResolveParser.ConceptPerformanceItemContext ctx) {
-        super.enterConceptPerformanceItem(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
     public void exitConceptPerformanceItem(
             ResolveParser.ConceptPerformanceItemContext ctx) {
         super.exitConceptPerformanceItem(ctx);
     }
 
+    // -----------------------------------------------------------
+    // Performance Profile Module for Enhancements
+    // -----------------------------------------------------------
+
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if the {@link ResolveFile} name matches the
+     * open and close names given in the file.</p>
      *
-     * @param ctx
+     * @param ctx Enhancement performance module node in ANTLR4 AST.
      */
     @Override
     public void enterEnhancementPerformanceModule(
             ResolveParser.EnhancementPerformanceModuleContext ctx) {
-        super.enterEnhancementPerformanceModule(ctx);
+        if (!myFile.getName().equals(ctx.name.getText())) {
+            throw new SourceErrorException(
+                    "Concept profile name does not match filename.",
+                    createPosSymbol(ctx.name), new IllegalArgumentException());
+        }
+
+        if (!myFile.getName().equals(ctx.closename.getText())) {
+            throw new SourceErrorException(
+                    "End name does not match the filename.",
+                    createPosSymbol(ctx.closename),
+                    new IllegalArgumentException());
+        }
     }
 
     /**
@@ -714,45 +692,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitEnhancementPerformanceModule(
             ResolveParser.EnhancementPerformanceModuleContext ctx) {
         super.exitEnhancementPerformanceModule(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterEnhancementPerformanceItems(
-            ResolveParser.EnhancementPerformanceItemsContext ctx) {
-        super.enterEnhancementPerformanceItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitEnhancementPerformanceItems(
-            ResolveParser.EnhancementPerformanceItemsContext ctx) {
-        super.exitEnhancementPerformanceItems(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterEnhancementPerformanceItem(
-            ResolveParser.EnhancementPerformanceItemContext ctx) {
-        super.enterEnhancementPerformanceItem(ctx);
     }
 
     /**
@@ -4257,13 +4196,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
-     * <p>This holds items related to syntactic sugar conversions for
-     * {@link ProgramExp}s.</p>
-     *
-     * <p><strong>Note:</strong> The only conversions we do right now are program
-     * array conversions.</p>
+     * <p>This holds new items related to syntactic sugar conversions for
+     * raw array types and {@link ProgramVariableArrayExp}s.</p>
      */
-    private class ProgramExpAdapter {
+    private class NewResolveConceptualElementContainer {
 
         // ===========================================================
         // Member Fields
@@ -4271,6 +4207,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         /** <p>The context that instantiated this object</p> */
         ParserRuleContext instantiatingContext;
+
+        /**
+         * <p>List of new module-level facility declaration objects.</p>
+         *
+         * <p><strong>Note:</strong> The only facilities generated at the moment are
+         * new {@code Static_Array_Template} facilities.</p>
+         */
+        List<FacilityDec> newModuleLevelFacilityDecs;
+
+        /**
+         * <p>List of new facility declaration objects.</p>
+         *
+         * <p><strong>Note:</strong> The only facilities generated at the moment are
+         * new {@code Static_Array_Template} facilities.</p>
+         */
+        List<FacilityDec> newFacilityDecs;
 
         /**
          * <p>List of new variable declaration objects.</p>
@@ -4286,7 +4238,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          * that contains a program array expression.</p>
          *
          * <p><strong>Note:</strong> The only statements generated at the moment are
-         * either new function assignment statements that stores the indexes in
+         * either new function assignment statements from indexes in
          * program array expressions or call statements to swap elements in the array(s).</p>
          */
         List<Statement> newPreStmts;
@@ -4306,55 +4258,18 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         /**
          * <p>This constructs a temporary structure to store all the newly declared
-         * items that resulted from syntactic sugar conversions for {@link ProgramExp}s.</p>
+         * items that resulted from syntactic sugar conversions for raw array types
+         * and/or {@link ProgramVariableArrayExp}s.</p>
          *
          * @param instantiatingContext The context that instantiated this object.
          */
-        ProgramExpAdapter(ParserRuleContext instantiatingContext) {
+        NewResolveConceptualElementContainer(ParserRuleContext instantiatingContext) {
             this.instantiatingContext = instantiatingContext;
+            newModuleLevelFacilityDecs = new ArrayList<>();
+            newFacilityDecs = new ArrayList<>();
             newVarDecs = new ArrayList<>();
             newPreStmts = new ArrayList<>();
             newPostStmts = new ArrayList<>();
-        }
-    }
-
-    /**
-     * <p>This holds items related to syntactic sugar conversions for
-     * {@link Ty}s.</p>
-     *
-     * <p><strong>Note:</strong> The only conversions we do right now are
-     * raw array types.</p>
-     */
-    private class RawTypeAdapter {
-
-        // ===========================================================
-        // Member Fields
-        // ===========================================================
-
-        /** <p>The context that instantiated this object</p> */
-        ParserRuleContext instantiatingContext;
-
-        /**
-         * <p>List of new facility declaration objects.</p>
-         *
-         * <p><strong>Note:</strong> The only facilities generated at the moment are
-         * new {@code Static_Array_Template} facilities.</p>
-         */
-        List<FacilityDec> newFacilityDecs;
-
-        // ===========================================================
-        // Constructors
-        // ===========================================================
-
-        /**
-         * <p>This constructs a temporary structure to store all the newly facility
-         * declarations that resulted from syntactic sugar conversions for {@link Ty}s.</p>
-         *
-         * @param instantiatingContext The context that instantiated this object.
-         */
-        RawTypeAdapter(ParserRuleContext instantiatingContext) {
-            this.instantiatingContext = instantiatingContext;
-            newFacilityDecs = new ArrayList<>();
         }
     }
 
