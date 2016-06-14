@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.statements;
 
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
@@ -31,8 +31,8 @@ public class FuncAssignStmt extends Statement {
     /** <p>The variable expression to be assigned</p> */
     private final ProgramVariableExp myVariableExp;
 
-    /** <p>The programming function expression</p> */
-    private final ProgramFunctionExp myFunctionExp;
+    /** <p>The programming expression to be assigned</p> */
+    private final ProgramExp myAssignExp;
 
     // ===========================================================
     // Constructors
@@ -44,14 +44,13 @@ public class FuncAssignStmt extends Statement {
      * @param l A {@link Location} representation object.
      * @param var A {@link ProgramVariableExp} representing the variable
      *            expression we want to assign to.
-     * @param exp A {@link ProgramFunctionExp} representing the function
-     *            we are calling.
+     * @param exp A {@link ProgramExp} representing the expression we are
+     *            assigning.
      */
-    public FuncAssignStmt(Location l, ProgramVariableExp var,
-            ProgramFunctionExp exp) {
+    public FuncAssignStmt(Location l, ProgramVariableExp var, ProgramExp exp) {
         super(l);
         myVariableExp = var;
-        myFunctionExp = exp;
+        myAssignExp = exp;
     }
 
     // ===========================================================
@@ -67,7 +66,7 @@ public class FuncAssignStmt extends Statement {
 
         sb.append(myVariableExp.asString(indentSize, innerIndentInc));
         sb.append(" := ");
-        sb.append(myFunctionExp.asString(0, innerIndentInc));
+        sb.append(myAssignExp.asString(0, innerIndentInc));
 
         return sb.toString();
     }
@@ -86,18 +85,18 @@ public class FuncAssignStmt extends Statement {
 
         if (!myVariableExp.equals(that.myVariableExp))
             return false;
-        return myFunctionExp.equals(that.myFunctionExp);
+        return myAssignExp.equals(that.myAssignExp);
 
     }
 
     /**
-     * <p>This method returns the function expression in
+     * <p>This method returns the assigned expression in
      * this function assignment statement.</p>
      *
-     * @return The {@link ProgramFunctionExp} representation object.
+     * @return The {@link ProgramExp} representation object.
      */
-    public final ProgramFunctionExp getFunctionExp() {
-        return myFunctionExp;
+    public final ProgramExp getAssignExp() {
+        return myAssignExp;
     }
 
     /**
@@ -116,7 +115,7 @@ public class FuncAssignStmt extends Statement {
     @Override
     public final int hashCode() {
         int result = myVariableExp.hashCode();
-        result = 31 * result + myFunctionExp.hashCode();
+        result = 31 * result + myAssignExp.hashCode();
         return result;
     }
 
@@ -130,8 +129,7 @@ public class FuncAssignStmt extends Statement {
     @Override
     protected final Statement copy() {
         return new FuncAssignStmt(new Location(myLoc),
-                (ProgramVariableExp) myVariableExp.clone(),
-                (ProgramFunctionExp) myFunctionExp.clone());
+                (ProgramVariableExp) myVariableExp.clone(), myAssignExp.clone());
     }
 
 }

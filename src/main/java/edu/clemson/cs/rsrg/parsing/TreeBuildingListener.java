@@ -39,24 +39,18 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
-import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
-import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
-import edu.clemson.cs.rsrg.absyn.statements.PresumeStmt;
-import edu.clemson.cs.rsrg.absyn.statements.Statement;
+import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.parsing.utilities.SwapStmtGenerator;
 import java.util.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -1474,6 +1468,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
+        // TODO:
+        // If either side contains an array expression, its index could contain another array expression.
+        // In this case, we will generate extra variable declarations and statements that will need to be
+        // inserted appropriately.
+        /*SwapStmtGenerator generator =
+                new SwapStmtGenerator(createLocation(ctx),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
         super.exitProcedureDecl(ctx);
     }
 
@@ -1923,71 +1925,42 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a function assignment statement.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterAssignStmt(ResolveParser.AssignStmtContext ctx) {
-        super.enterAssignStmt(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Assign statement node in ANTLR4 AST.
      */
     @Override
     public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
-        super.exitAssignStmt(ctx);
+        myNodes.put(ctx, new FuncAssignStmt(createLocation(ctx),
+                (ProgramVariableExp) myNodes.removeFrom(ctx.left),
+                (ProgramExp) myNodes.removeFrom(ctx.right)));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method generates either a regular swap statement
-     * or an operation call to one of the swap-operations in
-     * {@code Static_Array_Template}.</p>
+     * <p>This method generates a swap statement.</p>
      *
      * @param ctx Swap statement node in ANTLR4 AST.
      */
     @Override
     public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
-        // TODO:
-        // If either side contains an array expression, its index could contain another array expression.
-        // In this case, we will generate extra variable declarations and statements that will need to be
-        // inserted appropriately.
-        SwapStmtGenerator generator =
-                new SwapStmtGenerator(createLocation(ctx),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));
-        myNodes.put(ctx, generator.buildStatement());
+        myNodes.put(ctx, new SwapStmt(createLocation(ctx),
+                (ProgramVariableExp) myNodes.removeFrom(ctx.left),
+                (ProgramVariableExp) myNodes.removeFrom(ctx.right)));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a call statement.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterCallStmt(ResolveParser.CallStmtContext ctx) {
-        super.enterCallStmt(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Call statement node in ANTLR4 AST.
      */
     @Override
     public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
-        super.exitCallStmt(ctx);
+        myNodes.put(ctx, new CallStmt(createLocation(ctx),
+                (ProgramFunctionExp) myNodes.removeFrom(ctx.progParamExp())));
     }
 
     /**
@@ -2045,73 +2018,81 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates an if statement.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterIfStmt(ResolveParser.IfStmtContext ctx) {
-        super.enterIfStmt(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx If statement node in ANTLR4 AST.
      */
     @Override
     public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
-        super.exitIfStmt(ctx);
+        // Condition
+        ProgramExp conditionExp = (ProgramExp) myNodes.removeFrom(ctx.progExp());
+
+        // Statements inside the "if"
+        List<Statement> ifStmts = new ArrayList<>();
+        List<ResolveParser.StmtContext> ifStmtContext = ctx.stmt();
+        for (ResolveParser.StmtContext stmtContext : ifStmtContext) {
+            ifStmts.add((Statement) myNodes.removeFrom(stmtContext));
+        }
+
+        // Statements inside the "else" (if any)
+        List<Statement> elseStmts = new ArrayList<>();
+        if (ctx.elsePart() != null) {
+            List<ResolveParser.StmtContext> elseStmtContext = ctx.elsePart().stmt();
+            for (ResolveParser.StmtContext stmtContext : elseStmtContext) {
+                elseStmts.add((Statement) myNodes.removeFrom(stmtContext));
+            }
+        }
+
+        myNodes.put(ctx, new IfStmt(createLocation(ctx),
+                new IfConditionItem(createLocation(ctx), conditionExp, ifStmts),
+                new ArrayList<IfConditionItem>(), elseStmts));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a while statement.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterElsePart(ResolveParser.ElsePartContext ctx) {
-        super.enterElsePart(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitElsePart(ResolveParser.ElsePartContext ctx) {
-        super.exitElsePart(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterWhileStmt(ResolveParser.WhileStmtContext ctx) {
-        super.enterWhileStmt(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx While statement node in ANTLR4 AST.
      */
     @Override
     public void exitWhileStmt(ResolveParser.WhileStmtContext ctx) {
-        super.exitWhileStmt(ctx);
+        // Condition
+        ProgramExp conditionExp = (ProgramExp) myNodes.removeFrom(ctx.progExp());
+
+        // Changing clause
+        List<ProgramVariableExp> changingVars = new ArrayList<>();
+        if (ctx.changingClause() != null) {
+            List<ResolveParser.ProgVarNameExpContext> changingVarContexts =
+                    ctx.changingClause().progVarNameExp();
+            for (ResolveParser.ProgVarNameExpContext context : changingVarContexts) {
+                changingVars.add((ProgramVariableExp) myNodes.removeFrom(context));
+            }
+        }
+
+        // Maintaining clause
+        AssertionClause maintainingClause;
+        if (ctx.maintainingClause() != null) {
+            maintainingClause = (AssertionClause) myNodes.removeFrom(ctx.maintainingClause());
+        }
+        else {
+            maintainingClause = createTrueAssertionClause(createLocation(ctx),
+                    AssertionClause.ClauseType.MAINTAINING);
+        }
+
+        // Decreasing clause
+        AssertionClause decreasingClause = (AssertionClause) myNodes.removeFrom(ctx.decreasingClause());
+
+        // Statements inside the "while"
+        List<Statement> whileStmts = new ArrayList<>();
+        List<ResolveParser.StmtContext> whileStmtContext = ctx.stmt();
+        for (ResolveParser.StmtContext stmtContext : whileStmtContext) {
+            whileStmts.add((Statement) myNodes.removeFrom(stmtContext));
+        }
+
+        myNodes.put(ctx, new WhileStmt(createLocation(ctx), conditionExp,
+                new LoopVerificationItem(createLocation(ctx), changingVars,
+                        maintainingClause, decreasingClause, null), whileStmts));
     }
 
     // -----------------------------------------------------------
@@ -2514,87 +2495,34 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new maintaining clause.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterChangingClause(ResolveParser.ChangingClauseContext ctx) {
-        super.enterChangingClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitChangingClause(ResolveParser.ChangingClauseContext ctx) {
-        super.exitChangingClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterMaintainingClause(
-            ResolveParser.MaintainingClauseContext ctx) {
-        super.enterMaintainingClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Maintaining clause node in ANTLR4 AST.
      */
     @Override
     public void exitMaintainingClause(ResolveParser.MaintainingClauseContext ctx) {
-        super.exitMaintainingClause(ctx);
+        myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.MAINTAINING, ctx.mathExp()));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new decreasing clause.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterDecreasingClause(ResolveParser.DecreasingClauseContext ctx) {
-        super.enterDecreasingClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Decreasing clause node in ANTLR4 AST.
      */
     @Override
     public void exitDecreasingClause(ResolveParser.DecreasingClauseContext ctx) {
-        super.exitDecreasingClause(ctx);
-    }
+        Exp whichEntailsExp = null;
+        if (ctx.mathExp() != null) {
+            whichEntailsExp = (Exp) myNodes.removeFrom(ctx.mathExp());
+        }
+        Exp decreasingExp = (Exp) myNodes.removeFrom(ctx.mathAddingExp());
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterCorrespondenceClause(
-            ResolveParser.CorrespondenceClauseContext ctx) {
-        super.enterCorrespondenceClause(ctx);
+        myNodes.put(ctx, new AssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.DECREASING, decreasingExp,
+                whichEntailsExp));
     }
 
     /**
@@ -2618,18 +2546,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterConventionClause(ResolveParser.ConventionClauseContext ctx) {
-        super.enterConventionClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
     public void exitConventionClause(ResolveParser.ConventionClauseContext ctx) {
         super.exitConventionClause(ctx);
     }
@@ -2642,33 +2558,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterDurationClause(ResolveParser.DurationClauseContext ctx) {
-        super.enterDurationClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
     public void exitDurationClause(ResolveParser.DurationClauseContext ctx) {
         super.exitDurationClause(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterManipulationDispClause(
-            ResolveParser.ManipulationDispClauseContext ctx) {
-        super.enterManipulationDispClause(ctx);
     }
 
     /**

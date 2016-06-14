@@ -597,7 +597,7 @@ elsePart
 
 whileStmt
     :   WHILE progExp (changingClause)?
-        (maintainingClause)? (decreasingClause)? DO stmt* END SEMICOLON
+        (maintainingClause)? (decreasingClause) DO stmt* END SEMICOLON
     ;
 
 // mathematical type theorems

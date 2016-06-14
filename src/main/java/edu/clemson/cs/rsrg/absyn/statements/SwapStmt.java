@@ -64,10 +64,8 @@ public class SwapStmt extends Statement {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
 
-        sb.append(myLeftHandSide.asString(indentSize + innerIndentInc,
-                innerIndentInc));
+        sb.append(myLeftHandSide.asString(indentSize, innerIndentInc));
         sb.append(" :=: ");
-
         sb.append(myRightHandSide.asString(0, innerIndentInc));
 
         return sb.toString();
