@@ -4185,6 +4185,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         ParserRuleContext instantiatingContext;
 
         /**
+         * <p>Since we don't have symbol table, we really don't know if
+         * we are generating a new object with the same name. In order to avoid
+         * problems, all of our objects will have a name that starts with "_" and
+         * end the current new element counter. This number increases by 1 each
+         * time we create a new element.</p>
+         */
+        int newElementCounter;
+
+        /**
          * <p>List of new module-level facility declaration objects.</p>
          *
          * <p><strong>Note:</strong> The only facilities generated at the moment are
@@ -4241,6 +4250,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          */
         NewResolveConceptualElementContainer(ParserRuleContext instantiatingContext) {
             this.instantiatingContext = instantiatingContext;
+            newElementCounter = 0;
             newModuleLevelFacilityDecs = new ArrayList<>();
             newFacilityDecs = new ArrayList<>();
             newVarDecs = new ArrayList<>();
