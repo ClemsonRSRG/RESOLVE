@@ -18,7 +18,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
 import edu.clemson.cs.rsrg.absyn.clauses.*;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.*;
@@ -27,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.*;
 import edu.clemson.cs.rsrg.absyn.declarations.*;
 import edu.clemson.cs.rsrg.absyn.*;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.*;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.*;
 import edu.clemson.cs.rsrg.absyn.expressions.*;
@@ -115,16 +115,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postVarExp(VarExp e) {}
 
-    public boolean walkMathVarDec(MathVarDec e) {
+    public boolean walkVarDec(VarDec e) {
         return false;
     }
 
-    public void preMathVarDec(MathVarDec e) {}
+    public void preVarDec(VarDec e) {}
 
-    public void midMathVarDec(MathVarDec e, ResolveConceptualElement previous,
+    public void midVarDec(VarDec e, ResolveConceptualElement previous,
             ResolveConceptualElement next) {}
 
-    public void postMathVarDec(MathVarDec e) {}
+    public void postVarDec(VarDec e) {}
 
     public boolean walkSetCollectionExp(SetCollectionExp e) {
         return false;
@@ -148,17 +148,6 @@ public abstract class TreeWalkerVisitor {
 
     public void postProgramCharExp(ProgramCharExp e) {}
 
-    public boolean walkRecordTy(RecordTy e) {
-        return false;
-    }
-
-    public void preRecordTy(RecordTy e) {}
-
-    public void midRecordTy(RecordTy e, ResolveConceptualElement previous,
-            ResolveConceptualElement next) {}
-
-    public void postRecordTy(RecordTy e) {}
-
     public boolean walkAltItemExp(AltItemExp e) {
         return false;
     }
@@ -181,19 +170,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postDoubleExp(DoubleExp e) {}
 
-    public boolean walkFacilityTypeRepresentationDec(
-            FacilityTypeRepresentationDec e) {
+    public boolean walkArbitraryExpTy(ArbitraryExpTy e) {
         return false;
     }
 
-    public void preFacilityTypeRepresentationDec(FacilityTypeRepresentationDec e) {}
+    public void preArbitraryExpTy(ArbitraryExpTy e) {}
 
-    public void midFacilityTypeRepresentationDec(
-            FacilityTypeRepresentationDec e, ResolveConceptualElement previous,
-            ResolveConceptualElement next) {}
+    public void midArbitraryExpTy(ArbitraryExpTy e,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
-    public void postFacilityTypeRepresentationDec(
-            FacilityTypeRepresentationDec e) {}
+    public void postArbitraryExpTy(ArbitraryExpTy e) {}
 
     public boolean walkMathTypeTheoremDec(MathTypeTheoremDec e) {
         return false;
@@ -360,16 +346,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postStringExp(StringExp e) {}
 
-    public boolean walkAuxVarDec(AuxVarDec e) {
+    public boolean walkParameterVarDec(ParameterVarDec e) {
         return false;
     }
 
-    public void preAuxVarDec(AuxVarDec e) {}
+    public void preParameterVarDec(ParameterVarDec e) {}
 
-    public void midAuxVarDec(AuxVarDec e, ResolveConceptualElement previous,
-            ResolveConceptualElement next) {}
+    public void midParameterVarDec(ParameterVarDec e,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
-    public void postAuxVarDec(AuxVarDec e) {}
+    public void postParameterVarDec(ParameterVarDec e) {}
 
     public boolean walkLoopVerificationItem(LoopVerificationItem e) {
         return false;
@@ -734,16 +720,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postOutfixExp(OutfixExp e) {}
 
-    public boolean walkParameterVarDec(ParameterVarDec e) {
+    public boolean walkMathVarDec(MathVarDec e) {
         return false;
     }
 
-    public void preParameterVarDec(ParameterVarDec e) {}
+    public void preMathVarDec(MathVarDec e) {}
 
-    public void midParameterVarDec(ParameterVarDec e,
-            ResolveConceptualElement previous, ResolveConceptualElement next) {}
+    public void midMathVarDec(MathVarDec e, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
-    public void postParameterVarDec(ParameterVarDec e) {}
+    public void postMathVarDec(MathVarDec e) {}
 
     public boolean walkProgramLiteralExp(ProgramLiteralExp e) {
         return false;
@@ -756,16 +742,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postProgramLiteralExp(ProgramLiteralExp e) {}
 
-    public boolean walkVarDec(VarDec e) {
+    public boolean walkTypeRepresentationDec(TypeRepresentationDec e) {
         return false;
     }
 
-    public void preVarDec(VarDec e) {}
+    public void preTypeRepresentationDec(TypeRepresentationDec e) {}
 
-    public void midVarDec(VarDec e, ResolveConceptualElement previous,
-            ResolveConceptualElement next) {}
+    public void midTypeRepresentationDec(TypeRepresentationDec e,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
-    public void postVarDec(VarDec e) {}
+    public void postTypeRepresentationDec(TypeRepresentationDec e) {}
 
     public boolean walkOperationDec(OperationDec e) {
         return false;
@@ -800,16 +786,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postModuleDec(ModuleDec e) {}
 
-    public boolean walkNameTy(NameTy e) {
+    public boolean walkRecordTy(RecordTy e) {
         return false;
     }
 
-    public void preNameTy(NameTy e) {}
+    public void preRecordTy(RecordTy e) {}
 
-    public void midNameTy(NameTy e, ResolveConceptualElement previous,
+    public void midRecordTy(RecordTy e, ResolveConceptualElement previous,
             ResolveConceptualElement next) {}
 
-    public void postNameTy(NameTy e) {}
+    public void postRecordTy(RecordTy e) {}
 
     public boolean walkMathExp(MathExp e) {
         return false;
@@ -891,16 +877,19 @@ public abstract class TreeWalkerVisitor {
 
     public void postMathDefinitionDec(MathDefinitionDec e) {}
 
-    public boolean walkTypeRepresentationDec(TypeRepresentationDec e) {
+    public boolean walkFacilityTypeRepresentationDec(
+            FacilityTypeRepresentationDec e) {
         return false;
     }
 
-    public void preTypeRepresentationDec(TypeRepresentationDec e) {}
+    public void preFacilityTypeRepresentationDec(FacilityTypeRepresentationDec e) {}
 
-    public void midTypeRepresentationDec(TypeRepresentationDec e,
-            ResolveConceptualElement previous, ResolveConceptualElement next) {}
+    public void midFacilityTypeRepresentationDec(
+            FacilityTypeRepresentationDec e, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
-    public void postTypeRepresentationDec(TypeRepresentationDec e) {}
+    public void postFacilityTypeRepresentationDec(
+            FacilityTypeRepresentationDec e) {}
 
     public boolean walkProgramIntegerExp(ProgramIntegerExp e) {
         return false;
@@ -1034,16 +1023,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postCharExp(CharExp e) {}
 
-    public boolean walkArbitraryExpTy(ArbitraryExpTy e) {
+    public boolean walkNameTy(NameTy e) {
         return false;
     }
 
-    public void preArbitraryExpTy(ArbitraryExpTy e) {}
+    public void preNameTy(NameTy e) {}
 
-    public void midArbitraryExpTy(ArbitraryExpTy e,
-            ResolveConceptualElement previous, ResolveConceptualElement next) {}
+    public void midNameTy(NameTy e, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
-    public void postArbitraryExpTy(ArbitraryExpTy e) {}
+    public void postNameTy(NameTy e) {}
 
     public boolean walkMemoryStmt(MemoryStmt e) {
         return false;

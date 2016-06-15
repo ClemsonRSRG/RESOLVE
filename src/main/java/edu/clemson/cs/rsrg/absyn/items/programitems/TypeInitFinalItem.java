@@ -16,7 +16,6 @@ import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AuxVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
@@ -61,9 +60,6 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
     /** <p>The affects clause.</p> */
     private final AffectsClause myAffects;
 
-    /** <p>List of auxiliary variable declarations.</p> */
-    private final List<AuxVarDec> myAuxVariableDecs;
-
     /** <p>List of facility declarations.</p> */
     private final List<FacilityDec> myFacilityDecs;
 
@@ -90,15 +86,13 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
      *                affects clause.
      * @param facilities List of facility declarations in this block.
      * @param variables List of variables in this block.
-     * @param aux_variables List of auxiliary variables in this block.
      * @param statements List of statements in this block.
      */
     public TypeInitFinalItem(Location l, ItemType type, AffectsClause affects,
             List<FacilityDec> facilities, List<VarDec> variables,
-            List<AuxVarDec> aux_variables, List<Statement> statements) {
+            List<Statement> statements) {
         super(l);
         myAffects = affects;
-        myAuxVariableDecs = aux_variables;
         myFacilityDecs = facilities;
         myItemType = type;
         myStatements = statements;
@@ -136,12 +130,6 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
                     innerIndentInc));
         }
 
-        Iterator<AuxVarDec> it3 = myAuxVariableDecs.iterator();
-        while (it3.hasNext()) {
-            sb.append(it3.next().asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
-
         Iterator<Statement> it4 = myStatements.iterator();
         while (it4.hasNext()) {
             sb.append(it4.next().asString(indentSize + innerIndentInc,
@@ -164,8 +152,7 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
         }
 
         return new TypeInitFinalItem(new Location(myLoc), myItemType,
-                newAffects, copyFacDecs(), copyVars(), copyAuxVars(),
-                copyStatements());
+                newAffects, copyFacDecs(), copyVars(), copyStatements());
     }
 
     /**
@@ -182,8 +169,6 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
 
         if (myAffects != null ? !myAffects.equals(that.myAffects)
                 : that.myAffects != null)
-            return false;
-        if (!myAuxVariableDecs.equals(that.myAuxVariableDecs))
             return false;
         if (!myFacilityDecs.equals(that.myFacilityDecs))
             return false;
@@ -203,16 +188,6 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
      */
     public final AffectsClause getAffectedVars() {
         return myAffects;
-    }
-
-    /**
-     * <p>This method returns the list of auxiliary variables
-     * in this type initialization/finalization block.</p>
-     *
-     * @return A list of {@link AuxVarDec} representation objects.
-     */
-    public final List<AuxVarDec> getAuxVariables() {
-        return myAuxVariableDecs;
     }
 
     /**
@@ -251,7 +226,6 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
     @Override
     public final int hashCode() {
         int result = myAffects != null ? myAffects.hashCode() : 0;
-        result = 31 * result + myAuxVariableDecs.hashCode();
         result = 31 * result + myFacilityDecs.hashCode();
         result = 31 * result + myItemType.hashCode();
         result = 31 * result + myStatements.hashCode();
@@ -262,21 +236,6 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
     // ===========================================================
     // Private Methods
     // ===========================================================
-
-    /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the auxiliary variables.</p>
-     *
-     * @return A list containing {@link AuxVarDec}s.
-     */
-    private List<AuxVarDec> copyAuxVars() {
-        List<AuxVarDec> copyArgs = new ArrayList<>();
-        for (AuxVarDec a : myAuxVariableDecs) {
-            copyArgs.add((AuxVarDec) a.clone());
-        }
-
-        return copyArgs;
-    }
 
     /**
      * <p>This is a helper method that makes a copy of the

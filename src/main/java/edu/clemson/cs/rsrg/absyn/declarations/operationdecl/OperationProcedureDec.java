@@ -15,7 +15,6 @@ package edu.clemson.cs.rsrg.absyn.declarations.operationdecl;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AuxVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import java.util.ArrayList;
@@ -54,11 +53,6 @@ public class OperationProcedureDec extends Dec {
     private final List<VarDec> myVariableDecs;
 
     /**
-     * <p>The list of auxiliary variable declarations</p>
-     */
-    private final List<AuxVarDec> myAuxVariableDecs;
-
-    /**
      * <p>The list of statements</p>
      */
     private final List<Statement> myStatements;
@@ -75,26 +69,23 @@ public class OperationProcedureDec extends Dec {
     /**
      * <p>This constructs a local recursive operation procedure declaration.</p>
      *
-     * @param opDec         An {@link OperationDec} containing all the operation
-     *                      related items.
-     * @param decreasing    A {@link AssertionClause} representing the procedure's
-     *                      decreasing clause.
-     * @param facDecs       A list of {@link FacilityDec} representing the procedure's
-     *                      facility declarations.
-     * @param varDecs       A list of {@link VarDec} representing the procedure's
-     *                      variables.
-     * @param auxVarDecs    A list of {@link AuxVarDec} representing the procedure's
-     *                      auxiliary variables.
-     * @param statements    As list of {@link Statement} representing the procedure's
-     *                      statements.
+     * @param opDec An {@link OperationDec} containing all the operation
+     *              related items.
+     * @param decreasing A {@link AssertionClause} representing the procedure's
+     *                   decreasing clause.
+     * @param facDecs A list of {@link FacilityDec} representing the procedure's
+     *                facility declarations.
+     * @param varDecs A list of {@link VarDec} representing the procedure's
+     *                variables.
+     * @param statements As list of {@link Statement} representing the procedure's
+     *                   statements.
      * @param recursiveFlag A boolean indicating if this procedure is recursive or not.
      */
     public OperationProcedureDec(OperationDec opDec,
             AssertionClause decreasing, List<FacilityDec> facDecs,
-            List<VarDec> varDecs, List<AuxVarDec> auxVarDecs,
-            List<Statement> statements, boolean recursiveFlag) {
+            List<VarDec> varDecs, List<Statement> statements,
+            boolean recursiveFlag) {
         super(opDec.getLocation(), opDec.getName());
-        myAuxVariableDecs = auxVarDecs;
         myDecreasing = decreasing;
         myFacilityDecs = facDecs;
         myRecursiveFlag = recursiveFlag;
@@ -106,21 +97,18 @@ public class OperationProcedureDec extends Dec {
     /**
      * <p>This constructs a local operation procedure declaration.</p>
      *
-     * @param opDec      An {@link OperationDec} containing all the operation
-     *                   related items.
-     * @param facDecs    A list of {@link FacilityDec} representing the procedure's
-     *                   facility declarations.
-     * @param varDecs    A list of {@link VarDec} representing the procedure's
-     *                   variables.
-     * @param auxVarDecs A list of {@link AuxVarDec} representing the procedure's
-     *                   auxiliary variables.
+     * @param opDec An {@link OperationDec} containing all the operation
+     *              related items.
+     * @param facDecs A list of {@link FacilityDec} representing the procedure's
+     *                facility declarations.
+     * @param varDecs A list of {@link VarDec} representing the procedure's
+     *                variables.
      * @param statements As list of {@link Statement} representing the procedure's
      *                   statements.
      */
     public OperationProcedureDec(OperationDec opDec, List<FacilityDec> facDecs,
-            List<VarDec> varDecs, List<AuxVarDec> auxVarDecs,
-            List<Statement> statements) {
-        this(opDec, null, facDecs, varDecs, auxVarDecs, statements, false);
+            List<VarDec> varDecs, List<Statement> statements) {
+        this(opDec, null, facDecs, varDecs, statements, false);
     }
 
     // ===========================================================
@@ -165,14 +153,6 @@ public class OperationProcedureDec extends Dec {
             sb.append("\n");
         }
 
-        // auxiliary variable declarations
-        sb.append("\n");
-        for (AuxVarDec varDec : myAuxVariableDecs) {
-            sb.append(varDec.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-            sb.append("\n");
-        }
-
         // statements
         sb.append("\n");
         for (Statement statement : myStatements) {
@@ -212,20 +192,8 @@ public class OperationProcedureDec extends Dec {
             return false;
         if (!myVariableDecs.equals(that.myVariableDecs))
             return false;
-        if (!myAuxVariableDecs.equals(that.myAuxVariableDecs))
-            return false;
         return myStatements.equals(that.myStatements);
 
-    }
-
-    /**
-     * <p>This method returns the list of auxiliary variables
-     * for this operation procedure declaration.</p>
-     *
-     * @return A list of {@link AuxVarDec} representation objects.
-     */
-    public final List<AuxVarDec> getAuxVariables() {
-        return myAuxVariableDecs;
     }
 
     /**
@@ -300,7 +268,6 @@ public class OperationProcedureDec extends Dec {
                         + (myDecreasing != null ? myDecreasing.hashCode() : 0);
         result = 31 * result + myFacilityDecs.hashCode();
         result = 31 * result + myVariableDecs.hashCode();
-        result = 31 * result + myAuxVariableDecs.hashCode();
         result = 31 * result + myStatements.hashCode();
         result = 31 * result + (myRecursiveFlag ? 1 : 0);
         return result;
@@ -330,17 +297,12 @@ public class OperationProcedureDec extends Dec {
             newVarDecs.add((VarDec) v.clone());
         }
 
-        List<AuxVarDec> newAuxVarDecs = new ArrayList<>();
-        for (AuxVarDec a : myAuxVariableDecs) {
-            newAuxVarDecs.add((AuxVarDec) a.clone());
-        }
-
         List<Statement> newStatements = new ArrayList<>();
         for (Statement s : myStatements) {
             newStatements.add(s.clone());
         }
 
         return new OperationProcedureDec((OperationDec) myWrappedOpDec.clone(), newDecreasing,
-                newFacilityDecs, newVarDecs, newAuxVarDecs, newStatements, myRecursiveFlag);
+                newFacilityDecs, newVarDecs, newStatements, myRecursiveFlag);
     }
 }

@@ -16,7 +16,6 @@ import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AuxVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
@@ -56,9 +55,6 @@ public class ProcedureDec extends Dec {
     /** <p>The list of variable declarations</p> */
     private final List<VarDec> myVariableDecs;
 
-    /** <p>The list of auxiliary variable declarations</p> */
-    private final List<AuxVarDec> myAuxVariableDecs;
-
     /** <p>The list of statements</p> */
     private final List<Statement> myStatements;
 
@@ -86,8 +82,6 @@ public class ProcedureDec extends Dec {
      *                facility declarations.
      * @param varDecs A list of {@link VarDec} representing the procedure's
      *                variables.
-     * @param auxVarDecs A list of {@link AuxVarDec} representing the procedure's
-     *                   auxiliary variables.
      * @param statements As list of {@link Statement} representing the procedure's
      *                   statements.
      * @param recursiveFlag A boolean indicating if this procedure is recursive or not.
@@ -95,11 +89,9 @@ public class ProcedureDec extends Dec {
     public ProcedureDec(PosSymbol name, List<ParameterVarDec> parameters,
             Ty returnTy, AffectsClause affects, AssertionClause decreasing,
             List<FacilityDec> facDecs, List<VarDec> varDecs,
-            List<AuxVarDec> auxVarDecs, List<Statement> statements,
-            boolean recursiveFlag) {
+            List<Statement> statements, boolean recursiveFlag) {
         super(name.getLocation(), name);
         myAffects = affects;
-        myAuxVariableDecs = auxVarDecs;
         myDecreasing = decreasing;
         myFacilityDecs = facDecs;
         myParameters = parameters;
@@ -124,17 +116,14 @@ public class ProcedureDec extends Dec {
      *                facility declarations.
      * @param varDecs A list of {@link VarDec} representing the procedure's
      *                variables.
-     * @param auxVarDecs A list of {@link AuxVarDec} representing the procedure's
-     *                   auxiliary variables.
      * @param statements As list of {@link Statement} representing the procedure's
      *                   statements.
      */
     public ProcedureDec(PosSymbol name, List<ParameterVarDec> parameters,
             Ty returnTy, AffectsClause affects, List<FacilityDec> facDecs,
-            List<VarDec> varDecs, List<AuxVarDec> auxVarDecs,
-            List<Statement> statements) {
+            List<VarDec> varDecs, List<Statement> statements) {
         this(name, parameters, returnTy, affects, null, facDecs, varDecs,
-                auxVarDecs, statements, false);
+                statements, false);
     }
 
     // ===========================================================
@@ -202,14 +191,6 @@ public class ProcedureDec extends Dec {
             sb.append("\n");
         }
 
-        // auxiliary variable declarations
-        sb.append("\n");
-        for (AuxVarDec varDec : myAuxVariableDecs) {
-            sb.append(varDec.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-            sb.append("\n");
-        }
-
         // statements
         sb.append("\n");
         for (Statement statement : myStatements) {
@@ -255,8 +236,6 @@ public class ProcedureDec extends Dec {
             return false;
         if (!myVariableDecs.equals(that.myVariableDecs))
             return false;
-        if (!myAuxVariableDecs.equals(that.myAuxVariableDecs))
-            return false;
         return myStatements.equals(that.myStatements);
 
     }
@@ -269,16 +248,6 @@ public class ProcedureDec extends Dec {
      */
     public final AffectsClause getAffectedVars() {
         return myAffects;
-    }
-
-    /**
-     * <p>This method returns the list of auxiliary variables
-     * for this procedure declaration.</p>
-     *
-     * @return A list of {@link AuxVarDec} representation objects.
-     */
-    public final List<AuxVarDec> getAuxVariables() {
-        return myAuxVariableDecs;
     }
 
     /**
@@ -364,7 +333,6 @@ public class ProcedureDec extends Dec {
                         + (myDecreasing != null ? myDecreasing.hashCode() : 0);
         result = 31 * result + myFacilityDecs.hashCode();
         result = 31 * result + myVariableDecs.hashCode();
-        result = 31 * result + myAuxVariableDecs.hashCode();
         result = 31 * result + myStatements.hashCode();
         result = 31 * result + (myRecursiveFlag ? 1 : 0);
         return result;
@@ -409,11 +377,6 @@ public class ProcedureDec extends Dec {
             newVarDecs.add((VarDec) v.clone());
         }
 
-        List<AuxVarDec> newAuxVarDecs = new ArrayList<>();
-        for (AuxVarDec a : myAuxVariableDecs) {
-            newAuxVarDecs.add((AuxVarDec) a.clone());
-        }
-
         List<Statement> newStatements = new ArrayList<>();
         for (Statement s : myStatements) {
             newStatements.add(s.clone());
@@ -421,6 +384,6 @@ public class ProcedureDec extends Dec {
 
         return new ProcedureDec(myName.clone(), newParameters, newReturnTy,
                 newAffects, newDecreasing, newFacilityDecs, newVarDecs,
-                newAuxVarDecs, newStatements, myRecursiveFlag);
+                newStatements, myRecursiveFlag);
     }
 }
