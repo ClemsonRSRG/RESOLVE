@@ -1855,56 +1855,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitVariableDecl(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterAuxVariableDeclGroup(
-            ResolveParser.AuxVariableDeclGroupContext ctx) {
-        super.enterAuxVariableDeclGroup(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitAuxVariableDeclGroup(
-            ResolveParser.AuxVariableDeclGroupContext ctx) {
-        super.exitAuxVariableDeclGroup(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterAuxVariableDecl(ResolveParser.AuxVariableDeclContext ctx) {
-        super.enterAuxVariableDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitAuxVariableDecl(ResolveParser.AuxVariableDeclContext ctx) {
-        super.exitAuxVariableDecl(ctx);
-    }
-
     // -----------------------------------------------------------
     // Statements
     // -----------------------------------------------------------
