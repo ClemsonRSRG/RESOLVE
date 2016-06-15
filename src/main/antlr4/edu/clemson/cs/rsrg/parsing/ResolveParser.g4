@@ -365,7 +365,6 @@ representationInit
         (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
@@ -375,7 +374,6 @@ representationFinal
         (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
@@ -389,7 +387,6 @@ facilityRepresentationInit
         (ensuresClause)?
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
@@ -401,7 +398,6 @@ facilityRepresentationFinal
         (ensuresClause)?
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
@@ -426,7 +422,6 @@ procedureDecl
         (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
@@ -438,7 +433,6 @@ recursiveProcedureDecl
         decreasingClause
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
@@ -452,7 +446,6 @@ operationProcedureDecl
         PROCEDURE
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
@@ -467,7 +460,6 @@ recursiveOperationProcedureDecl
         decreasingClause
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
@@ -534,14 +526,6 @@ variableDeclGroup
 
 variableDecl
     :   VAR variableDeclGroup SEMICOLON
-    ;
-
-auxVariableDeclGroup
-    :   IDENTIFIER (COMMA IDENTIFIER)* COLON programNamedType
-    ;
-
-auxVariableDecl
-    :   AUX_VAR auxVariableDeclGroup SEMICOLON
     ;
 
 // state variable declaration

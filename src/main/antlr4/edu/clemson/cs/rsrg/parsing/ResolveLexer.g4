@@ -25,19 +25,6 @@ ARRAY
     :   'Array'
     ;
 
-AUX_CODE
-    :   'Aux_Code'
-    ;
-
-AUX_VAR
-    :   'Aux_Var'
-    ;
-
-AUXILIARY
-    :   'Aux'
-    |   'Auxiliary'
-    ;
-
 AXIOM
     :   'Axiom'
     ;
