@@ -607,13 +607,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the generated a realization item.</p>
      *
-     * @param ctx
+     * @param ctx Implementation item node in ANTLR4 AST.
      */
     @Override
     public void exitImplItem(ResolveParser.ImplItemContext ctx) {
-        super.exitImplItem(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     // -----------------------------------------------------------
