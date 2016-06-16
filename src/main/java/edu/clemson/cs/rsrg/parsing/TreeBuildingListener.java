@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
@@ -1632,7 +1633,32 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitOperationProcedureDecl(
-            ResolveParser.OperationProcedureDeclContext ctx) {}
+            ResolveParser.OperationProcedureDeclContext ctx) {
+        // Operation declaration
+        OperationDec operationDec =
+                (OperationDec) myNodes.removeFrom(ctx.operationDecl());
+
+        // Create the local operation procedure declaration that
+        // we are going to perform the syntactic sugar conversions on.
+        OperationProcedureDec beforeConversionOpProcDec =
+                new OperationProcedureDec(operationDec, getFacilityDecls(ctx
+                        .facilityDecl()), getVarDecls(ctx.variableDecl()),
+                        Utilities.collect(Statement.class, ctx.stmt(), myNodes));
+
+        // TODO:
+        // If either side contains an array expression, its index could contain another array expression.
+        // In this case, we will generate extra variable declarations and statements that will need to be
+        // inserted appropriately.
+        /*SwapStmtGenerator generator =
+                new SwapStmtGenerator(createLocation(ctx),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
+
+        // TODO: Change this one we have the converter done
+        OperationProcedureDec afterCoversionOpProcDec =
+                (OperationProcedureDec) beforeConversionOpProcDec.clone();
+        myNodes.put(ctx, afterCoversionOpProcDec);
+    }
 
     /**
      * {@inheritDoc}
@@ -1661,7 +1687,37 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitRecursiveOperationProcedureDecl(
-            ResolveParser.RecursiveOperationProcedureDeclContext ctx) {}
+            ResolveParser.RecursiveOperationProcedureDeclContext ctx) {
+        // Operation declaration
+        OperationDec operationDec =
+                (OperationDec) myNodes.removeFrom(ctx.operationDecl());
+
+        // Decreasing clause
+        AssertionClause decreasingClause =
+                (AssertionClause) myNodes.removeFrom(ctx.decreasingClause());
+
+        // Create the local operation procedure declaration that
+        // we are going to perform the syntactic sugar conversions on.
+        OperationProcedureDec beforeConversionOpProcDec =
+                new OperationProcedureDec(operationDec, decreasingClause,
+                        getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
+                                .variableDecl()), Utilities.collect(
+                                Statement.class, ctx.stmt(), myNodes), true);
+
+        // TODO:
+        // If either side contains an array expression, its index could contain another array expression.
+        // In this case, we will generate extra variable declarations and statements that will need to be
+        // inserted appropriately.
+        /*SwapStmtGenerator generator =
+                new SwapStmtGenerator(createLocation(ctx),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
+
+        // TODO: Change this one we have the converter done
+        OperationProcedureDec afterCoversionOpProcDec =
+                (OperationProcedureDec) beforeConversionOpProcDec.clone();
+        myNodes.put(ctx, afterCoversionOpProcDec);
+    }
 
     /**
      * {@inheritDoc}
