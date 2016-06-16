@@ -95,7 +95,7 @@ public class IfStmt extends Statement {
             }
         }
         printSpace(indentSize, sb);
-        sb.append("end");
+        sb.append("end;\n");
 
         return sb.toString();
     }

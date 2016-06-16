@@ -135,10 +135,10 @@ public class OperationProcedureDec extends Dec {
         if (myDecreasing != null) {
             sb.append(myDecreasing.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         // facility declarations
-        sb.append("\n");
         for (FacilityDec facilityDec : myFacilityDecs) {
             sb.append(facilityDec.asString(indentSize + innerIndentInc,
                     innerIndentInc));
@@ -146,11 +146,11 @@ public class OperationProcedureDec extends Dec {
         }
 
         // variable declarations
-        sb.append("\n");
         for (VarDec varDec : myVariableDecs) {
-            sb.append(varDec.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-            sb.append("\n");
+            printSpace(indentSize + innerIndentInc, sb);
+            sb.append("Var ");
+            sb.append(varDec.asString(0, innerIndentInc));
+            sb.append(";\n");
         }
 
         // statements
@@ -162,7 +162,9 @@ public class OperationProcedureDec extends Dec {
         }
 
         printSpace(indentSize, sb);
-        sb.append("end\n");
+        sb.append("end ");
+        sb.append(myName.asString(0, innerIndentInc));
+        sb.append(";");
 
         return sb.toString();
     }

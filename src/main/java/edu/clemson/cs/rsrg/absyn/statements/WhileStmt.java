@@ -94,7 +94,7 @@ public class WhileStmt extends Statement {
         }
 
         printSpace(indentSize, sb);
-        sb.append("end\n");
+        sb.append("end;\n");
 
         return sb.toString();
     }

@@ -91,16 +91,18 @@ public class LoopVerificationItem extends ResolveConceptualElement {
                 sb.append(", ");
             }
         }
-        sb.append("\n");
+        sb.append(";\n");
 
         // Maintaining clause
         sb.append(myMaintainingClause.asString(indentSize, innerIndentInc));
+        sb.append("\n");
 
         // Decreasing clause
         sb.append(myDecreasingClause.asString(indentSize, innerIndentInc));
 
         // Elapsed time clause (if any)
         if (myElapsedTimeClause != null) {
+            sb.append("\n");
             sb.append(myElapsedTimeClause.asString(indentSize, innerIndentInc));
         }
 

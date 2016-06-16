@@ -63,13 +63,11 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
         printSpace(indentSize, sb);
 
         if (getQualifier() != null) {
-            sb.append(getQualifier().asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(getQualifier().asString(0, innerIndentInc));
             sb.append("::");
         }
 
-        sb.append(myVarName.asString(indentSize + innerIndentInc,
-                innerIndentInc));
+        sb.append(myVarName.asString(0, innerIndentInc));
 
         return sb.toString();
     }
