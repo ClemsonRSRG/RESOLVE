@@ -414,8 +414,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * open and close names given in the file.</p>
      *
      * <p>If everything checks out, we create a new object to store
-     * all the elements that can be created by the syntatic sugar
-     * conversions.</p>
+     * all the new array facilities that can be created by the
+     * syntactic sugar conversions.</p>
      *
      * @param ctx Concept impl module node in ANTLR4 AST.
      */
@@ -563,8 +563,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * open and close names given in the file.</p>
      *
      * <p>If everything checks out, we create a new object to store
-     * all the elements that can be created by the syntatic sugar
-     * conversions.</p>
+     * all the new array facilities that can be created by the
+     * syntactic sugar conversions.</p>
      *
      * @param ctx Enhancement impl module node in ANTLR4 AST.
      */
@@ -1473,24 +1473,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
      *
-     * @param ctx
+     * @param ctx Procedure declaration node in ANTLR4 AST.
      */
     @Override
     public void enterProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
-        super.enterProcedureDecl(ctx);
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a procedure
+     * declaration. Any syntactic sugar will be taken care of before we
+     * are done processing this node.</p>
      *
-     * @param ctx
+     * @param ctx Procedure declaration node in ANTLR4 AST.
      */
     @Override
     public void exitProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
+        // Pop innermost the array facility container
+        ArrayFacilityDecContainer container =
+                myArrayFacilityDecContainerStack.pop();
+
         // TODO:
         // If either side contains an array expression, its index could contain another array expression.
         // In this case, we will generate extra variable declarations and statements that will need to be
@@ -1499,85 +1508,105 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 new SwapStmtGenerator(createLocation(ctx),
                         (ProgramVariableExp) myNodes.removeFrom(ctx.left),
                         (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
-        super.exitProcedureDecl(ctx);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
      *
-     * @param ctx
+     * @param ctx Recursive procedure declaration node in ANTLR4 AST.
      */
     @Override
     public void enterRecursiveProcedureDecl(
             ResolveParser.RecursiveProcedureDeclContext ctx) {
-        super.enterRecursiveProcedureDecl(ctx);
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a recursive procedure
+     * declaration. Any syntactic sugar will be taken care of before we
+     * are done processing this node.</p>
      *
-     * @param ctx
+     * @param ctx Recursive procedure declaration node in ANTLR4 AST.
      */
     @Override
     public void exitRecursiveProcedureDecl(
             ResolveParser.RecursiveProcedureDeclContext ctx) {
-        super.exitRecursiveProcedureDecl(ctx);
+        // Pop innermost the array facility container
+        ArrayFacilityDecContainer container =
+                myArrayFacilityDecContainerStack.pop();
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
      *
-     * @param ctx
+     * @param ctx Operation procedure declaration node in ANTLR4 AST.
      */
     @Override
     public void enterOperationProcedureDecl(
             ResolveParser.OperationProcedureDeclContext ctx) {
-        super.enterOperationProcedureDecl(ctx);
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for an operation procedure
+     * declaration. Any syntactic sugar will be taken care of before we
+     * are done processing this node.</p>
      *
-     * @param ctx
+     * @param ctx Operation procedure declaration node in ANTLR4 AST.
      */
     @Override
     public void exitOperationProcedureDecl(
             ResolveParser.OperationProcedureDeclContext ctx) {
-        super.exitOperationProcedureDecl(ctx);
+        // Pop innermost the array facility container
+        ArrayFacilityDecContainer container =
+                myArrayFacilityDecContainerStack.pop();
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
      *
-     * @param ctx
+     * @param ctx Recursive operation procedure declaration node in ANTLR4 AST.
      */
     @Override
     public void enterRecursiveOperationProcedureDecl(
             ResolveParser.RecursiveOperationProcedureDeclContext ctx) {
-        super.enterRecursiveOperationProcedureDecl(ctx);
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a recursive operation procedure
+     * declaration. Any syntactic sugar will be taken care of before we
+     * are done processing this node.</p>
      *
-     * @param ctx
+     * @param ctx Recursive operation procedure declaration node in ANTLR4 AST.
      */
     @Override
     public void exitRecursiveOperationProcedureDecl(
             ResolveParser.RecursiveOperationProcedureDeclContext ctx) {
-        super.exitRecursiveOperationProcedureDecl(ctx);
+        // Pop innermost the array facility container
+        ArrayFacilityDecContainer container =
+                myArrayFacilityDecContainerStack.pop();
     }
 
     /**
