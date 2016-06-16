@@ -84,8 +84,26 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /** <p>Boolean that indicates that we are processing a module argument.</p> */
     private boolean myIsProcessingModuleArgument;
 
-    /** <p>This contains all the new items created by some sort of syntactic conversion.</p> */
-    private NewResolveConceptualElementContainer myNewRCEContainer;
+    /**
+     * <p>This is a stack that contains containers for potential new array
+     * facilities.</p>
+     */
+    private Stack<ArrayFacilityDecContainer> myArrayFacilityDecContainerStack;
+
+    /**
+     * <p>This map provides a mapping between the newly declared array name types
+     * to the types of elements in the array.</p>
+     */
+    private Map<NameTy, NameTy> myArrayNameTyToInnerTyMap;
+
+    /**
+     * <p>Since we don't have symbol table, we really don't know if
+     * we are generating a new object with the same name. In order to avoid
+     * problems, all of our objects will have a name that starts with "_" and
+     * end the current new element counter. This number increases by 1 each
+     * time we create a new element.</p>
+     */
+    private int newElementCounter;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -118,7 +136,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myNodes = new ParseTreeProperty<>();
         myDefinitionMemberList = null;
         myIsProcessingModuleArgument = false;
-        myNewRCEContainer = null;
+        myArrayFacilityDecContainerStack = new Stack<>();
+        myArrayNameTyToInnerTyMap = new HashMap<>();
+        newElementCounter = 0;
     }
 
     // ===========================================================
@@ -237,7 +257,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         // Create a new container
-        myNewRCEContainer = new NewResolveConceptualElementContainer(ctx);
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
@@ -415,7 +436,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         // Create a new container
-        myNewRCEContainer = new NewResolveConceptualElementContainer(ctx);
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
@@ -563,7 +585,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         // Create a new container
-        myNewRCEContainer = new NewResolveConceptualElementContainer(ctx);
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
@@ -1834,25 +1857,71 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores a programming variable declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterVariableDecl(ResolveParser.VariableDeclContext ctx) {
-        super.enterVariableDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Variable declaration node in ANTLR4 AST.
      */
     @Override
     public void exitVariableDecl(ResolveParser.VariableDeclContext ctx) {
-        super.exitVariableDecl(ctx);
+        ResolveParser.VariableDeclGroupContext variableDeclGroupContext =
+                ctx.variableDeclGroup();
+
+        // Obtain the raw programing type. If we encounter an array type,
+        // we add a new array facility and create a new raw name type that
+        // refers to this array facility.
+        NameTy rawNameTy;
+        if (variableDeclGroupContext.programArrayType() != null) {
+            // Location
+            Location loc =
+                    createLocation(variableDeclGroupContext.programArrayType());
+
+            // Create name in the format of "_(Name of Variable)_Array_Fac_(myCounter)"
+            String newArrayName = "";
+            newArrayName +=
+                    ("_" + variableDeclGroupContext.IDENTIFIER(0).getText()
+                            + "_Array_Fac_" + newElementCounter++);
+
+            // Create the new raw type
+            rawNameTy =
+                    new NameTy(new Location(loc), new PosSymbol(new Location(
+                            loc), newArrayName), new PosSymbol(
+                            new Location(loc), "Static_Array"));
+
+            // Type for the elements in the array
+            NameTy arrayElementsTy =
+                    (NameTy) myNodes.removeFrom(variableDeclGroupContext
+                            .programArrayType().programNamedType());
+
+            // Lower and Upper Bound
+            ProgramExp low =
+                    (ProgramExp) myNodes.removeFrom(variableDeclGroupContext
+                            .programArrayType().progExp(0));
+            ProgramExp high =
+                    (ProgramExp) myNodes.removeFrom(variableDeclGroupContext
+                            .programArrayType().progExp(1));
+
+            // Create the new array facility and add it to the appropriate container
+            ArrayFacilityDecContainer innerMostContainer =
+                    myArrayFacilityDecContainerStack.pop();
+            innerMostContainer.newFacilityDecs.add(createArrayFacilityDec(loc,
+                    rawNameTy, arrayElementsTy, low, high));
+            myArrayFacilityDecContainerStack.push(innerMostContainer);
+
+            // Store the raw types in the map
+            myArrayNameTyToInnerTyMap.put((NameTy) rawNameTy.clone(),
+                    (NameTy) arrayElementsTy.clone());
+        }
+        else {
+            rawNameTy =
+                    (NameTy) myNodes.removeFrom(variableDeclGroupContext
+                            .programNamedType());
+        }
+
+        // For each identifier, create a new variable declaration
+        for (TerminalNode ident : variableDeclGroupContext.IDENTIFIER()) {
+            myNodes.put(ident, new VarDec(createPosSymbol(ident.getSymbol()),
+                    rawNameTy.clone()));
+        }
     }
 
     // -----------------------------------------------------------
@@ -3830,6 +3899,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     // ===========================================================
 
     /**
+     * <p>Create a {@link FacilityDec} for the current parser rule
+     * we are visiting.</p>
+     *
+     * @param l Location for all the new elements.
+     * @param newTy The new name type.
+     * @param arrayElementTy The type for the elements in the array.
+     * @param lowerBound The lower bound for the array.
+     * @param upperBound The upper bound for the array.
+     *
+     * @return A {@link FacilityDec} for the rule.
+     */
+    private FacilityDec createArrayFacilityDec(Location l, NameTy newTy, NameTy arrayElementTy, ProgramExp lowerBound, ProgramExp upperBound) {
+        // Create a list of arguments for the new FacilityDec and
+        // add the type, Low and High for Arrays
+        List<ModuleArgumentItem> moduleArgumentItems = new ArrayList<>();
+        moduleArgumentItems.add(new ModuleArgumentItem(new ProgramVariableNameExp(new Location(l), arrayElementTy.getQualifier(), arrayElementTy.getName())));
+        moduleArgumentItems.add(new ModuleArgumentItem(lowerBound));
+        moduleArgumentItems.add(new ModuleArgumentItem(upperBound));
+
+        return new FacilityDec(new PosSymbol(new Location(l), newTy.getName().getName()),
+                new PosSymbol(new Location(l), "Static_Array_Template"),
+                moduleArgumentItems, new ArrayList<EnhancementSpecItem>(),
+                new PosSymbol(new Location(l), "Std_Array_Realiz"), new ArrayList<ModuleArgumentItem>(),
+                new ArrayList<EnhancementSpecRealizItem>(), null, true);
+    }
+
+    /**
      * <p>Create an {@link AssertionClause} for the current parser rule
      * we are visiting.</p>
      *
@@ -4015,9 +4111,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * <p>This holds new items related to syntactic sugar conversions for
-     * raw array types and {@link ProgramVariableArrayExp}s.</p>
+     * raw array types.</p>
      */
-    private class NewResolveConceptualElementContainer {
+    private class ArrayFacilityDecContainer {
 
         // ===========================================================
         // Member Fields
@@ -4027,23 +4123,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         ParserRuleContext instantiatingContext;
 
         /**
-         * <p>Since we don't have symbol table, we really don't know if
-         * we are generating a new object with the same name. In order to avoid
-         * problems, all of our objects will have a name that starts with "_" and
-         * end the current new element counter. This number increases by 1 each
-         * time we create a new element.</p>
-         */
-        int newElementCounter;
-
-        /**
-         * <p>List of new module-level facility declaration objects.</p>
-         *
-         * <p><strong>Note:</strong> The only facilities generated at the moment are
-         * new {@code Static_Array_Template} facilities.</p>
-         */
-        List<FacilityDec> newModuleLevelFacilityDecs;
-
-        /**
          * <p>List of new facility declaration objects.</p>
          *
          * <p><strong>Note:</strong> The only facilities generated at the moment are
@@ -4051,6 +4130,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          */
         List<FacilityDec> newFacilityDecs;
 
+        // TODO: Move the following to the conversion walker.
         /**
          * <p>List of new variable declaration objects.</p>
          *
@@ -4058,7 +4138,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          * new integer variables to store the indexes resulting from program array
          * conversions.</p>
          */
-        List<VarDec> newVarDecs;
+        //List<VarDec> newVarDecs;
 
         /**
          * <p>List of new statements that needs to be inserted before the code
@@ -4068,7 +4148,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          * either new function assignment statements from indexes in
          * program array expressions or call statements to swap elements in the array(s).</p>
          */
-        List<Statement> newPreStmts;
+        //List<Statement> newPreStmts;
 
         /**
          * <p>List of new statements that needs to be inserted after the code
@@ -4077,27 +4157,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          * <p><strong>Note:</strong> The only statements generated at the moment are
          * call statements to swap elements in the array(s).</p>
          */
-        List<Statement> newPostStmts;
+        //List<Statement> newPostStmts;
 
         // ===========================================================
         // Constructors
         // ===========================================================
 
         /**
-         * <p>This constructs a temporary structure to store all the newly declared
-         * items that resulted from syntactic sugar conversions for raw array types
-         * and/or {@link ProgramVariableArrayExp}s.</p>
+         * <p>This constructs a temporary structure to store all the newly array facility
+         * declarations that resulted from syntactic sugar conversions for raw array types.</p>
          *
          * @param instantiatingContext The context that instantiated this object.
          */
-        NewResolveConceptualElementContainer(ParserRuleContext instantiatingContext) {
+        ArrayFacilityDecContainer(ParserRuleContext instantiatingContext) {
             this.instantiatingContext = instantiatingContext;
-            newElementCounter = 0;
-            newModuleLevelFacilityDecs = new ArrayList<>();
             newFacilityDecs = new ArrayList<>();
-            newVarDecs = new ArrayList<>();
-            newPreStmts = new ArrayList<>();
-            newPostStmts = new ArrayList<>();
         }
     }
 
