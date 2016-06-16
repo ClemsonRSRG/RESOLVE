@@ -128,11 +128,6 @@ public abstract class Dec extends ResolveConceptualElement {
      * @param mt The {@link MTType} type object.
      */
     public final void setMathType(MTType mt) {
-        if (mt == null) {
-            throw new NullMathTypeException("Trying to set null type on "
-                    + this.getClass());
-        }
-
         myMathType = mt;
     }
 

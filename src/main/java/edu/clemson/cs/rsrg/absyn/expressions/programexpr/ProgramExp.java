@@ -114,12 +114,6 @@ public abstract class ProgramExp extends Exp {
      * @param progType The {@link PTType} type object.
      */
     public final void setProgramType(PTType progType) {
-        if (progType == null) {
-            throw new NullProgramTypeException("Null Program Type on: "
-                    + this.getClass() + ". The causing expression is: "
-                    + this.toString());
-        }
-
         myProgramType = progType;
     }
 
