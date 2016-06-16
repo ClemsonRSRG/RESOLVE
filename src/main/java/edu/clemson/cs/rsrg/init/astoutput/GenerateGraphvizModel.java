@@ -22,6 +22,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
@@ -256,6 +257,23 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
         node.add("nodeData", e.getClauseType().name());
 
         myModel.add("nodes", node);
+    }
+
+    // -----------------------------------------------------------
+    // Loop Verification Items
+    // (Item containing changing/maintaining/decreasing clauses)
+    // -----------------------------------------------------------
+
+    /**
+     * <p>For all {@link LoopVerificationItem} nodes, we create a new node
+     * with its simple class name.</p>
+     *
+     * @param e Current {@link LoopVerificationItem} we are visiting.
+     */
+    @Override
+    public void postLoopVerificationItem(LoopVerificationItem e) {
+        myModel.add("nodes", createNode(myElementToNodeNumMap.get(e), e
+                .getClass().getSimpleName(), false));
     }
 
     // -----------------------------------------------------------
