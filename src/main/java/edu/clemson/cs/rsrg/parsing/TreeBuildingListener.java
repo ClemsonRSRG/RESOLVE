@@ -498,7 +498,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method generates a representation of a {@code Enhancement}
+     * <p>This method generates a representation of an {@code Enhancement}
      * module declaration.</p>
      *
      * @param ctx Enhancement module node in ANTLR4 AST.
@@ -594,14 +594,54 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a {@code Realization}
+     * module declaration for an {@code Enhancement} module.</p>
      *
-     * @param ctx
+     * @param ctx Enhancement impl module node in ANTLR4 AST.
      */
     @Override
     public void exitEnhancementImplModule(
             ResolveParser.EnhancementImplModuleContext ctx) {
-        super.exitEnhancementImplModule(ctx);
+        // Module parameters (if any)
+        List<ModuleParameterDec> parameterDecls =
+                getModuleArguments(ctx.moduleParameterList());
+
+        // Uses items (if any)
+        List<UsesItem> uses =
+                Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
+                        .usesList().usesItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+
+        // Module requires (if any)
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
+        }
+
+        // Profile (if any)
+        PosSymbol profileName = null;
+        if (ctx.profile != null) {
+            profileName = createPosSymbol(ctx.profile);
+        }
+
+        // Decs (if any)
+        List<Dec> decls =
+                Utilities.collect(Dec.class, ctx.implItems() != null ? ctx
+                        .implItems().implItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+
+        EnhancementRealizModuleDec enhancement =
+                new EnhancementRealizModuleDec(createLocation(ctx),
+                        createPosSymbol(ctx.name), parameterDecls, profileName,
+                        createPosSymbol(ctx.enhancement),
+                        createPosSymbol(ctx.concept), uses, requires, decls);
+        myNodes.put(ctx, enhancement);
     }
 
     /**

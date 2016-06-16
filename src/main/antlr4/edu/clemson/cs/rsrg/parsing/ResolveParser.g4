@@ -137,9 +137,7 @@ enhancementImplModule
     :   REALIZATION name=IDENTIFIER (moduleParameterList)?
         (WITH_PROFILE profile=IDENTIFIER)?
         FOR enhancement=IDENTIFIER
-        OF concept=IDENTIFIER
-        (ENHANCED BY cEnhancement=IDENTIFIER (moduleParameterList)?
-         REALIZED BY cRealization=IDENTIFIER (WITH_PROFILE cProfile=IDENTIFIER)? (moduleParameterList)?)* SEMICOLON
+        OF concept=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?
         (implItems)?
