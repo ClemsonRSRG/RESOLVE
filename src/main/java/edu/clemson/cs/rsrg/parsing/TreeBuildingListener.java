@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
@@ -1496,9 +1497,28 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
-        // Pop innermost the array facility container
-        ArrayFacilityDecContainer container =
-                myArrayFacilityDecContainerStack.pop();
+        // Return type (if any)
+        Ty returnTy = null;
+        if (ctx.programNamedType() != null) {
+            returnTy = (Ty) myNodes.removeFrom(ctx.programNamedType());
+        }
+
+        // Affects clause (if any)
+        AffectsClause affectsClause = null;
+        if (ctx.affectsClause() != null) {
+            affectsClause =
+                    (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        // Create the procedure declaration that we are going to perform
+        // the syntactic sugar conversions on.
+        ProcedureDec beforeConversionProcDec =
+                new ProcedureDec(createPosSymbol(ctx.name),
+                        getParameterDecls(ctx.operationParameterList()
+                                .parameterDecl()), returnTy, affectsClause,
+                        getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
+                                .variableDecl()), Utilities.collect(
+                                Statement.class, ctx.stmt(), myNodes));
 
         // TODO:
         // If either side contains an array expression, its index could contain another array expression.
@@ -1508,6 +1528,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 new SwapStmtGenerator(createLocation(ctx),
                         (ProgramVariableExp) myNodes.removeFrom(ctx.left),
                         (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
+
+        // TODO: Change this one we have the converter done
+        ProcedureDec afterCoversionProcDec =
+                (ProcedureDec) beforeConversionProcDec.clone();
+        myNodes.put(ctx, afterCoversionProcDec);
     }
 
     /**
@@ -1538,9 +1563,46 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitRecursiveProcedureDecl(
             ResolveParser.RecursiveProcedureDeclContext ctx) {
-        // Pop innermost the array facility container
-        ArrayFacilityDecContainer container =
-                myArrayFacilityDecContainerStack.pop();
+        // Return type (if any)
+        Ty returnTy = null;
+        if (ctx.programNamedType() != null) {
+            returnTy = (Ty) myNodes.removeFrom(ctx.programNamedType());
+        }
+
+        // Affects clause (if any)
+        AffectsClause affectsClause = null;
+        if (ctx.affectsClause() != null) {
+            affectsClause =
+                    (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        // Decreasing clause
+        AssertionClause decreasingClause =
+                (AssertionClause) myNodes.removeFrom(ctx.decreasingClause());
+
+        // Create the procedure declaration that we are going to perform
+        // the syntactic sugar conversions on.
+        ProcedureDec beforeConversionProcDec =
+                new ProcedureDec(createPosSymbol(ctx.name),
+                        getParameterDecls(ctx.operationParameterList()
+                                .parameterDecl()), returnTy, affectsClause,
+                        decreasingClause, getFacilityDecls(ctx.facilityDecl()),
+                        getVarDecls(ctx.variableDecl()), Utilities.collect(
+                                Statement.class, ctx.stmt(), myNodes), true);
+
+        // TODO:
+        // If either side contains an array expression, its index could contain another array expression.
+        // In this case, we will generate extra variable declarations and statements that will need to be
+        // inserted appropriately.
+        /*SwapStmtGenerator generator =
+                new SwapStmtGenerator(createLocation(ctx),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
+                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
+
+        // TODO: Change this one we have the converter done
+        ProcedureDec afterCoversionProcDec =
+                (ProcedureDec) beforeConversionProcDec.clone();
+        myNodes.put(ctx, afterCoversionProcDec);
     }
 
     /**
@@ -1570,11 +1632,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitOperationProcedureDecl(
-            ResolveParser.OperationProcedureDeclContext ctx) {
-        // Pop innermost the array facility container
-        ArrayFacilityDecContainer container =
-                myArrayFacilityDecContainerStack.pop();
-    }
+            ResolveParser.OperationProcedureDeclContext ctx) {}
 
     /**
      * {@inheritDoc}
@@ -1603,11 +1661,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitRecursiveOperationProcedureDecl(
-            ResolveParser.RecursiveOperationProcedureDeclContext ctx) {
-        // Pop innermost the array facility container
-        ArrayFacilityDecContainer container =
-                myArrayFacilityDecContainerStack.pop();
-    }
+            ResolveParser.RecursiveOperationProcedureDeclContext ctx) {}
 
     /**
      * {@inheritDoc}
@@ -1620,15 +1674,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitOperationDecl(ResolveParser.OperationDeclContext ctx) {
         // Parameters
-        List<ResolveParser.ParameterDeclContext> parameterDeclContexts =
-                ctx.operationParameterList().parameterDecl();
-        List<ParameterVarDec> varDecs = new ArrayList<>();
-        for (ResolveParser.ParameterDeclContext context : parameterDeclContexts) {
-            List<TerminalNode> varNames = context.variableDeclGroup().IDENTIFIER();
-            for (TerminalNode ident : varNames) {
-                varDecs.add((ParameterVarDec) myNodes.removeFrom(ident));
-            }
-        }
+        List<ParameterVarDec> varDecs =
+                getParameterDecls(ctx.operationParameterList().parameterDecl());
 
         // Return type (if any)
         Ty returnTy = null;
@@ -1639,16 +1686,20 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Affects clause (if any)
         AffectsClause affectsClause = null;
         if (ctx.affectsClause() != null) {
-            affectsClause = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+            affectsClause =
+                    (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
         }
 
         // Requires and ensures
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
-            requires = (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
         }
         else {
-            requires = createTrueAssertionClause(createLocation(ctx), AssertionClause.ClauseType.REQUIRES);
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
         }
 
         AssertionClause ensures;
@@ -1656,11 +1707,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             ensures = (AssertionClause) myNodes.removeFrom(ctx.ensuresClause());
         }
         else {
-            ensures = createTrueAssertionClause(createLocation(ctx), AssertionClause.ClauseType.ENSURES);
+            ensures =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.ENSURES);
         }
 
-        myNodes.put(ctx, new OperationDec(createPosSymbol(ctx.name),
-                varDecs, returnTy, affectsClause, requires, ensures));
+        myNodes.put(ctx, new OperationDec(createPosSymbol(ctx.name), varDecs,
+                returnTy, affectsClause, requires, ensures));
     }
 
     /**
@@ -4029,6 +4082,29 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
+     * <p>An helper method to retrieve the facility declarations (including any newly
+     * declared array facilities).</p>
+     *
+     * @param facilityDeclContexts The ANTLR4 parser rule for list of facilty declarations.
+     *
+     * @return List of {@link FacilityDec}.
+     */
+    private List<FacilityDec> getFacilityDecls(
+            List<ResolveParser.FacilityDeclContext> facilityDeclContexts) {
+        // Pop innermost the array facility container
+        ArrayFacilityDecContainer container =
+                myArrayFacilityDecContainerStack.pop();
+
+        // Add any local array facilities
+        List<FacilityDec> facilityDecs =
+                Utilities.collect(FacilityDec.class, facilityDeclContexts,
+                        myNodes);
+        facilityDecs.addAll(container.newFacilityDecs);
+
+        return facilityDecs;
+    }
+
+    /**
      * <p>Obtain the correct parameter mode based on the given
      * context.</p>
      *
@@ -4093,6 +4169,45 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         return parameterDecls;
+    }
+
+    /**
+     * <p>An helper method to retrieve the parameter variable declarations (if any).</p>
+     *
+     * @param parameterDeclContexts A list containing the ANTLR4 parser rule
+     *                              for parameter variable declarations.
+     *
+     * @return List of {@link ParameterVarDec}.
+     */
+    private List<ParameterVarDec> getParameterDecls(List<ResolveParser.ParameterDeclContext> parameterDeclContexts) {
+        List<ParameterVarDec> varDecs = new ArrayList<>();
+        for (ResolveParser.ParameterDeclContext context : parameterDeclContexts) {
+            List<TerminalNode> varNames = context.variableDeclGroup().IDENTIFIER();
+            for (TerminalNode ident : varNames) {
+                varDecs.add((ParameterVarDec) myNodes.removeFrom(ident));
+            }
+        }
+
+        return varDecs;
+    }
+
+    /**
+     * <p>An helper method to retrieve the variable declarations (if any).</p>
+     *
+     * @param variableDeclContexts A list containing the ANTLR4 parser rule
+     *                             for variable declarations.
+     *
+     * @return List of {@link VarDec}.
+     */
+    private List<VarDec> getVarDecls(List<ResolveParser.VariableDeclContext> variableDeclContexts) {
+        List<VarDec> varDecs = new ArrayList<>();
+        for (ResolveParser.VariableDeclContext context : variableDeclContexts) {
+            for (TerminalNode node : context.variableDeclGroup().IDENTIFIER()) {
+                varDecs.add((VarDec) myNodes.removeFrom(node));
+            }
+        }
+
+        return varDecs;
     }
 
     // ===========================================================
