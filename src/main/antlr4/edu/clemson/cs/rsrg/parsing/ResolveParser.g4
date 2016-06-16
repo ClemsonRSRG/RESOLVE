@@ -438,11 +438,7 @@ recursiveProcedureDecl
     ;
 
 operationProcedureDecl
-    :   OPERATION
-        name=IDENTIFIER operationParameterList SEMICOLON
-        (affectsClause)?
-        (requiresClause)?
-        (ensuresClause)?
+    :   operationDecl
         PROCEDURE
         (facilityDecl)*
         (variableDecl)*
@@ -451,11 +447,7 @@ operationProcedureDecl
     ;
 
 recursiveOperationProcedureDecl
-    :   OPERATION
-        name=IDENTIFIER operationParameterList SEMICOLON
-        (affectsClause)?
-        (requiresClause)?
-        (ensuresClause)?
+    :   operationDecl
         RECURSIVE PROCEDURE
         decreasingClause
         (facilityDecl)*
@@ -472,10 +464,7 @@ operationDecl
     ;
 
 performanceOperationDecl
-    :   OPERATION name=IDENTIFIER operationParameterList (COLON programNamedType)? SEMICOLON
-        (affectsClause)?
-        (requiresClause)?
-        (ensuresClause)?
+    :   operationDecl
         (durationClause)?
         (manipulationDispClause)?
     ;
