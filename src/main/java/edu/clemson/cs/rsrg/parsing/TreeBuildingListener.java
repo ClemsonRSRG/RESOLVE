@@ -54,6 +54,9 @@ import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
+
+import edu.clemson.cs.rsrg.parsing.utilities.SyntacticSugarConverter;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -105,7 +108,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * end the current new element counter. This number increases by 1 each
      * time we create a new element.</p>
      */
-    private int newElementCounter;
+    private int myNewElementCounter;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -140,7 +143,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myIsProcessingModuleArgument = false;
         myArrayFacilityDecContainerStack = new Stack<>();
         myArrayNameTyToInnerTyMap = new HashMap<>();
-        newElementCounter = 0;
+        myNewElementCounter = 0;
     }
 
     // ===========================================================
@@ -1561,6 +1564,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .variableDecl()), Utilities.collect(
                                 Statement.class, ctx.stmt(), myNodes));
 
+        // Attempt to resolve all the syntactic sugar conversions
+        SyntacticSugarConverter converter =
+                new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
+                        myNewElementCounter);
+        TreeWalker tw = new TreeWalker(converter);
+        tw.visit(beforeConversionProcDec);
+
         // TODO:
         // If either side contains an array expression, its index could contain another array expression.
         // In this case, we will generate extra variable declarations and statements that will need to be
@@ -1573,6 +1583,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // TODO: Change this one we have the converter done
         ProcedureDec afterCoversionProcDec =
                 (ProcedureDec) beforeConversionProcDec.clone();
+        myNewElementCounter = converter.getNewElementCounter();
+
         myNodes.put(ctx, afterCoversionProcDec);
     }
 
@@ -2057,7 +2069,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             String newArrayName = "";
             newArrayName +=
                     ("_" + variableDeclGroupContext.IDENTIFIER(0).getText()
-                            + "_Array_Fac_" + newElementCounter++);
+                            + "_Array_Fac_" + myNewElementCounter++);
 
             // Create the new raw type
             rawNameTy =
@@ -4360,7 +4372,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // ===========================================================
 
         /** <p>The context that instantiated this object</p> */
-        ParserRuleContext instantiatingContext;
+        final ParserRuleContext instantiatingContext;
 
         /**
          * <p>List of new facility declaration objects.</p>
@@ -4368,43 +4380,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          * <p><strong>Note:</strong> The only facilities generated at the moment are
          * new {@code Static_Array_Template} facilities.</p>
          */
-        List<FacilityDec> newFacilityDecs;
-
-        // TODO: Move the following to the conversion walker.
-        /**
-         * <p>List of new variable declaration objects.</p>
-         *
-         * <p><strong>Note:</strong> The only variables generated at the moment are
-         * new integer variables to store the indexes resulting from program array
-         * conversions.</p>
-         */
-        //List<VarDec> newVarDecs;
-
-        /**
-         * <p>List of new statements that needs to be inserted before the code
-         * that contains a program array expression.</p>
-         *
-         * <p><strong>Note:</strong> The only statements generated at the moment are
-         * either new function assignment statements from indexes in
-         * program array expressions or call statements to swap elements in the array(s).</p>
-         */
-        //List<Statement> newPreStmts;
-
-        /**
-         * <p>List of new statements that needs to be inserted after the code
-         * that contains a program array expression.</p>
-         *
-         * <p><strong>Note:</strong> The only statements generated at the moment are
-         * call statements to swap elements in the array(s).</p>
-         */
-        //List<Statement> newPostStmts;
+        final List<FacilityDec> newFacilityDecs;
 
         // ===========================================================
         // Constructors
         // ===========================================================
 
         /**
-         * <p>This constructs a temporary structure to store all the newly array facility
+         * <p>This constructs a temporary structure to store all the new array facility
          * declarations that resulted from syntactic sugar conversions for raw array types.</p>
          *
          * @param instantiatingContext The context that instantiated this object.
