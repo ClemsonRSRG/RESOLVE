@@ -23,10 +23,7 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>This class performs the various different syntactic sugar conversions
@@ -237,23 +234,23 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         final List<VarDec> newVarDecs;
 
         /**
-         * <p>List of new statements that needs to be inserted before the code
+         * <p>A stack of new statements that needs to be inserted before the code
          * that contains a program array expression.</p>
          *
          * <p><strong>Note:</strong> The only statements generated at the moment are
          * either new function assignment statements from indexes in
          * program array expressions or call statements to swap elements in the array(s).</p>
          */
-        final List<Statement> newPreStmts;
+        final Stack<Statement> newPreStmts;
 
         /**
-         * <p>List of new statements that needs to be inserted after the code
+         * <p>A queue of new statements that needs to be inserted after the code
          * that contains a program array expression.</p>
          *
          * <p><strong>Note:</strong> The only statements generated at the moment are
          * call statements to swap elements in the array(s).</p>
          */
-        final List<Statement> newPostStmts;
+        final Queue<Statement> newPostStmts;
 
         /**
          * <p>When walking an {@link IfStmt}, there might be syntactic sugar
@@ -273,8 +270,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
          */
         NewElementsContainer() {
             newVarDecs = new ArrayList<>();
-            newPreStmts = new ArrayList<>();
-            newPostStmts = new ArrayList<>();
+            newPreStmts = new Stack<>();
+            newPostStmts = new ArrayDeque<>();
             newIfConditionItem = null;
         }
     }
