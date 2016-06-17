@@ -17,8 +17,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableArrayExp;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
-import edu.clemson.cs.rsrg.absyn.statements.Statement;
+import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.ArrayList;
@@ -245,6 +246,13 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
          */
         final List<Statement> newPostStmts;
 
+        /**
+         * <p>When walking an {@link IfStmt}, there might be syntactic sugar
+         * for statements inside the if-statements that cause us to generate a new
+         * {@link IfConditionItem}</p>
+         */
+        IfConditionItem newIfConditionItem;
+
         // ===========================================================
         // Constructors
         // ===========================================================
@@ -258,6 +266,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             newVarDecs = new ArrayList<>();
             newPreStmts = new ArrayList<>();
             newPostStmts = new ArrayList<>();
+            newIfConditionItem = null;
         }
     }
 }
