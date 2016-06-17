@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.parsing.utilities;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableArrayExp;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
@@ -23,6 +24,7 @@ import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +70,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     private int myNewElementCounter;
 
     /**
+     * <p>This is a map from the original (unmodified) {@link ProgramExp} to
+     * the new copy of the potentially modified replacing {@link ProgramExp}.</p>
+     */
+    private final Map<ProgramExp, ProgramExp> myProgramExpMap;
+
+    /**
      * <p>Once we are done walking an element that could have a syntactic
      * sugar conversion, we add that element into this collector.</p>
      *
@@ -85,6 +93,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myArrayNameTyToInnerTyMap = arrayNameTyToInnerTyMap;
         myFinalProcessedElement = null;
         myNewElementCounter = newElementCounter;
+        myProgramExpMap = new HashMap<>();
     }
 
     // ===========================================================
