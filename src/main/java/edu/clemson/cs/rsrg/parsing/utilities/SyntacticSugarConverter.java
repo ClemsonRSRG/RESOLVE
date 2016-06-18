@@ -22,18 +22,18 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 import java.util.*;
 
 /**
  * <p>This class performs the various different syntactic sugar conversions
  * using part of the RESOLVE abstract syntax tree. This visitor logic is
- * implemented as a {@link TreeWalkerVisitor}.</p>
+ * implemented as a {@link TreeWalkerStackVisitor}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class SyntacticSugarConverter extends TreeWalkerVisitor {
+public class SyntacticSugarConverter extends TreeWalkerStackVisitor {
 
     // ===========================================================
     // Member Fields
