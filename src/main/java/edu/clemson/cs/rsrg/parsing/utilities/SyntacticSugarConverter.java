@@ -16,24 +16,25 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableArrayExp;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
+import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.*;
 
 /**
  * <p>This class performs the various different syntactic sugar conversions
  * using part of the RESOLVE abstract syntax tree. This visitor logic is
- * implemented as a {@link TreeWalkerStackVisitor}.</p>
+ * implemented as a {@link TreeWalkerVisitor}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class SyntacticSugarConverter extends TreeWalkerStackVisitor {
+public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
     // ===========================================================
     // Member Fields
@@ -115,7 +116,7 @@ public class SyntacticSugarConverter extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>This should be the last element we walk. All synctactic
+     * <p>This should be the last element we walk. All syntactic
      * sugar should have been performed and we can safely create
      * the new {@link ProcedureDec} to be returned.</p>
      *
