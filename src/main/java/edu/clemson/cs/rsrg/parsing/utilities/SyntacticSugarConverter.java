@@ -139,9 +139,16 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         super.postCallStmt(e);
     }
 
+    /**
+     * <p>This statement doesn't need to do any syntactic sugar conversions,
+     * therefore we create a new {@link ConfirmStmt} and add it to our
+     * {@link ResolveConceptualElementCollector} instance.</p>
+     *
+     * @param e Current {@link ConfirmStmt} we are visiting.
+     */
     @Override
     public void postConfirmStmt(ConfirmStmt e) {
-        super.postConfirmStmt(e);
+        myResolveElementCollector.stmts.add(e.clone());
     }
 
     @Override
@@ -165,14 +172,28 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         super.postIfStmt(e);
     }
 
+    /**
+     * <p>This statement doesn't need to do any syntactic sugar conversions,
+     * therefore we create a new {@link MemoryStmt} and add it to our
+     * {@link ResolveConceptualElementCollector} instance.</p>
+     *
+     * @param e Current {@link MemoryStmt} we are visiting.
+     */
     @Override
     public void postMemoryStmt(MemoryStmt e) {
-        super.postMemoryStmt(e);
+        myResolveElementCollector.stmts.add(e.clone());
     }
 
+    /**
+     * <p>This statement doesn't need to do any syntactic sugar conversions,
+     * therefore we create a new {@link PresumeStmt} and add it to our
+     * {@link ResolveConceptualElementCollector} instance.</p>
+     *
+     * @param e Current {@link PresumeStmt} we are visiting.
+     */
     @Override
     public void postPresumeStmt(PresumeStmt e) {
-        super.postPresumeStmt(e);
+        myResolveElementCollector.stmts.add(e.clone());
     }
 
     @Override
