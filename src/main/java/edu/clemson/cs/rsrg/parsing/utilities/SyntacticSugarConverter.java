@@ -162,12 +162,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     @Override
-    public void midIfStmt(IfStmt e, ResolveConceptualElement previous,
-            ResolveConceptualElement next) {
-        super.midIfStmt(e, previous, next);
-    }
-
-    @Override
     public void postIfStmt(IfStmt e) {
         super.postIfStmt(e);
     }
@@ -215,6 +209,16 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     @Override
     public void postWhileStmt(WhileStmt e) {
         super.postWhileStmt(e);
+    }
+
+    // -----------------------------------------------------------
+    // Item Nodes
+    // -----------------------------------------------------------
+
+    @Override
+    public void midIfConditionItem(IfConditionItem e,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {
+        super.midIfConditionItem(e, previous, next);
     }
 
     // -----------------------------------------------------------
