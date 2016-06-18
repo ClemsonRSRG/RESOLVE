@@ -130,6 +130,91 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myResolveElementCollector = null;
     }
 
+    // -----------------------------------------------------------
+    // Statement Nodes
+    // -----------------------------------------------------------
+
+    @Override
+    public void postCallStmt(CallStmt e) {
+        super.postCallStmt(e);
+    }
+
+    @Override
+    public void postConfirmStmt(ConfirmStmt e) {
+        super.postConfirmStmt(e);
+    }
+
+    @Override
+    public void postFuncAssignStmt(FuncAssignStmt e) {
+        super.postFuncAssignStmt(e);
+    }
+
+    @Override
+    public void preIfStmt(IfStmt e) {
+        super.preIfStmt(e);
+    }
+
+    @Override
+    public void midIfStmt(IfStmt e, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {
+        super.midIfStmt(e, previous, next);
+    }
+
+    @Override
+    public void postIfStmt(IfStmt e) {
+        super.postIfStmt(e);
+    }
+
+    @Override
+    public void postMemoryStmt(MemoryStmt e) {
+        super.postMemoryStmt(e);
+    }
+
+    @Override
+    public void postPresumeStmt(PresumeStmt e) {
+        super.postPresumeStmt(e);
+    }
+
+    @Override
+    public void postSwapStmt(SwapStmt e) {
+        super.postSwapStmt(e);
+    }
+
+    @Override
+    public void preWhileStmt(WhileStmt e) {
+        super.preWhileStmt(e);
+    }
+
+    @Override
+    public void midWhileStmt(WhileStmt e, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {
+        super.midWhileStmt(e, previous, next);
+    }
+
+    @Override
+    public void postWhileStmt(WhileStmt e) {
+        super.postWhileStmt(e);
+    }
+
+    // -----------------------------------------------------------
+    // Program Expression Nodes
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This replaces the {@link ProgramVariableArrayExp} inside
+     * the calling arguments with appropriate swapping operation from
+     * {@code Static_Array_Template}.</p>
+     *
+     * <p>Any new statements generated will be added to a
+     * {@link NewElementsContainer} instance.</p>
+     *
+     * @param e Current {@link ProgramFunctionExp} we are visiting.
+     */
+    @Override
+    public void postProgramFunctionExp(ProgramFunctionExp e) {
+    // TODO: Check each of the args to see if we have ProgramVariableArrayExp.
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
