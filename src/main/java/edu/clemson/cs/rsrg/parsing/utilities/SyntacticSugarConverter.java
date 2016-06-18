@@ -82,6 +82,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      */
     private ResolveConceptualElementCollector myResolveElementCollector;
 
+    /**
+     * <p>We might have nested if or while statements, therefore it is
+     * important we keep track of what statements we are visiting.</p>
+     */
+    private final Stack<Statement> myVisitingStmtStack;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -92,6 +98,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myFinalProcessedElement = null;
         myNewElementCounter = newElementCounter;
         myProgramExpMap = new HashMap<>();
+        myVisitingStmtStack = new Stack<>();
     }
 
     // ===========================================================
@@ -192,6 +199,26 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     @Override
     public void postPresumeStmt(PresumeStmt e) {
         myResolveElementCollector.stmts.add(e.clone());
+    }
+
+    /**
+     * <p>This stores the current statement for future use.</p>
+     *
+     * @param e Current {@link Statement} we are visiting.
+     */
+    @Override
+    public void preStatement(Statement e) {
+        myVisitingStmtStack.push(e);
+    }
+
+    /**
+     * <p>Remove this statement from our local storage.</p>
+     *
+     * @param e Current {@link Statement} we are visiting.
+     */
+    @Override
+    public void postStatement(Statement e) {
+        myVisitingStmtStack.pop();
     }
 
     @Override
