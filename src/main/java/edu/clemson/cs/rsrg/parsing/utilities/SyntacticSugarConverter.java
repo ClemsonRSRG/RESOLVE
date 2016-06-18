@@ -15,14 +15,14 @@ package edu.clemson.cs.rsrg.parsing.utilities;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableArrayExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.*;
 
@@ -241,7 +241,27 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      */
     @Override
     public void postProgramFunctionExp(ProgramFunctionExp e) {
-    // TODO: Check each of the args to see if we have ProgramVariableArrayExp.
+        List<ProgramExp> args = e.getArguments();
+        List<ProgramExp> newArgs = new ArrayList<>();
+        for (ProgramExp arg : args) {
+            // Check each of the args to see if we have ProgramVariableArrayExp.
+            if (isProgArrayExp(arg)) {
+                // TODO: Apply the syntactic conversions for arrays.
+            }
+            else {
+                // Make a deep copy from the original ProgramExp.
+                newArgs.add(arg.clone());
+            }
+        }
+
+        // Construct a new ProgramFunctionExp to put in our map
+        PosSymbol qualifier = null;
+        if (e.getQualifier() != null) {
+            qualifier = e.getQualifier().clone();
+        }
+
+        myProgramExpMap.put(e, new ProgramFunctionExp(new Location(e.getLocation()),
+                qualifier, e.getName().clone(), newArgs));
     }
 
     // ===========================================================
@@ -252,7 +272,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * <p>This method returns the current integer value for the
      * new element counter.</p>
      *
-     * @return An integer.
+     * @return The counter integer.
      */
     public final int getNewElementCounter() {
         return myNewElementCounter;
@@ -293,6 +313,31 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         return copyFacilityDecs;
+    }
+
+    /**
+     * <p>An helper method to check whether or not the {@link ProgramExp} passed
+     * in is a {@link ProgramVariableArrayExp}. This includes {@link ProgramVariableDotExp}
+     * that contain a {@link ProgramVariableArrayExp} as the last element.</p>
+     *
+     * @param exp The {@link ProgramExp} to be checked.
+     *
+     * @return {@code true} if it is a programming array expression, {@code false} otherwise.
+     */
+    private boolean isProgArrayExp(ProgramExp exp) {
+        boolean retVal = false;
+        if (exp instanceof ProgramVariableArrayExp) {
+            retVal = true;
+        }
+        else if (exp instanceof ProgramVariableDotExp) {
+            List<ProgramVariableExp> segments =
+                    ((ProgramVariableDotExp) exp).getSegments();
+            if (segments.get(segments.size() - 1) instanceof ProgramVariableArrayExp) {
+                retVal = true;
+            }
+        }
+
+        return retVal;
     }
 
     // ===========================================================
