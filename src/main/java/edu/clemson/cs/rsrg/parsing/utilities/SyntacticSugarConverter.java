@@ -53,6 +53,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     private ResolveConceptualElement myFinalProcessedElement;
 
     /**
+     * <p>We might have nested if or while statements, therefore it is
+     * important we keep track of what statements we are visiting.</p>
+     */
+    private final Stack<Statement> myNestedStmtStack;
+
+    /**
      * <p>This stores the new elements created by current statement
      * we are visiting.</p>
      */
@@ -82,12 +88,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      */
     private ResolveConceptualElementCollector myResolveElementCollector;
 
-    /**
-     * <p>We might have nested if or while statements, therefore it is
-     * important we keep track of what statements we are visiting.</p>
-     */
-    private final Stack<Statement> myVisitingStmtStack;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -98,7 +98,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myFinalProcessedElement = null;
         myNewElementCounter = newElementCounter;
         myProgramExpMap = new HashMap<>();
-        myVisitingStmtStack = new Stack<>();
+        myNestedStmtStack = new Stack<>();
     }
 
     // ===========================================================
@@ -169,12 +169,15 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
     @Override
     public void preIfStmt(IfStmt e) {
-        super.preIfStmt(e);
+        // We have began a new block that can contain statements,
+        // we need to store this in our stack.
+        myNestedStmtStack.push(e);
     }
 
     @Override
     public void postIfStmt(IfStmt e) {
-        super.postIfStmt(e);
+        // Done visiting this IfStmt, so we can pop it off the stack.
+        myNestedStmtStack.pop();
     }
 
     /**
@@ -201,26 +204,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myResolveElementCollector.stmts.add(e.clone());
     }
 
-    /**
-     * <p>This stores the current statement for future use.</p>
-     *
-     * @param e Current {@link Statement} we are visiting.
-     */
-    @Override
-    public void preStatement(Statement e) {
-        myVisitingStmtStack.push(e);
-    }
-
-    /**
-     * <p>Remove this statement from our local storage.</p>
-     *
-     * @param e Current {@link Statement} we are visiting.
-     */
-    @Override
-    public void postStatement(Statement e) {
-        myVisitingStmtStack.pop();
-    }
-
     @Override
     public void postSwapStmt(SwapStmt e) {
         super.postSwapStmt(e);
@@ -228,7 +211,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
     @Override
     public void preWhileStmt(WhileStmt e) {
-        super.preWhileStmt(e);
+        // We have began a new block that can contain statements,
+        // we need to store this in our stack.
+        myNestedStmtStack.push(e);
     }
 
     @Override
@@ -239,7 +224,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
     @Override
     public void postWhileStmt(WhileStmt e) {
-        super.postWhileStmt(e);
+        // Done visiting this IfStmt, so we can pop it off the stack.
+        myNestedStmtStack.pop();
     }
 
     // -----------------------------------------------------------
