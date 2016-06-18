@@ -111,8 +111,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      */
     @Override
     public void preProcedureDec(ProcedureDec e) {
+        // Deep copy is expensive, but we will be creating a
+        // completely new object when we are done walking the tree,
+        // so we don't want any aliasing going around.
         myResolveElementCollector =
-                new ResolveConceptualElementCollector(e.getFacilities());
+                new ResolveConceptualElementCollector(copyFacDecs(e
+                        .getFacilities()));
     }
 
     /**
@@ -273,6 +277,23 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method to create a new list of {@link FacilityDec}s
+     * that is a deep copy of the one passed in.</p>
+     *
+     * @param facilityDecs The original list of {@link FacilityDec}s.
+     *
+     * @return A list of {@link FacilityDec}s.
+     */
+    private List<FacilityDec> copyFacDecs(List<FacilityDec> facilityDecs) {
+        List<FacilityDec> copyFacilityDecs = new ArrayList<>();
+        for (FacilityDec facilityDec : facilityDecs) {
+            copyFacilityDecs.add((FacilityDec) facilityDec.clone());
+        }
+
+        return copyFacilityDecs;
+    }
 
     // ===========================================================
     // Helper Constructs
