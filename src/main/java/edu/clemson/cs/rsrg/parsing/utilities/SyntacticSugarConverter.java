@@ -370,6 +370,17 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             if (isProgArrayExp(arg)) {
                 // TODO: Apply the syntactic conversions for arrays.
             }
+            // ProgramFunctionExp
+            else if (arg instanceof ProgramFunctionExp) {
+                // Check to see if we have created a replacement expression
+                if (myReplacingElementsMap.containsKey(arg)) {
+                    newArgs.add((ProgramExp) myReplacingElementsMap.remove(arg));
+                }
+                else {
+                    throw new MiscErrorException("Could not locate the replacement expression for: " + arg.toString(),
+                            new IllegalStateException());
+                }
+            }
             else {
                 // Make a deep copy from the original ProgramExp.
                 newArgs.add(arg.clone());
