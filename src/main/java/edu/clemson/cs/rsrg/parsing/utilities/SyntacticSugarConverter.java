@@ -13,12 +13,16 @@
 package edu.clemson.cs.rsrg.parsing.utilities;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -53,18 +57,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     private ResolveConceptualElement myFinalProcessedElement;
 
     /**
-     * <p>We might have nested if or while statements, therefore it is
-     * important we keep track of what statements we are visiting.</p>
-     */
-    private final Stack<Statement> myNestedStmtStack;
-
-    /**
-     * <p>This stores the new elements created by current statement
-     * we are visiting.</p>
-     */
-    private NewElementsContainer myNewElementContainer;
-
-    /**
      * <p>Since we don't have symbol table, we really don't know if
      * we are generating a new object with the same name. In order to avoid
      * problems, all of our objects will have a name that starts with "_" and
@@ -74,19 +66,32 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     private int myNewElementCounter;
 
     /**
-     * <p>This is a map from the original (unmodified) {@link ProgramExp} to
-     * the new copy of the potentially modified replacing {@link ProgramExp}.</p>
+     * <p>This stores the new statements created by current statement
+     * we are visiting.</p>
      */
-    private final Map<ProgramExp, ProgramExp> myProgramExpMap;
+    private NewStatementsContainer myNewStatementsContainer;
+
+    /**
+     * <p>This stores the {@link ParameterVarDec}, {@link FacilityDec} and
+     * {@link VarDec} obtained from the parent node.</p>
+     */
+    private ParentNodeElementsContainer myParentNodeElementsContainer;
+
+    /**
+     * <p>This is a map from the original {@link ResolveConceptualElement} to
+     * the replacing {@link ResolveConceptualElement}.</p>
+     */
+    private final Map<ResolveConceptualElement, ResolveConceptualElement> myReplacingElementsMap;
 
     /**
      * <p>Once we are done walking an element that could have a syntactic
-     * sugar conversion, we add that element into this collector.</p>
+     * sugar conversion, we add that element into the top-most collector.</p>
      *
-     * <p>When we reach the top-most node, it will create a new instance
-     * of the object with these elements.</p>
+     * <p>When we are done walking a {@link ResolveConceptualElement} that
+     * can contain a list of {@link Statement}s, we build a new instance
+     * of the object using the elements in the collector.</p>
      */
-    private ResolveConceptualElementCollector myResolveElementCollector;
+    private Stack<ResolveConceptualElementCollector> myResolveElementCollectorStack;
 
     // ===========================================================
     // Constructors
@@ -97,8 +102,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myArrayNameTyToInnerTyMap = arrayNameTyToInnerTyMap;
         myFinalProcessedElement = null;
         myNewElementCounter = newElementCounter;
-        myProgramExpMap = new HashMap<>();
-        myNestedStmtStack = new Stack<>();
+        myReplacingElementsMap = new HashMap<>();
+        myResolveElementCollectorStack = new Stack<>();
     }
 
     // ===========================================================
@@ -118,12 +123,14 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      */
     @Override
     public void preProcedureDec(ProcedureDec e) {
-        // Deep copy is expensive, but we will be creating a
-        // completely new object when we are done walking the tree,
-        // so we don't want any aliasing going around.
-        myResolveElementCollector =
-                new ResolveConceptualElementCollector(copyFacDecs(e
-                        .getFacilities()));
+        // Store the params, facility and variable declarations
+        myParentNodeElementsContainer =
+                new ParentNodeElementsContainer(e.getParameters(), e
+                        .getFacilities(), e.getVariables());
+
+        // Create a new collector
+        myResolveElementCollectorStack
+                .push(new ResolveConceptualElementCollector(e));
     }
 
     /**
@@ -135,49 +142,106 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      */
     @Override
     public void postProcedureDec(ProcedureDec e) {
-        //myFinalProcessedElement = new ProcedureDec();
+        // Return type (if any)
+        Ty returnTy = null;
+        if (e.getReturnTy() != null) {
+            returnTy = e.getReturnTy().clone();
+        }
+
+        // Affects clause (if any)
+        AffectsClause affectsClause = null;
+        if (e.getAffectedVars() != null) {
+            affectsClause = e.getAffectedVars().clone();
+        }
+
+        // Decreasing clause (if any)
+        AssertionClause decreasingClause = null;
+        boolean recursiveFlag = false;
+        if (e.getDecreasing() != null) {
+            decreasingClause = e.getDecreasing().clone();
+            recursiveFlag = true;
+        }
+
+        // Build the new ProcedureDec
+        ResolveConceptualElementCollector collector =
+                myResolveElementCollectorStack.pop();
+        myFinalProcessedElement =
+                new ProcedureDec(e.getName().clone(),
+                        myParentNodeElementsContainer.parameterVarDecs,
+                        returnTy, affectsClause, decreasingClause,
+                        myParentNodeElementsContainer.facilityDecs,
+                        myParentNodeElementsContainer.varDecs, collector.stmts,
+                        recursiveFlag);
 
         // Just in case
-        myResolveElementCollector = null;
+        myParentNodeElementsContainer = null;
     }
 
     // -----------------------------------------------------------
     // Statement Nodes
     // -----------------------------------------------------------
 
+    /**
+     * <p>This statement could have syntactic sugar conversions, so
+     * we will need to have a way to store the new {@link Statement}s that get
+     * generated.</p>
+     *
+     * @param e Current {@link CallStmt} we are visiting.
+     */
+    @Override
+    public void preCallStmt(CallStmt e) {
+        myNewStatementsContainer = new NewStatementsContainer();
+    }
+
     @Override
     public void postCallStmt(CallStmt e) {
-        super.postCallStmt(e);
+        myNewStatementsContainer = null;
     }
 
     /**
      * <p>This statement doesn't need to do any syntactic sugar conversions,
-     * therefore we create a new {@link ConfirmStmt} and add it to our
+     * therefore we create a new {@link ConfirmStmt} and add it to the top-most
      * {@link ResolveConceptualElementCollector} instance.</p>
      *
      * @param e Current {@link ConfirmStmt} we are visiting.
      */
     @Override
     public void postConfirmStmt(ConfirmStmt e) {
-        myResolveElementCollector.stmts.add(e.clone());
+        addToInnerMostCollector(e.clone());
+    }
+
+    /**
+     * <p>This statement could have syntactic sugar conversions, so
+     * we will need to have a way to store the new {@link Statement}s that get
+     * generated.</p>
+     *
+     * @param e Current {@link FuncAssignStmt} we are visiting.
+     */
+    @Override
+    public void preFuncAssignStmt(FuncAssignStmt e) {
+        myNewStatementsContainer = new NewStatementsContainer();
     }
 
     @Override
     public void postFuncAssignStmt(FuncAssignStmt e) {
-        super.postFuncAssignStmt(e);
+        myNewStatementsContainer = null;
     }
 
     @Override
     public void preIfStmt(IfStmt e) {
         // We have began a new block that can contain statements,
         // we need to store this in our stack.
-        myNestedStmtStack.push(e);
+        myResolveElementCollectorStack
+                .push(new ResolveConceptualElementCollector(e));
     }
 
     @Override
     public void postIfStmt(IfStmt e) {
         // Done visiting this IfStmt, so we can pop it off the stack.
-        myNestedStmtStack.pop();
+        ResolveConceptualElementCollector collector =
+                myResolveElementCollectorStack.pop();
+
+        // TODO: Build the new IfStmt and add it to the 'next' collector.
     }
 
     /**
@@ -189,7 +253,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      */
     @Override
     public void postMemoryStmt(MemoryStmt e) {
-        myResolveElementCollector.stmts.add(e.clone());
+        addToInnerMostCollector(e.clone());
     }
 
     /**
@@ -201,31 +265,53 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      */
     @Override
     public void postPresumeStmt(PresumeStmt e) {
-        myResolveElementCollector.stmts.add(e.clone());
+        addToInnerMostCollector(e.clone());
+    }
+
+    /**
+     * <p>This statement could have syntactic sugar conversions, so
+     * we will need to have a way to store the new {@link Statement}s that get
+     * generated.</p>
+     *
+     * @param e Current {@link SwapStmt} we are visiting.
+     */
+    @Override
+    public void preSwapStmt(SwapStmt e) {
+        myNewStatementsContainer = new NewStatementsContainer();
     }
 
     @Override
     public void postSwapStmt(SwapStmt e) {
-        super.postSwapStmt(e);
+        myNewStatementsContainer = null;
     }
 
     @Override
     public void preWhileStmt(WhileStmt e) {
         // We have began a new block that can contain statements,
         // we need to store this in our stack.
-        myNestedStmtStack.push(e);
+        myResolveElementCollectorStack
+                .push(new ResolveConceptualElementCollector(e));
+
+        // A container for the loop-condition
+        myNewStatementsContainer = new NewStatementsContainer();
     }
 
     @Override
     public void midWhileStmt(WhileStmt e, ResolveConceptualElement previous,
             ResolveConceptualElement next) {
-        super.midWhileStmt(e, previous, next);
+    // TODO: Check to see if the condition item has any syntactic sugar conversions.
+    // If yes, we will need to add it back to the while statement list.
+
+    // TODO: Set myNewStatementsContainer to null if we are done visiting the loop condition
     }
 
     @Override
     public void postWhileStmt(WhileStmt e) {
-        // Done visiting this IfStmt, so we can pop it off the stack.
-        myNestedStmtStack.pop();
+        // Done visiting this WhileStmt, so we can pop it off the stack.
+        ResolveConceptualElementCollector collector =
+                myResolveElementCollectorStack.pop();
+
+        // TODO: Build the new WhileStmt and add it to the 'next' collector.
     }
 
     // -----------------------------------------------------------
@@ -233,9 +319,32 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     @Override
+    public void preIfConditionItem(IfConditionItem e) {
+        // We have began a new block that can contain statements,
+        // we need to store this in our stack.
+        myResolveElementCollectorStack
+                .push(new ResolveConceptualElementCollector(e));
+
+        // A container for the if-condition
+        myNewStatementsContainer = new NewStatementsContainer();
+    }
+
+    @Override
     public void midIfConditionItem(IfConditionItem e,
             ResolveConceptualElement previous, ResolveConceptualElement next) {
-        super.midIfConditionItem(e, previous, next);
+    // TODO: Check to see if the condition item has any syntactic sugar conversions.
+    // If yes, we will need to add it back to both the statements inside the if and also inside the else.
+
+    // TODO: Set myNewStatementsContainer to null if we are done visiting the if condition
+    }
+
+    @Override
+    public void postIfConditionItem(IfConditionItem e) {
+        // Done visiting this IfConditionItem, so we can pop it off the stack.
+        ResolveConceptualElementCollector collector =
+                myResolveElementCollectorStack.pop();
+
+        // TODO: Build the new IfConditionItem and add it to our new items map.
     }
 
     // -----------------------------------------------------------
@@ -248,7 +357,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * {@code Static_Array_Template}.</p>
      *
      * <p>Any new statements generated will be added to a
-     * {@link NewElementsContainer} instance.</p>
+     * {@link NewStatementsContainer} instance.</p>
      *
      * @param e Current {@link ProgramFunctionExp} we are visiting.
      */
@@ -273,7 +382,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             qualifier = e.getQualifier().clone();
         }
 
-        myProgramExpMap.put(e, new ProgramFunctionExp(new Location(e.getLocation()),
+        myReplacingElementsMap.put(e, new ProgramFunctionExp(new Location(e.getLocation()),
                 qualifier, e.getName().clone(), newArgs));
     }
 
@@ -312,20 +421,19 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>An helper method to create a new list of {@link FacilityDec}s
-     * that is a deep copy of the one passed in.</p>
+     * <p>An helper method to add a {@link Statement} to the top-most
+     * collector.</p>
      *
-     * @param facilityDecs The original list of {@link FacilityDec}s.
-     *
-     * @return A list of {@link FacilityDec}s.
+     * @param statement A {@link Statement} object.
      */
-    private List<FacilityDec> copyFacDecs(List<FacilityDec> facilityDecs) {
-        List<FacilityDec> copyFacilityDecs = new ArrayList<>();
-        for (FacilityDec facilityDec : facilityDecs) {
-            copyFacilityDecs.add((FacilityDec) facilityDec.clone());
-        }
+    private void addToInnerMostCollector(Statement statement) {
+        // Get the top-most collector and add the statement
+        ResolveConceptualElementCollector collector =
+                myResolveElementCollectorStack.pop();
+        collector.stmts.add(statement);
 
-        return copyFacilityDecs;
+        // Put it back on the stack
+        myResolveElementCollectorStack.push(collector);
     }
 
     /**
@@ -358,10 +466,112 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>As we walk though the various different nodes, each
-     * {@link ResolveConceptualElement} we are done processing will
-     * be added to this class. Once we are done walking all the nodes
-     * and we are back to the top-most node, we will use the elements
+     * <p>This holds a copy of the {@link ParameterVarDec}, {@link VarDec} and
+     * {@link FacilityDec} for the incoming parent node.</p>
+     */
+    private class ParentNodeElementsContainer {
+
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        /**
+         * <p>List of parameter variable declaration objects.</p>
+         */
+        final List<ParameterVarDec> parameterVarDecs;
+
+        /**
+         * <p>List of variable declaration objects.</p>
+         */
+        final List<FacilityDec> facilityDecs;
+
+        /**
+         * <p>List of variable declaration objects.</p>
+         */
+        final List<VarDec> varDecs;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This constructs a temporary structure to store the elements from
+         * the incoming parent node we are walking.</p>
+         *
+         * @param params List of parameter variables.
+         * @param facs List of facility declarations.
+         * @param vars List of regular variables.
+         */
+        ParentNodeElementsContainer(List<ParameterVarDec> params,
+                List<FacilityDec> facs, List<VarDec> vars) {
+            parameterVarDecs = copyParamDecls(params);
+            facilityDecs = copyFacDecls(facs);
+            varDecs = copyVarDecls(vars);
+        }
+
+        // ===========================================================
+        // Private Methods
+        // ===========================================================
+
+        /**
+         * <p>An helper method to create a new list of {@link FacilityDec}s
+         * that is a deep copy of the one passed in.</p>
+         *
+         * @param facilityDecs The original list of {@link FacilityDec}s.
+         *
+         * @return A list of {@link FacilityDec}s.
+         */
+        private List<FacilityDec> copyFacDecls(List<FacilityDec> facilityDecs) {
+            List<FacilityDec> copyFacilityDecs = new ArrayList<>();
+            for (FacilityDec facilityDec : facilityDecs) {
+                copyFacilityDecs.add((FacilityDec) facilityDec.clone());
+            }
+
+            return copyFacilityDecs;
+        }
+
+        /**
+         * <p>An helper method to create a new list of {@link ParameterVarDec}s
+         * that is a deep copy of the one passed in.</p>
+         *
+         * @param parameterVarDecs The original list of {@link ParameterVarDec}s.
+         *
+         * @return A list of {@link ParameterVarDec}s.
+         */
+        private List<ParameterVarDec> copyParamDecls(List<ParameterVarDec> parameterVarDecs) {
+            List<ParameterVarDec> copyParamDecs = new ArrayList<>();
+            for (ParameterVarDec parameterVarDec : parameterVarDecs) {
+                copyParamDecs.add((ParameterVarDec) parameterVarDec.clone());
+            }
+
+            return copyParamDecs;
+        }
+
+        /**
+         * <p>An helper method to create a new list of {@link VarDec}s
+         * that is a deep copy of the one passed in.</p>
+         *
+         * @param varDecs The original list of {@link VarDec}s.
+         *
+         * @return A list of {@link VarDec}s.
+         */
+        private List<VarDec> copyVarDecls(List<VarDec> varDecs) {
+            List<VarDec> copyVarDecs = new ArrayList<>();
+            for (VarDec varDec : varDecs) {
+                copyVarDecs.add((VarDec) varDec.clone());
+            }
+
+            return copyVarDecs;
+        }
+    }
+
+    /**
+     * <p>As we walk though the various different nodes that can contain
+     * a list of {@link Statement}s, once we are done with a particular
+     * {@link Statement}, it will be added to this class. Once we are done
+     * walking all the statements and we are back to the
+     * {@link ResolveConceptualElement} that contains the list of
+     * {@link Statement}s, we will use the elements
      * stored in this class to create the new object.</p>
      */
     private class ResolveConceptualElementCollector {
@@ -371,18 +581,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>List of facility declaration objects.</p>
-         *
-         * <p><strong>Note:</strong> Currently, none of the syntactic sugar
-         * conversions create any {@link FacilityDec}, so this list should
-         * remain the same.</p>
+         * <p>The {@link ResolveConceptualElement} that created this collector.</p>
          */
-        final List<FacilityDec> facilityDecs;
-
-        /**
-         * <p>List of variable declaration objects.</p>
-         */
-        final List<VarDec> varDecs;
+        final ResolveConceptualElement instantiatingElement;
 
         /**
          * <p>List of statement objects.</p>
@@ -394,34 +595,26 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>This constructs a temporary structure to store all the elements
-         * in the RESOLVE AST we are walking.</p>
+         * <p>This constructs a temporary structure to store the list of
+         * {@link Statement}s.</p>
+         *
+         * @param e The element that created this object.
          */
-        ResolveConceptualElementCollector(List<FacilityDec> facDecs) {
-            facilityDecs = facDecs;
-            varDecs = new ArrayList<>();
+        ResolveConceptualElementCollector(ResolveConceptualElement e) {
+            instantiatingElement = e;
             stmts = new ArrayList<>();
         }
     }
 
     /**
-     * <p>This holds new items related to syntactic sugar conversions for
+     * <p>This holds new {@link Statement}s related to syntactic sugar conversions for
      * {@link ProgramVariableArrayExp}.</p>
      */
-    private class NewElementsContainer {
+    private class NewStatementsContainer {
 
         // ===========================================================
         // Member Fields
         // ===========================================================
-
-        /**
-         * <p>List of new variable declaration objects.</p>
-         *
-         * <p><strong>Note:</strong> The only variables generated at the moment are
-         * new integer variables to store the indexes resulting from program array
-         * conversions and any variables used to swap elements out of the array.</p>
-         */
-        final List<VarDec> newVarDecs;
 
         /**
          * <p>A stack of new statements that needs to be inserted before the code
@@ -442,27 +635,17 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
          */
         final Queue<Statement> newPostStmts;
 
-        /**
-         * <p>When walking an {@link IfStmt}, there might be syntactic sugar
-         * for statements inside the if-statements that cause us to generate a new
-         * {@link IfConditionItem}</p>
-         */
-        IfConditionItem newIfConditionItem;
-
         // ===========================================================
         // Constructors
         // ===========================================================
 
         /**
-         * <p>This constructs a temporary structure to store all the new variable
-         * declaration and statements that resulted from syntactic sugar conversions
-         * for {@link ProgramVariableArrayExp}.</p>
+         * <p>This constructs a temporary structure to store all the new statements that
+         * resulted from syntactic sugar conversions for {@link ProgramVariableArrayExp}.</p>
          */
-        NewElementsContainer() {
-            newVarDecs = new ArrayList<>();
+        NewStatementsContainer() {
             newPreStmts = new Stack<>();
             newPostStmts = new ArrayDeque<>();
-            newIfConditionItem = null;
         }
     }
 }
