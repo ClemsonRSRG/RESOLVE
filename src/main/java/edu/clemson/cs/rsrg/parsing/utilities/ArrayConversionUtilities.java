@@ -48,8 +48,25 @@ public class ArrayConversionUtilities {
         return null;
     }
 
-    public static CallStmt buildSwapEntryCall() {
-        return null;
+    /**
+     * <p>An helper method to create a call to the {@code Swap_Entry}
+     * operation in {@code Static_Array_Template}.</p>
+     *
+     * @param l Location for the new elements.
+     * @param varExp Name of the variable to swap the contents of.
+     * @param facQualifier The facility name of the array.
+     * @param arrayNameExp The array name expression.
+     * @param arrayIndexExp The array index expression.
+     *
+     * @return A {@link CallStmt} object.
+     */
+    public static CallStmt buildSwapEntryCall(Location l, ProgramVariableNameExp varExp, PosSymbol facQualifier, ProgramVariableExp arrayNameExp, ProgramExp arrayIndexExp) {
+        List<ProgramExp> args = new ArrayList<>();
+        args.add(arrayNameExp.clone());
+        args.add(varExp.clone());
+        args.add(arrayIndexExp.clone());
+
+        return new CallStmt(new Location(l), new ProgramFunctionExp(new Location(l), facQualifier, new PosSymbol(new Location(l), "Swap_Entry"), args));
     }
 
     public static CallStmt buildSwapTwoEntriesCall() {

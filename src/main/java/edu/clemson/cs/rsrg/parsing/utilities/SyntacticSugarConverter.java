@@ -369,12 +369,24 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             if (ArrayConversionUtilities.isProgArrayExp(arg)) {
                 // Create a new variable to store the contents of the array expression
                 ProgramVariableExp arrayNameExp = ArrayConversionUtilities.getArrayNameExp(arg);
+                NameTy arrayTy = findArrayType(arrayNameExp);
+                NameTy arrayContentsTy = myArrayNameTyToInnerTyMap.get(arrayTy);
                 VarDec newArrayVarDec =
                         ArrayConversionUtilities.buildTempArrayNameVarDec(arrayNameExp,
-                                findArrayContentType(arrayNameExp), myNewElementCounter++);
+                                arrayContentsTy, myNewElementCounter++);
                 myParentNodeElementsContainer.varDecs.add(newArrayVarDec);
 
-                // TODO: Apply the syntactic conversions for arrays.
+                // Array index expression
+                ProgramExp arrayIndexExp = ArrayConversionUtilities.getArrayIndexExp(arg);
+
+                // Create the new call to "Swap_Entry" and add it to the pre/post
+                ProgramVariableNameExp newArrayVarDecAsProgramExp =
+                        new ProgramVariableNameExp(new Location(newArrayVarDec.getLocation()),
+                                null, newArrayVarDec.getName());
+                CallStmt swapEntryCall = ArrayConversionUtilities.buildSwapEntryCall(arg.getLocation(),
+                        newArrayVarDecAsProgramExp, arrayTy.getQualifier(), arrayNameExp, arrayIndexExp);
+                myNewStatementsContainer.newPreStmts.push(swapEntryCall.clone());
+                myNewStatementsContainer.newPostStmts.offer(swapEntryCall);
             }
             // ProgramFunctionExp
             else if (arg instanceof ProgramFunctionExp) {
@@ -454,16 +466,16 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that retrieves the type for the contents in
+     * <p>An helper method that retrieves the static array type for
      * the array expression.</p>
      *
      * @param exp The array expression name.
      *
-     * @return The {@link Ty} for the contents of the array.
+     * @return The {@link Ty} for the array.
      *
      * @exception MiscErrorException
      */
-    private NameTy findArrayContentType(ProgramVariableExp exp) {
+    private NameTy findArrayType(ProgramVariableExp exp) {
         NameTy contentTy;
         if (exp instanceof ProgramVariableDotExp) {
             // TODO: Change this when we pass shared state/type realization to this class.
@@ -490,8 +502,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                                 + exp.toString(), new IllegalStateException());
             }
             else {
-                NameTy arrayTy = (NameTy) varDec.getTy();
-                contentTy = myArrayNameTyToInnerTyMap.get(arrayTy);
+                contentTy = (NameTy) varDec.getTy().clone();
             }
         }
         else {
