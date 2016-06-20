@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
@@ -534,6 +535,13 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         addToInnerMostCollector(newStatement);
     }
 
+    /**
+     * <p>This loop condition could have syntactic sugar conversions, so
+     * we will need to have a way to store the new {@link Statement}s that get
+     * generated.</p>
+     *
+     * @param e Current {@link WhileStmt} we are visiting.
+     */
     @Override
     public void preWhileStmt(WhileStmt e) {
         // We have began a new block that can contain statements,
@@ -545,22 +553,76 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myNewStatementsContainer = new NewStatementsContainer();
     }
 
+    /**
+     * <p>After visiting the loop condition, we could have generated new {@link Statement}s, so
+     * we will need to place those in the appropriate locations.</p>
+     *
+     * @param e Current {@link WhileStmt} we are visiting.
+     * @param previous The previous {@link ResolveConceptualElement} visited.
+     * @param next The next {@link ResolveConceptualElement} to visit.
+     */
     @Override
     public void midWhileStmt(WhileStmt e, ResolveConceptualElement previous,
             ResolveConceptualElement next) {
-    // TODO: Check to see if the condition item has any syntactic sugar conversions.
-    // If yes, we will need to add it back to the while statement list.
+        // Check to see if the condition item has any syntactic sugar conversions.
+        // If yes, we will need to add it back to the correct locations.
+        if (previous instanceof ProgramExp
+                && next instanceof LoopVerificationItem) {
+            // Obtain the right container to insert the statements that appear before
+            // this WhileStmt and any statements that need to appear before.
+            ResolveConceptualElementCollector whileStmtCollector =
+                    myResolveElementCollectorStack.pop();
+            while (!myNewStatementsContainer.newPreStmts.empty()) {
+                addToInnerMostCollector(myNewStatementsContainer.newPreStmts
+                        .pop());
+            }
 
-    // TODO: Set myNewStatementsContainer to null if we are done visiting the loop condition
+            // Put the collector stack back the way it was and
+            // Add any statements that need to appear after this WhileStmt.
+            myResolveElementCollectorStack.push(whileStmtCollector);
+            while (!myNewStatementsContainer.newPostStmts.isEmpty()) {
+                addToInnerMostCollector(myNewStatementsContainer.newPostStmts
+                        .remove());
+            }
+
+            // Set myNewStatementsContainer to null if we are done visiting the loop condition
+            myNewStatementsContainer = null;
+        }
     }
 
+    /**
+     * <p>We are done visiting this node, therefore we create a
+     * new {@link WhileStmt} for future use.</p>
+     *
+     * @param e Current {@link WhileStmt} we are visiting.
+     */
     @Override
     public void postWhileStmt(WhileStmt e) {
         // Done visiting this WhileStmt, so we can pop it off the stack.
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
 
-        // TODO: Build the new WhileStmt and add it to the 'next' collector.
+        // Check we got the right collector
+        if (!collector.instantiatingElement.equals(e)) {
+            throw new MiscErrorException(
+                    "Something went wrong during the syntactic sugar conversion",
+                    new IllegalStateException());
+        }
+
+        // Build the new WhileStmt and add it to the 'next' collector.
+        ProgramExp newConditionExp;
+        ProgramExp conditionExp = e.getTest();
+        if (myReplacingElementsMap.containsKey(conditionExp)) {
+            newConditionExp =
+                    (ProgramExp) myReplacingElementsMap.remove(conditionExp);
+        }
+        else {
+            newConditionExp = conditionExp.clone();
+        }
+
+        addToInnerMostCollector(new WhileStmt(new Location(e.getLocation()),
+                newConditionExp, e.getLoopVerificationBlock().clone(),
+                collector.stmts));
     }
 
     // -----------------------------------------------------------
