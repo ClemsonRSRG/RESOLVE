@@ -367,7 +367,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         List<ProgramExp> newArgs = new ArrayList<>();
         for (ProgramExp arg : args) {
             // Check each of the args to see if we have ProgramVariableArrayExp.
-            if (isProgArrayExp(arg)) {
+            if (ArrayConversionUtilities.isProgArrayExp(arg)) {
                 // TODO: Apply the syntactic conversions for arrays.
             }
             // ProgramFunctionExp
@@ -445,31 +445,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
         // Put it back on the stack
         myResolveElementCollectorStack.push(collector);
-    }
-
-    /**
-     * <p>An helper method to check whether or not the {@link ProgramExp} passed
-     * in is a {@link ProgramVariableArrayExp}. This includes {@link ProgramVariableDotExp}
-     * that contain a {@link ProgramVariableArrayExp} as the last element.</p>
-     *
-     * @param exp The {@link ProgramExp} to be checked.
-     *
-     * @return {@code true} if it is a programming array expression, {@code false} otherwise.
-     */
-    private boolean isProgArrayExp(ProgramExp exp) {
-        boolean retVal = false;
-        if (exp instanceof ProgramVariableArrayExp) {
-            retVal = true;
-        }
-        else if (exp instanceof ProgramVariableDotExp) {
-            List<ProgramVariableExp> segments =
-                    ((ProgramVariableDotExp) exp).getSegments();
-            if (segments.get(segments.size() - 1) instanceof ProgramVariableArrayExp) {
-                retVal = true;
-            }
-        }
-
-        return retVal;
     }
 
     // ===========================================================

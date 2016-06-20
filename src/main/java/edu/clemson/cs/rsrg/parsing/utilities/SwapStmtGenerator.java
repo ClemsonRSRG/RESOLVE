@@ -16,11 +16,10 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.absyn.statements.SwapStmt;
-import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>The main purpose of this class is to assist the {@link TreeBuildingListener}
+ * <p>The main purpose of this class is to assist the {@link SyntacticSugarConverter}
  * in building the various different swap statements.</p>
  *
  * <p>Most of the time, we are simply building a regular {@link SwapStmt}. However,
