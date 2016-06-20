@@ -1570,15 +1570,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         TreeWalker tw = new TreeWalker(converter);
         tw.visit(beforeConversionProcDec);
 
-        // TODO:
-        // If either side contains an array expression, its index could contain another array expression.
-        // In this case, we will generate extra variable declarations and statements that will need to be
-        // inserted appropriately.
-        /*SwapStmtGenerator generator =
-                new SwapStmtGenerator(createLocation(ctx),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
-
         // TODO: Change this one we have the converter done
         ProcedureDec afterCoversionProcDec =
                 (ProcedureDec) beforeConversionProcDec.clone();
@@ -1642,15 +1633,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         getVarDecls(ctx.variableDecl()), Utilities.collect(
                                 Statement.class, ctx.stmt(), myNodes), true);
 
-        // TODO:
-        // If either side contains an array expression, its index could contain another array expression.
-        // In this case, we will generate extra variable declarations and statements that will need to be
-        // inserted appropriately.
-        /*SwapStmtGenerator generator =
-                new SwapStmtGenerator(createLocation(ctx),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
-
         // TODO: Change this one we have the converter done
         ProcedureDec afterCoversionProcDec =
                 (ProcedureDec) beforeConversionProcDec.clone();
@@ -1695,15 +1677,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 new OperationProcedureDec(operationDec, getFacilityDecls(ctx
                         .facilityDecl()), getVarDecls(ctx.variableDecl()),
                         Utilities.collect(Statement.class, ctx.stmt(), myNodes));
-
-        // TODO:
-        // If either side contains an array expression, its index could contain another array expression.
-        // In this case, we will generate extra variable declarations and statements that will need to be
-        // inserted appropriately.
-        /*SwapStmtGenerator generator =
-                new SwapStmtGenerator(createLocation(ctx),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
 
         // TODO: Change this one we have the converter done
         OperationProcedureDec afterCoversionOpProcDec =
@@ -1754,15 +1727,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
                                 .variableDecl()), Utilities.collect(
                                 Statement.class, ctx.stmt(), myNodes), true);
-
-        // TODO:
-        // If either side contains an array expression, its index could contain another array expression.
-        // In this case, we will generate extra variable declarations and statements that will need to be
-        // inserted appropriately.
-        /*SwapStmtGenerator generator =
-                new SwapStmtGenerator(createLocation(ctx),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.left),
-                        (ProgramVariableExp) myNodes.removeFrom(ctx.right));*/
 
         // TODO: Change this one we have the converter done
         OperationProcedureDec afterCoversionOpProcDec =

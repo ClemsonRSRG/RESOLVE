@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
@@ -298,20 +299,128 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This statement could have syntactic sugar conversions, so
-     * we will need to have a way to store the new {@link Statement}s that get
-     * generated.</p>
+     * <p>This statement could have syntactic sugar conversions, so it generates
+     * the appropriate "swap" call.</p>
      *
      * @param e Current {@link SwapStmt} we are visiting.
      */
     @Override
-    public void preSwapStmt(SwapStmt e) {
-        myNewStatementsContainer = new NewStatementsContainer();
-    }
-
-    @Override
     public void postSwapStmt(SwapStmt e) {
-        myNewStatementsContainer = null;
+        // Build the various different "swap" statements.
+        Location l = e.getLocation();
+        ProgramVariableExp leftExp = e.getLeft();
+        ProgramVariableExp rightExp = e.getRight();
+
+        // Boolean that indicates whether or not the expressions are
+        // some kind of ProgramVariableArrayExp
+        boolean isLeftArrayExp =
+                ArrayConversionUtilities.isProgArrayExp(leftExp);
+        boolean isRightArrayExp =
+                ArrayConversionUtilities.isProgArrayExp(rightExp);
+
+        // Case #1: Left expression is not an expression that is a ProgramVariableArrayExp,
+        // but the right is a ProgramVariableArrayExp.
+        // (ie: x :=: A[i], where "A" is an array, "i" is
+        // index and "x" is a variable.)
+        Statement newStatement;
+        if (!isLeftArrayExp && isRightArrayExp) {
+            // Obtain the array type, name and index
+            ProgramVariableExp arrayNameExp =
+                    ArrayConversionUtilities.getArrayNameExp(leftExp);
+            ProgramExp arrayIndexExp =
+                    ArrayConversionUtilities.getArrayIndexExp(leftExp);
+            NameTy arrayTy = findArrayType(arrayNameExp);
+
+            // New "Swap_Entry" call
+            newStatement =
+                    ArrayConversionUtilities
+                            .buildSwapEntryCall(l, rightExp, arrayTy
+                                    .getQualifier(), arrayNameExp,
+                                    arrayIndexExp);
+        }
+        // Case #2: Right expression is not an expression that is a ProgramVariableArrayExp,
+        // but the left is a ProgramVariableArrayExp.
+        // (ie: A[i] :=: x, where "A" is an array, "i" is
+        // index and "x" is a variable.)
+        else if (isLeftArrayExp && !isRightArrayExp) {
+            // Obtain the array type, name and index
+            ProgramVariableExp arrayNameExp =
+                    ArrayConversionUtilities.getArrayNameExp(rightExp);
+            ProgramExp arrayIndexExp =
+                    ArrayConversionUtilities.getArrayIndexExp(rightExp);
+            NameTy arrayTy = findArrayType(arrayNameExp);
+
+            // New "Swap_Entry" call
+            newStatement =
+                    ArrayConversionUtilities
+                            .buildSwapEntryCall(l, rightExp, arrayTy
+                                    .getQualifier(), arrayNameExp,
+                                    arrayIndexExp);
+        }
+        // Case #3: Both left and right expressions are ProgramVariableArrayExp
+        // expressions.
+        // (ie: A[i] :=: A[j], where "A" is an array and
+        // "i" and "j" are indexes)
+        else if (isLeftArrayExp && isRightArrayExp) {
+            // Obtain the array type, name and index
+            ProgramVariableExp leftArrayNameExp =
+                    ArrayConversionUtilities.getArrayNameExp(leftExp);
+            ProgramVariableExp rightArrayNameExp =
+                    ArrayConversionUtilities.getArrayNameExp(rightExp);
+            ProgramExp leftArrayIndexExp =
+                    ArrayConversionUtilities.getArrayIndexExp(leftExp);
+            ProgramExp rightArrayIndexExp =
+                    ArrayConversionUtilities.getArrayIndexExp(rightExp);
+
+            // Throw an exception if the array names are not equivalent
+            if (!leftArrayNameExp.equivalent(rightArrayNameExp)) {
+                PosSymbol rightArrayNameAsPosSymbol;
+                if (rightArrayNameExp instanceof ProgramVariableNameExp) {
+                    rightArrayNameAsPosSymbol =
+                            ((ProgramVariableNameExp) rightArrayNameExp)
+                                    .getName();
+                }
+                else {
+                    StringBuffer sb = new StringBuffer();
+                    Iterator<ProgramVariableExp> segsIt =
+                            ((ProgramVariableDotExp) rightArrayNameExp)
+                                    .getSegments().iterator();
+                    while (segsIt.hasNext()) {
+                        ProgramVariableNameExp current =
+                                (ProgramVariableNameExp) segsIt.next();
+                        sb.append(current.getName().getName());
+
+                        if (segsIt.hasNext()) {
+                            sb.append(".");
+                        }
+                    }
+
+                    rightArrayNameAsPosSymbol =
+                            new PosSymbol(new Location(rightArrayNameExp
+                                    .getLocation()), sb.toString());
+                }
+
+                throw new SourceErrorException(
+                        "Cannot swap elements between two different arrays!",
+                        rightArrayNameAsPosSymbol);
+            }
+
+            // New "Swap_Two_Entries" call
+            NameTy arrayTy = findArrayType(leftArrayNameExp);
+            newStatement =
+                    ArrayConversionUtilities.buildSwapTwoEntriesCall(l, arrayTy
+                            .getQualifier(), leftArrayNameExp,
+                            leftArrayIndexExp, rightArrayIndexExp);
+        }
+        // Case #4: If it is not cases 1-4, then we build a regular
+        // SwapStmt.
+        else {
+            newStatement =
+                    new SwapStmt(new Location(l), (ProgramVariableExp) leftExp
+                            .clone(), (ProgramVariableExp) rightExp.clone());
+        }
+
+        addToInnerMostCollector(newStatement);
     }
 
     @Override

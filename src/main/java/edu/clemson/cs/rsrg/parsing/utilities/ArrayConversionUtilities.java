@@ -60,17 +60,40 @@ public class ArrayConversionUtilities {
      *
      * @return A {@link CallStmt} object.
      */
-    public static CallStmt buildSwapEntryCall(Location l, ProgramVariableNameExp varExp, PosSymbol facQualifier, ProgramVariableExp arrayNameExp, ProgramExp arrayIndexExp) {
+    public static CallStmt buildSwapEntryCall(
+            Location l, ProgramVariableExp varExp, PosSymbol facQualifier,
+            ProgramVariableExp arrayNameExp, ProgramExp arrayIndexExp) {
         List<ProgramExp> args = new ArrayList<>();
         args.add(arrayNameExp.clone());
         args.add(varExp.clone());
         args.add(arrayIndexExp.clone());
 
-        return new CallStmt(new Location(l), new ProgramFunctionExp(new Location(l), facQualifier, new PosSymbol(new Location(l), "Swap_Entry"), args));
+        return new CallStmt(new Location(l), new ProgramFunctionExp(new Location(l),
+                facQualifier, new PosSymbol(new Location(l), "Swap_Entry"), args));
     }
 
-    public static CallStmt buildSwapTwoEntriesCall() {
-        return null;
+    /**
+     * <p>An helper method to create a call to the {@code Swap_Two_Entries}
+     * operation in {@code Static_Array_Template}.</p>
+     *
+     * @param l Location for the new elements.
+     * @param facQualifier The facility name of the array.
+     * @param arrayNameExp The array name expression.
+     * @param arrayIndexExp1 The first array index expression.
+     * @param arrayIndexExp2 The second array index expression.
+     *
+     * @return A {@link CallStmt} object.
+     */
+    public static CallStmt buildSwapTwoEntriesCall(
+            Location l, PosSymbol facQualifier, ProgramVariableExp arrayNameExp,
+            ProgramExp arrayIndexExp1, ProgramExp arrayIndexExp2) {
+        List<ProgramExp> args = new ArrayList<>();
+        args.add(arrayNameExp.clone());
+        args.add(arrayIndexExp1.clone());
+        args.add(arrayIndexExp2.clone());
+
+        return new CallStmt(new Location(l), new ProgramFunctionExp(new Location(l),
+                facQualifier, new PosSymbol(new Location(l), "Swap_Two_Entries"), args));
     }
 
     /**
