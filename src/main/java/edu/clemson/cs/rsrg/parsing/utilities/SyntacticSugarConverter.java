@@ -195,15 +195,44 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myNewStatementsContainer = new NewStatementsContainer();
     }
 
+    /**
+     * <p>This statement could have syntactic sugar conversions, so it checks to see
+     * if we have generated new {@link Statement}s and place those in the appropriate
+     * location.</p>
+     *
+     * @param e Current {@link CallStmt} we are visiting.
+     */
     @Override
     public void postCallStmt(CallStmt e) {
+        // Add any statements that need to appear before this one.
+        while (!myNewStatementsContainer.newPreStmts.empty()) {
+            addToInnerMostCollector(myNewStatementsContainer.newPreStmts.pop());
+        }
+
+        // Rebuild the new call statement with the new args (if necessary)
+        ProgramFunctionExp exp;
+        if (myReplacingElementsMap.containsKey(e.getFunctionExp())) {
+            exp =
+                    (ProgramFunctionExp) myReplacingElementsMap.remove(e
+                            .getFunctionExp());
+        }
+        else {
+            exp = (ProgramFunctionExp) e.getFunctionExp().clone();
+        }
+        addToInnerMostCollector(new CallStmt(new Location(e.getLocation()), exp));
+
+        // Add any statements that need to appear after this one.
+        while (!myNewStatementsContainer.newPostStmts.isEmpty()) {
+            addToInnerMostCollector(myNewStatementsContainer.newPostStmts
+                    .remove());
+        }
+
         myNewStatementsContainer = null;
     }
 
     /**
      * <p>This statement doesn't need to do any syntactic sugar conversions,
-     * therefore we create a new {@link ConfirmStmt} and add it to the top-most
-     * {@link ResolveConceptualElementCollector} instance.</p>
+     * therefore we create a new {@link ConfirmStmt} for future use.</p>
      *
      * @param e Current {@link ConfirmStmt} we are visiting.
      */
@@ -248,8 +277,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
     /**
      * <p>This statement doesn't need to do any syntactic sugar conversions,
-     * therefore we create a new {@link MemoryStmt} and add it to our
-     * {@link ResolveConceptualElementCollector} instance.</p>
+     * therefore we create a new {@link MemoryStmt} for future use.</p>
      *
      * @param e Current {@link MemoryStmt} we are visiting.
      */
@@ -260,8 +288,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
     /**
      * <p>This statement doesn't need to do any syntactic sugar conversions,
-     * therefore we create a new {@link PresumeStmt} and add it to our
-     * {@link ResolveConceptualElementCollector} instance.</p>
+     * therefore we create a new {@link PresumeStmt} for future use.</p>
      *
      * @param e Current {@link PresumeStmt} we are visiting.
      */
