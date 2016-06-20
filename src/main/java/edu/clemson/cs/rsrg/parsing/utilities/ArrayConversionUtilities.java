@@ -14,10 +14,8 @@ package edu.clemson.cs.rsrg.parsing.utilities;
 
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
-import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -47,36 +45,6 @@ public class ArrayConversionUtilities {
         return null;
     }
 
-    /**
-     * <a>An helper method to create a {@link FuncAssignStmt} to store
-     * the array indexes.</a>
-     *
-     * @param l Location for the new statement.
-     * @param variableExp The variable to be assigned to.
-     * @param indexExp The array index expression.
-     *
-     * @return A {@link FuncAssignStmt} object.
-     */
-    public static FuncAssignStmt buildStoreArrayIndexStmt(
-            Location l, ProgramVariableExp variableExp, ProgramExp indexExp) {
-        // Call "Replica" if it is not already some kind
-        // of ProgramFunctionExp that returns an integer.
-        ProgramExp newIndexExp;
-        if (!(indexExp instanceof ProgramFunctionExp)) {
-            Location indexLocation = indexExp.getLocation();
-            List<ProgramExp> args = new ArrayList<>();
-            args.add(indexExp.clone());
-
-            newIndexExp = new ProgramFunctionExp(new Location(indexLocation), null,
-                    new PosSymbol(new Location(indexLocation), "Replica"), args);
-        }
-        else {
-            newIndexExp = indexExp.clone();
-        }
-
-        return new FuncAssignStmt(new Location(l), variableExp, newIndexExp);
-    }
-
     public static CallStmt buildSwapEntryCall() {
         return null;
     }
@@ -86,7 +54,8 @@ public class ArrayConversionUtilities {
     }
 
     /**
-     * <p>An helper method that returns the array index expression.</p>
+     * <p>An helper method that returns a new {@link ProgramExp} containing
+     * the array index expression.</p>
      *
      * @param exp A programming expression.
      *
@@ -97,7 +66,8 @@ public class ArrayConversionUtilities {
     public static ProgramExp getArrayIndexExp(ProgramExp exp) {
         ProgramExp arrayIndexExp;
         if (exp instanceof ProgramVariableArrayExp) {
-            arrayIndexExp = ((ProgramVariableArrayExp) exp).getArrayIndexExp();
+            arrayIndexExp =
+                    ((ProgramVariableArrayExp) exp).getArrayIndexExp().clone();
         }
         else if (exp instanceof ProgramVariableDotExp) {
             List<ProgramVariableExp> segments =
@@ -107,7 +77,7 @@ public class ArrayConversionUtilities {
             if (lastElementExp instanceof ProgramVariableArrayExp) {
                 arrayIndexExp =
                         ((ProgramVariableArrayExp) lastElementExp)
-                                .getArrayIndexExp();
+                                .getArrayIndexExp().clone();
             }
             else {
                 throw new MiscErrorException(
@@ -124,7 +94,8 @@ public class ArrayConversionUtilities {
     }
 
     /**
-     * <p>An helper method that returns the array name expression.</p>
+     * <p>An helper method that returns a new {@link ProgramExp} containing
+     * the array name expression.</p>
      *
      * @param exp A programming expression.
      *
@@ -135,7 +106,7 @@ public class ArrayConversionUtilities {
     public static ProgramExp getArrayNameExp(ProgramExp exp) {
         ProgramExp arrayNameExp;
         if (exp instanceof ProgramVariableArrayExp) {
-            arrayNameExp = ((ProgramVariableArrayExp) exp).getArrayNameExp();
+            arrayNameExp = ((ProgramVariableArrayExp) exp).getArrayNameExp().clone();
         }
         else if (exp instanceof ProgramVariableDotExp) {
             List<ProgramVariableExp> newSegments = new ArrayList<>();
