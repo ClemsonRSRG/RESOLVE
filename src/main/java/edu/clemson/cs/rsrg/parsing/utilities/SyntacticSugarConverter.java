@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.parsing.utilities;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.VirtualListNode;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
@@ -371,6 +372,13 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myNewStatementsContainer = null;
     }
 
+    /**
+     * <p>This statement could have syntactic sugar conversions, so
+     * we will need to have a way to store the new {@link Statement}s that get
+     * generated.</p>
+     *
+     * @param e Current {@link IfStmt} we are visiting.
+     */
     @Override
     public void preIfStmt(IfStmt e) {
         // We have began a new block that can contain statements,
@@ -379,13 +387,39 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                 .push(new ResolveConceptualElementCollector(e));
     }
 
+    /**
+     * <p>We are done visiting this node, therefore we create a
+     * new {@link IfStmt} for future use.</p>
+     *
+     * @param e Current {@link IfStmt} we are visiting.
+     */
     @Override
     public void postIfStmt(IfStmt e) {
         // Done visiting this IfStmt, so we can pop it off the stack.
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
 
-        // TODO: Build the new IfStmt and add it to the 'next' collector.
+        // Check we got the right collector
+        if (!collector.instantiatingElement.equals(e)) {
+            throw new MiscErrorException(
+                    "Something went wrong during the syntactic sugar conversion",
+                    new IllegalStateException());
+        }
+
+        // Retrieve the new IfConditionItem
+        IfConditionItem newIfConditionItem = (IfConditionItem) myReplacingElementsMap.remove(e.getIfClause());
+
+        // Retrieve all the Else-If's IfConditionItems
+        // Note: Right now there shouldn't be any.
+        List<IfConditionItem> newElseIfItems = new ArrayList<>();
+        List<IfConditionItem> elseIfPairs = e.getElseifpairs();
+        for (IfConditionItem item : elseIfPairs) {
+            newElseIfItems.add((IfConditionItem) myReplacingElementsMap.remove(item));
+        }
+
+        // Build the new IfStmt and add it to the 'next' collector.
+        addToInnerMostCollector(new IfStmt(new Location(e.getLocation()),
+                newIfConditionItem, newElseIfItems, collector.stmts));
     }
 
     /**
@@ -569,7 +603,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         if (previous instanceof ProgramExp
                 && next instanceof LoopVerificationItem) {
             // Obtain the right container to insert the statements that appear before
-            // this WhileStmt and any statements that need to appear before.
+            // this WhileStmt.
             ResolveConceptualElementCollector whileStmtCollector =
                     myResolveElementCollectorStack.pop();
 
@@ -647,6 +681,13 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // Item Nodes
     // -----------------------------------------------------------
 
+    /**
+     * <p>This if-condition could have syntactic sugar conversions, so
+     * we will need to have a way to store the new {@link Statement}s that get
+     * generated.</p>
+     *
+     * @param e Current {@link IfConditionItem} we are visiting.
+     */
     @Override
     public void preIfConditionItem(IfConditionItem e) {
         // We have began a new block that can contain statements,
@@ -658,22 +699,98 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myNewStatementsContainer = new NewStatementsContainer();
     }
 
+    /**
+     * <p>After visiting the if-condition, we could have generated new {@link Statement}s, so
+     * we will need to place those in the appropriate locations.</p>
+     *
+     * @param e Current {@link IfConditionItem} we are visiting.
+     * @param previous The previous {@link ResolveConceptualElement} visited.
+     * @param next The next {@link ResolveConceptualElement} to visit.
+     */
     @Override
     public void midIfConditionItem(IfConditionItem e,
             ResolveConceptualElement previous, ResolveConceptualElement next) {
-    // TODO: Check to see if the condition item has any syntactic sugar conversions.
-    // If yes, we will need to add it back to both the statements inside the if and also inside the else.
+        // Check to see if the condition item has any syntactic sugar conversions.
+        // If yes, we will need to add it back to both the statements inside the if and also inside the else.
+        if (previous instanceof ProgramExp && next instanceof VirtualListNode) {
+            // Obtain the container for IfConditionItem and the container for a IfStmt.
+            ResolveConceptualElementCollector ifConditionItemCollector =
+                    myResolveElementCollectorStack.pop();
+            ResolveConceptualElementCollector ifStmtCollector =
+                    myResolveElementCollectorStack.pop();
 
-    // TODO: Set myNewStatementsContainer to null if we are done visiting the if condition
+            // Check we got the right collector
+            if (!ifConditionItemCollector.instantiatingElement.equals(e)) {
+                throw new MiscErrorException(
+                        "Something went wrong during the syntactic sugar conversion",
+                        new IllegalStateException());
+            }
+
+            // Check we got the right collector
+            if (!(ifStmtCollector.instantiatingElement instanceof IfStmt)) {
+                throw new MiscErrorException(
+                        "Something went wrong during the syntactic sugar conversion",
+                        new IllegalStateException());
+            }
+
+            // Add all the new statements generated by the if-condition to the collector
+            // that will contain this IfStmt.
+            while (!myNewStatementsContainer.newPreStmts.empty()) {
+                addToInnerMostCollector(myNewStatementsContainer.newPreStmts
+                        .pop());
+            }
+
+            // Add all the new statements generated by the if-condition to both the
+            // IfConditionItem collector and the IfStmt collector (else statements)
+            while (!myNewStatementsContainer.newPostStmts.isEmpty()) {
+                Statement statement =
+                        myNewStatementsContainer.newPostStmts.remove();
+                ifConditionItemCollector.stmts.add(statement.clone());
+                ifStmtCollector.stmts.add(statement);
+            }
+
+            // Put the collectors back in the right place.
+            myResolveElementCollectorStack.push(ifStmtCollector);
+            myResolveElementCollectorStack.push(ifConditionItemCollector);
+
+            // Set myNewStatementsContainer to null if we are done visiting the if condition
+            myNewStatementsContainer = null;
+        }
     }
 
+    /**
+     * <p>We are done visiting this node, therefore we create a
+     * new {@link IfConditionItem} for future use.</p>
+     *
+     * @param e Current {@link IfConditionItem} we are visiting.
+     */
     @Override
     public void postIfConditionItem(IfConditionItem e) {
         // Done visiting this IfConditionItem, so we can pop it off the stack.
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
 
-        // TODO: Build the new IfConditionItem and add it to our new items map.
+        // Check we got the right collector
+        if (!collector.instantiatingElement.equals(e)) {
+            throw new MiscErrorException(
+                    "Something went wrong during the syntactic sugar conversion",
+                    new IllegalStateException());
+        }
+
+        // Retrieve the new if-condition (if any)
+        ProgramExp newConditionExp;
+        ProgramExp conditionExp = e.getTest();
+        if (myReplacingElementsMap.containsKey(conditionExp)) {
+            newConditionExp =
+                    (ProgramExp) myReplacingElementsMap.remove(conditionExp);
+        }
+        else {
+            newConditionExp = conditionExp.clone();
+        }
+
+        // Build the new IfConditionItem and add it to our new items map.
+        myReplacingElementsMap.put(e, new IfConditionItem(new Location(e
+                .getLocation()), newConditionExp, collector.stmts));
     }
 
     /**
