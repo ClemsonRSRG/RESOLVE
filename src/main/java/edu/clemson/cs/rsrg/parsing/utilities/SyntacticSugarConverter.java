@@ -17,6 +17,8 @@ import edu.clemson.cs.rsrg.absyn.VirtualListNode;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -118,6 +120,77 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Parent Nodes
     // -----------------------------------------------------------
+
+    /**
+     * <p>This should be the top-most node that we start with
+     * when processing syntactic sugar conversions inside a
+     * {@link OperationProcedureDec}.</p>
+     *
+     * @param e Current {@link OperationProcedureDec} we are visiting.
+     */
+    @Override
+    public void preOperationProcedureDec(OperationProcedureDec e) {
+        // Store the params, facility and variable declarations
+        myParentNodeElementsContainer =
+                new ParentNodeElementsContainer(e.getWrappedOpDec()
+                        .getParameters(), e.getFacilities(), e.getVariables());
+
+        // Create a new collector
+        myResolveElementCollectorStack
+                .push(new ResolveConceptualElementCollector(e));
+    }
+
+    /**
+     * <p>This should be the last element we walk. All syntactic
+     * sugar should have been performed and we can safely create
+     * the new {@link OperationProcedureDec} to be returned.</p>
+     *
+     * @param e Current {@link OperationProcedureDec} we are visiting.
+     */
+    @Override
+    public void postOperationProcedureDec(OperationProcedureDec e) {
+        // Get the original OperationDec
+        OperationDec opDec = e.getWrappedOpDec();
+
+        // Return type (if any)
+        Ty returnTy = null;
+        if (opDec.getReturnTy() != null) {
+            returnTy = opDec.getReturnTy().clone();
+        }
+
+        // Affects clause (if any)
+        AffectsClause affectsClause = null;
+        if (opDec.getAffectedVars() != null) {
+            affectsClause = opDec.getAffectedVars().clone();
+        }
+
+        // New OperationDec
+        OperationDec newOperationDec =
+                new OperationDec(opDec.getName().clone(),
+                        myParentNodeElementsContainer.parameterVarDecs,
+                        returnTy, affectsClause, opDec.getRequires().clone(),
+                        opDec.getEnsures().clone());
+
+        // Decreasing clause (if any)
+        AssertionClause decreasingClause = null;
+        boolean recursiveFlag = false;
+        if (e.getDecreasing() != null) {
+            decreasingClause = e.getDecreasing().clone();
+            recursiveFlag = true;
+        }
+
+        // Build the new OperationProcedureDec
+        ResolveConceptualElementCollector collector =
+                myResolveElementCollectorStack.pop();
+        myFinalProcessedElement =
+                new OperationProcedureDec(newOperationDec, decreasingClause,
+                        myParentNodeElementsContainer.facilityDecs,
+                        myParentNodeElementsContainer.varDecs, collector.stmts,
+                        recursiveFlag);
+
+        // Just in case
+        myParentNodeElementsContainer = null;
+    }
 
     /**
      * <p>This should be the top-most node that we start with
