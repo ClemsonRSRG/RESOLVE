@@ -12,11 +12,13 @@
  */
 package edu.clemson.cs.rsrg.parsing.utilities;
 
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableArrayExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableDotExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
-import edu.clemson.cs.rsrg.absyn.statements.Statement;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
+import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
+import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,19 +38,49 @@ public class ArrayConversionUtilities {
     // Public Methods
     // ===========================================================
 
-    public static Statement buildAssignEntryCall() {
+    public static CallStmt buildAssignEntryCall() {
         return null;
     }
 
-    public static Statement buildEntryReplicaCall() {
+    public static CallStmt buildEntryReplicaCall() {
         return null;
     }
 
-    public static Statement buildSwapEntryCall() {
+    /**
+     * <a>An helper method to create a {@link FuncAssignStmt} to store
+     * the array indexes.</a>
+     *
+     * @param l Location for the new statement.
+     * @param variableExp The variable to be assigned to.
+     * @param indexExp The array index expression.
+     *
+     * @return A {@link FuncAssignStmt} object.
+     */
+    public static FuncAssignStmt buildStoreArrayIndexStmt(
+            Location l, ProgramVariableExp variableExp, ProgramExp indexExp) {
+        // Call "Replica" if it is not already some kind
+        // of ProgramFunctionExp that returns an integer.
+        ProgramExp newIndexExp;
+        if (!(indexExp instanceof ProgramFunctionExp)) {
+            Location indexLocation = indexExp.getLocation();
+            List<ProgramExp> args = new ArrayList<>();
+            args.add(indexExp.clone());
+
+            newIndexExp = new ProgramFunctionExp(new Location(indexLocation), null,
+                    new PosSymbol(new Location(indexLocation), "Replica"), args);
+        }
+        else {
+            newIndexExp = indexExp.clone();
+        }
+
+        return new FuncAssignStmt(new Location(l), variableExp, newIndexExp);
+    }
+
+    public static CallStmt buildSwapEntryCall() {
         return null;
     }
 
-    public static Statement buildSwapTwoEntriesCall() {
+    public static CallStmt buildSwapTwoEntriesCall() {
         return null;
     }
 
