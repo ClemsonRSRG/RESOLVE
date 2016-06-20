@@ -356,9 +356,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * the calling arguments with appropriate swapping operation from
      * {@code Static_Array_Template}.</p>
      *
-     * <p>Any new statements generated will be added to a
-     * {@link NewStatementsContainer} instance.</p>
-     *
      * @param e Current {@link ProgramFunctionExp} we are visiting.
      */
     @Override

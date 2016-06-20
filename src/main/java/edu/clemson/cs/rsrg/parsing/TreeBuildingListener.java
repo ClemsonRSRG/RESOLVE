@@ -53,10 +53,9 @@ import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import java.util.*;
-
 import edu.clemson.cs.rsrg.parsing.utilities.SyntacticSugarConverter;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import java.util.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;

@@ -15,10 +15,11 @@ package edu.clemson.cs.rsrg.parsing.utilities;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -82,6 +83,91 @@ public class ArrayConversionUtilities {
 
     public static CallStmt buildSwapTwoEntriesCall() {
         return null;
+    }
+
+    /**
+     * <p>An helper method that returns the array index expression.</p>
+     *
+     * @param exp A programming expression.
+     *
+     * @return The array index expression.
+     *
+     * @exception MiscErrorException
+     */
+    public static ProgramExp getArrayIndexExp(ProgramExp exp) {
+        ProgramExp arrayIndexExp;
+        if (exp instanceof ProgramVariableArrayExp) {
+            arrayIndexExp = ((ProgramVariableArrayExp) exp).getArrayIndexExp();
+        }
+        else if (exp instanceof ProgramVariableDotExp) {
+            List<ProgramVariableExp> segments =
+                    ((ProgramVariableDotExp) exp).getSegments();
+            ProgramExp lastElementExp = segments.get(segments.size() - 1);
+
+            if (lastElementExp instanceof ProgramVariableArrayExp) {
+                arrayIndexExp =
+                        ((ProgramVariableArrayExp) lastElementExp)
+                                .getArrayIndexExp();
+            }
+            else {
+                throw new MiscErrorException(
+                        "Not a programming array expression: " + exp.toString(),
+                        new IllegalStateException());
+            }
+        }
+        else {
+            throw new MiscErrorException("Not a programming array expression: "
+                    + exp.toString(), new IllegalStateException());
+        }
+
+        return arrayIndexExp;
+    }
+
+    /**
+     * <p>An helper method that returns the array name expression.</p>
+     *
+     * @param exp A programming expression.
+     *
+     * @return The array name expression.
+     *
+     * @exception MiscErrorException
+     */
+    public static ProgramExp getArrayNameExp(ProgramExp exp) {
+        ProgramExp arrayNameExp;
+        if (exp instanceof ProgramVariableArrayExp) {
+            arrayNameExp = ((ProgramVariableArrayExp) exp).getArrayNameExp();
+        }
+        else if (exp instanceof ProgramVariableDotExp) {
+            List<ProgramVariableExp> newSegments = new ArrayList<>();
+            Iterator<ProgramVariableExp> segmentIt = ((ProgramVariableDotExp) exp).getSegments().iterator();
+            while (segmentIt.hasNext()) {
+                ProgramVariableExp currentExp = segmentIt.next();
+
+                // Not the last element
+                if (segmentIt.hasNext()) {
+                    newSegments.add((ProgramVariableExp) currentExp.clone());
+                }
+                else {
+                    if (currentExp instanceof ProgramVariableArrayExp) {
+                        ProgramVariableArrayExp arrayExp = (ProgramVariableArrayExp) currentExp;
+                        newSegments.add((ProgramVariableExp) arrayExp.getArrayNameExp().clone());
+                    }
+                    else {
+                        throw new MiscErrorException(
+                                "Not a programming array expression: " + exp.toString(),
+                                new IllegalStateException());
+                    }
+                }
+            }
+
+            arrayNameExp = new ProgramVariableDotExp(new Location(exp.getLocation()), newSegments);
+        }
+        else {
+            throw new MiscErrorException("Not a programming array expression: "
+                    + exp.toString(), new IllegalStateException());
+        }
+
+        return arrayNameExp;
     }
 
     /**
