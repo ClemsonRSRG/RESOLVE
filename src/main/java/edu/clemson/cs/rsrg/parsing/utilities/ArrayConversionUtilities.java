@@ -12,10 +12,13 @@
  */
 package edu.clemson.cs.rsrg.parsing.utilities;
 
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
+import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +54,56 @@ public class ArrayConversionUtilities {
 
     public static CallStmt buildSwapTwoEntriesCall() {
         return null;
+    }
+
+    /**
+     * <p>An helper method to build a new {@link VarDec} to store the value
+     * in the array expression resulting from calling the operations in
+     * {@code Static_Array_Template}.</p>
+     *
+     * @param arrayNameExp The {@link ProgramVariableExp} containing the array name.
+     * @param arrayContentType The {@link Ty} of the array's contents.
+     * @param counter An integer value that helps us create distinct
+     *                new variables.
+     *
+     * @return A {@link VarDec} object.
+     *
+     * @exception MiscErrorException
+     */
+    public static VarDec buildTempArrayNameVarDec(
+            ProgramVariableExp arrayNameExp, Ty arrayContentType, int counter) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("_");
+
+        if (arrayNameExp instanceof ProgramVariableNameExp) {
+            sb.append(((ProgramVariableNameExp) arrayNameExp).getName()
+                    .getName());
+        }
+        else if (arrayNameExp instanceof ProgramVariableDotExp) {
+            Iterator<ProgramVariableExp> segmentIt =
+                    ((ProgramVariableDotExp) arrayNameExp).getSegments()
+                            .iterator();
+            while (segmentIt.hasNext()) {
+                ProgramVariableNameExp next =
+                        (ProgramVariableNameExp) segmentIt.next();
+                sb.append(next.getName().getName());
+
+                if (segmentIt.hasNext()) {
+                    sb.append("_");
+                }
+            }
+        }
+        else {
+            throw new MiscErrorException(
+                    "Cannot generate a new variable declaration using: "
+                            + arrayNameExp, new IllegalStateException());
+        }
+        sb.append("_");
+        sb.append(counter);
+
+        return new VarDec(new PosSymbol(
+                new Location(arrayNameExp.getLocation()), sb.toString()),
+                arrayContentType.clone());
     }
 
     /**

@@ -97,6 +97,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // Constructors
     // ===========================================================
 
+    // TODO: Javadocs here!
     public SyntacticSugarConverter(Map<NameTy, NameTy> arrayNameTyToInnerTyMap,
             int newElementCounter) {
         myArrayNameTyToInnerTyMap = arrayNameTyToInnerTyMap;
