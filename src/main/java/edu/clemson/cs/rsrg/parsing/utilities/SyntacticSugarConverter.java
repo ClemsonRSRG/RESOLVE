@@ -254,8 +254,119 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         myNewStatementsContainer = new NewStatementsContainer();
     }
 
+    /**
+     * <p>This statement could have syntactic sugar conversions, so it checks to see
+     * if we have generated new {@link Statement}s and place those in the appropriate
+     * location.</p>
+     *
+     * @param e Current {@link FuncAssignStmt} we are visiting.
+     */
     @Override
     public void postFuncAssignStmt(FuncAssignStmt e) {
+        // Add any statements that need to appear before this one.
+        while (!myNewStatementsContainer.newPreStmts.empty()) {
+            addToInnerMostCollector(myNewStatementsContainer.newPreStmts.pop());
+        }
+
+        // Build the various different "function assignment" statements.
+        Location l = e.getLocation();
+        ProgramVariableExp leftExp = e.getVariableExp();
+        ProgramExp rightExp = e.getAssignExp();
+
+        // Boolean that indicates whether or not the expressions are
+        // some kind of ProgramVariableArrayExp
+        boolean isLeftArrayExp =
+                ArrayConversionUtilities.isProgArrayExp(leftExp);
+        boolean isRightArrayExp =
+                ArrayConversionUtilities.isProgArrayExp(rightExp);
+
+        // Case #1: Left expression is not an expression that is a ProgramVariableArrayExp,
+        // but the right is a ProgramVariableArrayExp.
+        // (ie: x := A[i], where "A" is an array, "i" is
+        // index and "x" is a variable.)
+        Statement newStatement;
+        if (!isLeftArrayExp && isRightArrayExp) {
+            // Obtain the array type, name and index
+            ProgramVariableExp arrayNameExp =
+                    ArrayConversionUtilities.getArrayNameExp(rightExp);
+            ProgramExp arrayIndexExp =
+                    ArrayConversionUtilities.getArrayIndexExp(rightExp);
+            NameTy arrayTy = findArrayType(arrayNameExp);
+
+            newStatement = new FuncAssignStmt(new Location(l), (ProgramVariableExp) leftExp.clone(),
+                    ArrayConversionUtilities.buildEntryReplicaCall(l, arrayTy.getQualifier(),
+                            arrayNameExp, arrayIndexExp));
+        }
+        // Case #2: Right expression is not an expression that is a ProgramVariableArrayExp,
+        // but the left is a ProgramVariableArrayExp.
+        // (ie: A[i] := x, where "A" is an array, "i" is
+        // index and "x" is a variable.)
+        else if (isLeftArrayExp && !isRightArrayExp) {
+            // Obtain the array type, name and index
+            ProgramVariableExp arrayNameExp =
+                    ArrayConversionUtilities.getArrayNameExp(leftExp);
+            ProgramExp arrayIndexExp =
+                    ArrayConversionUtilities.getArrayIndexExp(leftExp);
+            NameTy arrayTy = findArrayType(arrayNameExp);
+
+            newStatement = ArrayConversionUtilities.buildAssignEntryCall(new Location(l),
+                    rightExp.clone(), arrayTy.getQualifier(), arrayNameExp, arrayIndexExp);
+        }
+        // Case #3: Both left and right expressions are ProgramVariableArrayExp
+        // expressions.
+        // Note: They can be array expressions from different arrays
+        // (ie: A[i] := B[j], where "A" is an array and
+        // "i" and "j" are indexes)
+        else if (isLeftArrayExp && isRightArrayExp) {
+            // Obtain the array type, name and index
+            ProgramVariableExp leftArrayNameExp =
+                    ArrayConversionUtilities.getArrayNameExp(leftExp);
+            ProgramVariableExp rightArrayNameExp =
+                    ArrayConversionUtilities.getArrayNameExp(rightExp);
+            ProgramExp leftArrayIndexExp =
+                    ArrayConversionUtilities.getArrayIndexExp(leftExp);
+            ProgramExp rightArrayIndexExp =
+                    ArrayConversionUtilities.getArrayIndexExp(rightExp);
+            NameTy leftArrayTy = findArrayType(leftArrayNameExp);
+            NameTy rightArrayTy = findArrayType(rightArrayNameExp);
+
+            ProgramFunctionExp newEntryReplicaCall = ArrayConversionUtilities.buildEntryReplicaCall(l,
+                    rightArrayTy.getQualifier(), rightArrayNameExp, rightArrayIndexExp);
+            newStatement = ArrayConversionUtilities.buildAssignEntryCall(new Location(l),
+                    newEntryReplicaCall, leftArrayTy.getQualifier(), leftArrayNameExp, leftArrayIndexExp);
+        }
+        // Case #4: If it is not cases 1-4, then we build a regular
+        // FuncAssignStmt.
+        else {
+            ProgramExp newRightExp;
+            if (rightExp instanceof ProgramFunctionExp) {
+                if (myReplacingElementsMap.containsKey(rightExp)) {
+                    newRightExp = (ProgramExp) myReplacingElementsMap.remove(rightExp);
+                }
+                else {
+                    newRightExp = rightExp.clone();
+                }
+            }
+            else {
+                // Add a call to "Replica"
+                List<ProgramExp> args = new ArrayList<>();
+                args.add(rightExp.clone());
+
+                newRightExp = new ProgramFunctionExp(new Location(rightExp.getLocation()),
+                        null, new PosSymbol(new Location(rightExp.getLocation()), "Replica"), args);
+            }
+
+            newStatement = new FuncAssignStmt(new Location(l),
+                    (ProgramVariableExp) leftExp.clone(), newRightExp);
+        }
+        addToInnerMostCollector(newStatement);
+
+        // Add any statements that need to appear after this one.
+        while (!myNewStatementsContainer.newPostStmts.isEmpty()) {
+            addToInnerMostCollector(myNewStatementsContainer.newPostStmts
+                    .remove());
+        }
+
         myNewStatementsContainer = null;
     }
 
@@ -381,7 +492,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                                     .getName();
                 }
                 else {
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     Iterator<ProgramVariableExp> segsIt =
                             ((ProgramVariableDotExp) rightArrayNameExp)
                                     .getSegments().iterator();

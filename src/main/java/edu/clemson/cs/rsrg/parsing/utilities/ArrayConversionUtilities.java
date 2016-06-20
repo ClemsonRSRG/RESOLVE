@@ -40,12 +40,50 @@ public class ArrayConversionUtilities {
     // Public Methods
     // ===========================================================
 
-    public static CallStmt buildAssignEntryCall() {
-        return null;
+    /**
+     * <p>An helper method to create a call to the {@code Assign_Entry}
+     * operation in {@code Static_Array_Template}.</p>
+     *
+     * @param l Location for the new elements.
+     * @param assignExp Expression to be assigned to.
+     * @param facQualifier The facility name of the array.
+     * @param arrayNameExp The array name expression.
+     * @param arrayIndexExp The array index expression.
+     *
+     * @return A {@link ProgramFunctionExp} object.
+     */
+    public static CallStmt buildAssignEntryCall(
+            Location l, ProgramExp assignExp, PosSymbol facQualifier,
+            ProgramVariableExp arrayNameExp, ProgramExp arrayIndexExp) {
+        List<ProgramExp> args = new ArrayList<>();
+        args.add(arrayNameExp.clone());
+        args.add(assignExp.clone());
+        args.add(arrayIndexExp.clone());
+
+        return new CallStmt(new Location(l), new ProgramFunctionExp(new Location(l),
+                facQualifier, new PosSymbol(new Location(l), "Assign_Entry"), args));
     }
 
-    public static CallStmt buildEntryReplicaCall() {
-        return null;
+    /**
+     * <p>An helper method to create a call to the {@code Entry_Replica}
+     * operation in {@code Static_Array_Template}.</p>
+     *
+     * @param l Location for the new elements.
+     * @param facQualifier The facility name of the array.
+     * @param arrayNameExp The array name expression.
+     * @param arrayIndexExp The array index expression.
+     *
+     * @return A {@link ProgramFunctionExp} object.
+     */
+    public static ProgramFunctionExp buildEntryReplicaCall(
+            Location l, PosSymbol facQualifier,
+            ProgramVariableExp arrayNameExp, ProgramExp arrayIndexExp) {
+        List<ProgramExp> args = new ArrayList<>();
+        args.add(arrayNameExp.clone());
+        args.add(arrayIndexExp.clone());
+
+        return new ProgramFunctionExp(new Location(l), facQualifier,
+                new PosSymbol(new Location(l), "Entry_Replica"), args);
     }
 
     /**
