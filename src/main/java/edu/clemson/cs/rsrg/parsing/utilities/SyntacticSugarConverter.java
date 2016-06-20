@@ -572,6 +572,14 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             // this WhileStmt and any statements that need to appear before.
             ResolveConceptualElementCollector whileStmtCollector =
                     myResolveElementCollectorStack.pop();
+
+            // Check we got the right collector
+            if (!whileStmtCollector.instantiatingElement.equals(e)) {
+                throw new MiscErrorException(
+                        "Something went wrong during the syntactic sugar conversion",
+                        new IllegalStateException());
+            }
+
             while (!myNewStatementsContainer.newPreStmts.empty()) {
                 addToInnerMostCollector(myNewStatementsContainer.newPreStmts
                         .pop());
