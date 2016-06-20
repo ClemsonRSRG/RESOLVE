@@ -609,7 +609,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                     new IllegalStateException());
         }
 
-        // Build the new WhileStmt and add it to the 'next' collector.
+        // Retrieve the new loop condition (if any)
         ProgramExp newConditionExp;
         ProgramExp conditionExp = e.getTest();
         if (myReplacingElementsMap.containsKey(conditionExp)) {
@@ -620,9 +620,19 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             newConditionExp = conditionExp.clone();
         }
 
+        // Retrieve the new LoopVerificationItem (if any)
+        LoopVerificationItem newItem;
+        LoopVerificationItem item = e.getLoopVerificationBlock();
+        if (myReplacingElementsMap.containsKey(item)) {
+            newItem = (LoopVerificationItem) myReplacingElementsMap.get(item);
+        }
+        else {
+            newItem = item.clone();
+        }
+
+        // Build the new WhileStmt and add it to the 'next' collector.
         addToInnerMostCollector(new WhileStmt(new Location(e.getLocation()),
-                newConditionExp, e.getLoopVerificationBlock().clone(),
-                collector.stmts));
+                newConditionExp, newItem, collector.stmts));
     }
 
     // -----------------------------------------------------------
@@ -656,6 +666,31 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                 myResolveElementCollectorStack.pop();
 
         // TODO: Build the new IfConditionItem and add it to our new items map.
+    }
+
+    /**
+     * <p>The user might not have supplied a {@code changing} clause,
+     * therefore we will need to generate one.</p>
+     *
+     * @param e Current {@link LoopVerificationItem} we are visiting.
+     */
+    @Override
+    public void postLoopVerificationItem(LoopVerificationItem e) {
+        if (e.getChangingVars().isEmpty()) {
+            AssertionClause newElapsedTimeClause = null;
+            if (e.getElapsedTimeClause() != null) {
+                newElapsedTimeClause = e.getElapsedTimeClause().clone();
+            }
+            AssertionClause newMaintainingClause =
+                    e.getMaintainingClause().clone();
+            AssertionClause newDecreasingClause =
+                    e.getDecreasingClause().clone();
+
+            myReplacingElementsMap.put(e, new LoopVerificationItem(
+                    new Location(e.getLocation()), formChangingClause(),
+                    newMaintainingClause, newDecreasingClause,
+                    newElapsedTimeClause));
+        }
     }
 
     // -----------------------------------------------------------
@@ -821,6 +856,29 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         return contentTy;
+    }
+
+    /**
+     * <p>An helper method that adds all the variables in scope as {@code changing}.</p>
+     *
+     * @return A list of {@link ProgramVariableExp} that are changing.
+     */
+    private List<ProgramVariableExp> formChangingClause() {
+        List<ProgramVariableExp> changingList = new ArrayList<>();
+
+        // TODO: Add all the shared state variables
+
+        // Add all the parameter variables
+        for (ParameterVarDec v : myParentNodeElementsContainer.parameterVarDecs) {
+            changingList.add(new ProgramVariableNameExp(new Location(v.getLocation()), null, v.getName().clone()));
+        }
+
+        // Add all the local variables
+        for (VarDec v : myParentNodeElementsContainer.varDecs) {
+            changingList.add(new ProgramVariableNameExp(new Location(v.getLocation()), null, v.getName().clone()));
+        }
+
+        return changingList;
     }
 
     /**
