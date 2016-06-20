@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -366,6 +367,13 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         for (ProgramExp arg : args) {
             // Check each of the args to see if we have ProgramVariableArrayExp.
             if (ArrayConversionUtilities.isProgArrayExp(arg)) {
+                // Create a new variable to store the contents of the array expression
+                ProgramVariableExp arrayNameExp = ArrayConversionUtilities.getArrayNameExp(arg);
+                VarDec newArrayVarDec =
+                        ArrayConversionUtilities.buildTempArrayNameVarDec(arrayNameExp,
+                                findArrayContentType(arrayNameExp), myNewElementCounter++);
+                myParentNodeElementsContainer.varDecs.add(newArrayVarDec);
+
                 // TODO: Apply the syntactic conversions for arrays.
             }
             // ProgramFunctionExp
@@ -443,6 +451,110 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
         // Put it back on the stack
         myResolveElementCollectorStack.push(collector);
+    }
+
+    /**
+     * <p>An helper method that retrieves the type for the contents in
+     * the array expression.</p>
+     *
+     * @param exp The array expression name.
+     *
+     * @return The {@link Ty} for the contents of the array.
+     *
+     * @exception MiscErrorException
+     */
+    private NameTy findArrayContentType(ProgramVariableExp exp) {
+        NameTy contentTy;
+        if (exp instanceof ProgramVariableDotExp) {
+            // TODO: Change this when we pass shared state/type realization to this class.
+            // Right now we assume the array expressions won't be in some kind of record.
+            throw new RuntimeException();
+        }
+        else if (exp instanceof ProgramVariableNameExp) {
+            // TODO: Change this when we pass shared state to this class.
+            String arrayVarName =
+                    ((ProgramVariableNameExp) exp).getName().getName();
+
+            // Search parameter variables
+            AbstractVarDec varDec = searchParameterVarDecs(arrayVarName);
+
+            // Search local variables (if not found);
+            if (varDec == null) {
+                varDec = searchVarDecs(arrayVarName);
+            }
+
+            // Throw exception if we can't find it.
+            if (varDec == null) {
+                throw new MiscErrorException(
+                        "Cannot locate the content type for the array: "
+                                + exp.toString(), new IllegalStateException());
+            }
+            else {
+                NameTy arrayTy = (NameTy) varDec.getTy();
+                contentTy = myArrayNameTyToInnerTyMap.get(arrayTy);
+            }
+        }
+        else {
+            throw new MiscErrorException(
+                    "Cannot locate the content type for the array: "
+                            + exp.toString(), new IllegalStateException());
+        }
+
+        return contentTy;
+    }
+
+    /**
+     * <p>An helper method to try to locate a {@link ParameterVarDec} based on
+     * the string name passed in.</p>
+     *
+     * @param name Name of the variable we are trying to find.
+     *
+     * @return A copy of the {@link ParameterVarDec} if found, else {@code null}.
+     *
+     * @exception MiscErrorException
+     */
+    private ParameterVarDec searchParameterVarDecs(String name) {
+        ParameterVarDec parameterVarDec = null;
+        for (ParameterVarDec v : myParentNodeElementsContainer.parameterVarDecs) {
+            if (v.getName().getName().equals(name)) {
+                if (parameterVarDec == null) {
+                    parameterVarDec = (ParameterVarDec) v.clone();
+                }
+                else {
+                    throw new MiscErrorException(
+                            "Found two parameter variables for: " + name,
+                            new IllegalStateException());
+                }
+            }
+        }
+
+        return parameterVarDec;
+    }
+
+    /**
+     * <p>An helper method to try to locate a {@link VarDec} based on
+     * the string name passed in.</p>
+     *
+     * @param name Name of the variable we are trying to find.
+     *
+     * @return A copy of the {@link VarDec} if found, else {@code null}.
+     *
+     * @exception MiscErrorException
+     */
+    private VarDec searchVarDecs(String name) {
+        VarDec varDec = null;
+        for (VarDec v : myParentNodeElementsContainer.varDecs) {
+            if (varDec == null) {
+                varDec = (VarDec) v.clone();
+            }
+            else {
+                throw new MiscErrorException(
+                        "Found two variables for: " + name,
+                        new IllegalStateException());
+            }
+        }
+
+        return varDec;
     }
 
     // ===========================================================

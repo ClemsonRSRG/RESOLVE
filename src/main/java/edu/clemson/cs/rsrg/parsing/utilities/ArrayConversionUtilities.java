@@ -147,7 +147,7 @@ public class ArrayConversionUtilities {
     }
 
     /**
-     * <p>An helper method that returns a new {@link ProgramExp} containing
+     * <p>An helper method that returns a new {@link ProgramVariableExp} containing
      * the array name expression.</p>
      *
      * @param exp A programming expression.
@@ -156,10 +156,10 @@ public class ArrayConversionUtilities {
      *
      * @exception MiscErrorException
      */
-    public static ProgramExp getArrayNameExp(ProgramExp exp) {
-        ProgramExp arrayNameExp;
+    public static ProgramVariableExp getArrayNameExp(ProgramExp exp) {
+        ProgramVariableExp arrayNameExp;
         if (exp instanceof ProgramVariableArrayExp) {
-            arrayNameExp = ((ProgramVariableArrayExp) exp).getArrayNameExp().clone();
+            arrayNameExp = (ProgramVariableExp) ((ProgramVariableArrayExp) exp).getArrayNameExp().clone();
         }
         else if (exp instanceof ProgramVariableDotExp) {
             List<ProgramVariableExp> newSegments = new ArrayList<>();
