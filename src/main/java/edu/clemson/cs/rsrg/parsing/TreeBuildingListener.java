@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.parsing;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
@@ -24,7 +25,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathCategoricalDefinition
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
-import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
@@ -2721,51 +2721,69 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new correspondence clause.</p>
      *
-     * @param ctx
+     * @param ctx Correspondence clause node in ANTLR4 AST.
      */
     @Override
     public void exitCorrespondenceClause(
             ResolveParser.CorrespondenceClauseContext ctx) {
-        super.exitCorrespondenceClause(ctx);
+        myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp()));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new convention clause.</p>
      *
-     * @param ctx
+     * @param ctx Convention clause node in ANTLR4 AST.
      */
     @Override
     public void exitConventionClause(ResolveParser.ConventionClauseContext ctx) {
-        super.exitConventionClause(ctx);
+        myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.CONVENTION, ctx.mathExp()));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new duration clause.</p>
      *
-     * @param ctx
+     * @param ctx Duration clause node in ANTLR4 AST.
      */
     @Override
     public void exitDurationClause(ResolveParser.DurationClauseContext ctx) {
-        super.exitDurationClause(ctx);
+        Exp whichEntailsExp = null;
+        if (ctx.mathExp() != null) {
+            whichEntailsExp = (Exp) myNodes.removeFrom(ctx.mathExp());
+        }
+        Exp decreasingExp = (Exp) myNodes.removeFrom(ctx.mathAddingExp());
+
+        myNodes.put(ctx, new AssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.DURATION, decreasingExp,
+                whichEntailsExp));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new manipulation displacement clause.</p>
      *
-     * @param ctx
+     * @param ctx Manipulation displacement clause node in ANTLR4 AST.
      */
     @Override
     public void exitManipulationDispClause(
             ResolveParser.ManipulationDispClauseContext ctx) {
-        super.exitManipulationDispClause(ctx);
+        Exp whichEntailsExp = null;
+        if (ctx.mathExp() != null) {
+            whichEntailsExp = (Exp) myNodes.removeFrom(ctx.mathExp());
+        }
+        Exp decreasingExp = (Exp) myNodes.removeFrom(ctx.mathAddingExp());
+
+        myNodes.put(ctx, new AssertionClause(createLocation(ctx),
+                AssertionClause.ClauseType.MANIPDISP, decreasingExp,
+                whichEntailsExp));
     }
 
     // -----------------------------------------------------------
