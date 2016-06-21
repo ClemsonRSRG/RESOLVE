@@ -68,6 +68,7 @@ public class ConfirmStmt extends Statement {
         printSpace(indentSize, sb);
         sb.append("Confirm ");
         sb.append(myAssertion.asString(0, innerIndentInc));
+        sb.append(";");
 
         return sb.toString();
     }

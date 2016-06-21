@@ -67,6 +67,7 @@ public class FuncAssignStmt extends Statement {
         sb.append(myVariableExp.asString(indentSize, innerIndentInc));
         sb.append(" := ");
         sb.append(myAssignExp.asString(0, innerIndentInc));
+        sb.append(";");
 
         return sb.toString();
     }

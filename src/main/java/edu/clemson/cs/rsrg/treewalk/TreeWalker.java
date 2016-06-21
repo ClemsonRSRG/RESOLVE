@@ -191,10 +191,10 @@ public class TreeWalker {
                 }
             }
             catch (IllegalAccessException iae) {
-                throw new MiscErrorException("Error accessing class: " + currentClass.getSimpleName(), iae);
+                throw new MiscErrorException("Error accessing class: " + currentClass.getSimpleName(), iae.getCause());
             }
             catch (InvocationTargetException ite) {
-                throw new MiscErrorException("Target invocation error for class: " + currentClass.getSimpleName(), ite);
+                throw new MiscErrorException("Target invocation error for class: " + currentClass.getSimpleName(), ite.getTargetException());
             }
         }
 

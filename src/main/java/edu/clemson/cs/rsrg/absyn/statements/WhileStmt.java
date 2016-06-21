@@ -71,9 +71,10 @@ public class WhileStmt extends Statement {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
         // loop condition
+        sb.append("\n");
+        printSpace(indentSize, sb);
         sb.append("While ( ");
         sb.append(myTestingExp.asString(0, innerIndentInc));
         sb.append(" )\n");

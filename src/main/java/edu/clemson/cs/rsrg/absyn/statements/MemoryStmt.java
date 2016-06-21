@@ -81,6 +81,7 @@ public class MemoryStmt extends Statement {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
         sb.append(myType.name());
+        sb.append(";");
 
         return sb.toString();
     }

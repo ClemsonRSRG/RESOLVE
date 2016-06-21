@@ -59,6 +59,7 @@ public class PresumeStmt extends Statement {
         printSpace(indentSize, sb);
         sb.append("Presume ");
         sb.append(myAssertion.asString(0, innerIndentInc));
+        sb.append(";");
 
         return sb.toString();
     }

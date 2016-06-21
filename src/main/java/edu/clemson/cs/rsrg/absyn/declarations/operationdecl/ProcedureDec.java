@@ -174,7 +174,7 @@ public class ProcedureDec extends Dec {
         if (myDecreasing != null) {
             sb.append(myDecreasing.asString(indentSize + innerIndentInc,
                     innerIndentInc));
-            sb.append("\n");
+            sb.append(";\n");
         }
 
         // facility declarations

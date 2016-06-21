@@ -70,22 +70,22 @@ public class IfStmt extends Statement {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
         // If
-        sb.append(myIfClause.asString(0, innerIndentInc));
         sb.append("\n");
+        printSpace(indentSize, sb);
+        sb.append(myIfClause.asString(indentSize, innerIndentInc));
 
         // Else-if
         for (IfConditionItem c : myElseIfs) {
             printSpace(indentSize, sb);
             sb.append("Else ");
             sb.append(c.asString(0, innerIndentInc));
-            sb.append("\n");
         }
 
         // Else
         if (myElseStatements.size() > 0) {
+            printSpace(indentSize, sb);
             sb.append("Else\n");
 
             for (Statement s : myElseStatements) {

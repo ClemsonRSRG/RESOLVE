@@ -55,7 +55,11 @@ public class CallStmt extends Statement {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        return myFunctionExp.asString(indentSize, innerIndentInc);
+        StringBuilder sb = new StringBuilder();
+        sb.append(myFunctionExp.asString(indentSize, innerIndentInc));
+        sb.append(";");
+
+        return sb.toString();
     }
 
     /**

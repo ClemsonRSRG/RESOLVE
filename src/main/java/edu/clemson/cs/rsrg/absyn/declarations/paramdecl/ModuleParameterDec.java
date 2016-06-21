@@ -54,7 +54,13 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        return myWrappedDec.asString(indentSize, innerIndentInc);
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        sb.append(myWrappedDec.asString(indentSize + innerIndentInc,
+                innerIndentInc));
+        sb.append("\n");
+
+        return sb.toString();
     }
 
     /**

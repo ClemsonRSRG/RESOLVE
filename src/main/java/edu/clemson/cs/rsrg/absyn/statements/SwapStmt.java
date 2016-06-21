@@ -67,6 +67,7 @@ public class SwapStmt extends Statement {
         sb.append(myLeftHandSide.asString(indentSize, innerIndentInc));
         sb.append(" :=: ");
         sb.append(myRightHandSide.asString(0, innerIndentInc));
+        sb.append(";");
 
         return sb.toString();
     }

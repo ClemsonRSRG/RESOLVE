@@ -73,11 +73,10 @@ public class IfConditionItem extends ResolveConceptualElement {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
-        sb.append("If ");
+        sb.append("If ( ");
         sb.append(myTestingExp.asString(0, innerIndentInc));
-        sb.append(" then\n");
+        sb.append(" ) then\n");
 
         // Print the statements
         for (Statement s : myStatements) {
