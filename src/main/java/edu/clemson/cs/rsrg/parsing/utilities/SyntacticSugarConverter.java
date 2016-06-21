@@ -545,15 +545,15 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         if (!isLeftArrayExp && isRightArrayExp) {
             // Obtain the array type, name and index
             ProgramVariableExp arrayNameExp =
-                    ArrayConversionUtilities.getArrayNameExp(leftExp);
+                    ArrayConversionUtilities.getArrayNameExp(rightExp);
             ProgramExp arrayIndexExp =
-                    ArrayConversionUtilities.getArrayIndexExp(leftExp);
+                    ArrayConversionUtilities.getArrayIndexExp(rightExp);
             NameTy arrayTy = findArrayType(arrayNameExp);
 
             // New "Swap_Entry" call
             newStatement =
                     ArrayConversionUtilities
-                            .buildSwapEntryCall(l, rightExp, arrayTy
+                            .buildSwapEntryCall(l, leftExp, arrayTy
                                     .getQualifier(), arrayNameExp,
                                     arrayIndexExp);
         }
@@ -564,9 +564,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         else if (isLeftArrayExp && !isRightArrayExp) {
             // Obtain the array type, name and index
             ProgramVariableExp arrayNameExp =
-                    ArrayConversionUtilities.getArrayNameExp(rightExp);
+                    ArrayConversionUtilities.getArrayNameExp(leftExp);
             ProgramExp arrayIndexExp =
-                    ArrayConversionUtilities.getArrayIndexExp(rightExp);
+                    ArrayConversionUtilities.getArrayIndexExp(leftExp);
             NameTy arrayTy = findArrayType(arrayNameExp);
 
             // New "Swap_Entry" call
