@@ -201,6 +201,15 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
+     * <p>This method returns the item type.</p>
+     *
+     * @return The {@link ItemType} object.
+     */
+    public final ItemType getItemType() {
+        return myItemType;
+    }
+
+    /**
      * <p>This method returns the list of statements
      * in this type initialization/finalization block.</p>
      *

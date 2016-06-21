@@ -1302,7 +1302,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>This method generates a new representation for a type model
      * initialization item.</p>
      *
-     * @param ctx Spec model init item node in ANTLR4 AST.
+     * @param ctx Spec model init node in ANTLR4 AST.
      */
     @Override
     public void exitSpecModelInit(ResolveParser.SpecModelInitContext ctx) {
@@ -1331,7 +1331,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>This method generates a new representation for a type model
      * finalization item.</p>
      *
-     * @param ctx Spec model final item node in ANTLR4 AST.
+     * @param ctx Spec model final node in ANTLR4 AST.
      */
     @Override
     public void exitSpecModelFinal(ResolveParser.SpecModelFinalContext ctx) {
@@ -1357,157 +1357,121 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a type realization
+     * initialization item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterRepresentationInit(
-            ResolveParser.RepresentationInitContext ctx) {
-        super.enterRepresentationInit(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Representation init node in ANTLR4 AST.
      */
     @Override
     public void exitRepresentationInit(
             ResolveParser.RepresentationInitContext ctx) {
-        super.exitRepresentationInit(ctx);
+        AffectsClause affects = null;
+        if (ctx.affectsClause() != null) {
+            affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
+                TypeInitFinalItem.ItemType.INITIALIZATION, affects,
+                getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
+                        .variableDecl()), Utilities.collect(Statement.class,
+                        ctx.stmt(), myNodes)));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a type realization
+     * finalization item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterRepresentationFinal(
-            ResolveParser.RepresentationFinalContext ctx) {
-        super.enterRepresentationFinal(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Representation final node in ANTLR4 AST.
      */
     @Override
     public void exitRepresentationFinal(
             ResolveParser.RepresentationFinalContext ctx) {
-        super.exitRepresentationFinal(ctx);
+        AffectsClause affects = null;
+        if (ctx.affectsClause() != null) {
+            affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
+                TypeInitFinalItem.ItemType.FINALIZATION, affects,
+                getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
+                        .variableDecl()), Utilities.collect(Statement.class,
+                        ctx.stmt(), myNodes)));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a facility type realization
+     * initialization item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterFacilityRepresentationInit(
-            ResolveParser.FacilityRepresentationInitContext ctx) {
-        super.enterFacilityRepresentationInit(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Facility representation item node in ANTLR4 AST.
      */
     @Override
     public void exitFacilityRepresentationInit(
             ResolveParser.FacilityRepresentationInitContext ctx) {
-        super.exitFacilityRepresentationInit(ctx);
+        AffectsClause affects = null;
+        if (ctx.affectsClause() != null) {
+            affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
+                TypeInitFinalItem.ItemType.INITIALIZATION, affects,
+                getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
+                        .variableDecl()), Utilities.collect(Statement.class,
+                        ctx.stmt(), myNodes)));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a facility type realization
+     * finalization item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterFacilityRepresentationFinal(
-            ResolveParser.FacilityRepresentationFinalContext ctx) {
-        super.enterFacilityRepresentationFinal(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Facility representation final node in ANTLR4 AST.
      */
     @Override
     public void exitFacilityRepresentationFinal(
             ResolveParser.FacilityRepresentationFinalContext ctx) {
-        super.exitFacilityRepresentationFinal(ctx);
+        AffectsClause affects = null;
+        if (ctx.affectsClause() != null) {
+            affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
+        }
+
+        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
+                TypeInitFinalItem.ItemType.FINALIZATION, affects,
+                getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
+                        .variableDecl()), Utilities.collect(Statement.class,
+                        ctx.stmt(), myNodes)));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a performance type model
+     * initialization item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterPerformanceSpecModelInit(
-            ResolveParser.PerformanceSpecModelInitContext ctx) {
-        super.enterPerformanceSpecModelInit(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Performance spec model init node in ANTLR4 AST.
      */
     @Override
     public void exitPerformanceSpecModelInit(
             ResolveParser.PerformanceSpecModelInitContext ctx) {
-        super.exitPerformanceSpecModelInit(ctx);
+    // TODO: Build these AST nodes.
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for a performance type model
+     * finalization item.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterPerformanceSpecModelFinal(
-            ResolveParser.PerformanceSpecModelFinalContext ctx) {
-        super.enterPerformanceSpecModelFinal(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Performance spec model final node in ANTLR4 AST.
      */
     @Override
     public void exitPerformanceSpecModelFinal(
             ResolveParser.PerformanceSpecModelFinalContext ctx) {
-        super.exitPerformanceSpecModelFinal(ctx);
+    // TODO: Build these AST nodes.
     }
 
     // -----------------------------------------------------------
@@ -1571,11 +1535,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         tw.visit(beforeConversionProcDec);
 
         // Obtain the new ProcedureDec generated by the converter
-        ProcedureDec afterCoversionProcDec =
+        ProcedureDec afterConversionProcDec =
                 (ProcedureDec) converter.getProcessedElement();
         myNewElementCounter = converter.getNewElementCounter();
 
-        myNodes.put(ctx, afterCoversionProcDec);
+        myNodes.put(ctx, afterConversionProcDec);
     }
 
     /**
@@ -1641,9 +1605,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         tw.visit(beforeConversionProcDec);
 
         // Obtain the new ProcedureDec generated by the converter
-        ProcedureDec afterCoversionProcDec =
+        ProcedureDec afterConversionProcDec =
                 (ProcedureDec) converter.getProcessedElement();
-        myNodes.put(ctx, afterCoversionProcDec);
+        myNodes.put(ctx, afterConversionProcDec);
     }
 
     /**
@@ -1693,9 +1657,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         tw.visit(beforeConversionOpProcDec);
 
         // Obtain the new OperationProcedureDec generated by the converter
-        OperationProcedureDec afterCoversionOpProcDec =
+        OperationProcedureDec afterConversionOpProcDec =
                 (OperationProcedureDec) converter.getProcessedElement();
-        myNodes.put(ctx, afterCoversionOpProcDec);
+        myNodes.put(ctx, afterConversionOpProcDec);
     }
 
     /**
@@ -1750,9 +1714,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         tw.visit(beforeConversionOpProcDec);
 
         // Obtain the new OperationProcedureDec generated by the converter
-        OperationProcedureDec afterCoversionOpProcDec =
+        OperationProcedureDec afterConversionOpProcDec =
                 (OperationProcedureDec) converter.getProcessedElement();
-        myNodes.put(ctx, afterCoversionOpProcDec);
+        myNodes.put(ctx, afterConversionOpProcDec);
     }
 
     /**
@@ -4189,6 +4153,44 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             AssertionClause.ClauseType clauseType) {
         return new AssertionClause(l, clauseType, VarExp.getTrueVarExp(
                 new Location(l), myTypeGraph));
+    }
+
+    /**
+     * <p>Create an {@link TypeInitFinalItem}
+     * for the current parser rule we are visiting.</p>
+     *
+     * @param l Location for the item.
+     * @param itemType The item type.
+     * @param affects The {@link AffectsClause} for this item.
+     * @param facilityDecs List of {@link FacilityDec}s for this item.
+     * @param varDecs List of {@link VarDec}s for this item.
+     * @param statements List of {@link Statement}s for this item.
+     *
+     * @return A {@link TypeInitFinalItem} for the rule.
+     */
+    private TypeInitFinalItem createTypeInitFinalItem(Location l,
+            TypeInitFinalItem.ItemType itemType, AffectsClause affects,
+            List<FacilityDec> facilityDecs, List<VarDec> varDecs,
+            List<Statement> statements) {
+        // Create the finalization item that we are going to perform
+        // the syntactic sugar conversions on.
+        TypeInitFinalItem beforeConversionFinalItem =
+                new TypeInitFinalItem(new Location(l), itemType, affects,
+                        facilityDecs, varDecs, statements);
+
+        // Attempt to resolve all the syntactic sugar conversions
+        SyntacticSugarConverter converter =
+                new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
+                        myNewElementCounter);
+        TreeWalker tw = new TreeWalker(converter);
+        tw.visit(beforeConversionFinalItem);
+
+        // Obtain the new TypeInitFinalItem generated by the converter
+        TypeInitFinalItem afterConversionFinalItem =
+                (TypeInitFinalItem) converter.getProcessedElement();
+        myNewElementCounter = converter.getNewElementCounter();
+
+        return afterConversionFinalItem;
     }
 
     /**
