@@ -96,6 +96,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private boolean myIsProcessingModuleArgument;
 
     /**
+     * <p>This helper class help us keep track of all the module level
+     * array facilities.</p>
+     */
+    private NewModuleDecMembers myModuleLevelDecs;
+
+    /**
      * <p>This is a stack that contains containers for potential new array
      * facilities.</p>
      */
@@ -147,6 +153,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myNodes = new ParseTreeProperty<>();
         myDefinitionMemberList = null;
         myIsProcessingModuleArgument = false;
+        myModuleLevelDecs = null;
         myArrayFacilityDecContainerStack = new Stack<>();
         myArrayNameTyToInnerTyMap = new HashMap<>();
         myNewElementCounter = 0;
@@ -267,9 +274,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     new IllegalArgumentException());
         }
 
-        // Create a new container
-        myArrayFacilityDecContainerStack
-                .push(new ArrayFacilityDecContainer(ctx));
+        // Create a helper class to keep track of new module level declarations
+        myModuleLevelDecs = new NewModuleDecMembers();
     }
 
     /**
@@ -446,9 +452,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     new IllegalArgumentException());
         }
 
-        // Create a new container
-        myArrayFacilityDecContainerStack
-                .push(new ArrayFacilityDecContainer(ctx));
+        // Create a helper class to keep track of new module level declarations
+        myModuleLevelDecs = new NewModuleDecMembers();
     }
 
     /**
@@ -595,9 +600,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     new IllegalArgumentException());
         }
 
-        // Create a new container
-        myArrayFacilityDecContainerStack
-                .push(new ArrayFacilityDecContainer(ctx));
+        // Create a helper class to keep track of new module level declarations
+        myModuleLevelDecs = new NewModuleDecMembers();
     }
 
     /**
@@ -1120,6 +1124,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
+     *
+     * @param ctx Type realization declaration node in ANTLR4 AST.
+     */
+    @Override
+    public void enterTypeRepresentationDecl(
+            ResolveParser.TypeRepresentationDeclContext ctx) {
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
      * <p>This method generates a representation of a type realization
      * declaration.</p>
      *
@@ -1145,6 +1165,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         else {
             rawTy = (Ty) myNodes.removeFrom(ctx.programNamedType());
         }
+
+        // Obtain any array facility declarations and
+        // store it into our module level members
+        ArrayFacilityDecContainer innerMostContainer =
+                myArrayFacilityDecContainerStack.pop();
+        myModuleLevelDecs.newFacilityDecsMap.put(ctx,
+                innerMostContainer.newFacilityDecs);
 
         AssertionClause convention;
         if (ctx.conventionClause() != null) {
@@ -1205,6 +1232,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
+     *
+     * @param ctx Facility type realization declaration node in ANTLR4 AST.
+     */
+    @Override
+    public void enterFacilityTypeRepresentationDecl(
+            ResolveParser.FacilityTypeRepresentationDeclContext ctx) {
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
      * <p>This method generates a representation of a facility type realization
      * declaration.</p>
      *
@@ -1230,6 +1273,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         else {
             rawTy = (NameTy) myNodes.removeFrom(ctx.programNamedType());
         }
+
+        // Obtain any array facility declarations and
+        // store it into our module level members
+        ArrayFacilityDecContainer innerMostContainer =
+                myArrayFacilityDecContainerStack.pop();
+        myModuleLevelDecs.newFacilityDecsMap.put(ctx,
+                innerMostContainer.newFacilityDecs);
 
         AssertionClause convention;
         if (ctx.conventionClause() != null) {
@@ -1399,6 +1449,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
+     *
+     * @param ctx Shared state realization declaration node in ANTLR4 AST.
+     */
+    @Override
+    public void enterSharedStateDecl(ResolveParser.SharedStateDeclContext ctx) {
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
      * <p>This method generates a representation of a shared state realization
      * declaration.</p>
      *
@@ -1414,6 +1479,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 sharedStateVars.add((VarDec) myNodes.removeFrom(ident));
             }
         }
+
+        // Obtain any array facility declarations and
+        // store it into our module level members
+        ArrayFacilityDecContainer innerMostContainer =
+                myArrayFacilityDecContainerStack.pop();
+        myModuleLevelDecs.newFacilityDecsMap.put(ctx, innerMostContainer.newFacilityDecs);
 
         AssertionClause convention;
         if (ctx.conventionClause() != null) {
@@ -1467,7 +1538,24 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        myNodes.put(ctx, new SharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars, convention, correspondence, initItem, finalItem));
+        myNodes.put(ctx, new SharedStateRealizationDec(createPosSymbol(ctx.name),
+                sharedStateVars, convention, correspondence, initItem, finalItem));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
+     *
+     * @param ctx Facility shared state realization declaration node in ANTLR4 AST.
+     */
+    @Override
+    public void enterFacilitySharedStateRepresentationDecl(
+            ResolveParser.FacilitySharedStateRepresentationDeclContext ctx) {
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
@@ -1488,6 +1576,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 sharedStateVars.add((VarDec) myNodes.removeFrom(ident));
             }
         }
+
+        // Obtain any array facility declarations and
+        // store it into our module level members
+        ArrayFacilityDecContainer innerMostContainer =
+                myArrayFacilityDecContainerStack.pop();
+        myModuleLevelDecs.newFacilityDecsMap.put(ctx, innerMostContainer.newFacilityDecs);
 
         AssertionClause convention;
         if (ctx.conventionClause() != null) {
@@ -1539,7 +1633,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        myNodes.put(ctx, new FacilitySharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars, convention, initItem, finalItem));
+        myNodes.put(ctx, new FacilitySharedStateRealizationDec(createPosSymbol(ctx.name),
+                sharedStateVars, convention, initItem, finalItem));
     }
 
     // -----------------------------------------------------------
@@ -1607,6 +1702,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
+     *
+     * @param ctx Representation init node in ANTLR4 AST.
+     */
+    @Override
+    public void enterRepresentationInit(
+            ResolveParser.RepresentationInitContext ctx) {
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
      * <p>This method generates a new representation for a type realization
      * initialization item.</p>
      *
@@ -1625,6 +1736,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
                         .variableDecl()), Utilities.collect(Statement.class,
                         ctx.stmt(), myNodes)));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
+     *
+     * @param ctx Representation final node in ANTLR4 AST.
+     */
+    @Override
+    public void enterRepresentationFinal(
+            ResolveParser.RepresentationFinalContext ctx) {
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
@@ -1653,10 +1780,26 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
+     *
+     * @param ctx Facility representation init node in ANTLR4 AST.
+     */
+    @Override
+    public void enterFacilityRepresentationInit(
+            ResolveParser.FacilityRepresentationInitContext ctx) {
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
      * <p>This method generates a new representation for a facility type realization
      * initialization item.</p>
      *
-     * @param ctx Facility representation item node in ANTLR4 AST.
+     * @param ctx Facility representation init node in ANTLR4 AST.
      */
     @Override
     public void exitFacilityRepresentationInit(
@@ -1693,6 +1836,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 requires, ensures, getFacilityDecls(ctx.facilityDecl()),
                 getVarDecls(ctx.variableDecl()), Utilities.collect(
                         Statement.class, ctx.stmt(), myNodes)));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>We create a new object to store all the new array facilities
+     * that can be created by the syntactic sugar conversions.</p>
+     *
+     * @param ctx Facility representation final node in ANTLR4 AST.
+     */
+    @Override
+    public void enterFacilityRepresentationFinal(
+            ResolveParser.FacilityRepresentationFinalContext ctx) {
+        // Create a new container
+        myArrayFacilityDecContainerStack
+                .push(new ArrayFacilityDecContainer(ctx));
     }
 
     /**
@@ -4784,6 +4943,36 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         ArrayFacilityDecContainer(ParserRuleContext instantiatingContext) {
             this.instantiatingContext = instantiatingContext;
             newFacilityDecs = new ArrayList<>();
+        }
+    }
+
+    /**
+     * <p>When building a {@link ModuleDec}, we would like the new array facility
+     * declarations to appear immediately before the different type/shared state
+     * representations that created it.</p>
+     *
+     * <p>This class allow us to keep track to this, so that when we add the different
+     * declarations to the {@link ModuleDec}, we add these array facilities
+     * in the right spot.</p>
+     */
+    private class NewModuleDecMembers {
+
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        final Map<ParserRuleContext, List<FacilityDec>> newFacilityDecsMap;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This constructs a temporary structure to a map that contains
+         * all the parser rules contexts that generated an array facility declaration.</p>
+         */
+        NewModuleDecMembers() {
+            this.newFacilityDecsMap = new HashMap<>();
         }
     }
 
