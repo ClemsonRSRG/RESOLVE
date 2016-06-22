@@ -33,7 +33,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -47,6 +49,7 @@ import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
@@ -1029,26 +1032,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 ResolveParser.ProgramArrayTypeContext arrayTypeContext =
                         variableDeclGroupContext.programArrayType();
                 Location loc = createLocation(arrayTypeContext);
-
                 String firstIdent =
                         variableDeclGroupContext.IDENTIFIER(0).getText();
 
-                // Type for the elements in the array
-                NameTy arrayElementsTy =
-                        (NameTy) myNodes.removeFrom(arrayTypeContext
-                                .programNamedType());
-
-                // Lower and Upper Bound
-                ProgramExp low =
-                        (ProgramExp) myNodes.removeFrom(arrayTypeContext
-                                .progExp(0));
-                ProgramExp high =
-                        (ProgramExp) myNodes.removeFrom(arrayTypeContext
-                                .progExp(1));
-
                 rawNameTy =
                         createNameTyFromArrayType(loc, firstIdent,
-                                arrayElementsTy, low, high);
+                                arrayTypeContext);
             }
             else {
                 rawNameTy =
@@ -1128,74 +1117,179 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a type realization
+     * declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterTypeRepresentationDecl(
-            ResolveParser.TypeRepresentationDeclContext ctx) {
-        super.enterTypeRepresentationDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Type realization declaration node in ANTLR4 AST.
      */
     @Override
     public void exitTypeRepresentationDecl(
             ResolveParser.TypeRepresentationDeclContext ctx) {
-        super.exitTypeRepresentationDecl(ctx);
+        // Obtain the raw programing type. If we encounter an array type,
+        // we add a new array facility and create a new raw name type that
+        // refers to this array facility.
+        Ty rawTy;
+        if (ctx.programArrayType() != null) {
+            Location loc = createLocation(ctx.programArrayType());
+            String name = ctx.name.getText();
+
+            rawTy =
+                    createNameTyFromArrayType(loc, name, ctx.programArrayType());
+        }
+        else if (ctx.programRecordType() != null) {
+            rawTy = (Ty) myNodes.removeFrom(ctx.programRecordType());
+        }
+        else {
+            rawTy = (Ty) myNodes.removeFrom(ctx.programNamedType());
+        }
+
+        AssertionClause convention;
+        if (ctx.conventionClause() != null) {
+            convention =
+                    (AssertionClause) myNodes
+                            .removeFrom(ctx.conventionClause());
+        }
+        else {
+            convention =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CONVENTION);
+        }
+
+        AssertionClause correspondence;
+        if (ctx.correspondenceClause() != null) {
+            correspondence =
+                    (AssertionClause) myNodes.removeFrom(ctx
+                            .correspondenceClause());
+        }
+        else {
+            correspondence =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CORRESPONDENCE);
+        }
+
+        TypeInitFinalItem initItem;
+        if (ctx.representationInit() != null) {
+            initItem =
+                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                            .representationInit());
+        }
+        else {
+            initItem =
+                    new TypeInitFinalItem(createLocation(ctx),
+                            TypeInitFinalItem.ItemType.INITIALIZATION, null,
+                            new ArrayList<FacilityDec>(),
+                            new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        TypeInitFinalItem finalItem;
+        if (ctx.representationFinal() != null) {
+            finalItem =
+                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                            .representationFinal());
+        }
+        else {
+            finalItem =
+                    new TypeInitFinalItem(createLocation(ctx),
+                            TypeInitFinalItem.ItemType.FINALIZATION, null,
+                            new ArrayList<FacilityDec>(),
+                            new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        myNodes.put(ctx, new TypeRepresentationDec(createPosSymbol(ctx.name),
+                rawTy, convention, correspondence, initItem, finalItem));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a facility type realization
+     * declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterFacilityTypeRepresentationDecl(
-            ResolveParser.FacilityTypeRepresentationDeclContext ctx) {
-        super.enterFacilityTypeRepresentationDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Facility type realization declaration node in ANTLR4 AST.
      */
     @Override
     public void exitFacilityTypeRepresentationDecl(
             ResolveParser.FacilityTypeRepresentationDeclContext ctx) {
-        super.exitFacilityTypeRepresentationDecl(ctx);
+        // Obtain the raw programing type. If we encounter an array type,
+        // we add a new array facility and create a new raw name type that
+        // refers to this array facility.
+        Ty rawTy;
+        if (ctx.programArrayType() != null) {
+            Location loc = createLocation(ctx.programArrayType());
+            String name = ctx.name.getText();
+
+            rawTy =
+                    createNameTyFromArrayType(loc, name, ctx.programArrayType());
+        }
+        else if (ctx.programRecordType() != null) {
+            rawTy = (RecordTy) myNodes.removeFrom(ctx.programRecordType());
+        }
+        else {
+            rawTy = (NameTy) myNodes.removeFrom(ctx.programNamedType());
+        }
+
+        AssertionClause convention;
+        if (ctx.conventionClause() != null) {
+            convention =
+                    (AssertionClause) myNodes
+                            .removeFrom(ctx.conventionClause());
+        }
+        else {
+            convention =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CONVENTION);
+        }
+
+        FacilityTypeInitFinalItem initItem;
+        if (ctx.facilityRepresentationInit() != null) {
+            initItem =
+                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
+                            .facilityRepresentationInit());
+        }
+        else {
+            initItem =
+                    new FacilityTypeInitFinalItem(createLocation(ctx),
+                            FacilityTypeInitFinalItem.ItemType.INITIALIZATION,
+                            null, createTrueAssertionClause(
+                                    createLocation(ctx),
+                                    AssertionClause.ClauseType.REQUIRES),
+                            createTrueAssertionClause(createLocation(ctx),
+                                    AssertionClause.ClauseType.ENSURES),
+                            new ArrayList<FacilityDec>(),
+                            new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        FacilityTypeInitFinalItem finalItem;
+        if (ctx.facilityRepresentationFinal() != null) {
+            finalItem =
+                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
+                            .facilityRepresentationFinal());
+        }
+        else {
+            finalItem =
+                    new FacilityTypeInitFinalItem(createLocation(ctx),
+                            FacilityTypeInitFinalItem.ItemType.FINALIZATION,
+                            null, createTrueAssertionClause(
+                                    createLocation(ctx),
+                                    AssertionClause.ClauseType.REQUIRES),
+                            createTrueAssertionClause(createLocation(ctx),
+                                    AssertionClause.ClauseType.ENSURES),
+                            new ArrayList<FacilityDec>(),
+                            new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        myNodes.put(ctx, new FacilityTypeRepresentationDec(
+                createPosSymbol(ctx.name), rawTy, convention, initItem,
+                finalItem));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a performance type model
+     * declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterPerformanceTypeModelDecl(
-            ResolveParser.PerformanceTypeModelDeclContext ctx) {
-        super.enterPerformanceTypeModelDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Performance type model declaration node in ANTLR4 AST.
      */
     @Override
     public void exitPerformanceTypeModelDecl(
@@ -2118,22 +2212,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             String firstIdent =
                     variableDeclGroupContext.IDENTIFIER(0).getText();
 
-            // Type for the elements in the array
-            NameTy arrayElementsTy =
-                    (NameTy) myNodes.removeFrom(variableDeclGroupContext
-                            .programArrayType().programNamedType());
-
-            // Lower and Upper Bound
-            ProgramExp low =
-                    (ProgramExp) myNodes.removeFrom(variableDeclGroupContext
-                            .programArrayType().progExp(0));
-            ProgramExp high =
-                    (ProgramExp) myNodes.removeFrom(variableDeclGroupContext
-                            .programArrayType().progExp(1));
-
             rawNameTy =
-                    createNameTyFromArrayType(loc, firstIdent, arrayElementsTy,
-                            low, high);
+                    createNameTyFromArrayType(loc, firstIdent,
+                            variableDeclGroupContext.programArrayType());
         }
         else {
             rawNameTy =
@@ -4262,15 +4343,24 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      *
      * @param l Location for the new elements.
      * @param firstIdentAsString The first variable identifier as a string.
-     * @param arrayElementsTy The program type for the elements in the array.
-     * @param low The lower bound for the array.
-     * @param high The upper bound for the array.
+     * @param arrayTypeContext The program array context.
      *
      * @return A {@link NameTy} for the rule.
      */
     private NameTy createNameTyFromArrayType(Location l,
-            String firstIdentAsString, NameTy arrayElementsTy, ProgramExp low,
-            ProgramExp high) {
+            String firstIdentAsString,
+            ResolveParser.ProgramArrayTypeContext arrayTypeContext) {
+        // Type for the elements in the array
+        NameTy arrayElementsTy =
+                (NameTy) myNodes
+                        .removeFrom(arrayTypeContext.programNamedType());
+
+        // Lower and Upper Bound
+        ProgramExp low =
+                (ProgramExp) myNodes.removeFrom(arrayTypeContext.progExp(0));
+        ProgramExp high =
+                (ProgramExp) myNodes.removeFrom(arrayTypeContext.progExp(1));
+
         // Create name in the format of "_(Name of Variable)_Array_Fac_(myCounter)"
         String newArrayName = "";
         newArrayName +=
