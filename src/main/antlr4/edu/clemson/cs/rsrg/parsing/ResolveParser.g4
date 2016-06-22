@@ -54,7 +54,6 @@ facilityItem
     |   facilityTypeRepresentationDecl
     |   recursiveOperationProcedureDecl
     |   operationProcedureDecl
-    |   recursiveProcedureDecl
     |   mathDefinitionDecl
     ;
 
