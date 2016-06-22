@@ -1149,21 +1149,25 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     private NameTy findArrayType(ProgramVariableExp exp) {
         NameTy contentTy;
         if (exp instanceof ProgramVariableDotExp) {
-            // TODO: Change this when we pass shared state/type realization to this class.
+            // TODO: Change this when we pass type realization to this class.
             // Right now we assume the array expressions won't be in some kind of record.
             throw new RuntimeException();
         }
         else if (exp instanceof ProgramVariableNameExp) {
-            // TODO: Change this when we pass shared state to this class.
             String arrayVarName =
                     ((ProgramVariableNameExp) exp).getName().getName();
 
             // Search parameter variables
             AbstractVarDec varDec = searchParameterVarDecs(arrayVarName);
 
-            // Search local variables (if not found);
+            // Search local variables (if not found)
             if (varDec == null) {
                 varDec = searchVarDecs(arrayVarName);
+            }
+
+            // Search shared state variables (if not found)
+            if (varDec == null) {
+                varDec = searchSharedStates(arrayVarName);
             }
 
             // Throw exception if we can't find it.
@@ -1244,6 +1248,39 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>An helper method to try to locate a {@link VarDec} in all of our
+     * {@link AbstractSharedStateRealizationDec} based on the string name passed in.</p>
+     *
+     * @param name Name of the variable we are trying to find.
+     *
+     * @return A copy of the {@link VarDec} if found, else {@code null}.
+     *
+     * @exception MiscErrorException
+     */
+    private VarDec searchSharedStates(String name) {
+        VarDec varDec = null;
+        // For all the shared state declarations,
+        // search their state variables.
+        for (AbstractSharedStateRealizationDec realizationDec : myCopySSRList) {
+            List<VarDec> stateVars = realizationDec.getStateVars();
+            for (VarDec v : stateVars) {
+                if (v.getName().getName().equals(name)) {
+                    if (varDec == null) {
+                        varDec = (VarDec) v.clone();
+                    }
+                    else {
+                        throw new MiscErrorException(
+                                "Found two variables for: " + name,
+                                new IllegalStateException());
+                    }
+                }
+            }
+        }
+
+        return varDec;
+    }
+
+    /**
      * <p>An helper method to try to locate a {@link VarDec} based on
      * the string name passed in.</p>
      *
@@ -1256,13 +1293,14 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     private VarDec searchVarDecs(String name) {
         VarDec varDec = null;
         for (VarDec v : myParentNodeElementsContainer.varDecs) {
-            if (varDec == null) {
-                varDec = (VarDec) v.clone();
-            }
-            else {
-                throw new MiscErrorException(
-                        "Found two variables for: " + name,
-                        new IllegalStateException());
+            if (v.getName().getName().equals(name)) {
+                if (varDec == null) {
+                    varDec = (VarDec) v.clone();
+                }
+                else {
+                    throw new MiscErrorException("Found two variables for: "
+                            + name, new IllegalStateException());
+                }
             }
         }
 
