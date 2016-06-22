@@ -2040,7 +2040,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Attempt to resolve all the syntactic sugar conversions
         SyntacticSugarConverter converter =
                 new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
-                        myNewElementCounter);
+                        myCopyTRList, myCopySSRList, myNewElementCounter);
         TreeWalker tw = new TreeWalker(converter);
         tw.visit(beforeConversionProcDec);
 
@@ -2110,7 +2110,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Attempt to resolve all the syntactic sugar conversions
         SyntacticSugarConverter converter =
                 new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
-                        myNewElementCounter);
+                        myCopyTRList, myCopySSRList, myNewElementCounter);
         TreeWalker tw = new TreeWalker(converter);
         tw.visit(beforeConversionProcDec);
 
@@ -2162,7 +2162,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Attempt to resolve all the syntactic sugar conversions
         SyntacticSugarConverter converter =
                 new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
-                        myNewElementCounter);
+                        myCopyTRList, myCopySSRList, myNewElementCounter);
         TreeWalker tw = new TreeWalker(converter);
         tw.visit(beforeConversionOpProcDec);
 
@@ -2219,7 +2219,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Attempt to resolve all the syntactic sugar conversions
         SyntacticSugarConverter converter =
                 new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
-                        myNewElementCounter);
+                        myCopyTRList, myCopySSRList, myNewElementCounter);
         TreeWalker tw = new TreeWalker(converter);
         tw.visit(beforeConversionOpProcDec);
 
@@ -4613,7 +4613,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Attempt to resolve all the syntactic sugar conversions
         SyntacticSugarConverter converter =
                 new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
-                        myNewElementCounter);
+                        myCopyTRList, myCopySSRList, myNewElementCounter);
         TreeWalker tw = new TreeWalker(converter);
         tw.visit(beforeConversionFinalItem);
 
@@ -4752,7 +4752,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Attempt to resolve all the syntactic sugar conversions
         SyntacticSugarConverter converter =
                 new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
-                        myNewElementCounter);
+                        myCopyTRList, myCopySSRList, myNewElementCounter);
         TreeWalker tw = new TreeWalker(converter);
         tw.visit(beforeConversionFinalItem);
 

@@ -20,10 +20,10 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.*;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.AbstractFunctionExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
@@ -59,6 +59,20 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * to the types of elements in the array.</p>
      */
     private final Map<NameTy, NameTy> myArrayNameTyToInnerTyMap;
+
+    /**
+     * <p>This is a deep copy of all the type representations created during the
+     * tree building process. Note that the list contains either all
+     * {@link TypeRepresentationDec}s or all {@link FacilityTypeRepresentationDec}s.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myCopyTRList;
+
+    /**
+     * <p>This is a deep copy of all the shared state representations created during the
+     * tree building process. Note that the list contains either all
+     * {@link SharedStateRealizationDec}s or all {@link FacilitySharedStateRealizationDec}s.</p>
+     */
+    private final List<AbstractSharedStateRealizationDec> myCopySSRList;
 
     /**
      * <p>Once we are done walking the tree, the top most node will create
@@ -101,16 +115,30 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * can contain a list of {@link Statement}s, we build a new instance
      * of the object using the elements in the collector.</p>
      */
-    private Stack<ResolveConceptualElementCollector> myResolveElementCollectorStack;
+    private final Stack<ResolveConceptualElementCollector> myResolveElementCollectorStack;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    // TODO: Javadocs here!
+    /**
+     * <p>This class attempts to convert all syntactic sugar before we
+     * generate the final RESOLVE AST.</p>
+     *
+     * @param arrayNameTyToInnerTyMap A map that provides mapping from newly declared
+     *                                array name types to the types of elements in the array.
+     * @param typeRepresentationDecList The list of type representation declarations.
+     * @param sharedStateRealizationDecs The list of shared state representation declarations.
+     * @param newElementCounter A counter that indicates the number of elements created
+     *                          by the tree building process.
+     */
     public SyntacticSugarConverter(Map<NameTy, NameTy> arrayNameTyToInnerTyMap,
+            List<AbstractTypeRepresentationDec> typeRepresentationDecList,
+            List<AbstractSharedStateRealizationDec> sharedStateRealizationDecs,
             int newElementCounter) {
         myArrayNameTyToInnerTyMap = arrayNameTyToInnerTyMap;
+        myCopyTRList = typeRepresentationDecList;
+        myCopySSRList = sharedStateRealizationDecs;
         myFinalProcessedElement = null;
         myNewElementCounter = newElementCounter;
         myReplacingElementsMap = new HashMap<>();
