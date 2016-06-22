@@ -32,13 +32,11 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.AbstractSharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.FacilitySharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.PerformanceTypeFamilyDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -114,6 +112,20 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private Map<NameTy, NameTy> myArrayNameTyToInnerTyMap;
 
     /**
+     * <p>This is a deep copy of all the type representations created during the
+     * tree building process. Note that the list contains either all
+     * {@link TypeRepresentationDec}s or all {@link FacilityTypeRepresentationDec}s.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myCopyTRList;
+
+    /**
+     * <p>This is a deep copy of all the shared state representations created during the
+     * tree building process. Note that the list contains either all
+     * {@link SharedStateRealizationDec}s or all {@link FacilitySharedStateRealizationDec}s.</p>
+     */
+    private final List<AbstractSharedStateRealizationDec> myCopySSRList;
+
+    /**
      * <p>Since we don't have symbol table, we really don't know if
      * we are generating a new object with the same name. In order to avoid
      * problems, all of our objects will have a name that starts with "_" and
@@ -156,6 +168,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myModuleLevelDecs = null;
         myArrayFacilityDecContainerStack = new Stack<>();
         myArrayNameTyToInnerTyMap = new HashMap<>();
+        myCopyTRList = new ArrayList<>();
+        myCopySSRList = new ArrayList<>();
         myNewElementCounter = 0;
     }
 
@@ -1222,8 +1236,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        myNodes.put(ctx, new TypeRepresentationDec(createPosSymbol(ctx.name),
-                rawTy, convention, correspondence, initItem, finalItem));
+        TypeRepresentationDec representationDec =
+                new TypeRepresentationDec(createPosSymbol(ctx.name), rawTy,
+                        convention, correspondence, initItem, finalItem);
+        myCopyTRList.add((TypeRepresentationDec) representationDec.clone());
+
+        myNodes.put(ctx, representationDec);
     }
 
     /**
@@ -1328,9 +1346,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        myNodes.put(ctx, new FacilityTypeRepresentationDec(
-                createPosSymbol(ctx.name), rawTy, convention, initItem,
-                finalItem));
+        FacilityTypeRepresentationDec representationDec =
+                new FacilityTypeRepresentationDec(createPosSymbol(ctx.name),
+                        rawTy, convention, initItem, finalItem);
+        myCopyTRList.add((FacilityTypeRepresentationDec) representationDec
+                .clone());
+
+        myNodes.put(ctx, representationDec);
     }
 
     /**
@@ -1535,8 +1557,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        myNodes.put(ctx, new SharedStateRealizationDec(createPosSymbol(ctx.name),
-                sharedStateVars, convention, correspondence, initItem, finalItem));
+        SharedStateRealizationDec realizationDec =
+                new SharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars,
+                        convention, correspondence, initItem, finalItem);
+        myCopySSRList.add((SharedStateRealizationDec) realizationDec.clone());
+
+        myNodes.put(ctx, realizationDec);
     }
 
     /**
@@ -1630,8 +1656,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        myNodes.put(ctx, new FacilitySharedStateRealizationDec(createPosSymbol(ctx.name),
-                sharedStateVars, convention, initItem, finalItem));
+        FacilitySharedStateRealizationDec realizationDec =
+                new FacilitySharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars,
+                        convention, initItem, finalItem);
+        myCopySSRList.add((FacilitySharedStateRealizationDec) realizationDec.clone());
+
+        myNodes.put(ctx, realizationDec);
     }
 
     // -----------------------------------------------------------
