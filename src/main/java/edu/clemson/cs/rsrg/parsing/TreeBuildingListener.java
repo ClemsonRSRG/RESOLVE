@@ -1237,7 +1237,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.name), abstractStateVars, constraint, initItem, finalItem));
+        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.name), abstractStateVars,
+                constraint, initItem, finalItem));
     }
 
     /**
@@ -1416,11 +1417,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
         }
 
-        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
-                TypeInitFinalItem.ItemType.INITIALIZATION, affects,
-                getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
-                        .variableDecl()), Utilities.collect(Statement.class,
-                        ctx.stmt(), myNodes)));
+        // Requires and ensures
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
+        }
+
+        AssertionClause ensures;
+        if (ctx.ensuresClause() != null) {
+            ensures = (AssertionClause) myNodes.removeFrom(ctx.ensuresClause());
+        }
+        else {
+            ensures =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.ENSURES);
+        }
+
+        myNodes.put(ctx, createFacilityTypeInitFinalItem(createLocation(ctx),
+                FacilityTypeInitFinalItem.ItemType.INITIALIZATION, affects,
+                requires, ensures, getFacilityDecls(ctx.facilityDecl()),
+                getVarDecls(ctx.variableDecl()), Utilities.collect(
+                        Statement.class, ctx.stmt(), myNodes)));
     }
 
     /**
@@ -1439,11 +1462,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
         }
 
-        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
-                TypeInitFinalItem.ItemType.FINALIZATION, affects,
-                getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
-                        .variableDecl()), Utilities.collect(Statement.class,
-                        ctx.stmt(), myNodes)));
+        // Requires and ensures
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
+        }
+
+        AssertionClause ensures;
+        if (ctx.ensuresClause() != null) {
+            ensures = (AssertionClause) myNodes.removeFrom(ctx.ensuresClause());
+        }
+        else {
+            ensures =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.ENSURES);
+        }
+
+        myNodes.put(ctx, createFacilityTypeInitFinalItem(createLocation(ctx),
+                FacilityTypeInitFinalItem.ItemType.FINALIZATION, affects,
+                requires, ensures, getFacilityDecls(ctx.facilityDecl()),
+                getVarDecls(ctx.variableDecl()), Utilities.collect(
+                        Statement.class, ctx.stmt(), myNodes)));
     }
 
     /**
@@ -4101,6 +4146,48 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         Exp assertionExp = (Exp) myNodes.removeFrom(mathExps.get(0));
 
         return new AssertionClause(l, clauseType, assertionExp, whichEntailsExp);
+    }
+
+    /**
+     * <p>Create an {@link FacilityTypeInitFinalItem}
+     * for the current parser rule we are visiting.</p>
+     *
+     * @param l Location for the item.
+     * @param itemType The item type.
+     * @param affects The {@link AffectsClause} for this item.
+     * @param requires The requires {@link AssertionClause} for this item.
+     * @param ensures The ensures {@link AssertionClause} for this item.
+     * @param facilityDecs List of {@link FacilityDec}s for this item.
+     * @param varDecs List of {@link VarDec}s for this item.
+     * @param statements List of {@link Statement}s for this item.
+     *
+     * @return A {@link FacilityTypeInitFinalItem} for the rule.
+     */
+    private FacilityTypeInitFinalItem createFacilityTypeInitFinalItem(
+            Location l, FacilityTypeInitFinalItem.ItemType itemType,
+            AffectsClause affects, AssertionClause requires,
+            AssertionClause ensures, List<FacilityDec> facilityDecs,
+            List<VarDec> varDecs, List<Statement> statements) {
+        // Create the finalization item that we are going to perform
+        // the syntactic sugar conversions on.
+        FacilityTypeInitFinalItem beforeConversionFinalItem =
+                new FacilityTypeInitFinalItem(new Location(l), itemType,
+                        affects, requires, ensures, facilityDecs, varDecs,
+                        statements);
+
+        // Attempt to resolve all the syntactic sugar conversions
+        SyntacticSugarConverter converter =
+                new SyntacticSugarConverter(myArrayNameTyToInnerTyMap,
+                        myNewElementCounter);
+        TreeWalker tw = new TreeWalker(converter);
+        tw.visit(beforeConversionFinalItem);
+
+        // Obtain the new TypeInitFinalItem generated by the converter
+        FacilityTypeInitFinalItem afterConversionFinalItem =
+                (FacilityTypeInitFinalItem) converter.getProcessedElement();
+        myNewElementCounter = converter.getNewElementCounter();
+
+        return afterConversionFinalItem;
     }
 
     /**

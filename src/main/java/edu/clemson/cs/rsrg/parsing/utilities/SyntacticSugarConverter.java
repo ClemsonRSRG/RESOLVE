@@ -27,6 +27,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.AbstractFunctionExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityTypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -123,6 +124,55 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Parent Nodes
     // -----------------------------------------------------------
+
+    /**
+     * <p>This should be the top-most node that we start with
+     * when processing syntactic sugar conversions inside a
+     * {@link FacilityTypeInitFinalItem}.</p>
+     *
+     * @param e Current {@link FacilityTypeInitFinalItem} we are visiting.
+     */
+    @Override
+    public void preFacilityTypeInitFinalItem(FacilityTypeInitFinalItem e) {
+        // Store the params, facility and variable declarations
+        myParentNodeElementsContainer =
+                new ParentNodeElementsContainer(
+                        new ArrayList<ParameterVarDec>(), e.getFacilities(), e
+                                .getVariables());
+
+        // Create a new collector
+        myResolveElementCollectorStack
+                .push(new ResolveConceptualElementCollector(e));
+    }
+
+    /**
+     * <p>This should be the last element we walk. All syntactic
+     * sugar should have been performed and we can safely create
+     * the new {@link FacilityTypeInitFinalItem} to be returned.</p>
+     *
+     * @param e Current {@link FacilityTypeInitFinalItem} we are visiting.
+     */
+    @Override
+    public void postFacilityTypeInitFinalItem(FacilityTypeInitFinalItem e) {
+        // Affects clause (if any)
+        AffectsClause affectsClause = null;
+        if (e.getAffectedVars() != null) {
+            affectsClause = e.getAffectedVars().clone();
+        }
+
+        // Build the new ProcedureDec
+        ResolveConceptualElementCollector collector =
+                myResolveElementCollectorStack.pop();
+        myFinalProcessedElement =
+                new FacilityTypeInitFinalItem(new Location(e.getLocation()), e
+                        .getItemType(), affectsClause, e.getRequires().clone(),
+                        e.getEnsures().clone(),
+                        myParentNodeElementsContainer.facilityDecs,
+                        myParentNodeElementsContainer.varDecs, collector.stmts);
+
+        // Just in case
+        myParentNodeElementsContainer = null;
+    }
 
     /**
      * <p>This should be the top-most node that we start with
