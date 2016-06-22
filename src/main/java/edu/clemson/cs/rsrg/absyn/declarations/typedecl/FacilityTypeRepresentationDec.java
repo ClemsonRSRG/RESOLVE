@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
-import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityTypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
@@ -26,6 +26,16 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 public class FacilityTypeRepresentationDec
         extends
             AbstractTypeRepresentationDec {
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>The initialization block for the new type.</p> */
+    private final FacilityTypeInitFinalItem myTypeInitItem;
+
+    /** <p>The finalization block for the new type.</p> */
+    private final FacilityTypeInitFinalItem myTypeFinalItem;
 
     // ===========================================================
     // Constructors
@@ -41,9 +51,11 @@ public class FacilityTypeRepresentationDec
      * @param finalItem Finalization block for this new type.
      */
     public FacilityTypeRepresentationDec(PosSymbol name, Ty ty,
-            AssertionClause convention, TypeInitFinalItem initItem,
-            TypeInitFinalItem finalItem) {
-        super(name, ty, convention, initItem, finalItem);
+            AssertionClause convention, FacilityTypeInitFinalItem initItem,
+            FacilityTypeInitFinalItem finalItem) {
+        super(name, ty, convention);
+        myTypeInitItem = initItem;
+        myTypeFinalItem = finalItem;
     }
 
     // ===========================================================
@@ -72,7 +84,7 @@ public class FacilityTypeRepresentationDec
         sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
-        sb.append("end\n");
+        sb.append("end;\n");
 
         return sb.toString();
     }

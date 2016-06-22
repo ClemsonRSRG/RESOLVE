@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
-import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
@@ -38,12 +37,6 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     /** <p>The convention clause for the new type.</p> */
     protected final AssertionClause myConvention;
 
-    /** <p>The initialization block for the new type.</p> */
-    protected final TypeInitFinalItem myTypeInitItem;
-
-    /** <p>The finalization block for the new type.</p> */
-    protected final TypeInitFinalItem myTypeFinalItem;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -57,17 +50,12 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
      * @param name Name of the new type.
      * @param ty Raw type used to implement this new type.
      * @param convention Type convention.
-     * @param initItem Initialization block for this new type.
-     * @param finalItem Finalization block for this new type.
      */
     protected AbstractTypeRepresentationDec(PosSymbol name, Ty ty,
-            AssertionClause convention, TypeInitFinalItem initItem,
-            TypeInitFinalItem finalItem) {
+            AssertionClause convention) {
         super(name.getLocation(), name);
         myConvention = convention;
         myTy = ty;
-        myTypeFinalItem = finalItem;
-        myTypeInitItem = initItem;
     }
 
     // ===========================================================
@@ -90,11 +78,7 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
 
         if (!myTy.equals(that.myTy))
             return false;
-        if (!myConvention.equals(that.myConvention))
-            return false;
-        if (!myTypeInitItem.equals(that.myTypeInitItem))
-            return false;
-        return myTypeFinalItem.equals(that.myTypeFinalItem);
+        return myConvention.equals(that.myConvention);
 
     }
 
@@ -118,26 +102,6 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     }
 
     /**
-     * <p>Returns the finalization block for this type representation.</p>
-     *
-     * @return The code block used for finalization
-     * in {@link TypeInitFinalItem} format.
-     */
-    public final TypeInitFinalItem getTypeFinalItem() {
-        return myTypeFinalItem;
-    }
-
-    /**
-     * <p>Returns the initialization block for this type representation.</p>
-     *
-     * @return The code block used for initialization
-     * in {@link TypeInitFinalItem} format.
-     */
-    public final TypeInitFinalItem getTypeInitItem() {
-        return myTypeInitItem;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -145,8 +109,6 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
         int result = super.hashCode();
         result = 31 * result + myTy.hashCode();
         result = 31 * result + myConvention.hashCode();
-        result = 31 * result + myTypeInitItem.hashCode();
-        result = 31 * result + myTypeFinalItem.hashCode();
         return result;
     }
 

@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
-import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
@@ -32,6 +32,12 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
     /** <p>The correspondence clause for the new type.</p> */
     private final AssertionClause myCorrespondence;
 
+    /** <p>The initialization block for the new type.</p> */
+    private final TypeInitFinalItem myTypeInitItem;
+
+    /** <p>The finalization block for the new type.</p> */
+    private final TypeInitFinalItem myTypeFinalItem;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -49,8 +55,10 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
     public TypeRepresentationDec(PosSymbol name, Ty ty,
             AssertionClause convention, AssertionClause correspondence,
             TypeInitFinalItem initItem, TypeInitFinalItem finalItem) {
-        super(name, ty, convention, initItem, finalItem);
+        super(name, ty, convention);
         myCorrespondence = correspondence;
+        myTypeFinalItem = finalItem;
+        myTypeInitItem = initItem;
     }
 
     // ===========================================================
@@ -83,7 +91,7 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
         sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
-        sb.append("end\n");
+        sb.append("end;\n");
 
         return sb.toString();
     }
@@ -102,7 +110,11 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
 
         TypeRepresentationDec that = (TypeRepresentationDec) o;
 
-        return myCorrespondence.equals(that.myCorrespondence);
+        if (!myCorrespondence.equals(that.myCorrespondence))
+            return false;
+        if (!myTypeInitItem.equals(that.myTypeInitItem))
+            return false;
+        return myTypeFinalItem.equals(that.myTypeFinalItem);
 
     }
 
@@ -116,12 +128,34 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
     }
 
     /**
+     * <p>Returns the finalization block for this type representation.</p>
+     *
+     * @return The code block used for finalization
+     * in {@link TypeInitFinalItem} format.
+     */
+    public final TypeInitFinalItem getTypeFinalItem() {
+        return myTypeFinalItem;
+    }
+
+    /**
+     * <p>Returns the initialization block for this type representation.</p>
+     *
+     * @return The code block used for initialization
+     * in {@link TypeInitFinalItem} format.
+     */
+    public final TypeInitFinalItem getTypeInitItem() {
+        return myTypeInitItem;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public final int hashCode() {
         int result = super.hashCode();
         result = 31 * result + myCorrespondence.hashCode();
+        result = 31 * result + myTypeInitItem.hashCode();
+        result = 31 * result + myTypeFinalItem.hashCode();
         return result;
     }
 
