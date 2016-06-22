@@ -98,8 +98,10 @@ public class PerfTypeInitFinalSpecItem extends ResolveConceptualElement {
         sb.append("\n");
 
         // duration clause
-        sb.append(myDuration.asString(indentSize + innerIndentInc,
-                innerIndentInc));
+        if (myDuration != null) {
+            sb.append(myDuration.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
+        }
 
         // manipulative displacement clause
         if (myManipDisp != null) {
@@ -115,13 +117,18 @@ public class PerfTypeInitFinalSpecItem extends ResolveConceptualElement {
      */
     @Override
     public final PerfTypeInitFinalSpecItem clone() {
+        AssertionClause newDuration = null;
+        if (myDuration != null) {
+            newDuration = myDuration.clone();
+        }
+
         AssertionClause newManipDisp = null;
         if (myManipDisp != null) {
             newManipDisp = myManipDisp.clone();
         }
 
         return new PerfTypeInitFinalSpecItem(new Location(myLoc), myItemType,
-                myDuration.clone(), newManipDisp);
+                newDuration, newManipDisp);
     }
 
     /**
@@ -138,7 +145,8 @@ public class PerfTypeInitFinalSpecItem extends ResolveConceptualElement {
 
         if (myItemType != that.myItemType)
             return false;
-        if (!myDuration.equals(that.myDuration))
+        if (myDuration != null ? !myDuration.equals(that.myDuration)
+                : that.myDuration != null)
             return false;
         return myManipDisp != null ? myManipDisp.equals(that.myManipDisp)
                 : that.myManipDisp == null;
@@ -183,8 +191,8 @@ public class PerfTypeInitFinalSpecItem extends ResolveConceptualElement {
      */
     @Override
     public final int hashCode() {
-        int result = myItemType.hashCode();
-        result = 31 * result + myDuration.hashCode();
+        int result = myItemType != null ? myItemType.hashCode() : 0;
+        result = 31 * result + (myDuration != null ? myDuration.hashCode() : 0);
         result =
                 31 * result
                         + (myManipDisp != null ? myManipDisp.hashCode() : 0);

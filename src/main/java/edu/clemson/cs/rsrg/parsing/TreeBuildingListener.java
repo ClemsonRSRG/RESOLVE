@@ -42,6 +42,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.PerfTypeInitFinalSpecItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
@@ -1502,7 +1503,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitPerformanceSpecModelInit(
             ResolveParser.PerformanceSpecModelInitContext ctx) {
-    // TODO: Build these AST nodes.
+        AssertionClause duration = null;
+        if (ctx.durationClause() != null) {
+            duration =
+                    (AssertionClause) myNodes.removeFrom(ctx.durationClause());
+        }
+
+        AssertionClause manipDisp = null;
+        if (ctx.manipulationDispClause() != null) {
+            manipDisp =
+                    (AssertionClause) myNodes.removeFrom(ctx
+                            .manipulationDispClause());
+        }
+
+        myNodes.put(ctx, new PerfTypeInitFinalSpecItem(createLocation(ctx),
+                PerfTypeInitFinalSpecItem.ItemType.INITIALIZATION, duration,
+                manipDisp));
     }
 
     /**
@@ -1516,7 +1532,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitPerformanceSpecModelFinal(
             ResolveParser.PerformanceSpecModelFinalContext ctx) {
-    // TODO: Build these AST nodes.
+        AssertionClause duration = null;
+        if (ctx.durationClause() != null) {
+            duration =
+                    (AssertionClause) myNodes.removeFrom(ctx.durationClause());
+        }
+
+        AssertionClause manipDisp = null;
+        if (ctx.manipulationDispClause() != null) {
+            manipDisp =
+                    (AssertionClause) myNodes.removeFrom(ctx
+                            .manipulationDispClause());
+        }
+
+        myNodes.put(ctx, new PerfTypeInitFinalSpecItem(createLocation(ctx),
+                PerfTypeInitFinalSpecItem.ItemType.FINALIZATION, duration,
+                manipDisp));
     }
 
     // -----------------------------------------------------------
