@@ -34,6 +34,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.PerformanceTypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
@@ -44,7 +45,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.PerfTypeInitFinalSpecItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.PerformanceSpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
@@ -1294,7 +1295,37 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitPerformanceTypeModelDecl(
             ResolveParser.PerformanceTypeModelDeclContext ctx) {
-        super.exitPerformanceTypeModelDecl(ctx);
+        Ty mathTy = (Ty) myNodes.removeFrom(ctx.mathTypeExp());
+
+        AssertionClause constraint;
+        if (ctx.constraintClause() != null) {
+            constraint =
+                    (AssertionClause) myNodes
+                            .removeFrom(ctx.constraintClause());
+        }
+        else {
+            constraint =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CONSTRAINT);
+        }
+
+        PerformanceSpecInitFinalItem initItem = null;
+        if (ctx.performanceSpecModelInit() != null) {
+            initItem =
+                    (PerformanceSpecInitFinalItem) myNodes.removeFrom(ctx
+                            .performanceSpecModelInit());
+        }
+
+        PerformanceSpecInitFinalItem finalItem = null;
+        if (ctx.performanceSpecModelFinal() != null) {
+            finalItem =
+                    (PerformanceSpecInitFinalItem) myNodes.removeFrom(ctx
+                            .performanceSpecModelFinal());
+        }
+
+        myNodes.put(ctx, new PerformanceTypeFamilyDec(
+                createPosSymbol(ctx.name), mathTy, constraint, initItem,
+                finalItem));
     }
 
     // -----------------------------------------------------------
@@ -1637,8 +1668,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             .manipulationDispClause());
         }
 
-        myNodes.put(ctx, new PerfTypeInitFinalSpecItem(createLocation(ctx),
-                PerfTypeInitFinalSpecItem.ItemType.INITIALIZATION, duration,
+        myNodes.put(ctx, new PerformanceSpecInitFinalItem(createLocation(ctx),
+                PerformanceSpecInitFinalItem.ItemType.INITIALIZATION, duration,
                 manipDisp));
     }
 
@@ -1666,8 +1697,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             .manipulationDispClause());
         }
 
-        myNodes.put(ctx, new PerfTypeInitFinalSpecItem(createLocation(ctx),
-                PerfTypeInitFinalSpecItem.ItemType.FINALIZATION, duration,
+        myNodes.put(ctx, new PerformanceSpecInitFinalItem(createLocation(ctx),
+                PerformanceSpecInitFinalItem.ItemType.FINALIZATION, duration,
                 manipDisp));
     }
 

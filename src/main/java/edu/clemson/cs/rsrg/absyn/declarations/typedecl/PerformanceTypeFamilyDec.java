@@ -1,5 +1,5 @@
 /**
- * TypeFamilyDec.java
+ * PerformanceTypeFamilyDec.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -12,19 +12,19 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
-import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.PerformanceSpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the type family declaration objects
+ * <p>This is the class for all the performance type family declaration objects
  * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class TypeFamilyDec extends Dec {
+public class PerformanceTypeFamilyDec extends Dec {
 
     // ===========================================================
     // Member Fields
@@ -33,38 +33,33 @@ public class TypeFamilyDec extends Dec {
     /** <p>The type model for the new type family.</p> */
     private final Ty myTy;
 
-    /** <p>The exemplar for the new type family.</p> */
-    private final PosSymbol myExemplar;
-
     /** <p>The constraint clause for the new type family.</p> */
     private final AssertionClause myConstraint;
 
     /** <p>The initialization block for the new type family.</p> */
-    private final SpecInitFinalItem myTypeInitItem;
+    private final PerformanceSpecInitFinalItem myTypeInitItem;
 
     /** <p>The finalization block for the new type family.</p> */
-    private final SpecInitFinalItem myTypeFinalItem;
+    private final PerformanceSpecInitFinalItem myTypeFinalItem;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a type family declaration.</p>
+     * <p>This constructs a performance type family declaration.</p>
      *
      * @param name Name of the new type family.
      * @param ty Model for the new type family.
-     * @param exemplar Exemplar variable name.
      * @param constraint Type constraint.
      * @param initItem Initialization information for verification.
      * @param finalItem Finalization information for verification.
      */
-    public TypeFamilyDec(PosSymbol name, Ty ty, PosSymbol exemplar,
-            AssertionClause constraint, SpecInitFinalItem initItem,
-            SpecInitFinalItem finalItem) {
+    public PerformanceTypeFamilyDec(PosSymbol name, Ty ty,
+            AssertionClause constraint, PerformanceSpecInitFinalItem initItem,
+            PerformanceSpecInitFinalItem finalItem) {
         super(name.getLocation(), name);
         myConstraint = constraint;
-        myExemplar = exemplar;
         myTy = ty;
         myTypeInitItem = initItem;
         myTypeFinalItem = finalItem;
@@ -85,12 +80,6 @@ public class TypeFamilyDec extends Dec {
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(" is modeled by ");
         sb.append(myTy.asString(0, innerIndentInc));
-
-        // exemplar
-        printSpace(indentSize + innerIndentInc, sb);
-        sb.append("exemplar ");
-        sb.append(myExemplar.asString(0, innerIndentInc));
-        sb.append("\n");
 
         // constraint
         sb.append(myConstraint.asString(indentSize + innerIndentInc,
@@ -119,22 +108,22 @@ public class TypeFamilyDec extends Dec {
         if (!super.equals(o))
             return false;
 
-        TypeFamilyDec that = (TypeFamilyDec) o;
+        PerformanceTypeFamilyDec that = (PerformanceTypeFamilyDec) o;
 
         if (!myTy.equals(that.myTy))
             return false;
-        if (!myExemplar.equals(that.myExemplar))
-            return false;
         if (!myConstraint.equals(that.myConstraint))
             return false;
-        if (!myTypeInitItem.equals(that.myTypeInitItem))
+        if (myTypeInitItem != null ? !myTypeInitItem
+                .equals(that.myTypeInitItem) : that.myTypeInitItem != null)
             return false;
-        return myTypeFinalItem.equals(that.myTypeFinalItem);
+        return myTypeFinalItem != null ? myTypeFinalItem
+                .equals(that.myTypeFinalItem) : that.myTypeFinalItem == null;
 
     }
 
     /**
-     * <p>Returns the type constraint for this type family.</p>
+     * <p>Returns the type constraint for this performance type family.</p>
      *
      * @return The type constraint in {@link AssertionClause} format.
      */
@@ -143,37 +132,28 @@ public class TypeFamilyDec extends Dec {
     }
 
     /**
-     * <p>Returns the finalization block for this type family.</p>
+     * <p>Returns the finalization block for this performance type family.</p>
      *
      * @return All relevant verification for finalization
-     * in {@link SpecInitFinalItem} format.
+     * in {@link PerformanceSpecInitFinalItem} format.
      */
-    public final SpecInitFinalItem getFinalization() {
+    public final PerformanceSpecInitFinalItem getFinalization() {
         return myTypeFinalItem;
     }
 
     /**
-     * <p>Returns the initialization block for this type family.</p>
+     * <p>Returns the initialization block for this performance type family.</p>
      *
      * @return All relevant verification for initialization
-     * in {@link SpecInitFinalItem} format.
+     * in {@link PerformanceSpecInitFinalItem} format.
      */
-    public final SpecInitFinalItem getInitialization() {
+    public final PerformanceSpecInitFinalItem getInitialization() {
         return myTypeInitItem;
     }
 
     /**
-     * <p>Returns the exemplar for this type family.</p>
-     *
-     * @return The exemplar in {@link PosSymbol} format.
-     */
-    public final PosSymbol getExemplar() {
-        return myExemplar;
-    }
-
-    /**
      * <p>Returns the raw type model representation
-     * of this type family.</p>
+     * of this performance type family.</p>
      *
      * @return The raw type in {@link Ty} format.
      */
@@ -188,10 +168,17 @@ public class TypeFamilyDec extends Dec {
     public final int hashCode() {
         int result = super.hashCode();
         result = 31 * result + myTy.hashCode();
-        result = 31 * result + myExemplar.hashCode();
         result = 31 * result + myConstraint.hashCode();
-        result = 31 * result + myTypeInitItem.hashCode();
-        result = 31 * result + myTypeFinalItem.hashCode();
+        result =
+                31
+                        * result
+                        + (myTypeInitItem != null ? myTypeInitItem.hashCode()
+                                : 0);
+        result =
+                31
+                        * result
+                        + (myTypeFinalItem != null ? myTypeFinalItem.hashCode()
+                                : 0);
         return result;
     }
 
@@ -203,10 +190,10 @@ public class TypeFamilyDec extends Dec {
      * {@inheritDoc}
      */
     @Override
-    protected final TypeFamilyDec copy() {
-        return new TypeFamilyDec(myName.clone(), myTy.clone(), myExemplar
-                .clone(), myConstraint.clone(), myTypeInitItem.clone(),
-                myTypeFinalItem.clone());
+    protected final PerformanceTypeFamilyDec copy() {
+        return new PerformanceTypeFamilyDec(myName.clone(), myTy.clone(),
+                myConstraint.clone(), myTypeInitItem.clone(), myTypeFinalItem
+                        .clone());
     }
 
 }

@@ -306,7 +306,7 @@ facilityTypeRepresentationDecl
     ;
 
 performanceTypeModelDecl
-    :   TYPE FAMILY IS MODELED BY mathTypeExp SEMICOLON
+    :   TYPE FAMILY name=IDENTIFIER IS MODELED BY mathTypeExp SEMICOLON
         (constraintClause)?
         (performanceSpecModelInit)?
         (performanceSpecModelFinal)?
