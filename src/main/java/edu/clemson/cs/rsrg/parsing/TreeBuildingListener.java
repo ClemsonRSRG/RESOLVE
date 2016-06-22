@@ -599,9 +599,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     createPosSymbol(ctx.closename),
                     new IllegalArgumentException());
         }
-
-        // Create a helper class to keep track of new module level declarations
-        myModuleLevelDecs = new NewModuleDecMembers();
     }
 
     /**
