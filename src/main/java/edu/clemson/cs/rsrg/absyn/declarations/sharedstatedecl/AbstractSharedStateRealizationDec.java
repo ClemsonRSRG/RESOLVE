@@ -1,5 +1,5 @@
 /**
- * AbstractTypeRepresentationDec.java
+ * AbstractSharedStateRealizationDec.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,31 +10,34 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
+package edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
-import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <p>This is the abstract base class for both the type representation and
- * facility type representation objects that the compiler builds
+ * <p>This is the abstract base class for both the shared state realization and
+ * facility shared state realization objects that the compiler builds
  * using the ANTLR4 AST nodes.</p>
  *
+ * @author Yu-Shan Sun
  * @version 1.0
  */
-public abstract class AbstractTypeRepresentationDec extends Dec {
+public abstract class AbstractSharedStateRealizationDec extends Dec {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The raw type for the new type.</p> */
-    protected final Ty myTy;
+    /** <p>The list of programming variables for the new shared state.</p> */
+    protected final List<VarDec> myStateVars;
 
-    /** <p>The convention clause for the new type.</p> */
+    /** <p>The convention clause for the new shared state.</p> */
     protected final AssertionClause myConvention;
 
     // ===========================================================
@@ -42,19 +45,19 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the name,
-     * raw type and convention for any objects created from a class
-     * that inherits from {@code AbstractTypeRepresentationDec}.</p>
+     * <p>An helper constructor that allow us to store the name
+     * and convention for any objects created from a class
+     * that inherits from {@code AbstractSharedStateRealizationDec}.</p>
      *
-     * @param name Name of the new type.
-     * @param ty Raw type used to implement this new type.
-     * @param convention Type convention.
+     * @param name Name of the new shared state.
+     * @param stateVarDecs The list of {@link VarDec}s that are in the new shared state.
+     * @param convention Shared state convention.
      */
-    protected AbstractTypeRepresentationDec(PosSymbol name, Ty ty,
-            AssertionClause convention) {
+    protected AbstractSharedStateRealizationDec(PosSymbol name,
+            List<VarDec> stateVarDecs, AssertionClause convention) {
         super(name.getLocation(), name);
+        myStateVars = stateVarDecs;
         myConvention = convention;
-        myTy = ty;
     }
 
     // ===========================================================
@@ -73,16 +76,17 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
         if (!super.equals(o))
             return false;
 
-        AbstractTypeRepresentationDec that = (AbstractTypeRepresentationDec) o;
+        AbstractSharedStateRealizationDec that =
+                (AbstractSharedStateRealizationDec) o;
 
-        if (!myTy.equals(that.myTy))
+        if (!myStateVars.equals(that.myStateVars))
             return false;
         return myConvention.equals(that.myConvention);
 
     }
 
     /**
-     * <p>Returns the convention for this type representation.</p>
+     * <p>Returns the convention for this shared state.</p>
      *
      * @return The type convention in {@link AssertionClause} format.
      */
@@ -91,13 +95,12 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     }
 
     /**
-     * <p>Returns the raw type model representation
-     * used to implement this type.</p>
+     * <p>Returns the variables for this shared state.</p>
      *
-     * @return The raw type in {@link Ty} format.
+     * @return The list of {@link VarDec} representations.
      */
-    public final Ty getRepresentation() {
-        return myTy;
+    public final List<VarDec> getStateVars() {
+        return myStateVars;
     }
 
     /**
@@ -106,7 +109,7 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + myTy.hashCode();
+        result = 31 * result + myStateVars.hashCode();
         result = 31 * result + myConvention.hashCode();
         return result;
     }
@@ -116,15 +119,29 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>Implemented by concrete subclasses of {@link AbstractTypeRepresentationDec}
+     * <p>Implemented by concrete subclasses of {@link AbstractSharedStateRealizationDec}
      * to manufacture a copy of themselves.</p>
      *
-     * @return A new {@link AbstractTypeRepresentationDec} that is a
+     * @return A new {@link AbstractSharedStateRealizationDec} that is a
      * deep copy of the original.
      */
-    protected AbstractTypeRepresentationDec copy() {
+    protected AbstractSharedStateRealizationDec copy() {
         throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
                 + this.getClass(), new CloneNotSupportedException());
     }
 
+    /**
+     * <p>An helper method to copy all the programming variables
+     * in this shared state.</p>
+     *
+     * @return A deep copy of the list of {@link VarDec}s.
+     */
+    protected final List<VarDec> copyStateVars() {
+        List<VarDec> newStateVars = new ArrayList<>();
+        for (VarDec varDec : myStateVars) {
+            newStateVars.add((VarDec) varDec.clone());
+        }
+
+        return newStateVars;
+    }
 }

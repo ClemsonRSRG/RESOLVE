@@ -1,5 +1,5 @@
 /**
- * FacilityTypeRepresentationDec.java
+ * SharedStateRealizationDec.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,53 +10,64 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
+package edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityTypeInitFinalItem;
-import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import java.util.List;
 
 /**
- * <p>This is the class for all the facility type representation declaration objects
+ * <p>This is the class for all the shared state representation declaration objects
  * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
- * @version 2.0
+ * @author Yu-Shan Sun
+ * @version 1.0
  */
-public class FacilityTypeRepresentationDec
+public class SharedStateRealizationDec
         extends
-            AbstractTypeRepresentationDec {
+            AbstractSharedStateRealizationDec {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
+    /** <p>The correspondence clause for the new type.</p> */
+    private final AssertionClause myCorrespondence;
+
     /** <p>The initialization block for the new type.</p> */
-    private final FacilityTypeInitFinalItem myTypeInitItem;
+    private final TypeInitFinalItem myTypeInitItem;
 
     /** <p>The finalization block for the new type.</p> */
-    private final FacilityTypeInitFinalItem myTypeFinalItem;
+    private final TypeInitFinalItem myTypeFinalItem;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a facility type representation declaration.</p>
+     * <p>This constructs a shared state representation declaration.</p>
      *
-     * @param name Name of the new type.
-     * @param ty Raw type used to implement this new type.
-     * @param convention Type convention.
-     * @param initItem Initialization block for this new type.
-     * @param finalItem Finalization block for this new type.
+     * @param name Name of the new shared state.
+     * @param stateVarDecs The list of {@link VarDec}s that are in the new shared state.
+     * @param convention Shared state convention.
+     * @param correspondence Shared state correspondence.
+     * @param initItem Initialization block for this new shared state.
+     * @param finalItem Finalization block for this new shared state.
      */
-    public FacilityTypeRepresentationDec(PosSymbol name, Ty ty,
-            AssertionClause convention, FacilityTypeInitFinalItem initItem,
-            FacilityTypeInitFinalItem finalItem) {
-        super(name, ty, convention);
+    public SharedStateRealizationDec(PosSymbol name, List<VarDec> stateVarDecs,
+            AssertionClause convention, AssertionClause correspondence,
+            TypeInitFinalItem initItem, TypeInitFinalItem finalItem) {
+        super(name, stateVarDecs, convention);
+        myCorrespondence = correspondence;
         myTypeInitItem = initItem;
         myTypeFinalItem = finalItem;
     }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     // ===========================================================
     // Public Methods
@@ -69,13 +80,24 @@ public class FacilityTypeRepresentationDec
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("Type ");
+        sb.append("Shared State ");
         sb.append(myName.asString(0, innerIndentInc));
-        sb.append(" = ");
-        sb.append(myTy.asString(0, innerIndentInc));
+        sb.append(" =\n");
+
+        // shared state variables
+        for (VarDec varDec : myStateVars) {
+            printSpace(indentSize + innerIndentInc, sb);
+            sb.append("Var ");
+            sb.append(varDec.asString(0, innerIndentInc));
+            sb.append(";\n");
+        }
 
         // convention
         sb.append(myConvention.asString(indentSize + innerIndentInc,
+                innerIndentInc));
+
+        // correspondence
+        sb.append(myCorrespondence.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
         // initialization/finalization
@@ -101,8 +123,10 @@ public class FacilityTypeRepresentationDec
         if (!super.equals(o))
             return false;
 
-        FacilityTypeRepresentationDec that = (FacilityTypeRepresentationDec) o;
+        SharedStateRealizationDec that = (SharedStateRealizationDec) o;
 
+        if (!myCorrespondence.equals(that.myCorrespondence))
+            return false;
         if (!myTypeInitItem.equals(that.myTypeInitItem))
             return false;
         return myTypeFinalItem.equals(that.myTypeFinalItem);
@@ -110,12 +134,21 @@ public class FacilityTypeRepresentationDec
     }
 
     /**
+     * <p>Returns the correspondence for this type representation.</p>
+     *
+     * @return The type correspondence in {@link AssertionClause} format.
+     */
+    public final AssertionClause getCorrespondence() {
+        return myCorrespondence;
+    }
+
+    /**
      * <p>Returns the finalization block for this type representation.</p>
      *
      * @return The code block used for finalization
-     * in {@link FacilityTypeInitFinalItem} format.
+     * in {@link TypeInitFinalItem} format.
      */
-    public final FacilityTypeInitFinalItem getTypeFinalItem() {
+    public final TypeInitFinalItem getTypeFinalItem() {
         return myTypeFinalItem;
     }
 
@@ -123,9 +156,9 @@ public class FacilityTypeRepresentationDec
      * <p>Returns the initialization block for this type representation.</p>
      *
      * @return The code block used for initialization
-     * in {@link FacilityTypeInitFinalItem} format.
+     * in {@link TypeInitFinalItem} format.
      */
-    public final FacilityTypeInitFinalItem getTypeInitItem() {
+    public final TypeInitFinalItem getTypeInitItem() {
         return myTypeInitItem;
     }
 
@@ -135,6 +168,7 @@ public class FacilityTypeRepresentationDec
     @Override
     public final int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + myCorrespondence.hashCode();
         result = 31 * result + myTypeInitItem.hashCode();
         result = 31 * result + myTypeFinalItem.hashCode();
         return result;
@@ -148,10 +182,10 @@ public class FacilityTypeRepresentationDec
      * {@inheritDoc}
      */
     @Override
-    protected final FacilityTypeRepresentationDec copy() {
-        return new FacilityTypeRepresentationDec(myName.clone(), myTy.clone(),
-                myConvention.clone(), myTypeInitItem.clone(), myTypeFinalItem
-                        .clone());
+    protected final SharedStateRealizationDec copy() {
+        return new SharedStateRealizationDec(myName.clone(), copyStateVars(),
+                myConvention.clone(), myCorrespondence.clone(), myTypeInitItem
+                        .clone(), myTypeFinalItem.clone());
     }
 
 }

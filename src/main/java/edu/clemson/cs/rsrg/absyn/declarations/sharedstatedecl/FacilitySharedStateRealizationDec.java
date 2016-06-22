@@ -1,5 +1,5 @@
 /**
- * FacilityTypeRepresentationDec.java
+ * FacilitySharedStateRealizationDec.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,22 +10,24 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
+package edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityTypeInitFinalItem;
-import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import java.util.List;
 
 /**
- * <p>This is the class for all the facility type representation declaration objects
+ * <p>This is the class for all the facility shared state representation declaration objects
  * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
- * @version 2.0
+ * @author Yu-Shan Sun
+ * @version 1.0
  */
-public class FacilityTypeRepresentationDec
+public class FacilitySharedStateRealizationDec
         extends
-            AbstractTypeRepresentationDec {
+            AbstractSharedStateRealizationDec {
 
     // ===========================================================
     // Member Fields
@@ -42,18 +44,19 @@ public class FacilityTypeRepresentationDec
     // ===========================================================
 
     /**
-     * <p>This constructs a facility type representation declaration.</p>
+     * <p>This constructs a facility shared state representation declaration.</p>
      *
-     * @param name Name of the new type.
-     * @param ty Raw type used to implement this new type.
-     * @param convention Type convention.
-     * @param initItem Initialization block for this new type.
-     * @param finalItem Finalization block for this new type.
+     * @param name Name of the new shared state.
+     * @param stateVarDecs The list of {@link VarDec}s that are in the new shared state.
+     * @param convention Shared state convention.
+     * @param initItem Initialization block for this new shared state.
+     * @param finalItem Finalization block for this new shared state.
      */
-    public FacilityTypeRepresentationDec(PosSymbol name, Ty ty,
-            AssertionClause convention, FacilityTypeInitFinalItem initItem,
+    public FacilitySharedStateRealizationDec(PosSymbol name,
+            List<VarDec> stateVarDecs, AssertionClause convention,
+            FacilityTypeInitFinalItem initItem,
             FacilityTypeInitFinalItem finalItem) {
-        super(name, ty, convention);
+        super(name, stateVarDecs, convention);
         myTypeInitItem = initItem;
         myTypeFinalItem = finalItem;
     }
@@ -69,10 +72,17 @@ public class FacilityTypeRepresentationDec
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("Type ");
+        sb.append("Shared State ");
         sb.append(myName.asString(0, innerIndentInc));
-        sb.append(" = ");
-        sb.append(myTy.asString(0, innerIndentInc));
+        sb.append(" =\n");
+
+        // shared state variables
+        for (VarDec varDec : myStateVars) {
+            printSpace(indentSize + innerIndentInc, sb);
+            sb.append("Var ");
+            sb.append(varDec.asString(0, innerIndentInc));
+            sb.append(";\n");
+        }
 
         // convention
         sb.append(myConvention.asString(indentSize + innerIndentInc,
@@ -101,7 +111,8 @@ public class FacilityTypeRepresentationDec
         if (!super.equals(o))
             return false;
 
-        FacilityTypeRepresentationDec that = (FacilityTypeRepresentationDec) o;
+        FacilitySharedStateRealizationDec that =
+                (FacilitySharedStateRealizationDec) o;
 
         if (!myTypeInitItem.equals(that.myTypeInitItem))
             return false;
@@ -148,10 +159,10 @@ public class FacilityTypeRepresentationDec
      * {@inheritDoc}
      */
     @Override
-    protected final FacilityTypeRepresentationDec copy() {
-        return new FacilityTypeRepresentationDec(myName.clone(), myTy.clone(),
-                myConvention.clone(), myTypeInitItem.clone(), myTypeFinalItem
-                        .clone());
+    protected final FacilitySharedStateRealizationDec copy() {
+        return new FacilitySharedStateRealizationDec(myName.clone(),
+                copyStateVars(), myConvention.clone(), myTypeInitItem.clone(),
+                myTypeFinalItem.clone());
     }
 
 }
