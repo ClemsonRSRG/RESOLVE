@@ -32,7 +32,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.FacilitySharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.PerformanceTypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
@@ -1397,53 +1399,147 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a shared state realization
+     * declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterSharedStateRepresentationDecl(
-            ResolveParser.SharedStateRepresentationDeclContext ctx) {
-        super.enterSharedStateRepresentationDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Shared state realization declaration node in ANTLR4 AST.
      */
     @Override
     public void exitSharedStateRepresentationDecl(
             ResolveParser.SharedStateRepresentationDeclContext ctx) {
-        super.exitSharedStateRepresentationDecl(ctx);
+        List<VarDec> sharedStateVars = new ArrayList<>();
+        List<ResolveParser.VariableDeclContext> variableDeclContexts = ctx.variableDecl();
+        for (ResolveParser.VariableDeclContext variableDeclContext : variableDeclContexts) {
+            for (TerminalNode ident : variableDeclContext.variableDeclGroup().IDENTIFIER()) {
+                sharedStateVars.add((VarDec) myNodes.removeFrom(ident));
+            }
+        }
+
+        AssertionClause convention;
+        if (ctx.conventionClause() != null) {
+            convention =
+                    (AssertionClause) myNodes
+                            .removeFrom(ctx.conventionClause());
+        }
+        else {
+            convention =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CONVENTION);
+        }
+
+        AssertionClause correspondence;
+        if (ctx.correspondenceClause() != null) {
+            correspondence =
+                    (AssertionClause) myNodes.removeFrom(ctx
+                            .correspondenceClause());
+        }
+        else {
+            correspondence =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CORRESPONDENCE);
+        }
+
+        TypeInitFinalItem initItem;
+        if (ctx.representationInit() != null) {
+            initItem =
+                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                            .representationInit());
+        }
+        else {
+            initItem =
+                    new TypeInitFinalItem(createLocation(ctx),
+                            TypeInitFinalItem.ItemType.INITIALIZATION, null,
+                            new ArrayList<FacilityDec>(),
+                            new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        TypeInitFinalItem finalItem;
+        if (ctx.representationFinal() != null) {
+            finalItem =
+                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                            .representationFinal());
+        }
+        else {
+            finalItem =
+                    new TypeInitFinalItem(createLocation(ctx),
+                            TypeInitFinalItem.ItemType.FINALIZATION, null,
+                            new ArrayList<FacilityDec>(),
+                            new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        myNodes.put(ctx, new SharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars, convention, correspondence, initItem, finalItem));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a facility shared state realization
+     * declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterFacilitySharedStateRepresentationDecl(
-            ResolveParser.FacilitySharedStateRepresentationDeclContext ctx) {
-        super.enterFacilitySharedStateRepresentationDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Facility shared state realization declaration node in ANTLR4 AST.
      */
     @Override
     public void exitFacilitySharedStateRepresentationDecl(
             ResolveParser.FacilitySharedStateRepresentationDeclContext ctx) {
-        super.exitFacilitySharedStateRepresentationDecl(ctx);
+        List<VarDec> sharedStateVars = new ArrayList<>();
+        List<ResolveParser.VariableDeclContext> variableDeclContexts = ctx.variableDecl();
+        for (ResolveParser.VariableDeclContext variableDeclContext : variableDeclContexts) {
+            for (TerminalNode ident : variableDeclContext.variableDeclGroup().IDENTIFIER()) {
+                sharedStateVars.add((VarDec) myNodes.removeFrom(ident));
+            }
+        }
+
+        AssertionClause convention;
+        if (ctx.conventionClause() != null) {
+            convention =
+                    (AssertionClause) myNodes
+                            .removeFrom(ctx.conventionClause());
+        }
+        else {
+            convention =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.CONVENTION);
+        }
+
+        FacilityTypeInitFinalItem initItem;
+        if (ctx.facilityRepresentationInit() != null) {
+            initItem =
+                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
+                            .facilityRepresentationInit());
+        }
+        else {
+            initItem =
+                    new FacilityTypeInitFinalItem(createLocation(ctx),
+                            FacilityTypeInitFinalItem.ItemType.INITIALIZATION,
+                            null, createTrueAssertionClause(
+                            createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES),
+                            createTrueAssertionClause(createLocation(ctx),
+                                    AssertionClause.ClauseType.ENSURES),
+                            new ArrayList<FacilityDec>(),
+                            new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        FacilityTypeInitFinalItem finalItem;
+        if (ctx.facilityRepresentationFinal() != null) {
+            finalItem =
+                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
+                            .facilityRepresentationFinal());
+        }
+        else {
+            finalItem =
+                    new FacilityTypeInitFinalItem(createLocation(ctx),
+                            FacilityTypeInitFinalItem.ItemType.FINALIZATION,
+                            null, createTrueAssertionClause(
+                            createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES),
+                            createTrueAssertionClause(createLocation(ctx),
+                                    AssertionClause.ClauseType.ENSURES),
+                            new ArrayList<FacilityDec>(),
+                            new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        myNodes.put(ctx, new FacilitySharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars, convention, initItem, finalItem));
     }
 
     // -----------------------------------------------------------
