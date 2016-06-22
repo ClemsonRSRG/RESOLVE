@@ -1193,7 +1193,14 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     private List<ProgramVariableExp> formChangingClause() {
         List<ProgramVariableExp> changingList = new ArrayList<>();
 
-        // TODO: Add all the shared state variables
+        // For all the shared state declarations,
+        // add their state variables.
+        for (AbstractSharedStateRealizationDec realizationDec : myCopySSRList) {
+            List<VarDec> stateVars = realizationDec.getStateVars();
+            for (VarDec v : stateVars) {
+                changingList.add(new ProgramVariableNameExp(new Location(v.getLocation()), null, v.getName().clone()));
+            }
+        }
 
         // Add all the parameter variables
         for (ParameterVarDec v : myParentNodeElementsContainer.parameterVarDecs) {
