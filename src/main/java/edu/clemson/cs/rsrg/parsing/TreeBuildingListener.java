@@ -1015,26 +1015,53 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new program record type.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterProgramRecordType(
-            ResolveParser.ProgramRecordTypeContext ctx) {
-        super.enterProgramRecordType(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Program record type node in ANTLR4 AST.
      */
     @Override
     public void exitProgramRecordType(ResolveParser.ProgramRecordTypeContext ctx) {
-        super.exitProgramRecordType(ctx);
+        List<ResolveParser.VariableDeclGroupContext> variableDeclGroupContexts =
+                ctx.variableDeclGroup();
+        for (ResolveParser.VariableDeclGroupContext variableDeclGroupContext : variableDeclGroupContexts) {
+            NameTy rawNameTy;
+            if (variableDeclGroupContext.programArrayType() != null) {
+                ResolveParser.ProgramArrayTypeContext arrayTypeContext =
+                        variableDeclGroupContext.programArrayType();
+                Location loc = createLocation(arrayTypeContext);
+
+                String firstIdent =
+                        variableDeclGroupContext.IDENTIFIER(0).getText();
+
+                // Type for the elements in the array
+                NameTy arrayElementsTy =
+                        (NameTy) myNodes.removeFrom(arrayTypeContext
+                                .programNamedType());
+
+                // Lower and Upper Bound
+                ProgramExp low =
+                        (ProgramExp) myNodes.removeFrom(arrayTypeContext
+                                .progExp(0));
+                ProgramExp high =
+                        (ProgramExp) myNodes.removeFrom(arrayTypeContext
+                                .progExp(1));
+
+                rawNameTy =
+                        createNameTyFromArrayType(loc, firstIdent,
+                                arrayElementsTy, low, high);
+            }
+            else {
+                rawNameTy =
+                        (NameTy) myNodes.removeFrom(variableDeclGroupContext
+                                .programNamedType());
+            }
+
+            // For each identifier, create a new variable declaration
+            for (TerminalNode ident : variableDeclGroupContext.IDENTIFIER()) {
+                myNodes.put(ident, new VarDec(
+                        createPosSymbol(ident.getSymbol()), rawNameTy.clone()));
+            }
+        }
     }
 
     // -----------------------------------------------------------
@@ -2085,21 +2112,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // refers to this array facility.
         NameTy rawNameTy;
         if (variableDeclGroupContext.programArrayType() != null) {
-            // Location
             Location loc =
                     createLocation(variableDeclGroupContext.programArrayType());
 
-            // Create name in the format of "_(Name of Variable)_Array_Fac_(myCounter)"
-            String newArrayName = "";
-            newArrayName +=
-                    ("_" + variableDeclGroupContext.IDENTIFIER(0).getText()
-                            + "_Array_Fac_" + myNewElementCounter++);
-
-            // Create the new raw type
-            rawNameTy =
-                    new NameTy(new Location(loc), new PosSymbol(new Location(
-                            loc), newArrayName), new PosSymbol(
-                            new Location(loc), "Static_Array"));
+            String firstIdent =
+                    variableDeclGroupContext.IDENTIFIER(0).getText();
 
             // Type for the elements in the array
             NameTy arrayElementsTy =
@@ -2114,16 +2131,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     (ProgramExp) myNodes.removeFrom(variableDeclGroupContext
                             .programArrayType().progExp(1));
 
-            // Create the new array facility and add it to the appropriate container
-            ArrayFacilityDecContainer innerMostContainer =
-                    myArrayFacilityDecContainerStack.pop();
-            innerMostContainer.newFacilityDecs.add(createArrayFacilityDec(loc,
-                    rawNameTy, arrayElementsTy, low, high));
-            myArrayFacilityDecContainerStack.push(innerMostContainer);
-
-            // Store the raw types in the map
-            myArrayNameTyToInnerTyMap.put((NameTy) rawNameTy.clone(),
-                    (NameTy) arrayElementsTy.clone());
+            rawNameTy =
+                    createNameTyFromArrayType(loc, firstIdent, arrayElementsTy,
+                            low, high);
         }
         else {
             rawNameTy =
@@ -4244,6 +4254,46 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private Location createLocation(Token t) {
         return new Location(new Location(myFile, t.getLine(), t
                 .getCharPositionInLine(), ""));
+    }
+
+    /**
+     * <p>Create a {@link NameTy} from the a program array type
+     * for the current parser rule we are visiting.</p>
+     *
+     * @param l Location for the new elements.
+     * @param firstIdentAsString The first variable identifier as a string.
+     * @param arrayElementsTy The program type for the elements in the array.
+     * @param low The lower bound for the array.
+     * @param high The upper bound for the array.
+     *
+     * @return A {@link NameTy} for the rule.
+     */
+    private NameTy createNameTyFromArrayType(Location l,
+            String firstIdentAsString, NameTy arrayElementsTy, ProgramExp low,
+            ProgramExp high) {
+        // Create name in the format of "_(Name of Variable)_Array_Fac_(myCounter)"
+        String newArrayName = "";
+        newArrayName +=
+                ("_" + firstIdentAsString + "_Array_Fac_" + myNewElementCounter++);
+
+        // Create the new raw type
+        NameTy rawNameTy =
+                new NameTy(new Location(l), new PosSymbol(new Location(l),
+                        newArrayName), new PosSymbol(new Location(l),
+                        "Static_Array"));
+
+        // Create the new array facility and add it to the appropriate container
+        ArrayFacilityDecContainer innerMostContainer =
+                myArrayFacilityDecContainerStack.pop();
+        innerMostContainer.newFacilityDecs.add(createArrayFacilityDec(l,
+                rawNameTy, arrayElementsTy, low, high));
+        myArrayFacilityDecContainerStack.push(innerMostContainer);
+
+        // Store the raw types in the map
+        myArrayNameTyToInnerTyMap.put((NameTy) rawNameTy.clone(),
+                (NameTy) arrayElementsTy.clone());
+
+        return rawNameTy;
     }
 
     /**
