@@ -30,8 +30,7 @@ import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityTypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
-import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
-import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.rawtypes.*;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
@@ -1149,9 +1148,44 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     private NameTy findArrayType(ProgramVariableExp exp) {
         NameTy contentTy;
         if (exp instanceof ProgramVariableDotExp) {
-            // TODO: Change this when we pass type realization to this class.
-            // Right now we assume the array expressions won't be in some kind of record.
-            throw new RuntimeException();
+            // At this point, we should have a ProgramVariableDotExp
+            // with all ProgramVariableNameExps as segments.
+            List<ProgramVariableExp> segments =
+                    ((ProgramVariableDotExp) exp).getSegments();
+            ProgramVariableNameExp firstExp =
+                    (ProgramVariableNameExp) segments.remove(0);
+            String firstVarName = firstExp.getName().getName();
+
+            // Search parameter variables
+            AbstractVarDec varDec = searchParameterVarDecs(firstVarName);
+
+            // Search local variables (if not found)
+            if (varDec == null) {
+                varDec = searchVarDecs(firstVarName);
+            }
+
+            // Throw exception if we can't find it.
+            if (varDec == null) {
+                throw new MiscErrorException(
+                        "Cannot locate the content type for the array: "
+                                + exp.toString(), new IllegalStateException());
+            }
+            else {
+                // Each of the remaining ProgramVariableNameExp's in the segment
+                // must be a VarDec inside a type realization, so we track each
+                // one down until we find the array variable declaration.
+                NameTy recordTy = (NameTy) varDec.getTy();
+                for (ProgramVariableExp variableExp : segments) {
+                    ProgramVariableNameExp variableNameExp =
+                            (ProgramVariableNameExp) variableExp;
+                    recordTy =
+                            searchRecords(recordTy, variableNameExp.getName()
+                                    .getName());
+                }
+
+                // When are done, the recordTy should contain what we are searching for.
+                contentTy = (NameTy) recordTy.clone();
+            }
         }
         else if (exp instanceof ProgramVariableNameExp) {
             String arrayVarName =
@@ -1248,6 +1282,54 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>An helper method to try to locate a {@link NameTy} in all of our
+     * {@link AbstractTypeRepresentationDec} based on the {@link NameTy}
+     * and the name.</p>
+     *
+     * @param rawTy The {@link NameTy} for a type representation.
+     * @param name Name of the variable we are trying to find.
+     *
+     * @return A copy of the {@link Ty} if found, else {@code null}.
+     *
+     * @exception MiscErrorException
+     */
+    private NameTy searchRecords(NameTy rawTy, String name) {
+        NameTy returnTy = null;
+
+        for (AbstractTypeRepresentationDec typeRepresentationDec : myCopyTRList) {
+            if (typeRepresentationDec.getName().equals(rawTy.getName())) {
+                Ty representationTy = typeRepresentationDec.getRepresentation();
+
+                if (representationTy instanceof RecordTy) {
+                    List<VarDec> varDecs =
+                            ((RecordTy) representationTy).getFields();
+                    for (VarDec v : varDecs) {
+                        if (v.getName().getName().equals(name)) {
+                            if (returnTy == null) {
+                                returnTy = (NameTy) v.getTy().clone();
+                            }
+                            else {
+                                throw new MiscErrorException(
+                                        "Found two variables for: " + name,
+                                        new IllegalStateException());
+                            }
+                        }
+                    }
+                }
+                else {
+                    throw new MiscErrorException(
+                            "Variable ["
+                                    + name
+                                    + "] does not point to a type that contains a record",
+                            new IllegalStateException());
+                }
+            }
+        }
+
+        return returnTy;
+    }
+
+    /**
      * <p>An helper method to try to locate a {@link VarDec} in all of our
      * {@link AbstractSharedStateRealizationDec} based on the string name passed in.</p>
      *
@@ -1258,9 +1340,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * @exception MiscErrorException
      */
     private VarDec searchSharedStates(String name) {
-        VarDec varDec = null;
         // For all the shared state declarations,
         // search their state variables.
+        VarDec varDec = null;
         for (AbstractSharedStateRealizationDec realizationDec : myCopySSRList) {
             List<VarDec> stateVars = realizationDec.getStateVars();
             for (VarDec v : stateVars) {
