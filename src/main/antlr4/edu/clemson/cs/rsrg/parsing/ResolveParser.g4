@@ -198,7 +198,6 @@ enhancementPerformanceItems
 
 enhancementPerformanceItem
     :   performanceOperationDecl
-    |   performanceTypeModelDecl
     |   mathDefinitionDecl
     |   mathDefinesDecl
     ;
