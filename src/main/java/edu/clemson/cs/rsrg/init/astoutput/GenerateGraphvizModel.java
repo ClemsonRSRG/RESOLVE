@@ -21,9 +21,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AbstractVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -238,6 +236,25 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
     // Specification Init/Final Items
     // -----------------------------------------------------------
+
+    /**
+     * <p>For all {@link PerformanceSpecInitFinalItem} nodes, create a new node and
+     * add the item type.</p>
+     *
+     * @param e Current {@link PerformanceSpecInitFinalItem} we are visiting.
+     */
+    @Override
+    public void postPerformanceSpecInitFinalItem(PerformanceSpecInitFinalItem e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        // Add the item type
+        node.add("nodeData", e.getClauseType().name());
+
+        myModel.add("nodes", node);
+    }
 
     /**
      * <p>For all {@link SpecInitFinalItem} nodes, create a new node and
