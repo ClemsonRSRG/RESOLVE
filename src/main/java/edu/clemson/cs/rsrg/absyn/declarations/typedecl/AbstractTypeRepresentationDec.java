@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -125,6 +126,33 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     protected AbstractTypeRepresentationDec copy() {
         throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
                 + this.getClass(), new CloneNotSupportedException());
+    }
+
+    /**
+     * <p>A helper method to form the string with type
+     * the module's uses items.</p>
+     *
+     * @param indentSize The base indentation to the first line
+     *                   of the text.
+     * @param innerIndentInc The additional indentation increment
+     *                       for the subsequent lines.
+     *
+     * @return A formatted text string.
+     */
+    protected final String formRepresentationTy(int indentSize,
+            int innerIndentInc) {
+        StringBuffer sb = new StringBuffer();
+        if (myTy instanceof RecordTy) {
+            sb.append(" is represented by Record\n");
+            sb.append(myTy
+                    .asString(indentSize + innerIndentInc, innerIndentInc));
+        }
+        else {
+            sb.append(" = ");
+            sb.append(myTy.asString(0, innerIndentInc));
+        }
+
+        return sb.toString();
     }
 
 }

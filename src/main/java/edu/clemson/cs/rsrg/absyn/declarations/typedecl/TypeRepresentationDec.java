@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
@@ -74,16 +75,17 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
         printSpace(indentSize, sb);
         sb.append("Type ");
         sb.append(myName.asString(0, innerIndentInc));
-        sb.append(" = ");
-        sb.append(myTy.asString(0, innerIndentInc));
+        sb.append(formRepresentationTy(indentSize, innerIndentInc));
 
         // convention
         sb.append(myConvention.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // correspondence
         sb.append(myCorrespondence.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // initialization/finalization
         sb.append(myTypeInitItem.asString(indentSize + innerIndentInc,
@@ -91,7 +93,8 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
         sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
-        sb.append("end;\n");
+        printSpace(indentSize, sb);
+        sb.append("end;");
 
         return sb.toString();
     }

@@ -95,10 +95,12 @@ public class SharedStateRealizationDec
         // convention
         sb.append(myConvention.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // correspondence
         sb.append(myCorrespondence.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // initialization/finalization
         sb.append(myTypeInitItem.asString(indentSize + innerIndentInc,
@@ -106,7 +108,8 @@ public class SharedStateRealizationDec
         sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
-        sb.append("end;\n");
+        printSpace(indentSize, sb);
+        sb.append("end;");
 
         return sb.toString();
     }

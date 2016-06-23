@@ -124,6 +124,7 @@ public class OperationProcedureDec extends Dec {
 
         // operation declaration
         sb.append(myWrappedOpDec.asString(indentSize, innerIndentInc));
+        sb.append("\n");
 
         printSpace(indentSize, sb);
         if (myRecursiveFlag) {

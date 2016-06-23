@@ -60,6 +60,7 @@ public class TypeInitFinalItem extends AbstractTypeInitFinalItem {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
+        printSpace(indentSize, sb);
         sb.append(myItemType.toString());
         sb.append("\n");
 
@@ -87,6 +88,7 @@ public class TypeInitFinalItem extends AbstractTypeInitFinalItem {
                     innerIndentInc));
         }
 
+        printSpace(indentSize, sb);
         sb.append("end;\n");
 
         return sb.toString();

@@ -57,12 +57,14 @@ public class RecordTy extends Ty {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
         for (VarDec v : myInnerFields) {
             sb.append(v.asString(indentSize + innerIndentInc, innerIndentInc));
-            sb.append("\n");
+            sb.append(";\n");
         }
+
+        printSpace(indentSize, sb);
+        sb.append("end;\n");
 
         return sb.toString();
     }

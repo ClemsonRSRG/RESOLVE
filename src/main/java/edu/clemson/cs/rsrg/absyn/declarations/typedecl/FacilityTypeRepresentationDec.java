@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityTypeInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
@@ -71,12 +72,12 @@ public class FacilityTypeRepresentationDec
         printSpace(indentSize, sb);
         sb.append("Type ");
         sb.append(myName.asString(0, innerIndentInc));
-        sb.append(" = ");
-        sb.append(myTy.asString(0, innerIndentInc));
+        sb.append(formRepresentationTy(indentSize, innerIndentInc));
 
         // convention
         sb.append(myConvention.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // initialization/finalization
         sb.append(myTypeInitItem.asString(indentSize + innerIndentInc,
@@ -84,7 +85,8 @@ public class FacilityTypeRepresentationDec
         sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
-        sb.append("end;\n");
+        printSpace(indentSize, sb);
+        sb.append("end;");
 
         return sb.toString();
     }

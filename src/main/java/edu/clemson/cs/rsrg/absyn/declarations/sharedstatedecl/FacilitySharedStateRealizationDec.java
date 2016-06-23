@@ -87,6 +87,7 @@ public class FacilitySharedStateRealizationDec
         // convention
         sb.append(myConvention.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // initialization/finalization
         sb.append(myTypeInitItem.asString(indentSize + innerIndentInc,
@@ -94,7 +95,8 @@ public class FacilitySharedStateRealizationDec
         sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
-        sb.append("end;\n");
+        printSpace(indentSize, sb);
+        sb.append("end;");
 
         return sb.toString();
     }
