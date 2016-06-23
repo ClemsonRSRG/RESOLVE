@@ -24,10 +24,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
@@ -254,6 +251,48 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
 
         // Add the item type
         node.add("nodeData", e.getClauseType().name());
+
+        myModel.add("nodes", node);
+    }
+
+    // -----------------------------------------------------------
+    // Realization Init/Final Items
+    // -----------------------------------------------------------
+
+    /**
+     * <p>For all {@link FacilityTypeInitFinalItem} nodes, create a new node and
+     * add the item type.</p>
+     *
+     * @param e Current {@link FacilityTypeInitFinalItem} we are visiting.
+     */
+    @Override
+    public void postFacilityTypeInitFinalItem(FacilityTypeInitFinalItem e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        // Add the item type
+        node.add("nodeData", e.getItemType().name());
+
+        myModel.add("nodes", node);
+    }
+
+    /**
+     * <p>For all {@link TypeInitFinalItem} nodes, create a new node and
+     * add the item type.</p>
+     *
+     * @param e Current {@link TypeInitFinalItem} we are visiting.
+     */
+    @Override
+    public void postTypeInitFinalItem(TypeInitFinalItem e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        // Add the item type
+        node.add("nodeData", e.getItemType().name());
 
         myModel.add("nodes", node);
     }
