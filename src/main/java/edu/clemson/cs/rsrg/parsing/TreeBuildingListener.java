@@ -3572,13 +3572,28 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
         // build logical expressions
         else {
-            // Obtain the 2 expressions
-            Exp leftExp = (Exp) myNodes.removeFrom(ctx.mathRelationalExp(0));
-            Exp rightExp = (Exp) myNodes.removeFrom(ctx.mathRelationalExp(1));
+            // Obtain all the expressions
+            List<Exp> exps = new ArrayList<>();
+            for (ResolveParser.MathRelationalExpContext context : relationalExpContexts) {
+                exps.add((Exp) myNodes.removeFrom(context));
+            }
 
-            newElement =
-                    new InfixExp(leftExp.getLocation(), leftExp, null,
-                            createPosSymbol(ctx.op), rightExp);
+            // Reduce the expressions until we have 1 left
+            while (exps.size() > 1) {
+                Exp leftExp = exps.remove(0);
+                Exp rightExp = exps.remove(0);
+
+                // Form an infix expression using the operator
+                Exp newFirstExp =
+                        new InfixExp(new Location(leftExp.getLocation()), leftExp,
+                                null, createPosSymbol(ctx.op), rightExp);
+
+                // Add it back to the list for the next iteration of the loop
+                exps.add(0, newFirstExp);
+            }
+
+            // Remove the final element from the list
+            newElement = exps.remove(0);
         }
 
         myNodes.put(ctx, newElement);
@@ -3745,16 +3760,32 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         List<ResolveParser.MathMultiplyingExpContext> mathExps =
                 ctx.mathMultiplyingExp();
         if (mathExps.size() > 1) {
-            PosSymbol qualifier = null;
-            if (ctx.qualifier != null) {
-                qualifier = createPosSymbol(ctx.qualifier);
+            // Obtain all the expressions
+            List<Exp> exps = new ArrayList<>();
+            for (ResolveParser.MathMultiplyingExpContext context : mathExps) {
+                exps.add((Exp) myNodes.removeFrom(context));
             }
 
-            newElement =
-                    new InfixExp(createLocation(ctx), (Exp) myNodes
-                            .removeFrom(mathExps.get(0)), qualifier,
-                            createPosSymbol(ctx.op), (Exp) myNodes
-                                    .removeFrom(mathExps.get(1)));
+            // Reduce the expressions until we have 1 left
+            while (exps.size() > 1) {
+                Exp leftExp = exps.remove(0);
+                Exp rightExp = exps.remove(0);
+
+                PosSymbol qualifier = null;
+                if (ctx.qualifier != null) {
+                    qualifier = createPosSymbol(ctx.qualifier);
+                }
+
+                // Form an infix expression using the operator
+                Exp newFirstExp = new InfixExp(new Location(leftExp.getLocation()), leftExp,
+                        qualifier, createPosSymbol(ctx.op), rightExp);
+
+                // Add it back to the list for the next iteration of the loop
+                exps.add(0, newFirstExp);
+            }
+
+            // Remove the final element from the list
+            newElement = exps.remove(0);
         }
         else {
             newElement = myNodes.removeFrom(mathExps.remove(0));
@@ -3780,16 +3811,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         List<ResolveParser.MathExponentialExpContext> mathExps =
                 ctx.mathExponentialExp();
         if (mathExps.size() != 1) {
-            PosSymbol qualifier = null;
-            if (ctx.qualifier != null) {
-                qualifier = createPosSymbol(ctx.qualifier);
+            // Obtain all the expressions
+            List<Exp> exps = new ArrayList<>();
+            for (ResolveParser.MathExponentialExpContext context : mathExps) {
+                exps.add((Exp) myNodes.removeFrom(context));
             }
 
-            newElement =
-                    new InfixExp(createLocation(ctx), (Exp) myNodes
-                            .removeFrom(mathExps.get(0)), qualifier,
-                            createPosSymbol(ctx.op), (Exp) myNodes
-                                    .removeFrom(mathExps.get(1)));
+            // Reduce the expressions until we have 1 left
+            while (exps.size() > 1) {
+                Exp leftExp = exps.remove(0);
+                Exp rightExp = exps.remove(0);
+
+                PosSymbol qualifier = null;
+                if (ctx.qualifier != null) {
+                    qualifier = createPosSymbol(ctx.qualifier);
+                }
+
+                // Form an infix expression using the operator and
+                // add it back to the list for the next iteration of the loop
+                exps.add(0, new InfixExp(new Location(leftExp.getLocation()), leftExp,
+                        qualifier, createPosSymbol(ctx.op), rightExp));
+            }
+
+            // Remove the final element from the list
+            newElement = exps.remove(0);
         }
         else {
             newElement = myNodes.removeFrom(mathExps.remove(0));

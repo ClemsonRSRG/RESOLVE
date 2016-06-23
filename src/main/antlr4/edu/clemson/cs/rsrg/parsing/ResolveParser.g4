@@ -750,7 +750,9 @@ mathImpliesExp
     ;
 
 mathLogicalExp
-    :   mathRelationalExp (op=(AND | OR) mathRelationalExp)*
+    :   mathRelationalExp
+    |   mathRelationalExp (op=AND mathRelationalExp)+
+    |   mathRelationalExp (op=OR mathRelationalExp)+
     ;
 
 mathRelationalExp
@@ -780,14 +782,22 @@ mathFunctionTypeExp
 
 mathAddingExp
     :   mathMultiplyingExp
-        (qualifier=IDENTIFIER QUALIFIER)? (op=(PLUS | MINUS | CONCAT | UNION | INTERSECT | WITHOUT | TILDE)
-         mathMultiplyingExp)*
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=PLUS mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=MINUS mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=CONCAT mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=UNION mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=INTERSECT mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=WITHOUT mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=TILDE mathMultiplyingExp)+
     ;
 
 mathMultiplyingExp
     :   mathExponentialExp
-        (qualifier=IDENTIFIER QUALIFIER)? (op=(MULTIPLY | DIVIDE | MOD | REM | DIV)
-         mathExponentialExp)*
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=MULTIPLY mathExponentialExp)+
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=DIVIDE mathExponentialExp)+
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=MOD mathExponentialExp)+
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=REM mathExponentialExp)+
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=DIV mathExponentialExp)+
     ;
 
 mathExponentialExp
