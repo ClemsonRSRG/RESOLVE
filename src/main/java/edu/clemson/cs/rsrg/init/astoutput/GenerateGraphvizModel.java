@@ -25,15 +25,18 @@ import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.*;
+import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -487,6 +490,40 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
+     * <p>For all {@link CrossTypeExp} nodes, create a new node and
+     * add all the variables in this expression.</p>
+     *
+     * @param e Current {@link CrossTypeExp} we are visiting.
+     */
+    @Override
+    public void postCrossTypeExp(CrossTypeExp e) {
+        // Create the new node
+        ST node =
+                createNode(myElementToNodeNumMap.get(e), e.getClass()
+                        .getSimpleName(), true);
+
+        StringBuffer sb = new StringBuffer();
+
+        // Add all the variables/types in the cartesian product to
+        // the output string
+        Map<PosSymbol, ArbitraryExpTy> fields = e.getTagsToFieldsMap();
+        Iterator<PosSymbol> keyIt = fields.keySet().iterator();
+        while (keyIt.hasNext()) {
+            PosSymbol p = keyIt.next();
+            sb.append(p.getName());
+            sb.append(": ");
+            sb.append(fields.get(p));
+
+            if (keyIt.hasNext()) {
+                sb.append(", ");
+            }
+        }
+
+        node.add("nodeData", sb.toString());
+        myModel.add("nodes", node);
+    }
+
+    /**
      * <p>For all {@link FunctionExp} nodes, create a new node and
      * add the function's name (with qualifier if it is not {@code null}
      * and/or with the carat expression if it is not {@code null}).</p>
@@ -602,7 +639,7 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     public void postMathExp(MathExp e) {
         if (!(e instanceof InfixExp) && !(e instanceof TypeAssertionExp)
                 && !(e instanceof QuantExp) && !(e instanceof FunctionExp)
-                && !(e instanceof OutfixExp)) {
+                && !(e instanceof OutfixExp) && !(e instanceof CrossTypeExp)) {
             // Create the new node
             ST node =
                     createNode(myElementToNodeNumMap.get(e), e.getClass()

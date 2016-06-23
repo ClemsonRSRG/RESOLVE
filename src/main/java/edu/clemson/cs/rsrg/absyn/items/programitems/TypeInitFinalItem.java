@@ -68,24 +68,28 @@ public class TypeInitFinalItem extends AbstractTypeInitFinalItem {
         if (myAffects != null) {
             sb.append(myAffects.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         Iterator<FacilityDec> it1 = myFacilityDecs.iterator();
         while (it1.hasNext()) {
             sb.append(it1.next().asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         Iterator<VarDec> it2 = myVariableDecs.iterator();
         while (it2.hasNext()) {
             sb.append(it2.next().asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         Iterator<Statement> it4 = myStatements.iterator();
         while (it4.hasNext()) {
             sb.append(it4.next().asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         printSpace(indentSize, sb);

@@ -4052,7 +4052,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         // math expression
-        Exp mathExp = (Exp) myNodes.removeFrom(ctx.mathExp());
+        Exp mathExp;
+        if (ctx.mathExp() != null) {
+            mathExp = (Exp) myNodes.removeFrom(ctx.mathExp());
+        }
+        else {
+            mathExp = (Exp) myNodes.removeFrom(ctx.mathInfixExp());
+        }
 
         myNodes.put(ctx, new OutfixExp(createLocation(ctx), operator, mathExp));
     }
@@ -4129,7 +4135,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         List<MathVarDec> varDecls = new ArrayList<>();
         for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroups) {
             // Get each math variable declaration
-            varDecls.add((MathVarDec) myNodes.removeFrom(context));
+            List<TerminalNode> idents = context.IDENTIFIER();
+            for (TerminalNode ident : idents) {
+                varDecls.add((MathVarDec) myNodes.removeFrom(ident));
+            }
         }
 
         // body expression
@@ -4154,8 +4163,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = new HashMap<>();
         for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroups) {
             // Get each math variable declaration
-            MathVarDec varDec = (MathVarDec) myNodes.removeFrom(context);
-            tagsToFieldsMap.put(varDec.getName(), (ArbitraryExpTy) varDec.getTy());
+            List<TerminalNode> idents = context.IDENTIFIER();
+            for (TerminalNode ident : idents) {
+                MathVarDec varDec = (MathVarDec) myNodes.removeFrom(ident);
+                tagsToFieldsMap.put(varDec.getName(), (ArbitraryExpTy) varDec.getTy());
+            }
         }
 
         myNodes.put(ctx, new CrossTypeExp(createLocation(ctx), tagsToFieldsMap));

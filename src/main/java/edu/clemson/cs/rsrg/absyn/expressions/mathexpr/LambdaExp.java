@@ -81,9 +81,8 @@ public class LambdaExp extends MathExp {
                 sb.append(", ");
             }
         }
-        sb.append(").(\n");
-        sb.append(myBodyExp.asString(indentSize + innerIndentInc,
-                innerIndentInc));
+        sb.append(").(");
+        sb.append(myBodyExp.asString(0, innerIndentInc));
         sb.append(")");
 
         return sb.toString();
