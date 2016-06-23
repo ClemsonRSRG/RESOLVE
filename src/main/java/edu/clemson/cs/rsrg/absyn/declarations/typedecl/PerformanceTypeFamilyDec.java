@@ -80,17 +80,22 @@ public class PerformanceTypeFamilyDec extends Dec {
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(" is modeled by ");
         sb.append(myTy.asString(0, innerIndentInc));
+        sb.append(";\n");
 
         // constraint
         sb.append(myConstraint.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // initialization/finalization
         sb.append(myTypeInitItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
         sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
+        printSpace(indentSize, sb);
         sb.append("end;\n");
 
         return sb.toString();

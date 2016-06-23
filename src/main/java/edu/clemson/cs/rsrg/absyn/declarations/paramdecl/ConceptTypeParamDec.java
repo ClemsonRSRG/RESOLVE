@@ -48,7 +48,8 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append(myName.asString(indentSize + innerIndentInc, innerIndentInc));
+        sb.append("TYPE ");
+        sb.append(myName.asString(0, innerIndentInc));
 
         return sb.toString();
     }

@@ -823,27 +823,64 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of an {@code Profile}
+     * module declaration for an {@code Concept} module.</p>
      *
-     * @param ctx
+     * @param ctx Concept performance module node in ANTLR4 AST.
      */
     @Override
     public void exitConceptPerformanceModule(
             ResolveParser.ConceptPerformanceModuleContext ctx) {
-        super.exitConceptPerformanceModule(ctx);
+        // Module parameters (if any)
+        List<ModuleParameterDec> parameterDecls =
+                getModuleArguments(ctx.moduleParameterList());
+
+        // Uses items (if any)
+        List<UsesItem> uses =
+                Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
+                        .usesList().usesItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+
+        // Module requires (if any)
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
+        }
+
+        // Decs (if any)
+        List<Dec> decls =
+                Utilities.collect(Dec.class,
+                        ctx.conceptPerformanceItems() != null ? ctx
+                                .conceptPerformanceItems()
+                                .conceptPerformanceItem()
+                                : new ArrayList<ParseTree>(), myNodes);
+
+        PerformanceConceptModuleDec performance =
+                new PerformanceConceptModuleDec(createLocation(ctx),
+                        createPosSymbol(ctx.name), parameterDecls,
+                        createPosSymbol(ctx.fullName),
+                        createPosSymbol(ctx.concept), uses, requires, decls);
+        myNodes.put(ctx, performance);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the generated item for concept
+     * performance profiles.</p>
      *
-     * @param ctx
+     * @param ctx Concept performance item node in ANTLR4 AST.
      */
     @Override
     public void exitConceptPerformanceItem(
             ResolveParser.ConceptPerformanceItemContext ctx) {
-        super.exitConceptPerformanceItem(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     // -----------------------------------------------------------
@@ -930,7 +967,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method stores the generated enhancement item for
+     * <p>This method stores the generated item for enhancement
      * performance profiles.</p>
      *
      * @param ctx Enhancement performance item node in ANTLR4 AST.

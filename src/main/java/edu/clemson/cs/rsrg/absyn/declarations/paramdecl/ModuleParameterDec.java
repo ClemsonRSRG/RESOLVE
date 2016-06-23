@@ -13,6 +13,8 @@
 package edu.clemson.cs.rsrg.absyn.declarations.paramdecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
@@ -58,7 +60,6 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
         sb.append("\n");
         sb.append(myWrappedDec.asString(indentSize + innerIndentInc,
                 innerIndentInc));
-        sb.append("\n");
 
         return sb.toString();
     }

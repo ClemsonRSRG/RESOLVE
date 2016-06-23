@@ -99,6 +99,7 @@ public class ConceptModuleDec extends ModuleDec {
             sb.append("\n\n");
         }
 
+        sb.append("\n");
         sb.append(formDecEnd(indentSize, innerIndentInc));
 
         return sb.toString();

@@ -85,6 +85,7 @@ public class TypeFamilyDec extends Dec {
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(" is modeled by ");
         sb.append(myTy.asString(0, innerIndentInc));
+        sb.append(";\n");
 
         // exemplar
         printSpace(indentSize + innerIndentInc, sb);
@@ -95,14 +96,18 @@ public class TypeFamilyDec extends Dec {
         // constraint
         sb.append(myConstraint.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
         // initialization/finalization
         sb.append(myTypeInitItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
         sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
+        sb.append("\n");
 
-        sb.append("end;\n");
+        printSpace(indentSize, sb);
+        sb.append("end;");
 
         return sb.toString();
     }

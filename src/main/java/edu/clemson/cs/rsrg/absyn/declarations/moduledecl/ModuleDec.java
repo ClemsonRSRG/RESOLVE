@@ -204,7 +204,7 @@ public abstract class ModuleDec extends Dec {
                     sb.append(" ");
                 }
             }
-            sb.append(" )");
+            sb.append("\n )");
         }
 
         return sb.toString();
