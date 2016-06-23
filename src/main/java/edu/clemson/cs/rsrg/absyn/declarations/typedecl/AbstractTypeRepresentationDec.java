@@ -16,8 +16,8 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 
 /**
  * <p>This is the abstract base class for both the type representation and

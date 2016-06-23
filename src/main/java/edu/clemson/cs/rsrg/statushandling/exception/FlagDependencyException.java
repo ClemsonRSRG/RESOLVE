@@ -1,5 +1,5 @@
 /**
- * MiscErrorException.java
+ * FlagDependencyException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,37 +10,38 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.errorhandling.exception;
+package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
- *  <p>The miscellaneous error exception for the compiler
- *  where there is no line or location information available.</p>
+ * <p>A <code>FlagDependencyException</code> indicates that the user-provided
+ * flag configuration is not acceptable for some reason.  The reason for the
+ * exception is provided in the exception's message.</p>
  *
+ * @author Hampton Smith
  * @author Yu-Shan Sun
  * @version 2.0
  */
-public class MiscErrorException extends CompilerException {
+public class FlagDependencyException extends CompilerException {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 6L;
 
     // ==========================================================
     // Constructors
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a throwable cause and a message for the
-     * that caused an source exception to be thrown.</p>
+     * <p>This constructor takes in a message
+     * that caused a flag dependency exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
-     * @param cause Cause of the exception.
      */
-    public MiscErrorException(String message, Throwable cause) {
-        super(message, cause);
+    public FlagDependencyException(String message) {
+        super(message, (Throwable) null);
     }
 
 }

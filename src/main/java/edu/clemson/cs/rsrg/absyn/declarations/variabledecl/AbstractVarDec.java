@@ -14,9 +14,9 @@ package edu.clemson.cs.rsrg.absyn.declarations.variabledecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 
 /**
  * <p>This is the abstract base class for both the mathematical and

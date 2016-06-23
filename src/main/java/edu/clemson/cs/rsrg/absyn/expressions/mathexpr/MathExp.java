@@ -14,10 +14,10 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.errorhandling.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.NullMathTypeException;
 import java.util.*;
 
 /**

@@ -13,8 +13,8 @@
 package edu.clemson.cs.rsrg.absyn.statements;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 
 /**
  * <p>This is the abstract base class for all the statements objects

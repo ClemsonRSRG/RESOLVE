@@ -14,10 +14,10 @@ package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
-import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
-import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
-import edu.clemson.cs.rsrg.errorhandling.exception.FlagDependencyException;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.statushandling.WriterStatusHandler;
+import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.flag.FlagManager;
 import edu.clemson.cs.rsrg.misc.Utilities;
@@ -61,9 +61,9 @@ public class CompileEnvironment {
     private final Map<ModuleIdentifier, File> myExternalRealizFiles;
 
     /**
-     * <p>This is the default error handler for the RESOLVE compiler.</p>
+     * <p>This is the default status handler for the RESOLVE compiler.</p>
      */
-    private final ErrorHandler myErrorHandler;
+    private final StatusHandler myStatusHandler;
 
     /**
      * <p>This list stores all the incomplete modules.</p>
@@ -112,13 +112,13 @@ public class CompileEnvironment {
      *
      * @param args The specified compiler arguments array.
      * @param compilerVersion The current compiler version.
-     * @param errorHandler An error handler to display debug or error messages.
+     * @param statusHandler A status handler to display debug or error messages.
      *
      * @throws FlagDependencyException
      * @throws IOException
      */
     public CompileEnvironment(String[] args, String compilerVersion,
-            ErrorHandler errorHandler)
+            StatusHandler statusHandler)
             throws FlagDependencyException,
                 IOException {
         flags = new FlagManager(args);
@@ -146,20 +146,20 @@ public class CompileEnvironment {
                     new File(myCompileDir, "Error-Log-"
                             + dateFormat.format(date) + ".log");
 
-            errorHandler =
-                    new WriterErrorHandler(new BufferedWriter(
+            statusHandler =
+                    new WriterStatusHandler(new BufferedWriter(
                             new OutputStreamWriter(new FileOutputStream(
                                     errorFile), "utf-8")));
         }
-        myErrorHandler = errorHandler;
+        myStatusHandler = statusHandler;
 
         // Debugging information
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             synchronized (System.out) {
                 // Print Compiler Messages
-                myErrorHandler.info(null, "RESOLVE Compiler/Verifier - "
+                myStatusHandler.info(null, "RESOLVE Compiler/Verifier - "
                         + compilerVersion + " Version.");
-                myErrorHandler.info(null, "\tUse -help flag for options.\n");
+                myStatusHandler.info(null, "\tUse -help flag for options.\n");
             }
         }
     }
@@ -182,7 +182,7 @@ public class CompileEnvironment {
 
         // Print out debugging message
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myErrorHandler.info(null, "Completed record: " + mid.toString());
+            myStatusHandler.info(null, "Completed record: " + mid.toString());
         }
     }
 
@@ -205,7 +205,7 @@ public class CompileEnvironment {
 
         // Print out debugging message
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myErrorHandler.info(null, "Construct record: " + mid.toString());
+            myStatusHandler.info(null, "Construct record: " + mid.toString());
         }
     }
 
@@ -260,12 +260,12 @@ public class CompileEnvironment {
     }
 
     /**
-     * <p>Returns the compiler's error handler object.</p>
+     * <p>Returns the compiler's status handler object.</p>
      *
-     * @return Error handler object.
+     * @return A {@link StatusHandler} object.
      */
-    public ErrorHandler getErrorHandler() {
-        return myErrorHandler;
+    public StatusHandler getStatusHandler() {
+        return myStatusHandler;
     }
 
     /**

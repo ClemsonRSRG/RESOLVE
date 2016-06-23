@@ -1,5 +1,5 @@
 /**
- * NullProgramTypeException.java
+ * NullMathTypeException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,23 +10,23 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.errorhandling.exception;
+package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
- * <p>An {@code NullProgramTypeException} indicates we encountered an
- * null {link PTType} and is trying to use it in some way.</p>
+ * <p>An {@code NullMathTypeException} indicates we encountered an
+ * null {link MTType} and is trying to use it in some way.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class NullProgramTypeException extends CompilerException {
+public class NullMathTypeException extends CompilerException {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 8L;
+    private static final long serialVersionUID = 5L;
 
     // ==========================================================
     // Constructors
@@ -38,7 +38,7 @@ public class NullProgramTypeException extends CompilerException {
      *
      * @param message Message to be displayed when the exception is thrown.
      */
-    public NullProgramTypeException(String message) {
+    public NullMathTypeException(String message) {
         super(message, (Throwable) null);
     }
 

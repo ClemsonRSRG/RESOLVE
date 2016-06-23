@@ -1,5 +1,5 @@
 /**
- * WriterErrorHandler.java
+ * WriterStatusHandler.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.errorhandling;
+package edu.clemson.cs.rsrg.statushandling;
 
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.io.Writer;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class WriterErrorHandler implements ErrorHandler {
+public class WriterStatusHandler implements StatusHandler {
 
     // ===========================================================
     // Member Fields
@@ -46,7 +46,7 @@ public class WriterErrorHandler implements ErrorHandler {
      *
      * @param outWriter A <code>Writer</code> object.
      */
-    public WriterErrorHandler(Writer outWriter) {
+    public WriterStatusHandler(Writer outWriter) {
         myOutputWriter = outWriter;
         stopLogging = false;
     }

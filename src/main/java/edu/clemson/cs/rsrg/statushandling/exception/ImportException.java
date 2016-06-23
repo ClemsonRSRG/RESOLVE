@@ -1,5 +1,5 @@
 /**
- * CircularDependencyException.java
+ * ImportException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,24 +10,23 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.errorhandling.exception;
+package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
- * <p>An {@code CircularDependencyException} indicates an unresolvable
- * circular dependency between two (or more) modules.</p>
+ * <p>An {@code ImportException} indicates we encountered an error
+ * while trying to import a new module.</p>
  *
  * @author Yu-Shan Sun
- * @author Daniel Welch
  * @version 2.0
  */
-public class CircularDependencyException extends CompilerException {
+public class ImportException extends CompilerException {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     // ==========================================================
     // Constructors
@@ -35,11 +34,11 @@ public class CircularDependencyException extends CompilerException {
 
     /**
      * <p>This constructor takes in a message
-     * that caused a circular dependency exception to be thrown.</p>
+     * that caused a import exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
      */
-    public CircularDependencyException(String message) {
+    public ImportException(String message) {
         super(message, (Throwable) null);
     }
 

@@ -15,8 +15,8 @@ package edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.util.ArrayList;
 import java.util.List;
 

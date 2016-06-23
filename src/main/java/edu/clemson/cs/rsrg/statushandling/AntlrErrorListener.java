@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.errorhandling;
+package edu.clemson.cs.rsrg.statushandling;
 
 import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
 import org.antlr.v4.runtime.*;
@@ -30,9 +30,9 @@ public class AntlrErrorListener extends BaseErrorListener {
     // ==========================================================
 
     /**
-     * <p>This is the error handler for the RESOLVE compiler.</p>
+     * <p>This is the status handler for the RESOLVE compiler.</p>
      */
-    private final ErrorHandler myErrorHandler;
+    private final StatusHandler myStatusHandler;
 
     // ==========================================================
     // Constructors
@@ -42,10 +42,10 @@ public class AntlrErrorListener extends BaseErrorListener {
      * <p>This creates an ANTLR4 error listener with the current
      * error handler deployed by the compiler.</p>
      *
-     * @param errorHandler An error handler to display debug or error messages.
+     * @param statusHandler An status handler to display debug or error messages.
      */
-    public AntlrErrorListener(ErrorHandler errorHandler) {
-        myErrorHandler = errorHandler;
+    public AntlrErrorListener(StatusHandler statusHandler) {
+        myStatusHandler = statusHandler;
     }
 
     // ===========================================================
@@ -83,7 +83,7 @@ public class AntlrErrorListener extends BaseErrorListener {
         String errorMsg =
                 buildErrorMsg(offendingToken, charPositionInLine, errorLine,
                         msg);
-        myErrorHandler.error(null, errorMsg);
+        myStatusHandler.error(null, errorMsg);
     }
 
     // ===========================================================

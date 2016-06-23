@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.errorhandling;
+package edu.clemson.cs.rsrg.statushandling;
 
 import java.io.PrintWriter;
 
@@ -22,7 +22,7 @@ import java.io.PrintWriter;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class StdErrHandler extends WriterErrorHandler implements ErrorHandler {
+public class StdErrHandler extends WriterStatusHandler implements StatusHandler {
 
     // ===========================================================
     // Constructors

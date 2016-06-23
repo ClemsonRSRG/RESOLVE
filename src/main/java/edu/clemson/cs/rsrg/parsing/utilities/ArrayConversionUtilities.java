@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;

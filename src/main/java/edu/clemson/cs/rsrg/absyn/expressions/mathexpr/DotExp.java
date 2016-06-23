@@ -13,8 +13,8 @@
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Iterator;

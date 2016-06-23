@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init.flag;
 
-import edu.clemson.cs.rsrg.errorhandling.exception.FlagDependencyException;
+import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
 import java.util.*;
 
 /**

@@ -95,7 +95,7 @@ public class ASTOutputPipeline extends AbstractPipeline {
                     + "\n");
             sb.append("\n---------------Output Module AST---------------\n");
 
-            myCompileEnvironment.getErrorHandler().info(null, sb.toString());
+            myCompileEnvironment.getStatusHandler().info(null, sb.toString());
         }
     }
 
@@ -115,7 +115,7 @@ public class ASTOutputPipeline extends AbstractPipeline {
             writer.close();
         }
         catch (IOException ioe) {
-            myCompileEnvironment.getErrorHandler().error(null,
+            myCompileEnvironment.getStatusHandler().error(null,
                     "Error while writing to file: " + outputFileName);
         }
     }

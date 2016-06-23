@@ -1,5 +1,5 @@
 /**
- * ErrorHandler.java
+ * StatusHandler.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.errorhandling;
+package edu.clemson.cs.rsrg.statushandling;
 
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
@@ -22,7 +22,7 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public interface ErrorHandler {
+public interface StatusHandler {
 
     /**
      * <p>This method displays the error message passed in.</p>

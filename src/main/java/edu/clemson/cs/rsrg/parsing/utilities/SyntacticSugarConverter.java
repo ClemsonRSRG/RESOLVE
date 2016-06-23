@@ -32,10 +32,10 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
 import edu.clemson.cs.rsrg.absyn.statements.*;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.*;
 

@@ -16,10 +16,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.util.Iterator;
 import java.util.List;
 

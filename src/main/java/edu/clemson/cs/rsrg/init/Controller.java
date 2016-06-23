@@ -14,10 +14,10 @@ package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
-import edu.clemson.cs.rsrg.errorhandling.StdErrHandler;
-import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
-import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
-import edu.clemson.cs.rsrg.errorhandling.exception.*;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
+import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
+import edu.clemson.cs.rsrg.statushandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
@@ -63,9 +63,9 @@ public class Controller {
     private final CompileEnvironment myCompileEnvironment;
 
     /**
-     * <p>This is the error handler for the RESOLVE compiler.</p>
+     * <p>This is the status handler for the RESOLVE compiler.</p>
      */
-    private final ErrorHandler myErrorHandler;
+    private final StatusHandler myStatusHandler;
 
     /**
      * <p>This is the error listener for all ANTLR4 related objects.</p>
@@ -102,8 +102,8 @@ public class Controller {
      */
     public Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
-        myErrorHandler = compileEnvironment.getErrorHandler();
-        myAntlrErrorListener = new AntlrErrorListener(myErrorHandler);
+        myStatusHandler = compileEnvironment.getStatusHandler();
+        myAntlrErrorListener = new AntlrErrorListener(myStatusHandler);
         mySymbolTable =
                 (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
@@ -148,7 +148,7 @@ public class Controller {
                     sb.append("\n---------------Print Module---------------\n\n");
                     sb.append(dec.asString(0, 4));
                     sb.append("\n---------------Print Module---------------\n");
-                    myErrorHandler.info(null, sb.toString());
+                    myStatusHandler.info(null, sb.toString());
                 }
 
                 // Output AST to Graphviz dot file.
@@ -179,12 +179,12 @@ public class Controller {
             }
             else {
                 CompilerException see = (CompilerException) cause;
-                myErrorHandler.error(see.getErrorLocation(), e.getMessage());
+                myStatusHandler.error(see.getErrorLocation(), e.getMessage());
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)
-                        && myErrorHandler instanceof StdErrHandler) {
+                        && myStatusHandler instanceof StdErrHandler) {
                    e.printStackTrace();
                 }
-                myErrorHandler.stopLogging();
+                myStatusHandler.stopLogging();
             }
         }
     }

@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.absyn;
 
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import java.util.*;
 

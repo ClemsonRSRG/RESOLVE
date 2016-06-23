@@ -15,9 +15,10 @@ package edu.clemson.cs.rsrg.init;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
-import edu.clemson.cs.rsrg.errorhandling.exception.CompilerException;
-import edu.clemson.cs.rsrg.errorhandling.exception.FlagDependencyException;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
+import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.flag.Flag;
@@ -30,8 +31,8 @@ import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
-import edu.clemson.cs.rsrg.errorhandling.StdErrHandler;
-import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
+import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -167,24 +168,25 @@ public class ResolveCompiler {
      * is called by running the compiler from the command line.</p>
      */
     public void invokeCompiler() {
-        // Create a error handler
-        ErrorHandler errorHandler = new StdErrHandler();
+        // Create a status handler
+        StatusHandler statusHandler = new StdErrHandler();
 
         // Handle all arguments to the compiler
-        CompileEnvironment compileEnvironment = handleCompileArgs(errorHandler);
+        CompileEnvironment compileEnvironment =
+                handleCompileArgs(statusHandler);
 
         // Compile files/directories listed in the argument list
         try {
             compileRealFiles(myArgumentFileList, compileEnvironment);
         }
         catch (CompilerException e) {
-            // YS - The error handler object might have changed.
-            errorHandler = compileEnvironment.getErrorHandler();
-            errorHandler.error(null, e.getMessage());
+            // YS - The status handler object might have changed.
+            statusHandler = compileEnvironment.getStatusHandler();
+            statusHandler.error(null, e.getMessage());
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
                 e.printStackTrace();
             }
-            errorHandler.stopLogging();
+            statusHandler.stopLogging();
         }
     }
 
@@ -193,13 +195,15 @@ public class ResolveCompiler {
      * is called by running the compiler from the WebAPI/WebIDE.</p>
      *
      * @param fileMap A map containing all the user modified files.
+     * @param statusHandler A status handler to display debug or error messages.
      * @param proverListener A listener object that needs to be
      *                       passed to the prover.
      */
     public void invokeCompiler(Map<String, ResolveFile> fileMap,
-            ErrorHandler errorHandler, ProverListener proverListener) {
+            StatusHandler statusHandler, ProverListener proverListener) {
         // Handle all arguments to the compiler
-        CompileEnvironment compileEnvironment = handleCompileArgs(errorHandler);
+        CompileEnvironment compileEnvironment =
+                handleCompileArgs(statusHandler);
 
         // Store the file map
         compileEnvironment.setFileMap(fileMap);
@@ -212,14 +216,14 @@ public class ResolveCompiler {
             compileArbitraryFiles(myArgumentFileList, compileEnvironment);
         }
         catch (CompilerException e) {
-            // YS - The error handler object might have changed.
-            errorHandler = compileEnvironment.getErrorHandler();
-            errorHandler.error(null, e.getMessage());
+            // YS - The status handler object might have changed.
+            statusHandler = compileEnvironment.getStatusHandler();
+            statusHandler.error(null, e.getMessage());
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
-                    && errorHandler instanceof StdErrHandler) {
+                    && statusHandler instanceof StdErrHandler) {
                 e.printStackTrace();
             }
-            errorHandler.stopLogging();
+            statusHandler.stopLogging();
         }
     }
 
@@ -339,11 +343,11 @@ public class ResolveCompiler {
      * <code>CompileEnvironment</code> that includes information
      * on the current compilation job.</p>
      *
-     * @param errorHandler An error handler to display debug or error messages.
+     * @param statusHandler A status handler to display debug or error messages.
      *
-     * @return A new <code>CompileEnvironment</code> for the current job.
+     * @return A new {@link CompileEnvironment} for the current job.
      */
-    private CompileEnvironment handleCompileArgs(ErrorHandler errorHandler) {
+    private CompileEnvironment handleCompileArgs(StatusHandler statusHandler) {
         CompileEnvironment compileEnvironment = null;
         try {
             // Instantiate a new compile environment that will store
@@ -351,7 +355,7 @@ public class ResolveCompiler {
             // process.
             compileEnvironment =
                     new CompileEnvironment(myCompilerArgs, myCompilerVersion,
-                            errorHandler);
+                            statusHandler);
 
             if (compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
                 printHelpMessage(compileEnvironment);
@@ -379,14 +383,14 @@ public class ResolveCompiler {
             }
         }
         catch (FlagDependencyException | IOException e) {
-            // YS - The error handler object might have changed.
-            errorHandler = compileEnvironment.getErrorHandler();
-            errorHandler.error(null, e.getMessage());
+            // YS - The status handler object might have changed.
+            statusHandler = compileEnvironment.getStatusHandler();
+            statusHandler.error(null, e.getMessage());
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
-                    && errorHandler instanceof StdErrHandler) {
+                    && statusHandler instanceof StdErrHandler) {
                 e.printStackTrace();
             }
-            errorHandler.stopLogging();
+            statusHandler.stopLogging();
         }
 
         return compileEnvironment;
@@ -400,7 +404,7 @@ public class ResolveCompiler {
      */
     private void printHelpMessage(CompileEnvironment compileEnvironment) {
         if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG)) {
-            ErrorHandler debugHandler = compileEnvironment.getErrorHandler();
+            StatusHandler debugHandler = compileEnvironment.getStatusHandler();
             debugHandler.info(null,
                     "Usage: java -jar RESOLVE.jar [options] <files>");
             debugHandler.info(null, "where options include:");

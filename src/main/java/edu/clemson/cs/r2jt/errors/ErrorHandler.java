@@ -37,7 +37,7 @@ public class ErrorHandler {
     // Variables
     // ===========================================================
 
-    //private static ErrorHandler instance = new ErrorHandler();
+    //private static StatusHandler instance = new StatusHandler();
 
     private final CompileEnvironment myInstanceEnvironment;
 
@@ -63,7 +63,7 @@ public class ErrorHandler {
     // Constructors
     // ===========================================================
 
-    //private ErrorHandler() { 
+    //private StatusHandler() {
     //myInstanceEnvironment = null; }
 
     public ErrorHandler(CompileEnvironment env) {
@@ -104,7 +104,7 @@ public class ErrorHandler {
     // ===========================================================
 
     /** Returns the unique instance of this error handler. */
-    //public static ErrorHandler getInstance() {
+    //public static StatusHandler getInstance() {
     //return instance;
     //}
 
@@ -482,7 +482,7 @@ public class ErrorHandler {
         String pkg = file.getParentFile().getName();
         //System.out.println("compilePosModule: "+targetFile.getName().getLocation());
         String key = pkg + "." + fileName;
-        //System.out.println("Checking UserFileMap for: " + key + " (ErrorHandler(522)");
+        //System.out.println("Checking UserFileMap for: " + key + " (StatusHandler(522)");
         if (myInstanceEnvironment.isUserFile(key)) {
             //System.out.println("found: "+key);
             MetaFile inputFile = myInstanceEnvironment.getUserFileFromMap(key);

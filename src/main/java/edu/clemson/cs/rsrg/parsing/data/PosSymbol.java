@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.parsing.data;
 
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 

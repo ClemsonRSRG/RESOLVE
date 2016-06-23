@@ -1,5 +1,5 @@
 /**
- * FlagDependencyException.java
+ * DuplicateEntryException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,25 +10,24 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.errorhandling.exception;
+package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
- * <p>A <code>FlagDependencyException</code> indicates that the user-provided
- * flag configuration is not acceptable for some reason.  The reason for the
- * exception is provided in the exception's message.</p>
+ * <p>A <code>DuplicateEntryException</code> indicates that the user-provided
+ * entry already is a duplicate of another entry.</p>
  *
  * @author Hampton Smith
  * @author Yu-Shan Sun
  * @version 2.0
  */
-public class FlagDependencyException extends CompilerException {
+public class DuplicateEntryException extends CompilerException {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 6L;
+    private static final long serialVersionUID = 7L;
 
     // ==========================================================
     // Constructors
@@ -36,11 +35,11 @@ public class FlagDependencyException extends CompilerException {
 
     /**
      * <p>This constructor takes in a message
-     * that caused a flag dependency exception to be thrown.</p>
+     * that caused a duplicate entry exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
      */
-    public FlagDependencyException(String message) {
+    public DuplicateEntryException(String message) {
         super(message, (Throwable) null);
     }
 

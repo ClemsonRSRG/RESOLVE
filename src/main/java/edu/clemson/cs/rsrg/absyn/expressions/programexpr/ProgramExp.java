@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.programexpr;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.errorhandling.exception.NullProgramTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
