@@ -185,6 +185,7 @@ conceptPerformanceItem
 enhancementPerformanceModule
     :   PROFILE name=IDENTIFIER (moduleParameterList)?
         SHORT_FOR fullName=IDENTIFIER FOR enhancement=IDENTIFIER
+        OF concept=IDENTIFIER
         WITH_PROFILE conceptProfile=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?

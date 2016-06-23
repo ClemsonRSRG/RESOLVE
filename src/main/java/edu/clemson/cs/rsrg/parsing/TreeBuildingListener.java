@@ -878,27 +878,67 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of an {@code Profile}
+     * module declaration for an {@code Enhancement} module.</p>
      *
-     * @param ctx
+     * @param ctx Enhancement performance module node in ANTLR4 AST.
      */
     @Override
     public void exitEnhancementPerformanceModule(
             ResolveParser.EnhancementPerformanceModuleContext ctx) {
-        super.exitEnhancementPerformanceModule(ctx);
+        // Module parameters (if any)
+        List<ModuleParameterDec> parameterDecls =
+                getModuleArguments(ctx.moduleParameterList());
+
+        // Uses items (if any)
+        List<UsesItem> uses =
+                Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
+                        .usesList().usesItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+
+        // Module requires (if any)
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
+        }
+
+        // Decs (if any)
+        List<Dec> decls =
+                Utilities.collect(Dec.class,
+                        ctx.enhancementPerformanceItems() != null ? ctx
+                                .enhancementPerformanceItems()
+                                .enhancementPerformanceItem()
+                                : new ArrayList<ParseTree>(), myNodes);
+
+        PerformanceEnhancementModuleDec performance =
+                new PerformanceEnhancementModuleDec(createLocation(ctx),
+                        createPosSymbol(ctx.name), parameterDecls,
+                        createPosSymbol(ctx.fullName),
+                        createPosSymbol(ctx.enhancement),
+                        createPosSymbol(ctx.concept),
+                        createPosSymbol(ctx.conceptProfile), uses, requires,
+                        decls);
+        myNodes.put(ctx, performance);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the generated enhancement item for
+     * performance profiles.</p>
      *
-     * @param ctx
+     * @param ctx Enhancement performance item node in ANTLR4 AST.
      */
     @Override
     public void exitEnhancementPerformanceItem(
             ResolveParser.EnhancementPerformanceItemContext ctx) {
-        super.exitEnhancementPerformanceItem(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     // -----------------------------------------------------------
