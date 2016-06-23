@@ -5,6 +5,12 @@
 target/
 *.class
 
+###########################
+# Generated dot/svg files #
+###########################
+
+*.dot
+*.svg
 
 ###################
 # Temporary Files #

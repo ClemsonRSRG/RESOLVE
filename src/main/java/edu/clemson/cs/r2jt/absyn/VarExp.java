@@ -236,7 +236,7 @@ public class VarExp extends Exp {
 
             	}
             	if(type == null){
-            		// added the null (for ErrorHandler) after changing it to not be abstract
+            		// added the null (for StatusHandler) after changing it to not be abstract
     	        	MathExpTypeResolver METR = new MathExpTypeResolver(env.getSymbolTable(env.getModuleID(env.getTargetFile())),
     	        												new TypeMatcher(), null);
     	        	type = METR.getVarExpType(this);

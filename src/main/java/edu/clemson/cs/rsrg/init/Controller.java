@@ -12,25 +12,29 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST;
-import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
-import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
-import edu.clemson.cs.rsrg.errorhandling.exception.*;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
+import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
+import edu.clemson.cs.rsrg.statushandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.init.file.Utilities;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.rsrg.init.pipeline.ASTOutputPipeline;
+import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
-import edu.clemson.cs.rsrg.parsing.*;
-import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
+import edu.clemson.cs.rsrg.parsing.ResolveLexer;
+import edu.clemson.cs.rsrg.parsing.ResolveParser;
+import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
+import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -59,9 +63,9 @@ public class Controller {
     private final CompileEnvironment myCompileEnvironment;
 
     /**
-     * <p>This is the error handler for the RESOLVE compiler.</p>
+     * <p>This is the status handler for the RESOLVE compiler.</p>
      */
-    private final ErrorHandler myErrorHandler;
+    private final StatusHandler myStatusHandler;
 
     /**
      * <p>This is the error listener for all ANTLR4 related objects.</p>
@@ -98,8 +102,8 @@ public class Controller {
      */
     public Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
-        myErrorHandler = compileEnvironment.getErrorHandler();
-        myAntlrErrorListener = new AntlrErrorListener(myErrorHandler);
+        myStatusHandler = compileEnvironment.getStatusHandler();
+        myAntlrErrorListener = new AntlrErrorListener(myStatusHandler);
         mySymbolTable =
                 (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
@@ -118,28 +122,47 @@ public class Controller {
     public void compileTargetFile(ResolveFile file) {
         try {
             // Use ANTLR4 to build the AST
-            ModuleAST targetModule = createModuleAST(file);
+            ModuleDec targetModule = createModuleAST(file);
 
             // Add this file to our compile environment
-            /*myCompileEnvironment.constructRecord(file, targetModule);
+            myCompileEnvironment.constructRecord(file, targetModule);
 
             // Create a dependencies graph and search for import
             // dependencies.
             DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g =
-                    new DefaultDirectedGraph<ModuleIdentifier, DefaultEdge>(
+                    new DefaultDirectedGraph<>(
                             DefaultEdge.class);
             g.addVertex(new ModuleIdentifier(targetModule));
-            findDependencies(g, targetModule);
+            // TODO: Uncomment this line when we can build all decs.
+            //findDependencies(g, targetModule);
 
             // Begin analyzing the file
-            AnalysisPipeline analysisPipe =
-                    new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
+            //AnalysisPipeline analysisPipe =
+            //        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
-                analysisPipe.process(m);
+                // DEBUG: Print the entire ModuleDec
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                    ModuleDec dec = myCompileEnvironment.getModuleAST(m);
+
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("\n---------------Print Module---------------\n\n");
+                    sb.append(dec.asString(0, 4));
+                    sb.append("\n---------------Print Module---------------\n");
+                    myStatusHandler.info(null, sb.toString());
+                }
+
+                // Output AST to Graphviz dot file.
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_EXPORT_AST)) {
+                    ASTOutputPipeline astOutputPipe =
+                            new ASTOutputPipeline(myCompileEnvironment, mySymbolTable);
+                    astOutputPipe.process(m);
+                }
+
+                //analysisPipe.process(m);
 
                 // Complete compilation for this module
                 myCompileEnvironment.completeRecord(m);
-            }*/
+            }
         }
         catch (Throwable e) {
             Throwable cause = e;
@@ -156,14 +179,12 @@ public class Controller {
             }
             else {
                 CompilerException see = (CompilerException) cause;
-                myErrorHandler.error(see.getOffendingToken(), e.getMessage());
-            }
-        }
-        finally {
-            // Stop error logging
-            ErrorHandler errorHandler = myCompileEnvironment.getErrorHandler();
-            if (!errorHandler.hasStopped()) {
-                errorHandler.stopLogging();
+                myStatusHandler.error(see.getErrorLocation(), e.getMessage());
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)
+                        && myStatusHandler instanceof StdErrHandler) {
+                   e.printStackTrace();
+                }
+                myStatusHandler.stopLogging();
             }
         }
     }
@@ -182,20 +203,27 @@ public class Controller {
      *
      * @throws MiscErrorException
      */
-    private void addFilesForExternalImports(ModuleAST m) {
-        Set<Token> externals =
-                m.getImports().getImportsOfType(
-                        ImportCollectionAST.ImportType.EXTERNAL);
-
-        for (Token externalImport : externals) {
+    private void addFilesForExternalImports(ModuleDec m) {
+        List<UsesItem> allUsesItems = m.getUsesItems();
+        for (UsesItem importItem : allUsesItems) {
             try {
                 FileLocator l =
-                        new FileLocator(externalImport.getText(),
+                        new FileLocator(importItem.getName().getName(),
                                 NON_NATIVE_EXT);
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 Files.walkFileTree(workspaceDir.toPath(), l);
-                myCompileEnvironment.addExternalRealizFile(
-                        new ModuleIdentifier(externalImport), l.getFile());
+
+                // Only attempt to add
+                List<File> foundFiles = l.getFiles();
+                if (foundFiles.size() == 1) {
+                    myCompileEnvironment.addExternalRealizFile(
+                            new ModuleIdentifier(importItem), l.getFile());
+                }
+                else if (foundFiles.size() > 1) {
+                    throw new ImportException(
+                            "Found more than one external import with the name "
+                                    + importItem.getName().getName() + ";");
+                }
             }
             catch (IOException ioe) {
                 throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
@@ -209,29 +237,45 @@ public class Controller {
      *
      * @param file The RESOLVE file that we are going to compile.
      *
-     * @return The ANTLR4 Module AST.
+     * @return The inner representation for a module. See {link ModuleDec}.
      *
      * @throws MiscErrorException
+     * @throws SourceErrorException
      */
-    private ModuleAST createModuleAST(ResolveFile file) {
+    private ModuleDec createModuleAST(ResolveFile file) {
         ANTLRInputStream input = file.getInputStream();
         if (input == null) {
             throw new MiscErrorException("ANTLRInputStream null",
                     new IllegalArgumentException());
         }
 
+        // Create a RESOLVE language lexer
         ResolveLexer lexer = new ResolveLexer(input);
-        ResolveTokenFactory factory = new ResolveTokenFactory(input);
+        ResolveTokenFactory factory = new ResolveTokenFactory(file, input);
         lexer.setTokenFactory(factory);
 
+        // Create a RESOLVE language parser
         TokenStream tokenStream = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokenStream);
         parser.removeErrorListeners();
         parser.addErrorListener(myAntlrErrorListener);
         parser.setTokenFactory(factory);
-        ParserRuleContext context = parser.module();
-        //return TreeUtil.createASTNodeFrom(start);
-        return null;
+        ParserRuleContext rootModuleCtx = parser.module();
+        int numParserErrors = parser.getNumberOfSyntaxErrors();
+        if (numParserErrors != 0) {
+            throw new MiscErrorException("Found " + numParserErrors
+                    + " errors while parsing " + file.toString(),
+                    new IllegalStateException());
+        }
+
+        // Build the intermediate representation
+        TreeBuildingListener v =
+                new TreeBuildingListener(file, myCompileEnvironment
+                        .getTypeGraph());
+        ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
+        ModuleDec result = v.getModule();
+
+        return result;
     }
 
     /**
@@ -243,17 +287,19 @@ public class Controller {
      *
      * @throws CircularDependencyException
      * @throws ImportException
+     * @throws SourceErrorException
      */
-    private void findDependencies(DefaultDirectedGraph g, ModuleAST root) {
-        for (Token importRequest : root.getImports().getImportsExcluding(
-                ImportCollectionAST.ImportType.EXTERNAL)) {
-            ResolveFile file = findResolveFile(importRequest.getText());
+    private void findDependencies(DefaultDirectedGraph g, ModuleDec root) {
+        List<UsesItem> allUsesItems = root.getUsesItems();
+        for (UsesItem importRequest : allUsesItems) {
+            ResolveFile file =
+                    findResolveFile(importRequest.getName().getName());
             ModuleIdentifier id = new ModuleIdentifier(importRequest);
             ModuleIdentifier rootId = new ModuleIdentifier(root);
-            ModuleAST module;
+            ModuleDec module;
 
             // Search for the file in our processed modules
-            if (myCompileEnvironment.containsID(id)) {
+            if (!myCompileEnvironment.containsID(id)) {
                 module = createModuleAST(file);
                 myCompileEnvironment.constructRecord(file, module);
             }
@@ -262,13 +308,11 @@ public class Controller {
             }
 
             // Import error
-            if (root.getImports().inCategory(
-                    ImportCollectionAST.ImportType.IMPLICIT, importRequest)) {
-                if (!module.appropriateForImport()) {
-                    throw new ImportException("Invalid import "
-                            + module.getName() + "; Cannot import module of "
-                            + "type: " + module.getClass());
-                }
+            if (module == null) {
+                throw new ImportException("Invalid import "
+                        + importRequest.toString()
+                        + "; Cannot import module of " + "type: "
+                        + file.getModuleType().getExtension());
             }
 
             // Check for circular dependency
@@ -312,7 +356,8 @@ public class Controller {
                         new FileLocator(baseName, ModuleType.getAllExtensions());
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 Files.walkFileTree(workspaceDir.toPath(), l);
-                ModuleType extType = Utilities.getModuleType(baseName);
+                ModuleType extType =
+                        Utilities.getModuleType(l.getFile().getName());
                 file =
                         Utilities.convertToResolveFile(l.getFile(), extType,
                                 workspaceDir.getAbsolutePath());
@@ -334,13 +379,13 @@ public class Controller {
      * @return An ordered list of <code>ModuleIdentifiers</code>.
      */
     private List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph g) {
-        List<ModuleIdentifier> result = new ArrayList<ModuleIdentifier>();
+        List<ModuleIdentifier> result = new ArrayList<>();
 
         EdgeReversedGraph<ModuleIdentifier, DefaultEdge> reversed =
-                new EdgeReversedGraph<ModuleIdentifier, DefaultEdge>(g);
+                new EdgeReversedGraph<>(g);
 
         TopologicalOrderIterator<ModuleIdentifier, DefaultEdge> dependencies =
-                new TopologicalOrderIterator<ModuleIdentifier, DefaultEdge>(
+                new TopologicalOrderIterator<>(
                         reversed);
         while (dependencies.hasNext()) {
             result.add(dependencies.next());
@@ -366,7 +411,7 @@ public class Controller {
             return false;
         }
         GraphIterator<ModuleIdentifier, DefaultEdge> iterator =
-                new DepthFirstIterator<ModuleIdentifier, DefaultEdge>(g, src);
+                new DepthFirstIterator<>(g, src);
 
         while (iterator.hasNext()) {
             ModuleIdentifier next = iterator.next();
@@ -377,5 +422,4 @@ public class Controller {
         }
         return false;
     }
-
 }

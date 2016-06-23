@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>15.06.01a</version>
+    <version>Summer16a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -19,6 +19,7 @@
 
         <developer>
             <name>Yu-Shan Sun</name>
+            <email>yushans@g.clemson.edu</email>
             <roles>
                 <role>Project lead - RESOLVE</role>
             </roles>
@@ -75,11 +76,11 @@
     </scm>
 
     <dependencies>
-       <!--<dependency>
+        <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.9-RC1</version>
-        </dependency>-->
+            <version>0.9.10</version>
+        </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-maven-plugin</artifactId>
@@ -125,8 +126,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -237,6 +238,16 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Plugin to generate Javadoc.
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
+                <configuration>
+                    <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
+                    <sourcepath>${project.basedir}/src/main/java/edu/clemson/cs/rsrg</sourcepath>
+                </configuration>
+            </plugin> -->
             <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

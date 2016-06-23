@@ -1,0 +1,113 @@
+walkerImplementation(pkgName, className, imports, methods) ::= <<
+package <pkgName>;
+
+<imports; separator = "\n">
+
+public abstract class <className> {
+
+    // ===========================================================
+    // Visitor Methods
+    // ===========================================================
+
+    // -----------------------------------------------------------
+    // All objects
+    // -----------------------------------------------------------
+
+    public void preAny(ResolveConceptualElement e) {}
+
+    public void postAny(ResolveConceptualElement e) {}
+
+    // -----------------------------------------------------------
+    // Each object
+    // -----------------------------------------------------------
+
+    <methods; separator = "\n\n">
+}>>
+
+walkerImports(importItem) ::= <<import <importItem>.*;>>
+
+walkerMethods(name, qualName, isMember) ::= <<
+
+public boolean walk<name>(<if(isMember)><qualName><else><name><endif> e) {
+    return false;
+}
+
+public void pre<name>(<if(isMember)><qualName><else><name><endif> e) {}
+
+public void mid<name>(<if(isMember)><qualName><else><name><endif> e,
+    ResolveConceptualElement previous, ResolveConceptualElement next) {}
+
+public void post<name>(<if(isMember)><qualName><else><name><endif> e) {}
+
+>>
+
+walkerStackImplementation(pkgName, className, parentClassName, imports) ::= <<
+package <pkgName>;
+
+<imports; separator = "\n">
+import java.util.Iterator;
+import java.util.LinkedList;
+
+public abstract class <className> extends <parentClassName> {
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    private LinkedList\<ResolveConceptualElement> myVisitStack =
+        new LinkedList\<>();
+
+    private ResolveConceptualElement myParent;
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    public void preAnyStack(ResolveConceptualElement data) {}
+
+    public void postAnyStack(ResolveConceptualElement data) {}
+
+    public final void preAny(ResolveConceptualElement data) {
+        preAnyStack(data);
+        myParent = data;
+        pushParent();
+    }
+
+    public final void postAny(ResolveConceptualElement data) {
+        popParent();
+        postAnyStack(data);
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    protected final ResolveConceptualElement getParent() {
+        return myVisitStack.peek();
+    }
+
+    protected final ResolveConceptualElement getAncestor(int index) {
+        return myVisitStack.get(index);
+    }
+
+    protected final int getAncestorSize() {
+        return myVisitStack.size();
+    }
+
+    protected final Iterator\<ResolveConceptualElement> getAncestorInterator() {
+        return myVisitStack.iterator();
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    private final void pushParent() {
+        myVisitStack.push(myParent);
+    }
+
+    private final void popParent() {
+        myVisitStack.pop();
+    }
+
+}>>

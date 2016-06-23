@@ -13,16 +13,34 @@
 package edu.clemson.cs.rsrg.init.pipeline;
 
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 
 public class AnalysisPipeline extends AbstractPipeline {
 
-    public AnalysisPipeline(CompileEnvironment compileEnvironment,
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>This generates a pipeline to populate new symbols and
+     * perform semantic analysis.</p>
+     *
+     * @param ce The current compilation environment.
+     * @param symbolTable The symbol table.
+     */
+    public AnalysisPipeline(CompileEnvironment ce,
             MathSymbolTableBuilder symbolTable) {
-        super(compileEnvironment, symbolTable);
+        super(ce, symbolTable);
     }
 
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void process(ModuleIdentifier currentTarget) {
     /* PopulatingVisitor populator = new PopulatingVisitor(mySymbolTable);
@@ -37,4 +55,5 @@ public class AnalysisPipeline extends AbstractPipeline {
      PopulatingVisitor.emitDebug("Type Graph:\n\n"
              + mySymbolTable.getTypeGraph().toString());*/
     }
+
 }

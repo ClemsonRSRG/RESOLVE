@@ -138,7 +138,11 @@ implItem
 // uses, imports
 
 usesList
-    :   USES IDENTIFIER (COMMA IDENTIFIER)* SEMICOLON
+    :   USES usesItem (COMMA usesItem)* SEMICOLON
+    ;
+
+usesItem
+    :   IDENTIFIER
     ;
 
 // parameter related rules

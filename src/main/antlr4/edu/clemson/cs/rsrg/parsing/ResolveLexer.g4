@@ -4,8 +4,12 @@ ABS
     :   'abs'
     ;
 
-ALL
-    :   'all'
+ABSTRACT_VAR
+    :   'Abstract_Var'
+    ;
+
+AFFECTS
+    :	'affects'
     ;
 
 ALTERS
@@ -21,19 +25,6 @@ ARRAY
     :   'Array'
     ;
 
-AUX_CODE
-    :   'Aux_Code'
-    ;
-
-AUX_VAR
-    :   'Aux_Var'
-    ;
-
-AUXILIARY
-    :   'Aux'
-    |   'Auxiliary'
-    ;
-
 AXIOM
     :   'Axiom'
     ;
@@ -43,23 +34,23 @@ BASECASE
     ;
 
 BIG_CONCAT
-    :   'Concatenation'
+    :   'Big_Concatenation'
     ;
 
 BIG_INTERSECT
-    :   'Intersection'
+    :   'Big_Intersection'
     ;
 
 BIG_PRODUCT
-    :   'Product'
+    :   'Big_Product'
     ;
 
 BIG_SUM
-    :   'Sum'
+    :   'Big_Sum'
     ;
 
 BIG_UNION
-    :   'Union'
+    :   'Big_Union'
     ;
 
 BY
@@ -152,6 +143,7 @@ ELAPSED_TIME
 
 ELSE
     :   'Else'
+    |   'else'
     ;
 
 END
@@ -180,7 +172,13 @@ EXEMPLAR
     ;
 
 EXISTS
-    :   'exists'
+    :   'There exists'
+    |   'there exists'
+    ;
+
+EXISTS_UNIQUE
+    :   'There exists unique'
+    |   'there exists unique'
     ;
 
 EXTERNALLY
@@ -207,17 +205,27 @@ FINALIZATION
     :   'finalization'
     ;
 
-FROM
-    :   'from'
-    ;
-
 FOR
     :   'For'
     |   'for'
     ;
 
+FORALL
+    :   'For all'
+    |   'for all'
+    ;
+
+FORGET
+    :   'Forget'
+    ;
+
+FROM
+    :   'from'
+    ;
+
 IF
     :   'If'
+    |   'if'
     ;
 
 IFF
@@ -241,11 +249,11 @@ INDUCTIVE
     ;
 
 INDUCTIVE_BASE_NUM
-    :   '(i.)'
+    :   '(i).'
     ;
 
 INDUCTIVE_HYP_NUM
-    :   '(ii.)'
+    :   '(ii).'
     ;
 
 INITIALIZATION
@@ -290,10 +298,6 @@ MAINP_DISP
 
 MAINTAINING
     :   'maintaining'
-    ;
-
-MATH
-    :   'Math'
     ;
 
 MOD
@@ -374,6 +378,10 @@ PRESERVES
     |   'preserves'
     ;
 
+PRESUME
+    :	'Presume'
+    ;
+
 PROFILE
     :   'Profile'
     ;
@@ -437,6 +445,10 @@ RESTORES
     |   'restores'
     ;
 
+SHAREDSTATE
+    :   'Shared State'
+    ;
+
 SHORT_FOR
     :   'short_for'
     ;
@@ -449,12 +461,8 @@ SUBSTR
     :   'is_substring_of'
     ;
 
-SUCH
-    :   'such'
-    ;
-
-THAT
-    :   'that'
+SUCHTHAT
+    :   'such that'
     ;
 
 THEN
@@ -465,9 +473,12 @@ THEOREM
     :   'Theorem'
     ;
 
-THERE
-    :   'There'
-    |   'there'
+THEOREM_ASSOCIATIVE
+    :   'Theorem (Associative)'
+    ;
+
+THEOREM_COMMUTATIVE
+    :   'Theorem (Commutative)'
     ;
 
 TYPE
@@ -477,11 +488,6 @@ TYPE
 
 UNION
     :   'union'
-    ;
-
-UNIQUE
-    :   'Unique'
-    |   'unique'
     ;
 
 UPDATES
@@ -499,6 +505,10 @@ VAR
 
 WHERE
     :   'where'
+    ;
+
+WHICH_ENTAILS
+    :   'which_entails'
     ;
 
 WHILE
@@ -599,6 +609,10 @@ LPAREN
     :   '('
     ;
 
+LSQBRACK
+    :   '['
+    ;
+
 LT
     :   '<'
     ;
@@ -637,6 +651,10 @@ RBRACE
 
 RPAREN
     :   ')'
+    ;
+
+RSQBRACK
+    :   ']'
     ;
 
 SEMICOLON
@@ -711,7 +729,7 @@ IDENTIFIER
     ;
 
 LETTER
-    :   [a-zA-Z$_]
+    :   [a-zA-Z]
     ;
 
 LETTER_OR_DIGIT

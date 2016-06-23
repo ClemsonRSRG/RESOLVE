@@ -40,6 +40,7 @@ precisItem
 facilityModule
     :   FACILITY name=IDENTIFIER SEMICOLON
         (usesList)?
+        (requiresClause)?
         (facilityItems)?
         END closename=IDENTIFIER SEMICOLON EOF
     ;
@@ -49,12 +50,12 @@ facilityItems
     ;
 
 facilityItem
-    :   stateVariableDecl
-    |   facilityDecl
+    :   facilityDecl
+    |   facilitySharedStateRepresentationDecl
+    |   facilityTypeRepresentationDecl
+    |   recursiveOperationProcedureDecl
     |   operationProcedureDecl
     |   mathDefinitionDecl
-    |   moduleFacilityInit
-    |   moduleFacilityFinal
     ;
 
 // short facility module
@@ -78,12 +79,9 @@ conceptItems
     ;
 
 conceptItem
-    :   moduleStateVariableDecl
-    |   confirmMathTypeDecl
-    |   constraintClause
-    |   moduleSpecInit
-    |   moduleSpecFinal
+    :   constraintClause
     |   operationDecl
+    |   sharedStateDecl
     |   typeModelDecl
     |   mathDefinitionDecl
     |   mathDefinesDecl
@@ -92,14 +90,24 @@ conceptItem
 // concept impl module
 
 conceptImplModule
-    :   REALIZATION name=IDENTIFIER
+    :   REALIZATION name=IDENTIFIER (moduleParameterList)?
         (WITH_PROFILE profile=IDENTIFIER)?
         FOR concept=IDENTIFIER
         (ENHANCED BY enhancement=IDENTIFIER)* SEMICOLON
         (usesList)?
         (requiresClause)?
-        (implItems)?
+        (conceptImplItems)?
         END closename=IDENTIFIER SEMICOLON EOF
+    ;
+
+conceptImplItems
+    :   (conceptImplItem)+
+    ;
+
+conceptImplItem
+    :   implItem
+    |   sharedStateRepresentationDecl
+    |   typeRepresentationDecl
     ;
 
 // enhancement module
@@ -118,9 +126,7 @@ enhancementItems
     ;
 
 enhancementItem
-    :   moduleStateVariableDecl
-    |   operationDecl
-    |   typeModelDecl
+    :   operationDecl
     |   mathDefinitionDecl
     |   mathDefinesDecl
     ;
@@ -131,9 +137,7 @@ enhancementImplModule
     :   REALIZATION name=IDENTIFIER (moduleParameterList)?
         (WITH_PROFILE profile=IDENTIFIER)?
         FOR enhancement=IDENTIFIER
-        OF concept=IDENTIFIER
-        (ENHANCED BY cEnhancement=IDENTIFIER (moduleParameterList)?
-         REALIZED BY cRealization=IDENTIFIER (WITH_PROFILE cProfile=IDENTIFIER)? (moduleParameterList)?)* SEMICOLON
+        OF concept=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?
         (implItems)?
@@ -145,16 +149,12 @@ implItems
     ;
 
 implItem
-    :   stateVariableDecl
+    :   facilityDecl
+    |   recursiveOperationProcedureDecl
     |   operationProcedureDecl
-    |   facilityDecl
     |   procedureDecl
+    |   recursiveProcedureDecl
     |   mathDefinitionDecl
-    |   typeRepresentationDecl
-    |   conventionClause
-    |   correspondenceClause
-    |   moduleImplInit
-    |   moduleImplFinal
     ;
 
 // concept performance module
@@ -164,6 +164,7 @@ conceptPerformanceModule
         SHORT_FOR fullName=IDENTIFIER FOR concept=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?
+        (conceptPerformanceItems)?
         END closename=IDENTIFIER SEMICOLON EOF
     ;
 
@@ -172,11 +173,7 @@ conceptPerformanceItems
     ;
 
 conceptPerformanceItem
-    :   moduleStateVariableDecl
-    |   confirmMathTypeDecl
-    |   constraintClause
-    |   performanceModuleSpecInit
-    |   performanceModuleSpecFinal
+    :   constraintClause
     |   performanceOperationDecl
     |   performanceTypeModelDecl
     |   mathDefinitionDecl
@@ -188,9 +185,11 @@ conceptPerformanceItem
 enhancementPerformanceModule
     :   PROFILE name=IDENTIFIER (moduleParameterList)?
         SHORT_FOR fullName=IDENTIFIER FOR enhancement=IDENTIFIER
+        OF concept=IDENTIFIER
         WITH_PROFILE conceptProfile=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?
+        (enhancementPerformanceItems)?
         END closename=IDENTIFIER SEMICOLON EOF
     ;
 
@@ -199,9 +198,7 @@ enhancementPerformanceItems
     ;
 
 enhancementPerformanceItem
-    :   confirmMathTypeDecl
-    |   performanceOperationDecl
-    |   performanceTypeModelDecl
+    :   performanceOperationDecl
     |   mathDefinitionDecl
     |   mathDefinesDecl
     ;
@@ -209,7 +206,11 @@ enhancementPerformanceItem
 // uses, imports
 
 usesList
-    :   USES IDENTIFIER (COMMA IDENTIFIER)* SEMICOLON
+    :   USES usesItem (COMMA usesItem)* SEMICOLON
+    ;
+
+usesItem
+    :   IDENTIFIER
     ;
 
 // parameter related rules
@@ -267,181 +268,146 @@ parameterMode
 
 // type and record related rules
 
-type
+programNamedType
     :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
     ;
 
-record
-    :   RECORD (recordVariableDeclGroup)+ END
+programArrayType
+    :   ARRAY progExp RANGE progExp OF programNamedType
     ;
 
-recordVariableDeclGroup
-    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type SEMICOLON
+programRecordType
+    :   RECORD (variableDeclGroup SEMICOLON)+ END
     ;
 
 typeModelDecl
     :   TYPE FAMILY name=IDENTIFIER IS MODELED BY mathTypeExp SEMICOLON
         EXEMPLAR exemplar=IDENTIFIER SEMICOLON
         (constraintClause)?
-        (typeModelInit)?
-        (typeModelFinal)?
+        (specModelInit)?
+        (specModelFinal)?
         END SEMICOLON
     ;
 
 typeRepresentationDecl
-    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (record|type) SEMICOLON
+    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (programNamedType|programArrayType|programRecordType) SEMICOLON
         (conventionClause)?
         (correspondenceClause)?
-        (typeRepresentationInit)?
-        (typeRepresentationFinal)?
+        (representationInit)?
+        (representationFinal)?
         END SEMICOLON
     ;
 
 facilityTypeRepresentationDecl
-    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (record|type) SEMICOLON
+    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (programNamedType|programArrayType|programRecordType) SEMICOLON
         (conventionClause)?
-        (facilityTypeRepresentationInit)?
-        (facilityTypeRepresentationFinal)?
+        (facilityRepresentationInit)?
+        (facilityRepresentationFinal)?
         END SEMICOLON
     ;
 
 performanceTypeModelDecl
-    :   TYPE FAMILY IS MODELED BY mathTypeExp SEMICOLON
+    :   TYPE FAMILY name=IDENTIFIER IS MODELED BY mathTypeExp SEMICOLON
         (constraintClause)?
-        (performanceTypeModelInit)?
-        (performanceTypeModelFinal)?
+        (performanceSpecModelInit)?
+        (performanceSpecModelFinal)?
+        END SEMICOLON
+    ;
+
+// shared state rules
+
+sharedStateDecl
+    :   SHAREDSTATE name=IDENTIFIER
+        (moduleStateVariableDecl)+
+        (constraintClause)?
+        (specModelInit)?
+        (specModelFinal)?
+        END SEMICOLON
+    ;
+
+sharedStateRepresentationDecl
+    :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
+        (variableDecl)+
+        (conventionClause)?
+        (correspondenceClause)?
+        (representationInit)?
+        (representationFinal)?
+        END SEMICOLON
+    ;
+
+facilitySharedStateRepresentationDecl
+    :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
+        (variableDecl)+
+        (conventionClause)?
+        (facilityRepresentationInit)?
+        (facilityRepresentationFinal)?
         END SEMICOLON
     ;
 
 // initialization, finalization rules
 
-typeModelInit
+specModelInit
     :   INITIALIZATION
-        (requiresClause)?
+        (affectsClause)?
         (ensuresClause)?
     ;
 
-typeModelFinal
+specModelFinal
     :   FINALIZATION
-        (requiresClause)?
+        (affectsClause)?
         (ensuresClause)?
     ;
 
-typeRepresentationInit
+representationInit
     :   INITIALIZATION
-        (affectsClause)*
+        (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
 
-typeRepresentationFinal
+representationFinal
     :   FINALIZATION
-        (affectsClause)*
+        (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
-    ;
-
-facilityTypeRepresentationInit
-    :   INITIALIZATION
-        (affectsClause)*
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-        END SEMICOLON
-    ;
-
-facilityTypeRepresentationFinal
-    :   FINALIZATION
-        (affectsClause)*
-        (requiresClause)?
-        (ensuresClause)?
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-        END SEMICOLON
-    ;
-
-performanceTypeModelInit
-    :   INITIALIZATION
-        (durationClause)?
-        (manipulationDispClause)?
-    ;
-
-performanceTypeModelFinal
-    :   FINALIZATION
-        (durationClause)?
-        (manipulationDispClause)?
     ;
 
 //We use special rules for facility module init and final to allow requires
 //and ensures clauses (which aren't allowed in normal impl modules)...
-moduleFacilityInit
-    :   FAC_INIT
-        (affectsClause)*
-        (requiresClause)?
-        (ensuresClause)?
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-    ;
-
-moduleFacilityFinal
-    :   FAC_FINAL
-        (affectsClause)*
-        (requiresClause)?
-        (ensuresClause)?
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-    ;
-
-moduleSpecInit
+facilityRepresentationInit
     :   INITIALIZATION
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
+        (facilityDecl)*
+        (variableDecl)*
+        (stmt)*
+        END SEMICOLON
     ;
 
-moduleSpecFinal
-    :   FAC_FINAL
+facilityRepresentationFinal
+    :   FINALIZATION
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
-    ;
-
-moduleImplInit
-    :   FAC_INIT
-        (affectsClause)*
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
         (stmt)*
+        END SEMICOLON
     ;
 
-moduleImplFinal
-    :   FAC_FINAL
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-    ;
-
-performanceModuleSpecInit
-    :   PERF_INIT
+performanceSpecModelInit
+    :   INITIALIZATION
         (durationClause)?
         (manipulationDispClause)?
     ;
 
-performanceModuleSpecFinal
-    :   PERF_FINAL
+performanceSpecModelFinal
+    :   FINALIZATION
         (durationClause)?
         (manipulationDispClause)?
     ;
@@ -449,42 +415,54 @@ performanceModuleSpecFinal
 // functions
 
 procedureDecl
-    :   (recursive=RECURSIVE)? PROCEDURE name=IDENTIFIER
-        operationParameterList (COLON type)? SEMICOLON
-        (affectsClause)*
-        (decreasingClause)?
+    :   PROCEDURE name=IDENTIFIER
+        operationParameterList (COLON programNamedType)? SEMICOLON
+        (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
+        (stmt)*
+        END closename=IDENTIFIER SEMICOLON
+    ;
+
+recursiveProcedureDecl
+    :   RECURSIVE PROCEDURE name=IDENTIFIER
+        operationParameterList (COLON programNamedType)? SEMICOLON
+        (affectsClause)?
+        decreasingClause
+        (facilityDecl)*
+        (variableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
 
 operationProcedureDecl
-    :   OPERATION
-        name=IDENTIFIER operationParameterList SEMICOLON
-        (affectsClause)*
-        (requiresClause)?
-        (ensuresClause)?
-        (recursive=RECURSIVE)? PROCEDURE
-        (decreasingClause)?
+    :   operationDecl
+        PROCEDURE
         (facilityDecl)*
         (variableDecl)*
-        (auxVariableDecl)*
+        (stmt)*
+        END closename=IDENTIFIER SEMICOLON
+    ;
+
+recursiveOperationProcedureDecl
+    :   operationDecl
+        RECURSIVE PROCEDURE
+        decreasingClause
+        (facilityDecl)*
+        (variableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
 
 operationDecl
-    :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
-        (affectsClause)*
+    :   OPERATION name=IDENTIFIER operationParameterList (COLON programNamedType)? SEMICOLON
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
     ;
 
 performanceOperationDecl
-    :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
-        (ensuresClause)?
+    :   operationDecl
         (durationClause)?
         (manipulationDispClause)?
     ;
@@ -506,7 +484,7 @@ conceptEnhancementDecl
 
 enhancementPairDecl
     :   ENHANCED BY spec=IDENTIFIER (specArgs=moduleArgumentList)?
-        (externally=EXTERNALLY)? REALIZED BY impl=IDENTIFIER
+        REALIZED BY impl=IDENTIFIER
         (WITH_PROFILE profile=IDENTIFIER)?
         (implArgs=moduleArgumentList)?
     ;
@@ -530,29 +508,17 @@ mathVariableDecl
     ;
 
 variableDeclGroup
-    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type
+    :   IDENTIFIER (COMMA IDENTIFIER)* COLON (programNamedType|programArrayType)
     ;
 
 variableDecl
     :   VAR variableDeclGroup SEMICOLON
     ;
 
-auxVariableDeclGroup
-    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type
-    ;
-
-auxVariableDecl
-    :   AUX_VAR auxVariableDeclGroup SEMICOLON
-    ;
-
 // state variable declaration
 
 moduleStateVariableDecl
-    :   VAR mathVariableDeclGroup SEMICOLON
-    ;
-
-stateVariableDecl
-    :   VAR variableDeclGroup SEMICOLON
+    :   ABSTRACT_VAR mathVariableDeclGroup SEMICOLON
     ;
 
 // statements
@@ -561,25 +527,35 @@ stmt
     :   assignStmt
     |   swapStmt
     |   callStmt
+    |	presumeStmt
     |   confirmStmt
+    |   memoryStmt
     |   ifStmt
     |   whileStmt
     ;
 
 assignStmt
-    :   left=progExp ASSIGN_OP right=progExp SEMICOLON
+    :   left=progVariableExp ASSIGN_OP right=progExp SEMICOLON
     ;
 
 swapStmt
-    :   left=progExp SWAP_OP right=progExp SEMICOLON
+    :   left=progVariableExp SWAP_OP right=progVariableExp SEMICOLON
     ;
 
 callStmt
     :   progParamExp SEMICOLON
     ;
 
+presumeStmt
+    :	PRESUME	mathExp SEMICOLON
+    ;
+
 confirmStmt
     :   CONFIRM mathExp SEMICOLON
+    ;
+
+memoryStmt
+    :   (REMEMBER | FORGET) SEMICOLON
     ;
 
 ifStmt
@@ -592,20 +568,22 @@ elsePart
 
 whileStmt
     :   WHILE progExp (changingClause)?
-        (maintainingClause)? (decreasingClause)? DO stmt* END SEMICOLON
+        (maintainingClause)? (decreasingClause) DO stmt* END SEMICOLON
     ;
 
 // mathematical type theorems
 
 mathTypeTheoremDecl
     :   TYPE THEOREM name=IDENTIFIER COLON
-        (FOR ALL mathVariableDeclGroup COMMA)+ mathImpliesExp SEMICOLON
+        (FORALL mathVariableDeclGroup COMMA)+ mathImpliesExp SEMICOLON
     ;
 
 // mathematical theorems, corollaries, etc
 
 mathAssertionDecl
-    :   (AXIOM | COROLLARY | LEMMA | PROPERTY | THEOREM ) name=mathTheoremIdent
+    :   assertionType=(AXIOM | COROLLARY | LEMMA | PROPERTY |
+            THEOREM | THEOREM_ASSOCIATIVE | THEOREM_COMMUTATIVE)
+        name=mathTheoremIdent
         COLON mathExp SEMICOLON
     ;
 
@@ -629,7 +607,7 @@ mathDefinitionDecl
     ;
 
 mathCategoricalDecl
-    :   CATEGORICAL DEFINITION INTRODUCES categoricalDefinitionSignature
+    :   CATEGORICAL DEFINITION name=IDENTIFIER INTRODUCES categoricalDefinitionSignature
         RELATED BY mathExp SEMICOLON
     ;
 
@@ -639,7 +617,7 @@ mathImplicitDefinitionDecl
     ;
 
 mathInductiveDefinitionDecl
-    :   INDUCTIVE DEFINITION inductiveDefinitionSignature
+    :   INDUCTIVE DEFINITION definitionSignature
         IS INDUCTIVE_BASE_NUM mathExp SEMICOLON
         INDUCTIVE_HYP_NUM mathExp SEMICOLON
     ;
@@ -652,25 +630,6 @@ categoricalDefinitionSignature
     :   definitionSignature (COMMA definitionSignature)*
     ;
 
-inductiveDefinitionSignature
-    :   inductivePrefixSignature
-    |   inductiveInfixSignature
-    ;
-
-inductivePrefixSignature
-    :   ON mathVariableDecl OF prefixOp
-        LPAREN (inductiveParameterList COMMA)? IDENTIFIER RPAREN COLON mathTypeExp
-    ;
-
-inductiveInfixSignature
-    :   ON mathVariableDecl OF LPAREN mathVariableDecl RPAREN infixOp
-        LPAREN IDENTIFIER RPAREN COLON mathTypeExp
-    ;
-
-inductiveParameterList
-    :   mathVariableDeclGroup (COMMA mathVariableDeclGroup)*
-    ;
-
 definitionSignature
     :   standardInfixSignature
     |   standardOutfixSignature
@@ -679,7 +638,7 @@ definitionSignature
 
 standardInfixSignature
     :   LPAREN mathVariableDecl RPAREN
-        infixOp
+        (IDENTIFIER | infixOp)
         LPAREN mathVariableDecl RPAREN COLON mathTypeExp
     ;
 
@@ -696,11 +655,11 @@ standardPrefixSignature
     ;
 
 prefixOp
-    :   (PLUS | MINUS | NOT | ABS | COMPLEMENT)
+    :   op=(PLUS | MINUS | NOT | ABS | COMPLEMENT)
     ;
 
 infixOp
-    :   (IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | EXP | MOD | REM | DIV |
+    :   op=(IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | EXP | MOD | REM | DIV |
          IMPLIES | IFF | RANGE | AND | OR | UNION | INTERSECT | IN | NOT_IN | GT | LT |
          GT_EQL | LT_EQL | EQL | NOT_EQL)
     ;
@@ -712,57 +671,47 @@ definitionParameterList
 // mathematical clauses
 
 affectsClause
-    :   parameterMode progNamedExp (COMMA progNamedExp)* SEMICOLON
+    :   AFFECTS mathVarNameExp (COMMA mathVarNameExp)* SEMICOLON
     ;
 
 requiresClause
-    :   REQUIRES mathExp SEMICOLON
+    :   REQUIRES mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 ensuresClause
-    :   ENSURES mathExp SEMICOLON
+    :   ENSURES mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 constraintClause
-    :   CONSTRAINT mathExp SEMICOLON
+    :   CONSTRAINT mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 changingClause
-    :   CHANGING progVariableExp (COMMA progVariableExp)*
+    :   CHANGING progVarNameExp (COMMA progVarNameExp)* SEMICOLON
     ;
 
 maintainingClause
-    :   MAINTAINING mathExp SEMICOLON
+    :   MAINTAINING mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 decreasingClause
-    :   DECREASING mathAddingExp SEMICOLON
-    ;
-
-whereClause
-    :   WHERE mathExp
+    :   DECREASING mathAddingExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 correspondenceClause
-    :   CORR mathExp SEMICOLON
+    :   CORR mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 conventionClause
-    :   CONVENTION mathExp SEMICOLON
+    :   CONVENTION mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 durationClause
-    :   DURATION mathAddingExp SEMICOLON
+    :   DURATION mathAddingExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 manipulationDispClause
-    :   MAINP_DISP mathAddingExp SEMICOLON
-    ;
-
-// mathematical type declarations
-
-confirmMathTypeDecl
-    :   CONFIRM MATH TYPE mathVariableDecl SEMICOLON
+    :   MAINP_DISP mathAddingExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 // mathematical expressions
@@ -778,18 +727,18 @@ mathExp
 
 mathIteratedExp
     :   op=(BIG_CONCAT | BIG_INTERSECT | BIG_PRODUCT | BIG_SUM | BIG_UNION)
-        IDENTIFIER COLON mathTypeExp
-        (whereClause)?
+        mathVariableDecl
+        (mathWhereExp)?
         (COMMA | OF) LBRACE mathExp RBRACE
     ;
 
 mathQuantifiedExp
     :   mathImpliesExp
-    |   FOR ALL mathVariableDeclGroup (whereClause)? COMMA
+    |   FORALL mathVariableDeclGroup (mathWhereExp)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
-    |   THERE EXISTS UNIQUE mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
+    |   EXISTS_UNIQUE mathVariableDeclGroup (mathWhereExp)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
-    |   THERE EXISTS mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
+    |   EXISTS mathVariableDeclGroup (mathWhereExp)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
     ;
 
@@ -801,7 +750,9 @@ mathImpliesExp
     ;
 
 mathLogicalExp
-    :   mathRelationalExp (op=(AND | OR) mathRelationalExp)*
+    :   mathRelationalExp
+    |   mathRelationalExp (op=AND mathRelationalExp)+
+    |   mathRelationalExp (op=OR mathRelationalExp)+
     ;
 
 mathRelationalExp
@@ -826,19 +777,27 @@ mathTypeAssertionExp
     ;
 
 mathFunctionTypeExp
-    :   mathAddingExp (FUNCARROW mathAddingExp)*
+    :   mathAddingExp (FUNCARROW mathAddingExp)?
     ;
 
 mathAddingExp
     :   mathMultiplyingExp
-        (op=(PLUS | MINUS | CONCAT | UNION | INTERSECT | WITHOUT | TILDE)
-         mathMultiplyingExp)*
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=PLUS mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=MINUS mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=CONCAT mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=UNION mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=INTERSECT mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=WITHOUT mathMultiplyingExp)+
+    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=TILDE mathMultiplyingExp)+
     ;
 
 mathMultiplyingExp
     :   mathExponentialExp
-        (op=(MULTIPLY | DIVIDE | MOD | REM | DIV)
-         mathExponentialExp)*
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=MULTIPLY mathExponentialExp)+
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=DIVIDE mathExponentialExp)+
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=MOD mathExponentialExp)+
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=REM mathExponentialExp)+
+    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=DIV mathExponentialExp)+
     ;
 
 mathExponentialExp
@@ -846,7 +805,7 @@ mathExponentialExp
     ;
 
 mathPrefixExp
-    :   prefixOp mathPrimaryExp
+    :   (qualifier=IDENTIFIER QUALIFIER)? prefixOp mathPrimaryExp
     |   mathPrimaryExp
     ;
 
@@ -875,11 +834,11 @@ mathAlternativeExpItem
     ;
 
 mathLiteralExp
-    :   BOOLEAN_LITERAL         #mathBooleanExp
-    |   INTEGER_LITERAL         #mathIntegerExp
-    |   REAL_LITERAL            #mathRealExp
-    |   CHARACTER_LITERAL       #mathCharacterExp
-    |   STRING_LITERAL          #mathStringExp
+    :   BOOLEAN_LITERAL                                     #mathBooleanExp
+    |   (qualifier=IDENTIFIER QUALIFIER)? INTEGER_LITERAL   #mathIntegerExp
+    |   REAL_LITERAL                                        #mathRealExp
+    |   CHARACTER_LITERAL                                   #mathCharacterExp
+    |   STRING_LITERAL                                      #mathStringExp
     ;
 
 mathDotExp
@@ -888,31 +847,37 @@ mathDotExp
     ;
 
 mathFunctionApplicationExp
-    :   HASH mathCleanFunctionExp
-    |   mathCleanFunctionExp
+    :   HASH mathCleanFunctionExp   #mathOldExp
+    |   mathCleanFunctionExp        #mathFunctOrVarExp
     ;
 
 mathCleanFunctionExp
-    :   name=IDENTIFIER (CARAT mathNestedExp)? LPAREN mathExp (COMMA mathExp)* RPAREN
-    |   name=IDENTIFIER
-    |   OP (infixOp | NOT | ABS | COMPLEMENT)
+    :   (qualifier=IDENTIFIER QUALIFIER)?
+        name=IDENTIFIER (CARAT mathNestedExp)?
+        LPAREN mathExp (COMMA mathExp)* RPAREN                  #mathFunctionExp
+    |   mathVarNameExp                                          #mathVarExp
+    |   OP (qualifier=IDENTIFIER QUALIFIER)?
+        (infixOp | op=NOT | op=ABS | op=COMPLEMENT)             #mathOpNameExp
     ;
 
+mathVarNameExp
+    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
+    ;
 
 mathOutfixExp
     :   lop=LT mathInfixExp rop=GT
-    |   lop=LL mathExp rop=GT
+    |   lop=LL mathExp rop=GG
     |   lop=BAR mathExp rop=BAR
     |   lop=DBL_BAR mathExp rop=DBL_BAR
     ;
 
 mathSetExp
-    :   LBRACE mathVariableDecl BAR mathExp RBRACE          #mathSetBuilderExp
-    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE           #mathSetCollectionExp
+    :   LBRACE mathVariableDecl (mathWhereExp)? BAR mathExp RBRACE       #mathSetBuilderExp
+    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE                       #mathSetCollectionExp
     ;
 
 mathTupleExp
-    :   LPAREN mathExp (COMMA mathExp)+ RPAREN
+    :   LPAREN mathExp COMMA mathExp RPAREN
     ;
 
 //NOTE: Allows only very rudimentary lambda expressions.
@@ -930,34 +895,42 @@ mathNestedExp
     :   LPAREN mathExp RPAREN
     ;
 
+mathWhereExp
+    :   WHERE mathExp
+    ;
+
 // program expressions
 
 progExp
-    :   op=(NOT|MINUS) progExp                      #progApplicationExp
-    |   progExp op=(MULTIPLY|DIVIDE) progExp        #progApplicationExp
-    |   progExp op=(PLUS|MINUS) progExp             #progApplicationExp
-    |   progExp op=(LT_EQL|GT_EQL|GT|LT) progExp    #progApplicationExp
-    |   progExp op=(EQL|NOT_EQL) progExp            #progApplicationExp
-    |   LPAREN progExp RPAREN                       #progNestedExp
+    :   progExp
+        op=(AND|OR|EQL|NOT_EQL|LT_EQL|GT_EQL|GT|LT|
+        PLUS|MINUS|MULTIPLY|DIVIDE|MOD|REM|DIV)
+        progExp                                     #progApplicationExp
+    |   progExponential                             #progExponentialExp
+    ;
+
+progExponential
+    :   progUnary (EXP progExponential)?
+    ;
+
+progUnary
+    :   op=(NOT|MINUS) progExp                      #progUnaryExp
     |   progPrimary                                 #progPrimaryExp
     ;
 
 progPrimary
-    :   progLiteralExp
-    |   progVariableExp
-    |   progParamExp
+    :   progLiteral             #progLiteralExp
+    |   progParamExp            #progFunctionExp
+    |   progVariableExp         #progVarExp
+    |   LPAREN progExp RPAREN   #progNestedExp
     ;
 
-//This intermediate rule is really only needed to help make
-//the 'changingClause' rule a little more strict about what it accepts.
-//A root VariableExp class is no longer reflected in the ast.
-progVariableExp
-    :   progDotExp
-    |   progNamedExp
-    ;
-
-progDotExp
-    :   progNamedExp (DOT progNamedExp)+
+// Real numbers are currently not supported. Should add this
+// to the grammar when we do.
+progLiteral
+    :   INTEGER_LITERAL      #progIntegerExp
+    |   CHARACTER_LITERAL    #progCharacterExp
+    |   STRING_LITERAL       #progStringExp
     ;
 
 progParamExp
@@ -965,12 +938,37 @@ progParamExp
         LPAREN (progExp (COMMA progExp)*)? RPAREN
     ;
 
-progNamedExp
-    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
+// This intermediate rule is really only needed to help make
+// 'swapStmt' and 'assignStmt' rules a little more strict about
+// what they accept.
+progVariableExp
+    :   progVarDotExp
+    |   progVarDotArrayExp
+    |   progVarArrayExp
+    |   progVarNameExp
     ;
 
-progLiteralExp
-    :   INTEGER_LITERAL      #progIntegerExp
-    |   CHARACTER_LITERAL    #progCharacterExp
-    |   STRING_LITERAL       #progStringExp
+// This is a progamming dotted expression that contains only
+// program variable names.
+progVarDotExp
+    :   progVarNameExp (DOT progVarNameExp)+
+    ;
+
+// This is a programming dotted expression that contains all
+// program variable names except the last expression, which is a
+// program array expression.
+// Note: Arrays are simply syntactic sugar. We should convert these
+// to the corresponding calls when building the RESOLVE AST.
+progVarDotArrayExp
+    :   progVarNameExp (DOT progVarNameExp)* (DOT progVarArrayExp)
+    ;
+
+// Note: Arrays are simply syntactic sugar. We should convert these
+// to the corresponding calls when building the RESOLVE AST.
+progVarArrayExp
+    :   progVarNameExp LSQBRACK progExp RSQBRACK
+    ;
+
+progVarNameExp
+    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
     ;

@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.parsing.data;
 
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.TokenFactory;
@@ -33,6 +34,9 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     // Member Fields
     // ===========================================================
 
+    /** <p>The file that created this token factory.</p> */
+    private final ResolveFile myFile;
+
     /** <p>Input data stream</p> */
     private final CharStream myInput;
 
@@ -43,9 +47,11 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     /**
      * <p>This object creates {@link ResolveToken}s rather than the default tokens.</p>
      *
+     * @param file Input file.
      * @param input Input data stream.
      */
-    public ResolveTokenFactory(CharStream input) {
+    public ResolveTokenFactory(ResolveFile file, CharStream input) {
+        myFile = file;
         myInput = input;
     }
 
@@ -62,8 +68,11 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
      * @return A token object.
      */
     @Override
-    public ResolveToken create(int type, String text) {
-        return new ResolveToken(type, text);
+    public final ResolveToken create(int type, String text) {
+        ResolveToken t = new ResolveToken(type, text);
+        t.mySourceName = myFile.toString();
+
+        return t;
     }
 
     /**
@@ -75,13 +84,13 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
      * @return A token object.
      */
     @Override
-    public ResolveToken create(Pair<TokenSource, CharStream> source, int type,
-            String text, int channel, int start, int stop, int line,
+    public final ResolveToken create(Pair<TokenSource, CharStream> source,
+            int type, String text, int channel, int start, int stop, int line,
             int charPositionInLine) {
         ResolveToken t = new ResolveToken(source, type, channel, start, stop);
         t.setLine(line);
         t.setCharPositionInLine(charPositionInLine);
-        t.mySourceName = myInput.getSourceName();
+        t.mySourceName = myFile.toString();
 
         return t;
     }
