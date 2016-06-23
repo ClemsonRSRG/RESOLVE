@@ -7,5 +7,3 @@ Concepts/Stack_Template/Obvious_CC_Realiz.rb
 Concepts/Stack_Template/Obvious_Flipping_Realiz.rb
 Concepts/Standard/Integer_Template/Iterative_Add_to_Realiz.rb
 Concepts/Standard/Integer_Template/Recursive_Add_to_Realiz.rb
-Facilities/Stack_Examples/Alt_Rev_Stack.fa
-Facilities/Stack_Examples/RevStack.fa
