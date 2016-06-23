@@ -473,25 +473,84 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a {@code Realization}
+     * module declaration for an {@code Concept} module.</p>
      *
-     * @param ctx
+     * @param ctx Concept impl module node in ANTLR4 AST.
      */
     @Override
     public void exitConceptImplModule(ResolveParser.ConceptImplModuleContext ctx) {
-        super.exitConceptImplModule(ctx);
+        // Module parameters (if any)
+        List<ModuleParameterDec> parameterDecls =
+                getModuleArguments(ctx.moduleParameterList());
+
+        // Uses items (if any)
+        List<UsesItem> uses =
+                Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
+                                .usesList().usesItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+
+        // Module requires (if any)
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
+        }
+
+        // Profile (if any)
+        PosSymbol profileName = null;
+        if (ctx.profile != null) {
+            profileName = createPosSymbol(ctx.profile);
+        }
+
+        // Decs (if any)
+        List<Dec> decls = new ArrayList<>();
+        if (ctx.conceptImplItems() != null) {
+            List<ResolveParser.ConceptImplItemContext> itemContexts = ctx.conceptImplItems().conceptImplItem();
+            for (ResolveParser.ConceptImplItemContext item : itemContexts) {
+                // Add any new array facility declarations that was generated
+                // by this shared state representation.
+                if (item.sharedStateRepresentationDecl() != null) {
+                    if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.sharedStateRepresentationDecl())) {
+                        decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.sharedStateRepresentationDecl()));
+                    }
+                }
+                // Add any new array facility declarations that was generated
+                // by this type representation.
+                else if (item.typeRepresentationDecl() != null){
+                    if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.typeRepresentationDecl())) {
+                        decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.typeRepresentationDecl()));
+                    }
+                }
+
+                // Add the item to the declaration list
+                decls.add((Dec) myNodes.removeFrom(item));
+            }
+        }
+
+        ConceptRealizModuleDec realization =
+                new ConceptRealizModuleDec(createLocation(ctx),
+                        createPosSymbol(ctx.name), parameterDecls,
+                        profileName, createPosSymbol(ctx.concept),
+                        uses, requires, decls);
+        myNodes.put(ctx, realization);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the generated realization item.</p>
      *
-     * @param ctx
+     * @param ctx Concept implementation item node in ANTLR4 AST.
      */
     @Override
     public void exitConceptImplItem(ResolveParser.ConceptImplItemContext ctx) {
-        super.exitConceptImplItem(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     // -----------------------------------------------------------
@@ -660,18 +719,18 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .implItems().implItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
-        EnhancementRealizModuleDec enhancement =
+        EnhancementRealizModuleDec realization =
                 new EnhancementRealizModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls, profileName,
                         createPosSymbol(ctx.enhancement),
                         createPosSymbol(ctx.concept), uses, requires, decls);
-        myNodes.put(ctx, enhancement);
+        myNodes.put(ctx, realization);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method stores the generated a realization item.</p>
+     * <p>This method stores the generated realization item.</p>
      *
      * @param ctx Implementation item node in ANTLR4 AST.
      */
@@ -1042,6 +1101,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitProgramRecordType(ResolveParser.ProgramRecordTypeContext ctx) {
+        List<VarDec> fields = new ArrayList<>();
         List<ResolveParser.VariableDeclGroupContext> variableDeclGroupContexts =
                 ctx.variableDeclGroup();
         for (ResolveParser.VariableDeclGroupContext variableDeclGroupContext : variableDeclGroupContexts) {
@@ -1065,10 +1125,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
             // For each identifier, create a new variable declaration
             for (TerminalNode ident : variableDeclGroupContext.IDENTIFIER()) {
-                myNodes.put(ident, new VarDec(
-                        createPosSymbol(ident.getSymbol()), rawNameTy.clone()));
+                fields.add(new VarDec(createPosSymbol(ident.getSymbol()), rawNameTy.clone()));
             }
         }
+
+        myNodes.put(ctx, new RecordTy(createLocation(ctx), fields));
     }
 
     // -----------------------------------------------------------

@@ -1208,7 +1208,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             if (varDec == null) {
                 throw new MiscErrorException(
                         "Cannot locate the content type for the array: "
-                                + exp.toString(), new IllegalStateException());
+                                + exp.toString(), new NullPointerException());
             }
             else {
                 contentTy = (NameTy) varDec.getTy().clone();
@@ -1217,7 +1217,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         else {
             throw new MiscErrorException(
                     "Cannot locate the content type for the array: "
-                            + exp.toString(), new IllegalStateException());
+                            + exp.toString(), new NullPointerException());
         }
 
         return contentTy;
@@ -1321,7 +1321,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                             "Variable ["
                                     + name
                                     + "] does not point to a type that contains a record",
-                            new IllegalStateException());
+                            new NullPointerException());
                 }
             }
         }

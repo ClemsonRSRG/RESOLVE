@@ -441,7 +441,7 @@ public class ResolveCompiler {
         // Debug out to file implies that the debug flag is also on.
         FlagDependencies.addImplies(FLAG_DEBUG_FILE_OUT, FLAG_DEBUG);
 
-        // Stack traces require debug flag is on
-        FlagDependencies.addRequires(FLAG_DEBUG_STACK_TRACE, FLAG_DEBUG);
+        // Stack traces implies debug flag is on
+        FlagDependencies.addImplies(FLAG_DEBUG_STACK_TRACE, FLAG_DEBUG);
     }
 }

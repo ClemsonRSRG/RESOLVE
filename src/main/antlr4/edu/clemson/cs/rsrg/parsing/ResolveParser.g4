@@ -89,7 +89,7 @@ conceptItem
 // concept impl module
 
 conceptImplModule
-    :   REALIZATION name=IDENTIFIER
+    :   REALIZATION name=IDENTIFIER (moduleParameterList)?
         (WITH_PROFILE profile=IDENTIFIER)?
         FOR concept=IDENTIFIER
         (ENHANCED BY enhancement=IDENTIFIER)* SEMICOLON
