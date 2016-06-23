@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>16.05.31a</version>
+    <version>Summer16a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
