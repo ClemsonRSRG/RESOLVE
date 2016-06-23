@@ -4738,7 +4738,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Create name in the format of "_(Name of Variable)_Array_Fac_(myCounter)"
         String newArrayName = "";
         newArrayName +=
-                ("_" + firstIdentAsString + "_Array_Fac_" + myNewElementCounter++);
+                ("_" + firstIdentAsString + "_Array_Fac_" + (++myNewElementCounter));
 
         // Create the new raw type
         NameTy rawNameTy =

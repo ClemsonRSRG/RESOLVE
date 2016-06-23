@@ -1043,7 +1043,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                 NameTy arrayContentsTy = myArrayNameTyToInnerTyMap.get(arrayTy);
                 VarDec newArrayVarDec =
                         ArrayConversionUtilities.buildTempArrayNameVarDec(arrayNameExp,
-                                arrayContentsTy, myNewElementCounter++);
+                                arrayContentsTy, ++myNewElementCounter);
                 myParentNodeElementsContainer.varDecs.add(newArrayVarDec);
 
                 // Array index expression
@@ -1057,6 +1057,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                         newArrayVarDecAsProgramExp, arrayTy.getQualifier(), arrayNameExp, arrayIndexExp);
                 myNewStatementsContainer.newPreStmts.push(swapEntryCall.clone());
                 myNewStatementsContainer.newPostStmts.offer(swapEntryCall);
+
+                // Store the newArrayVarDecAsProgramExp as an arg
+                newArgs.add(newArrayVarDecAsProgramExp.clone());
             }
             // ProgramFunctionExp
             else if (arg instanceof ProgramFunctionExp) {
