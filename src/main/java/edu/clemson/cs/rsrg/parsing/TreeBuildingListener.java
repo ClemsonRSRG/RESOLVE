@@ -295,25 +295,76 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a {@code Facility}
+     * module declaration.</p>
      *
-     * @param ctx
+     * @param ctx Facility module node in ANTLR4 AST.
      */
     @Override
     public void exitFacilityModule(ResolveParser.FacilityModuleContext ctx) {
-        super.exitFacilityModule(ctx);
+        // No module parameters, but we need to pass an empty list
+        List<ModuleParameterDec> parameterDecls = new ArrayList<>();
+
+        // Uses items (if any)
+        List<UsesItem> uses =
+                Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
+                                .usesList().usesItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+
+        // Module requires (if any)
+        AssertionClause requires;
+        if (ctx.requiresClause() != null) {
+            requires =
+                    (AssertionClause) myNodes.removeFrom(ctx.requiresClause());
+        }
+        else {
+            requires =
+                    createTrueAssertionClause(createLocation(ctx),
+                            AssertionClause.ClauseType.REQUIRES);
+        }
+
+        // Decs (if any)
+        List<Dec> decls = new ArrayList<>();
+        if (ctx.facilityItems() != null) {
+            List<ResolveParser.FacilityItemContext> itemContexts = ctx.facilityItems().facilityItem();
+            for (ResolveParser.FacilityItemContext item : itemContexts) {
+                // Add any new array facility declarations that was generated
+                // by this facility shared state representation.
+                if (item.facilitySharedStateRepresentationDecl() != null) {
+                    if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.facilitySharedStateRepresentationDecl())) {
+                        decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.facilitySharedStateRepresentationDecl()));
+                    }
+                }
+                // Add any new array facility declarations that was generated
+                // by this facility type representation.
+                else if (item.facilityTypeRepresentationDecl() != null){
+                    if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.facilityTypeRepresentationDecl())) {
+                        decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.facilityTypeRepresentationDecl()));
+                    }
+                }
+
+                // Add the item to the declaration list
+                decls.add((Dec) myNodes.removeFrom(item));
+            }
+        }
+
+        FacilityModuleDec facility =
+                new FacilityModuleDec(createLocation(ctx),
+                        createPosSymbol(ctx.name), parameterDecls,
+                        uses, requires, decls);
+        myNodes.put(ctx, facility);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method stores the generated facility item.</p>
      *
-     * @param ctx
+     * @param ctx Facility item node in ANTLR4 AST.
      */
     @Override
     public void exitFacilityItem(ResolveParser.FacilityItemContext ctx) {
-        super.exitFacilityItem(ctx);
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     // -----------------------------------------------------------

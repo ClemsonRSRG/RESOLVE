@@ -40,6 +40,7 @@ precisItem
 facilityModule
     :   FACILITY name=IDENTIFIER SEMICOLON
         (usesList)?
+        (requiresClause)?
         (facilityItems)?
         END closename=IDENTIFIER SEMICOLON EOF
     ;
