@@ -57,7 +57,7 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     /** <p>The duration expression</p> */
     private final AssertionClause myDuration;
 
-    /** <p>The manipulative displacement expression</p> */
+    /** <p>The manipulation displacement expression</p> */
     private final AssertionClause myManipDisp;
 
     // ===========================================================
@@ -73,7 +73,7 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
      * @param duration A {@link AssertionClause} representing the initialization's/finalization's
      *                 duration clause.
      * @param manip_disp A {@link AssertionClause} representing the initialization's/finalization's
-     *                   manipulative displacement clause.
+     *                   manipulation displacement clause.
      */
     public PerformanceSpecInitFinalItem(Location l, ItemType type,
             AssertionClause duration, AssertionClause manip_disp) {
@@ -176,7 +176,7 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the manipulative displacement clause
+     * <p>This method returns the manipulation displacement clause
      * in this performance profile's
      * type initialization/finalization verification block.</p>
      *

@@ -12,13 +12,9 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.operationdecl;
 
-import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameter;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
-import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
-import java.util.Iterator;
 
 /**
  * <p>This is the class for all the performance operation declaration objects
@@ -53,7 +49,7 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
      * @param duration A {@link AssertionClause} representing the
      *                 performance operation's duration clause.
      * @param manip_disp A {@link AssertionClause} representing the
-     *                   performance operation's manipulative displacement clause.
+     *                   performance operation's manipulation displacement clause.
      */
     public PerformanceOperationDec(OperationDec opDec,
             AssertionClause duration, AssertionClause manip_disp) {
@@ -73,57 +69,24 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("Operation ");
-        sb.append(myName.asString(0, innerIndentInc));
 
-        // parameters
-        sb.append("( ");
-        Iterator<ParameterVarDec> paraIt =
-                myWrappedOpDec.getParameters().iterator();
-        while (paraIt.hasNext()) {
-            sb.append(paraIt.next().asString(0, innerIndentInc));
-
-            if (paraIt.hasNext()) {
-                sb.append("; ");
-            }
-        }
-        sb.append(" )");
-
-        // return value
-        Ty returnTy = myWrappedOpDec.getReturnTy();
-        if (returnTy != null) {
-            sb.append(" : ");
-            sb.append(returnTy.asString(0, innerIndentInc));
-        }
-
-        sb.append(";\n");
-
-        // affects clause
-        AffectsClause affects = myWrappedOpDec.getAffectedVars();
-        if (affects != null) {
-            sb.append(affects.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
-
-        // requires clause
-        AssertionClause requires = myWrappedOpDec.getRequires();
-        sb.append(requires
-                .asString(indentSize + innerIndentInc, innerIndentInc));
-
-        // ensures clause
-        AssertionClause ensures = myWrappedOpDec.getEnsures();
-        sb
-                .append(ensures.asString(indentSize + innerIndentInc,
-                        innerIndentInc));
+        // operation declaration
+        sb.append(myWrappedOpDec.asString(indentSize, innerIndentInc));
+        sb.append("\n");
 
         // duration clause
-        sb.append(myDuration.asString(indentSize + innerIndentInc,
-                innerIndentInc));
+        if (myDuration != null) {
+            sb.append(myDuration.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
+            sb.append("\n");
+        }
 
         // manip_disp clause
-        sb.append(myManipDisp.asString(indentSize + innerIndentInc,
-                innerIndentInc));
+        if (myManipDisp != null) {
+            sb.append(myManipDisp.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
+            sb.append("\n");
+        }
 
         return sb.toString();
     }
@@ -144,7 +107,8 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
 
         if (!myWrappedOpDec.equals(that.myWrappedOpDec))
             return false;
-        if (!myDuration.equals(that.myDuration))
+        if (myDuration != null ? !myDuration.equals(that.myDuration)
+                : that.myDuration != null)
             return false;
         return myManipDisp != null ? myManipDisp.equals(that.myManipDisp)
                 : that.myManipDisp == null;
@@ -162,7 +126,7 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the manipulative displacement clause
+     * <p>This method returns the manipulation displacement clause
      * for this performance operation declaration.</p>
      *
      * @return The {@link AssertionClause} representation object.
@@ -188,7 +152,7 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
     public final int hashCode() {
         int result = super.hashCode();
         result = 31 * result + myWrappedOpDec.hashCode();
-        result = 31 * result + myDuration.hashCode();
+        result = 31 * result + (myDuration != null ? myDuration.hashCode() : 0);
         result =
                 31 * result
                         + (myManipDisp != null ? myManipDisp.hashCode() : 0);
@@ -204,13 +168,18 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
      */
     @Override
     protected final PerformanceOperationDec copy() {
+        AssertionClause newDuration = null;
+        if (myDuration != null) {
+            newDuration = myDuration.clone();
+        }
+
         AssertionClause newManipDisp = null;
         if (myManipDisp != null) {
             newManipDisp = myManipDisp.clone();
         }
 
         return new PerformanceOperationDec((OperationDec) myWrappedOpDec
-                .clone(), myDuration.clone(), newManipDisp);
+                .clone(), newDuration, newManipDisp);
     }
 
 }

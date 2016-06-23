@@ -27,6 +27,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.PerformanceOperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
@@ -1470,8 +1471,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method generates a representation of a performance type model
-     * declaration.</p>
+     * <p>This method generates a representation of a type model
+     * declaration for performance profiles..</p>
      *
      * @param ctx Performance type model declaration node in ANTLR4 AST.
      */
@@ -2041,8 +2042,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method generates a new representation for a performance type model
-     * initialization item.</p>
+     * <p>This method generates a new representation for a type model
+     * initialization item for performance profiles.</p>
      *
      * @param ctx Performance spec model init node in ANTLR4 AST.
      */
@@ -2070,8 +2071,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method generates a new representation for a performance type model
-     * finalization item.</p>
+     * <p>This method generates a new representation for a type model
+     * finalization item for performance profiles.</p>
      *
      * @param ctx Performance spec model final node in ANTLR4 AST.
      */
@@ -2397,27 +2398,34 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a new representation for an operation
+     * declaration for performance profiles.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterPerformanceOperationDecl(
-            ResolveParser.PerformanceOperationDeclContext ctx) {
-        super.enterPerformanceOperationDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Operation declaration node in ANTLR4 AST.
      */
     @Override
     public void exitPerformanceOperationDecl(
             ResolveParser.PerformanceOperationDeclContext ctx) {
-        super.exitPerformanceOperationDecl(ctx);
+        // Operation declaration
+        OperationDec operationDec =
+                (OperationDec) myNodes.removeFrom(ctx.operationDecl());
+
+        // duration and manipulation displacement
+        AssertionClause duration = null;
+        if (ctx.durationClause() != null) {
+            duration =
+                    (AssertionClause) myNodes.removeFrom(ctx.durationClause());
+        }
+
+        AssertionClause manipDisp = null;
+        if (ctx.manipulationDispClause() != null) {
+            manipDisp =
+                    (AssertionClause) myNodes.removeFrom(ctx
+                            .manipulationDispClause());
+        }
+
+        myNodes.put(ctx, new PerformanceOperationDec(operationDec, duration,
+                manipDisp));
     }
 
     // -----------------------------------------------------------
