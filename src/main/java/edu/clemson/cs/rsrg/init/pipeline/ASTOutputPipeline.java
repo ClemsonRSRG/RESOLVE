@@ -81,8 +81,7 @@ public class ASTOutputPipeline extends AbstractPipeline {
         GenerateGraphvizModel twv =
                 new GenerateGraphvizModel(group, group.getInstanceOf(
                         "outputGraphvizGVFile").add("moduleName", moduleName));
-        TreeWalker tw = new TreeWalker(twv);
-        tw.visit(moduleDec);
+        TreeWalker.visit(twv, moduleDec);
 
         // Write the contents to file
         String outputFileName = moduleName + "_ModuleDec.gv";
