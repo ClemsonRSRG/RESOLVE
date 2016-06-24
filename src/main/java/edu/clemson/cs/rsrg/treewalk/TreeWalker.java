@@ -30,32 +30,9 @@ import java.util.List;
  * @author Blair Durkee
  * @author Yu-Shan Sun
  * @author Daniel Welch
- *
  * @version 2.0
  */
 public class TreeWalker {
-
-    // ===========================================================
-    // Member Fields
-    // ===========================================================
-
-    /** <p>The tree walker visitor we are going to use.</p> */
-    private final TreeWalkerVisitor myVisitor;
-
-    // ===========================================================
-    // Constructors
-    // ===========================================================
-
-    /**
-     * <p>Constructs a new {@code TreeWalker} that applies the logic of
-     * {@link TreeWalkerVisitor} to a abstract syntax tree.</p>
-     *
-     * @param visitor An instance of {@link TreeWalkerVisitor} which implements
-     *                visit methods to be applied to nodes of the RESOLVE AST.
-     */
-    public TreeWalker(TreeWalkerVisitor visitor) {
-        myVisitor = visitor;
-    }
 
     // ===========================================================
     // Public Methods
@@ -70,14 +47,17 @@ public class TreeWalker {
      * named {@code walk[className]}, that returns true, the children are
      * skipped.</p>
      *
+     * @param visitor An instance of {@link TreeWalkerVisitor} which implements
+     *                visit methods to be applied to nodes of the RESOLVE AST.
      * @param e	The RESOLVE ast node to walk
      */
-    public void visit(ResolveConceptualElement e) {
+    public static void visit(TreeWalkerVisitor visitor,
+            ResolveConceptualElement e) {
         if (e != null) {
             // are we overriding the walking for this element?
-            if (!walkOverride(e)) {
+            if (!walkOverride(visitor, e)) {
                 // invoke the "pre" visitor method(s)
-                invokeVisitorMethods("pre", e);
+                invokeVisitorMethods(visitor, "pre", e);
 
                 List<ResolveConceptualElement> children = e.getChildren();
                 if (children.size() > 0) {
@@ -88,13 +68,14 @@ public class TreeWalker {
                     while (iter.hasNext()) {
                         prevChild = nextChild;
                         nextChild = iter.next();
-                        invokeVisitorMethods("mid", e, prevChild, nextChild);
-                        visit(nextChild);
+                        invokeVisitorMethods(visitor, "mid", e, prevChild,
+                                nextChild);
+                        visit(visitor, nextChild);
                     }
-                    invokeVisitorMethods("mid", e, nextChild, null);
+                    invokeVisitorMethods(visitor, "mid", e, nextChild, null);
                 }
                 // invoke the "post" visitor method(s)
-                invokeVisitorMethods("post", e);
+                invokeVisitorMethods(visitor, "post", e);
             }
         }
     }
@@ -107,17 +88,19 @@ public class TreeWalker {
      * <p>Invokes each of the visitor methods on the various different
      * {@link ResolveConceptualElement}s.</p>
      *
+     * @param visitor An instance of {@link TreeWalkerVisitor} which implements
+     *                visit methods to be applied to nodes of the RESOLVE AST.
      * @param prefix Prefix string for the current walking method.
      * @param e The node to walk.
      */
-    private void invokeVisitorMethods(String prefix,
+    private static void invokeVisitorMethods(TreeWalkerVisitor visitor, String prefix,
             ResolveConceptualElement... e) {
         boolean pre = prefix.equals("pre"), post = prefix.equals("post"), mid =
                 prefix.equals("mid"), list = (e[0] instanceof VirtualListNode);
 
         // Invoke generic visitor methods (preAny, postAny)
         if (pre) {
-            myVisitor.preAny(e[0]);
+            visitor.preAny(e[0]);
         }
 
         // Get the heirarchy of classes from which this node inherits
@@ -171,17 +154,17 @@ public class TreeWalker {
                 Method visitorMethod;
                 if (pre || post) { // pre and post methods
                     visitorMethod =
-                            this.myVisitor.getClass().getMethod(methodName,
+                            visitor.getClass().getMethod(methodName,
                                     currentClass);
                 }
                 else { // mid methods
                     visitorMethod =
-                            this.myVisitor.getClass().getMethod(methodName,
+                            visitor.getClass().getMethod(methodName,
                                     currentClass, paramType, paramType);
                 }
 
                 // Invoking the visitor method now!!!
-                visitorMethod.invoke(this.myVisitor, (Object[]) parent);
+                visitorMethod.invoke(visitor, (Object[]) parent);
             }
             catch (NoSuchMethodException nsme) {
                 //This is fine if we're dealing with a virtual node, otherwise
@@ -199,7 +182,7 @@ public class TreeWalker {
         }
 
         if (post) {
-            myVisitor.postAny(e[0]);
+            visitor.postAny(e[0]);
         }
     }
 
@@ -207,11 +190,13 @@ public class TreeWalker {
      * <p>Check to see if {@code e} has override the default
      * walking mechanism.</p>
      *
+     * @param visitor An instance of {@link TreeWalkerVisitor} which implements
+     *                visit methods to be applied to nodes of the RESOLVE AST.
      * @param e Current element that we are walking.
      *
      * @return {@code true} if override exists, {@code false} otherwise.
      */
-    private boolean walkOverride(ResolveConceptualElement e) {
+    private static boolean walkOverride(TreeWalkerVisitor visitor, ResolveConceptualElement e) {
         Class<?> elementClass = e.getClass();
         List<Class<?>> classHierarchy = new ArrayList<>();
         while (elementClass != ResolveConceptualElement.class) {
@@ -228,10 +213,10 @@ public class TreeWalker {
                 String walkMethodName = "walk" + c.getSimpleName();
                 try {
                     Method walkMethod =
-                            this.myVisitor.getClass().getMethod(walkMethodName,
+                            visitor.getClass().getMethod(walkMethodName,
                                     c);
                     foundOverride =
-                            ((Boolean) walkMethod.invoke(this.myVisitor, e));
+                            ((Boolean) walkMethod.invoke(visitor, e));
                 }
                 catch (NoSuchMethodException nsme) {
                     //Shouldn't be possible
