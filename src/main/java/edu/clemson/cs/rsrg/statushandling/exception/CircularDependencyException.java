@@ -27,7 +27,7 @@ public class CircularDependencyException extends CompilerException {
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 1L;
 
     // ==========================================================
     // Constructors

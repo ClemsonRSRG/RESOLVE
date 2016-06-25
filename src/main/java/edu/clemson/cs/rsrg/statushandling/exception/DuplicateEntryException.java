@@ -27,7 +27,7 @@ public class DuplicateEntryException extends CompilerException {
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 7L;
+    private static final long serialVersionUID = 1L;
 
     // ==========================================================
     // Constructors

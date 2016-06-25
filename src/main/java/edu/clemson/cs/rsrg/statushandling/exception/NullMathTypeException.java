@@ -12,9 +12,11 @@
  */
 package edu.clemson.cs.rsrg.statushandling.exception;
 
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+
 /**
  * <p>An {@code NullMathTypeException} indicates we encountered an
- * null {link MTType} and is trying to use it in some way.</p>
+ * null {@link MTType} and is trying to use it in some way.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -26,7 +28,7 @@ public class NullMathTypeException extends CompilerException {
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 5L;
+    private static final long serialVersionUID = 1L;
 
     // ==========================================================
     // Constructors
