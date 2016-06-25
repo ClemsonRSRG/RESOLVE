@@ -1,5 +1,5 @@
 /**
- * EqualsPredicate.java
+ * IsInPredicate.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
+package edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.VariableReplacingVisitor;
@@ -19,22 +19,22 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import java.util.Map;
 
 /**
- * <p>This class establishes that two {@link MTType}s can be established
- * to be "equals".</p>
+ * <p>This class establishes that one {@link MTType} can be established
+ * as "is-in" another {@link MTType}.</p>
  *
  * @version 2.0
  */
-public class EqualsPredicate implements TypeRelationshipPredicate {
+public class IsInPredicate implements TypeRelationshipPredicate {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The first {@link MTType} object in this equals predicate.</p> */
-    private final MTType myType1;
+    /** <p>The element {@link MTType} object in this is-in predicate.</p> */
+    private final MTType myElement;
 
-    /** <p>The second {@link MTType} object in this equals predicate.</p> */
-    private final MTType myType2;
+    /** <p>The declared {@link MTType} object in this is-in predicate.</p> */
+    private final MTType myDeclaredType;
 
     /** <p>The current type graph object in use.</p> */
     private final TypeGraph myTypeGraph;
@@ -44,15 +44,15 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
     // ===========================================================
 
     /**
-     * <p>This creates a new "equals" predicate for two types.</p>
+     * <p>This creates a new "is-in" predicate for two types.</p>
      *
      * @param g The current type graph.
-     * @param type1 First {@link MTType} object.
-     * @param type2 Second {@link MTType} object.
+     * @param element The element {@link MTType} to be contained.
+     * @param declaredType A declared {@link MTType} that can contain types.
      */
-    public EqualsPredicate(TypeGraph g, MTType type1, MTType type2) {
-        myType1 = type1;
-        myType2 = type2;
+    public IsInPredicate(TypeGraph g, MTType element, MTType declaredType) {
+        myElement = element;
+        myDeclaredType = declaredType;
         myTypeGraph = g;
     }
 
@@ -72,20 +72,16 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
      * @return {@code true} if it can be demonstrated statically, {@code false} otherwise.
      */
     @Override
-    public final boolean canBeDemonstratedStatically(MTType canonical1,
+    public boolean canBeDemonstratedStatically(MTType canonical1,
             MTType canonical2, Map<String, MTType> typeBindings,
             Map<String, Exp> expressionBindings) {
-        MTType substituted1 =
-                myType1.getCopyWithVariablesSubstituted(typeBindings);
-        MTType substituted2 =
-                myType2.getCopyWithVariablesSubstituted(typeBindings);
+        MTType substitutedElement =
+                myElement.getCopyWithVariablesSubstituted(typeBindings);
+        MTType substitutedDeclaredType =
+                myDeclaredType.getCopyWithVariablesSubstituted(typeBindings);
 
-        //TODO : This was not well considered, it just made some fun stuff work
-        //       out right.  So think about if it's ok to make this a "subset
-        //       of" predicate rather than an "equals" predicate.
-
-        return myTypeGraph.isSubtype(substituted1, substituted2);
-        //return substituted1.equals(substituted2);
+        return myTypeGraph.isKnownToBeIn(substitutedElement,
+                substitutedDeclaredType);
     }
 
     /**
@@ -97,20 +93,20 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
      * @return A {@code TypeRelationshipPredicate} after the substitution.
      */
     @Override
-    public final TypeRelationshipPredicate replaceUnboundVariablesInTypes(
+    public TypeRelationshipPredicate replaceUnboundVariablesInTypes(
             Map<String, String> substitutions) {
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitutions, myTypeGraph);
 
-        myType1.accept(renamer);
+        myElement.accept(renamer);
         MTType newType1 = renamer.getFinalExpression();
 
         renamer = new VariableReplacingVisitor(substitutions, myTypeGraph);
 
-        myType2.accept(renamer);
+        myDeclaredType.accept(renamer);
         MTType newType2 = renamer.getFinalExpression();
 
-        return new EqualsPredicate(myTypeGraph, newType1, newType2);
+        return new IsInPredicate(myTypeGraph, newType1, newType2);
     }
 
     /**
@@ -120,7 +116,6 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
      */
     @Override
     public final String toString() {
-        return myType1 + " = " + myType2;
+        return myElement + " : " + myDeclaredType;
     }
-
 }
