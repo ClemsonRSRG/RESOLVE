@@ -25,15 +25,6 @@ import java.util.Map;
 public interface TypeRelationshipPredicate {
 
     /**
-     *
-     * @param substitutions Map of substitutions for unbound variables.
-     *
-     * @return A {@code TypeRelationshipPredicate} after the substitution.
-     */
-    TypeRelationshipPredicate replaceUnboundVariablesInTypes(
-            Map<String, String> substitutions);
-
-    /**
      * <p>Given two types, we attempt to statically demonstrate if
      * their type relationship can be established statically.</p>
      *
@@ -47,5 +38,16 @@ public interface TypeRelationshipPredicate {
     boolean canBeDemonstratedStatically(MTType canonical1, MTType canonical2,
             Map<String, MTType> typeBindings,
             Map<String, Exp> expressionBindings);
+
+    /**
+     * <p>Given a map of substitutions, we attempt to replace any
+     * unbound variables in types.</p>
+     *
+     * @param substitutions Map of substitutions for unbound variables.
+     *
+     * @return A {@code TypeRelationshipPredicate} after the substitution.
+     */
+    TypeRelationshipPredicate replaceUnboundVariablesInTypes(
+            Map<String, String> substitutions);
 
 }
