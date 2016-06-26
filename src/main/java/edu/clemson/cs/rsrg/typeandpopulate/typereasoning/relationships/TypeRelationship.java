@@ -198,7 +198,9 @@ public class TypeRelationship {
      *
      * @throws NoSolutionException
      */
-    public final Exp getValidTypeConditionsTo(Exp value, Map<String, MTType> typeBindings) throws NoSolutionException {
+    public final Exp getValidTypeConditionsTo(Exp value,
+            Map<String, MTType> typeBindings) throws NoSolutionException {
+
         Exp result;
 
         Map<String, Exp> internalBindings;
