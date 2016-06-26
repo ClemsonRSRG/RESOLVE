@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typevisitor;
 
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 
 /**
  * <p>This is the abstract base class that contains empty implementations
@@ -34,7 +34,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTType(MTType t) {}
+    public void beginMTType(MTType t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -44,7 +44,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTType(MTType t) {}
+    public void endMTType(MTType t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -54,7 +54,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTAbstract(MTAbstract<?> t) {}
+    public void beginMTAbstract(MTAbstract<?> t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -64,7 +64,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTAbstract(MTAbstract<?> t) {}
+    public void endMTAbstract(MTAbstract<?> t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -114,7 +114,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTFunction(MTFunction t) {}
+    public void beginMTFunction(MTFunction t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -124,7 +124,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTFunction(MTFunction t) {}
+    public void endMTFunction(MTFunction t) {}
 
     /**
      * <p>This method adds additional logic before we visit

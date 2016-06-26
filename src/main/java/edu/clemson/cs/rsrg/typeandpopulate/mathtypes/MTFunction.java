@@ -22,8 +22,12 @@ import java.util.Map;
  */
 public class MTFunction extends MTType {
 
-    public MTFunction(TypeGraph g, MTType range, List<MTType> paramTypes) {
+    // ===========================================================
+    // Constructors
+    // ===========================================================
 
+    public MTFunction(TypeGraph g, MTType range, List<MTType> paramTypes) {
+        super(g);
     }
 
     @Override
