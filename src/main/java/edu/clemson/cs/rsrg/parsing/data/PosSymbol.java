@@ -87,7 +87,12 @@ public class PosSymbol implements BasicCapabilities {
      */
     @Override
     public final PosSymbol clone() {
-        return new PosSymbol(new Location(myLocation), mySymbol.getName());
+        Location newLoc = null;
+        if (myLocation != null) {
+            newLoc = myLocation.clone();
+        }
+
+        return new PosSymbol(newLoc, mySymbol.getName());
     }
 
     /**

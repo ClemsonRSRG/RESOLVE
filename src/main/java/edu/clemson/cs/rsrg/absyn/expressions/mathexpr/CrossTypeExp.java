@@ -254,7 +254,7 @@ public class CrossTypeExp extends MathExp {
             newTagsToFields.put(newTag, (ArbitraryExpTy) field.clone());
         }
 
-        return new CrossTypeExp(new Location(myLoc), newTagsToFields);
+        return new CrossTypeExp(cloneLocation(), newTagsToFields);
     }
 
     /**

@@ -147,7 +147,7 @@ public class NameTy extends Ty {
         }
         PosSymbol newName = myName.clone();
 
-        return new NameTy(new Location(myLoc), newQualifier, newName);
+        return new NameTy(cloneLocation(), newQualifier, newName);
     }
 
 }

@@ -144,7 +144,7 @@ public class CharExp extends LiteralExp {
      */
     @Override
     protected final Exp copy() {
-        return new CharExp(new Location(myLoc), myCharacter.charValue());
+        return new CharExp(cloneLocation(), myCharacter.charValue());
     }
 
     /**
@@ -152,7 +152,7 @@ public class CharExp extends LiteralExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new CharExp(new Location(myLoc), myCharacter.charValue());
+        return new CharExp(cloneLocation(), myCharacter.charValue());
     }
 
 }

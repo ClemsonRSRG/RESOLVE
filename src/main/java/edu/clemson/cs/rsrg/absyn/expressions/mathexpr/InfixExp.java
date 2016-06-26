@@ -110,9 +110,8 @@ public class InfixExp extends AbstractFunctionExp {
             }
 
             retExp =
-                    new InfixExp(new Location(myLoc), newLeftSide,
-                            newOpQualifier, myOperationName.clone(),
-                            newRightSide);
+                    new InfixExp(cloneLocation(), newLeftSide, newOpQualifier,
+                            myOperationName.clone(), newRightSide);
         }
         else {
             retExp = this.clone();
@@ -268,7 +267,7 @@ public class InfixExp extends AbstractFunctionExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new InfixExp(new Location(myLoc), newLeft, newOpQualifier,
+        return new InfixExp(cloneLocation(), newLeft, newOpQualifier,
                 myOperationName.clone(), newRight);
     }
 
@@ -375,7 +374,7 @@ public class InfixExp extends AbstractFunctionExp {
             }
             else {
                 retVal =
-                        new InfixExp(new Location(myLoc), leftHandSide,
+                        new InfixExp(cloneLocation(), leftHandSide,
                                 newOpQualifier, operatorName, rightHandSide);
             }
         }
@@ -387,8 +386,8 @@ public class InfixExp extends AbstractFunctionExp {
         }
         else {
             retVal =
-                    new InfixExp(new Location(myLoc), leftHandSide,
-                            newOpQualifier, operatorName, rightHandSide);
+                    new InfixExp(cloneLocation(), leftHandSide, newOpQualifier,
+                            operatorName, rightHandSide);
 
             if (retVal.equivalent(this)) {
                 retVal = ((MathExp) retVal).simplify();
@@ -461,9 +460,8 @@ public class InfixExp extends AbstractFunctionExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new InfixExp(new Location(myLoc), myLeftHandSide,
-                newOpQualifier, myOperationName.clone(), myRightHandSide
-                        .clone());
+        return new InfixExp(cloneLocation(), myLeftHandSide, newOpQualifier,
+                myOperationName.clone(), myRightHandSide.clone());
     }
 
     /**
@@ -476,7 +474,7 @@ public class InfixExp extends AbstractFunctionExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new InfixExp(new Location(myLoc), substitute(myLeftHandSide,
+        return new InfixExp(cloneLocation(), substitute(myLeftHandSide,
                 substitutions), newOpQualifier, myOperationName.clone(),
                 substitute(myRightHandSide, substitutions));
     }
@@ -501,7 +499,7 @@ public class InfixExp extends AbstractFunctionExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new InfixExp(new Location(myLoc), leftSimplify, newOpQualifier,
+        return new InfixExp(cloneLocation(), leftSimplify, newOpQualifier,
                 myOperationName.clone(), rightSimplify);
     }
 

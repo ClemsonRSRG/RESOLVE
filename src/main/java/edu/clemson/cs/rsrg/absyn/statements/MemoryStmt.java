@@ -128,7 +128,7 @@ public class MemoryStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new MemoryStmt(new Location(myLoc), myType);
+        return new MemoryStmt(cloneLocation(), myType);
     }
 
 }

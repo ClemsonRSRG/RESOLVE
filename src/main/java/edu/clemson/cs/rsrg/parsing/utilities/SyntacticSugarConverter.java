@@ -191,7 +191,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
         myFinalProcessedElement =
-                new FacilityTypeInitFinalItem(new Location(e.getLocation()), e
+                new FacilityTypeInitFinalItem(e.getLocation().clone(), e
                         .getItemType(), affectsClause, e.getRequires().clone(),
                         e.getEnsures().clone(),
                         myParentNodeElementsContainer.facilityDecs,
@@ -374,8 +374,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
         myFinalProcessedElement =
-                new TypeInitFinalItem(new Location(e.getLocation()), e
-                        .getItemType(), affectsClause,
+                new TypeInitFinalItem(e.getLocation().clone(), e.getItemType(),
+                        affectsClause,
                         myParentNodeElementsContainer.facilityDecs,
                         myParentNodeElementsContainer.varDecs, collector.stmts);
 
@@ -423,7 +423,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         else {
             exp = (ProgramFunctionExp) e.getFunctionExp().clone();
         }
-        addToInnerMostCollector(new CallStmt(new Location(e.getLocation()), exp));
+        addToInnerMostCollector(new CallStmt(e.getLocation().clone(), exp));
 
         // Add any statements that need to appear after this one.
         while (!myNewStatementsContainer.newPostStmts.isEmpty()) {
@@ -496,7 +496,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                     ArrayConversionUtilities.getArrayIndexExp(rightExp);
             NameTy arrayTy = findArrayType(arrayNameExp);
 
-            newStatement = new FuncAssignStmt(new Location(l), (ProgramVariableExp) leftExp.clone(),
+            newStatement = new FuncAssignStmt(l.clone(), (ProgramVariableExp) leftExp.clone(),
                     ArrayConversionUtilities.buildEntryReplicaCall(l, arrayTy.getQualifier(),
                             arrayNameExp, arrayIndexExp));
         }
@@ -512,7 +512,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                     ArrayConversionUtilities.getArrayIndexExp(leftExp);
             NameTy arrayTy = findArrayType(arrayNameExp);
 
-            newStatement = ArrayConversionUtilities.buildAssignEntryCall(new Location(l),
+            newStatement = ArrayConversionUtilities.buildAssignEntryCall(l.clone(),
                     rightExp.clone(), arrayTy.getQualifier(), arrayNameExp, arrayIndexExp);
         }
         // Case #3: Both left and right expressions are ProgramVariableArrayExp
@@ -535,7 +535,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
             ProgramFunctionExp newEntryReplicaCall = ArrayConversionUtilities.buildEntryReplicaCall(l,
                     rightArrayTy.getQualifier(), rightArrayNameExp, rightArrayIndexExp);
-            newStatement = ArrayConversionUtilities.buildAssignEntryCall(new Location(l),
+            newStatement = ArrayConversionUtilities.buildAssignEntryCall(l.clone(),
                     newEntryReplicaCall, leftArrayTy.getQualifier(), leftArrayNameExp, leftArrayIndexExp);
         }
         // Case #4: If it is not cases 1-4, then we build a regular
@@ -555,11 +555,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                 List<ProgramExp> args = new ArrayList<>();
                 args.add(rightExp.clone());
 
-                newRightExp = new ProgramFunctionExp(new Location(rightExp.getLocation()),
-                        null, new PosSymbol(new Location(rightExp.getLocation()), "Replica"), args);
+                newRightExp = new ProgramFunctionExp(rightExp.getLocation().clone(),
+                        null, new PosSymbol(rightExp.getLocation().clone(), "Replica"), args);
             }
 
-            newStatement = new FuncAssignStmt(new Location(l),
+            newStatement = new FuncAssignStmt(l.clone(),
                     (ProgramVariableExp) leftExp.clone(), newRightExp);
         }
         addToInnerMostCollector(newStatement);
@@ -619,7 +619,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         // Build the new IfStmt and add it to the 'next' collector.
-        addToInnerMostCollector(new IfStmt(new Location(e.getLocation()),
+        addToInnerMostCollector(new IfStmt(e.getLocation().clone(),
                 newIfConditionItem, newElseIfItems, collector.stmts));
     }
 
@@ -743,8 +743,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                     }
 
                     rightArrayNameAsPosSymbol =
-                            new PosSymbol(new Location(rightArrayNameExp
-                                    .getLocation()), sb.toString());
+                            new PosSymbol(rightArrayNameExp.getLocation()
+                                    .clone(), sb.toString());
                 }
 
                 throw new SourceErrorException(
@@ -763,7 +763,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // SwapStmt.
         else {
             newStatement =
-                    new SwapStmt(new Location(l), (ProgramVariableExp) leftExp
+                    new SwapStmt(l.clone(), (ProgramVariableExp) leftExp
                             .clone(), (ProgramVariableExp) rightExp.clone());
         }
 
@@ -874,7 +874,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         // Build the new WhileStmt and add it to the 'next' collector.
-        addToInnerMostCollector(new WhileStmt(new Location(e.getLocation()),
+        addToInnerMostCollector(new WhileStmt(e.getLocation().clone(),
                 newConditionExp, newItem, collector.stmts));
     }
 
@@ -990,8 +990,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         // Build the new IfConditionItem and add it to our new items map.
-        myReplacingElementsMap.put(e, new IfConditionItem(new Location(e
-                .getLocation()), newConditionExp, collector.stmts));
+        myReplacingElementsMap.put(e, new IfConditionItem(e.getLocation()
+                .clone(), newConditionExp, collector.stmts));
     }
 
     /**
@@ -1012,8 +1012,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             AssertionClause newDecreasingClause =
                     e.getDecreasingClause().clone();
 
-            myReplacingElementsMap.put(e, new LoopVerificationItem(
-                    new Location(e.getLocation()), formChangingClause(),
+            myReplacingElementsMap.put(e, new LoopVerificationItem(e
+                    .getLocation().clone(), formChangingClause(),
                     newMaintainingClause, newDecreasingClause,
                     newElapsedTimeClause));
         }
@@ -1051,7 +1051,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
                 // Create the new call to "Swap_Entry" and add it to the pre/post
                 ProgramVariableNameExp newArrayVarDecAsProgramExp =
-                        new ProgramVariableNameExp(new Location(newArrayVarDec.getLocation()),
+                        new ProgramVariableNameExp(newArrayVarDec.getLocation().clone(),
                                 null, newArrayVarDec.getName());
                 CallStmt swapEntryCall = ArrayConversionUtilities.buildSwapEntryCall(arg.getLocation(),
                         newArrayVarDecAsProgramExp, arrayTy.getQualifier(), arrayNameExp, arrayIndexExp);
@@ -1084,7 +1084,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             qualifier = e.getQualifier().clone();
         }
 
-        myReplacingElementsMap.put(e, new ProgramFunctionExp(new Location(e.getLocation()),
+        myReplacingElementsMap.put(e, new ProgramFunctionExp(e.getLocation().clone(),
                 qualifier, e.getName().clone(), newArgs));
     }
 
@@ -1239,18 +1239,18 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         for (AbstractSharedStateRealizationDec realizationDec : myCopySSRList) {
             List<VarDec> stateVars = realizationDec.getStateVars();
             for (VarDec v : stateVars) {
-                changingList.add(new ProgramVariableNameExp(new Location(v.getLocation()), null, v.getName().clone()));
+                changingList.add(new ProgramVariableNameExp(v.getLocation().clone(), null, v.getName().clone()));
             }
         }
 
         // Add all the parameter variables
         for (ParameterVarDec v : myParentNodeElementsContainer.parameterVarDecs) {
-            changingList.add(new ProgramVariableNameExp(new Location(v.getLocation()), null, v.getName().clone()));
+            changingList.add(new ProgramVariableNameExp(v.getLocation().clone(), null, v.getName().clone()));
         }
 
         // Add all the local variables
         for (VarDec v : myParentNodeElementsContainer.varDecs) {
-            changingList.add(new ProgramVariableNameExp(new Location(v.getLocation()), null, v.getName().clone()));
+            changingList.add(new ProgramVariableNameExp(v.getLocation().clone(), null, v.getName().clone()));
         }
 
         return changingList;

@@ -83,7 +83,7 @@ public class ShortFacilityModuleDec extends ModuleDec {
      */
     @Override
     protected final ShortFacilityModuleDec copy() {
-        return new ShortFacilityModuleDec(new Location(myLoc), myName.clone(),
+        return new ShortFacilityModuleDec(cloneLocation(), myName.clone(),
                 (FacilityDec) myDecs.get(0).clone());
     }
 

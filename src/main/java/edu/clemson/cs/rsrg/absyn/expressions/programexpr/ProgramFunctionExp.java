@@ -269,7 +269,7 @@ public class ProgramFunctionExp extends ProgramExp {
             newQualifier = myQualifier.clone();
         }
 
-        return new ProgramFunctionExp(new Location(myLoc), newQualifier,
+        return new ProgramFunctionExp(cloneLocation(), newQualifier,
                 myOperationName.clone(), copyExps());
     }
 
@@ -288,7 +288,7 @@ public class ProgramFunctionExp extends ProgramExp {
             newExpressionArgs.add((ProgramExp) substitute(e, substitutions));
         }
 
-        return new ProgramFunctionExp(new Location(myLoc), newQualifier, myOperationName.clone(), newExpressionArgs);
+        return new ProgramFunctionExp(cloneLocation(), newQualifier, myOperationName.clone(), newExpressionArgs);
     }
 
     // ===========================================================

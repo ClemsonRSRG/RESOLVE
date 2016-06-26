@@ -85,7 +85,7 @@ public class AffectsClause extends ResolveConceptualElement {
             newAffectedExps.add(exp.clone());
         }
 
-        return new AffectsClause(new Location(myLoc), newAffectedExps);
+        return new AffectsClause(cloneLocation(), newAffectedExps);
     }
 
     /**

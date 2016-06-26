@@ -122,7 +122,7 @@ public class ProgramStringExp extends ProgramLiteralExp {
      */
     @Override
     protected final Exp copy() {
-        return new ProgramStringExp(new Location(myLoc), myString);
+        return new ProgramStringExp(cloneLocation(), myString);
     }
 
     /**
@@ -130,7 +130,7 @@ public class ProgramStringExp extends ProgramLiteralExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new ProgramStringExp(new Location(myLoc), myString);
+        return new ProgramStringExp(cloneLocation(), myString);
     }
 
 }

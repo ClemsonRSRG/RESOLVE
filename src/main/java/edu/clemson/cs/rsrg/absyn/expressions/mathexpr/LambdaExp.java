@@ -214,7 +214,7 @@ public class LambdaExp extends MathExp {
     public final Exp remember() {
         Exp newBody = ((MathExp) myBodyExp).remember();
 
-        return new LambdaExp(new Location(myLoc), copyParameters(), newBody);
+        return new LambdaExp(cloneLocation(), copyParameters(), newBody);
     }
 
     /**
@@ -236,7 +236,7 @@ public class LambdaExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new LambdaExp(new Location(myLoc), copyParameters(), myBodyExp
+        return new LambdaExp(cloneLocation(), copyParameters(), myBodyExp
                 .clone());
     }
 
@@ -245,7 +245,7 @@ public class LambdaExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new LambdaExp(new Location(myLoc), copyParameters(), substitute(
+        return new LambdaExp(cloneLocation(), copyParameters(), substitute(
                 myBodyExp, substitutions));
     }
 

@@ -138,7 +138,7 @@ public class FacilityModuleDec extends ModuleDec {
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
 
-        return new FacilityModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
+        return new FacilityModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newUsesItems, myRequires.clone(), newDecs);
     }
 }

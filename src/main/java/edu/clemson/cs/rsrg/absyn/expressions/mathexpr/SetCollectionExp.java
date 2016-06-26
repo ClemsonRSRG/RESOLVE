@@ -214,7 +214,7 @@ public class SetCollectionExp extends MathExp {
             newVarExps.add((MathExp) m.remember());
         }
 
-        return new SetCollectionExp(new Location(myLoc), newVarExps);
+        return new SetCollectionExp(cloneLocation(), newVarExps);
     }
 
     /**
@@ -236,7 +236,7 @@ public class SetCollectionExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new SetCollectionExp(new Location(myLoc), copyExps());
+        return new SetCollectionExp(cloneLocation(), copyExps());
     }
 
     /**
@@ -249,7 +249,7 @@ public class SetCollectionExp extends MathExp {
             newMembers.add((MathExp) substitute(m, substitutions));
         }
 
-        return new SetCollectionExp(new Location(myLoc), newMembers);
+        return new SetCollectionExp(cloneLocation(), newMembers);
     }
 
     // ===========================================================

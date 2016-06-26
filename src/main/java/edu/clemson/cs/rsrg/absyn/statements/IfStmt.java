@@ -184,7 +184,7 @@ public class IfStmt extends Statement {
             newElseStmts.add(statement.clone());
         }
 
-        return new IfStmt(new Location(myLoc), myIfClause.clone(), newElseIfs,
+        return new IfStmt(cloneLocation(), myIfClause.clone(), newElseIfs,
                 newElseStmts);
     }
 }

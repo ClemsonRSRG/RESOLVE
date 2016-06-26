@@ -120,8 +120,8 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
             newAffects = myAffects.clone();
         }
 
-        return new SpecInitFinalItem(new Location(myLoc), myItemType,
-                newAffects, myEnsures.clone());
+        return new SpecInitFinalItem(cloneLocation(), myItemType, newAffects,
+                myEnsures.clone());
     }
 
     /**

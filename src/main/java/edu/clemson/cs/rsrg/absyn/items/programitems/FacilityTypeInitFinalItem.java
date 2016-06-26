@@ -131,7 +131,7 @@ public class FacilityTypeInitFinalItem extends AbstractTypeInitFinalItem {
             newAffects = myAffects.clone();
         }
 
-        return new FacilityTypeInitFinalItem(new Location(myLoc), myItemType,
+        return new FacilityTypeInitFinalItem(cloneLocation(), myItemType,
                 newAffects, myRequires.clone(), myEnsures.clone(),
                 copyFacDecs(), copyVars(), copyStatements());
     }

@@ -148,7 +148,7 @@ public class DoubleExp extends LiteralExp {
      */
     @Override
     protected final Exp copy() {
-        return new DoubleExp(new Location(myLoc), myDouble);
+        return new DoubleExp(cloneLocation(), myDouble);
     }
 
     /**
@@ -156,7 +156,7 @@ public class DoubleExp extends LiteralExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new DoubleExp(new Location(myLoc), myDouble);
+        return new DoubleExp(cloneLocation(), myDouble);
     }
 
 }

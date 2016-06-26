@@ -224,13 +224,12 @@ public class OldExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        Location newLoc = new Location(myLoc);
         Exp newOrigExp = null;
         if (myOrigExp != null) {
             newOrigExp = myOrigExp.clone();
         }
 
-        return new OldExp(newLoc, newOrigExp);
+        return new OldExp(cloneLocation(), newOrigExp);
     }
 
     /**
@@ -238,8 +237,7 @@ public class OldExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new OldExp(new Location(myLoc), substitute(myOrigExp,
-                substitutions));
+        return new OldExp(cloneLocation(), substitute(myOrigExp, substitutions));
     }
 
 }

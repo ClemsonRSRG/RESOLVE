@@ -146,7 +146,7 @@ public class StringExp extends LiteralExp {
      */
     @Override
     protected final Exp copy() {
-        return new StringExp(new Location(myLoc), myString);
+        return new StringExp(cloneLocation(), myString);
     }
 
     /**
@@ -154,7 +154,7 @@ public class StringExp extends LiteralExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new StringExp(new Location(myLoc), myString);
+        return new StringExp(cloneLocation(), myString);
     }
 
 }

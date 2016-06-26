@@ -127,7 +127,7 @@ public class SwapStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new SwapStmt(new Location(myLoc),
+        return new SwapStmt(cloneLocation(),
                 (ProgramVariableExp) myLeftHandSide.clone(),
                 (ProgramVariableExp) myRightHandSide.clone());
     }

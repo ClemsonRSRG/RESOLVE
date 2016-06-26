@@ -122,7 +122,7 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
      */
     @Override
     protected final Exp copy() {
-        return new ProgramIntegerExp(new Location(myLoc), myInteger);
+        return new ProgramIntegerExp(cloneLocation(), myInteger);
     }
 
     /**
@@ -130,7 +130,7 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new ProgramIntegerExp(new Location(myLoc), myInteger);
+        return new ProgramIntegerExp(cloneLocation(), myInteger);
     }
 
 }

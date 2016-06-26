@@ -124,7 +124,7 @@ public class LoopVerificationItem extends ResolveConceptualElement {
             newElapsedTimeClause = myElapsedTimeClause.clone();
         }
 
-        return new LoopVerificationItem(new Location(myLoc),
+        return new LoopVerificationItem(cloneLocation(),
                 newChangingVars,
                 myMaintainingClause.clone(),
                 myDecreasingClause.clone(),

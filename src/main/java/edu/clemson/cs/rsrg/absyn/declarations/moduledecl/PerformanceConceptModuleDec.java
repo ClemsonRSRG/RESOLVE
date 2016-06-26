@@ -183,7 +183,7 @@ public class PerformanceConceptModuleDec extends ModuleDec {
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
 
-        return new PerformanceConceptModuleDec(new Location(myLoc), myName.clone(),
+        return new PerformanceConceptModuleDec(cloneLocation(), myName.clone(),
                 newParameterDecs, myProfileLongName.clone(), myConceptName.clone(),
                 newUsesItems, myRequires.clone(), newDecs);
     }

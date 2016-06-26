@@ -242,7 +242,7 @@ public class IfExp extends MathExp {
             elseExp = ((MathExp) elseExp).remember();
         }
 
-        return new IfExp(new Location(myLoc), testingExp, thenExp, elseExp);
+        return new IfExp(cloneLocation(), testingExp, thenExp, elseExp);
     }
 
     /**
@@ -269,7 +269,7 @@ public class IfExp extends MathExp {
             newElseExp = myElseExp.clone();
         }
 
-        return new IfExp(new Location(myLoc), myTestingExp.clone(), myThenExp
+        return new IfExp(cloneLocation(), myTestingExp.clone(), myThenExp
                 .clone(), newElseExp);
     }
 
@@ -283,7 +283,7 @@ public class IfExp extends MathExp {
             newElseExp = substitute(myElseExp, substitutions);
         }
 
-        return new IfExp(new Location(myLoc), substitute(myTestingExp,
+        return new IfExp(cloneLocation(), substitute(myTestingExp,
                 substitutions), substitute(myThenExp, substitutions),
                 newElseExp);
     }

@@ -195,7 +195,7 @@ public class PrefixExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new PrefixExp(new Location(myLoc), qualifier, myOperationName
+        return new PrefixExp(cloneLocation(), qualifier, myOperationName
                 .clone(), newArgument);
     }
 
@@ -223,10 +223,14 @@ public class PrefixExp extends AbstractFunctionExp {
                 newOpQualifier = myQualifier.clone();
             }
 
+            Location newLoc = null;
+            if (equalsExp.getLocation() != null) {
+                newLoc = equalsExp.getLocation().clone();
+            }
+
             newArgument =
-                    new EqualsExp(new Location(equalsExp.getLocation()),
-                            equalsExp.getLeft(), newOpQualifier, newOperator,
-                            equalsExp.getRight());
+                    new EqualsExp(newLoc, equalsExp.getLeft(), newOpQualifier,
+                            newOperator, equalsExp.getRight());
         }
         else {
             newArgument = this.clone();
@@ -237,7 +241,7 @@ public class PrefixExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new PrefixExp(new Location(myLoc), qualifier, myOperationName
+        return new PrefixExp(cloneLocation(), qualifier, myOperationName
                 .clone(), newArgument);
     }
 
@@ -255,7 +259,7 @@ public class PrefixExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new PrefixExp(new Location(myLoc), qualifier, myOperationName
+        return new PrefixExp(cloneLocation(), qualifier, myOperationName
                 .clone(), myArgument.clone());
     }
 
@@ -269,7 +273,7 @@ public class PrefixExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new PrefixExp(new Location(myLoc), qualifier, myOperationName
+        return new PrefixExp(cloneLocation(), qualifier, myOperationName
                 .clone(), substitute(myArgument, substitutions));
     }
 

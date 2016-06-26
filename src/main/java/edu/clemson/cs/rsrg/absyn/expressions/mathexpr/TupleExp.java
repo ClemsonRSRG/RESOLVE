@@ -298,7 +298,7 @@ public class TupleExp extends MathExp {
             newFieldExps.add(copyExp);
         }
 
-        return new TupleExp(new Location(myLoc), newFieldExps);
+        return new TupleExp(cloneLocation(), newFieldExps);
     }
 
     /**
@@ -320,7 +320,7 @@ public class TupleExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new TupleExp(new Location(myLoc), copyExps());
+        return new TupleExp(cloneLocation(), copyExps());
     }
 
     /**
@@ -333,7 +333,7 @@ public class TupleExp extends MathExp {
             newFields.add(substitute(f, substitutions));
         }
 
-        return new TupleExp(new Location(myLoc), newFields);
+        return new TupleExp(cloneLocation(), newFields);
     }
 
     // ===========================================================

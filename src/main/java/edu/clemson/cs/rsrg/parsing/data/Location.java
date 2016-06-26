@@ -15,12 +15,12 @@ package edu.clemson.cs.rsrg.parsing.data;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 
 /**
- * <p>This class points to the location within a ResolveFile.</p>
+ * <p>This class points to the location within a {@link ResolveFile}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class Location {
+public class Location implements Cloneable {
 
     // ===========================================================
     // Member Fields
@@ -60,20 +60,21 @@ public class Location {
         myLocationDetails = locationDetails;
     }
 
-    /**
-     * <p>Copy constructor</p>
-     *
-     * @param l The location object to copy.
-     */
-    public Location(Location l) {
-        myFile = l.myFile;
-        myPosition = new Pos(l.myPosition);
-        myLocationDetails = new String(l.myLocationDetails);
-    }
-
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>This method overrides the default clone method implementation
+     * for the {@link Location} class.</p>
+     *
+     * @return A deep copy of the object.
+     */
+    @Override
+    public final Location clone() {
+        return new Location(myFile, myPosition.myCurrline,
+                myPosition.myCurrColumn, myLocationDetails);
+    }
 
     /**
      * <p>Equals method to compare two locations.</p>

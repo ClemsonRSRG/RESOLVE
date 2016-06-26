@@ -271,7 +271,7 @@ public class QuantExp extends MathExp {
         Exp newWhere = ((MathExp) myWhereExp).remember();
         Exp newBody = ((MathExp) myBodyExp).remember();
 
-        return new QuantExp(new Location(myLoc), myQuantification, copyVars(),
+        return new QuantExp(cloneLocation(), myQuantification, copyVars(),
                 newWhere, newBody);
     }
 
@@ -299,7 +299,7 @@ public class QuantExp extends MathExp {
             newWhere = myWhereExp.clone();
         }
 
-        return new QuantExp(new Location(myLoc), myQuantification, myVars,
+        return new QuantExp(cloneLocation(), myQuantification, myVars,
                 newWhere, myBodyExp.clone());
     }
 
@@ -313,7 +313,7 @@ public class QuantExp extends MathExp {
             newWhere = substitute(myWhereExp, substitutions);
         }
 
-        return new QuantExp(new Location(myLoc), myQuantification, copyVars(),
+        return new QuantExp(cloneLocation(), myQuantification, copyVars(),
                 newWhere, substitute(myBodyExp, substitutions));
     }
 

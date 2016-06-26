@@ -134,7 +134,7 @@ public class AssumeStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new AssumeStmt(new Location(myLoc), myAssertion.clone(),
+        return new AssumeStmt(cloneLocation(), myAssertion.clone(),
                 myIsStipulate);
     }
 

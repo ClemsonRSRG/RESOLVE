@@ -128,8 +128,7 @@ public class ConfirmStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new ConfirmStmt(new Location(myLoc), myAssertion.clone(),
-                mySimplify);
+        return new ConfirmStmt(cloneLocation(), myAssertion.clone(), mySimplify);
     }
 
 }

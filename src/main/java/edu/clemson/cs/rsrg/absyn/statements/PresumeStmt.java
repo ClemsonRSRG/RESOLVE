@@ -106,7 +106,7 @@ public class PresumeStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new PresumeStmt(new Location(myLoc), myAssertion.clone());
+        return new PresumeStmt(cloneLocation(), myAssertion.clone());
     }
 
 }

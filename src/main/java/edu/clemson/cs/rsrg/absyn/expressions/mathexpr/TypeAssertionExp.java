@@ -233,7 +233,7 @@ public class TypeAssertionExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new TypeAssertionExp(new Location(myLoc), myExp.clone(),
+        return new TypeAssertionExp(cloneLocation(), myExp.clone(),
                 getAssertedTy());
     }
 
@@ -242,7 +242,7 @@ public class TypeAssertionExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new TypeAssertionExp(new Location(myLoc), substitute(myExp,
+        return new TypeAssertionExp(cloneLocation(), substitute(myExp,
                 substitutions), new ArbitraryExpTy(myAssertedTy
                 .getArbitraryExp().substitute(substitutions)));
     }

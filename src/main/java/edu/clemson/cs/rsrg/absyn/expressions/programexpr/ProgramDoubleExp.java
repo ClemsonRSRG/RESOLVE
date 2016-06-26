@@ -124,7 +124,7 @@ public class ProgramDoubleExp extends ProgramLiteralExp {
      */
     @Override
     protected final Exp copy() {
-        return new ProgramDoubleExp(new Location(myLoc), myDouble);
+        return new ProgramDoubleExp(cloneLocation(), myDouble);
     }
 
     /**
@@ -132,7 +132,7 @@ public class ProgramDoubleExp extends ProgramLiteralExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new ProgramDoubleExp(new Location(myLoc), myDouble);
+        return new ProgramDoubleExp(cloneLocation(), myDouble);
     }
 
 }

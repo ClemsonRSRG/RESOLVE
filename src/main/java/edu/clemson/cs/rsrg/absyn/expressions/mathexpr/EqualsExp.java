@@ -58,7 +58,7 @@ public class EqualsExp extends InfixExp {
          * @return A {@link PosSymbol} object containing the operator.
          */
         public PosSymbol getOperatorAsPosSymbol(Location l) {
-            return new PosSymbol(new Location(l), toString());
+            return new PosSymbol(l.clone(), toString());
         }
     }
 
@@ -165,7 +165,7 @@ public class EqualsExp extends InfixExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), newLeft, newOpQualifier,
+        return new EqualsExp(cloneLocation(), newLeft, newOpQualifier,
                 myOperator, newRight);
     }
 
@@ -224,8 +224,8 @@ public class EqualsExp extends InfixExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), myLeftHandSide,
-                newOpQualifier, myOperator, myRightHandSide.clone());
+        return new EqualsExp(cloneLocation(), myLeftHandSide, newOpQualifier,
+                myOperator, myRightHandSide.clone());
     }
 
     /**
@@ -238,7 +238,7 @@ public class EqualsExp extends InfixExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), substitute(myLeftHandSide,
+        return new EqualsExp(cloneLocation(), substitute(myLeftHandSide,
                 substitutions), newOpQualifier, myOperator, substitute(
                 myRightHandSide, substitutions));
     }
