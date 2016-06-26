@@ -10,9 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.typeandpopulate.exception;
-
-import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
+package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
  * <p>A <code>DuplicateEntryException</code> indicates that the user-provided
