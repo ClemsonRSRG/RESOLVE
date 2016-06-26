@@ -60,20 +60,21 @@ public class Location implements Cloneable {
         myLocationDetails = locationDetails;
     }
 
-    /**
-     * <p>Copy constructor</p>
-     *
-     * @param l The location object to copy.
-     */
-    public Location(Location l) {
-        myFile = l.myFile;
-        myPosition = new Pos(l.myPosition);
-        myLocationDetails = new String(l.myLocationDetails);
-    }
-
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>This method overrides the default clone method implementation
+     * for the {@link Location} class.</p>
+     *
+     * @return A deep copy of the object.
+     */
+    @Override
+    public final Location clone() {
+        return new Location(myFile, myPosition.myCurrline,
+                myPosition.myCurrColumn, myLocationDetails);
+    }
 
     /**
      * <p>Equals method to compare two locations.</p>
