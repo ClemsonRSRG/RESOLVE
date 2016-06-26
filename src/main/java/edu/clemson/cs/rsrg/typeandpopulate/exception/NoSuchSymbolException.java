@@ -1,5 +1,5 @@
 /**
- * NullProgramTypeException.java
+ * NoSuchSymbolException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,36 +10,36 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.statushandling.exception;
+package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
 /**
- * <p>An {@code NullProgramTypeException} indicates we encountered an
- * null {link PTType} and is trying to use it in some way.</p>
+ * <p>An {@code NoSuchSymbolException} indicates we encountered an
+ * symbol that does not exist in our symbol table or in any of our scopes.</p>
  *
- * @author Yu-Shan Sun
- * @version 1.0
+ * @version 2.0
  */
-public class NullProgramTypeException extends CompilerException {
+public class NoSuchSymbolException extends SymbolTableException {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 8L;
+    private static final long serialVersionUID = 1L;
 
     // ==========================================================
     // Constructors
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a message
-     * that caused a import exception to be thrown.</p>
+     * <p>This constructor takes in a message and a throwable cause
+     * that resulted in this exception.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
+     * @param cause Cause of the exception.
      */
-    public NullProgramTypeException(String message) {
-        super(message, (Throwable) null);
+    public NoSuchSymbolException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

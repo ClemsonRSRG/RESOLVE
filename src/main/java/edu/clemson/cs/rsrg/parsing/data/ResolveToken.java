@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.parsing.data;
 
-import edu.clemson.cs.r2jt.parsing.ResolveLexer;
+import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.TokenSource;

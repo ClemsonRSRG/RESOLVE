@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.WriterStatusHandler;
@@ -21,9 +21,9 @@ import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.flag.FlagManager;
 import edu.clemson.cs.rsrg.misc.Utilities;
-import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;

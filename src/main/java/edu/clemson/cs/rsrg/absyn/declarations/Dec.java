@@ -12,11 +12,11 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
  * <p>This is the abstract base class for all the declaration objects

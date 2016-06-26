@@ -16,8 +16,6 @@ package edu.clemson.cs.rsrg.statushandling.exception;
  * <p>A <code>DuplicateEntryException</code> indicates that the user-provided
  * entry already is a duplicate of another entry.</p>
  *
- * @author Hampton Smith
- * @author Yu-Shan Sun
  * @version 2.0
  */
 public class DuplicateEntryException extends CompilerException {
@@ -27,7 +25,7 @@ public class DuplicateEntryException extends CompilerException {
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 7L;
+    private static final long serialVersionUID = 1L;
 
     // ==========================================================
     // Constructors

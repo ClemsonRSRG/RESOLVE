@@ -12,12 +12,13 @@
  */
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
-import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.statushandling.exception.NullMathTypeException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.*;
 
 /**
@@ -153,6 +154,24 @@ public abstract class MathExp extends Exp {
                 new InfixExp(new Location(l), e1.clone(), null, new PosSymbol(
                         new Location(l), "implies"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
+
+        return retval;
+    }
+
+    /**
+     * <p>This static method method creates a variable expression that
+     * matches the boolean {@code false}.</p>
+     *
+     * @param l A {@link Location} where the representation object is created from.
+     * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
+     *
+     * @return The {@link VarExp} representation object.
+     */
+    public final static VarExp getFalseVarExp(Location l, TypeGraph tg) {
+        VarExp retval =
+                new VarExp(new Location(l), null, new PosSymbol(
+                        new Location(l), "false"));
+        retval.setMathType(tg.BOOLEAN);
 
         return retval;
     }

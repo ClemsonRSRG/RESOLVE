@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.init.pipeline;
 
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 
 /**

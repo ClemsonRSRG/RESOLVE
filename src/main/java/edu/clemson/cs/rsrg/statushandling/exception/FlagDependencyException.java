@@ -14,7 +14,7 @@ package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
  * <p>A <code>FlagDependencyException</code> indicates that the user-provided
- * flag configuration is not acceptable for some reason.  The reason for the
+ * flag configuration is not acceptable for some reason. The reason for the
  * exception is provided in the exception's message.</p>
  *
  * @author Hampton Smith
@@ -28,7 +28,7 @@ public class FlagDependencyException extends CompilerException {
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 6L;
+    private static final long serialVersionUID = 1L;
 
     // ==========================================================
     // Constructors

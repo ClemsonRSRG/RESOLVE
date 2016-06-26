@@ -26,7 +26,7 @@ public class ImportException extends CompilerException {
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 1L;
 
     // ==========================================================
     // Constructors
@@ -34,7 +34,7 @@ public class ImportException extends CompilerException {
 
     /**
      * <p>This constructor takes in a message
-     * that caused a import exception to be thrown.</p>
+     * that caused an import exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
      */

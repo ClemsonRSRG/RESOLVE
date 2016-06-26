@@ -1,5 +1,5 @@
 /**
- * MiscErrorException.java
+ * NullMathTypeException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,16 +10,18 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.statushandling.exception;
+package edu.clemson.cs.rsrg.typeandpopulate.exception;
+
+import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
- *  <p>The miscellaneous error exception for the compiler
- *  where there is no line or location information available.</p>
+ * <p>An {@code NullMathTypeException} indicates we encountered an
+ * null {@link MTType} and is trying to use it in some way.</p>
  *
- * @author Yu-Shan Sun
- * @version 2.0
+ * @version 1.0
  */
-public class MiscErrorException extends CompilerException {
+public class NullMathTypeException extends CompilerException {
 
     // ===========================================================
     // Member Fields
@@ -33,14 +35,13 @@ public class MiscErrorException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a throwable cause and a message for the
-     * that caused an source exception to be thrown.</p>
+     * <p>This constructor takes in a message that caused this
+     * exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
-     * @param cause Cause of the exception.
      */
-    public MiscErrorException(String message, Throwable cause) {
-        super(message, cause);
+    public NullMathTypeException(String message) {
+        super(message, (Throwable) null);
     }
 
 }

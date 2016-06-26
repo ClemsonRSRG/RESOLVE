@@ -101,7 +101,7 @@ public abstract class CompilerException extends RuntimeException {
     /**
      * <p>Return the location that caused this exception to be thrown.</p>
      *
-     * @return A {link Location} object.
+     * @return A {@link Location} object.
      */
     public Location getErrorLocation() {
         return myErrorLocation;
