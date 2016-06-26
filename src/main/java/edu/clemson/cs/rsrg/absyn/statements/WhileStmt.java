@@ -175,6 +175,6 @@ public class WhileStmt extends Statement {
             copyWhileStatements.add(s.clone());
         }
 
-        return new WhileStmt(new Location(myLoc), myTestingExp.clone(), myVerificationBlock.clone(), copyWhileStatements);
+        return new WhileStmt(cloneLocation(), myTestingExp.clone(), myVerificationBlock.clone(), copyWhileStatements);
     }
 }

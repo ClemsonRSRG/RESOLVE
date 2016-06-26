@@ -257,7 +257,7 @@ public class VarExp extends MathExp {
         }
         PosSymbol newName = myName.clone();
 
-        return new VarExp(new Location(myLoc), newQualifier, newName,
+        return new VarExp(cloneLocation(), newQualifier, newName,
                 myQuantification);
     }
 
@@ -272,7 +272,7 @@ public class VarExp extends MathExp {
         }
         PosSymbol newName = myName.clone();
 
-        return new VarExp(new Location(myLoc), newQualifier, newName,
+        return new VarExp(cloneLocation(), newQualifier, newName,
                 myQuantification);
     }
 

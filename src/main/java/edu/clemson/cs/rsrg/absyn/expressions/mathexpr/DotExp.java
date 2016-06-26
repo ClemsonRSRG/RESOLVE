@@ -218,7 +218,7 @@ public class DotExp extends MathExp {
             newSegmentExps.add(copyExp);
         }
 
-        return new DotExp(new Location(myLoc), newSegmentExps);
+        return new DotExp(cloneLocation(), newSegmentExps);
     }
 
     /**
@@ -240,7 +240,7 @@ public class DotExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new DotExp(new Location(myLoc), copyExps());
+        return new DotExp(cloneLocation(), copyExps());
     }
 
     /**
@@ -253,7 +253,7 @@ public class DotExp extends MathExp {
             newSegments.add(substitute(e, substitutions));
         }
 
-        return new DotExp(new Location(myLoc), newSegments);
+        return new DotExp(cloneLocation(), newSegments);
     }
 
     // ===========================================================

@@ -174,7 +174,7 @@ public class ConceptModuleDec extends ModuleDec {
         List<AssertionClause> newConstraints = new ArrayList<>(myConstraints.size());
         Collections.copy(newConstraints, myConstraints);
 
-        return new ConceptModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
+        return new ConceptModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newUsesItems, myRequires.clone(), newConstraints, newDecs);
     }
 }

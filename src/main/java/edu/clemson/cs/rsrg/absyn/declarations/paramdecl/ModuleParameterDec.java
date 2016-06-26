@@ -13,8 +13,6 @@
 package edu.clemson.cs.rsrg.absyn.declarations.paramdecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
-import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**

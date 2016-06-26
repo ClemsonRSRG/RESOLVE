@@ -12,9 +12,9 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
-import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 

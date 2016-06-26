@@ -84,9 +84,20 @@ public abstract class MathExp extends Exp {
                     new NullPointerException());
         }
 
+        // Attempt to find a location for the conjunct
+        Location newExpLoc = cloneLocation(l);
+        if (newExpLoc == null) {
+            newExpLoc = cloneLocation(e1.getLocation());
+
+            if (newExpLoc == null) {
+                newExpLoc = cloneLocation(e2.getLocation());
+            }
+        }
+        Location newPosSymbolLoc = cloneLocation(newExpLoc);
+
         MathExp retval =
-                new InfixExp(new Location(l), e1.clone(), null, new PosSymbol(
-                        new Location(l), "and"), e2.clone());
+                new InfixExp(newExpLoc, e1.clone(), null, new PosSymbol(
+                        newPosSymbolLoc, "and"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 
         return retval;
@@ -117,9 +128,20 @@ public abstract class MathExp extends Exp {
                     new NullPointerException());
         }
 
+        // Attempt to find a location for the conjunct
+        Location newExpLoc = cloneLocation(l);
+        if (newExpLoc == null) {
+            newExpLoc = cloneLocation(e1.getLocation());
+
+            if (newExpLoc == null) {
+                newExpLoc = cloneLocation(e2.getLocation());
+            }
+        }
+        Location newPosSymbolLoc = cloneLocation(newExpLoc);
+
         MathExp retval =
-                new InfixExp(new Location(l), e1.clone(), null, new PosSymbol(
-                        new Location(l), "or"), e2.clone());
+                new InfixExp(newExpLoc, e1.clone(), null, new PosSymbol(
+                        newPosSymbolLoc, "or"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 
         return retval;
@@ -150,9 +172,20 @@ public abstract class MathExp extends Exp {
                     new NullPointerException());
         }
 
+        // Attempt to find a location for the conjunct
+        Location newExpLoc = cloneLocation(l);
+        if (newExpLoc == null) {
+            newExpLoc = cloneLocation(e1.getLocation());
+
+            if (newExpLoc == null) {
+                newExpLoc = cloneLocation(e2.getLocation());
+            }
+        }
+        Location newPosSymbolLoc = cloneLocation(newExpLoc);
+
         MathExp retval =
-                new InfixExp(new Location(l), e1.clone(), null, new PosSymbol(
-                        new Location(l), "implies"), e2.clone());
+                new InfixExp(newExpLoc, e1.clone(), null, new PosSymbol(
+                        newPosSymbolLoc, "implies"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 
         return retval;
@@ -168,9 +201,13 @@ public abstract class MathExp extends Exp {
      * @return The {@link VarExp} representation object.
      */
     public final static VarExp getFalseVarExp(Location l, TypeGraph tg) {
+        // Attempt to find a location for the conjunct
+        Location newExpLoc = cloneLocation(l);
+        Location newPosSymbolLoc = cloneLocation(l);
+
         VarExp retval =
-                new VarExp(new Location(l), null, new PosSymbol(
-                        new Location(l), "false"));
+                new VarExp(newExpLoc, null, new PosSymbol(newPosSymbolLoc,
+                        "false"));
         retval.setMathType(tg.BOOLEAN);
 
         return retval;
@@ -186,9 +223,13 @@ public abstract class MathExp extends Exp {
      * @return The {@link VarExp} representation object.
      */
     public final static VarExp getTrueVarExp(Location l, TypeGraph tg) {
+        // Attempt to find a location for the conjunct
+        Location newExpLoc = cloneLocation(l);
+        Location newPosSymbolLoc = cloneLocation(l);
+
         VarExp retval =
-                new VarExp(new Location(l), null, new PosSymbol(
-                        new Location(l), "true"));
+                new VarExp(newExpLoc, null, new PosSymbol(newPosSymbolLoc,
+                        "true"));
         retval.setMathType(tg.BOOLEAN);
 
         return retval;
@@ -264,6 +305,22 @@ public abstract class MathExp extends Exp {
     public List<InfixExp> split(MathExp assumpts, boolean single) {
         throw new UnsupportedOperationException("Split for classes of type "
                 + this.getClass() + " is not currently supported.");
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method to clone a {@link Location}.</p>
+     *
+     * @param l The location we want to make a copy of.
+     *
+     * @return A deep copy of {@code l} or {@code null} if {@code l}
+     * is {@code null}.
+     */
+    private static Location cloneLocation(Location l) {
+        return l != null ? l.clone() : null;
     }
 
 }

@@ -206,7 +206,7 @@ public class BetweenExp extends MathExp {
             }
         }
 
-        return new BetweenExp(new Location(myLoc), itemsCopy);
+        return new BetweenExp(cloneLocation(), itemsCopy);
     }
 
     /**
@@ -228,7 +228,7 @@ public class BetweenExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new BetweenExp(new Location(myLoc), copyExps());
+        return new BetweenExp(cloneLocation(), copyExps());
     }
 
     /**
@@ -241,7 +241,7 @@ public class BetweenExp extends MathExp {
             newJoiningExps.add(substitute(e, substitutions));
         }
 
-        return new BetweenExp(new Location(myLoc), newJoiningExps);
+        return new BetweenExp(cloneLocation(), newJoiningExps);
     }
 
     // ===========================================================

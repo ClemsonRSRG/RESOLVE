@@ -105,8 +105,8 @@ public class CallStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new CallStmt(new Location(myLoc),
-                (ProgramFunctionExp) myFunctionExp.clone());
+        return new CallStmt(cloneLocation(), (ProgramFunctionExp) myFunctionExp
+                .clone());
     }
 
 }

@@ -87,6 +87,6 @@ public class PrecisModuleDec extends ModuleDec {
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
 
-        return new PrecisModuleDec(new Location(myLoc), myName.clone(), newParameterDecs, newUsesItems, newDecs);
+        return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs, newUsesItems, newDecs);
     }
 }

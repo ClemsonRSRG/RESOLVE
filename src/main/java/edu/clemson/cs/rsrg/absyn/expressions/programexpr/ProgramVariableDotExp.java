@@ -172,7 +172,7 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
      */
     @Override
     protected final Exp copy() {
-        return new ProgramVariableDotExp(new Location(myLoc), copyExps());
+        return new ProgramVariableDotExp(cloneLocation(), copyExps());
     }
 
     /**
@@ -185,7 +185,7 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
             newSegments.add((ProgramVariableExp) substitute(e, substitutions));
         }
 
-        return new ProgramVariableDotExp(new Location(myLoc), newSegments);
+        return new ProgramVariableDotExp(cloneLocation(), newSegments);
     }
 
     // ===========================================================

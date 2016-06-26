@@ -12,9 +12,9 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.facilitydecl;
 
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
-import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;

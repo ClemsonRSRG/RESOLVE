@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn.rawtypes;
 
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -116,7 +117,11 @@ public class RecordTy extends Ty {
      */
     @Override
     protected final Ty copy() {
-        return new RecordTy(new Location(myLoc), getFields());
-    }
+        List<VarDec> newFields = new ArrayList<>();
+        for (VarDec varDec : myInnerFields) {
+            newFields.add((VarDec) varDec.clone());
+        }
 
+        return new RecordTy(cloneLocation(), newFields);
+    }
 }

@@ -60,8 +60,8 @@ public class ArrayConversionUtilities {
         args.add(assignExp.clone());
         args.add(arrayIndexExp.clone());
 
-        return new CallStmt(new Location(l), new ProgramFunctionExp(new Location(l),
-                facQualifier, new PosSymbol(new Location(l), "Assign_Entry"), args));
+        return new CallStmt(l.clone(), new ProgramFunctionExp(l.clone(),
+                facQualifier, new PosSymbol(l.clone(), "Assign_Entry"), args));
     }
 
     /**
@@ -82,8 +82,8 @@ public class ArrayConversionUtilities {
         args.add(arrayNameExp.clone());
         args.add(arrayIndexExp.clone());
 
-        return new ProgramFunctionExp(new Location(l), facQualifier,
-                new PosSymbol(new Location(l), "Entry_Replica"), args);
+        return new ProgramFunctionExp(l.clone(), facQualifier,
+                new PosSymbol(l.clone(), "Entry_Replica"), args);
     }
 
     /**
@@ -106,8 +106,8 @@ public class ArrayConversionUtilities {
         args.add(varExp.clone());
         args.add(arrayIndexExp.clone());
 
-        return new CallStmt(new Location(l), new ProgramFunctionExp(new Location(l),
-                facQualifier, new PosSymbol(new Location(l), "Swap_Entry"), args));
+        return new CallStmt(l.clone(), new ProgramFunctionExp(l.clone(),
+                facQualifier, new PosSymbol(l.clone(), "Swap_Entry"), args));
     }
 
     /**
@@ -130,8 +130,8 @@ public class ArrayConversionUtilities {
         args.add(arrayIndexExp1.clone());
         args.add(arrayIndexExp2.clone());
 
-        return new CallStmt(new Location(l), new ProgramFunctionExp(new Location(l),
-                facQualifier, new PosSymbol(new Location(l), "Swap_Two_Entries"), args));
+        return new CallStmt(l.clone(), new ProgramFunctionExp(l.clone(),
+                facQualifier, new PosSymbol(l.clone(), "Swap_Two_Entries"), args));
     }
 
     /**
@@ -179,9 +179,8 @@ public class ArrayConversionUtilities {
         sb.append("_");
         sb.append(counter);
 
-        return new VarDec(new PosSymbol(
-                new Location(arrayNameExp.getLocation()), sb.toString()),
-                arrayContentType.clone());
+        return new VarDec(new PosSymbol(arrayNameExp.getLocation().clone(), sb
+                .toString()), arrayContentType.clone());
     }
 
     /**
@@ -262,7 +261,7 @@ public class ArrayConversionUtilities {
                 }
             }
 
-            arrayNameExp = new ProgramVariableDotExp(new Location(exp.getLocation()), newSegments);
+            arrayNameExp = new ProgramVariableDotExp(exp.getLocation().clone(), newSegments);
         }
         else {
             throw new MiscErrorException("Not a programming array expression: "

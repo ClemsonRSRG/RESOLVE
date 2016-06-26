@@ -214,7 +214,7 @@ public class EnhancementRealizModuleDec extends ModuleDec {
             newProfileName = myProfileName.clone();
         }
 
-        return new EnhancementRealizModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
+        return new EnhancementRealizModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newProfileName, myEnhancementName.clone(), myConceptName.clone(),
                 newUsesItems, myRequires.clone(), newDecs);
     }

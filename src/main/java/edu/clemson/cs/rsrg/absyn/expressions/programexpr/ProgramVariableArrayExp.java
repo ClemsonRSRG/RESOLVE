@@ -175,7 +175,7 @@ public class ProgramVariableArrayExp extends ProgramVariableExp {
      */
     @Override
     protected final Exp copy() {
-        return new ProgramVariableArrayExp(new Location(myLoc),
+        return new ProgramVariableArrayExp(cloneLocation(),
                 (ProgramVariableExp) myProgramNameExp.clone(),
                 myProgramIndexExp.clone());
     }

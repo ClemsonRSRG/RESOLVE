@@ -198,7 +198,7 @@ public class VCVarExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new VCVarExp(new Location(myLoc), myOrigExp.clone());
+        return new VCVarExp(cloneLocation(), myOrigExp.clone());
     }
 
     /**
@@ -206,7 +206,7 @@ public class VCVarExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new VCVarExp(new Location(myLoc), substitute(myOrigExp,
+        return new VCVarExp(cloneLocation(), substitute(myOrigExp,
                 substitutions));
     }
 

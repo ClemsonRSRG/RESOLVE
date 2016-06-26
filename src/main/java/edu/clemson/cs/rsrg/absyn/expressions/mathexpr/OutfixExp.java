@@ -280,7 +280,7 @@ public class OutfixExp extends AbstractFunctionExp {
      */
     @Override
     public final PosSymbol getOperatorAsPosSymbol() {
-        return new PosSymbol(new Location(myLoc), getOperatorAsString());
+        return new PosSymbol(cloneLocation(), getOperatorAsString());
     }
 
     /**
@@ -327,7 +327,7 @@ public class OutfixExp extends AbstractFunctionExp {
     public final Exp remember() {
         Exp newArgument = ((MathExp) myArgument).remember();
 
-        return new OutfixExp(new Location(myLoc), myOperator, newArgument);
+        return new OutfixExp(cloneLocation(), myOperator, newArgument);
     }
 
     /**
@@ -349,8 +349,7 @@ public class OutfixExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp copy() {
-        return new OutfixExp(new Location(myLoc), myOperator, myArgument
-                .clone());
+        return new OutfixExp(cloneLocation(), myOperator, myArgument.clone());
     }
 
     /**
@@ -358,7 +357,7 @@ public class OutfixExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new OutfixExp(new Location(myLoc), myOperator, substitute(
+        return new OutfixExp(cloneLocation(), myOperator, substitute(
                 myArgument, substitutions));
     }
 

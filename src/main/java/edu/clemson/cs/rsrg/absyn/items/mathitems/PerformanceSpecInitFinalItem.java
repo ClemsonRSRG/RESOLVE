@@ -127,8 +127,8 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
             newManipDisp = myManipDisp.clone();
         }
 
-        return new PerformanceSpecInitFinalItem(new Location(myLoc),
-                myItemType, newDuration, newManipDisp);
+        return new PerformanceSpecInitFinalItem(cloneLocation(), myItemType,
+                newDuration, newManipDisp);
     }
 
     /**

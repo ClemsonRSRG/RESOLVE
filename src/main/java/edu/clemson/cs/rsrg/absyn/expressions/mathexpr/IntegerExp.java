@@ -175,7 +175,7 @@ public class IntegerExp extends LiteralExp {
             newQualifier = myQualifier.clone();
         }
 
-        return new IntegerExp(new Location(myLoc), newQualifier, myInteger);
+        return new IntegerExp(cloneLocation(), newQualifier, myInteger);
     }
 
     /**
@@ -188,7 +188,7 @@ public class IntegerExp extends LiteralExp {
             newQualifier = myQualifier.clone();
         }
 
-        return new IntegerExp(new Location(myLoc), newQualifier, myInteger);
+        return new IntegerExp(cloneLocation(), newQualifier, myInteger);
     }
 
 }

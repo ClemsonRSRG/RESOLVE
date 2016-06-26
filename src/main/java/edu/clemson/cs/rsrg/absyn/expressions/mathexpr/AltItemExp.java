@@ -223,7 +223,7 @@ public class AltItemExp extends MathExp {
 
         Exp assignmentExp = ((MathExp) myAssignmentExp).remember();
 
-        return new AltItemExp(new Location(myLoc), testingExp, assignmentExp);
+        return new AltItemExp(cloneLocation(), testingExp, assignmentExp);
     }
 
     /**
@@ -250,8 +250,7 @@ public class AltItemExp extends MathExp {
             newTest = myTestingExp.clone();
         }
 
-        return new AltItemExp(new Location(myLoc), newTest, myAssignmentExp
-                .clone());
+        return new AltItemExp(cloneLocation(), newTest, myAssignmentExp.clone());
     }
 
     /**
@@ -264,8 +263,8 @@ public class AltItemExp extends MathExp {
             newTest = substitute(myTestingExp, substitutions);
         }
 
-        return new AltItemExp(myLoc, newTest, substitute(myAssignmentExp,
-                substitutions));
+        return new AltItemExp(cloneLocation(), newTest, substitute(
+                myAssignmentExp, substitutions));
     }
 
 }

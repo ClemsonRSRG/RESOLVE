@@ -129,7 +129,7 @@ public class FuncAssignStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new FuncAssignStmt(new Location(myLoc),
+        return new FuncAssignStmt(cloneLocation(),
                 (ProgramVariableExp) myVariableExp.clone(), myAssignExp.clone());
     }
 

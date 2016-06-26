@@ -201,10 +201,9 @@ public class TypeNode {
                         (MathExp.isLiteralTrue(relationshipConditions));
 
                 finalConditions =
-                        MathExp.formDisjunct(new Location(
-                                relationshipConditions.getLocation()),
-                                relationshipConditions.clone(), finalConditions
-                                        .clone());
+                        MathExp.formDisjunct(relationshipConditions
+                                .getLocation(), relationshipConditions,
+                                finalConditions);
             }
             catch (NoSolutionException nse) {}
         }

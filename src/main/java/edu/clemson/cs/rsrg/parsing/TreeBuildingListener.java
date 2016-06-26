@@ -3618,7 +3618,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
                 // Form an infix expression using the operator
                 Exp newFirstExp =
-                        new InfixExp(new Location(leftExp.getLocation()), leftExp,
+                        new InfixExp(leftExp.getLocation().clone(), leftExp,
                                 null, createPosSymbol(ctx.op), rightExp);
 
                 // Add it back to the list for the next iteration of the loop
@@ -3654,8 +3654,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             Exp exp3 = (Exp) myNodes.removeFrom(ctx.mathInfixExp(2));
 
             List<Exp> joiningExps = new ArrayList<>();
-            joiningExps.add(new InfixExp(new Location(exp1.getLocation()), exp1.clone(), null, createPosSymbol(ctx.op1), exp2.clone()));
-            joiningExps.add(new InfixExp(new Location(exp1.getLocation()), exp2.clone(), null, createPosSymbol(ctx.op2), exp3.clone()));
+            joiningExps.add(new InfixExp(exp1.getLocation().clone(), exp1.clone(), null, createPosSymbol(ctx.op1), exp2.clone()));
+            joiningExps.add(new InfixExp(exp2.getLocation().clone(), exp2.clone(), null, createPosSymbol(ctx.op2), exp3.clone()));
 
             newElement = new BetweenExp(createLocation(ctx), joiningExps);
         }
@@ -3810,7 +3810,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 }
 
                 // Form an infix expression using the operator
-                Exp newFirstExp = new InfixExp(new Location(leftExp.getLocation()), leftExp,
+                Exp newFirstExp = new InfixExp(leftExp.getLocation().clone(), leftExp,
                         qualifier, createPosSymbol(ctx.op), rightExp);
 
                 // Add it back to the list for the next iteration of the loop
@@ -3862,7 +3862,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
                 // Form an infix expression using the operator and
                 // add it back to the list for the next iteration of the loop
-                exps.add(0, new InfixExp(new Location(leftExp.getLocation()), leftExp,
+                exps.add(0, new InfixExp(leftExp.getLocation().clone(), leftExp,
                         qualifier, createPosSymbol(ctx.op), rightExp));
             }
 
@@ -4800,14 +4800,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Create a list of arguments for the new FacilityDec and
         // add the type, Low and High for Arrays
         List<ModuleArgumentItem> moduleArgumentItems = new ArrayList<>();
-        moduleArgumentItems.add(new ModuleArgumentItem(new ProgramVariableNameExp(new Location(l), arrayElementTy.getQualifier(), arrayElementTy.getName())));
+        moduleArgumentItems.add(new ModuleArgumentItem(new ProgramVariableNameExp(l.clone(), arrayElementTy.getQualifier(), arrayElementTy.getName())));
         moduleArgumentItems.add(new ModuleArgumentItem(lowerBound));
         moduleArgumentItems.add(new ModuleArgumentItem(upperBound));
 
-        return new FacilityDec(new PosSymbol(new Location(l), newTy.getName().getName()),
-                new PosSymbol(new Location(l), "Static_Array_Template"),
+        return new FacilityDec(new PosSymbol(l.clone(), newTy.getName().getName()),
+                new PosSymbol(l.clone(), "Static_Array_Template"),
                 moduleArgumentItems, new ArrayList<EnhancementSpecItem>(),
-                new PosSymbol(new Location(l), "Std_Array_Realiz"), new ArrayList<ModuleArgumentItem>(),
+                new PosSymbol(l.clone(), "Std_Array_Realiz"), new ArrayList<ModuleArgumentItem>(),
                 new ArrayList<EnhancementSpecRealizItem>(), null, true);
     }
 
@@ -4856,9 +4856,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Create the finalization item that we are going to perform
         // the syntactic sugar conversions on.
         FacilityTypeInitFinalItem beforeConversionFinalItem =
-                new FacilityTypeInitFinalItem(new Location(l), itemType,
-                        affects, requires, ensures, facilityDecs, varDecs,
-                        statements);
+                new FacilityTypeInitFinalItem(l.clone(), itemType, affects,
+                        requires, ensures, facilityDecs, varDecs, statements);
 
         // Attempt to resolve all the syntactic sugar conversions
         SyntacticSugarConverter converter =
@@ -4895,8 +4894,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @return A {@link Location} for the rule.
      */
     private Location createLocation(Token t) {
-        return new Location(new Location(myFile, t.getLine(), t
-                .getCharPositionInLine(), ""));
+        return new Location(myFile, t.getLine(), t.getCharPositionInLine(), "");
     }
 
     /**
@@ -4930,9 +4928,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         // Create the new raw type
         NameTy rawNameTy =
-                new NameTy(new Location(l), new PosSymbol(new Location(l),
-                        newArrayName), new PosSymbol(new Location(l),
-                        "Static_Array"));
+                new NameTy(l.clone(), new PosSymbol(l.clone(), newArrayName),
+                        new PosSymbol(l.clone(), "Static_Array"));
 
         // Create the new array facility and add it to the appropriate container
         ArrayFacilityDecContainer innerMostContainer =
@@ -4971,8 +4968,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private AssertionClause createTrueAssertionClause(Location l,
             AssertionClause.ClauseType clauseType) {
-        return new AssertionClause(l, clauseType, VarExp.getTrueVarExp(
-                new Location(l), myTypeGraph));
+        return new AssertionClause(l, clauseType, VarExp.getTrueVarExp(l,
+                myTypeGraph));
     }
 
     /**
@@ -4995,7 +4992,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Create the finalization item that we are going to perform
         // the syntactic sugar conversions on.
         TypeInitFinalItem beforeConversionFinalItem =
-                new TypeInitFinalItem(new Location(l), itemType, affects,
+                new TypeInitFinalItem(l.clone(), itemType, affects,
                         facilityDecs, varDecs, statements);
 
         // Attempt to resolve all the syntactic sugar conversions

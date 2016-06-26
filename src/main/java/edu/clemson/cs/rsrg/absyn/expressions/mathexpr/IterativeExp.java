@@ -82,7 +82,7 @@ public class IterativeExp extends MathExp {
          * @return A {@link PosSymbol} object containing the operator.
          */
         public PosSymbol getOperatorAsPosSymbol(Location l) {
-            return new PosSymbol(new Location(l), toString());
+            return new PosSymbol(l.clone(), toString());
         }
     }
 
@@ -302,8 +302,8 @@ public class IterativeExp extends MathExp {
         Exp newWhere = ((MathExp) myWhereExp).remember();
         Exp newBody = ((MathExp) myBodyExp).remember();
 
-        return new IterativeExp(new Location(myLoc), myOperator,
-                (MathVarDec) myVar.clone(), newWhere, newBody);
+        return new IterativeExp(cloneLocation(), myOperator, (MathVarDec) myVar
+                .clone(), newWhere, newBody);
     }
 
     /**
@@ -330,8 +330,8 @@ public class IterativeExp extends MathExp {
             newWhere = myWhereExp.clone();
         }
 
-        return new IterativeExp(new Location(myLoc), myOperator,
-                (MathVarDec) myVar.clone(), newWhere, myBodyExp.clone());
+        return new IterativeExp(cloneLocation(), myOperator, (MathVarDec) myVar
+                .clone(), newWhere, myBodyExp.clone());
     }
 
     /**
@@ -344,9 +344,8 @@ public class IterativeExp extends MathExp {
             newWhere = substitute(myWhereExp, substitutions);
         }
 
-        return new IterativeExp(new Location(myLoc), myOperator,
-                (MathVarDec) myVar.clone(), newWhere, substitute(myBodyExp,
-                        substitutions));
+        return new IterativeExp(cloneLocation(), myOperator, (MathVarDec) myVar
+                .clone(), newWhere, substitute(myBodyExp, substitutions));
     }
 
 }

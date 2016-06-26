@@ -108,8 +108,8 @@ public class TypeInitFinalItem extends AbstractTypeInitFinalItem {
             newAffects = myAffects.clone();
         }
 
-        return new TypeInitFinalItem(new Location(myLoc), myItemType,
-                newAffects, copyFacDecs(), copyVars(), copyStatements());
+        return new TypeInitFinalItem(cloneLocation(), myItemType, newAffects,
+                copyFacDecs(), copyVars(), copyStatements());
     }
 
 }

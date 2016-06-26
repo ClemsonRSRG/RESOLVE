@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
-import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 

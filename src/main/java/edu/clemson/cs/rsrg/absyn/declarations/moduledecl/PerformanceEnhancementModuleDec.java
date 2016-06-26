@@ -228,7 +228,7 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
 
-        return new PerformanceEnhancementModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
+        return new PerformanceEnhancementModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 myProfileLongName.clone(), myEnhancementName.clone(), myConceptName.clone(),
                 myConceptProfileName.clone(), newUsesItems, myRequires.clone(), newDecs);
     }

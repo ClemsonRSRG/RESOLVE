@@ -190,8 +190,7 @@ public class UnaryMinusExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new UnaryMinusExp(new Location(myLoc), myInnerArgumentExp
-                .clone());
+        return new UnaryMinusExp(cloneLocation(), myInnerArgumentExp.clone());
     }
 
     /**
@@ -199,7 +198,7 @@ public class UnaryMinusExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new UnaryMinusExp(new Location(myLoc), substitute(
+        return new UnaryMinusExp(cloneLocation(), substitute(
                 myInnerArgumentExp, substitutions));
     }
 

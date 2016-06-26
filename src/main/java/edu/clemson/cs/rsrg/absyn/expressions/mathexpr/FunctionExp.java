@@ -333,7 +333,7 @@ public class FunctionExp extends AbstractFunctionExp {
             newArgs.add(copyExp);
         }
 
-        return new FunctionExp(new Location(myLoc), qualifier, newNameExp, newCaratExp, newArgs);
+        return new FunctionExp(cloneLocation(), qualifier, newNameExp, newCaratExp, newArgs);
     }
 
     /**
@@ -365,7 +365,7 @@ public class FunctionExp extends AbstractFunctionExp {
             newCaratExp = myFuncNameCaratExp.clone();
         }
 
-        return new FunctionExp(new Location(myLoc), qualifier,
+        return new FunctionExp(cloneLocation(), qualifier,
                 (VarExp) myFuncNameExp.clone(), newCaratExp, copyExps());
     }
 
@@ -390,7 +390,7 @@ public class FunctionExp extends AbstractFunctionExp {
             newArgs.add(substitute(f, substitutions));
         }
 
-        return new FunctionExp(new Location(myLoc), qualifier,
+        return new FunctionExp(cloneLocation(), qualifier,
                 (VarExp) substitute(myFuncNameExp, substitutions),
                 newCaratExp, newArgs);
     }

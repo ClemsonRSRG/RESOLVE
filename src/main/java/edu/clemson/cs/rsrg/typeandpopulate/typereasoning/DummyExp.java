@@ -62,7 +62,7 @@ public class DummyExp extends MathExp {
      * @param original A {@code DummyExp} representation object.
      */
     public DummyExp(DummyExp original) {
-        super(new Location(original.getLocation()));
+        super(original.cloneLocation());
         myMathType = original.myMathType;
     }
 

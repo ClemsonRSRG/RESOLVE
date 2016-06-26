@@ -152,7 +152,7 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
             newQualifier = getQualifier().clone();
         }
 
-        return new ProgramVariableNameExp(new Location(myLoc), newQualifier,
+        return new ProgramVariableNameExp(cloneLocation(), newQualifier,
                 myVarName.clone());
     }
 
@@ -166,7 +166,7 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
             newQualifier = getQualifier().clone();
         }
 
-        return new ProgramVariableNameExp(new Location(myLoc), newQualifier,
+        return new ProgramVariableNameExp(cloneLocation(), newQualifier,
                 myVarName.clone());
     }
 

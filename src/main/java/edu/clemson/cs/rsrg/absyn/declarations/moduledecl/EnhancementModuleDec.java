@@ -158,7 +158,7 @@ public class EnhancementModuleDec extends ModuleDec {
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
 
-        return new EnhancementModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
+        return new EnhancementModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 myConceptName.clone(), newUsesItems, myRequires.clone(), newDecs);
     }
 }

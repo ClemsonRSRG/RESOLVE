@@ -212,7 +212,7 @@ public class AlternativeExp extends MathExp {
             itemsCopy.add(item.remember());
         }
 
-        return new AlternativeExp(new Location(myLoc), itemsCopy);
+        return new AlternativeExp(cloneLocation(), itemsCopy);
     }
 
     /**
@@ -234,7 +234,7 @@ public class AlternativeExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new AlternativeExp(new Location(myLoc), copyAltItemList());
+        return new AlternativeExp(cloneLocation(), copyAltItemList());
     }
 
     /**
@@ -247,7 +247,7 @@ public class AlternativeExp extends MathExp {
             newAlternatives.add((AltItemExp) substitute(e, substitutions));
         }
 
-        return new AlternativeExp(myLoc, newAlternatives);
+        return new AlternativeExp(cloneLocation(), newAlternatives);
     }
 
     // ===========================================================

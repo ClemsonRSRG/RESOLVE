@@ -234,8 +234,15 @@ public class TypeRelationship {
 
         Map<Exp, Exp> finalSubstitutions = new HashMap<>();
         for (Map.Entry<String, Exp> substitution : internalBindings.entrySet()) {
-            finalSubstitutions.put(new VarExp(new Location(value.getLocation()), null,
-                    new PosSymbol(new Location(value.getLocation()), substitution.getKey())),
+            Location newExpLoc = null;
+            Location newPosSymbolLoc = null;
+            if (value.getLocation() != null) {
+                newExpLoc = value.getLocation().clone();
+                newPosSymbolLoc = value.getLocation().clone();
+            }
+
+            finalSubstitutions.put(new VarExp(newExpLoc, null,
+                    new PosSymbol(newPosSymbolLoc, substitution.getKey())),
                     substitution.getValue());
         }
         result = result.substitute(finalSubstitutions);

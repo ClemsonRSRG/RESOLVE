@@ -192,7 +192,7 @@ public class AssertionClause extends ResolveConceptualElement {
             newWhichEntailsExp = myWhichEntailsExp.clone();
         }
 
-        return new AssertionClause(new Location(myLoc), myClauseType,
+        return new AssertionClause(cloneLocation(), myClauseType,
                 myAssertionExp.clone(), newWhichEntailsExp);
     }
 

@@ -194,7 +194,7 @@ public class ConceptRealizModuleDec extends ModuleDec {
             newProfileName = myProfileName.clone();
         }
 
-        return new ConceptRealizModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
+        return new ConceptRealizModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newProfileName, myConceptName.clone(), newUsesItems, myRequires.clone(), newDecs);
     }
 }
