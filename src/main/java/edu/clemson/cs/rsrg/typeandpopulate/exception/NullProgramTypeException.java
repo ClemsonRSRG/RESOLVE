@@ -19,7 +19,6 @@ import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
  * <p>An {@code NullProgramTypeException} indicates we encountered an
  * null {@link PTType} and is trying to use it in some way.</p>
  *
- * @author Yu-Shan Sun
  * @version 1.0
  */
 public class NullProgramTypeException extends CompilerException {

@@ -12,14 +12,13 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
  * <p>An {@code TypeMismatchException} indicates we encountered two
  * {@link MTType}s that are not compatible.</p>
  *
- * @author Yu-Shan Sun
  * @version 2.0
  */
 public class TypeMismatchException extends CompilerException {

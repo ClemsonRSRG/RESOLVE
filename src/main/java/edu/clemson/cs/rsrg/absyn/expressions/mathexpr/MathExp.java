@@ -12,12 +12,13 @@
  */
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
-import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.*;
 
 /**

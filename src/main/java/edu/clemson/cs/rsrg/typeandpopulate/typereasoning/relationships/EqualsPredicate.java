@@ -12,10 +12,10 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate2.VariableReplacingVisitor;
-import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.VariableReplacingVisitor;
 import java.util.Map;
 
 /**

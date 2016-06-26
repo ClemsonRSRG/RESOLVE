@@ -1,5 +1,5 @@
 /**
- * NullMathTypeException.java
+ * SymbolTableException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -13,35 +13,29 @@
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
- * <p>An {@code NullMathTypeException} indicates we encountered an
- * null {@link MTType} and is trying to use it in some way.</p>
+ * <p>An exception that inherits from {@code SymbolTableException} indicates we encountered
+ * some sort of error when building the symbol table.</p>
  *
+ * @author Yu-Shan Sun
  * @version 1.0
  */
-public class NullMathTypeException extends CompilerException {
-
-    // ===========================================================
-    // Member Fields
-    // ===========================================================
-
-    /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 1L;
+public abstract class SymbolTableException extends CompilerException {
 
     // ==========================================================
     // Constructors
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a message that caused this
-     * exception to be thrown.</p>
+     * <p>This constructor takes in a throwable cause and a message
+     * that caused the exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
+     * @param cause   Cause of the exception.
      */
-    public NullMathTypeException(String message) {
-        super(message, (Throwable) null);
+    protected SymbolTableException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

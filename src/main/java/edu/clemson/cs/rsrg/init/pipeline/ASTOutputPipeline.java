@@ -12,12 +12,12 @@
  */
 package edu.clemson.cs.rsrg.init.pipeline;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;

@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.Map;
 
 /**

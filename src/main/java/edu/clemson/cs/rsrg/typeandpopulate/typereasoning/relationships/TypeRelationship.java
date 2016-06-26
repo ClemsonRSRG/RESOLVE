@@ -12,8 +12,6 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
-import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -21,7 +19,9 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.BindingException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.BindingExpression;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.*;
 
 /**

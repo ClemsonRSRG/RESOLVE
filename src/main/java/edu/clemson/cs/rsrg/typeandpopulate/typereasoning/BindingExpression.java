@@ -12,9 +12,7 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.AbstractFunctionExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.LambdaExp;
@@ -22,6 +20,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.TupleExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.BindingException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

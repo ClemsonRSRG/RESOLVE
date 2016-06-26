@@ -12,13 +12,13 @@
  */
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.LinkedList;
 import java.util.List;
 

@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
  * <p>A {@code BindingException} indicates we encountered an

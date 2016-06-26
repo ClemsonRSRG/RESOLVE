@@ -12,11 +12,11 @@
  */
 package edu.clemson.cs.rsrg.absyn.rawtypes;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
  * <p>A {@link Ty} represents the <em>description</em> of a

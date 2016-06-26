@@ -1,5 +1,5 @@
 /**
- * NullMathTypeException.java
+ * NoSuchSymbolException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -12,16 +12,13 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
-import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
-
 /**
- * <p>An {@code NullMathTypeException} indicates we encountered an
- * null {@link MTType} and is trying to use it in some way.</p>
+ * <p>An {@code NoSuchSymbolException} indicates we encountered an
+ * symbol that does not exist in our symbol table or in any of our scopes.</p>
  *
- * @version 1.0
+ * @version 2.0
  */
-public class NullMathTypeException extends CompilerException {
+public class NoSuchSymbolException extends SymbolTableException {
 
     // ===========================================================
     // Member Fields
@@ -35,13 +32,14 @@ public class NullMathTypeException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a message that caused this
-     * exception to be thrown.</p>
+     * <p>This constructor takes in a message and a throwable cause
+     * that resulted in this exception.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
+     * @param cause Cause of the exception.
      */
-    public NullMathTypeException(String message) {
-        super(message, (Throwable) null);
+    public NoSuchSymbolException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

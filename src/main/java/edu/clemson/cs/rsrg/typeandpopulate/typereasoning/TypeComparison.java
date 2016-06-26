@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
  * <p>This is an interface for all types of type comparisons

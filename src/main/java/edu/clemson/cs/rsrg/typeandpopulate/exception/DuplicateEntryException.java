@@ -18,8 +18,6 @@ import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
  * <p>A <code>DuplicateEntryException</code> indicates that the user-provided
  * entry already is a duplicate of another entry.</p>
  *
- * @author Hampton Smith
- * @author Yu-Shan Sun
  * @version 2.0
  */
 public class DuplicateEntryException extends CompilerException {
