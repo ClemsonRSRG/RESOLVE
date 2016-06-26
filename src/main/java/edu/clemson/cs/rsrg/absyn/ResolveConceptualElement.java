@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn;
 
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.lang.reflect.Field;
@@ -221,6 +222,24 @@ public abstract class ResolveConceptualElement
     // ===========================================================
     // Protected Methods
     // ===========================================================
+
+    /**
+     * <p>In most situations, this method simply calls the {@link Location#clone()}
+     * method. However, there are {@link ResolveConceptualElement}s that
+     * the compiler creates internally that does not belong to a location
+     * in a {@link ResolveFile}. In this case, we simply return {@code null}.</p>
+     *
+     * @return A deep copy of the {@link Location} object or {@code null} if
+     * the original {@link Location} object is {@code null}.
+     */
+    protected final Location cloneLocation() {
+        Location newLocation = null;
+        if (myLoc != null) {
+            newLocation = myLoc.clone();
+        }
+
+        return newLocation;
+    }
 
     /**
      * <p>Builds a sequence of numSpaces spaces and returns that
