@@ -1,5 +1,5 @@
 /**
- * BindingException.java
+ * NoSolutionException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -12,16 +12,16 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 
 /**
- * <p>A {@code BindingException} indicates we encountered an
- * error while attempting to bind an expression to a {@link MTType}.</p>
+ * <p>An {@code NoSolutionException} indicates we encountered an
+ * error in our type reasoning process where we don't know how to
+ * recover from.</p>
  *
  * @version 2.0
  */
-public class BindingException extends CompilerException {
+public class NoSolutionException extends CompilerException {
 
     // ===========================================================
     // Member Fields
@@ -30,27 +30,19 @@ public class BindingException extends CompilerException {
     /** <p>Serial version for Serializable objects</p> */
     private static final long serialVersionUID = 1L;
 
-    /** <p>The object we are attempting to bind.</p> */
-    public final Object found;
-
-    /** <p>The object we expect to bind to.</p> */
-    public final Object expected;
-
     // ==========================================================
     // Constructors
     // ==========================================================
 
     /**
-     * <p>This constructor takes both the expected object and the
-     * found object and forms the appropriate exception message.</p>
+     * <p>This constructor takes in a message and a throwable cause
+     * that resulted in this exception.</p>
      *
-     * @param found The object we are attempting to bind.
-     * @param expected The object we expect to bind to.
+     * @param message Message to be displayed when the exception is thrown.
+     * @param cause Cause of the exception.
      */
-    public BindingException(Object found, Object expected) {
-        super("Expecting: " + expected + "\nFound: " + found, (Throwable) null);
-        this.found = found;
-        this.expected = expected;
+    public NoSolutionException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }
