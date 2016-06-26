@@ -25,7 +25,10 @@ import java.util.*;
  *
  * @version 2.0
  */
-public abstract class ResolveConceptualElement implements BasicCapabilities {
+public abstract class ResolveConceptualElement
+        implements
+            BasicCapabilities,
+            Cloneable {
 
     // ===========================================================
     // Member Fields

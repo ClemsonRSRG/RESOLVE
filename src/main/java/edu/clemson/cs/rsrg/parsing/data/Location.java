@@ -15,12 +15,12 @@ package edu.clemson.cs.rsrg.parsing.data;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 
 /**
- * <p>This class points to the location within a ResolveFile.</p>
+ * <p>This class points to the location within a {@link ResolveFile}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class Location {
+public class Location implements Cloneable {
 
     // ===========================================================
     // Member Fields
