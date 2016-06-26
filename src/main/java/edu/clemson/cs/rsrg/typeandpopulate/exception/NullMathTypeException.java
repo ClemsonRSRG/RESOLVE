@@ -1,5 +1,5 @@
 /**
- * DuplicateEntryException.java
+ * NullMathTypeException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,17 +10,19 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.statushandling.exception;
+package edu.clemson.cs.rsrg.typeandpopulate.exception;
+
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 
 /**
- * <p>A <code>DuplicateEntryException</code> indicates that the user-provided
- * entry already is a duplicate of another entry.</p>
+ * <p>An {@code NullMathTypeException} indicates we encountered an
+ * null {@link MTType} and is trying to use it in some way.</p>
  *
- * @author Hampton Smith
  * @author Yu-Shan Sun
- * @version 2.0
+ * @version 1.0
  */
-public class DuplicateEntryException extends CompilerException {
+public class NullMathTypeException extends CompilerException {
 
     // ===========================================================
     // Member Fields
@@ -34,12 +36,12 @@ public class DuplicateEntryException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a message
-     * that caused a duplicate entry exception to be thrown.</p>
+     * <p>This constructor takes in a message that caused this
+     * exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
      */
-    public DuplicateEntryException(String message) {
+    public NullMathTypeException(String message) {
         super(message, (Throwable) null);
     }
 

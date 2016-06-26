@@ -17,7 +17,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.statushandling.exception.NullMathTypeException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
 import java.util.*;
 
 /**

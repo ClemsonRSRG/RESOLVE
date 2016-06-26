@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init.flag;
 
-import edu.clemson.cs.rsrg.statushandling.exception.DuplicateEntryException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateEntryException;
 import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.util.Arrays;

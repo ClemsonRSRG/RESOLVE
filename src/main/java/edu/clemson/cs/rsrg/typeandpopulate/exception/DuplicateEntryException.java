@@ -1,5 +1,5 @@
 /**
- * NullProgramTypeException.java
+ * DuplicateEntryException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,18 +10,19 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.statushandling.exception;
+package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
+import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 
 /**
- * <p>An {@code NullProgramTypeException} indicates we encountered an
- * null {@link PTType} and is trying to use it in some way.</p>
+ * <p>A <code>DuplicateEntryException</code> indicates that the user-provided
+ * entry already is a duplicate of another entry.</p>
  *
+ * @author Hampton Smith
  * @author Yu-Shan Sun
- * @version 1.0
+ * @version 2.0
  */
-public class NullProgramTypeException extends CompilerException {
+public class DuplicateEntryException extends CompilerException {
 
     // ===========================================================
     // Member Fields
@@ -36,11 +37,11 @@ public class NullProgramTypeException extends CompilerException {
 
     /**
      * <p>This constructor takes in a message
-     * that caused a import exception to be thrown.</p>
+     * that caused a duplicate entry exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
      */
-    public NullProgramTypeException(String message) {
+    public DuplicateEntryException(String message) {
         super(message, (Throwable) null);
     }
 

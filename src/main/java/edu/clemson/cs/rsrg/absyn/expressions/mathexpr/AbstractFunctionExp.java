@@ -190,6 +190,15 @@ public abstract class AbstractFunctionExp extends MathExp {
     }
 
     /**
+     * <p>Returns the list of parameters in this expression.</p>
+     *
+     * @return A list of {@link Exp} containing all the parameters to this function.
+     */
+    public final List<Exp> getParameters() {
+        return this.getSubExpressions();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
