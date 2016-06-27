@@ -1,5 +1,5 @@
 /**
- * MTNamed.java
+ * MTGeneric.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -15,26 +15,23 @@ package edu.clemson.cs.rsrg.typeandpopulate.mathtypes;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * <p>Represents a type that is simply a named reference to some bound variable.
- * For example, in <code>BigUnion{t : MType}{t}</code>, the second "t" is a named type.</p>
+ * <p>A generic mathematical type.</p>
  *
  * @version 2.0
  */
-public class MTNamed extends MTType {
+public class MTGeneric extends MTAbstract<MTGeneric> {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>An integer value that helps us retrieve the hashcode for this class.</p> */
-    private final static int BASE_HASH = "MTNamed".hashCode();
+    private static final int BASE_HASH = "MTGeneric".hashCode();
 
-    /** <p>The named type's name.</p> */
+    /** <p>The generic type's name.</p> */
     private final String myName;
 
     // ===========================================================
@@ -42,12 +39,12 @@ public class MTNamed extends MTType {
     // ===========================================================
 
     /**
-     * <p>This constructs a type that references some bound variable.</p>
+     * <p>This constructs a generic type with some name.</p>
      *
      * @param g The current type graph.
      * @param name The name for this type.
      */
-    public MTNamed(TypeGraph g, String name) {
+    public MTGeneric(TypeGraph g, String name) {
         super(g);
         myName = name;
     }
@@ -80,7 +77,7 @@ public class MTNamed extends MTType {
      */
     @Override
     public final void acceptClose(TypeVisitor v) {
-        v.endMTNamed(this);
+        v.endMTAbstract(this);
         v.endMTType(this);
     }
 
@@ -93,14 +90,14 @@ public class MTNamed extends MTType {
     @Override
     public final void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
-        v.beginMTNamed(this);
+        v.beginMTAbstract(this);
     }
 
     /**
      * <p>This method returns a list of {@link MTType}s
      * that are part of this type.</p>
      *
-     * @return An empty list, because {@code MTNamed} cannot
+     * @return An empty list, because {@code MTGeneric} cannot
      * contain component types.
      */
     @Override
@@ -109,7 +106,7 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method returns the name for this {@code MTNamed} type.</p>
+     * <p>This method returns the name for this {@code MTGeneric} type.</p>
      *
      * @return Name as a string.
      */
@@ -125,40 +122,11 @@ public class MTNamed extends MTType {
      * @param newType The {@link MTType} to replace the one in our component list.
      *
      * @return This method will always throw an {@link IndexOutOfBoundsException},
-     * since {@code MTNamed} cannot contain component types.
+     * since {@code MTGeneric} cannot contain component types.
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
         throw new IndexOutOfBoundsException();
-    }
-
-    /**
-     * <p>This method takes a map of original types and converts it to a map
-     * of {@code MTNamed} types.</p>
-     *
-     * @param source The current type graph.
-     * @param original Original map of {@link MTType}s.
-     *
-     * @return A map of {@code MTNamed} types.
-     */
-    public static Map<MTNamed, MTType> toMTNamedMap(TypeGraph source, Map<String, MTType> original) {
-        Map<MTNamed, MTType> result = new HashMap<>();
-
-        for (Map.Entry<String, MTType> e : original.entrySet()) {
-            result.put(new MTNamed(source, e.getKey()), e.getValue());
-        }
-
-        return result;
-    }
-
-    /**
-     * <p>This method returns the object in string format.</p>
-     *
-     * @return Object as a string.
-     */
-    @Override
-    public final String toString() {
-        return "'" + myName + "'";
     }
 
     // ===========================================================
@@ -176,7 +144,7 @@ public class MTNamed extends MTType {
      */
     @Override
     protected final int getHashCode() {
-        return BASE_HASH;
+        return BASE_HASH + myName.hashCode();
     }
 
 }
