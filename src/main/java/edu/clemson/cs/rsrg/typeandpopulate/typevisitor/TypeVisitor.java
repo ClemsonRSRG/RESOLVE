@@ -23,9 +23,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
  */
 public abstract class TypeVisitor {
 
-    // TODO: Remove this
-    public abstract MTType getFinalExpression();
-
     /**
      * <p>This method adds additional logic before we visit
      * a {@link MTType}.</p>

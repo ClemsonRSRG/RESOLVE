@@ -24,7 +24,6 @@ public class VariableReplacingVisitor extends TypeVisitor {
     public VariableReplacingVisitor(Map<String, String> substitutions,
             TypeGraph g) {}
 
-    @Override
     public MTType getFinalExpression() {
         return null;
     }
