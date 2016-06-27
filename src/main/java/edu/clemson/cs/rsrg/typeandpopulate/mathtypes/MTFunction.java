@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO:
+ * TODO: Fix this class
  */
 public class MTFunction extends MTType {
 
@@ -36,7 +36,22 @@ public class MTFunction extends MTType {
     }
 
     @Override
+    public void acceptOpen(TypeVisitor v) {
+
+    }
+
+    @Override
+    public void acceptClose(TypeVisitor v) {
+
+    }
+
+    @Override
     public Map<String, MTType> bindTo(MTType o, Map<String, MTType> context) {
+        return null;
+    }
+
+    @Override
+    public List<MTType> getComponentTypes() {
         return null;
     }
 
@@ -46,13 +61,22 @@ public class MTFunction extends MTType {
     }
 
     @Override
-    public TypeGraph getTypeGraph() {
+    public MTType withComponentReplaced(int index, MTType newType) {
         return null;
     }
 
+    /**
+     * <p>This is just a template method to <em>force</em> all concrete
+     * subclasses of <code>MTType</code> to implement <code>hashCode()</code>,
+     * as the type resolution algorithm depends on it being implemented
+     * sensibly.</p>
+     *
+     * @return A hashcode consistent with <code>equals()</code> and thus
+     * alpha-equivalency.
+     */
     @Override
-    public MTType getCopyWithVariablesSubstituted(
-            Map<String, MTType> substitutions) {
-        return null;
+    protected int getHashCode() {
+        return 0;
     }
+
 }

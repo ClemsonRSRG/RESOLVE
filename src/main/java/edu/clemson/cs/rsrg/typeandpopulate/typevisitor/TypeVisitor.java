@@ -191,7 +191,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTProper(MTProper t) {}
+    public void beginMTProper(MTProper t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -201,7 +201,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTProper(MTProper t) {}
+    public void endMTProper(MTProper t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -251,7 +251,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTNamed(MTNamed t) {}
+    public void beginMTNamed(MTNamed t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -261,7 +261,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTNamed(MTNamed t) {}
+    public void endMTNamed(MTNamed t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -291,7 +291,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginChildren(MTType t) {}
+    public void beginChildren(MTType t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -301,6 +301,6 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endChildren(MTType t) {}
+    public void endChildren(MTType t) {}
 
 }
