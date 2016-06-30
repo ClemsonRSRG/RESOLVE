@@ -100,7 +100,7 @@ public class MTNamed extends MTType {
      * <p>This method returns a list of {@link MTType}s
      * that are part of this type.</p>
      *
-     * @return An empty list, because {@code MTNamed} cannot
+     * @return An empty list, because {@link MTNamed} cannot
      * contain component types.
      */
     @Override
@@ -109,7 +109,7 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method returns the name for this {@code MTNamed} type.</p>
+     * <p>This method returns the name for this {@link MTNamed} type.</p>
      *
      * @return Name as a string.
      */
@@ -125,7 +125,7 @@ public class MTNamed extends MTType {
      * @param newType The {@link MTType} to replace the one in our component list.
      *
      * @return This method will always throw an {@link IndexOutOfBoundsException},
-     * since {@code MTNamed} cannot contain component types.
+     * since {@link MTNamed} cannot contain component types.
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
@@ -139,7 +139,7 @@ public class MTNamed extends MTType {
      * @param source The current type graph.
      * @param original Original map of {@link MTType}s.
      *
-     * @return A map of {@code MTNamed} types.
+     * @return A map of {@link MTNamed} types.
      */
     public static Map<MTNamed, MTType> toMTNamedMap(TypeGraph source, Map<String, MTType> original) {
         Map<MTNamed, MTType> result = new HashMap<>();
@@ -167,7 +167,7 @@ public class MTNamed extends MTType {
 
     /**
      * <p>This is just a template method to <em>force</em> all concrete
-     * subclasses of <code>MTType</code> to implement <code>hashCode()</code>,
+     * subclasses of {@link MTType} to implement <code>hashCode()</code>,
      * as the type resolution algorithm depends on it being implemented
      * sensibly.</p>
      *

@@ -152,6 +152,18 @@ public abstract class MTType {
     }
 
     /**
+     * <p>Indicates that every instance of this type is itself known to contain
+     * only elements that are types.  Practically, this answers the question,
+     * "if a function returns an instance of this type, can that instance itself
+     * be said to contain only types?"</p>
+     *
+     * @return {@code true} if it can, {@code false} otherwise.
+     */
+    public boolean membersKnownToContainOnlyMTypes() {
+        return false;
+    }
+
+    /**
      * <p>This method attempts to replace a component type at the specified
      * index.</p>
      *

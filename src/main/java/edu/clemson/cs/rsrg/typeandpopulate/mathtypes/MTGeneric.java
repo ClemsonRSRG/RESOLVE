@@ -97,7 +97,7 @@ public class MTGeneric extends MTAbstract<MTGeneric> {
      * <p>This method returns a list of {@link MTType}s
      * that are part of this type.</p>
      *
-     * @return An empty list, because {@code MTGeneric} cannot
+     * @return An empty list, because {@link MTGeneric} cannot
      * contain component types.
      */
     @Override
@@ -106,7 +106,7 @@ public class MTGeneric extends MTAbstract<MTGeneric> {
     }
 
     /**
-     * <p>This method returns the name for this {@code MTGeneric} type.</p>
+     * <p>This method returns the name for this {@link MTGeneric} type.</p>
      *
      * @return Name as a string.
      */
@@ -122,7 +122,7 @@ public class MTGeneric extends MTAbstract<MTGeneric> {
      * @param newType The {@link MTType} to replace the one in our component list.
      *
      * @return This method will always throw an {@link IndexOutOfBoundsException},
-     * since {@code MTGeneric} cannot contain component types.
+     * since {@link MTGeneric} cannot contain component types.
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
@@ -135,7 +135,7 @@ public class MTGeneric extends MTAbstract<MTGeneric> {
 
     /**
      * <p>This is just a template method to <em>force</em> all concrete
-     * subclasses of <code>MTType</code> to implement <code>hashCode()</code>,
+     * subclasses of {@link MTType} to implement <code>hashCode()</code>,
      * as the type resolution algorithm depends on it being implemented
      * sensibly.</p>
      *

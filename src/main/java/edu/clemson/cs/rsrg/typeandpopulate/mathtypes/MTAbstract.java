@@ -29,7 +29,7 @@ public abstract class MTAbstract<T extends MTType> extends MTType {
     /**
      * <p>An helper constructor that allow us to store the type graph
      * of any objects created from a class that inherits from
-     * {@code MTAbstract}.</p>
+     * {@link MTAbstract}.</p>
      *
      * @param g The current type graph.
      */

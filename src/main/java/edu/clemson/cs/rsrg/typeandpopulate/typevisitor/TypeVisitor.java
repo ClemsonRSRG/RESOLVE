@@ -231,7 +231,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTUnion(MTUnion t) {}
+    public void beginMTUnion(MTUnion t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -241,7 +241,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTUnion(MTUnion t) {}
+    public void endMTUnion(MTUnion t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -271,7 +271,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTGeneric(MTGeneric t) {}
+    public void beginMTGeneric(MTGeneric t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -281,7 +281,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTGeneric(MTGeneric t) {}
+    public void endMTGeneric(MTGeneric t) {}
 
     /**
      * <p>This method adds additional logic before we visit
