@@ -240,7 +240,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
      * @return {@code true} if it can, {@code false} otherwise.
      */
     @Override
-    public final boolean isKnownToContainOnlyMTypes() {
+    public boolean isKnownToContainOnlyMTypes() {
         //Note that, effectively, we represent an instance of the range of our
         //function.  Thus, we're known to contain only MTypes if the function's
         //range's members are known only to contain MTypes.
@@ -257,7 +257,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
      * @return {@code true} if it can, {@code false} otherwise.
      */
     @Override
-    public final boolean membersKnownToContainOnlyMTypes() {
+    public boolean membersKnownToContainOnlyMTypes() {
         boolean result = true;
         Iterator<MTType> arguments = myArguments.iterator();
         while (arguments.hasNext()) {
@@ -314,7 +314,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
      * replaced with {@code newType}.
      */
     @Override
-    public final MTType withComponentReplaced(int index, MTType newType) {
+    public MTType withComponentReplaced(int index, MTType newType) {
         MTFunction newFunction = myFunction;
         List<MTType> newArguments = myArguments;
 

@@ -171,7 +171,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTPowertypeApplication(MTPowertypeApplication t) {}
+    public void beginMTPowertypeApplication(MTPowertypeApplication t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -181,7 +181,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTPowertypeApplication(MTPowertypeApplication t) {}
+    public void endMTPowertypeApplication(MTPowertypeApplication t) {}
 
     /**
      * <p>This method adds additional logic before we visit

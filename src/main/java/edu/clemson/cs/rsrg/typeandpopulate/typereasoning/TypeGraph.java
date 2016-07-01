@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTProper;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.Map;
@@ -27,6 +28,8 @@ public class TypeGraph {
     public final MTProper EMPTY_SET =
             new MTProper(this, CLS, false, "Empty_Set");
     public final MTProper VOID = new MTProper(this, CLS, false, "Void");
+
+    public MTFunction POWERTYPE;
 
     public boolean isSubtype(MTType subtype, MTType supertype) {
         return false;
