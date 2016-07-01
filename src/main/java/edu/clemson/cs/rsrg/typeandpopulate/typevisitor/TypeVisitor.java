@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typevisitor;
 
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 
 /**
  * <p>This is the abstract base class that contains empty implementations
@@ -23,9 +23,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
  */
 public abstract class TypeVisitor {
 
-    // TODO: Remove this
-    public abstract MTType getFinalExpression();
-
     /**
      * <p>This method adds additional logic before we visit
      * a {@link MTType}.</p>
@@ -34,7 +31,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTType(MTType t) {}
+    public void beginMTType(MTType t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -44,7 +41,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTType(MTType t) {}
+    public void endMTType(MTType t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -54,7 +51,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTAbstract(MTAbstract<?> t) {}
+    public void beginMTAbstract(MTAbstract<?> t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -64,7 +61,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTAbstract(MTAbstract<?> t) {}
+    public void endMTAbstract(MTAbstract<?> t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -74,7 +71,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTBigUnion(MTBigUnion t) {}
+    public void beginMTBigUnion(MTBigUnion t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -84,7 +81,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTBigUnion(MTBigUnion t) {}
+    public void endMTBigUnion(MTBigUnion t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -94,7 +91,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTCartesian(MTCartesian t) {}
+    public void beginMTCartesian(MTCartesian t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -104,7 +101,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTCartesian(MTCartesian t) {}
+    public void endMTCartesian(MTCartesian t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -114,7 +111,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTFunction(MTFunction t) {}
+    public void beginMTFunction(MTFunction t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -124,7 +121,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTFunction(MTFunction t) {}
+    public void endMTFunction(MTFunction t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -134,7 +131,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTFunctionApplication(MTFunctionApplication t) {}
+    public void beginMTFunctionApplication(MTFunctionApplication t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -144,7 +141,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTFunctionApplication(MTFunctionApplication t) {}
+    public void endMTFunctionApplication(MTFunctionApplication t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -154,7 +151,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTIntersect(MTIntersect t) {}
+    public void beginMTIntersect(MTIntersect t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -164,7 +161,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTIntersect(MTIntersect t) {}
+    public void endMTIntersect(MTIntersect t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -174,7 +171,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTPowertypeApplication(MTPowertypeApplication t) {}
+    public void beginMTPowertypeApplication(MTPowertypeApplication t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -184,7 +181,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTPowertypeApplication(MTPowertypeApplication t) {}
+    public void endMTPowertypeApplication(MTPowertypeApplication t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -194,7 +191,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTProper(MTProper t) {}
+    public void beginMTProper(MTProper t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -204,7 +201,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTProper(MTProper t) {}
+    public void endMTProper(MTProper t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -214,7 +211,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTSetRestriction(MTSetRestriction t) {}
+    public void beginMTSetRestriction(MTSetRestriction t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -224,7 +221,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTSetRestriction(MTSetRestriction t) {}
+    public void endMTSetRestriction(MTSetRestriction t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -234,7 +231,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTUnion(MTUnion t) {}
+    public void beginMTUnion(MTUnion t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -244,7 +241,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTUnion(MTUnion t) {}
+    public void endMTUnion(MTUnion t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -254,7 +251,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTNamed(MTNamed t) {}
+    public void beginMTNamed(MTNamed t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -264,7 +261,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTNamed(MTNamed t) {}
+    public void endMTNamed(MTNamed t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -274,7 +271,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTGeneric(MTGeneric t) {}
+    public void beginMTGeneric(MTGeneric t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -284,7 +281,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTGeneric(MTGeneric t) {}
+    public void endMTGeneric(MTGeneric t) {}
 
     /**
      * <p>This method adds additional logic before we visit
@@ -294,7 +291,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginChildren(MTType t) {}
+    public void beginChildren(MTType t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -304,6 +301,6 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endChildren(MTType t) {}
+    public void endChildren(MTType t) {}
 
 }
