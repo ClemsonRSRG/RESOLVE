@@ -77,6 +77,7 @@ public class MTGeneric extends MTAbstract<MTGeneric> {
      */
     @Override
     public final void acceptClose(TypeVisitor v) {
+        v.endMTGeneric(this);
         v.endMTAbstract(this);
         v.endMTType(this);
     }
@@ -91,6 +92,7 @@ public class MTGeneric extends MTAbstract<MTGeneric> {
     public final void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTAbstract(this);
+        v.beginMTGeneric(this);
     }
 
     /**

@@ -1,5 +1,5 @@
 /**
- * MTUnion.java
+ * MTIntersect.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -17,19 +17,19 @@ import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
 import java.util.*;
 
 /**
- * <p>An union type that contains various other
+ * <p>An intersection type that contains various other
  * {@link MTType}s.</p>
  *
  * @version 2.0
  */
-public class MTUnion extends MTAbstract<MTUnion> {
+public class MTIntersect extends MTAbstract<MTIntersect> {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>An integer value that helps us retrieve the hashcode for this class.</p> */
-    private final static int BASE_HASH = "MTUnion".hashCode();
+    private final static int BASE_HASH = "MTIntersect".hashCode();
 
     /** <p>List of {@link MTType}s that are in this union type. </p> */
     private List<MTType> myMembers = new LinkedList<>();
@@ -39,35 +39,35 @@ public class MTUnion extends MTAbstract<MTUnion> {
     // ===========================================================
 
     /**
-     * <p>This constructs an union type with no members initially.</p>
+     * <p>This constructs an intersection type with no members initially.</p>
      *
      * @param g The current type graph.
      */
-    public MTUnion(TypeGraph g) {
+    public MTIntersect(TypeGraph g) {
         super(g);
     }
 
     /**
-     * <p>This constructs an union type with the {@link MTType}s
-     * as members of this type.</p>
+     * <p>This constructs an intersection type with the {@link MTType}s
+     * as elements of this type.</p>
      *
      * @param g The current type graph.
-     * @param members The {@link MTType}s that are in this union type.
+     * @param elements The {@link MTType}s that are in this union type.
      */
-    public MTUnion(TypeGraph g, MTType... members) {
-        this(g, Arrays.asList(members));
+    public MTIntersect(TypeGraph g, MTType... elements) {
+        this(g, Arrays.asList(elements));
     }
 
     /**
      * <p>This constructs an union type with the list of {@link MTType}s
-     * as members of this type.</p>
+     * as elements of this type.</p>
      *
      * @param g The current type graph.
-     * @param members The list of {@link MTType}s that are in this union type.
+     * @param elements The list of {@link MTType}s that are in this union type.
      */
-    public MTUnion(TypeGraph g, List<MTType> members) {
+    public MTIntersect(TypeGraph g, List<MTType> elements) {
         this(g);
-        myMembers.addAll(members);
+        myMembers.addAll(elements);
     }
 
     // ===========================================================
@@ -103,7 +103,7 @@ public class MTUnion extends MTAbstract<MTUnion> {
      */
     @Override
     public final void acceptClose(TypeVisitor v) {
-        v.endMTUnion(this);
+        v.endMTIntersect(this);
         v.endMTAbstract(this);
         v.endMTType(this);
     }
@@ -118,11 +118,11 @@ public class MTUnion extends MTAbstract<MTUnion> {
     public final void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTAbstract(this);
-        v.beginMTUnion(this);
+        v.beginMTIntersect(this);
     }
 
     /**
-     * <p>Add a new {@link MTType} to this union type.</p>
+     * <p>Add a new {@link MTType} to this intersection type.</p>
      *
      * @param t A {@link MTType} object.
      */
@@ -131,12 +131,12 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>Checks to see if {@code member} is part of this union
+     * <p>Checks to see if {@code member} is part of this intersection
      * type.</p>
      *
      * @param member A {@link MTType} object.
      *
-     * @return {@code true} if {@code member} is in this union type,
+     * @return {@code true} if {@code member} is in this intersection type,
      * {@code false} otherwise.
      */
     public final boolean containsMember(MTType member) {
@@ -147,7 +147,7 @@ public class MTUnion extends MTAbstract<MTUnion> {
      * <p>This method returns a list of {@link MTType}s
      * that are part of this type.</p>
      *
-     * @return The list of {@link MTType}s in this union type.
+     * @return The list of {@link MTType}s in this intersection type.
      */
     @Override
     public final List<MTType> getComponentTypes() {
@@ -206,7 +206,7 @@ public class MTUnion extends MTAbstract<MTUnion> {
         while (members.hasNext()) {
             MTType member = members.next();
             if (sb.length() > 1) {
-                sb.append(" union ");
+                sb.append(" intersect ");
             }
             sb.append(member.toString());
         }
@@ -229,7 +229,7 @@ public class MTUnion extends MTAbstract<MTUnion> {
         List<MTType> newMembers = new LinkedList<>(myMembers);
         newMembers.set(index, newType);
 
-        return new MTUnion(getTypeGraph(), newMembers);
+        return new MTIntersect(getTypeGraph(), newMembers);
     }
 
     // ===========================================================
@@ -250,7 +250,7 @@ public class MTUnion extends MTAbstract<MTUnion> {
         int result = BASE_HASH;
 
         for (MTType t : myMembers) {
-            result *= 61;
+            result *= 45;
             result += t.hashCode();
         }
 

@@ -151,7 +151,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTIntersect(MTIntersect t) {}
+    public void beginMTIntersect(MTIntersect t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -161,7 +161,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTIntersect(MTIntersect t) {}
+    public void endMTIntersect(MTIntersect t) {}
 
     /**
      * <p>This method adds additional logic before we visit
