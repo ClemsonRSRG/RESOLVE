@@ -131,7 +131,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTFunctionApplication(MTFunctionApplication t) {}
+    public void beginMTFunctionApplication(MTFunctionApplication t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -141,7 +141,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTFunctionApplication(MTFunctionApplication t) {}
+    public void endMTFunctionApplication(MTFunctionApplication t) {}
 
     /**
      * <p>This method adds additional logic before we visit

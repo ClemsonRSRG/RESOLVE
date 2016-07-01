@@ -26,6 +26,7 @@ public class TypeGraph {
     public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
     public final MTProper EMPTY_SET =
             new MTProper(this, CLS, false, "Empty_Set");
+    public final MTProper VOID = new MTProper(this, CLS, false, "Void");
 
     public boolean isSubtype(MTType subtype, MTType supertype) {
         return false;

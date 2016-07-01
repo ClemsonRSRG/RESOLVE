@@ -31,7 +31,7 @@ public class MTIntersect extends MTAbstract<MTIntersect> {
     /** <p>An integer value that helps us retrieve the hashcode for this class.</p> */
     private final static int BASE_HASH = "MTIntersect".hashCode();
 
-    /** <p>List of {@link MTType}s that are in this union type. </p> */
+    /** <p>List of {@link MTType}s that are in this intersection type. </p> */
     private List<MTType> myMembers = new LinkedList<>();
 
     // ===========================================================
