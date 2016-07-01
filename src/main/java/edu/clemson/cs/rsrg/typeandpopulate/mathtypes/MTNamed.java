@@ -118,21 +118,6 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method attempts to replace a component type at the specified
-     * index.</p>
-     *
-     * @param index Index to a component type.
-     * @param newType The {@link MTType} to replace the one in our component list.
-     *
-     * @return This method will always throw an {@link IndexOutOfBoundsException},
-     * since {@link MTNamed} cannot contain component types.
-     */
-    @Override
-    public final MTType withComponentReplaced(int index, MTType newType) {
-        throw new IndexOutOfBoundsException();
-    }
-
-    /**
      * <p>This method takes a map of original types and converts it to a map
      * of {@code MTNamed} types.</p>
      *
@@ -159,6 +144,21 @@ public class MTNamed extends MTType {
     @Override
     public final String toString() {
         return "'" + myName + "'";
+    }
+
+    /**
+     * <p>This method attempts to replace a component type at the specified
+     * index.</p>
+     *
+     * @param index Index to a component type.
+     * @param newType The {@link MTType} to replace the one in our component list.
+     *
+     * @return This method will always throw an {@link IndexOutOfBoundsException},
+     * since {@link MTNamed} cannot contain component types.
+     */
+    @Override
+    public final MTType withComponentReplaced(int index, MTType newType) {
+        throw new IndexOutOfBoundsException();
     }
 
     // ===========================================================

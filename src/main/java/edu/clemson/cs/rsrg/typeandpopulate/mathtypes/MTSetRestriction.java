@@ -164,7 +164,7 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
      * @param index Index to a component type.
      * @param newType The {@link MTType} to replace the one in our component list.
      *
-     * @return A new {@link MTUnion} with the type at the specified index
+     * @return A new {@link MTSetRestriction} with the type at the specified index
      * replaced with {@code newType}.
      */
     @Override

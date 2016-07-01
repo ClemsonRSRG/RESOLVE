@@ -71,7 +71,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTBigUnion(MTBigUnion t) {}
+    public void beginMTBigUnion(MTBigUnion t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -81,7 +81,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTBigUnion(MTBigUnion t) {}
+    public void endMTBigUnion(MTBigUnion t) {}
 
     /**
      * <p>This method adds additional logic before we visit
