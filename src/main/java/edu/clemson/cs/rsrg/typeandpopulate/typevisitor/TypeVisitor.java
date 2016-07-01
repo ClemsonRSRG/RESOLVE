@@ -91,7 +91,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTCartesian(MTCartesian t) {}
+    public void beginMTCartesian(MTCartesian t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -101,7 +101,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTCartesian(MTCartesian t) {}
+    public void endMTCartesian(MTCartesian t) {}
 
     /**
      * <p>This method adds additional logic before we visit

@@ -52,18 +52,18 @@ public class MTIntersect extends MTAbstract<MTIntersect> {
      * as elements of this type.</p>
      *
      * @param g The current type graph.
-     * @param elements The {@link MTType}s that are in this union type.
+     * @param elements The {@link MTType}s that are in this intersection type.
      */
     public MTIntersect(TypeGraph g, MTType... elements) {
         this(g, Arrays.asList(elements));
     }
 
     /**
-     * <p>This constructs an union type with the list of {@link MTType}s
+     * <p>This constructs an intersection type with the list of {@link MTType}s
      * as elements of this type.</p>
      *
      * @param g The current type graph.
-     * @param elements The list of {@link MTType}s that are in this union type.
+     * @param elements The list of {@link MTType}s that are in this intersection type.
      */
     public MTIntersect(TypeGraph g, List<MTType> elements) {
         this(g);
@@ -221,7 +221,7 @@ public class MTIntersect extends MTAbstract<MTIntersect> {
      * @param index Index to a component type.
      * @param newType The {@link MTType} to replace the one in our component list.
      *
-     * @return A new {@link MTUnion} with the type at the specified index
+     * @return A new {@link MTIntersect} with the type at the specified index
      * replaced with {@code newType}.
      */
     @Override
