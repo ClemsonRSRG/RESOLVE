@@ -211,7 +211,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void beginMTSetRestriction(MTSetRestriction t) {}
+    public void beginMTSetRestriction(MTSetRestriction t) {}
 
     /**
      * <p>This method adds additional logic after we visit
@@ -221,7 +221,7 @@ public abstract class TypeVisitor {
      *
      * @param t A math type.
      */
-    //public void endMTSetRestriction(MTSetRestriction t) {}
+    public void endMTSetRestriction(MTSetRestriction t) {}
 
     /**
      * <p>This method adds additional logic before we visit
