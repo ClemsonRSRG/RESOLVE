@@ -60,7 +60,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- License related information -->
-        <license.url>src/main/resources/LICENSE-Header.txt</license.url>
+        <license.url>src/resources/LICENSE-Header.txt</license.url>
     </properties>
 
     <issueManagement>
@@ -207,7 +207,7 @@
                         <exclude>src/main/antlr3/**</exclude>
                         <exclude>src/main/antlr4/**</exclude>
                         <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
-                        <exclude>src/main/resources/**</exclude>
+                        <exclude>src/resources/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -274,6 +274,13 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <!-- Resources directory for source files -->
+        <resources>
+            <resource>
+                <directory>src/resources</directory>
+            </resource>
+        </resources>
 
         <!-- Source directory for test files -->
         <testSourceDirectory>test/java</testSourceDirectory>
