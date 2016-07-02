@@ -16,8 +16,6 @@ import java.io.StringWriter;
 import java.util.*;
 
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
-import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
