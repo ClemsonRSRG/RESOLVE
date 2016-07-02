@@ -179,7 +179,9 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
             data = sb.toString();
         }
         else if (e instanceof AbstractVarDec) {
-            data = e.asString(0, 0);
+            // We need to escape characters created by the tys.
+            // Ex: "->"
+            data = escapeSpecialChars(e.asString(0, 0).toCharArray());
         }
         else {
             data = e.getName().getName();

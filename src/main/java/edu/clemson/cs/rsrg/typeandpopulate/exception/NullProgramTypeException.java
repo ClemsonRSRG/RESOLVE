@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 
 /**
  * <p>An {@code NullProgramTypeException} indicates we encountered an

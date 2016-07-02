@@ -12,15 +12,13 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.ModuleScope;
-import edu.clemson.cs.r2jt.typeandpopulate2.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate2.Scope;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 
 /**
- * TODO:
+ * TODO: Refactor this class
  */
 public class MathSymbolTableBuilder extends ScopeRepository {
 

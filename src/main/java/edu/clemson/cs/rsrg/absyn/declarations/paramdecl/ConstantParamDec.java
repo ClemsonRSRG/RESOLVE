@@ -12,11 +12,11 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.paramdecl;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 
 /**
  * <p>This is the class for all the constant parameter declaration objects

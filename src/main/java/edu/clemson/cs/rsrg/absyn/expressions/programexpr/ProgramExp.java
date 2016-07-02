@@ -12,9 +12,9 @@
  */
 package edu.clemson.cs.rsrg.absyn.expressions.programexpr;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 
 /**
  * <p>This is the abstract base class for all the programming expression objects
