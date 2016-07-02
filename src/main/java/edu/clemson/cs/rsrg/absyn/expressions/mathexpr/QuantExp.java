@@ -12,10 +12,10 @@
  */
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

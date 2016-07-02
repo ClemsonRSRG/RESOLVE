@@ -12,8 +12,6 @@
  */
 package edu.clemson.cs.rsrg.parsing;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
@@ -60,6 +58,8 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.parsing.utilities.SyntacticSugarConverter;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.*;
 import org.antlr.v4.runtime.*;

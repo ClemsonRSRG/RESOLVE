@@ -12,16 +12,13 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
-import edu.clemson.cs.r2jt.absynnew.ResolveAST;
-import edu.clemson.cs.r2jt.typeandpopulate2.ModuleScope;
-import edu.clemson.cs.r2jt.typeandpopulate2.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate2.Scope;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 
 /**
- * <p>A <code>SymbolTable</code> maps {@link ResolveAST}s and
+ * <p>A <code>SymbolTable</code> maps {@link ResolveConceptualElement}s and
  * {@link ModuleIdentifier}s to the {@link Scope}s they introduce.</p>
  *
  * <p>Each <code>SymbolTable</code> has a {@link TypeGraph} that relates

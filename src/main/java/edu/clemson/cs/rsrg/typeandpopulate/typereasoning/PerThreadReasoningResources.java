@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.AlphaEquivalencyChecker;
+import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.AlphaEquivalencyChecker;
 
 /**
  * <p>Type reasoning is used extensively by the prover, where things are done
