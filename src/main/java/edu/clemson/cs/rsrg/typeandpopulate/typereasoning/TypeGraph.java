@@ -28,6 +28,7 @@ public class TypeGraph {
     public final MTProper EMPTY_SET =
             new MTProper(this, CLS, false, "Empty_Set");
     public final MTProper VOID = new MTProper(this, CLS, false, "Void");
+    public final MTType ELEMENT = new MTProper(this, "Element");
 
     public MTFunction POWERTYPE;
 
