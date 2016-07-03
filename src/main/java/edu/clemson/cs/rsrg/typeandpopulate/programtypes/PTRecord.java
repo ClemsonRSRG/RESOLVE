@@ -1,5 +1,5 @@
 /**
- * PTGeneric.java
+ * PTRecord.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -13,38 +13,53 @@
 package edu.clemson.cs.rsrg.typeandpopulate.programtypes;
 
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTNamed;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTCartesian;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTCartesian.Element;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>This class creates a generic type that hasn't been instantiated.</p>
+ * <p>This class creates a record type.</p>
  *
  * @version 2.0
  */
-public class PTGeneric extends PTType {
+public class PTRecord extends PTType {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>Name associated with this type.</p> */
-    private final String myName;
+    /** <p>A map of variable names and program types.</p> */
+    private final Map<String, PTType> myFields = new HashMap<>();
+
+    /** <p>The mathematical type corresponding to this record type.</p> */
+    private final MTType myMathTypeAlterEgo;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates a generic programming type.</p>
+     * <p>This creates a record programming type.</p>
      *
      * @param g The current type graph.
-     * @param name Name associated with this type.
+     * @param types A map of all programming types in this record.
      */
-    public PTGeneric(TypeGraph g, String name) {
+    public PTRecord(TypeGraph g, Map<String, PTType> types) {
         super(g);
-        myName = name;
+
+        myFields.putAll(types);
+
+        Element[] elements = new Element[types.size()];
+        int index = 0;
+        for (Map.Entry<String, PTType> field : types.entrySet()) {
+            elements[index] =
+                    new Element(field.getKey(), field.getValue().toMath());
+            index++;
+        }
+        myMathTypeAlterEgo = new MTCartesian(g, elements);
     }
 
     // ===========================================================
@@ -52,32 +67,15 @@ public class PTGeneric extends PTType {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default equals method implementation.</p>
+     * <p>This method returns the {@link PTType} associated with
+     * the name.</p>
      *
-     * @param o Object to be compared.
+     * @param name Name of a field variable.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return The {@link PTType} for {@code name}.
      */
-    @Override
-    public final boolean equals(Object o) {
-        boolean result = (o instanceof PTGeneric);
-
-        if (result) {
-            PTGeneric oAsPTGeneric = (PTGeneric) o;
-
-            result = myName.equals(oAsPTGeneric.getName());
-        }
-
-        return result;
-    }
-
-    /**
-     * <p>This method returns the name associated with this type.</p>
-     *
-     * @return A string.
-     */
-    public final String getName() {
-        return myName;
+    public final PTType getFieldType(String name) {
+        return myFields.get(name);
     }
 
     /**
@@ -94,13 +92,14 @@ public class PTGeneric extends PTType {
     public final PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
-        PTType result = this;
 
-        if (genericInstantiations.containsKey(myName)) {
-            result = genericInstantiations.get(myName);
+        Map<String, PTType> newFields = new HashMap<String, PTType>();
+        for (Map.Entry<String, PTType> type : myFields.entrySet()) {
+            newFields.put(type.getKey(), type.getValue().instantiateGenerics(
+                    genericInstantiations, instantiatingFacility));
         }
 
-        return result;
+        return new PTRecord(getTypeGraph(), newFields);
     }
 
     /**
@@ -109,8 +108,18 @@ public class PTGeneric extends PTType {
      * @return A {@link MTType} representation object.
      */
     @Override
-    public MTType toMath() {
-        return new MTNamed(myTypeGraph, myName);
+    public final MTType toMath() {
+        return myMathTypeAlterEgo;
+    }
+
+    /**
+     * <p>This method returns the object in string format.</p>
+     *
+     * @return Object as a string.
+     */
+    @Override
+    public final String toString() {
+        return "Record " + myFields;
     }
 
 }
