@@ -1,5 +1,5 @@
 /**
- * PTType.java
+ * PTElement.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -18,61 +18,30 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.Map;
 
 /**
- * <p>This abstract class serves as the parent class of all
- * program types.</p>
+ * <p>The program-type corresponding to {@link TypeGraph#ELEMENT},
+ * i.e., the type of all program types.</p>
  *
  * @version 2.0
  */
-public abstract class PTType {
-
-    // ===========================================================
-    // Member Fields
-    // ===========================================================
-
-    /** <p>The current type graph object in use.</p> */
-    protected final TypeGraph myTypeGraph;
+public class PTElement extends PTType {
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the type graph
-     * of any objects created from a class that inherits from
-     * {@code PTType}.</p>
+     * <p>This creates a programming type corresponding to
+     * {@link TypeGraph#ELEMENT}.</p>
      *
      * @param g The current type graph.
      */
-    protected PTType(TypeGraph g) {
-        myTypeGraph = g;
+    public PTElement(TypeGraph g) {
+        super(g);
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-
-    /**
-     * <p>This method returns {@code true} <strong>iff</strong> an value of this type
-     * would be acceptable where one of type {@code t} were required.</p>
-     *
-     * @param t The required type.
-     *
-     * @return {@code true} <strong>iff</strong> an value of this type
-     *         would be acceptable where one of type {@code t} were
-     *         required, {@code false} otherwise.
-     */
-    public boolean acceptableFor(PTType t) {
-        return equals(t);
-    }
-
-    /**
-     * <p>The type graph containing all the type relationships.</p>
-     *
-     * @return The type graph for the compiler.
-     */
-    public final TypeGraph getTypeGraph() {
-        return myTypeGraph;
-    }
 
     /**
      * <p>This method converts a generic {@link PTType} to a program type
@@ -84,15 +53,21 @@ public abstract class PTType {
      *
      * @return A {@link PTType} that has been instantiated.
      */
-    public abstract PTType instantiateGenerics(
+    @Override
+    public final PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility);
+            FacilityEntry instantiatingFacility) {
+        return this;
+    }
 
     /**
      * <p>This method returns the mathematical type associated with this program type.</p>
      *
      * @return A {@link MTType} representation object.
      */
-    public abstract MTType toMath();
+    @Override
+    public final MTType toMath() {
+        return myTypeGraph.ELEMENT;
+    }
 
 }

@@ -1,5 +1,5 @@
 /**
- * PTType.java
+ * PTGeneric.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -13,38 +13,38 @@
 package edu.clemson.cs.rsrg.typeandpopulate.programtypes;
 
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTNamed;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.Map;
 
 /**
- * <p>This abstract class serves as the parent class of all
- * program types.</p>
+ * <p>This class creates a generic type that hasn't been instantiated.</p>
  *
  * @version 2.0
  */
-public abstract class PTType {
+public class PTGeneric extends PTType {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The current type graph object in use.</p> */
-    protected final TypeGraph myTypeGraph;
+    /** <p>Name associated with this type.</p> */
+    private final String myName;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the type graph
-     * of any objects created from a class that inherits from
-     * {@code PTType}.</p>
+     * <p>This creates a generic programming type.</p>
      *
      * @param g The current type graph.
+     * @param name Name associated with this type.
      */
-    protected PTType(TypeGraph g) {
-        myTypeGraph = g;
+    public PTGeneric(TypeGraph g, String name) {
+        super(g);
+        myName = name;
     }
 
     // ===========================================================
@@ -52,26 +52,32 @@ public abstract class PTType {
     // ===========================================================
 
     /**
-     * <p>This method returns {@code true} <strong>iff</strong> an value of this type
-     * would be acceptable where one of type {@code t} were required.</p>
+     * <p>This method overrides the default equals method implementation.</p>
      *
-     * @param t The required type.
+     * @param o Object to be compared.
      *
-     * @return {@code true} <strong>iff</strong> an value of this type
-     *         would be acceptable where one of type {@code t} were
-     *         required, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
-    public boolean acceptableFor(PTType t) {
-        return equals(t);
+    @Override
+    public final boolean equals(Object o) {
+        boolean result = (o instanceof PTGeneric);
+
+        if (result) {
+            PTGeneric oAsPTGeneric = (PTGeneric) o;
+
+            result = myName.equals(oAsPTGeneric.getName());
+        }
+
+        return result;
     }
 
     /**
-     * <p>The type graph containing all the type relationships.</p>
+     * <p>This method returns the name associated with this type.</p>
      *
-     * @return The type graph for the compiler.
+     * @return A string.
      */
-    public final TypeGraph getTypeGraph() {
-        return myTypeGraph;
+    public final String getName() {
+        return myName;
     }
 
     /**
@@ -84,15 +90,27 @@ public abstract class PTType {
      *
      * @return A {@link PTType} that has been instantiated.
      */
-    public abstract PTType instantiateGenerics(
+    @Override
+    public final PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility);
+            FacilityEntry instantiatingFacility) {
+        PTType result = this;
+
+        if (genericInstantiations.containsKey(myName)) {
+            result = genericInstantiations.get(myName);
+        }
+
+        return result;
+    }
 
     /**
      * <p>This method returns the mathematical type associated with this program type.</p>
      *
      * @return A {@link MTType} representation object.
      */
-    public abstract MTType toMath();
+    @Override
+    public MTType toMath() {
+        return new MTNamed(myTypeGraph, myName);
+    }
 
 }

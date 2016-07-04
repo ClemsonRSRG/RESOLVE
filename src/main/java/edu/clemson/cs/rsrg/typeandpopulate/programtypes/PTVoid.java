@@ -1,5 +1,5 @@
 /**
- * PTType.java
+ * PTVoid.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -16,35 +16,37 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
- * <p>This abstract class serves as the parent class of all
- * program types.</p>
+ * <p>Since we are trying to give everything a type, there are
+ * operations that simply don't return anything and we would still
+ * like to give it a type. This class creates a generic {code Void}
+ * type.</p>
  *
  * @version 2.0
  */
-public abstract class PTType {
+public class PTVoid extends PTType {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The current type graph object in use.</p> */
-    protected final TypeGraph myTypeGraph;
+    /** <p>A map to store all the instances created by this class</p> */
+    private static WeakHashMap<TypeGraph, PTVoid> instances =
+            new WeakHashMap<>();
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the type graph
-     * of any objects created from a class that inherits from
-     * {@code PTType}.</p>
+     * <p>This creates a programming {code Void} type.</p>
      *
      * @param g The current type graph.
      */
-    protected PTType(TypeGraph g) {
-        myTypeGraph = g;
+    private PTVoid(TypeGraph g) {
+        super(g);
     }
 
     // ===========================================================
@@ -52,26 +54,34 @@ public abstract class PTType {
     // ===========================================================
 
     /**
-     * <p>This method returns {@code true} <strong>iff</strong> an value of this type
-     * would be acceptable where one of type {@code t} were required.</p>
+     * <p>This method overrides the default equals method implementation.</p>
      *
-     * @param t The required type.
+     * @param o Object to be compared.
      *
-     * @return {@code true} <strong>iff</strong> an value of this type
-     *         would be acceptable where one of type {@code t} were
-     *         required, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
-    public boolean acceptableFor(PTType t) {
-        return equals(t);
+    @Override
+    public final boolean equals(Object o) {
+        //We override this simply to show that we've given it some thought
+        return super.equals(o);
     }
 
     /**
-     * <p>The type graph containing all the type relationships.</p>
+     * <p>This method returns an instance of {@link PTVoid}.</p>
      *
-     * @return The type graph for the compiler.
+     * @param g The current type graph.
+     *
+     * @return A {@link PTVoid} object.
      */
-    public final TypeGraph getTypeGraph() {
-        return myTypeGraph;
+    public static PTVoid getInstance(TypeGraph g) {
+        PTVoid result = instances.get(g);
+
+        if (result == null) {
+            result = new PTVoid(g);
+            instances.put(g, result);
+        }
+
+        return result;
     }
 
     /**
@@ -84,15 +94,19 @@ public abstract class PTType {
      *
      * @return A {@link PTType} that has been instantiated.
      */
-    public abstract PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility);
+    @Override
+    public final PTType instantiateGenerics(Map<String, PTType> genericInstantiations, FacilityEntry instantiatingFacility) {
+        return this;
+    }
 
     /**
      * <p>This method returns the mathematical type associated with this program type.</p>
      *
      * @return A {@link MTType} representation object.
      */
-    public abstract MTType toMath();
+    @Override
+    public final MTType toMath() {
+        return myTypeGraph.VOID;
+    }
 
 }
