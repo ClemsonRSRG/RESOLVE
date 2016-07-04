@@ -1,5 +1,5 @@
 /**
- * PTRepresentation.java
+ * PTFacilityRepresentation.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -13,22 +13,19 @@
 package edu.clemson.cs.rsrg.typeandpopulate.programtypes;
 
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeDefinitionEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.Map;
 
 /**
- * <p>A <code>PTRepresentation</code> wraps an existing {@link PTType}
- * with additional information about a {@link PTFamily} this type
- * represents. An instance of <code>PTRepresentation</code> is thus a special
- * case of its wrapped type that happens to be functioning as a representation
- * type.</p>
+ * <p>A <code>PTFacilityRepresentation</code> is similar to a {@link PTRepresentation},
+ * but doesn't implement a {@link PTFamily}. An instance of <code>PTFacilityRepresentation</code>
+ * is thus a special case of its wrapped type that happens to be functioning as a
+ * representation type.</p>
  *
  * @version 2.0
  */
-public class PTRepresentation extends PTType {
+public class PTFacilityRepresentation extends PTType {
 
     // ===========================================================
     // Member Fields
@@ -40,54 +37,35 @@ public class PTRepresentation extends PTType {
      */
     private final PTInstantiated myBaseType;
 
-    /** <p>The entry for the type family.</p> */
-    private final ProgramTypeDefinitionEntry myFamily;
+    /**
+     * <p>Since facility representation types do not have a corresponding
+     * <code>PTFamily</code>, we just store the name they go by here.</p>
+     */
+    private final String myName;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates a program type that is a type realization for
-     * a type family.</p>
+     * <p>This creates a program type that is a facility type realization.</p>
      *
      * @param g The current type graph.
      * @param baseType The program type that was used to realize
      *                 this type. (Note: Can only be a facility
      *                 instantiated type or a record).
-     * @param family The entry for the type family.
+     * @param typeName This type's name.
      */
-    public PTRepresentation(TypeGraph g, PTInstantiated baseType,
-            ProgramTypeDefinitionEntry family) {
+    public PTFacilityRepresentation(TypeGraph g, PTInstantiated baseType,
+            String typeName) {
         super(g);
         myBaseType = baseType;
-        myFamily = family;
+        myName = typeName;
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-
-    /**
-     * <p>This method returns {@code true} <strong>iff</strong> an value of this type
-     * would be acceptable where one of type {@code t} were required.</p>
-     *
-     * @param t The required type.
-     *
-     * @return {@code true} <strong>iff</strong> an value of this type
-     *         would be acceptable where one of type {@code t} were
-     *         required, {@code false} otherwise.
-     */
-    @Override
-    public final boolean acceptableFor(PTType t) {
-        boolean result = super.acceptableFor(t);
-
-        if (!result) {
-            result = myFamily.getProgramType().acceptableFor(t);
-        }
-
-        return result;
-    }
 
     /**
      * <p>This method returns the program type that was used to implement
@@ -100,13 +78,12 @@ public class PTRepresentation extends PTType {
     }
 
     /**
-     * <p>This method returns the {@link SymbolTableEntry} that corresponding
-     * to the type family.</p>
+     * <p>This method returns the name associated with this type.</p>
      *
-     * @return A {@link ProgramTypeDefinitionEntry} representation object.
+     * @return A string.
      */
-    public final ProgramTypeDefinitionEntry getFamily() {
-        return myFamily;
+    public final String getName() {
+        return myName;
     }
 
     /**
@@ -135,16 +112,6 @@ public class PTRepresentation extends PTType {
     @Override
     public final MTType toMath() {
         return myBaseType.toMath();
-    }
-
-    /**
-     * <p>This method returns the object in string format.</p>
-     *
-     * @return Object as a string.
-     */
-    @Override
-    public final String toString() {
-        return myFamily.getName() + " as " + myBaseType;
     }
 
 }
