@@ -24,13 +24,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 public abstract class PTInstantiated extends PTType {
 
     // ===========================================================
-    // Member Fields
-    // ===========================================================
-
-    /** <p>The facility qualifier (if type is instantiated)</p> */
-    protected String myFacilityQualifier = null;
-
-    // ===========================================================
     // Constructors
     // ===========================================================
 
@@ -43,28 +36,6 @@ public abstract class PTInstantiated extends PTType {
      */
     protected PTInstantiated(TypeGraph g) {
         super(g);
-    }
-
-    // ===========================================================
-    // Public Methods
-    // ===========================================================
-
-    /**
-     * <p>This method returns the facility qualifier.</p>
-     *
-     * @return A string.
-     */
-    public final String getFacilityQualifier() {
-        return myFacilityQualifier;
-    }
-
-    /**
-     * <p>This methods adds a facility qualifier to this type.</p>
-     *
-     * @param facilityName The facility associated with this type.
-     */
-    public final void setFacilityQualifier(String facilityName) {
-        myFacilityQualifier = facilityName;
     }
 
 }

@@ -21,18 +21,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>This class creates a record type.</p>
+ * <p>A <code>PTRecord</code> is record of variables with
+ * {@link PTInstantiated} types that is used to implement a
+ * {@link PTFamily}.</p>
  *
  * @version 2.0
  */
-public class PTRecord extends PTType {
+public class PTRecord extends PTInstantiated {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>A map of variable names and program types.</p> */
-    private final Map<String, PTType> myFields = new HashMap<>();
+    private final Map<String, PTInstantiated> myFields = new HashMap<>();
 
     /** <p>The mathematical type corresponding to this record type.</p> */
     private final MTType myMathTypeAlterEgo;
@@ -47,14 +49,14 @@ public class PTRecord extends PTType {
      * @param g The current type graph.
      * @param types A map of all programming types in this record.
      */
-    public PTRecord(TypeGraph g, Map<String, PTType> types) {
+    public PTRecord(TypeGraph g, Map<String, PTInstantiated> types) {
         super(g);
 
         myFields.putAll(types);
 
         Element[] elements = new Element[types.size()];
         int index = 0;
-        for (Map.Entry<String, PTType> field : types.entrySet()) {
+        for (Map.Entry<String, PTInstantiated> field : types.entrySet()) {
             elements[index] =
                     new Element(field.getKey(), field.getValue().toMath());
             index++;
@@ -93,9 +95,9 @@ public class PTRecord extends PTType {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        Map<String, PTType> newFields = new HashMap<String, PTType>();
-        for (Map.Entry<String, PTType> type : myFields.entrySet()) {
-            newFields.put(type.getKey(), type.getValue().instantiateGenerics(
+        Map<String, PTInstantiated> newFields = new HashMap<>();
+        for (Map.Entry<String, PTInstantiated> type : myFields.entrySet()) {
+            newFields.put(type.getKey(), (PTInstantiated) type.getValue().instantiateGenerics(
                     genericInstantiations, instantiatingFacility));
         }
 
