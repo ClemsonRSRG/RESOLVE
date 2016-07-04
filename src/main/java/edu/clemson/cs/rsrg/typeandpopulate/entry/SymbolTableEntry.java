@@ -12,6 +12,12 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * TODO: Refactor this class
  */
@@ -52,4 +58,19 @@ public class SymbolTableEntry {
         },
     }
 
+    public static Map<String, MTType> buildMathTypeGenerics(
+            Map<String, PTType> genericInstantiations) {
+
+        Map<String, MTType> genericMathematicalInstantiations =
+                new HashMap<>();
+
+        for (Map.Entry<String, PTType> instantiation : genericInstantiations
+                .entrySet()) {
+
+            genericMathematicalInstantiations.put(instantiation.getKey(),
+                    instantiation.getValue().toMath());
+        }
+
+        return genericMathematicalInstantiations;
+    }
 }
