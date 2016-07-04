@@ -29,9 +29,6 @@ public abstract class PTType {
     // Member Fields
     // ===========================================================
 
-    /** <p>The facility qualifier (if type is instantiated)</p> */
-    protected String myFacilityQualifier = null;
-
     /** <p>The current type graph object in use.</p> */
     protected final TypeGraph myTypeGraph;
 
@@ -69,15 +66,6 @@ public abstract class PTType {
     }
 
     /**
-     * <p>This method returns the facility qualifier.</p>
-     *
-     * @return A string.
-     */
-    public final String getFacilityQualifier() {
-        return myFacilityQualifier;
-    }
-
-    /**
      * <p>The type graph containing all the type relationships.</p>
      *
      * @return The type graph for the compiler.
@@ -99,15 +87,6 @@ public abstract class PTType {
     public abstract PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility);
-
-    /**
-     * <p>This methods adds a facility qualifier to this type.</p>
-     *
-     * @param facilityName The facility associated with this type.
-     */
-    public final void setFacilityQualifier(String facilityName) {
-        myFacilityQualifier = facilityName;
-    }
 
     /**
      * <p>This method returns the mathematical type associated with this program type.</p>
