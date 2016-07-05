@@ -13,9 +13,9 @@
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 /**
  * <p>A <code>SymbolTable</code> maps {@link ResolveConceptualElement}s and

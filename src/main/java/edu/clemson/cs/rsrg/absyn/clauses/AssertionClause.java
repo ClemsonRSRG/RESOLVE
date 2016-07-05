@@ -30,6 +30,11 @@ public class AssertionClause extends ResolveConceptualElement {
     // ClauseType
     // ===========================================================
 
+    /**
+     * <p>This defines the various different assertion clause types.</p>
+     *
+     * @version 2.0
+     */
     public enum ClauseType {
         CONSTRAINT {
 

@@ -18,7 +18,7 @@ import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
-import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import java.io.*;

@@ -41,7 +41,7 @@ public abstract class MTType {
 
     /**
      * <p>An helper constructor that allow us to store the type graph
-     * of any objects created from a class that inherits from
+     * for any objects created from a class that inherits from
      * {@code MTType}.</p>
      *
      * @param g The current type graph.

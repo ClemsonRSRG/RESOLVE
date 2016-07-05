@@ -28,7 +28,7 @@ import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
-import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

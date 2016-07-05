@@ -12,17 +12,44 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
+import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
-
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO: Refactor this class
+ * <p>This abstract class serves as the parent class of all
+ * symbol table entries.</p>
+ *
+ * <p>Checklist for subclassing <code>SymbolTableEntry</code>:</p>
+ *
+ * <ul>
+ * 		<li>Create subclass.</li>
+ * 		<li>Add "toXXX()" method in this parent class.</li>
+ * 		<li>Override it in subclass.</li>
+ *      <li>Consider if entry can be coerced to other kinds of entries,
+ *      and override those toXXXs as well. (See ProgramVariableEntry
+ *      as an example.</li>
+ * </ul>
+ *
+ * @version 2.0
  */
-public class SymbolTableEntry {
+public abstract class SymbolTableEntry {
 
+    // ===========================================================
+    // Quantification
+    // ===========================================================
+
+    /**
+     * <p>This defines the various different quantification options
+     * for the expressions in the {@link ResolveConceptualElement}
+     * hierarchy.</p>
+     *
+     * @version 2.0
+     */
     public enum Quantification {
         NONE {
 
@@ -58,6 +85,54 @@ public class SymbolTableEntry {
         },
     }
 
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>Name associated with this entry.</p> */
+    private final String myName;
+
+    /** <p>Element that created this entry.</p> */
+    private final ResolveConceptualElement myDefiningElement;
+
+    /** <p>Module where this entry was created from.</p> */
+    private final ModuleIdentifier mySourceModuleIdentifier;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>An helper constructor that allow us to store the name,
+     * defining element and source module identifier for
+     * any objects created from a class that inherits from
+     * {@code SymbolTableEntry}.</p>
+     *
+     * @param name Name associated with this entry.
+     * @param definingElement The element that created this entry.
+     * @param sourceModule The module where this entry was created from.
+     */
+    protected SymbolTableEntry(String name,
+            ResolveConceptualElement definingElement,
+            ModuleIdentifier sourceModule) {
+        myName = name;
+        myDefiningElement = definingElement;
+        mySourceModuleIdentifier = sourceModule;
+    }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * <p>This static method returns a map of {@link MTType}s obtained
+     * from their associated {@link PTType}s.</p>
+     *
+     * @param genericInstantiations Map containing all the instantiations.
+     *
+     * @return A map containing the {@link MTType}s obtained from the
+     * instantiated program types.
+     */
     public static Map<String, MTType> buildMathTypeGenerics(
             Map<String, PTType> genericInstantiations) {
 
@@ -73,4 +148,56 @@ public class SymbolTableEntry {
 
         return genericMathematicalInstantiations;
     }
+
+    /**
+     * <p>This method returns the RESOLVE AST node that instantiated
+     * this entry.</p>
+     *
+     * @return The {@link ResolveConceptualElement} that instantiated this
+     * entry.
+     */
+    public final ResolveConceptualElement getDefiningElement() {
+        return myDefiningElement;
+    }
+
+    /**
+     * <p>This method returns a description associated with this entry.</p>
+     *
+     * @return A string.
+     */
+    public abstract String getEntryTypeDescription();
+
+    /**
+     * <p>This method returns the name associated with this entry.</p>
+     *
+     * @return A string.
+     */
+    public final String getName() {
+        return myName;
+    }
+
+    /**
+     * <p>This method returns the module identifier for the {@link ModuleDec}
+     * that instantiated this entry.</p>
+     *
+     * @return A {@link ModuleIdentifier} representation object.
+     */
+    public final ModuleIdentifier getSourceModuleIdentifier() {
+        return mySourceModuleIdentifier;
+    }
+
+    /**
+     * <p>This method converts a generic {@link SymbolTableEntry} to an entry
+     * that has all the generic types and variables replaced with actual
+     * values.</p>
+     *
+     * @param genericInstantiations Map containing all the instantiations.
+     * @param instantiatingFacility Facility that instantiated this type.
+     *
+     * @return A {@link SymbolTableEntry} that has been instantiated.
+     */
+    public abstract SymbolTableEntry instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilityEntry instantiatingFacility);
+
 }

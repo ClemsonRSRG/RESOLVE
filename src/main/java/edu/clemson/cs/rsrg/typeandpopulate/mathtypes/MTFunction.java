@@ -17,11 +17,11 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.LambdaExp;
-import edu.clemson.cs.rsrg.typeandpopulate.FunctionApplicationFactory;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.FunctionApplicationFactory;
 import java.util.*;
 
 /**
