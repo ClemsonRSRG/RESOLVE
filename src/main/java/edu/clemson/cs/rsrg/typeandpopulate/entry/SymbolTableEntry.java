@@ -14,6 +14,8 @@ package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -199,5 +201,33 @@ public abstract class SymbolTableEntry {
     public abstract SymbolTableEntry instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility);
+
+    /**
+     * <p>This method will attempt to convert this {@link SymbolTableEntry}
+     * into a {@link FacilityEntry}.</p>
+     *
+     * @param l Location where we encountered this entry.
+     *
+     * @return A {@link FacilityEntry} if possible. Otherwise,
+     * it throws a {@link SourceErrorException}.
+     */
+    public FacilityEntry toFacilityEntry(Location l) {
+        throw new SourceErrorException("Expecting a facility. Found "
+                + getEntryTypeDescription(), l);
+    }
+
+    /**
+     * <p>This method will attempt to convert this {@link SymbolTableEntry}
+     * into a {@link ShortFacilityEntry}.</p>
+     *
+     * @param l Location where we encountered this entry.
+     *
+     * @return A {@link ShortFacilityEntry} if possible. Otherwise,
+     * it throws a {@link SourceErrorException}.
+     */
+    public ShortFacilityEntry toShortFacilityEntry(Location l) {
+        throw new SourceErrorException("Expecting a short facility module.  "
+                + "Found " + getEntryTypeDescription(), l);
+    }
 
 }

@@ -21,7 +21,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
  *
  * @version 2.0
  */
-public class TypeMismatchException extends CompilerException {
+public class TypeMismatchException extends SymbolTableException {
 
     // ===========================================================
     // Member Fields
