@@ -232,6 +232,20 @@ public abstract class SymbolTableEntry {
 
     /**
      * <p>This method will attempt to convert this {@link SymbolTableEntry}
+     * into a {@link ProgramVariableEntry}.</p>
+     *
+     * @param l Location where we encountered this entry.
+     *
+     * @return A {@link ProgramVariableEntry} if possible. Otherwise,
+     * it throws a {@link SourceErrorException}.
+     */
+    public ProgramVariableEntry toProgramVariableEntry(Location l) {
+        throw new SourceErrorException("Expecting a program variable.  "
+                + "Found " + getEntryTypeDescription(), l);
+    }
+
+    /**
+     * <p>This method will attempt to convert this {@link SymbolTableEntry}
      * into a {@link ShortFacilityEntry}.</p>
      *
      * @param l Location where we encountered this entry.
