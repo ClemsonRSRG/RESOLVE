@@ -14,7 +14,9 @@ package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
 
@@ -23,19 +25,9 @@ import java.util.Map;
  */
 public class ProgramTypeEntry extends SymbolTableEntry {
 
-    /**
-     * <p>An helper constructor that allow us to store the name,
-     * defining element and source module identifier for
-     * any objects created from a class that inherits from
-     * {@code SymbolTableEntry}.</p>
-     *
-     * @param name            Name associated with this entry.
-     * @param definingElement The element that created this entry.
-     * @param sourceModule    The module where this entry was created from.
-     */
-    protected ProgramTypeEntry(String name,
+    public ProgramTypeEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule) {
+            ModuleIdentifier sourceModule, MTType modelType, PTType programType) {
         super(name, definingElement, sourceModule);
     }
 
