@@ -33,6 +33,11 @@ public class BindingVisitor extends TypeVisitor {
         myTypeGraph = g;
     }
 
+    public BindingVisitor(TypeGraph g, Map<String, MTType> concreteContext, Map<String, MTType> templateContext) {
+        //super(concreteContext, templateContext);
+        myTypeGraph = g;
+    }
+
     // TODO: This doesn't belong here
     public final boolean visit(MTType t1, MTType t2) {
         return false;
