@@ -75,7 +75,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
     /**
      * <p>This creates a symbol table entry for a mathematical symbol.</p>
      *
-     * @param g
+     * @param g The current type graph.
      * @param name Name associated with this entry.
      * @param q The quantifier (if any) associated with this entry.
      * @param definingElement The element that created this entry.
@@ -308,7 +308,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
      *
-     * @return A {@link SymbolTableEntry} that has been instantiated.
+     * @return A {@link MathSymbolEntry} that has been instantiated.
      */
     @Override
     public final MathSymbolEntry instantiateGenerics(Map<String, PTType> genericInstantiations, FacilityEntry instantiatingFacility) {

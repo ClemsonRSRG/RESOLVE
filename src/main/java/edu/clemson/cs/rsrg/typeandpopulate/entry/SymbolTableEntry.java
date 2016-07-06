@@ -244,4 +244,18 @@ public abstract class SymbolTableEntry {
                 + "Found " + getEntryTypeDescription(), l);
     }
 
+    /**
+     * <p>This method will attempt to convert this {@link SymbolTableEntry}
+     * into a {@link TheoremEntry}.</p>
+     *
+     * @param l Location where we encountered this entry.
+     *
+     * @return A {@link TheoremEntry} if possible. Otherwise,
+     * it throws a {@link SourceErrorException}.
+     */
+    public TheoremEntry toTheoremEntry(Location l) {
+        throw new SourceErrorException("Expecting a theorem.  " + "Found "
+                + getEntryTypeDescription(), l);
+    }
+
 }
