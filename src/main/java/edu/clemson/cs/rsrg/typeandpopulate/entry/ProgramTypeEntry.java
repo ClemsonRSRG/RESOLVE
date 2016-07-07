@@ -104,7 +104,7 @@ public class ProgramTypeEntry extends SymbolTableEntry {
      *
      * @return A {@link PTType} representation object.
      */
-    public final PTType getProgramType() {
+    public PTType getProgramType() {
         return myProgramType;
     }
 

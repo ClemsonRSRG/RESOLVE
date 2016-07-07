@@ -300,4 +300,18 @@ public abstract class SymbolTableEntry {
                 + getEntryTypeDescription(), l);
     }
 
+    /**
+     * <p>This method will attempt to convert this {@link SymbolTableEntry}
+     * into a {@link TypeFamilyEntry}.</p>
+     *
+     * @param l Location where we encountered this entry.
+     *
+     * @return A {@link TypeFamilyEntry} if possible. Otherwise,
+     * it throws a {@link SourceErrorException}.
+     */
+    public TypeFamilyEntry toTypeFamilyEntry(Location l) {
+        throw new SourceErrorException("Expecting a program type family.  "
+                + "Found " + getEntryTypeDescription(), l);
+    }
+
 }
