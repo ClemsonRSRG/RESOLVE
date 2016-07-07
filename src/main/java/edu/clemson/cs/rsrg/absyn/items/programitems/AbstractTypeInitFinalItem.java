@@ -35,6 +35,11 @@ public abstract class AbstractTypeInitFinalItem
     // ItemType
     // ===========================================================
 
+    /**
+     * <p>This defines both an item type for initialization and finalization.</p>
+     *
+     * @version 2.0
+     */
     public enum ItemType {
         INITIALIZATION {
 

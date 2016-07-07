@@ -41,7 +41,7 @@ public abstract class MTType {
 
     /**
      * <p>An helper constructor that allow us to store the type graph
-     * of any objects created from a class that inherits from
+     * for any objects created from a class that inherits from
      * {@code MTType}.</p>
      *
      * @param g The current type graph.
@@ -78,14 +78,52 @@ public abstract class MTType {
      */
     public abstract void acceptOpen(TypeVisitor v);
 
-    public Map<String, MTType> bindTo(MTType o, Map<String, MTType> context)
-            throws BindingException {
-
+    /**
+     * <p>This method attempts to bind {@code o} to a map of types for the current
+     * context.</p>
+     *
+     * @param o The type to bind.
+     * @param context The context map of types.
+     *
+     * @return The modified context type map if bind is successful, otherwise it throws
+     * an exception.
+     *
+     * @throws BindingException
+     */
+    public final Map<String, MTType> bindTo(MTType o,
+            Map<String, MTType> context) throws BindingException {
         BindingVisitor bind = new BindingVisitor(myTypeGraph, context);
         bind.visit(this, o);
 
         if (!bind.binds()) {
             throw new BindingException(this, o);
+        }
+
+        return bind.getBindings();
+    }
+
+    /**
+     * <p>This method attempts to bind {@code template} to a map of types for the current
+     * context using a template context.</p>
+     *
+     * @param template The template type to bind.
+     * @param thisContext The current context map of types.
+     * @param templateContext The template context map of types.
+     *
+     * @return The modified context type map if bind is successful, otherwise it throws
+     * an exception.
+     *
+     * @throws BindingException
+     */
+    public final Map<String, MTType> bindTo(MTType template,
+            Map<String, MTType> thisContext, Map<String, MTType> templateContext)
+            throws BindingException {
+        BindingVisitor bind =
+                new BindingVisitor(myTypeGraph, thisContext, templateContext);
+        bind.visit(this, template);
+
+        if (!bind.binds()) {
+            throw new BindingException(this, template);
         }
 
         return bind.getBindings();

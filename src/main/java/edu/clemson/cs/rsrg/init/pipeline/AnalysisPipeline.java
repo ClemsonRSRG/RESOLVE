@@ -13,8 +13,8 @@
 package edu.clemson.cs.rsrg.init.pipeline;
 
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
-import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 public class AnalysisPipeline extends AbstractPipeline {
 

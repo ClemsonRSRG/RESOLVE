@@ -1,5 +1,5 @@
 /**
- * TypeMismatchException.java
+ * SymbolNotOfKindTypeException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -12,15 +12,13 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
-
 /**
- * <p>An {@code TypeMismatchException} indicates we encountered two
- * {@link MTType}s that are not compatible.</p>
+ * <p>An {@code SymbolNotOfKindTypeException} indicates we encountered a
+ * symbol that is not a type that produces a type value.</p>
  *
  * @version 2.0
  */
-public class TypeMismatchException extends SymbolTableException {
+public class SymbolNotOfKindTypeException extends SymbolTableException {
 
     // ===========================================================
     // Member Fields
@@ -39,8 +37,8 @@ public class TypeMismatchException extends SymbolTableException {
      *
      * @param message Message to be displayed when the exception is thrown.
      */
-    public TypeMismatchException(String message) {
-        super(message, (Throwable) null);
+    public SymbolNotOfKindTypeException(String message) {
+        super(message, null);
     }
 
 }

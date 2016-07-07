@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.statushandling.exception;
 
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
@@ -55,6 +56,30 @@ public class SourceErrorException extends CompilerException {
      */
     public SourceErrorException(String message, PosSymbol symbol) {
         super(message, symbol, null);
+    }
+
+    /**
+     * <p>This constructor takes in a message for the location
+     * that caused an source exception to be thrown.</p>
+     *
+     * @param message Message to be displayed when the exception is thrown.
+     * @param location Location where the error occurred.
+     */
+    public SourceErrorException(String message, Location location) {
+        super(message, location, null);
+    }
+
+    /**
+     * <p>This constructor takes in a throwable cause and a message
+     * for the location that caused an source exception to be thrown.</p>
+     *
+     * @param message Message to be displayed when the exception is thrown.
+     * @param location Location where the error occurred.
+     * @param cause Cause of the exception.
+     */
+    public SourceErrorException(String message, Location location,
+            Throwable cause) {
+        super(message, location, cause);
     }
 
 }
