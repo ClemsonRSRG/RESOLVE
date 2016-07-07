@@ -17,6 +17,10 @@ import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.LazilyMappedImmutableList;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
@@ -55,8 +59,7 @@ public class OperationEntry extends SymbolTableEntry {
      * @param returnType The program type associated with this entry's return value.
      * @param parameters The program parameters associated with this entry.
      */
-    public OperationEntry(String name,
-                          ResolveConceptualElement definingElement,
+    public OperationEntry(String name, ResolveConceptualElement definingElement,
                           ModuleIdentifier sourceModule, PTType returnType,
                           List<ProgramParameterEntry> parameters) {
         this(name, definingElement, sourceModule, returnType,
@@ -87,6 +90,24 @@ public class OperationEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * <p>This method returns the affects clause associated with this entry.</p>
+     *
+     * @return An {@link AffectsClause} representation object.
+     */
+    public final AffectsClause getAffectsClause() {
+        return ((OperationDec) getDefiningElement()).getAffectedVars().clone();
+    }
+
+    /**
+     * <p>This method returns the ensures clause associated with this entry.</p>
+     *
+     * @return An {@link AssertionClause} representation object.
+     */
+    public final AssertionClause getEnsuresClause() {
+        return ((OperationDec) getDefiningElement()).getEnsures().clone();
+    }
+
+    /**
      * <p>This method returns a description associated with this entry.</p>
      *
      * @return A string.
@@ -103,6 +124,15 @@ public class OperationEntry extends SymbolTableEntry {
      */
     public final ImmutableList<ProgramParameterEntry> getParameters() {
         return myParameters;
+    }
+
+    /**
+     * <p>This method returns the requires clause associated with this entry.</p>
+     *
+     * @return An {@link AssertionClause} representation object.
+     */
+    public final AssertionClause getRequiresClause() {
+        return ((OperationDec) getDefiningElement()).getRequires().clone();
     }
 
     /**
