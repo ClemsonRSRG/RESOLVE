@@ -13,8 +13,8 @@
 package edu.clemson.cs.rsrg.typeandpopulate.programtypes;
 
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.TypeFamilyEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class PTRepresentation extends PTType {
     private final PTInstantiated myBaseType;
 
     /** <p>The entry for the type family.</p> */
-    private final ProgramTypeDefinitionEntry myFamily;
+    private final TypeFamilyEntry myFamily;
 
     // ===========================================================
     // Constructors
@@ -58,7 +58,7 @@ public class PTRepresentation extends PTType {
      * @param family The entry for the type family.
      */
     public PTRepresentation(TypeGraph g, PTInstantiated baseType,
-            ProgramTypeDefinitionEntry family) {
+            TypeFamilyEntry family) {
         super(g);
         myBaseType = baseType;
         myFamily = family;
@@ -103,9 +103,9 @@ public class PTRepresentation extends PTType {
      * <p>This method returns the {@link SymbolTableEntry} that corresponding
      * to the type family.</p>
      *
-     * @return A {@link ProgramTypeDefinitionEntry} representation object.
+     * @return A {@link TypeFamilyEntry} representation object.
      */
-    public final ProgramTypeDefinitionEntry getFamily() {
+    public final TypeFamilyEntry getFamily() {
         return myFamily;
     }
 
