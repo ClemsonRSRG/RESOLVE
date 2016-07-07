@@ -248,6 +248,20 @@ public abstract class SymbolTableEntry {
 
     /**
      * <p>This method will attempt to convert this {@link SymbolTableEntry}
+     * into a {@link OperationEntry}.</p>
+     *
+     * @param l Location where we encountered this entry.
+     *
+     * @return A {@link OperationEntry} if possible. Otherwise,
+     * it throws a {@link SourceErrorException}.
+     */
+    public OperationEntry toOperationEntry(Location l) {
+        throw new SourceErrorException("Expecting an operation.  Found "
+                + getEntryTypeDescription(), l);
+    }
+
+    /**
+     * <p>This method will attempt to convert this {@link SymbolTableEntry}
      * into a {@link ProgramParameterEntry}.</p>
      *
      * @param l Location where we encountered this entry.

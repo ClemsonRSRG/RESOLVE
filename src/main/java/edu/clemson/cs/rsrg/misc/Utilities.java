@@ -45,6 +45,14 @@ public class Utilities {
     }
 
     /**
+     * <p>A two-parameter mapping.</p>
+     */
+    public interface Mapping<I, O> {
+
+        O map(I input);
+    }
+
+    /**
      * <p>Returns a list of {@code E} given: an expected type {@code T}, some
      * number of concrete syntax {@code nodes}, and a mapping from rule contexts
      * to some number of elements descending from {@code E}.</p>
