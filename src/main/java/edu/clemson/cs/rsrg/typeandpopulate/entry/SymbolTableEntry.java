@@ -276,6 +276,20 @@ public abstract class SymbolTableEntry {
 
     /**
      * <p>This method will attempt to convert this {@link SymbolTableEntry}
+     * into a {@link ProcedureEntry}.</p>
+     *
+     * @param l Location where we encountered this entry.
+     *
+     * @return A {@link ProcedureEntry} if possible. Otherwise,
+     * it throws a {@link SourceErrorException}.
+     */
+    public ProcedureEntry toProcedureEntry(Location l) {
+        throw new SourceErrorException("Expecting a procedure.  Found "
+                + getEntryTypeDescription(), l);
+    }
+
+    /**
+     * <p>This method will attempt to convert this {@link SymbolTableEntry}
      * into a {@link ProgramParameterEntry}.</p>
      *
      * @param l Location where we encountered this entry.

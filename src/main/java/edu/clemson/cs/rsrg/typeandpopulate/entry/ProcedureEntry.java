@@ -1,5 +1,5 @@
 /**
- * OperationProfileEntry.java
+ * ProcedureEntry.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -13,8 +13,6 @@
 package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.PerformanceOperationDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
@@ -22,12 +20,12 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
 
 /**
- * <p>This creates a symbol table entry for a performance
- * profile for an operation.</p>
+ * <p>This creates a symbol table entry for a procedure declaration
+ * for an operation.</p>
  *
  * @version 2.0
  */
-public class OperationProfileEntry extends SymbolTableEntry {
+public class ProcedureEntry extends SymbolTableEntry {
 
     // ===========================================================
     // Member Fields
@@ -41,7 +39,7 @@ public class OperationProfileEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This creates a symbol table entry for a performance profile
+     * <p>This creates a symbol table entry for a procedure declaration
      * for an operation.</p>
      *
      * @param name Name associated with this entry.
@@ -49,10 +47,11 @@ public class OperationProfileEntry extends SymbolTableEntry {
      * @param sourceModule The module where this entry was created from.
      * @param correspondingOperation The operation entry associated with this entry.
      */
-    public OperationProfileEntry(String name,
+    public ProcedureEntry(String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, OperationEntry correspondingOperation) {
         super(name, definingElement, sourceModule);
+
         myCorrespondingOperation = correspondingOperation;
     }
 
@@ -70,43 +69,13 @@ public class OperationProfileEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the duration clause associated with this entry.</p>
-     *
-     * @return An {@link AssertionClause} representation object.
-     */
-    public final AssertionClause getDurationClause() {
-        return ((PerformanceOperationDec) getDefiningElement()).getDuration()
-                .clone();
-    }
-
-    /**
-     * <p>This method returns the ensures clause associated with this entry.</p>
-     *
-     * @return An {@link AssertionClause} representation object.
-     */
-    public final AssertionClause getEnsuresClause() {
-        return ((PerformanceOperationDec) getDefiningElement())
-                .getWrappedOpDec().getEnsures().clone();
-    }
-
-    /**
      * <p>This method returns a description associated with this entry.</p>
      *
      * @return A string.
      */
     @Override
     public final String getEntryTypeDescription() {
-        return "the profile of an operation";
-    }
-
-    /**
-     * <p>This method returns the manipulation displacement clause associated with this entry.</p>
-     *
-     * @return An {@link AssertionClause} representation object.
-     */
-    public final AssertionClause getManipDispClause() {
-        return ((PerformanceOperationDec) getDefiningElement()).getManipDisp()
-                .clone();
+        return "a procedure";
     }
 
     /**
@@ -117,26 +86,29 @@ public class OperationProfileEntry extends SymbolTableEntry {
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
      *
-     * @return A {@link SymbolTableEntry} that has been instantiated.
+     * @return A {@link ProcedureEntry} that has been instantiated.
      */
     @Override
-    public final SymbolTableEntry instantiateGenerics(
+    public final ProcedureEntry instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new ProcedureEntry(getName(), getDefiningElement(),
+                getSourceModuleIdentifier(), myCorrespondingOperation
+                        .instantiateGenerics(genericInstantiations,
+                                instantiatingFacility));
     }
 
     /**
      * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link OperationProfileEntry}.</p>
+     * into a {@link ProcedureEntry}.</p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link OperationProfileEntry} if possible. Otherwise,
+     * @return A {@link ProcedureEntry} if possible. Otherwise,
      * it throws a {@link SourceErrorException}.
      */
     @Override
-    public final OperationProfileEntry toOperationProfileEntry(Location l) {
+    public final ProcedureEntry toProcedureEntry(Location l) {
         return this;
     }
 
