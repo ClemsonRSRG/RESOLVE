@@ -26,6 +26,10 @@ import java.util.Map;
  */
 public class ProgramVariableEntry extends SymbolTableEntry {
 
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
     /** <p>The program type assigned to this entry.</p> */
     private final PTType myType;
 
