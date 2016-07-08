@@ -41,7 +41,7 @@ public class NameSearcher implements MultimatchTableSearcher<SymbolTableEntry> {
     // ===========================================================
 
     /**
-     * <p>This constructs a name searcher that specifies a search string
+     * <p>This constructs a searcher that specifies a search string
      * and a boolean flag that indicates whether or not we stop after
      * the first match.</p>
      *
@@ -55,7 +55,7 @@ public class NameSearcher implements MultimatchTableSearcher<SymbolTableEntry> {
     }
 
     /**
-     * <p>This constructs a name searcher that specifies a search string
+     * <p>This constructs a searcher that specifies a search string
      * and stops after we locate the first match.</p>
      *
      * @param searchString Name of the entry to be searched.

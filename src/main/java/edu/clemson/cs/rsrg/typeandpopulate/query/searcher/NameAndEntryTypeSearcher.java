@@ -1,5 +1,5 @@
 /**
- * EntryTypeSearcher.java
+ * NameAndEntryTypeSearcher.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -12,44 +12,53 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.query.searcher;
 
-import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.SymbolTable;
-import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>An <code>EntryTypeSearcher</code> returns entries in a {@link SymbolTable}
- * that have the specified entry type.</p>
+ * <p>A <code>NameAndEntryTypeSearcher</code> returns entries in a {@link SymbolTable}
+ * that have the specified name and entry type.</p>
  *
  * @version 2.0
  */
-public class EntryTypeSearcher<E extends SymbolTableEntry> implements MultimatchTableSearcher<E> {
+public class NameAndEntryTypeSearcher<E extends SymbolTableEntry>
+        implements
+            MultimatchTableSearcher<E> {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>An {@code EntryTypeSearcher} for {@link FacilityEntry}s.</p> */
-    public static final EntryTypeSearcher<FacilityEntry> FACILITY_SEARCHER =
-            new EntryTypeSearcher<>(FacilityEntry.class);
-
     /** <p>A class that inherits from {@link SymbolTableEntry}</p> */
     private final Class<E> myTargetClass;
+
+    /** <p>Name of the entry to be searched</p> */
+    private final String myTargetName;
+
+    /** <p>Boolean flag that indicates if we stop after we find the first or not.</p> */
+    private final boolean myStopAfterFirstFlag;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a searcher that specifies an symbol table
-     * entry type.</p>
+     * <p>This constructs a searcher that specifies a search string,
+     * an entry type and a boolean flag that indicates whether or
+     * not we stop after the first match.</p>
      *
+     * @param name Name of the entry to be searched.
      * @param targetClass A class that inherits from {@link SymbolTableEntry}.
+     * @param stopAfterFirst Boolean flag that indicates if we stop
+     *                       after we find the first or not.
      */
-    public EntryTypeSearcher(Class<E> targetClass) {
+    public NameAndEntryTypeSearcher(String name, Class<E> targetClass,
+            boolean stopAfterFirst) {
         myTargetClass = targetClass;
+        myTargetName = name;
+        myStopAfterFirstFlag = stopAfterFirst;
     }
 
     // ===========================================================
@@ -72,14 +81,19 @@ public class EntryTypeSearcher<E extends SymbolTableEntry> implements Multimatch
      *         un-searched scopes.
      */
     @Override
-    public final boolean addMatches(SymbolTable entries, List<E> matches, SearchContext l) {
-        Iterator<E> matchesIter = entries.iterateByType(myTargetClass);
+    public final boolean addMatches(SymbolTable entries, List<E> matches,
+            SearchContext l) {
+        SymbolTableEntry match = entries.get(myTargetName);
 
-        while (matchesIter.hasNext()) {
-            matches.add(matchesIter.next());
+        boolean foundOne =
+                (match != null)
+                        && myTargetClass.isAssignableFrom(match.getClass());
+
+        if (foundOne) {
+            matches.add((E) match);
         }
 
-        return false;
+        return myStopAfterFirstFlag && foundOne;
     }
 
 }
