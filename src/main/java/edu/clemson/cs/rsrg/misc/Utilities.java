@@ -53,6 +53,14 @@ public class Utilities {
     }
 
     /**
+     * <p>A three-parameter mapping.</p>
+     */
+    public interface Mapping3<P1, P2, P3, R> {
+
+        R map(P1 p1, P2 p2, P3 p3);
+    }
+
+    /**
      * <p>Returns a list of {@code E} given: an expected type {@code T}, some
      * number of concrete syntax {@code nodes}, and a mapping from rule contexts
      * to some number of elements descending from {@code E}.</p>

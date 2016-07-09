@@ -12,9 +12,13 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+
 /**
  * TODO: Refactor this class
  */
-public interface ModuleScope {
+public interface ModuleScope extends Scope {
+
+    ModuleDec getDefiningElement();
 
 }
