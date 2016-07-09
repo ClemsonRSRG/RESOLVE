@@ -59,7 +59,7 @@ public interface TableSearcher<E extends SymbolTableEntry> {
      * @param l The context from which <code>entries</code> was drawn.
      *
      * @return <code>true</code> if <code>matches</code> now represents a
-     *         final list of search results&mdash;i.e., no further symbol table
+     *         final list of search results; i.e., no further symbol table
      *         entries should be considered. <code>false</code> indicates that
      *         the search should continue, provided there are additional
      *         un-searched scopes.

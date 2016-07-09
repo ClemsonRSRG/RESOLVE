@@ -1,5 +1,5 @@
 /**
- * NameSearcher.java
+ * GenericProgramTypeSearcher.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -13,56 +13,39 @@
 package edu.clemson.cs.rsrg.typeandpopulate.query.searcher;
 
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.SymbolTable;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>A <code>NameSearcher</code> returns entries in a {@link SymbolTable}
- * that have the specified name.</p>
+ * <p>An <code>GenericProgramTypeSearcher</code> returns entries in a {@link SymbolTable}
+ * that are generic type parameters.</p>
  *
  * @version 2.0
  */
-public class NameSearcher implements MultimatchTableSearcher<SymbolTableEntry> {
+public class GenericProgramTypeSearcher
+        implements
+            MultimatchTableSearcher<ProgramTypeEntry> {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>Name of the entry to be searched</p> */
-    private final String mySearchString;
-
-    /** <p>Boolean flag that indicates if we stop after we find the first or not.</p> */
-    private final boolean myStopAfterFirstFlag;
+    /** <p>A singleton instance for this searcher.</p> */
+    public static final GenericProgramTypeSearcher INSTANCE =
+            new GenericProgramTypeSearcher();
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a searcher that specifies a search string
-     * and a boolean flag that indicates whether or not we stop after
-     * the first match.</p>
-     *
-     * @param searchString Name of the entry to be searched.
-     * @param stopAfterFirst Boolean flag that indicates if we stop
-     *                       after we find the first or not.
+     * <p>This constructs a searcher that searches for a generic
+     * program type.</p>
      */
-    public NameSearcher(String searchString, boolean stopAfterFirst) {
-        mySearchString = searchString;
-        myStopAfterFirstFlag = stopAfterFirst;
-    }
-
-    /**
-     * <p>This constructs a searcher that specifies a search string
-     * and stops after we locate the first match.</p>
-     *
-     * @param searchString Name of the entry to be searched.
-     */
-    public NameSearcher(String searchString) {
-        this(searchString, true);
-    }
+    private GenericProgramTypeSearcher() {}
 
     // ===========================================================
     // Public Methods
@@ -85,21 +68,21 @@ public class NameSearcher implements MultimatchTableSearcher<SymbolTableEntry> {
      */
     @Override
     public final boolean addMatches(SymbolTable entries,
-            List<SymbolTableEntry> matches, SearchContext l) {
-        boolean result = entries.containsKey(mySearchString);
+            List<ProgramTypeEntry> matches, SearchContext l) {
+        Iterator<ProgramParameterEntry> parameters =
+                entries.iterateByType(ProgramParameterEntry.class);
+        ProgramParameterEntry parameter;
+        while (parameters.hasNext()) {
+            parameter = parameters.next();
 
-        if (result) {
-            SymbolTableEntry e = entries.get(mySearchString);
-
-            // Parameters of imported modules or facility instantiations are not
-            // exported and therefore should not be considered for results
-            if (l.equals(SearchContext.SOURCE_MODULE)
-                    || !(e instanceof ProgramParameterEntry)) {
-                matches.add(entries.get(mySearchString));
+            if (parameter.getParameterMode().equals(
+                    ProgramParameterEntry.ParameterMode.TYPE)) {
+                matches.add(parameter.toProgramTypeEntry(parameter
+                        .getDefiningElement().getLocation()));
             }
         }
 
-        return myStopAfterFirstFlag && result;
+        return false;
     }
 
 }
