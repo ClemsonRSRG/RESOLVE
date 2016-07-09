@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.typeandpopulate.entry;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.SpecRealizationPairing;
 import java.util.Map;
 
 /**
@@ -44,6 +45,10 @@ public class FacilityEntry extends SymbolTableEntry {
      */
     @Override
     public String getEntryTypeDescription() {
+        return null;
+    }
+
+    public final SpecRealizationPairing getFacility() {
         return null;
     }
 
