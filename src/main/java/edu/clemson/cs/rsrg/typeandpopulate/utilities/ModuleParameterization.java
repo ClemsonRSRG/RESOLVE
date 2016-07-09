@@ -60,7 +60,7 @@ public class ModuleParameterization {
      *
      * @param module The module that is being instantiated.
      * @param instantiatingFacility The facility that is instantiating the module.
-     * @param sourceRepository The scope that this instantiation is happening in.
+     * @param sourceRepository The scope where this instantiation is happening in.
      */
     public ModuleParameterization(ModuleIdentifier module, FacilityEntry instantiatingFacility, ScopeRepository sourceRepository) {
         this(module, new LinkedList<ModuleArgumentItem>(), instantiatingFacility, sourceRepository);
@@ -72,7 +72,7 @@ public class ModuleParameterization {
      * @param module The module that is being instantiated.
      * @param parameters The list of parameters needed to instantiate this module.
      * @param instantiatingFacility The facility that is instantiating the module.
-     * @param sourceRepository The scope that this instantiation is happening in.
+     * @param sourceRepository The scope where this instantiation is happening in.
      */
     public ModuleParameterization(ModuleIdentifier module, List<ModuleArgumentItem> parameters, FacilityEntry instantiatingFacility, ScopeRepository sourceRepository) {
         myInstantiatingFacility = instantiatingFacility;
