@@ -58,7 +58,7 @@ public final class CongruenceClassProver {
     private final List<TheoremCongruenceClosureImpl> m_theorems;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 1500;
+    private final long DEFAULTTIMEOUT = 5000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private final Set<String> m_nonQuantifiedTheoremSymbols;
@@ -380,7 +380,7 @@ public final class CongruenceClassProver {
         ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC =
                 new ArrayList<TheoremCongruenceClosureImpl>();
         theoremsForThisVC.addAll(m_theorems);
-        // add quantified expressions local to the vc to theorems
+        /* add quantified expressions local to the vc to theorems
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, p, p, p, p,
@@ -394,6 +394,7 @@ public final class CongruenceClassProver {
                 vcc.assertSet(p, m_scope);
 
         }
+        */
         long startTime = System.currentTimeMillis();
         long endTime = myTimeout + startTime;
         Map<String, Integer> theoremAppliedCount =

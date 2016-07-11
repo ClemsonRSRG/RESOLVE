@@ -60,17 +60,18 @@ public class VerificationConditionCongruenceClosureImpl {
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new HashSet<String>();
-
+        //while(flipNots());
         addPExp(m_consequent.iterator(), false);
         addPExp(m_antecedent.iterator(), true);
 
-        forAllQuantifiedPExps = new ArrayList<PExp>();
+        /*forAllQuantifiedPExps = new ArrayList<PExp>();
         if (vc.m_liftedLambdaPredicates != null
                 && vc.m_liftedLambdaPredicates.size() > 0) {
             forAllQuantifiedPExps.addAll(vc.m_liftedLambdaPredicates);
             //addPExp(forAllQuantifiedPExps.iterator(),true);
             makeSetAssertions(vc);
         }
+        */
         // seed with (true = false) = false
         ArrayList<PExp> args = new ArrayList<PExp>();
         PSymbol fls = new PSymbol(m_typegraph.BOOLEAN, null, "false");
@@ -116,6 +117,15 @@ public class VerificationConditionCongruenceClosureImpl {
         m_conjunction.addExpression(fandfeqf);
     }
 
+    // Method to remove nots.  Wont work for cases where not x is an argument.
+    // Returns false when a full pass makes no changes.
+ /*   private boolean flipNots(){
+        boolean changed = false;
+        m_antecedent.appended()
+
+        return  changed;
+    }
+    */
     /* Ex.: p is for all k:Z, lambda0(k) = (x <= k)
     Adds these assertions:
     lambda0(_sv0) = (x <= _sv0)
@@ -123,7 +133,7 @@ public class VerificationConditionCongruenceClosureImpl {
     ------ Complements
     lambda0(_sv0_Comp) = not(x <=_sv0_Comp)
     ZSetComplement(ZSetCons(_sv0)) = ZSetCons(_sv0_Comp)
-     */
+
     protected void assertSet(PExp p, ModuleScope scope) {
         if (p.getQuantifiedVariables().size() != 1)
             return;
@@ -325,12 +335,12 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol negatedCondition =
                     new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
             splitConditions.add(negatedCondition);
-            /*args.clear();
-            args.add(negatedCondition);
-            args.add(new PSymbol(g.BOOLEAN, null, "true"));
-            splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
+            //args.clear();
+            //args.add(negatedCondition);
+            //args.add(new PSymbol(g.BOOLEAN, null, "true"));
+            //splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
             // AddisBinaryPartition (p1: Entity, p2: Entity) : B;
-             */
+
             args.clear();
             args.add(tBSym);
             args.add(fBSym);
@@ -342,7 +352,7 @@ public class VerificationConditionCongruenceClosureImpl {
         addPExp(splitConditions.iterator(), true);
 
     }
-
+*/
     protected ConjunctionOfNormalizedAtomicExpressions getConjunct() {
         return m_conjunction;
     }
@@ -371,8 +381,15 @@ public class VerificationConditionCongruenceClosureImpl {
                 m_conjunction.addExpression(curr);
             }
             else {
-                int intRepForExp = m_conjunction.addFormula(curr);
-                addGoal(m_registry.getSymbolForIndex(intRepForExp));
+                // Temp: replace with eliminate()
+                if(curr.getTopLevelOperation().equals("orB")){
+                    addGoal(m_registry.getSymbolForIndex(m_conjunction.addFormula(curr.getSubExpressions().get(0))));
+                    addGoal(m_registry.getSymbolForIndex(m_conjunction.addFormula(curr.getSubExpressions().get(1))));
+                }
+                else {
+                    int intRepForExp = m_conjunction.addFormula(curr);
+                    addGoal(m_registry.getSymbolForIndex(intRepForExp));
+                }
             }
         }
     }
@@ -387,9 +404,10 @@ public class VerificationConditionCongruenceClosureImpl {
     @Override
     public String toString() {
         String r = "\n" + "\n" + m_name + "\n" + m_conjunction;
-        for (PExp pq : forAllQuantifiedPExps) {
+        /*for (PExp pq : forAllQuantifiedPExps) {
             r += pq.toString() + "\n";
         }
+        */
         r += "----------------------------------\n";
 
         // Goals
