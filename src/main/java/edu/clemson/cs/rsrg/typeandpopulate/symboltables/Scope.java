@@ -121,8 +121,9 @@ public interface Scope {
      * and returns a new list rather than requiring an accumulator and starts
      * with an empty set of searched scopes and instantiations.</p>
      *
-     * @param searcher
-     * @return
+     * @param searcher The searcher to be used to match symbol table entries.
+     *
+     * @return A list of all symbols that match.
      */
     <E extends SymbolTableEntry> List<E> getMatches(TableSearcher<E> searcher,
             SearchContext l) throws DuplicateSymbolException;
