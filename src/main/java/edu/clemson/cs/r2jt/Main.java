@@ -21,7 +21,6 @@ import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
-import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.data.ModuleKind;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
@@ -505,7 +504,6 @@ public class Main {
             AlgebraicProver.setUpFlags();
             //Your module here!
             CongruenceClassProver.setUpFlags();
-            SMTProver.setUpFlags();
             FlagDependencies.seal();
         }
     }

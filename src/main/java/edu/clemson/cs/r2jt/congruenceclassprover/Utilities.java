@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Mike on 2/1/2016.
+ * Transformation that apply to both expressions in both VC and Theorems
  */
 public class Utilities {
 
