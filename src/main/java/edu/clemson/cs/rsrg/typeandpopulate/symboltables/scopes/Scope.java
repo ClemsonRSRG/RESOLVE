@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
+package edu.clemson.cs.rsrg.typeandpopulate.symboltables.scopes;
 
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
@@ -22,6 +22,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.query.MultimatchSymbolQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.SymbolQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher.SearchContext;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.SymbolTable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

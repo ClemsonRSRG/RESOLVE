@@ -20,10 +20,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.rsrg.typeandpopulate.symboltables.InstantiatedScope;
-import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
-import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.scopes.InstantiatedScope;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.scopes.ModuleScope;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.scopes.Scope;
 import java.util.*;
 
 /**
