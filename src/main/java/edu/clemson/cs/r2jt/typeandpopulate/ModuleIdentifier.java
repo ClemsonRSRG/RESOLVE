@@ -14,7 +14,6 @@ package edu.clemson.cs.r2jt.typeandpopulate;
 
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.absyn.UsesItem;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import org.antlr.v4.runtime.Token;
 
@@ -46,10 +45,6 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     public ModuleIdentifier(ModuleDec m) {
         this(m.getName().getName());
-    }
-
-    public ModuleIdentifier(ModuleAST m) {
-        this(m.getName().getText());
     }
 
     public ModuleIdentifier(Token t) {

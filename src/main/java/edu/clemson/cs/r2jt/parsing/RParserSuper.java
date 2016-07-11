@@ -57,7 +57,7 @@ public class RParserSuper extends Parser {
         this.facilityModule = false;
     }
 
-    //protected ErrorHandler err = ErrorHandler.getInstance();
+    //protected StatusHandler err = StatusHandler.getInstance();
     protected ErrorHandler err;
 
     protected boolean otherwise = false;

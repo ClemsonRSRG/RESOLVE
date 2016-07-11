@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.parsing.data;
 
-import edu.clemson.cs.r2jt.parsing.ResolveLexer;
+import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.TokenSource;
@@ -79,10 +79,10 @@ public class ResolveToken extends CommonToken {
      *
      * @param o The object to compare.
      *
-     * @return True if all the fields are equal, false otherwise.
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         boolean result;
         if (o == this) {
             result = true;
@@ -98,12 +98,32 @@ public class ResolveToken extends CommonToken {
     }
 
     /**
+     * <p>Returns the location from the token in string format.</p>
+     *
+     * @return Location as a String.
+     */
+    public final String getLocation() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(groomFileName(mySourceName));
+        sb.append(" ");
+
+        // Append the line and column number
+        sb.append("(");
+        sb.append(getLine());
+        sb.append(":");
+        sb.append(getCharPositionInLine());
+        sb.append(")");
+
+        return sb.toString();
+    }
+
+    /**
      * <p>Returns a hash code for this string.</p>
      *
      * @return A hash code value for this object.
      */
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return getText().hashCode();
     }
 
@@ -113,8 +133,27 @@ public class ResolveToken extends CommonToken {
      * @return Token as a string.
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return getText();
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>Trims all the path information from the filename.</p>
+     *
+     * @param fileName The full path filename.
+     *
+     * @return Filename only.
+     */
+    private String groomFileName(String fileName) {
+        int start = fileName.lastIndexOf("/");
+        if (start == -1) {
+            return fileName;
+        }
+        return fileName.substring(start + 1, fileName.length());
     }
 
 }

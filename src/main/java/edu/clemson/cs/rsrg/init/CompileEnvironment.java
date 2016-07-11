@@ -12,18 +12,18 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.absynnew.ModuleAST;
-import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
-import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.init.file.Utilities;
-import edu.clemson.cs.r2jt.misc.FlagDependencyException;
-import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.statushandling.WriterStatusHandler;
+import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.flag.FlagManager;
+import edu.clemson.cs.rsrg.misc.Utilities;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -52,7 +52,7 @@ public class CompileEnvironment {
      * and incomplete modules. A module is complete when we are done processing it. An
      * incomplete module usually means that we are still processing it's import.</p>
      */
-    private final Map<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>> myCompilingModules;
+    private final Map<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleDec, ResolveFile>> myCompilingModules;
 
     /**
      * <p>This map stores all externally realizations for a particular concept.
@@ -61,9 +61,9 @@ public class CompileEnvironment {
     private final Map<ModuleIdentifier, File> myExternalRealizFiles;
 
     /**
-     * <p>This is the default error handler for the RESOLVE compiler.</p>
+     * <p>This is the default status handler for the RESOLVE compiler.</p>
      */
-    private final ErrorHandler myErrorHandler;
+    private final StatusHandler myStatusHandler;
 
     /**
      * <p>This list stores all the incomplete modules.</p>
@@ -112,21 +112,21 @@ public class CompileEnvironment {
      *
      * @param args The specified compiler arguments array.
      * @param compilerVersion The current compiler version.
-     * @param errorHandler An error handler to display debug or error messages.
+     * @param statusHandler A status handler to display debug or error messages.
      *
      * @throws FlagDependencyException
      * @throws IOException
      */
     public CompileEnvironment(String[] args, String compilerVersion,
-            ErrorHandler errorHandler)
+            StatusHandler statusHandler)
             throws FlagDependencyException,
                 IOException {
         flags = new FlagManager(args);
         myCompilingModules =
-                new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
-        myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
-        myIncompleteModules = new LinkedList<ModuleIdentifier>();
-        myUserFileMap = new HashMap<String, ResolveFile>();
+                new HashMap<>();
+        myExternalRealizFiles = new HashMap<>();
+        myIncompleteModules = new LinkedList<>();
+        myUserFileMap = new HashMap<>();
 
         // Check for custom workspace path
         String path = null;
@@ -146,20 +146,20 @@ public class CompileEnvironment {
                     new File(myCompileDir, "Error-Log-"
                             + dateFormat.format(date) + ".log");
 
-            errorHandler =
-                    new WriterErrorHandler(new BufferedWriter(
+            statusHandler =
+                    new WriterStatusHandler(new BufferedWriter(
                             new OutputStreamWriter(new FileOutputStream(
                                     errorFile), "utf-8")));
         }
-        myErrorHandler = errorHandler;
+        myStatusHandler = statusHandler;
 
         // Debugging information
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             synchronized (System.out) {
                 // Print Compiler Messages
-                myErrorHandler.info(null, "RESOLVE Compiler/Verifier - "
+                myStatusHandler.info(null, "RESOLVE Compiler/Verifier - "
                         + compilerVersion + " Version.");
-                myErrorHandler.info(null, "\tUse -help flag for options.\n");
+                myStatusHandler.info(null, "\tUse -help flag for options.\n");
             }
         }
     }
@@ -181,8 +181,8 @@ public class CompileEnvironment {
         myIncompleteModules.remove(mid);
 
         // Print out debugging message
-        if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myErrorHandler.info(null, "Complete record: " + mid.toString());
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            myStatusHandler.info(null, "Completed record: " + mid.toString());
         }
     }
 
@@ -193,19 +193,19 @@ public class CompileEnvironment {
      * completed.</p>
      *
      * @param file The original source file.
-     * @param moduleAST The ANTLR4 module AST.
+     * @param moduleDec The module representation declaration.
      */
-    public void constructRecord(ResolveFile file, ModuleAST moduleAST) {
-        ModuleIdentifier mid = new ModuleIdentifier(moduleAST);
+    public void constructRecord(ResolveFile file, ModuleDec moduleDec) {
+        ModuleIdentifier mid = new ModuleIdentifier(moduleDec);
         assert !myCompilingModules.containsKey(mid) : "We already compiled a module with this ID!";
         myCompilingModules.put(mid,
-                new AbstractMap.SimpleEntry<ModuleAST, ResolveFile>(moduleAST,
+                new AbstractMap.SimpleEntry<>(moduleDec,
                         file));
         myIncompleteModules.add(mid);
 
         // Print out debugging message
-        if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myErrorHandler.info(null, "Construct record: " + mid.toString()); //DEBUG
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            myStatusHandler.info(null, "Construct record: " + mid.toString());
         }
     }
 
@@ -229,11 +229,11 @@ public class CompileEnvironment {
     }
 
     /**
-     * <pReturns the <code>ModuleAST</code> associated with the specified id.></p>
+     * <pReturns the <code>ModuleDec</code> associated with the specified id.></p>
      *
      * @param id The ID for the <code>ResolveFile</code> we want to search for.
      */
-    public ModuleAST getModuleAST(ModuleIdentifier id) {
+    public ModuleDec getModuleAST(ModuleIdentifier id) {
         return myCompilingModules.get(id).getKey();
     }
 
@@ -260,12 +260,12 @@ public class CompileEnvironment {
     }
 
     /**
-     * <p>Returns the compiler's error handler object.</p>
+     * <p>Returns the compiler's status handler object.</p>
      *
-     * @return Error handler object.
+     * @return A {@link StatusHandler} object.
      */
-    public ErrorHandler getErrorHandler() {
-        return myErrorHandler;
+    public StatusHandler getStatusHandler() {
+        return myStatusHandler;
     }
 
     /**

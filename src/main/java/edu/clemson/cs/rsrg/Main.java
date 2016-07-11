@@ -25,7 +25,7 @@ import edu.clemson.cs.rsrg.init.ResolveCompiler;
 public class Main {
 
     /**
-     * <p>This method creates and invokes the <code>ResolveCompiler</code>
+     * <p>This method creates and invokes the {@link ResolveCompiler}
      * to perform the compilation job.</p>
      *
      * @param args Arguments required to perform the compile process.

@@ -30,7 +30,7 @@ echo ""
 echo ""
 echo "---- PRE-EXECUTION SETUP ----"
 echo ""
-cp RESOLVE/target/RESOLVE-15.06.01a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
+cp RESOLVE/target/RESOLVE-Summer16a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
 cd RESOLVE-Workspace/RESOLVE/Main/
 echo ""
 echo "---- DONE WITH PRE-EXECUTION SETUP ----"
@@ -64,14 +64,15 @@ echo "---- DONE GENERATING PROVES ----"
 echo ""
 
 # Build jars for the following files
-echo ""
-echo "---- BUILDING JARS ----"
-echo ""
-for i in "${FILESTOBUILDJAR[@]}"
-do
-   echo "Analyzing $i"
-   java -jar resolve.jar -createJar -verboseJar -nodebug $i
-done
-echo ""
-echo "---- DONE BUILDING JARS ----"
-echo ""
+# Enable these when we have facilities to build
+#echo ""
+#echo "---- BUILDING JARS ----"
+#echo ""
+#for i in "${FILESTOBUILDJAR[@]}"
+#do
+#   echo "Analyzing $i"
+#   java -jar resolve.jar -createJar -verboseJar -nodebug $i
+#done
+#echo ""
+#echo "---- DONE BUILDING JARS ----"
+#echo ""

@@ -13,23 +13,59 @@
 package edu.clemson.cs.rsrg.init.pipeline;
 
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 /**
- * TODO: Description for this class
+ * <p>This is the abstract base class for all pipeline objects
+ * that are used to perform some sort of action.</p>
+ *
+ * @version 2.0
  */
 public abstract class AbstractPipeline {
 
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /**
+     * <p>The current job's compilation environment
+     * that stores all necessary objects and flags.</p>
+     */
     protected final CompileEnvironment myCompileEnvironment;
+
+    /** <p>The symbol table for the compiler.</p> */
     protected final MathSymbolTableBuilder mySymbolTable;
 
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>An helper constructor that allow us to store the
+     * {@link CompileEnvironment} and {@link MathSymbolTableBuilder}
+     * from a class that inherits from {@code AbstractPipeline}.</p>
+     *
+     * @param ce The current compilation environment.
+     * @param symbolTable The symbol table.
+     */
     protected AbstractPipeline(CompileEnvironment ce,
             MathSymbolTableBuilder symbolTable) {
         myCompileEnvironment = ce;
         mySymbolTable = symbolTable;
     }
 
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * <p>This method must be implemented by all inherited classes
+     * to specify how to process the module pointed by the
+     * {@code currentTarget} module identifier.</p>
+     *
+     * @param currentTarget The module identifier
+     */
     public abstract void process(ModuleIdentifier currentTarget);
 
 }
