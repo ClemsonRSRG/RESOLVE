@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
-import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
 import edu.clemson.cs.r2jt.rewriteprover.Prover;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
@@ -429,7 +428,6 @@ public class ResolveCompiler {
             VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
             CongruenceClassProver.setUpFlags();
-            SMTProver.setUpFlags();
             FlagDependencies.seal();
         }
     }

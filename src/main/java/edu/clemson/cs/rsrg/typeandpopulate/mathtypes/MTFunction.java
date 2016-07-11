@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.mathtypes;
 
-import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -492,28 +491,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
     }
 
     /**
-     * <p>This is an helper method that returns the parameters as a string
-     * for a SMT prover.</p>
-     *
-     * @return A string representation of the parameters.
-     */
-    public final String getParamStringForSMT() {
-        String rString = "";
-        for (MTType m : myParamTypes) {
-            if (m.toString().equals("B")) {
-                rString += "B ";
-            }
-            else if (m.toString().equals("MType")) {
-                rString += SMTProver.TypeSort + " ";
-            }
-            else
-                rString += SMTProver.NameSort + " ";
-        }
-        return rString;
-
-    }
-
-    /**
      * <p>This method returns the range for this {@link MTFunction}.</p>
      *
      * @return A {@link MTType} representing the function range.
@@ -529,58 +506,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
      */
     public final String getSingleParameterName() {
         return mySingleParameterName;
-    }
-
-    /**
-     * <p>This is an helper method that returns the type restriction as a string
-     * for a SMT prover.</p>
-     *
-     * @param funName Name to be used.
-     *
-     * @return A string representation of the type restriction.
-     */
-    public final String getTypeRestrictionClauseForSMT(String funName) {
-        // for all i,j : Syms, i:T, J:U implies op i j:V
-        String range = getRange().toString();
-        if (range.equals("B") || range.equals("MType") || range.contains("'"))
-            return "";
-        String trClause = "";
-        String sorts = "";
-        String antC = "";
-        String sucC = funName;
-        String pName = "s";
-        String tName = "";
-        int n = 0;
-        int antCount = 0;
-        for (MTType m : myParamTypes) {
-            pName = pName + n++;
-            if (m.toString().equals("B")) {
-                tName = "B ";
-            }
-            else if (m.toString().equals("MType")) {
-                tName = SMTProver.TypeSort;
-            }
-            else if (m.toString().contains("'")) {
-                return "";
-            }
-            else {
-                tName = SMTProver.NameSort;
-                antC += "(EleOf " + pName + " " + m.toString() + ")";
-                antCount++;
-            }
-            sorts += "(" + pName + " " + tName + ")";
-            sucC += " " + pName;
-        }
-        if (antCount > 1) {
-            antC = "(and " + antC + ")";
-        }
-        sucC = "(EleOf(" + sucC + ")" + range + ")";
-        if (antCount > 0)
-            trClause =
-                    "(assert( forall(" + sorts + ")(=>" + antC + sucC + ")))";
-        else
-            trClause = "(assert( forall(" + sorts + ")" + sucC + ")))";
-        return trClause;
     }
 
     /**

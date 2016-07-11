@@ -13,7 +13,6 @@
 package edu.clemson.cs.r2jt.typeandpopulate.entry;
 
 import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
-import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
@@ -69,56 +68,4 @@ public class TheoremEntry extends SymbolTableEntry {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public String toSMTLIB(Map<String, MTType> typeMap, boolean negate) {
-        String forAllString = "";
-        String typeRestrictionString = "";
-
-        int varCount = 0;
-        PExp asPExp = getAssertion();
-        for (PSymbol ps : asPExp.getQuantifiedVariables()) {
-            String nameSort = SMTProver.NameSort;
-            MTType type = ps.getType();
-            String typeString = ps.getType().toString();
-            if (type.getClass().getSimpleName().equals("MTFunction")) {
-                return "";
-            }
-            // TODO: add support for functions as types
-            if (typeString.equals("B")) {
-                nameSort = "B";
-            }
-            String name = ps.toSMTLIB(null);
-
-            if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
-                forAllString += "(" + name + " " + nameSort + ")";
-                if (nameSort != "B") {
-                    typeRestrictionString +=
-                            "(" + "EleOf " + name + " " + type + ")";
-                    varCount++;
-                }
-            }
-            else
-                throw new UnsupportedOperationException(
-                        "Only universal quantification is supported.");
-        }
-        if (forAllString.length() > 0) {
-            forAllString = "forall(" + forAllString + ")";
-        }
-        else if (forAllString.length() == 0) {
-            if (!negate)
-                return "(assert " + myAssertionAsPExp.toSMTLIB(typeMap) + ")";
-            else
-                return "(assert(not " + myAssertionAsPExp.toSMTLIB(typeMap)
-                        + "))";
-        }
-        if (varCount > 1) {
-            typeRestrictionString = "(and " + typeRestrictionString + ")";
-        }
-        String assertion =
-                "(" + forAllString + " (=> " + typeRestrictionString
-                        + myAssertionAsPExp.toSMTLIB(typeMap) + "))";
-        if (!negate)
-            return "(assert " + assertion + ") ";
-        else
-            return "(assert(not " + assertion + "))";
-    }
 }

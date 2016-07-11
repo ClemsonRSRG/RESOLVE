@@ -351,30 +351,6 @@ public class TheoremCongruenceClosureImpl {
             else
                 results.addAll(t_results);
         }
-
-        /*        Set<NormalizedAtomicExpression> postSet = new HashSet<NormalizedAtomicExpression>();
-         for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
-         if (!m_matchRequired.contains(e_t)) {
-         // Not in match required.  Doesn't contain _g.  Must have quantified argument.
-         for (PSymbol pq : m_insertExpr.getQuantifiedVariables()) {
-         if(pq.toString().equals("_g")) continue;
-         if (e_t.getOperatorsAsStrings(false).containsKey(pq.toString())) {
-         postSet.add(e_t);
-         break;
-         }
-         }
-         } else {
-         results =
-         vc.getConjunct().getMatchesForOverrideSet(e_t, results);
-         }
-         }
-         Set<java.util.Map<String, String>> t_results;
-         for (NormalizedAtomicExpression p_t : postSet) {
-         t_results = vc.getConjunct().getMatchesForOverrideSet(p_t, results);
-         if (t_results.isEmpty()) continue;
-         else results = t_results;
-         }
-         */
         return results;
     }
 

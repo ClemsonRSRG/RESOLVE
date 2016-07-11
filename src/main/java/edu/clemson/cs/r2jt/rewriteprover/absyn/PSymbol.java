@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
@@ -748,44 +747,4 @@ public class PSymbol extends PExp {
                         .equals("false"));
     }
 
-    public String toSMTLIB(Map<String, MTType> typeMap) {
-        String opString = getTopLevelOperation();
-        boolean negate = false;
-        if (opString == "/=") {
-            opString = "=";
-            negate = true;
-        }
-        else if (opString == "implies")
-            opString = "=>";
-        opString = SMTProver.replaceReservedChars(opString);
-        if (!SMTProver.NamesNotToBeChanged.contains(opString)) {
-            opString = SMTProver.ReserveString + opString;
-        }
-        String argsString = "";
-        PExpSubexpressionIterator subIt = getSubExpressionIterator();
-        while (subIt.hasNext()) {
-            PExp cur = subIt.next();
-
-            if (cur.getSubExpressions().size() > 0)
-                argsString += cur.toSMTLIB(typeMap);
-            else {
-                String op = cur.getTopLevelOperation();
-                op = SMTProver.replaceReservedChars(op);
-                if (!SMTProver.NamesNotToBeChanged.contains(op)) {
-                    op = SMTProver.ReserveString + op;
-                }
-                argsString += " " + op + " ";
-                if (typeMap != null)
-                    typeMap.put(op, cur.getType());
-            }
-        }
-        String combined = opString + " " + argsString;
-        if (argsString.length() != 0) {
-            combined = "(" + combined + ")";
-        }
-        if (negate)
-            return "(not " + combined + ")";
-        else
-            return combined;
-    }
 }
