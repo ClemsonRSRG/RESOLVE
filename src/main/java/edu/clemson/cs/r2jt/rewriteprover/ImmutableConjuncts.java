@@ -654,35 +654,4 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         return myCachedSymbolNames;
     }
 
-    public String toSMTLIB(Map<String, MTType> typeMap) {
-        String rString = "";
-
-        for (PExp p : myConjuncts) {
-            String forAllString = "";
-            String thereExistsString = "";
-            for (PSymbol ps : p.getQuantifiedVariables()) {
-                if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL))
-                    forAllString +=
-                            "(" + ps.toSMTLIB(typeMap) + " "
-                                    + ps.getType().toString() + ")";
-                if (ps.quantification
-                        .equals(PSymbol.Quantification.THERE_EXISTS))
-                    thereExistsString +=
-                            "(" + ps.toSMTLIB(typeMap) + " "
-                                    + ps.getType().toString() + ")";
-            }
-            if (forAllString.length() > 0) {
-                forAllString = "forall(" + forAllString + ")";
-            }
-            if (thereExistsString.length() > 0) {
-                thereExistsString = "exists(" + thereExistsString + ")";
-            }
-            String body =
-                    forAllString + " " + thereExistsString
-                            + p.toSMTLIB(typeMap);
-            rString += "(assert " + body + ")" + ";" + p.toString() + "\n";
-
-        }
-        return rString;
-    }
 }

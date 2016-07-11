@@ -144,7 +144,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         else {
             MTType type = expression.getType();
-            PSymbol asPsymbol = (PSymbol) expression;
             int root = addFormula(expression);
             if (m_evaluates_to_false)
                 return "";
@@ -215,8 +214,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // insert =(lhs,rhs) = someNewRoot
             int questEq = m_registry.getIndexForSymbol("=B");
             NormalizedAtomicExpression pred =
-                    new NormalizedAtomicExpression(getRegistry(), new int[] { questEq,
-                            lhs, rhs });
+                    new NormalizedAtomicExpression(getRegistry(), new int[] {
+                            questEq, lhs, rhs });
             return addAtomicFormula(pred);
             // }
         }

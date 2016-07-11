@@ -129,8 +129,6 @@ public abstract class PExp {
 
     public abstract boolean isObviouslyTrue();
 
-    public abstract String toSMTLIB(Map<String, MTType> typeMap);
-
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new LinkedList<PExp>();
 

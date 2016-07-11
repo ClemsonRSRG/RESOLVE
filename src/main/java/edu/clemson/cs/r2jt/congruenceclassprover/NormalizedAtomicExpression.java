@@ -29,8 +29,7 @@ public class NormalizedAtomicExpression {
     private Set<Integer> m_opIdSet;
     private Map<String, Integer> m_argMmap;
 
-    public NormalizedAtomicExpression(
-            Registry registry, int[] intArray) {
+    public NormalizedAtomicExpression(Registry registry, int[] intArray) {
         m_registry = registry;
         arity = intArray.length - 1;
         if (!m_registry.isCommutative(intArray[0])) {
@@ -58,25 +57,6 @@ public class NormalizedAtomicExpression {
 
     protected Registry getRegistry() {
         return m_registry;
-    }
-
-    protected int getOpIdUsedInAllPos(NormalizedAtomicExpression oe, int k) {
-        int bid = -4;
-        for (int i = 0; i <= oe.arity; ++i) {
-            if (oe.readPosition(i) == k && bid == -4) {
-                bid = readPosition(i);
-            }
-            else if (oe.readPosition(i) == k && readPosition(i) != bid) {
-                return -1;
-            }
-        }
-        if (oe.readRoot() == k) {
-            if (bid == -4)
-                return readRoot();
-            else if (readRoot() != bid)
-                return -1;
-        }
-        return bid;
     }
 
     protected Set<Integer> getOpIds() {

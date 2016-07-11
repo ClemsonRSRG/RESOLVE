@@ -66,13 +66,4 @@ public class Consequent extends ImmutableConjuncts {
         return new Antecedent(this);
     }
 
-    public String negateToSMT(Map<String, MTType> typeMap)
-            throws RuntimeException {
-        String rString = "";
-        if (this.size() != 1) {
-            throw new RuntimeException("Invalid Consequent");
-        }
-        rString = "(assert(not " + this.get(0).toSMTLIB(typeMap) + "))\n";
-        return rString;
-    }
 }
