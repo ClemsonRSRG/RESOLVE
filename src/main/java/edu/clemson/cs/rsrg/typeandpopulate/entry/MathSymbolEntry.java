@@ -22,7 +22,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeExceptio
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.GenericQuery;
-import edu.clemson.cs.rsrg.typeandpopulate.symboltables.scopes.Scope;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.ContainsNamedTypeChecker;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.VariableReplacingVisitor;

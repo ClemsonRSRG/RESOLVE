@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.typeandpopulate.symboltables.scopes;
+package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
@@ -20,6 +20,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher.SearchCo
 import java.util.*;
 
 abstract class AbstractScope implements Scope {
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     /**
      * <p>A simple variation on {@link #addMatches} that creates

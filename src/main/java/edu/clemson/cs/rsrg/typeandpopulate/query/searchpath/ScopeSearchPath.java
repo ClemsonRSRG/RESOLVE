@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
-import edu.clemson.cs.rsrg.typeandpopulate.symboltables.scopes.Scope;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import java.util.List;
 
 /**
