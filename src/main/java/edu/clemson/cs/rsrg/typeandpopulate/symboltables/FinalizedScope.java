@@ -27,6 +27,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
  */
 class FinalizedScope extends SyntacticScope {
 
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
     /**
      * <p>This creates an immutable scope for a {@link ResolveConceptualElement}.</p>
      *
