@@ -1,5 +1,5 @@
 /**
- * InstantiatedScope.java
+ * DummyIdentifierResolver.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -22,53 +22,24 @@ import edu.clemson.cs.rsrg.typeandpopulate.query.MultimatchSymbolQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.SymbolQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher.SearchContext;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
- * <p>An <code>InstantiatedScope</code> decorates an existing
- * {@link Scope} such that calls to {@link #addMatches(TableSearcher, List, Set, Map, FacilityEntry, SearchContext)},
- * the search method to which all others defer, are augmented with an additional
- * set of generic instantiations and an instantiating facility.</p>
+ * <p>A <code>DummyIdentifierResolver</code> is a scope for built-in
+ * things.</p>
  *
  * @version 2.0
  */
-public class InstantiatedScope extends AbstractScope {
-
-    // ===========================================================
-    // Member Fields
-    // ===========================================================
-
-    /** <p>The base scope that this class is instantiating.</p> */
-    private final Scope myBaseScope;
-
-    /** <p>The facility that is instantiating this scope.</p> */
-    private final FacilityEntry myInstantiatingFacility;
-
-    /** <p>Map containing all the instantiations.</p> */
-    private final Map<String, PTType> myAdditionalGenericInstantiations =
-            new HashMap<>();
+class DummyIdentifierResolver extends AbstractScope {
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates an instantiated scope for the generic
-     * <code>baseScope</code>.</p>
-     *
-     * @param baseScope The base scope that this class is instantiating.
-     * @param genericInstantiations Map containing all the instantiations.
-     * @param instantiatingFacility The facility that is instantiating this scope.
+     * <p>This creates a scope for all built-in things.</p>
      */
-    public InstantiatedScope(Scope baseScope, Map<String, PTType> genericInstantiations,
-                             FacilityEntry instantiatingFacility) {
-        myBaseScope = baseScope;
-        myAdditionalGenericInstantiations.putAll(genericInstantiations);
-        myInstantiatingFacility = instantiatingFacility;
-    }
+    DummyIdentifierResolver() {}
 
     // ===========================================================
     // Public Methods
@@ -90,7 +61,7 @@ public class InstantiatedScope extends AbstractScope {
      * 		<li>A scope is reached that is already in
      * 		    <code>searchedScopes</code>.</li>
      * 		<li><code>searcher</code>'s {@link
-     * 		    TableSearcher#addMatches(SymbolTable, List, TableSearcher.SearchContext)} method
+     * 		    TableSearcher#addMatches(SymbolTable, List, SearchContext)} method
      * 		    returns <code>true</code>, indicating the list is complete.</li>
      * 		<li>The <code>addMatches()</code> method throws a
      * 		    {@link DuplicateSymbolException}.</li>
@@ -133,16 +104,7 @@ public class InstantiatedScope extends AbstractScope {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility, SearchContext l)
             throws DuplicateSymbolException {
-
-        if (instantiatingFacility != null) {
-            //It's unclear how this could happen or what it would mean, so we
-            //fail fast.  If an example triggers this, we need to think
-            //carefully about what it would mean.
-            throw new RuntimeException("Duplicate instantiation???");
-        }
-
-        return myBaseScope.addMatches(searcher, matches, searchedScopes,
-                myAdditionalGenericInstantiations, myInstantiatingFacility, l);
+        return false;
     }
 
     /**
@@ -158,7 +120,7 @@ public class InstantiatedScope extends AbstractScope {
      */
     @Override
     public final List<ProgramParameterEntry> getFormalParameterEntries() {
-        return myBaseScope.getFormalParameterEntries();
+        return Collections.emptyList();
     }
 
     /**
@@ -171,9 +133,8 @@ public class InstantiatedScope extends AbstractScope {
      * @return A list of all symbols matching the given query.
      */
     @Override
-    public final <E extends SymbolTableEntry> List<E> query(
-            MultimatchSymbolQuery<E> query) {
-        return myBaseScope.query(query);
+    public final <E extends SymbolTableEntry> List<E> query(MultimatchSymbolQuery<E> query) {
+        return new LinkedList<>();
     }
 
     /**
@@ -197,8 +158,11 @@ public class InstantiatedScope extends AbstractScope {
      */
     @Override
     public final <E extends SymbolTableEntry> E queryForOne(SymbolQuery<E> query)
-            throws NoSuchSymbolException, DuplicateSymbolException {
-        return myBaseScope.queryForOne(query);
+            throws NoSuchSymbolException,
+                DuplicateSymbolException {
+        throw new NoSuchSymbolException(
+                "This scope cannot contain user created entries.",
+                new IllegalStateException());
     }
 
 }

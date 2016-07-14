@@ -1,5 +1,5 @@
 /**
- * InstantiatedScope.java
+ * SyntacticScope.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
+import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
@@ -22,52 +23,77 @@ import edu.clemson.cs.rsrg.typeandpopulate.query.MultimatchSymbolQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.SymbolQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher.SearchContext;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import java.util.*;
 
 /**
- * <p>An <code>InstantiatedScope</code> decorates an existing
- * {@link Scope} such that calls to {@link #addMatches(TableSearcher, List, Set, Map, FacilityEntry, SearchContext)},
- * the search method to which all others defer, are augmented with an additional
- * set of generic instantiations and an instantiating facility.</p>
+ * <p>A <code>SyntacticScope</code> corresponds to a RESOLVE scope that
+ * arises because of a concrete piece of source code (rather than, for example,
+ * the built-in global scope, or the top-level dummy scope), represented by
+ * a {@link ResolveConceptualElement} called its <em>defining element</em>. Such a
+ * scope therefore exists in a <em>lexical hierarchy</em> of those scopes
+ * introduced by its defining element's parent elements, necessarily passing
+ * through a {@link ModuleScope} (belonging to this scope's
+ * <em>source module</em>) before reaching the top-level dummy scope. If this
+ * scope corresponds to a module, it is its own source module.</p>
+ *
+ * <p>The symbols in this scope's lexical parents are therefore implicitly
+ * available from within this scope. Optionally, symbols from the transitive
+ * closure of all modules imported by this scope's source module (its
+ * <em>recursive imports</em>) are available, as are any symbols found in
+ * facilities defined in the source module or any modules directly imported by
+ * the source module (its <em>named imports</em>, which do not recursively
+ * include any modules imported from within named imports).</p>
+ *
+ * <p>Note that this class has no public constructor. Instances of this class
+ * can be retrieved from a {@link ScopeRepository} or constructed via
+ * some of the methods of {@link MathSymbolTableBuilder}.</p>
  *
  * @version 2.0
  */
-public class InstantiatedScope extends AbstractScope {
+abstract class SyntacticScope extends AbstractScope {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The base scope that this class is instantiating.</p> */
-    private final Scope myBaseScope;
+    /** <p>The element that created this scope.</p> */
+    final ResolveConceptualElement myDefiningElement;
 
-    /** <p>The facility that is instantiating this scope.</p> */
-    private final FacilityEntry myInstantiatingFacility;
+    /** <p>The parent scope.</p> */
+    Scope myParent;
 
-    /** <p>Map containing all the instantiations.</p> */
-    private final Map<String, PTType> myAdditionalGenericInstantiations =
-            new HashMap<>();
+    /** <p>The module identifier for the module that this scope belongs to.</p> */
+    private final ModuleIdentifier myRootModule;
+
+    /** <p>The symbol table bindings.</p> */
+    protected final BaseSymbolTable myBindings;
+
+    /** <p>The source scope repository.</p> */
+    private final ScopeRepository mySource;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates an instantiated scope for the generic
-     * <code>baseScope</code>.</p>
+     * <p>This creates a new scope for a {@link ResolveConceptualElement}.</p>
      *
-     * @param baseScope The base scope that this class is instantiating.
-     * @param genericInstantiations Map containing all the instantiations.
-     * @param instantiatingFacility The facility that is instantiating this scope.
+     * @param source The source scope repository.
+     * @param definingElement The element that created this scope.
+     * @param parent The parent scope.
+     * @param enclosingModule The module identifier for the module
+     *                        that this scope belongs to.
+     * @param bindings The symbol table bindings.
      */
-    public InstantiatedScope(Scope baseScope, Map<String, PTType> genericInstantiations,
-                             FacilityEntry instantiatingFacility) {
-        myBaseScope = baseScope;
-        myAdditionalGenericInstantiations.putAll(genericInstantiations);
-        myInstantiatingFacility = instantiatingFacility;
+    SyntacticScope(ScopeRepository source,
+            ResolveConceptualElement definingElement, Scope parent,
+            ModuleIdentifier enclosingModule, BaseSymbolTable bindings) {
+        mySource = source;
+        myDefiningElement = definingElement;
+        myParent = parent;
+        myRootModule = enclosingModule;
+        myBindings = bindings;
     }
 
     // ===========================================================
@@ -133,16 +159,31 @@ public class InstantiatedScope extends AbstractScope {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility, SearchContext l)
             throws DuplicateSymbolException {
+        boolean finished = false;
 
-        if (instantiatingFacility != null) {
-            //It's unclear how this could happen or what it would mean, so we
-            //fail fast.  If an example triggers this, we need to think
-            //carefully about what it would mean.
-            throw new RuntimeException("Duplicate instantiation???");
+        if (!searchedScopes.contains(this)) {
+            searchedScopes.add(this);
+
+            SymbolTable symbolTableView = myBindings;
+
+            if (instantiatingFacility != null) {
+                symbolTableView =
+                        new InstantiatedSymbolTable(myBindings,
+                                genericInstantiations, instantiatingFacility);
+            }
+
+            finished = searcher.addMatches(symbolTableView, matches, l);
+
+            if (!finished) {
+                finished =
+                        myParent
+                                .addMatches(searcher, matches, searchedScopes,
+                                        genericInstantiations,
+                                        instantiatingFacility, l);
+            }
         }
 
-        return myBaseScope.addMatches(searcher, matches, searchedScopes,
-                myAdditionalGenericInstantiations, myInstantiatingFacility, l);
+        return finished;
     }
 
     /**
@@ -158,7 +199,26 @@ public class InstantiatedScope extends AbstractScope {
      */
     @Override
     public final List<ProgramParameterEntry> getFormalParameterEntries() {
-        return myBaseScope.getFormalParameterEntries();
+        List<ProgramParameterEntry> result =
+                new LinkedList<>();
+
+        Iterator<ProgramParameterEntry> formalBindings =
+                myBindings.iterateByType(ProgramParameterEntry.class);
+
+        while (formalBindings.hasNext()) {
+            result.add(formalBindings.next());
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>Returns this scopes defining element.</p>
+     *
+     * @return The defining element.
+     */
+    public ResolveConceptualElement getDefiningElement() {
+        return myDefiningElement;
     }
 
     /**
@@ -173,7 +233,7 @@ public class InstantiatedScope extends AbstractScope {
     @Override
     public final <E extends SymbolTableEntry> List<E> query(
             MultimatchSymbolQuery<E> query) {
-        return myBaseScope.query(query);
+        return query.searchFromContext(this, mySource);
     }
 
     /**
@@ -197,8 +257,62 @@ public class InstantiatedScope extends AbstractScope {
      */
     @Override
     public final <E extends SymbolTableEntry> E queryForOne(SymbolQuery<E> query)
-            throws NoSuchSymbolException, DuplicateSymbolException {
-        return myBaseScope.queryForOne(query);
+            throws NoSuchSymbolException,
+                DuplicateSymbolException {
+        List<E> results = query.searchFromContext(this, mySource);
+
+        if (results.isEmpty()) {
+            throw new NoSuchSymbolException("No entries found!",
+                    new IllegalStateException());
+        }
+        else if (results.size() > 1) {
+            throw new DuplicateSymbolException("Found duplicate entries!",
+                    results.get(0));
+        }
+
+        return results.get(0);
+    }
+
+    /**
+     * <p>This method returns the object in string format.</p>
+     *
+     * @return Object as a string.
+     */
+    @Override
+    public final String toString() {
+        return myDefiningElement + " {" + myBindings.toString() + "}";
+    }
+
+    // ===========================================================
+    // Package Private Methods
+    // ===========================================================
+
+    /**
+     * <p>Returns the parent scope that contains this scope.</p>
+     *
+     * @return The {@link Scope}.
+     */
+    final Scope getParent() {
+        return myParent;
+    }
+
+    /**
+     * <p>Returns the module identifier for the module that instantiated
+     * this scope.</p>
+     *
+     * @return The {@link ModuleIdentifier}.
+     */
+    final ModuleIdentifier getRootModule() {
+        return myRootModule;
+    }
+
+    /**
+     * <p>Returns the source repository that contains this scope.</p>
+     *
+     * @return The {@link ScopeRepository}.
+     */
+    final ScopeRepository getSourceRepository() {
+        return mySource;
     }
 
 }
