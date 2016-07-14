@@ -22,6 +22,8 @@ import java.util.Map;
  */
 class BaseSymbolTable implements SymbolTable {
 
+    public BaseSymbolTable(BaseSymbolTable source) {}
+
     @Override
     public void put(String name, SymbolTableEntry entry) {
 
