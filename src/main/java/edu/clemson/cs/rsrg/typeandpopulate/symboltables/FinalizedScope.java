@@ -30,17 +30,17 @@ class FinalizedScope extends SyntacticScope {
     /**
      * <p>This creates an immutable scope for a {@link ResolveConceptualElement}.</p>
      *
-     * @param source The source scope repository.
+     * @param symbolTable The source scope repository.
      * @param definingElement The element that created this scope.
      * @param parent The parent scope.
      * @param enclosingModule The module identifier for the module
      *                        that this scope belongs to.
      * @param bindings The symbol table bindings.
      */
-    FinalizedScope(MathSymbolTable source,
+    FinalizedScope(MathSymbolTable symbolTable,
             ResolveConceptualElement definingElement, Scope parent,
             ModuleIdentifier enclosingModule, BaseSymbolTable bindings) {
-        super(source, definingElement, parent, enclosingModule,
+        super(symbolTable, definingElement, parent, enclosingModule,
                 new BaseSymbolTable(bindings));
     }
 

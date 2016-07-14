@@ -64,7 +64,7 @@ abstract class SyntacticScope extends AbstractScope {
     Scope myParent;
 
     /** <p>The module identifier for the module that this scope belongs to.</p> */
-    final ModuleIdentifier myRootModule;
+    private final ModuleIdentifier myRootModule;
 
     /** <p>The symbol table bindings.</p> */
     protected final BaseSymbolTable myBindings;
@@ -217,7 +217,7 @@ abstract class SyntacticScope extends AbstractScope {
      *
      * @return The defining element.
      */
-    public final ResolveConceptualElement getDefiningElement() {
+    public ResolveConceptualElement getDefiningElement() {
         return myDefiningElement;
     }
 
