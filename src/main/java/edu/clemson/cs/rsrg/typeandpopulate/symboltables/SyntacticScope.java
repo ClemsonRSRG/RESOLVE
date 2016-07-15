@@ -51,7 +51,7 @@ import java.util.*;
  *
  * @version 2.0
  */
-abstract class SyntacticScope extends AbstractScope {
+public abstract class SyntacticScope extends AbstractScope {
 
     // ===========================================================
     // Member Fields
@@ -222,6 +222,16 @@ abstract class SyntacticScope extends AbstractScope {
     }
 
     /**
+     * <p>Returns the module identifier for the module that instantiated
+     * this scope.</p>
+     *
+     * @return The {@link ModuleIdentifier}.
+     */
+    public final ModuleIdentifier getRootModule() {
+        return myRootModule;
+    }
+
+    /**
      * <p>Searches for symbols by the given query, using this <code>Scope</code>
      * as the source scope of the search, i.e. the scope that is the context
      * from which the search was triggered.</p>
@@ -294,16 +304,6 @@ abstract class SyntacticScope extends AbstractScope {
      */
     final Scope getParent() {
         return myParent;
-    }
-
-    /**
-     * <p>Returns the module identifier for the module that instantiated
-     * this scope.</p>
-     *
-     * @return The {@link ModuleIdentifier}.
-     */
-    final ModuleIdentifier getRootModule() {
-        return myRootModule;
     }
 
     /**
