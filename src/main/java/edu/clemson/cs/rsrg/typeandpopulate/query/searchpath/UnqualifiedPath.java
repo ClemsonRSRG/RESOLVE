@@ -69,6 +69,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     // ===========================================================
 
     /**
+     * <p>A search path for searching entries that are not qualified.</p>
      *
      * @param imports The import strategy to use.
      * @param facilities The facility strategy to use.
@@ -119,9 +120,13 @@ public class UnqualifiedPath implements ScopeSearchPath {
         return result;
     }
 
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
     /**
-     * <p>This method searches all the {@link FacilityEntry}s in scope and attempts
-     * to locate the instantiated version of all the supplied entries in {@code result}.</p>
+     * <p>This method searches all the instantiated {@code Facilities} in scope and attempts to
+     * find all entries that match and store those in the {@code result} list.</p>
      *
      * <p>If more than one match is found and <code>searcher</code> expects no
      * more than one match, throws a {@link DuplicateSymbolException}.</p>
@@ -132,16 +137,13 @@ public class UnqualifiedPath implements ScopeSearchPath {
      * @param source The current scope from which the search was spawned.
      * @param genericInstantiations Map containing all the instantiations.
      * @param searchedScopes Set of scopes searched.
-     * @param repo A collection of scopes.
      * @param <E> Entry type.
      *
-     * @return {@code true} if everything matches and we are done searching,
-     * {@code false} otherwise.
+     * @return {@code true} if we are done searching, {@code false} otherwise.
      */
-    public final <E extends SymbolTableEntry> boolean searchFacilities(
+    private <E extends SymbolTableEntry> boolean searchFacilities(
             TableSearcher<E> searcher, List<E> result, Scope source,
-            Map<String, PTType> genericInstantiations,
-            Set<Scope> searchedScopes, ScopeRepository repo)
+            Map<String, PTType> genericInstantiations, Set<Scope> searchedScopes)
             throws DuplicateSymbolException {
 
         List<FacilityEntry> facilities =
@@ -163,9 +165,10 @@ public class UnqualifiedPath implements ScopeSearchPath {
                             .equals(FacilityStrategy.FACILITY_INSTANTIATE));
 
             finished =
-                    facilityScope.addMatches(searcher, result, searchedScopes,
-                            new HashMap<String, PTType>(), null,
-                            SearchContext.FACILITY);
+                    facilityScope
+                            .addMatches(searcher, result, searchedScopes,
+                                    genericInstantiations, null,
+                                    SearchContext.FACILITY);
 
             // YS Edits
             // Search any enhancements in this facility declaration
@@ -178,12 +181,12 @@ public class UnqualifiedPath implements ScopeSearchPath {
                             facEnh
                                     .getScope(myFacilityStrategy
                                             .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+
                     // Search and add matches.
                     finished =
                             facilityScope.addMatches(searcher, result,
-                                    searchedScopes,
-                                    new HashMap<String, PTType>(), null,
-                                    SearchContext.FACILITY);
+                                    searchedScopes, genericInstantiations,
+                                    null, SearchContext.FACILITY);
                 }
             }
         }
@@ -191,13 +194,9 @@ public class UnqualifiedPath implements ScopeSearchPath {
         return finished;
     }
 
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
-
     /**
-     * <p>This method searches all the {@code Modules} in scope and attempts
-     * to locate all the supplied entries in {@code result}.</p>
+     * <p>This method searches all the {@code Modules} in scope and attempts to
+     * find all entries that match and store those in the {@code result} list.</p>
      *
      * <p>If more than one match is found and <code>searcher</code> expects no
      * more than one match, throws a {@link DuplicateSymbolException}.</p>
@@ -214,8 +213,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
      * @param depth Integer flag that indicates how deep we search.
      * @param <E> Entry type.
      *
-     * @return {@code true} if everything matches and we are done searching,
-     * {@code false} otherwise.
+     * @return {@code true} if we are done searching, {@code false} otherwise.
      */
     private <E extends SymbolTableEntry> boolean searchModule(
             TableSearcher<E> searcher, Scope source, ScopeRepository repo,
@@ -235,7 +233,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
 
             finished =
                     searchFacilities(searcher, results, source,
-                            genericInstantiations, searchedScopes, repo);
+                            genericInstantiations, searchedScopes);
         }
 
         //Finally, if requested, we search imports
