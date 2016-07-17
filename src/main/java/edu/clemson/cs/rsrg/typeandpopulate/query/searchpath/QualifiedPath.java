@@ -41,7 +41,8 @@ import java.util.List;
  *
  * <p>Instances of this class can be parameterized to determine how generics are
  * handled if the qualifier refers to a facility.</p>
-
+ *
+ * @version 2.0
  */
 public class QualifiedPath implements ScopeSearchPath {
 
@@ -52,7 +53,7 @@ public class QualifiedPath implements ScopeSearchPath {
     /** <p>The facility strategy to use.</p> */
     private final FacilityStrategy myFacilityStrategy;
 
-    /** <p>The entry's qualifier.</p> */
+    /** <p>A qualifier symbol that indicates the instantiating facility or module.</p> */
     private final PosSymbol myQualifier;
 
     // ===========================================================
@@ -60,16 +61,21 @@ public class QualifiedPath implements ScopeSearchPath {
     // ===========================================================
 
     /**
-     * <p>A search path for searching entries that are not qualified.</p>
+     * <p>A search path for searching entries that are qualified.</p>
      *
-     * <p><em>Note:</em> The FACILITY_IGNORE strategy is not permitted.</p>
+     * <p><em>Note:</em> The {@code FACILITY_IGNORE} strategy is not permitted.</p>
      *
-     * @param qualifier The entry's qualifier.
+     * @param qualifier A qualifier symbol that indicates the instantiating
+     *                  facility or module.
      * @param facilityStrategy The facility strategy to use.
      */
     public QualifiedPath(PosSymbol qualifier, FacilityStrategy facilityStrategy) {
         if (facilityStrategy == FacilityStrategy.FACILITY_IGNORE) {
             throw new IllegalArgumentException("Can't use FACILITY_IGNORE");
+        }
+
+        if (qualifier == null) {
+            throw new IllegalArgumentException("Qualifier can't be null!");
         }
 
         myQualifier = qualifier;

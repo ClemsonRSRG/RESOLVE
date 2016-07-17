@@ -75,15 +75,15 @@ public class UnqualifiedPath implements ScopeSearchPath {
     /**
      * <p>A search path for searching entries that are not qualified.</p>
      *
-     * @param imports The import strategy to use.
-     * @param facilities The facility strategy to use.
+     * @param importStrategy The import strategy to use.
+     * @param facilityStrategy The facility strategy to use.
      * @param localPriority Boolean flag that indicates whether or not
      *                      local items have priority.
      */
-    public UnqualifiedPath(ImportStrategy imports, FacilityStrategy facilities,
-            boolean localPriority) {
-        myImportStrategy = imports;
-        myFacilityStrategy = facilities;
+    public UnqualifiedPath(ImportStrategy importStrategy,
+            FacilityStrategy facilityStrategy, boolean localPriority) {
+        myImportStrategy = importStrategy;
+        myFacilityStrategy = facilityStrategy;
         myLocalPriorityFlag = localPriority;
     }
 
