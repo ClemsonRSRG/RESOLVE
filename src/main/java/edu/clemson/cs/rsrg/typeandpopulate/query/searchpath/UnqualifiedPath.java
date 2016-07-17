@@ -55,6 +55,10 @@ import java.util.*;
  */
 public class UnqualifiedPath implements ScopeSearchPath {
 
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
     /** <p>The import strategy to use.</p> */
     private final ImportStrategy myImportStrategy;
 
