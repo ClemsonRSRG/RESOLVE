@@ -19,9 +19,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.Facility
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 
 /**
- * <p>An <code>UnqualifiedNameQuery</code> takes a name and searches for entries that match.
- * There is no qualification provided, therefore a search is performed using the provided
- * <code>ImportStrategy</code> and <code>FacilityStrategy</code>.</p>
+ * <p>An <code>UnqualifiedNameQuery</code> takes a name and searches for entries that match
+ * the given name. This query does not take in a qualifier, therefore a search is performed
+ * using the provided <code>ImportStrategy</code> and <code>FacilityStrategy</code>.</p>
  *
  * @version 2.0
  */
