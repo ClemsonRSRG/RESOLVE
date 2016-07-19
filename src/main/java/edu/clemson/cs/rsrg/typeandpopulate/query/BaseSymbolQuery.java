@@ -78,7 +78,7 @@ abstract class BaseSymbolQuery<E extends SymbolTableEntry>
      * @return A list of matches.
      */
     @Override
-    public List<E> searchFromContext(Scope source, ScopeRepository repo)
+    public final List<E> searchFromContext(Scope source, ScopeRepository repo)
             throws DuplicateSymbolException {
         return mySearchPath.searchFromContext(mySearcher, source, repo);
     }

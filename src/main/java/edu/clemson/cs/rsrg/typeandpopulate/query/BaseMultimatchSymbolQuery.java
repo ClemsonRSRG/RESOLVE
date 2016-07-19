@@ -21,16 +21,25 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
 import java.util.List;
 
 /**
- * <p>Refines {@link BaseSymbolQuery} by guaranteeing that the
- * associated searcher is a {@link MultimatchTableSearcher},
- * and thus the search methods of this class are guaranteed not to throw a
- * {@link DuplicateSymbolException}.</p>
+ * <p>The most basic implementation of {@link MultimatchSymbolQuery}, which
+ * pairs a {@link ScopeSearchPath} with a {@link MultimatchTableSearcher} to
+ * define a fully parameterized strategy for searching a set of scopes.</p>
  *
  * @version 2.0
  */
 abstract class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
-        extends
-            BaseSymbolQuery<E> implements MultimatchSymbolQuery<E> {
+        implements
+            MultimatchSymbolQuery<E> {
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>Search path.</p> */
+    private final ScopeSearchPath mySearchPath;
+
+    /** <p>Symbol table searcher.</p> */
+    private final MultimatchTableSearcher<E> mySearcher;
 
     // ===========================================================
     // Constructors
@@ -45,7 +54,8 @@ abstract class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
      */
     protected BaseMultimatchSymbolQuery(ScopeSearchPath path,
             MultimatchTableSearcher<E> searcher) {
-        super(path, searcher);
+        mySearchPath = path;
+        mySearcher = searcher;
     }
 
     // ===========================================================
@@ -63,18 +73,7 @@ abstract class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
      */
     @Override
     public final List<E> searchFromContext(Scope source, ScopeRepository repo) {
-        List<E> result;
-
-        try {
-            result = super.searchFromContext(source, repo);
-        }
-        catch (DuplicateSymbolException dse) {
-            //Not possible.  We know our searcher is, in fact, a
-            //MultimatchTableSearch
-            throw new RuntimeException(dse);
-        }
-
-        return result;
+        return mySearchPath.searchFromContext(mySearcher, source, repo);
     }
 
 }
