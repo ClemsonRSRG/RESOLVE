@@ -30,7 +30,7 @@ import java.util.List;
  */
 abstract class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
         extends
-            BaseSymbolQuery<E> {
+            BaseSymbolQuery<E> implements MultimatchSymbolQuery<E> {
 
     // ===========================================================
     // Constructors
