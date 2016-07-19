@@ -15,11 +15,11 @@ package edu.clemson.cs.rsrg.typeandpopulate.query;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.NameSearcher;
 import edu.clemson.cs.rsrg.typeandpopulate.query.searchpath.UnqualifiedPath;
-import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 
 /**
- * <p>A <code>UnqualifiedNameQuery</code> takes a name and searches for entries that match.
+ * <p>An <code>UnqualifiedNameQuery</code> takes a name and searches for entries that match.
  * There is no qualification provided, therefore a search is performed using the provided
  * <code>ImportStrategy</code> and <code>FacilityStrategy</code>.</p>
  *
