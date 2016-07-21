@@ -21,7 +21,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.rsrg.typeandpopulate.query.GenericQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.query.GenericProgramTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.ContainsNamedTypeChecker;
@@ -170,7 +170,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
         }
 
         List<ProgramTypeEntry> callingContextProgramGenerics =
-                callingContext.query(GenericQuery.INSTANCE);
+                callingContext.query(GenericProgramTypeQuery.INSTANCE);
         Map<String, MTType> callingContextMathGenerics =
                 new HashMap<>(definitionSchematicTypes);
 

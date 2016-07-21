@@ -46,17 +46,44 @@ public class Utilities {
 
     /**
      * <p>A two-parameter mapping.</p>
+     *
+     * @param <I> a parameter argument type.
+     * @param <O> a parameter argument type.
      */
     public interface Mapping<I, O> {
 
+        /**
+         * <p>This method creates some sort of mapping
+         * between <code>input</code> and <code>R</code>.</p>
+         *
+         * @param input An object of type <code>I</code>
+         *
+         * @return A relationship mapping <code>O</code>.
+         */
         O map(I input);
     }
 
     /**
      * <p>A three-parameter mapping.</p>
+     *
+     * @param <P1> a parameter argument type.
+     * @param <P2> a parameter argument type.
+     * @param <P3> a parameter argument type.
+     * @param <R> the return type.
      */
     public interface Mapping3<P1, P2, P3, R> {
 
+        /**
+         * <p>This method creates some sort of mapping
+         * between <code>p1</code>, <code>p2</code>,
+         * <code>p3</code> and <code>R</code>.</p>
+         *
+         * @param p1 An object of type <code>P1</code>
+         * @param p2 An object of type <code>P2</code>
+         * @param p3 An object of type <code>P3</code>
+         *
+         * @return A relationship mapping <code>R</code>.
+         */
         R map(P1 p1, P2 p2, P3 p3);
     }
 
