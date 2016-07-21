@@ -24,9 +24,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
  *
  * @version 2.0
  */
-public class EntryTypeQuery<T extends SymbolTableEntry>
+public class EntryTypeQuery<E extends SymbolTableEntry>
         extends
-            BaseMultimatchSymbolQuery<T> {
+            BaseMultimatchSymbolQuery<E> {
 
     // ===========================================================
     // Constructors
@@ -39,7 +39,7 @@ public class EntryTypeQuery<T extends SymbolTableEntry>
      * @param importStrategy The import strategy to use.
      * @param facilityStrategy The facility strategy to use.
      */
-    public EntryTypeQuery(Class<T> entryType, ImportStrategy importStrategy, FacilityStrategy facilityStrategy) {
+    public EntryTypeQuery(Class<E> entryType, ImportStrategy importStrategy, FacilityStrategy facilityStrategy) {
         super(new UnqualifiedPath(importStrategy, facilityStrategy, false), new EntryTypeSearcher<>(entryType));
     }
 }

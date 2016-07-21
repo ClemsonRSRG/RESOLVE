@@ -30,9 +30,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
  *
  * @version 2.0
  */
-public class NameAndEntryTypeQuery<T extends SymbolTableEntry>
+public class NameAndEntryTypeQuery<E extends SymbolTableEntry>
         extends
-            BaseMultimatchSymbolQuery<T> {
+            BaseMultimatchSymbolQuery<E> {
 
     // ===========================================================
     // Constructors
@@ -52,7 +52,7 @@ public class NameAndEntryTypeQuery<T extends SymbolTableEntry>
      *                      local items have priority.
      */
     public NameAndEntryTypeQuery(PosSymbol qualifier, String name,
-            Class<T> entryType, ImportStrategy importStrategy,
+            Class<E> entryType, ImportStrategy importStrategy,
             FacilityStrategy facilityStrategy, boolean localPriority) {
         super(new PossiblyQualifiedPath(qualifier, importStrategy,
                 facilityStrategy, localPriority), new NameAndEntryTypeSearcher<>(name, entryType, false));
@@ -72,7 +72,7 @@ public class NameAndEntryTypeQuery<T extends SymbolTableEntry>
      *                      local items have priority.
      */
     public NameAndEntryTypeQuery(PosSymbol qualifier, PosSymbol name,
-            Class<T> entryType, ImportStrategy importStrategy,
+            Class<E> entryType, ImportStrategy importStrategy,
             FacilityStrategy facilityStrategy, boolean localPriority) {
         this(qualifier, name.getName(), entryType, importStrategy,
                 facilityStrategy, localPriority);
@@ -89,7 +89,7 @@ public class NameAndEntryTypeQuery<T extends SymbolTableEntry>
      * @param entryType The class type of the entry.
      */
     public NameAndEntryTypeQuery(PosSymbol qualifier, String name,
-            Class<T> entryType) {
+            Class<E> entryType) {
         this(qualifier, name, entryType, ImportStrategy.IMPORT_NONE,
                 FacilityStrategy.FACILITY_IGNORE, false);
     }
@@ -105,7 +105,7 @@ public class NameAndEntryTypeQuery<T extends SymbolTableEntry>
      * @param entryType The class type of the entry.
      */
     public NameAndEntryTypeQuery(PosSymbol qualifier, PosSymbol name,
-            Class<T> entryType) {
+            Class<E> entryType) {
         this(qualifier, name, entryType, ImportStrategy.IMPORT_NONE,
                 FacilityStrategy.FACILITY_IGNORE, false);
     }
