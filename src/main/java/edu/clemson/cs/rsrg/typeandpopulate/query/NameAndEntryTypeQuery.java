@@ -28,6 +28,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
  * search is performed using the provided <code>ImportStrategy</code> and
  * <code>FacilityStrategy</code>.</p>
  *
+ * @param <E> The return type of the base <code>MultimatchSymbolQuery</code>.
+ *
  * @version 2.0
  */
 public class NameAndEntryTypeQuery<E extends SymbolTableEntry>

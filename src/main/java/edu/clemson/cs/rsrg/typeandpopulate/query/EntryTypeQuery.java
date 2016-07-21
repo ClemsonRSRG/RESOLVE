@@ -22,6 +22,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
  * <p>A <code>EntryTypeQuery</code> returns all type <code>T</code> symbol entries
  * using using the provided <code>ImportStrategy</code> and <code>FacilityStrategy</code>.</p>
  *
+ * @param <E> The return type of the base <code>MultimatchSymbolQuery</code>.
+ *
  * @version 2.0
  */
 public class EntryTypeQuery<E extends SymbolTableEntry>

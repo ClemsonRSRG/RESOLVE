@@ -25,6 +25,8 @@ import java.util.List;
  * pairs a {@link ScopeSearchPath} with a {@link MultimatchTableSearcher} to
  * define a fully parameterized strategy for searching a set of scopes.</p>
  *
+ * @param <E> The return type of the base <code>MultimatchSymbolQuery</code>.
+ *
  * @version 2.0
  */
 abstract class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>

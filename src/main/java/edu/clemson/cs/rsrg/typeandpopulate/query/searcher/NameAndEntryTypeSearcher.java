@@ -21,6 +21,8 @@ import java.util.List;
  * <p>A <code>NameAndEntryTypeSearcher</code> returns entries in a {@link SymbolTable}
  * that have the specified name and entry type.</p>
  *
+ * @param <E> The return type of the base <code>MultimatchTableSearcher</code>.
+ *
  * @version 2.0
  */
 public class NameAndEntryTypeSearcher<E extends SymbolTableEntry>

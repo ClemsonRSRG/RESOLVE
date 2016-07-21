@@ -23,6 +23,8 @@ import java.util.List;
  * <p>An <code>EntryTypeSearcher</code> returns entries in a {@link SymbolTable}
  * that have the specified entry type.</p>
  *
+ * @param <E> The return type of the base <code>MultimatchTableSearcher</code>.
+ *
  * @version 2.0
  */
 public class EntryTypeSearcher<E extends SymbolTableEntry> implements MultimatchTableSearcher<E> {
