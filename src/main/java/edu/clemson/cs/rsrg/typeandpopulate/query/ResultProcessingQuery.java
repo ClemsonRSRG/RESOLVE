@@ -15,6 +15,8 @@ package edu.clemson.cs.rsrg.typeandpopulate.query;
 import edu.clemson.cs.rsrg.misc.Utilities.Mapping;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.query.searcher.TableSearcher;
+import edu.clemson.cs.rsrg.typeandpopulate.query.searchpath.ScopeSearchPath;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
 import java.util.LinkedList;
@@ -30,7 +32,7 @@ import java.util.List;
  *
  * @version 2.0
  */
-public class ResultProcessingQuery<T extends SymbolTableEntry, R extends SymbolTableEntry>
+abstract class ResultProcessingQuery<T extends SymbolTableEntry, R extends SymbolTableEntry>
         implements
             SymbolQuery<R> {
 
@@ -56,7 +58,7 @@ public class ResultProcessingQuery<T extends SymbolTableEntry, R extends SymbolT
      * @param baseQuery The query that is being decorated.
      * @param processing A mapping between two types of entries.
      */
-    public ResultProcessingQuery(SymbolQuery<T> baseQuery,
+    protected ResultProcessingQuery(SymbolQuery<T> baseQuery,
             Mapping<T, R> processing) {
         myBaseQuery = baseQuery;
         myMapping = processing;
@@ -94,4 +96,29 @@ public class ResultProcessingQuery<T extends SymbolTableEntry, R extends SymbolT
 
         return finalMatches;
     }
+
+    // ===========================================================
+    // Helper Constructs
+    // ===========================================================
+
+    /**
+     * <p>This is a simple implementation for a {@link BaseSymbolQuery}.</p>
+     */
+    static class SimpleSymbolQuery extends BaseSymbolQuery<SymbolTableEntry> {
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This query searches for all {@link SymbolTableEntry} that using a
+         * {@link TableSearcher}.</p>
+         */
+        SimpleSymbolQuery(ScopeSearchPath path,
+                TableSearcher<SymbolTableEntry> searcher) {
+            super(path, searcher);
+        }
+
+    }
+
 }
