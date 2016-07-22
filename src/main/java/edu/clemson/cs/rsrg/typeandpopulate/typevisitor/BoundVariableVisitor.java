@@ -39,9 +39,8 @@ abstract class BoundVariableVisitor extends TypeVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * a {@link MTBigUnion}.</p>
-     *
-     * <p>The default implementation does nothing.</p>
+     * a {@link MTBigUnion} by adding the binding information
+     * for all the quantified variables.</p>
      *
      * @param u A math type.
      */
@@ -52,9 +51,7 @@ abstract class BoundVariableVisitor extends TypeVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * a {@link MTBigUnion}.</p>
-     *
-     * <p>The default implementation does nothing.</p>
+     * a {@link MTBigUnion} by removing all the binding information.</p>
      *
      * @param u A math type.
      */
