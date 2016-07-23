@@ -212,6 +212,25 @@ public abstract class MTType {
      */
     public abstract MTType withComponentReplaced(int index, MTType newType);
 
+    /**
+     * <p>This method attempts to replace a component type for all the entries
+     * in the map.</p>
+     *
+     * @param newTypes A map of replace the one in our component list.
+     *
+     * @return A new {@code MTType} with the component type replaced.
+     */
+    public final MTType withComponentsReplaced(Map<Integer, MTType> newTypes) {
+        MTType target = this;
+        for (Map.Entry<Integer, MTType> entry : newTypes.entrySet()) {
+            target =
+                    target.withComponentReplaced(entry.getKey(), entry
+                            .getValue());
+        }
+
+        return target;
+    }
+
     // ===========================================================
     // Protected Methods
     // ===========================================================
