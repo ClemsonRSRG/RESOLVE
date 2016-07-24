@@ -88,7 +88,7 @@ public abstract class MTType {
      * @return The modified context type map if bind is successful, otherwise it throws
      * an exception.
      *
-     * @throws BindingException
+     * @throws BindingException Some error occurred during binding.
      */
     public final Map<String, MTType> bindTo(MTType o,
             Map<String, MTType> context) throws BindingException {
@@ -113,7 +113,7 @@ public abstract class MTType {
      * @return The modified context type map if bind is successful, otherwise it throws
      * an exception.
      *
-     * @throws BindingException
+     * @throws BindingException Some error occurred during binding.
      */
     public final Map<String, MTType> bindTo(MTType template,
             Map<String, MTType> thisContext, Map<String, MTType> templateContext)
@@ -160,6 +160,14 @@ public abstract class MTType {
         return myTypeGraph;
     }
 
+    /**
+     * <p>This method returns a new {@link MTType} with the
+     * substitutions specified by the map.</p>
+     *
+     * @param substitutions A map of substituting types.
+     *
+     * @return The modified {@link MTType}.
+     */
     public final MTType getCopyWithVariablesSubstituted(
             Map<String, MTType> substitutions) {
         VariableReplacingVisitor renamer =
