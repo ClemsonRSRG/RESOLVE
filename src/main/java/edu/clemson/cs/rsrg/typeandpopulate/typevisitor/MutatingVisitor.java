@@ -66,6 +66,8 @@ abstract class MutatingVisitor extends BoundVariableVisitor {
 
         myIndices.push(0); //We start at the zeroth child
         myChangesAtLevel.push(new HashMap<Integer, MTType>());
+
+        mutateBeginMTType(t);
     }
 
     /**
@@ -84,6 +86,8 @@ abstract class MutatingVisitor extends BoundVariableVisitor {
             myClosingType = t.withComponentsReplaced(changes);
             replaceWith(myClosingType);
         }
+
+        mutateEndChildren(t);
     }
 
     /**
@@ -95,6 +99,8 @@ abstract class MutatingVisitor extends BoundVariableVisitor {
      */
     @Override
     public final void endMTType(MTType t) {
+        mutateEndMTType(t);
+
         //We're not visiting any more children at this level (because the
         //level just ended!)
         myIndices.pop();
@@ -141,6 +147,30 @@ abstract class MutatingVisitor extends BoundVariableVisitor {
     protected final MTType getTransformedVersion() {
         return myClosingType;
     }
+
+    /**
+     * <p>This method adds additional logic to mutate
+     * {@code t} before we visit it.</p>
+     *
+     * @param t A math type.
+     */
+    protected void mutateBeginMTType(MTType t) {}
+
+    /**
+     * <p>This method adds additional logic to mutate
+     * {@code t}'s children before we visit them.</p>
+     *
+     * @param t A math type.
+     */
+    protected void mutateEndChildren(MTType t) {}
+
+    /**
+     * <p>This method adds additional logic to mutate
+     * a {@code t} after we visit it.</p>
+     *
+     * @param t A math type.
+     */
+    protected void mutateEndMTType(MTType t) {}
 
     /**
      * <p>This method uses {@code replacement} and appropriately

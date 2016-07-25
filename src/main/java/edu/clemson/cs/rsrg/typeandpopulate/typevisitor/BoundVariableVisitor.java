@@ -47,6 +47,7 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     @Override
     public final void beginMTBigUnion(MTBigUnion u) {
         myBoundVariables.push(toBindingInfoMap(u.getQuantifiedVariables()));
+        boundBeginMTBigUnion(u);
     }
 
     /**
@@ -57,6 +58,7 @@ abstract class BoundVariableVisitor extends TypeVisitor {
      */
     @Override
     public final void endMTBigUnion(MTBigUnion u) {
+        boundEndMTBigUnion(u);
         myBoundVariables.pop();
     }
 
@@ -75,6 +77,22 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     protected final void annotateInnermostBinding(String name, Object key, Object value) {
         getInnermostBindingInfo(name).annotations.put(key, value);
     }
+
+    /**
+     * <p>This method adds additional logic to bound
+     * {@code u} before we visit it.</p>
+     *
+     * @param u A math type.
+     */
+    protected void boundBeginMTBigUnion(MTBigUnion u) {}
+
+    /**
+     * <p>This method adds additional logic to bound
+     * {@code u} after we visit it.</p>
+     *
+     * @param u A math type.
+     */
+    protected void boundEndMTBigUnion(MTBigUnion u) {}
 
     /**
      * <p>This method returns the mathematical type used
