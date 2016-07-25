@@ -74,7 +74,7 @@ abstract class BoundVariableVisitor extends TypeVisitor {
      * @param key The binding key.
      * @param value The binding value.
      */
-    protected final void annotateInnermostBinding(String name, Object key, Object value) {
+    protected void annotateInnermostBinding(String name, Object key, Object value) {
         getInnermostBindingInfo(name).annotations.put(key, value);
     }
 
@@ -115,7 +115,7 @@ abstract class BoundVariableVisitor extends TypeVisitor {
      *
      * @return The object bound by the key for this variable.
      */
-    protected final Object getInnermostBindingAnnotation(String name, Object key) {
+    protected Object getInnermostBindingAnnotation(String name, Object key) {
         return getInnermostBindingInfo(name).annotations.get(key);
     }
 
