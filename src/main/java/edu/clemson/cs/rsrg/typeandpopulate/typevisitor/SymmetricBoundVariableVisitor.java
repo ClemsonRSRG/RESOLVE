@@ -129,7 +129,7 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     /**
      * <p>This method resets this symmetric visitor.</p>
      */
-    public final void reset() {
+    public void reset() {
         myBoundVariables1.clear();
         myBoundVariables2.clear();
     }

@@ -43,7 +43,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTType}.
+     * two {@link MTType}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -58,7 +58,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTAbstract}.
+     * two {@link MTAbstract}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -73,7 +73,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTBigUnion}.
+     * two {@link MTBigUnion}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -88,7 +88,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTCartesian}.
+     * two {@link MTCartesian}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -103,7 +103,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTFunction}.
+     * two {@link MTFunction}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -118,7 +118,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTFunctionApplication}.
+     * two {@link MTFunctionApplication}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -134,7 +134,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTIntersect}.
+     * two {@link MTIntersect}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -149,7 +149,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTPowertypeApplication}.
+     * two {@link MTPowertypeApplication}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -165,7 +165,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTProper}.
+     * two {@link MTProper}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -180,7 +180,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTSetRestriction}.
+     * two {@link MTSetRestriction}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -196,7 +196,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTUnion}.
+     * two {@link MTUnion}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -211,7 +211,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTNamed}.
+     * two {@link MTNamed}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -226,7 +226,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTGeneric}.
+     * two {@link MTGeneric}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -241,7 +241,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -256,7 +256,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -271,7 +271,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -286,7 +286,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -301,7 +301,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -316,7 +316,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -332,7 +332,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -347,7 +347,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -363,7 +363,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -378,7 +378,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -393,7 +393,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -408,7 +408,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -423,7 +423,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit <code>t1</code>
-     * and before we visit <code>t2</code>.
+     * and before we visit <code>t2</code>.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -437,7 +437,7 @@ abstract class SymmetricVisitor {
     }
 
     /**
-     * <p>This method provides logic for handling type mismatches.
+     * <p>This method provides logic for handling type mismatches.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -452,7 +452,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTType}.
+     * two {@link MTType}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -467,7 +467,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTAbstract}.
+     * two {@link MTAbstract}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -482,7 +482,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTBigUnion}.
+     * two {@link MTBigUnion}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -497,7 +497,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTCartesian}.
+     * two {@link MTCartesian}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -512,7 +512,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTFunction}.
+     * two {@link MTFunction}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -527,7 +527,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTFunctionApplication}.
+     * two {@link MTFunctionApplication}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -543,7 +543,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTIntersect}.
+     * two {@link MTIntersect}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -558,7 +558,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTPowertypeApplication}.
+     * two {@link MTPowertypeApplication}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -574,7 +574,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTProper}.
+     * two {@link MTProper}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -589,7 +589,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTSetRestriction}.
+     * two {@link MTSetRestriction}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -604,7 +604,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTUnion}.
+     * two {@link MTUnion}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -619,7 +619,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTNamed}.
+     * two {@link MTNamed}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -634,7 +634,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTGeneric}.
+     * two {@link MTGeneric}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
