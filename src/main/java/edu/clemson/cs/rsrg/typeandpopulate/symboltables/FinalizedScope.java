@@ -25,7 +25,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
  *
  * @version 2.0
  */
-class FinalizedScope extends SyntacticScope {
+public class FinalizedScope extends SyntacticScope {
 
     // ===========================================================
     // Constructors
