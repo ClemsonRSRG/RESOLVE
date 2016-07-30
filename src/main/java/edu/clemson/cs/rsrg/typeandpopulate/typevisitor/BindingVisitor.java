@@ -44,7 +44,7 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
     // ===========================================================
 
     /**
-     * <p>This constructs a blank visitor with the type graph.</p>
+     * <p>This constructs a visitor with the type graph.</p>
      *
      * @param g The current type graph.
      */
