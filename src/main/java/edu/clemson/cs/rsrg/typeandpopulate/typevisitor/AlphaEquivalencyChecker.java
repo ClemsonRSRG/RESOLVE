@@ -189,7 +189,7 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     /**
-     * <p>This method provides logic for handling type mismatches.
+     * <p>This method provides logic for handling type mismatches.</p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
