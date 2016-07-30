@@ -23,6 +23,7 @@ import java.util.Map;
  */
 public class TypeGraph {
 
+    public final MTType ENTITY = new MTProper(this, "Entity");
     public final MTProper CLS = new MTProper(this, null, true, "MType");
     public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
     public final MTProper EMPTY_SET =

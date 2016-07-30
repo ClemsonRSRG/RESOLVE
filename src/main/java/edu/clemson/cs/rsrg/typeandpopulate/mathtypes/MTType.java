@@ -88,7 +88,7 @@ public abstract class MTType {
      * @return The modified context type map if bind is successful, otherwise it throws
      * an exception.
      *
-     * @throws BindingException
+     * @throws BindingException Some error occurred during binding.
      */
     public final Map<String, MTType> bindTo(MTType o,
             Map<String, MTType> context) throws BindingException {
@@ -113,7 +113,7 @@ public abstract class MTType {
      * @return The modified context type map if bind is successful, otherwise it throws
      * an exception.
      *
-     * @throws BindingException
+     * @throws BindingException Some error occurred during binding.
      */
     public final Map<String, MTType> bindTo(MTType template,
             Map<String, MTType> thisContext, Map<String, MTType> templateContext)
@@ -160,6 +160,14 @@ public abstract class MTType {
         return myTypeGraph;
     }
 
+    /**
+     * <p>This method returns a new {@link MTType} with the
+     * substitutions specified by the map.</p>
+     *
+     * @param substitutions A map of substituting types.
+     *
+     * @return The modified {@link MTType}.
+     */
     public final MTType getCopyWithVariablesSubstituted(
             Map<String, MTType> substitutions) {
         VariableReplacingVisitor renamer =
@@ -211,6 +219,25 @@ public abstract class MTType {
      * @return A new {@code MTType} with the component type replaced.
      */
     public abstract MTType withComponentReplaced(int index, MTType newType);
+
+    /**
+     * <p>This method attempts to replace a component type for all the entries
+     * in the map.</p>
+     *
+     * @param newTypes A map of replace the one in our component list.
+     *
+     * @return A new {@code MTType} with the component type replaced.
+     */
+    public final MTType withComponentsReplaced(Map<Integer, MTType> newTypes) {
+        MTType target = this;
+        for (Map.Entry<Integer, MTType> entry : newTypes.entrySet()) {
+            target =
+                    target.withComponentReplaced(entry.getKey(), entry
+                            .getValue());
+        }
+
+        return target;
+    }
 
     // ===========================================================
     // Protected Methods
