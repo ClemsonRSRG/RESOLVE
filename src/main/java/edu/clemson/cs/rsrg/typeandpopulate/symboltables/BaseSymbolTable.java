@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import java.util.*;
 
 /**
- * <p>A helper class to factor out some logic repeated in {@link ScopeBuilder}
+ * <p>An helper class to factor out some logic repeated in {@link ScopeBuilder}
  * and {@link Scope} and remove the temptation to muck about with the
  * entry map directly.</p>
  *
