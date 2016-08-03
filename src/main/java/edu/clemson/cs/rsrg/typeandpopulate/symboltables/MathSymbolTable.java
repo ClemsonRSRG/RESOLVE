@@ -13,14 +13,35 @@
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * TODO: Refactor this class
+ * <p>A <code>MathSymbolTable</code> represents an immutable mapping from
+ * those nodes in the AST that define a scope to {@link FinalizedScope} objects
+ * representing those scopes and containing the symbols defined therein.</p>
+ *
+ * <p><code>Scope</code>s that were introduced at the module-level (e.g.,
+ * the scope defined by a {@link PrecisModuleDec}) will have an
+ * associated <code>Scope</code> that is further refined into an instance of
+ * {@link FinalizedModuleScope}. As a convenience, such module scopes may
+ * be retrieved in a type-safe way with a call to
+ * {@link #getModuleScope(ModuleIdentifier)}.</p>
+ *
+ * <p>Note that there are no public constructors for <code>MathSymbolTable</code>.
+ * New instances should be acquired from a call to {@link MathSymbolTableBuilder#seal()}.</p>
+ *
+ * @version 2.0
  */
 public class MathSymbolTable extends ScopeRepository {
+
+    // ===========================================================
+    // Strategies
+    // ===========================================================
 
     /**
      * <p>When starting a search from a particular scope, specifies how any
@@ -30,7 +51,7 @@ public class MathSymbolTable extends ScopeRepository {
      * by the search's <code>ImportStrategy</code> (which necessarily always
      * includes the source module).</p>
      *
-     * <p>Note that facilities cannot be recursively searched.  Imports and
+     * <p>Note that facilities cannot be recursively searched. Imports and
      * facilities appearing in available facilities will not be searched.</p>
      */
     public enum FacilityStrategy {
@@ -66,9 +87,9 @@ public class MathSymbolTable extends ScopeRepository {
      * <p>Imported modules are those listed in the <em>uses</em> clause of the
      * source module scope in which the scope is introduced.  For searches
      * originating directly in a module scope, the source module scope is the
-     * scope itself.  In addition to those scopes directly imported in the
+     * scope itself. In addition to those scopes directly imported in the
      * <em>uses</em> clause, any modules implicitly imported will also be
-     * searched.  Implicitly imported modules include the standard modules
+     * searched. Implicitly imported modules include the standard modules
      * (<code>Std_Boolean_Fac</code>, etc.), and any modules named in the header
      * of the source module (e.g., an enhancement realization implicitly imports
      * it's associate enhancement and concept.)</p>
@@ -81,10 +102,26 @@ public class MathSymbolTable extends ScopeRepository {
          */
         IMPORT_NONE {
 
+            /**
+             * <p>Returns the strategy that should be used to recursively search
+             * any imported modules.</p>
+             *
+             * @return The strategy that should be used to recursively search any
+             *         imported modules.
+             */
+            @Override
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_NONE;
             }
 
+            /**
+             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly imported modules.</p>
+             *
+             * @return <code>true</code> <strong>iff</strong> this strategy
+             *         requires searching directly imported modules.
+             */
+            @Override
             public boolean considerImports() {
                 return false;
             }
@@ -96,10 +133,26 @@ public class MathSymbolTable extends ScopeRepository {
          */
         IMPORT_NAMED {
 
+            /**
+             * <p>Returns the strategy that should be used to recursively search
+             * any imported modules.</p>
+             *
+             * @return The strategy that should be used to recursively search any
+             *         imported modules.
+             */
+            @Override
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_NONE;
             }
 
+            /**
+             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly imported modules.</p>
+             *
+             * @return <code>true</code> <strong>iff</strong> this strategy
+             *         requires searching directly imported modules.
+             */
+            @Override
             public boolean considerImports() {
                 return true;
             }
@@ -111,10 +164,26 @@ public class MathSymbolTable extends ScopeRepository {
          */
         IMPORT_RECURSIVE {
 
+            /**
+             * <p>Returns the strategy that should be used to recursively search
+             * any imported modules.</p>
+             *
+             * @return The strategy that should be used to recursively search any
+             *         imported modules.
+             */
+            @Override
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_RECURSIVE;
             }
 
+            /**
+             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly imported modules.</p>
+             *
+             * @return <code>true</code> <strong>iff</strong> this strategy
+             *         requires searching directly imported modules.
+             */
+            @Override
             public boolean considerImports() {
                 return true;
             }
@@ -137,43 +206,41 @@ public class MathSymbolTable extends ScopeRepository {
          *         requires searching directly imported modules.
          */
         public abstract boolean considerImports();
+
     }
 
-    /**
-     * <p>Returns the {@link ModuleScope} associated with the given
-     * {@link ModuleIdentifier}.</p>
-     *
-     * @param module The module identifier.
-     * @throws NoSuchSymbolException If no scope has been opened for the named
-     *                               module.
-     * @returns The associated module scope.
-     */
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    private final Map<ResolveConceptualElement, FinalizedScope> myScopes =
+            new HashMap<>();
+
+    private final Map<ModuleIdentifier, FinalizedModuleScope> myModuleScopes =
+            new HashMap<>();
+
+    private final TypeGraph myTypeGraph = null;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
     @Override
     public ModuleScope getModuleScope(ModuleIdentifier module)
             throws NoSuchSymbolException {
         return null;
     }
 
-    /**
-     * <p>Returns the {@link Scope} introduced and bounded by the given
-     * defining element.</p>
-     *
-     * @param e defining element.
-     * @throws NoSuchSymbolException If no scope has been opened for the given
-     *                               defining element.
-     * @returns The associated scope.
-     */
     @Override
     public Scope getScope(ResolveConceptualElement e) {
         return null;
     }
 
-    /**
-     * <p>Returns the {@link TypeGraph} that relates the types found in this
-     * <code>ScopeRepository</code>.</p>
-     *
-     * @return The <code>TypeGraph</code>.
-     */
     @Override
     public TypeGraph getTypeGraph() {
         return null;
