@@ -81,7 +81,6 @@ public class ScopeBuilder extends SyntacticScope {
     // Public Methods
     // ===========================================================
 
-
     /**
      * <p>Modifies the current working scope to add a new binding for a
      * symbol with an unqualified name, <code>name</code>, defined by the AST
@@ -567,7 +566,7 @@ public class ScopeBuilder extends SyntacticScope {
      *
      * @return A {@link FinalizedScope} object.
      */
-    final FinalizedScope seal(MathSymbolTable finalTable) {
+    FinalizedScope seal(MathSymbolTable finalTable) {
         return new FinalizedScope(finalTable, myDefiningElement, myParent, myRootModule, myBindings);
     }
 

@@ -42,7 +42,7 @@ public interface ModuleScope extends Scope {
      * is a copy and modifying it will not impact the behavior of this
      * <code>ModuleScope</code>.</p>
      *
-     * @returns A <code>List</code> of imported modules.
+     * @return A <code>List</code> of imported modules.
      */
     List<ModuleIdentifier> getImports();
 
