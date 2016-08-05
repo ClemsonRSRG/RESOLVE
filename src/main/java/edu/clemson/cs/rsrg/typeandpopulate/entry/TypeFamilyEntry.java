@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
@@ -36,7 +37,7 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     private final MathSymbolEntry myExemplar;
 
     /** <p>The mathematical type constraint for this entry.</p> */
-    private final Exp myConstraintExp;
+    private final AssertionClause myConstraint;
 
     // ===========================================================
     // Constructors
@@ -52,17 +53,17 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
      * @param modelType The mathematical type assigned to this entry.
      * @param programType The program type assigned to this entry.
      * @param exemplarEntry The exemplar for this entry.
-     * @param constraintExp The constraint expression for this entry.
+     * @param constraint The constraint for this entry.
      */
     public TypeFamilyEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, MTType modelType,
             PTFamily programType, MathSymbolEntry exemplarEntry,
-            Exp constraintExp) {
+            AssertionClause constraint) {
         super(g, name, definingElement, sourceModule, modelType, programType);
 
         myExemplar = exemplarEntry;
-        myConstraintExp = constraintExp;
+        myConstraint = constraint;
     }
 
     // ===========================================================
@@ -70,13 +71,13 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     // ===========================================================
 
     /**
-     *  <p>Since this is used by multiple objects, we really don't want to be returning a reference,
+     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
      * therefore this method returns a deep copy of the constraint expression.</p>
      *
-     * @return A {@link Exp} representation object.
+     * @return A {@link AssertionClause} representation object.
      */
-    public final Exp getAssertion() {
-        return myConstraintExp.clone();
+    public final AssertionClause getConstraint() {
+        return myConstraint.clone();
     }
 
     /**

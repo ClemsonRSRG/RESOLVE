@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
@@ -39,10 +39,10 @@ public class TypeRepresentationEntry extends SymbolTableEntry {
     private final PTType myRepresentation;
 
     /** <p>The mathematical convention expression for this entry.</p> */
-    private final Exp myConvention;
+    private final AssertionClause myConvention;
 
     /** <p>The mathematical correspondence expression for this entry.</p> */
-    private final Exp myCorrespondence;
+    private final AssertionClause myCorrespondence;
 
     // ===========================================================
     // Constructors
@@ -62,7 +62,8 @@ public class TypeRepresentationEntry extends SymbolTableEntry {
     public TypeRepresentationEntry(String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, TypeFamilyEntry definition,
-            PTType representation, Exp convention, Exp correspondence) {
+            PTType representation, AssertionClause convention,
+            AssertionClause correspondence) {
         super(name, definingElement, sourceModule);
         myDefinition = definition;
         myRepresentation = representation;
@@ -73,6 +74,26 @@ public class TypeRepresentationEntry extends SymbolTableEntry {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
+     * therefore this method returns a deep copy of the convention expression.</p>
+     *
+     * @return A {@link AssertionClause} representation object.
+     */
+    public final AssertionClause getConvention() {
+        return myConvention.clone();
+    }
+
+    /**
+     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
+     * therefore this method returns a deep copy of the correspondence expression.</p>
+     *
+     * @return A {@link AssertionClause} representation object.
+     */
+    public final AssertionClause getCorrespondence() {
+        return myCorrespondence.clone();
+    }
 
     /**
      * <p>This method returns the type family associated with this entry.</p>

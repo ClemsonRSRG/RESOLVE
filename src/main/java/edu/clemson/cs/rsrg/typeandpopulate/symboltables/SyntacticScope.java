@@ -64,7 +64,7 @@ public abstract class SyntacticScope extends AbstractScope {
     Scope myParent;
 
     /** <p>The module identifier for the module that this scope belongs to.</p> */
-    private final ModuleIdentifier myRootModule;
+    protected final ModuleIdentifier myRootModule;
 
     /** <p>The symbol table bindings.</p> */
     protected final BaseSymbolTable myBindings;
