@@ -386,6 +386,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         List<Exp> undRepList = new ArrayList<Exp>();
         List<Exp> replList = new ArrayList<Exp>();
 
+		// TODO: Modify the following logic to match the proof rules.
         // Replace post condition variables in the ensures clause
         for (int i = 0; i < argList.size(); i++) {
             ParameterVarDec varDec = paramList.get(i);
