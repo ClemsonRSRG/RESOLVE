@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -21,6 +22,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
  * TODO: Refactor this class
  */
 public class MathSymbolTableBuilder extends ScopeRepository {
+
+    public ScopeBuilder endScope() {
+        return null;
+    }
 
     /**
      * <p>Returns the {@link ModuleScope} associated with the given
@@ -52,6 +57,10 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     public TypeGraph getTypeGraph() {
+        return null;
+    }
+
+    public ModuleScopeBuilder startModuleScope(ModuleDec definingElement) {
         return null;
     }
 

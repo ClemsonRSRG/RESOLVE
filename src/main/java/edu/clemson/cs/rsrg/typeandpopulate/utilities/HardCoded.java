@@ -1,3 +1,15 @@
+/**
+ * HardCoded.java
+ * ---------------------------------
+ * Copyright (c) 2016
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.rsrg.typeandpopulate.utilities;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
@@ -17,16 +29,23 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTNamed;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTPowertypeApplication;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.ArrayList;
 
+/**
+ * <p>The <code>HardCoded</code> class defines all mathematical symbols
+ * and relationships that cannot be put into a {@code Precis} module.</p>
+ *
+ * @version 2.0
+ */
 public class HardCoded {
 
     /**
      * <p>This method establishes all built-in relationships of the symbol table.</p>
      *
-     * @param g
-     * @param b
+     * @param g The current type graph.
+     * @param b The current scope repository builder.
      */
     public static void addBuiltInRelationships(TypeGraph g,
             MathSymbolTableBuilder b) {
@@ -42,9 +61,14 @@ public class HardCoded {
             //   For all f : D2 -> R2,
             //       f : D1 -> R1;
 
-            AssertionClause requires = new AssertionClause(null, ClauseType.REQUIRES, VarExp.getTrueVarExp(null, g));
+            AssertionClause requires =
+                    new AssertionClause(null, ClauseType.REQUIRES, VarExp
+                            .getTrueVarExp(null, g));
             ModuleDec module =
-                    new FacilityModuleDec(null, new PosSymbol(null, "native"), new ArrayList<ModuleParameterDec>(), new ArrayList<UsesItem>(), requires, new ArrayList<Dec>());
+                    new FacilityModuleDec(null, new PosSymbol(null, "native"),
+                            new ArrayList<ModuleParameterDec>(),
+                            new ArrayList<UsesItem>(), requires,
+                            new ArrayList<Dec>());
 
             VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
             ScopeBuilder s = b.startModuleScope(module);
@@ -60,7 +84,9 @@ public class HardCoded {
             s.addBinding("f", Quantification.UNIVERSAL, v, new MTFunction(g,
                     new MTNamed(g, "R2"), new MTNamed(g, "D2")));
 
-            VarExp f = new VarExp(null, null, new PosSymbol(null, "f"), Quantification.UNIVERSAL);
+            VarExp f =
+                    new VarExp(null, null, new PosSymbol(null, "f"),
+                            Quantification.UNIVERSAL);
             f.setMathType(new MTFunction(g, new MTNamed(g, "R2"), new MTNamed(
                     g, "D2")));
 
@@ -78,15 +104,14 @@ public class HardCoded {
     /**
      * <p>This method establishes all built-in symbols of the symbol table.</p>
      *
-     * @param g
-     * @param b
+     * @param g The current type graph.
+     * @param b The current scope repository builder.
      */
     public static void addBuiltInSymbols(TypeGraph g, ScopeBuilder b) {
         VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
 
         try {
             b.addBinding("Entity", v, g.CLS, g.ENTITY);
-            b.addBinding("MType", v, g.CLS, g.CLS);
             b.addBinding("Cls", v, g.CLS, g.CLS);
 
             b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
@@ -121,12 +146,16 @@ public class HardCoded {
     }
 
     /**
+     * <p>This method returns the mathematical function used to represent an
+     * expression's meta-segment.</p>
      *
-     * @param g
-     * @param e
-     * @param metaSegment
+     * @param g The current type graph.
+     * @param e An {@link Exp}.
+     * @param metaSegment A string representing a meta-segment for
+     *                    <code>e</code>.
      *
-     * @return
+     * @return A {@link MTType} if we can establish its type,
+     * <code>null</code> otherwise.
      */
     public static MTType getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
         MTType result = null;
@@ -137,5 +166,5 @@ public class HardCoded {
 
         return result;
     }
-	
+
 }
