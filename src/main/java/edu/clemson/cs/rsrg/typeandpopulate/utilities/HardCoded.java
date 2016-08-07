@@ -1,7 +1,33 @@
 package edu.clemson.cs.rsrg.typeandpopulate.utilities;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.FacilityModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry.Quantification;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTNamed;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTPowertypeApplication;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import java.util.ArrayList;
+
 public class HardCoded {
 
+    /**
+     * <p>This method establishes all built-in relationships of the symbol table.</p>
+     *
+     * @param g
+     * @param b
+     */
     public static void addBuiltInRelationships(TypeGraph g,
             MathSymbolTableBuilder b) {
         try {
@@ -16,12 +42,11 @@ public class HardCoded {
             //   For all f : D2 -> R2,
             //       f : D1 -> R1;
 
-            PosSymbol ntv = new PosSymbol(null, Symbol.symbol("native"));
+            AssertionClause requires = new AssertionClause(null, ClauseType.REQUIRES, VarExp.getTrueVarExp(null, g));
             ModuleDec module =
-                    new FacilityModuleDec(ntv, null, null, null, null, null);
+                    new FacilityModuleDec(null, new PosSymbol(null, "native"), new ArrayList<ModuleParameterDec>(), new ArrayList<UsesItem>(), requires, new ArrayList<Dec>());
 
-            VarExp v = new VarExp();
-            v.setName(ntv);
+            VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
             ScopeBuilder s = b.startModuleScope(module);
 
             s.addBinding("D1", Quantification.UNIVERSAL, v, g.CLS);
@@ -35,12 +60,9 @@ public class HardCoded {
             s.addBinding("f", Quantification.UNIVERSAL, v, new MTFunction(g,
                     new MTNamed(g, "R2"), new MTNamed(g, "D2")));
 
-            PosSymbol fSym = new PosSymbol(null, Symbol.symbol("f"));
-            VarExp f = new VarExp();
-            f.setName(fSym);
+            VarExp f = new VarExp(null, null, new PosSymbol(null, "f"), Quantification.UNIVERSAL);
             f.setMathType(new MTFunction(g, new MTNamed(g, "R2"), new MTNamed(
                     g, "D2")));
-            f.setQuantification(VarExp.FORALL);
 
             g.addRelationship(f, new MTFunction(g, new MTNamed(g, "R1"),
                     new MTNamed(g, "D1")), null, s);
@@ -55,10 +77,12 @@ public class HardCoded {
 
     /**
      * <p>This method establishes all built-in symbols of the symbol table.</p>
+     *
+     * @param g
+     * @param b
      */
     public static void addBuiltInSymbols(TypeGraph g, ScopeBuilder b) {
-        VarExp v = new VarExp();
-        v.setName(new PosSymbol(null, Symbol.symbol("native")));
+        VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
 
         try {
             b.addBinding("Entity", v, g.CLS, g.ENTITY);
@@ -96,11 +120,18 @@ public class HardCoded {
         }
     }
 
+    /**
+     *
+     * @param g
+     * @param e
+     * @param metaSegment
+     *
+     * @return
+     */
     public static MTType getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
         MTType result = null;
 
         if (e.getMathTypeValue() != null && metaSegment.equals("Is_Initial")) {
-
             result = new MTFunction(g, g.BOOLEAN, g.ENTITY);
         }
 
