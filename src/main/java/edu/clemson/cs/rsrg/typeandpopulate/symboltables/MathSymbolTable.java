@@ -213,12 +213,15 @@ public class MathSymbolTable extends ScopeRepository {
     // Member Fields
     // ===========================================================
 
+    /** <p>A map of non-module scopes.</p> */
     private final Map<ResolveConceptualElement, FinalizedScope> myScopes =
             new HashMap<>();
 
+    /** <p>A map of module scopes</p> */
     private final Map<ModuleIdentifier, FinalizedModuleScope> myModuleScopes =
             new HashMap<>();
 
+    /** <p>The current type graph.</p> */
     private final TypeGraph myTypeGraph = null;
 
     // ===========================================================
