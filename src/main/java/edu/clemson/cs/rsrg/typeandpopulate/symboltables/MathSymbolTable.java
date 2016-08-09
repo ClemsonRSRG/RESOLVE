@@ -18,6 +18,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -222,12 +224,26 @@ public class MathSymbolTable extends ScopeRepository {
             new HashMap<>();
 
     /** <p>The current type graph.</p> */
-    private final TypeGraph myTypeGraph = null;
+    private final TypeGraph myTypeGraph;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
+	MathSymbolTable(TypeGraph g, Map<ResolveConceptualElement, ScopeBuilder> scopes, ScopeBuilder root) throws NoSuchModuleException {
+        myTypeGraph = g;
+
+        List<ImportRequest> importedModules = new LinkedList<>();
+
+        seal(root, importedModules);
+
+        for (ImportRequest request : importedModules) {
+            if (!myModuleScopes.containsKey(request.importedModule)) {
+                throw new NoSuchModuleException(request.sourceModule,
+                        request.importedModule);
+            }
+        }
+    }
 
     // ===========================================================
     // Public Methods
@@ -245,8 +261,77 @@ public class MathSymbolTable extends ScopeRepository {
     }
 
     @Override
-    public TypeGraph getTypeGraph() {
-        return null;
+    public final TypeGraph getTypeGraph() {
+        return myTypeGraph;
+    }
+	
+	// ===========================================================
+    // Private Methods
+    // ===========================================================
+	
+	private void seal(ScopeBuilder b, List<ImportRequest> importedModules) {
+        FinalizedScope result = b.seal(this);
+        FinalizedModuleScope resultAsModuleScope;
+        ModuleIdentifier resultIdentifier;
+
+        ResolveConceptualElement definingElement = b.getDefiningElement();
+        if (definingElement != null) {
+            myScopes.put(definingElement, result);
+
+            if (result instanceof FinalizedModuleScope) {
+                resultAsModuleScope = (FinalizedModuleScope) result;
+                resultIdentifier =
+                        new ModuleIdentifier((ModuleDec) b.getDefiningElement());
+
+                myModuleScopes.put(resultIdentifier, resultAsModuleScope);
+
+                importedModules.addAll(buildImportRequests(resultIdentifier,
+                        resultAsModuleScope.getImports()));
+            }
+        }
+
+        for (ScopeBuilder curChild : b.children()) {
+            curChild.setParent(result);
+            seal(curChild, importedModules);
+        }
+    }
+
+	// ===========================================================
+    // Helper Constructs
+    // ===========================================================
+
+    /**
+     * <p>An helper construct that keeps track of both {@link ModuleIdentifier}
+     * for the source and imported modules.</p>
+     */
+	private static class ImportRequest {
+		
+		// ===========================================================
+		// Member Fields
+		// ===========================================================
+
+        /** <p>The source module.</p> */
+        final ModuleIdentifier sourceModule;
+
+        /** <p>The imported module.</p> */
+        final ModuleIdentifier importedModule;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This creates a helper construct that keeps track of imported
+         * module for the specified source module.</p>
+         *
+         * @param source The source module's identifier.
+         * @param imported The imported module's identifier.
+         */
+        ImportRequest(ModuleIdentifier source, ModuleIdentifier imported) {
+            sourceModule = source;
+            importedModule = imported;
+        }
+        
     }
 
 }
