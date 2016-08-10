@@ -232,6 +232,16 @@ public class MathSymbolTable extends ScopeRepository {
     // Constructors
     // ===========================================================
 
+    /**
+     * <p>This constructs a mathematical symbol table.</p>
+     *
+     * @param g The current type graph.
+     * @param scopes The list of open scope builders.
+     * @param root The current scope repository builder.
+     *
+     * @throws NoSuchModuleException Throws an error if we cannot locate the requested
+     * imported module from the source module.
+     */
 	MathSymbolTable(TypeGraph g, Map<ResolveConceptualElement, ScopeBuilder> scopes, ScopeBuilder root) throws NoSuchModuleException {
         myTypeGraph = g;
 
@@ -251,17 +261,45 @@ public class MathSymbolTable extends ScopeRepository {
     // Public Methods
     // ===========================================================
 
+    /**
+     * <p>Returns the {@link ModuleScope} associated with the given
+     * {@link ModuleIdentifier}.</p>
+     *
+     * @param module The module identifier.
+     *
+     * @return The associated module scope.
+     *
+     * @throws NoSuchSymbolException If no scope has been opened for
+     * the named module.
+     */
     @Override
-    public ModuleScope getModuleScope(ModuleIdentifier module)
+    public final ModuleScope getModuleScope(ModuleIdentifier module)
             throws NoSuchSymbolException {
         return null;
     }
 
+    /**
+     * <p>Returns the {@link Scope} introduced and bounded by the given
+     * defining element.</p>
+     *
+     * @param e defining element.
+     *
+     * @return The associated scope.
+     *
+     * @throws NoSuchSymbolException If no scope has been opened for
+     * the given defining element.
+     */
     @Override
-    public Scope getScope(ResolveConceptualElement e) {
+    public final Scope getScope(ResolveConceptualElement e) {
         return null;
     }
 
+    /**
+     * <p>Returns the {@link TypeGraph} that relates the types found in this
+     * <code>MathSymbolTable</code>.</p>
+     *
+     * @return The {@link TypeGraph} object.
+     */
     @Override
     public final TypeGraph getTypeGraph() {
         return myTypeGraph;
