@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchModuleException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
@@ -269,7 +270,33 @@ public class MathSymbolTable extends ScopeRepository {
 	// ===========================================================
     // Private Methods
     // ===========================================================
-	
+
+    /**
+     * <p>This creates an {@link ImportRequest} for each imported
+     * module.</p>
+     *
+     * @param source The source module's identifier.
+     * @param imports The list of modules imported by <code>source</code>.
+     *
+     * @return A list of {@link ImportRequest}.
+     */
+    private static List<ImportRequest> buildImportRequests(ModuleIdentifier source, List<ModuleIdentifier> imports) {
+        List<ImportRequest> result = new LinkedList<>();
+
+        for (ModuleIdentifier imported : imports) {
+            result.add(new ImportRequest(source, imported));
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>This method makes sure that we do not attempt to import more modules
+     * after we invoke the constructor.</p>
+     *
+     * @param b The current scope repository builder.
+     * @param importedModules The list of imported modules.
+     */
 	private void seal(ScopeBuilder b, List<ImportRequest> importedModules) {
         FinalizedScope result = b.seal(this);
         FinalizedModuleScope resultAsModuleScope;
