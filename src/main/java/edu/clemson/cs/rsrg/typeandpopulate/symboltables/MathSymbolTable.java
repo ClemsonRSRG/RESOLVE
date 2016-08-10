@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchModuleException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -331,7 +332,7 @@ public class MathSymbolTable extends ScopeRepository {
             sourceModule = source;
             importedModule = imported;
         }
-        
+
     }
 
 }
