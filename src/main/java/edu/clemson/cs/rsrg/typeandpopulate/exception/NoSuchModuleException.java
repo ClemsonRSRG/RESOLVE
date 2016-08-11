@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.typeandpopulate.exception;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 /**
- * <p>An {@code NoSuchModuleException} indicates we attempted to request a
+ * <p>A {@code NoSuchModuleException} indicates we attempted to request a
  * module that is not found in the source module.</p>
  *
  * @version 2.0

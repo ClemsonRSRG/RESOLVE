@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchModuleException;
-import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchScopeException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.HashMap;
@@ -269,12 +269,12 @@ public class MathSymbolTable extends ScopeRepository {
      *
      * @return The associated module scope.
      *
-     * @throws NoSuchSymbolException If no scope has been opened for
+     * @throws NoSuchScopeException If no scope has been opened for
      * the named module.
      */
     @Override
     public final ModuleScope getModuleScope(ModuleIdentifier module)
-            throws NoSuchSymbolException {
+            throws NoSuchScopeException {
         return null;
     }
 
@@ -286,11 +286,12 @@ public class MathSymbolTable extends ScopeRepository {
      *
      * @return The associated scope.
      *
-     * @throws NoSuchSymbolException If no scope has been opened for
+     * @throws NoSuchScopeException If no scope has been opened for
      * the given defining element.
      */
     @Override
-    public final Scope getScope(ResolveConceptualElement e) {
+    public final Scope getScope(ResolveConceptualElement e)
+            throws NoSuchScopeException {
         return null;
     }
 

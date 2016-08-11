@@ -1,5 +1,5 @@
 /**
- * NoSuchSymbolException.java
+ * NoSuchScopeException.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -12,13 +12,15 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
+import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+
 /**
- * <p>A {@code NoSuchSymbolException} indicates we encountered a
- * symbol that does not exist in our symbol table or in any of our scopes.</p>
+ * <p>A {@code NoSuchScopeException} indicates we encountered a
+ * scope that does not exist in our symbol table or in any of our scopes.</p>
  *
  * @version 2.0
  */
-public class NoSuchSymbolException extends SymbolTableException {
+public class NoSuchScopeException extends NoSuchSymbolException {
 
     // ===========================================================
     // Member Fields
@@ -26,6 +28,9 @@ public class NoSuchSymbolException extends SymbolTableException {
 
     /** <p>Serial version for Serializable objects</p> */
     private static final long serialVersionUID = 1L;
+
+    /** <p>The element we attempted to request a scope.</p> */
+    public final ResolveConceptualElement requestedScope;
 
     // ==========================================================
     // Constructors
@@ -35,11 +40,11 @@ public class NoSuchSymbolException extends SymbolTableException {
      * <p>This constructor takes in a message and a throwable cause
      * that resulted in this exception.</p>
      *
-     * @param message Message to be displayed when the exception is thrown.
-     * @param cause Cause of the exception.
+     * @param e The element that we cannot locate a scope for.
      */
-    public NoSuchSymbolException(String message, Throwable cause) {
-        super(message, cause);
+    public NoSuchScopeException(ResolveConceptualElement e) {
+        super("Cannot locate scope for: " + e, new RuntimeException());
+        requestedScope = e;
     }
 
 }
