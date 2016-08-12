@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchModuleException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchScopeException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.HashMap;
@@ -236,13 +237,13 @@ public class MathSymbolTable extends ScopeRepository {
      * <p>This constructs a mathematical symbol table.</p>
      *
      * @param g The current type graph.
-     * @param scopes The list of open scope builders.
      * @param root The current scope repository builder.
      *
      * @throws NoSuchModuleException Throws an error if we cannot locate the requested
      * imported module from the source module.
      */
-	MathSymbolTable(TypeGraph g, Map<ResolveConceptualElement, ScopeBuilder> scopes, ScopeBuilder root) throws NoSuchModuleException {
+	MathSymbolTable(TypeGraph g, ScopeBuilder root)
+            throws NoSuchModuleException {
         myTypeGraph = g;
 
         List<ImportRequest> importedModules = new LinkedList<>();
@@ -269,13 +270,17 @@ public class MathSymbolTable extends ScopeRepository {
      *
      * @return The associated module scope.
      *
-     * @throws NoSuchScopeException If no scope has been opened for
+     * @throws NoSuchSymbolException If no scope has been opened for
      * the named module.
      */
     @Override
     public final ModuleScope getModuleScope(ModuleIdentifier module)
             throws NoSuchScopeException {
-        return null;
+        if (!myModuleScopes.containsKey(module)) {
+            throw new NoSuchSymbolException("" + module, null);
+        }
+
+        return myModuleScopes.get(module);
     }
 
     /**
@@ -292,7 +297,11 @@ public class MathSymbolTable extends ScopeRepository {
     @Override
     public final Scope getScope(ResolveConceptualElement e)
             throws NoSuchScopeException {
-        return null;
+        if (!myScopes.containsKey(e)) {
+            throw new NoSuchScopeException(e);
+        }
+
+        return myScopes.get(e);
     }
 
     /**
