@@ -96,8 +96,29 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     // Public Methods
     // ===========================================================
 
+    /**
+     * <p>Closes the most recently opened, unclosed working scope, including
+     * those opened with {@link #startModuleScope(ModuleDec)}.</p>
+     *
+     * @return The new innermost active scope after the former one was closed
+     * by this call. If the scope that was closed was the module scope,
+     * returns <code>null</code>.
+     */
     public final ScopeBuilder endScope() {
-        return null;
+        checkScopeOpen();
+        myLexicalScopeStack.pop();
+
+        ScopeBuilder result;
+
+        if (myLexicalScopeStack.size() == 1) {
+            result = null;
+            myCurModuleScope = null;
+        }
+        else {
+            result = myLexicalScopeStack.peek();
+        }
+
+        return result;
     }
 
     /**
@@ -196,6 +217,15 @@ public class MathSymbolTableBuilder extends ScopeRepository {
         parent.addChild(s);
         myLexicalScopeStack.push(s);
         myScopes.put(s.getDefiningElement(), s);
+    }
+
+    /**
+     * <p>This checks to see if we have any open scopes.</p>
+     */
+    private void checkScopeOpen() {
+        if (myLexicalScopeStack.size() == 1) {
+            throw new IllegalStateException("No open scope.");
+        }
     }
 
 }
