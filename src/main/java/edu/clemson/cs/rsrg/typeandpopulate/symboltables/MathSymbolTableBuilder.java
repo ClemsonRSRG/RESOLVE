@@ -145,8 +145,57 @@ public class MathSymbolTableBuilder extends ScopeRepository {
         return myTypeGraph;
     }
 
+    /**
+     * <p>Opens a new working module scope defined by the given
+     * <code>ModuleDec</code>.</p>
+     *
+     * @param definingElement The <code>ModuleDec</code> that defines this
+     *                        scope.
+     *
+     * @return The newly opened {@link ModuleScopeBuilder}.
+     *
+     * @throws IllegalStateException If a module scope is already open.
+     * @throws IllegalArgumentException If <code>definingElement</code> is
+     *             <code>null</code>.
+     */
     public final ModuleScopeBuilder startModuleScope(ModuleDec definingElement) {
-        return null;
+        if (definingElement == null) {
+            throw new IllegalArgumentException("definingElement may not be "
+                    + "null.");
+        }
+
+        if (myCurModuleScope != null) {
+            throw new IllegalStateException("Module scope already open.");
+        }
+
+        ScopeBuilder parent = myLexicalScopeStack.peek();
+
+        ModuleScopeBuilder s =
+                new ModuleScopeBuilder(myTypeGraph, definingElement, parent,
+                        this);
+
+        myCurModuleScope = s;
+
+        addScope(s, parent);
+        myModuleScopes.put(s.getModuleIdentifier(), s);
+
+        return s;
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>This adds a new scope to the parent scope.</p>
+     *
+     * @param s The new scope to be added.
+     * @param parent The parent scope.
+     */
+    private void addScope(ScopeBuilder s, ScopeBuilder parent) {
+        parent.addChild(s);
+        myLexicalScopeStack.push(s);
+        myScopes.put(s.getDefiningElement(), s);
     }
 
 }
