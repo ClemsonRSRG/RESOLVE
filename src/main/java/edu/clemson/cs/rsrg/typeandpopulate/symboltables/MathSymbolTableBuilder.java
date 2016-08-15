@@ -135,7 +135,11 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     @Override
     public final ModuleScope getModuleScope(ModuleIdentifier module)
             throws NoSuchSymbolException {
-        return null;
+        if (!myModuleScopes.containsKey(module)) {
+            throw new NoSuchSymbolException("" + module, null);
+        }
+
+        return myModuleScopes.get(module);
     }
 
     /**
@@ -152,7 +156,11 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     @Override
     public final Scope getScope(ResolveConceptualElement e)
             throws NoSuchScopeException {
-        return null;
+        if (!myScopes.containsKey(e)) {
+            throw new NoSuchScopeException(e);
+        }
+
+        return myScopes.get(e);
     }
 
     /**
@@ -203,6 +211,39 @@ public class MathSymbolTableBuilder extends ScopeRepository {
         return s;
     }
 
+    /**
+     * <p>Starts a new working scope to represent the scope defined by
+     * <code>definingElement</code>.  It's parent will be the last unclosed
+     * working scope (including unclosed working module scopes) and who's
+     * root parent is the currently open working module scope.</p>
+     *
+     * @param definingElement The AST node that defined this scope.
+     *
+     * @return The newly opened working scope.
+     *
+     * @throws IllegalArgumentException If <code>definingElement</code> is
+     * <code>null</code>.
+     * @throws IllegalStateException If no module scope is currently open.
+     */
+    public final ScopeBuilder startScope(ResolveConceptualElement definingElement) {
+        if (definingElement == null) {
+            throw new IllegalArgumentException("definingElement may not be "
+                    + "null.");
+        }
+
+        checkModuleScopeOpen();
+
+        ScopeBuilder parent = myLexicalScopeStack.peek();
+
+        ScopeBuilder s =
+                new ScopeBuilder(this, myTypeGraph, definingElement, parent,
+                        myCurModuleScope.getModuleIdentifier());
+
+        addScope(s, parent);
+
+        return s;
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
@@ -217,6 +258,15 @@ public class MathSymbolTableBuilder extends ScopeRepository {
         parent.addChild(s);
         myLexicalScopeStack.push(s);
         myScopes.put(s.getDefiningElement(), s);
+    }
+
+    /**
+     * <p>This checks to see if we have any open module scopes.</p>
+     */
+    private void checkModuleScopeOpen() {
+        if (myCurModuleScope == null) {
+            throw new IllegalStateException("No open module scope.");
+        }
     }
 
     /**
