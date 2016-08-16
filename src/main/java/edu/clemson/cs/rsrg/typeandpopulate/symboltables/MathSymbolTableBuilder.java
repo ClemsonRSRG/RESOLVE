@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchModuleException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchScopeException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -122,6 +123,18 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
+     * <p>Returns the most recently opened, unclosed working scope.</p>
+     *
+     * @return The most recently opened, unclosed working scope.
+     *
+     * @throws IllegalStateException If there are no open scopes.
+     */
+    public final ScopeBuilder getInnermostActiveScope() {
+        checkScopeOpen();
+        return myLexicalScopeStack.peek();
+    }
+
+    /**
      * <p>Returns the {@link ModuleScope} associated with the given
      * {@link ModuleIdentifier}.</p>
      *
@@ -172,6 +185,24 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     @Override
     public final TypeGraph getTypeGraph() {
         return myTypeGraph;
+    }
+
+    /**
+     * <p>Returns an immutable snapshot of the working symbol table represented
+     * by this <code>MathSymbolTableBuilder</code> as a <code>MathSymbolTable</code>.</p>
+     *
+     * @return The snapshot.
+     *
+     * @throws IllegalStateException If there are any open scopes.
+     * @throws NoSuchModuleException If any module claims to import a module
+     * for which there is no associated scope.
+     */
+    public final MathSymbolTable seal() throws NoSuchModuleException {
+        if (myLexicalScopeStack.size() > 1) {
+            throw new IllegalStateException("There are open scopes.");
+        }
+
+        return new MathSymbolTable(myTypeGraph, myLexicalScopeStack.peek());
     }
 
     /**
@@ -242,6 +273,34 @@ public class MathSymbolTableBuilder extends ScopeRepository {
         addScope(s, parent);
 
         return s;
+    }
+
+    /**
+     * <p>This method returns the object in string format.</p>
+     *
+     * <p><strong>Note:</strong> The {@code toString} method is intended
+     * for printing debugging messages. Do not use its value to perform
+     * compiler actions.</p>
+     *
+     * @return Object as a string.
+     */
+    @Override
+    public final String toString() {
+        StringBuilder result = new StringBuilder();
+
+        boolean first = true;
+        for (ScopeBuilder b : myLexicalScopeStack) {
+            if (first) {
+                first = false;
+            }
+            else {
+                result.append(",\n");
+            }
+
+            result.append(b.toString());
+        }
+
+        return result.toString();
     }
 
     // ===========================================================
