@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTProper;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import java.util.Map;
 
 /**
@@ -32,6 +33,16 @@ public class TypeGraph {
     public final MTType ELEMENT = new MTProper(this, "Element");
 
     public MTFunction POWERTYPE;
+    public MTFunction POWERCLASS;
+    public MTFunction UNION;
+    public MTFunction INTERSECT;
+    public MTFunction FUNCTION;
+    public MTFunction CROSS;
+    public MTFunction AND;
+    public MTFunction NOT;
+
+    public void addRelationship(Exp bindingExpression, MTType destination,
+            Exp bindingCondition, Scope environment) {}
 
     public boolean isSubtype(MTType subtype, MTType supertype) {
         return false;

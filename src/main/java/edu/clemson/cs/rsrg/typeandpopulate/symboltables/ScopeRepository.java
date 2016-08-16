@@ -18,18 +18,20 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 /**
- * <p>A <code>SymbolTable</code> maps {@link ResolveConceptualElement}s and
+ * <p>A <code>ScopeRepository</code> maps {@link ResolveConceptualElement}s and
  * {@link ModuleIdentifier}s to the {@link Scope}s they introduce.</p>
  *
- * <p>Each <code>SymbolTable</code> has a {@link TypeGraph} that relates
+ * <p>Each <code>ScopeRepository</code> has a {@link TypeGraph} that relates
  * the types found in the symbol table.</p>
  *
  * <p>While this base class defines no methods for mutating the symbol table,
- * concrete subclasses may provide mutation methods.  It is particularly
+ * concrete subclasses may provide mutation methods. It is particularly
  * important that clients be aware the symbol table may be "under construction"
- * even as they use it.  We therefore favor vocabulary such as "open" and
+ * even as they use it. We therefore favor vocabulary such as "open" and
  * "closed" for scopes rather than "exists", which might imply (erroneously)
  * that scopes spring into existence atomically and fully formed.</p>
+ *
+ * @version 2.0
  */
 public abstract class ScopeRepository {
 
@@ -39,10 +41,10 @@ public abstract class ScopeRepository {
      *
      * @param module The module identifier.
      *
-     * @returns The associated module scope.
+     * @return The associated module scope.
      *
-     * @throws NoSuchSymbolException If no scope has been opened for the named
-     *             module.
+     * @throws NoSuchSymbolException If no scope has been opened for
+     * the named module.
      */
     public abstract ModuleScope getModuleScope(ModuleIdentifier module)
             throws NoSuchSymbolException;
@@ -53,10 +55,10 @@ public abstract class ScopeRepository {
      *
      * @param e defining element.
      *
-     * @returns The associated scope.
+     * @return The associated scope.
      *
-     * @throws NoSuchSymbolException If no scope has been opened for the given
-     *             defining element.
+     * @throws NoSuchSymbolException If no scope has been opened for
+     * the given defining element.
      */
     public abstract Scope getScope(ResolveConceptualElement e);
 
@@ -64,7 +66,8 @@ public abstract class ScopeRepository {
      * <p>Returns the {@link TypeGraph} that relates the types found in this
      * <code>ScopeRepository</code>.</p>
      *
-     * @return The <code>TypeGraph</code>.
+     * @return The {@link TypeGraph} object.
      */
     public abstract TypeGraph getTypeGraph();
+
 }
