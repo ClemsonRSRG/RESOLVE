@@ -13,14 +13,40 @@
 package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchModuleException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchScopeException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
- * TODO: Refactor this class
+ * <p>A <code>MathSymbolTable</code> represents an immutable mapping from
+ * those nodes in the AST that define a scope to {@link FinalizedScope} objects
+ * representing those scopes and containing the symbols defined therein.</p>
+ *
+ * <p><code>Scope</code>s that were introduced at the module-level (e.g.,
+ * the scope defined by a {@link PrecisModuleDec}) will have an
+ * associated <code>Scope</code> that is further refined into an instance of
+ * {@link FinalizedModuleScope}. As a convenience, such module scopes may
+ * be retrieved in a type-safe way with a call to
+ * {@link #getModuleScope(ModuleIdentifier)}.</p>
+ *
+ * <p>Note that there are no public constructors for <code>MathSymbolTable</code>.
+ * New instances should be acquired from a call to {@link MathSymbolTableBuilder#seal()}.</p>
+ *
+ * @version 2.0
  */
 public class MathSymbolTable extends ScopeRepository {
+
+    // ===========================================================
+    // Strategies
+    // ===========================================================
 
     /**
      * <p>When starting a search from a particular scope, specifies how any
@@ -30,7 +56,7 @@ public class MathSymbolTable extends ScopeRepository {
      * by the search's <code>ImportStrategy</code> (which necessarily always
      * includes the source module).</p>
      *
-     * <p>Note that facilities cannot be recursively searched.  Imports and
+     * <p>Note that facilities cannot be recursively searched. Imports and
      * facilities appearing in available facilities will not be searched.</p>
      */
     public enum FacilityStrategy {
@@ -66,9 +92,9 @@ public class MathSymbolTable extends ScopeRepository {
      * <p>Imported modules are those listed in the <em>uses</em> clause of the
      * source module scope in which the scope is introduced.  For searches
      * originating directly in a module scope, the source module scope is the
-     * scope itself.  In addition to those scopes directly imported in the
+     * scope itself. In addition to those scopes directly imported in the
      * <em>uses</em> clause, any modules implicitly imported will also be
-     * searched.  Implicitly imported modules include the standard modules
+     * searched. Implicitly imported modules include the standard modules
      * (<code>Std_Boolean_Fac</code>, etc.), and any modules named in the header
      * of the source module (e.g., an enhancement realization implicitly imports
      * it's associate enhancement and concept.)</p>
@@ -81,10 +107,26 @@ public class MathSymbolTable extends ScopeRepository {
          */
         IMPORT_NONE {
 
+            /**
+             * <p>Returns the strategy that should be used to recursively search
+             * any imported modules.</p>
+             *
+             * @return The strategy that should be used to recursively search any
+             *         imported modules.
+             */
+            @Override
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_NONE;
             }
 
+            /**
+             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly imported modules.</p>
+             *
+             * @return <code>true</code> <strong>iff</strong> this strategy
+             *         requires searching directly imported modules.
+             */
+            @Override
             public boolean considerImports() {
                 return false;
             }
@@ -96,10 +138,26 @@ public class MathSymbolTable extends ScopeRepository {
          */
         IMPORT_NAMED {
 
+            /**
+             * <p>Returns the strategy that should be used to recursively search
+             * any imported modules.</p>
+             *
+             * @return The strategy that should be used to recursively search any
+             *         imported modules.
+             */
+            @Override
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_NONE;
             }
 
+            /**
+             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly imported modules.</p>
+             *
+             * @return <code>true</code> <strong>iff</strong> this strategy
+             *         requires searching directly imported modules.
+             */
+            @Override
             public boolean considerImports() {
                 return true;
             }
@@ -111,10 +169,26 @@ public class MathSymbolTable extends ScopeRepository {
          */
         IMPORT_RECURSIVE {
 
+            /**
+             * <p>Returns the strategy that should be used to recursively search
+             * any imported modules.</p>
+             *
+             * @return The strategy that should be used to recursively search any
+             *         imported modules.
+             */
+            @Override
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_RECURSIVE;
             }
 
+            /**
+             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly imported modules.</p>
+             *
+             * @return <code>true</code> <strong>iff</strong> this strategy
+             *         requires searching directly imported modules.
+             */
+            @Override
             public boolean considerImports() {
                 return true;
             }
@@ -137,21 +211,76 @@ public class MathSymbolTable extends ScopeRepository {
          *         requires searching directly imported modules.
          */
         public abstract boolean considerImports();
+
     }
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>A map of non-module scopes.</p> */
+    private final Map<ResolveConceptualElement, FinalizedScope> myScopes =
+            new HashMap<>();
+
+    /** <p>A map of module scopes</p> */
+    private final Map<ModuleIdentifier, FinalizedModuleScope> myModuleScopes =
+            new HashMap<>();
+
+    /** <p>The current type graph.</p> */
+    private final TypeGraph myTypeGraph;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>This constructs a mathematical symbol table.</p>
+     *
+     * @param g The current type graph.
+     * @param root The current scope repository builder.
+     *
+     * @throws NoSuchModuleException Throws an error if we cannot locate the requested
+     * imported module from the source module.
+     */
+	MathSymbolTable(TypeGraph g, ScopeBuilder root)
+            throws NoSuchModuleException {
+        myTypeGraph = g;
+
+        List<ImportRequest> importedModules = new LinkedList<>();
+
+        seal(root, importedModules);
+
+        for (ImportRequest request : importedModules) {
+            if (!myModuleScopes.containsKey(request.importedModule)) {
+                throw new NoSuchModuleException(request.sourceModule,
+                        request.importedModule);
+            }
+        }
+    }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     /**
      * <p>Returns the {@link ModuleScope} associated with the given
      * {@link ModuleIdentifier}.</p>
      *
      * @param module The module identifier.
-     * @throws NoSuchSymbolException If no scope has been opened for the named
-     *                               module.
-     * @returns The associated module scope.
+     *
+     * @return The associated module scope.
+     *
+     * @throws NoSuchSymbolException If no scope has been opened for
+     * the named module.
      */
     @Override
-    public ModuleScope getModuleScope(ModuleIdentifier module)
-            throws NoSuchSymbolException {
-        return null;
+    public final ModuleScope getModuleScope(ModuleIdentifier module)
+            throws NoSuchScopeException {
+        if (!myModuleScopes.containsKey(module)) {
+            throw new NoSuchSymbolException("" + module, null);
+        }
+
+        return myModuleScopes.get(module);
     }
 
     /**
@@ -159,24 +288,126 @@ public class MathSymbolTable extends ScopeRepository {
      * defining element.</p>
      *
      * @param e defining element.
-     * @throws NoSuchSymbolException If no scope has been opened for the given
-     *                               defining element.
-     * @returns The associated scope.
+     *
+     * @return The associated scope.
+     *
+     * @throws NoSuchScopeException If no scope has been opened for
+     * the given defining element.
      */
     @Override
-    public Scope getScope(ResolveConceptualElement e) {
-        return null;
+    public final Scope getScope(ResolveConceptualElement e)
+            throws NoSuchScopeException {
+        if (!myScopes.containsKey(e)) {
+            throw new NoSuchScopeException(e);
+        }
+
+        return myScopes.get(e);
     }
 
     /**
      * <p>Returns the {@link TypeGraph} that relates the types found in this
-     * <code>ScopeRepository</code>.</p>
+     * <code>MathSymbolTable</code>.</p>
      *
-     * @return The <code>TypeGraph</code>.
+     * @return The {@link TypeGraph} object.
      */
     @Override
-    public TypeGraph getTypeGraph() {
-        return null;
+    public final TypeGraph getTypeGraph() {
+        return myTypeGraph;
+    }
+	
+	// ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>This creates an {@link ImportRequest} for each imported
+     * module.</p>
+     *
+     * @param source The source module's identifier.
+     * @param imports The list of modules imported by <code>source</code>.
+     *
+     * @return A list of {@link ImportRequest}.
+     */
+    private static List<ImportRequest> buildImportRequests(ModuleIdentifier source, List<ModuleIdentifier> imports) {
+        List<ImportRequest> result = new LinkedList<>();
+
+        for (ModuleIdentifier imported : imports) {
+            result.add(new ImportRequest(source, imported));
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>This method makes sure that we do not attempt to import more modules
+     * after we invoke the constructor.</p>
+     *
+     * @param b The current scope repository builder.
+     * @param importedModules The list of imported modules.
+     */
+	private void seal(ScopeBuilder b, List<ImportRequest> importedModules) {
+        FinalizedScope result = b.seal(this);
+        FinalizedModuleScope resultAsModuleScope;
+        ModuleIdentifier resultIdentifier;
+
+        ResolveConceptualElement definingElement = b.getDefiningElement();
+        if (definingElement != null) {
+            myScopes.put(definingElement, result);
+
+            if (result instanceof FinalizedModuleScope) {
+                resultAsModuleScope = (FinalizedModuleScope) result;
+                resultIdentifier =
+                        new ModuleIdentifier((ModuleDec) b.getDefiningElement());
+
+                myModuleScopes.put(resultIdentifier, resultAsModuleScope);
+
+                importedModules.addAll(buildImportRequests(resultIdentifier,
+                        resultAsModuleScope.getImports()));
+            }
+        }
+
+        for (ScopeBuilder curChild : b.children()) {
+            curChild.setParent(result);
+            seal(curChild, importedModules);
+        }
+    }
+
+	// ===========================================================
+    // Helper Constructs
+    // ===========================================================
+
+    /**
+     * <p>An helper construct that keeps track of both {@link ModuleIdentifier}
+     * for the source and imported modules.</p>
+     */
+	private static class ImportRequest {
+		
+		// ===========================================================
+		// Member Fields
+		// ===========================================================
+
+        /** <p>The source module.</p> */
+        final ModuleIdentifier sourceModule;
+
+        /** <p>The imported module.</p> */
+        final ModuleIdentifier importedModule;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This creates a helper construct that keeps track of imported
+         * module for the specified source module.</p>
+         *
+         * @param source The source module's identifier.
+         * @param imported The imported module's identifier.
+         */
+        ImportRequest(ModuleIdentifier source, ModuleIdentifier imported) {
+            sourceModule = source;
+            importedModule = imported;
+        }
+
     }
 
 }

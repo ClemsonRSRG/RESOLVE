@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
@@ -43,10 +43,13 @@ public class FacilityTypeRepresentationEntry extends TypeRepresentationEntry {
      */
     public FacilityTypeRepresentationEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, PTType representation, Exp convention) {
+            ModuleIdentifier sourceModule, PTType representation,
+            AssertionClause convention) {
         super(name, definingElement, sourceModule, null, representation,
-                convention, VarExp.getTrueVarExp(null, representation
-                        .getTypeGraph()));
+                convention, new AssertionClause(definingElement.getLocation()
+                        .clone(), AssertionClause.ClauseType.CORRESPONDENCE,
+                        VarExp.getTrueVarExp(definingElement.getLocation()
+                                .clone(), representation.getTypeGraph())));
     }
 
     // ===========================================================
