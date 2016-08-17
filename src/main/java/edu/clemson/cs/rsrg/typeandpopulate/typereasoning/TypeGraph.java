@@ -13,10 +13,12 @@
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTProper;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,6 +41,17 @@ public class TypeGraph {
      */
     public final PerThreadReasoningResources threadResources =
             new PerThreadReasoningResources();
+
+    /** <p>A {@link NodePairPathStrategy} for {@link Exp}.</p> */
+    private final ExpValuePathStrategy EXP_VALUE_PATH =
+            new ExpValuePathStrategy();
+
+    /** <p>A {@link NodePairPathStrategy} for {@link MTType}.</p> */
+    private final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
+            new MTTypeValuePathStrategy();
+
+    /** <p>This contains all mathematical nodes for this graph.</p> */
+    private final HashMap<MTType, TypeNode> myTypeNodes;
 
     // ===========================================================
     // Global Mathematical Types
@@ -64,6 +77,13 @@ public class TypeGraph {
     // ===========================================================
     // Constructors
     // ===========================================================
+
+    /**
+     * <p>This creates a mathematical type graph.</p>
+     */
+    public TypeGraph() {
+        myTypeNodes = new HashMap<>();
+    }
 
     // ===========================================================
     // Public Methods
@@ -101,5 +121,97 @@ public class TypeGraph {
     // ===========================================================
     // Helper Constructs
     // ===========================================================
+
+    /**
+     * <p>A strategy pattern interface for a class type {@code V}
+     * that tests valid type conditions between a source and expected
+     * {@link MTType MTTypes}.</p>
+     *
+     * @param <V> The class of objects to be tested.
+     */
+    private interface NodePairPathStrategy<V> {
+
+        /**
+         * <p>This method establishes a valid type conditions for {@code sourceValue}
+         * using {@code sourceType}, {@code expectedType} and {@code bindings}.</p>
+         *
+         * @param sourceValue An object of type {@link V}.
+         * @param sourceType The mathematical source type.
+         * @param expectedType The mathematical expected type.
+         * @param bindings Map of established type bindings.
+         *
+         * @return An {@link Exp} with the valid type conditions
+         * between the types.
+         *
+         * @throws TypeMismatchException We cannot establish a type condition
+         * between the types for {@code sourceValue}.
+         */
+        Exp getValidTypeConditionsBetween(V sourceValue, MTType sourceType,
+                MTType expectedType, Map<String, MTType> bindings)
+                throws TypeMismatchException;
+
+    }
+
+    /**
+     * <p>An implementation of {@link NodePairPathStrategy} for {@link Exp}.</p>
+     */
+    private class ExpValuePathStrategy implements NodePairPathStrategy<Exp> {
+
+        /**
+         * <p>This method establishes a valid type conditions for {@code sourceValue}
+         * using {@code sourceType}, {@code expectedType} and {@code bindings}.</p>
+         *
+         * @param sourceValue An {@link Exp}.
+         * @param sourceType The mathematical source type.
+         * @param expectedType The mathematical expected type.
+         * @param bindings Map of established type bindings.
+         *
+         * @return An {@link Exp} with the valid type conditions
+         * between the types.
+         *
+         * @throws TypeMismatchException We cannot establish a type condition
+         * between the types for {@code sourceValue}.
+         */
+        @Override
+        public final Exp getValidTypeConditionsBetween(Exp sourceValue,
+                MTType sourceType, MTType expectedType,
+                Map<String, MTType> bindings) throws TypeMismatchException {
+            return myTypeNodes.get(sourceType).getValidTypeConditionsTo(
+                    sourceValue, expectedType, bindings);
+        }
+
+    }
+
+    /**
+     * <p>An implementation of {@link NodePairPathStrategy} for {@link MTType}.</p>
+     */
+    private class MTTypeValuePathStrategy
+            implements
+                NodePairPathStrategy<MTType> {
+
+        /**
+         * <p>This method establishes a valid type conditions for {@code sourceValue}
+         * using {@code sourceType}, {@code expectedType} and {@code bindings}.</p>
+         *
+         * @param sourceValue A {@link MTType}.
+         * @param sourceType The mathematical source type.
+         * @param expectedType The mathematical expected type.
+         * @param bindings Map of established type bindings.
+         *
+         * @return An {@link Exp} with the valid type conditions
+         * between the types.
+         *
+         * @throws TypeMismatchException We cannot establish a type condition
+         * between the types for {@code sourceValue}.
+         */
+        @Override
+        public final Exp getValidTypeConditionsBetween(MTType sourceValue,
+                MTType sourceType, MTType expectedType,
+                Map<String, MTType> bindings) throws TypeMismatchException {
+            return myTypeNodes.get(sourceType).getValidTypeConditionsTo(
+                    sourceValue, expectedType, bindings);
+        }
+
+    }
 
 }
