@@ -13,12 +13,12 @@
 package edu.clemson.cs.rsrg.typeandpopulate.mathtypes;
 
 import edu.clemson.cs.rsrg.typeandpopulate.exception.BindingException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.FinalizedScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
-import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.BindingVisitor;
-import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
-import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.VariableReplacingVisitor;
-import java.util.List;
-import java.util.Map;
+import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.*;
+import java.util.*;
 
 /**
  * <p>This abstract class serves as the parent class of all
@@ -34,6 +34,18 @@ public abstract class MTType {
 
     /** <p>The current type graph object in use.</p> */
     protected final TypeGraph myTypeGraph;
+
+    /** <p>Known alpha equivalent types.</p> */
+    private final Set<Object> myKnownAlphaEquivalencies = new HashSet<>();
+
+    /** <p>Known syntactic subtypes.</p> */
+    private final Map<MTType, Map<String, MTType>> myKnownSyntacticSubtypeBindings =
+            new HashMap<>();
+
+    /**
+     * <p>Allows us to detect if we're getting into an equals-loop.</p>
+     */
+    private int myEqualsDepth = 0;
 
     // ===========================================================
     // Constructors
@@ -77,6 +89,30 @@ public abstract class MTType {
      * @param v A visitor for types.
      */
     public abstract void acceptOpen(TypeVisitor v);
+
+    /**
+     * <p>This method attempts to bind {@code o} to a map of types for the current
+     * context.</p>
+     *
+     * @param o The type to bind.
+     * @param context The finalized scope context.
+     *
+     * @return The modified context type map if bind is successful, otherwise it throws
+     * an exception.
+     *
+     * @throws BindingException Some error occurred during binding.
+     */
+    public final Map<String, MTType> bindTo(MTType o, FinalizedScope context)
+            throws BindingException {
+        BindingVisitor bind = new BindingVisitor(myTypeGraph, context);
+        bind.visit(this, o);
+
+        if (!bind.binds()) {
+            throw new BindingException(this, o);
+        }
+
+        return bind.getBindings();
+    }
 
     /**
      * <p>This method attempts to bind {@code o} to a map of types for the current
@@ -130,12 +166,131 @@ public abstract class MTType {
     }
 
     /**
+     * <p>Returns <code>true</code> <strong>iff</strong> <code>o</code> is an
+     * </code>MTType</code> that is <em>alpha equivalent</em> to this type.
+     * I.e., it must be exactly the same with the sole exception that
+     * quantified variables may have different names if they are otherwise
+     * identical.  So, BigUnion{t : MType}{t} <code>equals</code>
+     * BigUnion{r : MType}{r}.  However, BigUnion{t : MType}{t} <em>does
+     * not</em> <code>equals</code> BigUnion{r : Power(MType)}{r}.</p>
+     *
+     * @param o The object to compare with this <code>MTType</code>.
+     *
+     * @return <code>true</code> <strong>iff</strong> this <code>MTType</code>
+     * is alpha equivalent to <code>o</code>.
+     */
+    @Override
+    public final boolean equals(Object o) {
+        myEqualsDepth++;
+
+        boolean result;
+
+        if (this == o) {
+            result = true;
+        }
+        else {
+            //We only check our cache if we're at the first level of equals
+            //comparison to avoid an infinite recursive loop
+            result =
+                    (myEqualsDepth == 1)
+                            && myKnownAlphaEquivalencies.contains(o);
+
+            if (!result) {
+                try {
+                    //All 'equals' logic should be put into AlphaEquivalencyChecker!
+                    //Don't override equals!
+                    AlphaEquivalencyChecker alphaEq =
+                            myTypeGraph.threadResources.alphaChecker;
+                    alphaEq.reset();
+
+                    alphaEq.visit(this, (MTType) o);
+
+                    result = alphaEq.getResult();
+                }
+                catch (ClassCastException cce) {
+                    result = false;
+                }
+
+                //We only cache our answer at the first level to avoid an
+                //infinite equals loop
+                if ((myEqualsDepth == 1) && result) {
+                    myKnownAlphaEquivalencies.add(o);
+                }
+            }
+        }
+
+        myEqualsDepth--;
+
+        return result;
+    }
+
+    /**
      * <p>This method returns a list of {@code MTType}s
      * that are part of this type.</p>
      *
      * @return A list of {@code MTType}s.
      */
     public abstract List<MTType> getComponentTypes();
+
+    /**
+     * <p>This method returns a new {@link MTType} with the
+     * substitutions specified by the map.</p>
+     *
+     * @param substitutions A map of substituting types.
+     *
+     * @return The modified {@link MTType}.
+     */
+    public final MTType getCopyWithVariablesSubstituted(
+            Map<String, MTType> substitutions) {
+        VariableReplacingVisitor renamer =
+                new VariableReplacingVisitor(substitutions);
+        accept(renamer);
+        return renamer.getFinalExpression();
+    }
+
+    /**
+     * <p>This method returns a map fo syntactic subtype bindings
+     * for {@code o}.</p>
+     *
+     * @param o A mathematical type.
+     *
+     * @return The collection of syntactic subtypes.
+     */
+    public final Map<String, MTType> getSyntacticSubtypeBindings(MTType o)
+            throws NoSolutionException {
+        Map<String, MTType> result;
+
+        if (myKnownSyntacticSubtypeBindings.containsKey(o)) {
+            result = myKnownSyntacticSubtypeBindings.get(o);
+        }
+        else {
+            SyntacticSubtypeChecker checker =
+                    new SyntacticSubtypeChecker(myTypeGraph);
+
+            try {
+                checker.visit(this, o);
+            }
+            catch (RuntimeException e) {
+
+                Throwable cause = e;
+                while (cause != null
+                        && !(cause instanceof TypeMismatchException)) {
+                    cause = cause.getCause();
+                }
+
+                if (cause == null) {
+                    throw e;
+                }
+
+                throw new NoSolutionException("Error while attempting to establish syntactic subtype.", new IllegalStateException());
+            }
+
+            result = Collections.unmodifiableMap(checker.getBindings());
+            myKnownSyntacticSubtypeBindings.put(o, result);
+        }
+
+        return result;
+    }
 
     /**
      * <p>Returns the type stored inside this type.</p>
@@ -161,22 +316,6 @@ public abstract class MTType {
     }
 
     /**
-     * <p>This method returns a new {@link MTType} with the
-     * substitutions specified by the map.</p>
-     *
-     * @param substitutions A map of substituting types.
-     *
-     * @return The modified {@link MTType}.
-     */
-    public final MTType getCopyWithVariablesSubstituted(
-            Map<String, MTType> substitutions) {
-        VariableReplacingVisitor renamer =
-                new VariableReplacingVisitor(substitutions);
-        accept(renamer);
-        return renamer.getFinalExpression();
-    }
-
-    /**
      * <p>This method overrides the default {@code hashCode} method implementation.</p>
      *
      * @return The hash code associated with the object.
@@ -184,6 +323,15 @@ public abstract class MTType {
     @Override
     public final int hashCode() {
         return getHashCode();
+    }
+
+    /**
+     * <p>Indicates that this type is {@link TypeGraph#BOOLEAN}.</p>
+     *
+     * @return {@code true} if it is, {@code false} otherwise.
+     */
+    public final boolean isBoolean() {
+        return (myTypeGraph.BOOLEAN == this);
     }
 
     /**
@@ -195,6 +343,37 @@ public abstract class MTType {
      */
     public boolean isKnownToContainOnlyMTypes() {
         return false;
+    }
+
+    /**
+     * <p>Indicates that this type is known to be a subtype of {@code o}.</p>
+     *
+     * @return {@code true} if it is a subtype, {@code false} otherwise.
+     */
+    public final boolean isSubtypeOf(MTType o) {
+        return myTypeGraph.isSubtype(this, o);
+    }
+
+    /**
+     * <p>Indicates that this type is known to be a syntactic
+     * subtype of {@code o}.</p>
+     *
+     * @return {@code true} if it is a syntactic subtype,
+     * {@code false} otherwise.
+     */
+    public final boolean isSyntacticSubtypeOf(MTType o) {
+
+        boolean result;
+
+        try {
+            getSyntacticSubtypeBindings(o);
+            result = true;
+        }
+        catch (NoSolutionException e) {
+            result = false;
+        }
+
+        return result;
     }
 
     /**

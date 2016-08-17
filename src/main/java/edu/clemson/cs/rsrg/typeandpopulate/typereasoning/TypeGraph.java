@@ -20,9 +20,29 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import java.util.Map;
 
 /**
- * TODO:
+ * <p>Represents a directed graph of types, where edges between types
+ * indicate a possible coercion that the type checker can perform.</p>
+ *
+ * @version 2.0
  */
 public class TypeGraph {
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /**
+     * <p>A set of non-thread-safe resources to be used during general type
+     * reasoning. This really doesn't belong here, but anything that's reasoning
+     * about types should already have access to a type graph, and only one type
+     * graph is created per thread, so this is a convenient place to put it.</p>
+     */
+    public final PerThreadReasoningResources threadResources =
+            new PerThreadReasoningResources();
+
+    // ===========================================================
+    // Global Mathematical Types
+    // ===========================================================
 
     public final MTType ENTITY = new MTProper(this, "Entity");
     public final MTProper CLS = new MTProper(this, null, true, "MType");
@@ -40,6 +60,14 @@ public class TypeGraph {
     public MTFunction CROSS;
     public MTFunction AND;
     public MTFunction NOT;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     public void addRelationship(Exp bindingExpression, MTType destination,
             Exp bindingCondition, Scope environment) {}
@@ -65,5 +93,13 @@ public class TypeGraph {
             Map<String, MTType> substitutions) {
         return null;
     }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    // ===========================================================
+    // Helper Constructs
+    // ===========================================================
 
 }
