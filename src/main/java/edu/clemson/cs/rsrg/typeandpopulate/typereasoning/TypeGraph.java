@@ -129,6 +129,10 @@ public class TypeGraph {
      */
     private class CanonicalizationResult {
 
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
         /** <p>A mathematical type.</p> */
         final MTType canonicalType;
 
@@ -137,6 +141,10 @@ public class TypeGraph {
 
         /** <p>A map of conversions.</p> */
         final Map<String, String> canonicalToEnvironmental;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
 
         /**
          * <p>This creates a canonicalization result for {@code canonicalType}.</p>
@@ -375,6 +383,74 @@ public class TypeGraph {
             return new MTCartesian(g,
                     new MTCartesian.Element(arguments.get(0)),
                     new MTCartesian.Element(arguments.get(1)));
+        }
+
+    }
+
+    /**
+     * <p>An helper class that indicates an established type relationship
+     * between two {@link MTType MTTypes}.</p>
+     */
+    private static class EstablishedRelationship {
+
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        /** <p>The mathematical types that has been established a type relationship.</p> */
+        private final MTType myType1, myType2;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This constructs an object that indicates that we have established a
+         * type relationship between {@code t1} and {@code t2}.</p>
+         *
+         * @param t1 A mathematical type.
+         * @param t2 Another mathematical type.
+         */
+        EstablishedRelationship(MTType t1, MTType t2) {
+            myType1 = t1;
+            myType2 = t2;
+        }
+
+        // ===========================================================
+        // Public Methods
+        // ===========================================================
+
+        /**
+         * <p>This method overrides the default {@code hashCode} method implementation
+         * for the {@code EstablishedRelationship} class.</p>
+         *
+         * @return The hash code associated with the object.
+         */
+        @Override
+        public final int hashCode() {
+            return myType1.hashCode() * 31 + myType2.hashCode();
+        }
+
+        /**
+         * <p>This method overrides the default {@code equals} method implementation
+         * to ensure that we have a correctly established type relationship.</p>
+         *
+         * @param o Object to be compared.
+         *
+         * @return {@code true} if all the fields are equal, {@code false} otherwise.
+         */
+        @Override
+        public final boolean equals(Object o) {
+            boolean result = o instanceof EstablishedRelationship;
+
+            if (result) {
+                EstablishedRelationship oAsER = (EstablishedRelationship) o;
+                result =
+                        myType1.equals(oAsER.myType1)
+                                && myType2.equals(oAsER.myType2);
+            }
+
+            return result;
         }
 
     }
