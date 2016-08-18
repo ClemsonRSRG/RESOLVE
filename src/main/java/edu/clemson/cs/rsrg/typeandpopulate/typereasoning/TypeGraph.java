@@ -14,12 +14,10 @@ package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTProper;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.TypeRelationshipPredicate;
-
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.FunctionApplicationFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -245,6 +243,138 @@ public class TypeGraph {
                 Map<String, MTType> bindings) throws TypeMismatchException {
             return myTypeNodes.get(sourceType).getValidTypeConditionsTo(
                     sourceValue, expectedType, bindings);
+        }
+
+    }
+
+    /**
+     * <p>This creates a {@link MTPowertypeApplication} type.</p>
+     */
+    private static class PowertypeApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        /**
+         * <p>This method returns a {@link MTType} resulting from a
+         * function application.</p>
+         *
+         * @param g The current type graph.
+         * @param f The function to be applied.
+         * @param calledAsName The name for this function application type.
+         * @param arguments List of arguments for applying the function.
+         *
+         * @return A function application {@link MTType}.
+         */
+        @Override
+        public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
+                String calledAsName, List<MTType> arguments) {
+            return new MTPowertypeApplication(g, arguments.get(0));
+        }
+
+    }
+
+    /**
+     * <p>This creates a {@link MTUnion} type.</p>
+     */
+    private static class UnionApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        /**
+         * <p>This method returns a {@link MTType} resulting from a
+         * function application.</p>
+         *
+         * @param g The current type graph.
+         * @param f The function to be applied.
+         * @param calledAsName The name for this function application type.
+         * @param arguments List of arguments for applying the function.
+         *
+         * @return A function application {@link MTType}.
+         */
+        @Override
+        public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
+                String calledAsName, List<MTType> arguments) {
+            return new MTUnion(g, arguments);
+        }
+
+    }
+
+    /**
+     * <p>This creates a {@link MTIntersect} type.</p>
+     */
+    private static class IntersectApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        /**
+         * <p>This method returns a {@link MTType} resulting from a
+         * function application.</p>
+         *
+         * @param g The current type graph.
+         * @param f The function to be applied.
+         * @param calledAsName The name for this function application type.
+         * @param arguments List of arguments for applying the function.
+         *
+         * @return A function application {@link MTType}.
+         */
+        @Override
+        public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
+                String calledAsName, List<MTType> arguments) {
+            return new MTIntersect(g, arguments);
+        }
+
+    }
+
+    /**
+     * <p>This creates a {@link MTFunction} type.</p>
+     */
+    private static class FunctionConstructorApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        /**
+         * <p>This method returns a {@link MTType} resulting from a
+         * function application.</p>
+         *
+         * @param g The current type graph.
+         * @param f The function to be applied.
+         * @param calledAsName The name for this function application type.
+         * @param arguments List of arguments for applying the function.
+         *
+         * @return A function application {@link MTType}.
+         */
+        @Override
+        public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
+                String calledAsName, List<MTType> arguments) {
+            return new MTFunction(g, arguments.get(1), arguments.get(0));
+        }
+
+    }
+
+    /**
+     * <p>This creates a {@link MTCartesian} type.</p>
+     */
+    private static class CartesianProductApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        /**
+         * <p>This method returns a {@link MTType} resulting from a
+         * function application.</p>
+         *
+         * @param g The current type graph.
+         * @param f The function to be applied.
+         * @param calledAsName The name for this function application type.
+         * @param arguments List of arguments for applying the function.
+         *
+         * @return A function application {@link MTType}.
+         */
+        @Override
+        public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
+                String calledAsName, List<MTType> arguments) {
+            return new MTCartesian(g,
+                    new MTCartesian.Element(arguments.get(0)),
+                    new MTCartesian.Element(arguments.get(1)));
         }
 
     }
