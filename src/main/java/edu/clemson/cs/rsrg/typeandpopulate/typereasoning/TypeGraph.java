@@ -18,7 +18,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTProper;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.TypeRelationshipPredicate;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -121,6 +124,38 @@ public class TypeGraph {
     // ===========================================================
     // Helper Constructs
     // ===========================================================
+
+    /**
+     * <p>An helper class that helps establish canonicalization results for
+     * a {@link MTType}.</p>
+     */
+    private class CanonicalizationResult {
+
+        /** <p>A mathematical type.</p> */
+        final MTType canonicalType;
+
+        /** <p>A list of established type relationships.</p> */
+        final List<TypeRelationshipPredicate> predicates;
+
+        /** <p>A map of conversions.</p> */
+        final Map<String, String> canonicalToEnvironmental;
+
+        /**
+         * <p>This creates a canonicalization result for {@code canonicalType}.</p>
+         *
+         * @param canonicalType A mathematical type.
+         * @param predicates A list of established type relationships.
+         * @param canonicalToOriginal A map of conversions.
+         */
+        CanonicalizationResult(MTType canonicalType,
+                List<TypeRelationshipPredicate> predicates,
+                Map<String, String> canonicalToOriginal) {
+            this.canonicalType = canonicalType;
+            this.predicates = predicates;
+            this.canonicalToEnvironmental = canonicalToOriginal;
+        }
+
+    }
 
     /**
      * <p>A strategy pattern interface for a class type {@code V}
