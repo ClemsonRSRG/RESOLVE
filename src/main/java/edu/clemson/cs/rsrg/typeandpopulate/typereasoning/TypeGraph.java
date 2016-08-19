@@ -13,12 +13,15 @@
 package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.TypeRelationshipPredicate;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.FunctionApplicationFactory;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +96,16 @@ public class TypeGraph {
     public void addRelationship(Exp bindingExpression, MTType destination,
             Exp bindingCondition, Scope environment) {}
 
+    public static MTType getCopyWithVariablesSubstituted(MTType original,
+            Map<String, MTType> substitutions) {
+        return null;
+    }
+
+    public static <T extends Exp> T getCopyWithVariablesSubstituted(T original,
+            Map<String, MTType> substitutions) {
+        return null;
+    }
+
     public boolean isSubtype(MTType subtype, MTType supertype) {
         return false;
     }
@@ -105,19 +118,356 @@ public class TypeGraph {
         return false;
     }
 
-    public static MTType getCopyWithVariablesSubstituted(MTType original,
-            Map<String, MTType> substitutions) {
-        return null;
-    }
-
-    public static <T extends Exp> T getCopyWithVariablesSubstituted(T original,
-            Map<String, MTType> substitutions) {
-        return null;
-    }
-
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>
+     * Returns the conditions required to establish that <code>foundValue</code>
+     * is a member of the type represented by <code>expectedEntry</code> along
+     * the path from <code>foundEntry</code> to <code>expectedEntry</code>. If
+     * no such conditions exist (i.e., if the conditions would be
+     * <code>false</code>), throws a <code>TypeMismatchException</code>.
+     * </p>
+     *
+     * @param foundValue The value we'd like to establish is in the type
+     *        represented by <code>expectedEntry</code>.
+     * @param foundEntry A node in the type graph of which
+     *        <code>foundValue</code> is a syntactic subtype.
+     * @param expectedEntry A node in the type graph of which representing a
+     *        type in which we would like to establish <code>foundValue</code>
+     *        resides.
+     * @param pathStrategy The strategy for following the path between
+     *        <code>foundEntry</code> and <code>expectedEntry</code>.
+     *
+     * @return The conditions under which the path can be followed.
+     *
+     * @throws TypeMismatchException If the conditions under which the path can
+     *         be followed would be <code>false</code>.
+     */
+    private <V> Exp getPathConditions(V foundValue, Map.Entry<MTType, Map<String, MTType>> foundEntry,
+            Map.Entry<MTType, Map<String, MTType>> expectedEntry, NodePairPathStrategy<V> pathStrategy)
+            throws TypeMismatchException {
+        Map<String, MTType> combinedBindings = new HashMap<>();
+
+        combinedBindings.clear();
+        combinedBindings.putAll(updateMapLabels(foundEntry.getValue(), "_s"));
+        combinedBindings
+                .putAll(updateMapLabels(expectedEntry.getValue(), "_d"));
+
+        Exp newCondition =
+                pathStrategy.getValidTypeConditionsBetween(foundValue,
+                        foundEntry.getKey(), expectedEntry.getKey(),
+                        combinedBindings);
+
+        return newCondition;
+    }
+
+    /**
+     * <p>This method returns all the syntactic subtypes associated with {@code query}
+     * as well as any type relationships that has been established.</p>
+     *
+     * @param query A mathematical type.
+     *
+     * @return A map containing subtypes and associated type relationships.
+     */
+    private Map<MTType, Map<String, MTType>> getSyntacticSubtypesWithRelationships(MTType query) {
+        Map<MTType, Map<String, MTType>> result = new HashMap<>();
+
+        Map<String, MTType> bindings;
+
+        for (MTType potential : myTypeNodes.keySet()) {
+            try {
+                bindings = query.getSyntacticSubtypeBindings(potential);
+                result.put(potential, new HashMap<>(bindings));
+            }
+            catch (NoSolutionException nse) {}
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>
+     * Returns the conditions under which <code>value</code> could be
+     * demonstrated to be a member of <code>expected</code>, given that
+     * <code>value</code> is known to be in <strong>MType</strong>.
+     * </p>
+     *
+     * <p>
+     * The result is a series of disjuncts expressing possible situations under
+     * which the <code>value</code> would be known to be in
+     * <code>expected</code>. One or more of these disjuncts may be
+     * <code>false</code>, but if one or more would have been <code>true</code>,
+     * this method will simplify the result to simply <code>true</code>.
+     * </p>
+     *
+     * <p>
+     * If there is no known set of circumstances under which <code>value</code>
+     * could be demonstrated a member of <code>expected</code> (i.e., if the
+     * return value would simply be <code>false</code>), this method throws a
+     * <code>TypeMismatchException</code>.
+     * </p>
+     *
+     * @param value The <code>RESOLVE</code> value to test for membership.
+     * @param expected A <code>RESOLVE</code> type against which to test
+     *        membership.
+     *
+     * @return The conditions under which <code>value</code> could be
+     *         demonstrated to be in <code>expected</code>.
+     *
+     * @throws TypeMismatchException If there are no known conditions under
+     *         which <code>value</code> could be demonstrated to be in
+     *         <code>expected</code>.
+     */
+    private Exp getValidTypeConditions(MTType value, MTType expected)
+            throws TypeMismatchException {
+        //See note in the getValidTypeConditionsTo() in TypeRelationship,
+        //re: Lovecraftian nightmare-scape
+
+        Exp result = MathExp.getFalseVarExp(null, this);
+
+        if (expected == CLS) {
+            //Every CLS is in CLS except for Entity and CLS, itself
+            result = MathExp.getTrueVarExp(null, this);
+        }
+        else if (expected instanceof MTPowertypeApplication) {
+            if (value.equals(EMPTY_SET)) {
+                //The empty set is in all powertypes
+                result = MathExp.getTrueVarExp(null, this);
+            }
+            else {
+                //If "expected" happens to be Power(t) for some t, we can
+                //"demote" value to an INSTANCE of itself (provided it is not
+                //the empty set), and expected to just t
+                MTPowertypeApplication expectedAsPowertypeApplication =
+                        (MTPowertypeApplication) expected;
+
+                DummyExp memberOfValue = new DummyExp(null, value);
+
+                if (isKnownToBeIn(memberOfValue, expectedAsPowertypeApplication
+                        .getArgument(0))) {
+                    result = MathExp.getTrueVarExp(null, this);
+                }
+            }
+        }
+
+        //If we've already established it statically, no need for further work
+        if (!MathExp.isLiteralTrue(result)) {
+            //If we haven't...
+
+            //At this stage, we've done everything safe and sensible that we can
+            //do if the value we're looking at exists outside Entity
+            if (value == CLS || value == ENTITY) {
+                throw new TypeMismatchException(
+                        "Unexpected mathematical type: " + value);
+            }
+
+            try {
+                Exp intermediateResult =
+                        getValidTypeConditions(value, value.getType(),
+                                expected, MTTYPE_VALUE_PATH);
+
+                if (MathExp.isLiteralTrue(intermediateResult)) {
+                    result = intermediateResult;
+                }
+                else {
+                    result =
+                            MathExp.formDisjunct(result.getLocation(), result,
+                                    intermediateResult);
+                }
+            }
+            catch (TypeMismatchException tme) {
+                if (MathExp.isLiteralFalse(result)) {
+                    throw tme;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>
+     * Returns the conditions under which <code>value</code> could be
+     * demonstrated to be a member of <code>expected</code>.
+     * </p>
+     *
+     * <p>
+     * The result is a series of disjuncts expressing possible situations under
+     * which the <code>value</code> would be known to be in
+     * <code>expected</code>. One or more of these disjuncts may be
+     * <code>false</code>, but if one or more would have been <code>true</code>,
+     * this method will simplify the result to simply <code>true</code>.
+     * </p>
+     *
+     * <p>
+     * If there is no known set of circumstances under which <code>value</code>
+     * could be demonstrated a member of <code>expected</code> (i.e., if the
+     * return value would simply be <code>false</code>), this method throws a
+     * <code>TypeMismatchException</code>.
+     * </p>
+     *
+     * @param value The <code>RESOLVE</code> value to test for membership.
+     * @param expected A <code>RESOLVE</code> type against which to test
+     *        membership.
+     *
+     * @return The conditions under which <code>value</code> could be
+     *         demonstrated to be in <code>expected</code>.
+     *
+     * @throws TypeMismatchException If there are no known conditions under
+     *         which <code>value</code> could be demonstrated to be in
+     *         <code>expected</code>.
+     */
+    private Exp getValidTypeConditions(Exp value, MTType expected)
+            throws TypeMismatchException {
+        Exp result;
+
+        MTType valueTypeValue = value.getMathTypeValue();
+        if (expected == ENTITY && valueTypeValue != CLS
+                && valueTypeValue != ENTITY) {
+            //Every RESOLVE value is in Entity.  The only things we could get
+            //passed that are "special" and not "RESOLVE values" are MType and
+            //Entity itself
+            result = MathExp.getTrueVarExp(null, this);
+        }
+        else if (valueTypeValue == CLS || valueTypeValue == ENTITY) {
+            //MType and Entity aren't in anything
+            throw new TypeMismatchException("Unexpected mathematical type: "
+                    + value);
+        }
+        else if (valueTypeValue == null) {
+            result =
+                    getValidTypeConditions(value, value.getMathType(),
+                            expected, EXP_VALUE_PATH);
+        }
+        else {
+            //We're looking at an expression that defines a type
+            result = getValidTypeConditions(valueTypeValue, expected);
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>
+     * Returns the conditions under which <code>foundValue</code>, which is of
+     * type <code>foundType</code>, could be demonstrated to be a member of
+     * <code>expected</code>. Individual paths are tested using the given
+     * <code>pathStrategy</code> (which lets us forget about what the java type
+     * of <code>foundValue</code> is&mdash;only that it's a type
+     * <code>pathStrategy</code> can handle.)
+     * </p>
+     *
+     * <p>
+     * The result is a series of disjuncts expressing possible situations under
+     * which the <code>value</code> would be known to be in
+     * <code>expected</code>. One or more of these disjuncts may be
+     * <code>false</code>, but if one or more would have been <code>true</code>,
+     * this method will simplify the result to simply <code>true</code>.
+     * </p>
+     *
+     * <p>
+     * If there is no known set of circumstances under which <code>value</code>
+     * could be demonstrated a member of <code>expected</code> (i.e., if the
+     * return value would simply be <code>false</code>), this method throws a
+     * <code>TypeMismatchException</code>.
+     * </p>
+     *
+     * @param foundValue The <code>RESOLVE</code> value to test for membership.
+     * @param foundType The mathematical type of the <code>RESOLVE</code> value
+     *        to test for membership.
+     * @param expected A <code>RESOLVE</code> type against which to test
+     *        membership.
+     *
+     * @return The conditions under which <code>value</code> could be
+     *         demonstrated to be in <code>expected</code>.
+     *
+     * @throws TypeMismatchException If there are no known conditions under
+     *         which <code>value</code> could be demonstrated to be in
+     *         <code>expected</code>.
+     */
+    private <V> Exp getValidTypeConditions(V foundValue, MTType foundType,
+            MTType expected, NodePairPathStrategy<V> pathStrategy)
+            throws TypeMismatchException {
+        if (foundType == null) {
+            throw new IllegalArgumentException(foundValue + " has no type.");
+        }
+
+        Map<MTType, Map<String, MTType>> potentialFoundNodes =
+                getSyntacticSubtypesWithRelationships(foundType);
+        Map<MTType, Map<String, MTType>> potentialExpectedNodes =
+                getSyntacticSubtypesWithRelationships(expected);
+
+        Exp result = MathExp.getFalseVarExp(null, this);
+
+        Exp newCondition;
+
+        Iterator<Map.Entry<MTType, Map<String, MTType>>> expectedEntries;
+        Iterator<Map.Entry<MTType, Map<String, MTType>>> foundEntries =
+                potentialFoundNodes.entrySet().iterator();
+        Map.Entry<MTType, Map<String, MTType>> foundEntry, expectedEntry;
+
+        boolean foundPath = false;
+
+        //If foundType equals expected, we're done
+        boolean foundTrivialPath = foundType.equals(expected);
+
+        while (!foundTrivialPath && foundEntries.hasNext()) {
+            foundEntry = foundEntries.next();
+
+            expectedEntries = potentialExpectedNodes.entrySet().iterator();
+
+            while (!foundTrivialPath && expectedEntries.hasNext()) {
+
+                expectedEntry = expectedEntries.next();
+
+                try {
+                    newCondition =
+                            getPathConditions(foundValue, foundEntry,
+                                    expectedEntry, pathStrategy);
+
+                    foundPath =
+                            foundPath | !MathExp.isLiteralFalse(newCondition);
+
+                    foundTrivialPath = MathExp.isLiteralTrue(newCondition);
+
+                    result =
+                            MathExp.formDisjunct(newCondition.getLocation(),
+                                    newCondition, result);
+                }
+                catch (TypeMismatchException e) {}
+            }
+        }
+
+        if (foundTrivialPath) {
+            result = MathExp.getTrueVarExp(null, this);
+        }
+        else if (!foundPath) {
+            throw new TypeMismatchException("No path found!");
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>An helper method that updates entries in a map.</p>
+     *
+     * @param original The original map.
+     * @param suffix The new suffix to be added to the map's key.
+     * @param <T> The class associated with the map's values.
+     *
+     * @return The modified map.
+     */
+    private <T> Map<String, T> updateMapLabels(Map<String, T> original, String suffix) {
+        Map<String, T> result = new HashMap<>();
+        for (Map.Entry<String, T> entry : original.entrySet()) {
+            result.put(entry.getKey() + suffix, entry.getValue());
+        }
+
+        return result;
+    }
 
     // ===========================================================
     // Helper Constructs
