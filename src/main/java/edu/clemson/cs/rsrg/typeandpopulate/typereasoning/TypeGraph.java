@@ -14,16 +14,21 @@ package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
+import edu.clemson.cs.rsrg.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.EqualsPredicate;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.TypeRelationshipPredicate;
+import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.CanonicalizingVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.UnboundTypeAccumulator;
+import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.VariableReplacingVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.FunctionApplicationFactory;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>Represents a directed graph of types, where edges between types
@@ -123,6 +128,158 @@ public class TypeGraph {
     // ===========================================================
 
     /**
+     * <p></p>
+     *
+     * @param t
+     * @param environment
+     * @param suffix
+     *
+     * @return
+     */
+    private CanonicalizationResult canonicalize(MTType t, Scope environment,
+            String suffix) {
+        CanonicalizingVisitor canonicalizer =
+                new CanonicalizingVisitor(this, environment, suffix);
+
+        t.accept(canonicalizer);
+
+        return new CanonicalizationResult(canonicalizer.getFinalExpression(),
+                canonicalizer.getTypePredicates(), canonicalizer
+                        .getCanonicalToEnvironmentOriginalMapping());
+    }
+
+    /**
+     * <p></p>
+     *
+     * @param original
+     * @param substitutions
+     *
+     * @return
+     */
+    private Exp getCopyWithVariableNamesChanged(Exp original, Map<String, String> substitutions) {
+        Exp result = original.clone();
+
+        if (result.getMathType() == null) {
+            throw new RuntimeException("copy() method for class "
+                    + original.getClass() + " did not properly copy the math "
+                    + "type of the object.");
+        }
+
+        result.setMathType(getCopyWithVariableNamesChanged(
+                result.getMathType(), substitutions));
+
+        // TODO: Since we have made our Exp hierarchy somewhat immutable,
+        // there is no way to replace all the sub-expressions using the original
+        // logic. What we are going to attempt is to generate all the new expressions
+        // and simply call subtituteChildren(). - YS
+        List<Exp> children = result.getSubExpressions();
+        Map<Exp, Exp> newChildrenExp = new HashMap<>();
+        int childCount = children.size();
+        for (int childIndex = 0; childIndex < childCount; childIndex++) {
+            Exp currentChildExp = children.get(childIndex);
+            newChildrenExp.put(currentChildExp.clone(),
+                    getCopyWithVariableNamesChanged(currentChildExp.clone(), substitutions));
+        }
+        result.substitute(newChildrenExp);
+
+        return result;
+    }
+
+    /**
+     * <p></p>
+     *
+     * @param original
+     * @param substitutions
+     *
+     * @return
+     */
+    private MTType getCopyWithVariableNamesChanged(MTType original,
+            Map<String, String> substitutions) {
+        VariableReplacingVisitor renamer =
+                new VariableReplacingVisitor(substitutions, this);
+        original.accept(renamer);
+        return renamer.getFinalExpression();
+    }
+
+    /**
+     * <p></p>
+     *
+     * @param universalVariableNames
+     * @param sourceEnvironmentalToCanonical
+     * @param destinationEnvironmentalToCanonical
+     *
+     * @return
+     */
+    private static Map<String, String> getEnvironmentalToExemplar(
+            Set<String> universalVariableNames,
+            Map<String, List<String>> sourceEnvironmentalToCanonical,
+            Map<String, List<String>> destinationEnvironmentalToCanonical) {
+        Map<String, String> environmentalToExemplar =
+                new HashMap<>();
+        for (String envVar : universalVariableNames) {
+            if (sourceEnvironmentalToCanonical.containsKey(envVar)) {
+                environmentalToExemplar.put(envVar,
+                        sourceEnvironmentalToCanonical.get(envVar).get(0));
+            }
+            else {
+                //It must be in destination because we checked above that one
+                //or the other makes use of this thing
+                environmentalToExemplar.put(envVar,
+                        destinationEnvironmentalToCanonical.get(envVar).get(0));
+            }
+        }
+
+        return environmentalToExemplar;
+    }
+
+    /**
+     * <p></p>
+     *
+     * @param sourceCanonicalResult
+     * @param destinationCanonicalResult
+     * @param environmentalToExemplar
+     * @param universalVariableNames
+     * @param sourceEnvironmentalToCanonical
+     * @param destinationEnvironmentalToCanonical
+     *
+     * @return
+     */
+    private List<TypeRelationshipPredicate> getFinalPredicates(
+            CanonicalizationResult sourceCanonicalResult,
+            CanonicalizationResult destinationCanonicalResult,
+            Map<String, String> environmentalToExemplar,
+            Set<String> universalVariableNames,
+            Map<String, List<String>> sourceEnvironmentalToCanonical,
+            Map<String, List<String>> destinationEnvironmentalToCanonical) {
+        //To begin with, the final predicates should include the predicates
+        //from each canonicalization, with top-level environmental variables
+        //finalized to their exemplar variable
+        List<TypeRelationshipPredicate> finalPredicates =
+                new LinkedList<>();
+        finalPredicates.addAll(replaceInPredicates(
+                sourceCanonicalResult.predicates, environmentalToExemplar));
+        finalPredicates
+                .addAll(replaceInPredicates(
+                        destinationCanonicalResult.predicates,
+                        environmentalToExemplar));
+
+        //Finally, it's possible that the same original variable existed in each
+        //of the source and destination.  We lost this info during
+        //canonicalization so we re-establish it with predicates
+        for (String envVar : universalVariableNames) {
+            if (sourceEnvironmentalToCanonical.containsKey(envVar)
+                    && destinationEnvironmentalToCanonical.containsKey(envVar)) {
+                finalPredicates.add(new EqualsPredicate(this, new MTNamed(this,
+                        sourceEnvironmentalToCanonical.get(envVar).get(0)),
+                        new MTNamed(this, destinationEnvironmentalToCanonical
+                                .get(envVar).get(0))));
+            }
+        }
+
+        return finalPredicates;
+    }
+
+    /**
      * <p>
      * Returns the conditions required to establish that <code>foundValue</code>
      * is a member of the type represented by <code>expectedEntry</code> along
@@ -183,6 +340,24 @@ public class TypeGraph {
                 result.put(potential, new HashMap<>(bindings));
             }
             catch (NoSolutionException nse) {}
+        }
+
+        return result;
+    }
+
+    /**
+     * <p></p>
+     *
+     * @param t
+     *
+     * @return
+     */
+    private TypeNode getTypeNode(MTType t) {
+        TypeNode result = myTypeNodes.get(t);
+
+        if (result == null) {
+            result = new TypeNode(this, t);
+            myTypeNodes.put(t, result);
         }
 
         return result;
@@ -446,6 +621,121 @@ public class TypeGraph {
         }
         else if (!foundPath) {
             throw new TypeMismatchException("No path found!");
+        }
+
+        return result;
+    }
+
+    /**
+     * <p></p>
+     *
+     * @param source
+     * @param destination
+     * @param environment
+     * @param sourceCanonicalResult
+     * @param destinationCanonicalResult
+     *
+     * @return
+     */
+    private static Set<String> getUniversallyQuantifiedVariables(MTType source, MTType destination, Scope environment,
+            CanonicalizationResult sourceCanonicalResult, CanonicalizationResult destinationCanonicalResult) {
+        Set<String> unboundTypeClosure = new HashSet<>();
+        Set<String> newUnboundTypes = new HashSet<>();
+        Set<String> nextBatch;
+
+        UnboundTypeAccumulator uta = new UnboundTypeAccumulator(environment);
+        source.accept(uta);
+        destination.accept(uta);
+        nextBatch = uta.getFinalUnboundNamedTypes();
+
+        try {
+            while (!nextBatch.isEmpty()) {
+                newUnboundTypes.clear();
+                newUnboundTypes.addAll(nextBatch);
+                nextBatch.clear();
+
+                for (String newUnboundType : newUnboundTypes) {
+                    //If it wasn't a MathSymbolEntry, the type checker would
+                    //already have bombed
+                    MathSymbolEntry entry =
+                            (MathSymbolEntry) environment
+                                    .queryForOne(new UnqualifiedNameQuery(
+                                            newUnboundType));
+
+                    MTType type = entry.getType();
+                    uta = new UnboundTypeAccumulator(environment);
+                    type.accept(uta);
+                    nextBatch.addAll(uta.getFinalUnboundNamedTypes());
+                }
+
+                unboundTypeClosure.addAll(newUnboundTypes);
+                nextBatch.removeAll(newUnboundTypes);
+            }
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException se) {
+            //This shouldn't be possible, the type checker would already have
+            //bombed
+            throw new RuntimeException(se);
+        }
+
+        //Make sure all those variables get bound
+        Set<String> remaining = new HashSet<>(unboundTypeClosure);
+        remaining.removeAll(sourceCanonicalResult.canonicalToEnvironmental
+                .values());
+        remaining.removeAll(destinationCanonicalResult.canonicalToEnvironmental
+                .values());
+        if (!remaining.isEmpty()) {
+            throw new IllegalArgumentException("The following universal "
+                    + "type variables will not be bound: " + remaining);
+        }
+
+        return unboundTypeClosure;
+    }
+
+    /**
+     * <p></p>
+     *
+     * @param original
+     * @param <K>
+     * @param <V>
+     *
+     * @return
+     */
+    private static <K, V> Map<V, List<K>> invertMap(Map<K, V> original) {
+        Map<V, List<K>> result = new HashMap<>();
+
+        V entryValue;
+        List<K> valueKeyList;
+        for (Map.Entry<K, V> entry : original.entrySet()) {
+            entryValue = entry.getValue();
+
+            valueKeyList = result.get(entryValue);
+            if (valueKeyList == null) {
+                valueKeyList = new LinkedList<>();
+                result.put(entryValue, valueKeyList);
+            }
+
+            valueKeyList.add(entry.getKey());
+        }
+
+        return result;
+    }
+
+    /**
+     * <p></p>
+     *
+     * @param original
+     * @param substitutions
+     *
+     * @return
+     */
+    private static List<TypeRelationshipPredicate> replaceInPredicates(
+            List<TypeRelationshipPredicate> original,
+            Map<String, String> substitutions) {
+        List<TypeRelationshipPredicate> result = new LinkedList<>();
+
+        for (TypeRelationshipPredicate p : original) {
+            result.add(p.replaceUnboundVariablesInTypes(substitutions));
         }
 
         return result;
