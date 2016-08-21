@@ -149,12 +149,12 @@ public class TypeGraph {
     }
 
     /**
-     * <p></p>
+     * <p>Returns a new {@link Exp} with the appropriate substitutions.</p>
      *
-     * @param original
-     * @param substitutions
+     * @param original Original expression.
+     * @param substitutions A map of substitutions.
      *
-     * @return
+     * @return A modified {@link Exp}.
      */
     private Exp getCopyWithVariableNamesChanged(Exp original, Map<String, String> substitutions) {
         Exp result = original.clone();
@@ -171,7 +171,7 @@ public class TypeGraph {
         // TODO: Since we have made our Exp hierarchy somewhat immutable,
         // there is no way to replace all the sub-expressions using the original
         // logic. What we are going to attempt is to generate all the new expressions
-        // and simply call subtituteChildren(). - YS
+        // and simply call substituteChildren(). - YS
         List<Exp> children = result.getSubExpressions();
         Map<Exp, Exp> newChildrenExp = new HashMap<>();
         int childCount = children.size();
@@ -186,12 +186,12 @@ public class TypeGraph {
     }
 
     /**
-     * <p></p>
+     * <p>Returns a new {@link MTType} with the appropriate substitutions.</p>
      *
-     * @param original
-     * @param substitutions
+     * @param original Original mathematical type.
+     * @param substitutions A map of substitutions.
      *
-     * @return
+     * @return A modified {@link MTType}.
      */
     private MTType getCopyWithVariableNamesChanged(MTType original,
             Map<String, String> substitutions) {
