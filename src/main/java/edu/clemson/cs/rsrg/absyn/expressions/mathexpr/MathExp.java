@@ -68,7 +68,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The resulting {@link Exp}.
      */
-    public final static MathExp formConjunct(Location l, Exp e1, Exp e2) {
+    public static MathExp formConjunct(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
             throw new NullMathTypeException("The math type for "
                     + e1.toString() + " is null.");
@@ -112,7 +112,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The resulting {@link Exp}.
      */
-    public final static MathExp formDisjunct(Location l, Exp e1, Exp e2) {
+    public static MathExp formDisjunct(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
             throw new NullMathTypeException("The math type for "
                     + e1.toString() + " is null.");
@@ -156,7 +156,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The resulting {@link Exp}.
      */
-    public final static MathExp formImplies(Location l, Exp e1, Exp e2) {
+    public static MathExp formImplies(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
             throw new NullMathTypeException("The math type for "
                     + e1.toString() + " is null.");
@@ -200,7 +200,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The {@link VarExp} representation object.
      */
-    public final static VarExp getFalseVarExp(Location l, TypeGraph tg) {
+    public static VarExp getFalseVarExp(Location l, TypeGraph tg) {
         // Attempt to find a location for the conjunct
         Location newExpLoc = cloneLocation(l);
         Location newPosSymbolLoc = cloneLocation(l);
@@ -222,7 +222,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The {@link VarExp} representation object.
      */
-    public final static VarExp getTrueVarExp(Location l, TypeGraph tg) {
+    public static VarExp getTrueVarExp(Location l, TypeGraph tg) {
         // Attempt to find a location for the conjunct
         Location newExpLoc = cloneLocation(l);
         Location newPosSymbolLoc = cloneLocation(l);
