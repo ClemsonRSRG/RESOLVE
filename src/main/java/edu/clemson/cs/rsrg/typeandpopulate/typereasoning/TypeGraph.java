@@ -106,17 +106,62 @@ public class TypeGraph {
     // Public Methods
     // ===========================================================
 
+    /**
+     * <p></p>
+     *
+     * @param bindingExpression
+     * @param destination
+     * @param bindingCondition
+     * @param environment
+     */
     public void addRelationship(Exp bindingExpression, MTType destination,
-            Exp bindingCondition, Scope environment) {}
+            Exp bindingCondition, Scope environment) {
 
-    public static MTType getCopyWithVariablesSubstituted(MTType original,
-            Map<String, MTType> substitutions) {
-        return null;
     }
 
+    /**
+     * <p>Returns a new {@link MTType} with the appropriate substitutions.</p>
+     *
+     * @param original Original mathematical type.
+     * @param substitutions A map of substitutions.
+     *
+     * @return A modified {@link MTType}.
+     */
+    public static MTType getCopyWithVariablesSubstituted(MTType original,
+            Map<String, MTType> substitutions) {
+        VariableReplacingVisitor renamer =
+                new VariableReplacingVisitor(substitutions);
+        original.accept(renamer);
+
+        return renamer.getFinalExpression();
+    }
+
+    /**
+     * <p>Returns a new {@link Exp} with the appropriate substitutions.</p>
+     *
+     * @param original Original expression.
+     * @param substitutions A map of substitutions.
+     * @param <T> The class type for {@code original}.
+     *
+     * @return A modified {@link Exp}.
+     */
     public static <T extends Exp> T getCopyWithVariablesSubstituted(T original,
             Map<String, MTType> substitutions) {
-        return null;
+
+        @SuppressWarnings("unchecked")
+        T result = (T) original.clone();
+        result.setMathType(result.getMathType()
+                .getCopyWithVariablesSubstituted(substitutions));
+
+        List<Exp> children = result.getSubExpressions();
+        Map<Exp, Exp> newChildrenExp = new HashMap<>();
+        for (Exp currentChildExp : children) {
+            newChildrenExp.put(currentChildExp.clone(),
+                    TypeGraph.getCopyWithVariablesSubstituted(currentChildExp.clone(), substitutions));
+        }
+        result.substitute(newChildrenExp);
+
+        return result;
     }
 
     /**
@@ -314,15 +359,9 @@ public class TypeGraph {
         result.setMathType(getCopyWithVariableNamesChanged(
                 result.getMathType(), substitutions));
 
-        // TODO: Since we have made our Exp hierarchy somewhat immutable,
-        // there is no way to replace all the sub-expressions using the original
-        // logic. What we are going to attempt is to generate all the new expressions
-        // and simply call substituteChildren(). - YS
         List<Exp> children = result.getSubExpressions();
         Map<Exp, Exp> newChildrenExp = new HashMap<>();
-        int childCount = children.size();
-        for (int childIndex = 0; childIndex < childCount; childIndex++) {
-            Exp currentChildExp = children.get(childIndex);
+        for (Exp currentChildExp : children) {
             newChildrenExp.put(currentChildExp.clone(),
                     getCopyWithVariableNamesChanged(currentChildExp.clone(), substitutions));
         }
@@ -344,6 +383,7 @@ public class TypeGraph {
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitutions, this);
         original.accept(renamer);
+
         return renamer.getFinalExpression();
     }
 
