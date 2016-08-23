@@ -77,22 +77,85 @@ public class TypeGraph {
     // Global Mathematical Types
     // ===========================================================
 
-    public final MTType ENTITY = new MTProper(this, "Entity");
-    public final MTProper CLS = new MTProper(this, null, true, "MType");
-    public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
-    public final MTProper EMPTY_SET =
-            new MTProper(this, CLS, false, "Empty_Set");
-    public final MTProper VOID = new MTProper(this, CLS, false, "Void");
+    /** <p><code>Element</code></p> */
     public final MTType ELEMENT = new MTProper(this, "Element");
 
-    public MTFunction POWERTYPE;
-    public MTFunction POWERCLASS;
-    public MTFunction UNION;
-    public MTFunction INTERSECT;
-    public MTFunction FUNCTION;
-    public MTFunction CROSS;
-    public MTFunction AND;
-    public MTFunction NOT;
+    /** <p><code>Entity</code></p> */
+    public final MTType ENTITY = new MTProper(this, "Entity");
+
+    /** <p><code>Class</code></p> */
+    public final MTProper CLS = new MTProper(this, null, true, "Cls");
+
+    /** <p><code>SSet</code></p> */
+    public final MTProper SET = new MTProper(this, CLS, true, "SSet");
+
+    /** <p><code>Boolean</code></p> */
+    public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
+
+    /** <p><code>R</code></p> */
+    public final MTProper R = new MTProper(this, CLS, false, "R");
+
+    /** <p><code>Atom</code></p> */
+    public final MTProper ATOM = new MTProper(this, CLS, false, "Atom");
+
+    /** <p><code>Void</code></p> */
+    public final MTProper VOID = new MTProper(this, CLS, false, "Void");
+
+    /** <p><code>Empty_Set</code></p> */
+    public final MTProper EMPTY_SET =
+            new MTProper(this, CLS, false, "Empty_Set");
+
+    /** <p>Factory for creating <code>PowerType</code> applications.</p> */
+    private final static FunctionApplicationFactory POWERTYPE_APPLICATION =
+            new PowertypeApplicationFactory();
+
+    /** <p>Factory for creating <code>Union</code> applications.</p> */
+    private final static FunctionApplicationFactory UNION_APPLICATION =
+            new UnionApplicationFactory();
+
+    /** <p>Factory for creating <code>Intersection</code> applications.</p> */
+    private final static FunctionApplicationFactory INTERSECT_APPLICATION =
+            new IntersectApplicationFactory();
+
+    /** <p>Factory for creating <code>Function</code> constructor applications.</p> */
+    private final static FunctionApplicationFactory FUNCTION_CONSTRUCTOR_APPLICATION =
+            new FunctionConstructorApplicationFactory();
+
+    /** <p>Factory for creating <code>Cartesian Product</code> applications.</p> */
+    private final static FunctionApplicationFactory CARTESIAN_PRODUCT_APPLICATION =
+            new CartesianProductApplicationFactory();
+
+    /** <p><code>PowerType</code> function</p> */
+    public final MTFunction POWERTYPE =
+            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+
+    /** <p><code>PowerClass</code> function</p> */
+    public final MTFunction POWERCLASS =
+            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+
+    /** <p><code>Union</code> function</p> */
+    public final MTFunction UNION =
+            new MTFunction(this, UNION_APPLICATION, CLS, CLS, CLS);
+
+    /** <p><code>Intersection</code> function</p> */
+    public final MTFunction INTERSECT =
+            new MTFunction(this, INTERSECT_APPLICATION, CLS, CLS, CLS);
+
+    /** <p>Mathematical <code>Function</code></p> */
+    public final MTFunction FUNCTION =
+            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS,
+                    CLS);
+
+    /** <p><code>Cartesian Product</code> function</p> */
+    public final MTFunction CROSS =
+            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
+
+    /** <p>Logical <code>And</code> function</p> */
+    public final MTFunction AND =
+            new MTFunction(this, BOOLEAN, BOOLEAN, BOOLEAN);
+
+    /** <p>Logical <code>Not</code> function</p> */
+    public final MTFunction NOT = new MTFunction(this, BOOLEAN, BOOLEAN);
 
     // ===========================================================
     // Constructors
