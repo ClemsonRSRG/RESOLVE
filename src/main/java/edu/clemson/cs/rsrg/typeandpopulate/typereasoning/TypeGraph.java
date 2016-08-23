@@ -62,6 +62,14 @@ public class TypeGraph {
     /** <p>This contains all mathematical nodes for this graph.</p> */
     private final HashMap<MTType, TypeNode> myTypeNodes;
 
+    /** <p>This contains all established relationships for mathematical subtypes.</p> */
+    private final Set<EstablishedRelationship> myEstablishedSubtypes =
+            new HashSet<>();
+
+    /** <p>This contains all established relationships for mathematical elements.</p> */
+    private final Set<EstablishedRelationship> myEstablishedElements =
+            new HashSet<>();
+
     // ===========================================================
     // Global Mathematical Types
     // ===========================================================
@@ -111,16 +119,153 @@ public class TypeGraph {
         return null;
     }
 
-    public boolean isSubtype(MTType subtype, MTType supertype) {
-        return false;
+    /**
+     * <p>Returns <code>true</code> <strong>iff</strong> <code>value</code> is
+     * known to definitely be a member of <code>expected</code>.</p>
+     *
+     * <p>
+     * I.e., this is the same as asking if
+     * <code>getValidTypeConditions(value, expected)</code> 1) doesn't throw an
+     * exception and 2) returns a value for which <code>isLiteralTrue()</code>
+     * returns <code>true</code>.
+     * </p>
+     *
+     * @param value The <code>RESOLVE</code> value to test for membership.
+     * @param expected A <code>RESOLVE</code> type against which to test
+     *                 membership.
+     *
+     * @return <code>true</code> <strong>iff</strong> <code>value</code> is
+     *         definitely in <code>expected</code>.
+     */
+    public final boolean isKnownToBeIn(Exp value, MTType expected) {
+        boolean result;
+
+        try {
+            Exp conditions = getValidTypeConditions(value, expected);
+            result = MathExp.isLiteralTrue(conditions);
+        }
+        catch (TypeMismatchException e) {
+            result = false;
+        }
+
+        return result;
     }
 
-    public boolean isKnownToBeIn(Exp value, MTType expected) {
-        return false;
+    /**
+     * <p>Returns <code>true</code> <strong>iff</strong> <code>value</code>, which
+     * is known to identify a <strong>MType</strong>, is known to definitely be
+     * a member of <code>expected</code>.</p>
+     *
+     * <p>
+     * I.e., this is the same as asking if
+     * <code>getValidTypeConditions(value, expected)</code> 1) doesn't throw an
+     * exception and 2) returns a value for which <code>isLiteralTrue()</code>
+     * returns <code>true</code>.
+     * </p>
+     *
+     * @param value The <code>RESOLVE</code> value to test for membership.
+     * @param expected A <code>RESOLVE</code> type against which to test
+     *                 membership.
+     *
+     * @return <code>true</code> <strong>iff</strong> <code>value</code> is
+     *         definitely in <code>expected</code>.
+     */
+    public final boolean isKnownToBeIn(MTType value, MTType expected) {
+        boolean result;
+
+        EstablishedRelationship r =
+                new EstablishedRelationship(value, expected);
+
+        //If the type of the given value is a subtype of the expected type, then
+        //its value must necessarily be in the expected type.  Note we can't
+        //reason about the type of CLS, so we exclude it
+        result =
+                myEstablishedElements.contains(r) || (value != CLS)
+                        && (value != ENTITY)
+                        && isSubtype(value.getType(), expected);
+
+        if (!result) {
+            try {
+                Exp conditions = getValidTypeConditions(value, expected);
+                result = MathExp.isLiteralTrue(conditions);
+            }
+            catch (TypeMismatchException e) {
+                result = false;
+            }
+        }
+
+        if (result) {
+            myEstablishedElements.add(r);
+        }
+
+        return result;
     }
 
-    public boolean isKnownToBeIn(MTType value, MTType expected) {
-        return false;
+    /**
+     * <p>Returns <code>true</code> <strong>iff</strong> every value in
+     * <code>subtype</code> must necessarily be in <code>supertype</code>.</p>
+     *
+     * @param subtype A type to test if it is subsumed by <code>supertype</code>.
+     * @param supertype A type to test if it subsumes <code>subtype</code>.
+     *
+     * @return Returns <code>true</code> <strong>iff</strong> every value in
+     *         <code>subtype</code> must necessarily be in
+     *         <code>supertype</code>.
+     */
+    public final boolean isSubtype(MTType subtype, MTType supertype) {
+        boolean result;
+
+        EstablishedRelationship r =
+                new EstablishedRelationship(subtype, supertype);
+
+        try {
+            result =
+                    supertype == ENTITY || supertype == CLS
+                            || myEstablishedSubtypes.contains(r)
+                            || subtype.equals(supertype)
+                            || subtype.isSyntacticSubtypeOf(supertype);
+        }
+        catch (NoSuchElementException nsee) {
+            //Syntactic subtype checker freaks out (rightly) if there are
+            //free variables in the expression, but the next check will deal
+            //correctly with them.
+            result = false;
+        }
+
+        if (!result) {
+            try {
+                Exp conditions =
+                        getValidTypeConditions(subtype,
+                                new MTPowertypeApplication(this, supertype));
+                result = MathExp.isLiteralTrue(conditions);
+            }
+            catch (TypeMismatchException e) {
+                result = false;
+            }
+        }
+
+        if (result) {
+            myEstablishedSubtypes.add(r);
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>This method returns the object in string format.</p>
+     *
+     * @return Object as a string.
+     */
+    @Override
+    public final String toString() {
+        StringBuilder str = new StringBuilder();
+
+        Set<MTType> keys = myTypeNodes.keySet();
+        for (MTType key : keys) {
+            str.append(myTypeNodes.get(key).toString());
+        }
+
+        return str.toString();
     }
 
     // ===========================================================
@@ -747,6 +892,50 @@ public class TypeGraph {
         }
 
         return result;
+    }
+
+    /**
+     * <p>An helper method that invokes the {@link Exp#substitute(Map)} method
+     * and takes care of any potential exceptions.</p>
+     *
+     * @param original Original expression.
+     * @param replacements A map of replacement expressions.
+     * @param environmentalToExemplar A map of environmental names to exemplar names.
+     *
+     * @return The modified expression.
+     */
+    private Exp safeVariableNameUpdate(Exp original, Map<Exp, Exp> replacements,
+                                       Map<String, String> environmentalToExemplar) {
+        MTType originalTypeValue = original.getMathTypeValue();
+
+        original = original.substitute(replacements);
+
+        if (original.getMathType() == null) {
+            throw new RuntimeException("substitute() method for class "
+                    + original.getClass() + " did not properly copy the math "
+                    + "type of the object.");
+        }
+
+        if (originalTypeValue != null && original.getMathTypeValue() == null) {
+            throw new RuntimeException("substitute() method for class "
+                    + original.getClass() + " did not properly copy the math "
+                    + "type value of the object.");
+        }
+
+        original =
+                getCopyWithVariableNamesChanged(original,
+                        environmentalToExemplar);
+
+        //Straight math type is taken care of inside the above call, since the
+        //math type is needed there, so no need to check it again here
+
+        if (originalTypeValue != null && original.getMathTypeValue() == null) {
+            throw new RuntimeException("copy() method for class "
+                    + original.getClass() + " did not properly copy the math "
+                    + "type value of the object.");
+        }
+
+        return original;
     }
 
     /**
