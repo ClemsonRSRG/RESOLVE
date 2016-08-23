@@ -212,7 +212,7 @@ public class TypeGraph {
      *        <code>bindingExpression</code>, <code>destination</code>, and
      *        <code>bindingCondition</code> should be evaluated.
      */
-    public void addRelationship(Exp bindingExpression, MTType destination,
+    public final void addRelationship(Exp bindingExpression, MTType destination,
             Exp bindingCondition, Scope environment) {
         //Sanitize and sanity check our inputs somewhat
         if (destination == null) {
