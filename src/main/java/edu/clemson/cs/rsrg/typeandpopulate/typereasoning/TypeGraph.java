@@ -128,13 +128,14 @@ public class TypeGraph {
     // ===========================================================
 
     /**
-     * <p></p>
+     * <p>Creates canonical names for names in {@code t}.</p>
      *
-     * @param t
-     * @param environment
-     * @param suffix
+     * @param t A mathematical type.
+     * @param environment The searching scope.
+     * @param suffix A suffix string for the predicate.
      *
-     * @return
+     * @return A {@link CanonicalizationResult} object with names in {@code t}
+     * being their canonical forms.
      */
     private CanonicalizationResult canonicalize(MTType t, Scope environment,
             String suffix) {
@@ -202,13 +203,18 @@ public class TypeGraph {
     }
 
     /**
-     * <p></p>
+     * <p>Get a mapping from environmental variables to "exemplar" variables
+     * -- a single representative name that either the source or destination
+     * will bind for us. There may be many choices, but they're all
+     * equivalent for our purposes.</p>
      *
-     * @param universalVariableNames
-     * @param sourceEnvironmentalToCanonical
-     * @param destinationEnvironmentalToCanonical
+     * @param universalVariableNames Set containing universal variable names.
+     * @param sourceEnvironmentalToCanonical A map containing conversions to canonical forms
+     *                                       from a source type.
+     * @param destinationEnvironmentalToCanonical A map containing conversions to canonical forms
+     *                                            from a destination type.
      *
-     * @return
+     * @return A map containing the conversion from environmental to exemplar.
      */
     private static Map<String, String> getEnvironmentalToExemplar(
             Set<String> universalVariableNames,
@@ -233,16 +239,18 @@ public class TypeGraph {
     }
 
     /**
-     * <p></p>
+     * <p>Returns the list of type relationships established.</p>
      *
-     * @param sourceCanonicalResult
-     * @param destinationCanonicalResult
-     * @param environmentalToExemplar
-     * @param universalVariableNames
-     * @param sourceEnvironmentalToCanonical
-     * @param destinationEnvironmentalToCanonical
+     * @param sourceCanonicalResult Canonical results from the source type.
+     * @param destinationCanonicalResult Canonical results from the destination type.
+     * @param environmentalToExemplar A map of environmental names to exemplar names.
+     * @param universalVariableNames Set containing universal variable names.
+     * @param sourceEnvironmentalToCanonical A map containing conversions to canonical forms
+     *                                       from a source type.
+     * @param destinationEnvironmentalToCanonical A map containing conversions to canonical forms
+     *                                            from a destination type.
      *
-     * @return
+     * @return A list of {@link TypeRelationshipPredicate}.
      */
     private List<TypeRelationshipPredicate> getFinalPredicates(
             CanonicalizationResult sourceCanonicalResult,
@@ -346,11 +354,11 @@ public class TypeGraph {
     }
 
     /**
-     * <p></p>
+     * <p>This method returns the type node representing {@code t}.</p>
      *
-     * @param t
+     * @param t A mathematical type.
      *
-     * @return
+     * @return A {@link TypeNode}.
      */
     private TypeNode getTypeNode(MTType t) {
         TypeNode result = myTypeNodes.get(t);
@@ -627,15 +635,15 @@ public class TypeGraph {
     }
 
     /**
-     * <p></p>
+     * <p>This method returns the set of universally quantified variables in the current scope.</p>
      *
-     * @param source
-     * @param destination
-     * @param environment
-     * @param sourceCanonicalResult
-     * @param destinationCanonicalResult
+     * @param source Source mathematical type.
+     * @param destination Destination mathematical type.
+     * @param environment The searching scope.
+     * @param sourceCanonicalResult Canonical results from the source type.
+     * @param destinationCanonicalResult Canonical results from the destination type.
      *
-     * @return
+     * @return Set containing universal variable names.
      */
     private static Set<String> getUniversallyQuantifiedVariables(MTType source, MTType destination, Scope environment,
             CanonicalizationResult sourceCanonicalResult, CanonicalizationResult destinationCanonicalResult) {
@@ -693,13 +701,13 @@ public class TypeGraph {
     }
 
     /**
-     * <p></p>
+     * <p>An helper method that inverts entries in a map.</p>
      *
-     * @param original
-     * @param <K>
-     * @param <V>
+     * @param original The original map.
+     * @param <K> The class associated with the map's keys.
+     * @param <V> The class associated with the map's values.
      *
-     * @return
+     * @return The inverted map.
      */
     private static <K, V> Map<V, List<K>> invertMap(Map<K, V> original) {
         Map<V, List<K>> result = new HashMap<>();
@@ -722,12 +730,12 @@ public class TypeGraph {
     }
 
     /**
-     * <p></p>
+     * <p>An helper method that replaces {@link TypeRelationshipPredicate TypeRelationshipPredicates}.</p>
      *
-     * @param original
-     * @param substitutions
+     * @param original The original list.
+     * @param substitutions A map of substitutions.
      *
-     * @return
+     * @return A modified list with the substitutions.
      */
     private static List<TypeRelationshipPredicate> replaceInPredicates(
             List<TypeRelationshipPredicate> original,
