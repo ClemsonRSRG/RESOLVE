@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
@@ -23,6 +24,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.EqualsPredicate;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.TypeRelationship;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.TypeRelationshipPredicate;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.CanonicalizingVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.UnboundTypeAccumulator;
@@ -107,16 +109,123 @@ public class TypeGraph {
     // ===========================================================
 
     /**
-     * <p></p>
+     * <p>
+     * Establishes that values binding to <code>bindingExpression</code> under
+     * the given environment may be considered to be of type
+     * <code>destination</code> assuming the proof obligations set forth in
+     * <code>bindingCondition</code> are satisfied.
+     * </p>
      *
-     * @param bindingExpression
-     * @param destination
-     * @param bindingCondition
-     * @param environment
+     * <p>
+     * <code>bindingExpression</code> must have a mathematical type set on it.
+     * I.e., it must be the case that
+     * <code>bindingExpression.getMathType() != null</code>.
+     * </p>
+     *
+     * <p>
+     * Any <code>VarExp</code>s, <code>AbstractFunctionExp</code>s, and
+     * <code>MTNamed</code> that appear in <code>bindingExpression</code>, its
+     * associated mathematical type, or <code>destination</code> must be bound
+     * under the given environment.
+     * </p>
+     *
+     * <p>
+     * Conversely, any universally bound variables in the given environment must
+     * appear in one of <code>bindingExpression</code>, its associated
+     * mathematical type, or <code>destination</code>. This gives the typing
+     * system a chance to provide concrete values to these "open" slots.
+     * </p>
+     *
+     * @param bindingExpression A snippet of syntax tree describing the
+     *        structure of values covered by this new relationship.
+     * @param destination The mathematical type that this new relationship
+     *        establishes values binding to <code>bindingExpression</code>
+     *        inhabit.
+     * @param bindingCondition Proof obligations that must be raised to
+     *        establish that a given value binding to
+     *        <code>bindingExpression</code> inhabits <code>destination</code>.
+     * @param environment The environment under which
+     *        <code>bindingExpression</code>, <code>destination</code>, and
+     *        <code>bindingCondition</code> should be evaluated.
      */
     public void addRelationship(Exp bindingExpression, MTType destination,
             Exp bindingCondition, Scope environment) {
+        //Sanitize and sanity check our inputs somewhat
+        if (destination == null) {
+            throw new IllegalArgumentException("Destination type may not be "
+                    + "null.");
+        }
 
+        MTType source = bindingExpression.getMathType();
+        if (source == null) {
+            throw new IllegalArgumentException("bindingExpression has no "
+                    + "type.");
+        }
+
+        if (bindingCondition == null) {
+            bindingCondition = MathExp.getTrueVarExp(null, this);
+        }
+
+        //Canonicalize the input types
+        CanonicalizationResult sourceCanonicalResult =
+                canonicalize(source, environment, "s");
+        CanonicalizationResult destinationCanonicalResult =
+                canonicalize(destination, environment, "d");
+
+        Set<String> universalVariableNames =
+                getUniversallyQuantifiedVariables(source, destination,
+                        environment, sourceCanonicalResult,
+                        destinationCanonicalResult);
+
+        Map<String, List<String>> sourceEnvironmentalToCanonical =
+                invertMap(sourceCanonicalResult.canonicalToEnvironmental);
+        Map<String, List<String>> destinationEnvironmentalToCanonical =
+                invertMap(destinationCanonicalResult.canonicalToEnvironmental);
+
+        //Get a mapping from environmental variables to "exemplar" variables--
+        //a single representative name that either the source or destination
+        //will bind for us.  There may be many choices, but they're all
+        //equivalent for our purposes
+        Map<String, String> environmentalToExemplar =
+                getEnvironmentalToExemplar(universalVariableNames,
+                        sourceEnvironmentalToCanonical,
+                        destinationEnvironmentalToCanonical);
+
+        List<TypeRelationshipPredicate> finalPredicates =
+                getFinalPredicates(sourceCanonicalResult,
+                        destinationCanonicalResult, environmentalToExemplar,
+                        universalVariableNames, sourceEnvironmentalToCanonical,
+                        destinationEnvironmentalToCanonical);
+
+        //We can't use the binding expression as-is.  It must be updated to
+        //reflect canonical variable names
+        Map<Exp, Exp> replacements = new HashMap<>();
+        for (Map.Entry<String, String> entry : environmentalToExemplar.entrySet()) {
+            replacements.put(new VarExp(null, null, new PosSymbol(null, entry.getKey())),
+                    new VarExp(null, null, new PosSymbol(null, entry.getValue())));
+        }
+        bindingExpression =
+                safeVariableNameUpdate(bindingExpression, replacements,
+                        environmentalToExemplar);
+
+        //Ditto for the binding condition
+        bindingCondition =
+                safeVariableNameUpdate(bindingCondition, replacements,
+                        environmentalToExemplar);
+
+        //At last!  We can add the relationship into the graph
+        TypeRelationship relationship =
+                new TypeRelationship(this,
+                        destinationCanonicalResult.canonicalType,
+                        bindingCondition, bindingExpression, finalPredicates);
+        TypeNode sourceNode = getTypeNode(sourceCanonicalResult.canonicalType);
+        sourceNode.addRelationship(relationship);
+
+        //We'd like to force the presence of the destination node
+        getTypeNode(destinationCanonicalResult.canonicalType);
+
+        Populator.emitDebug("Added relationship to type node ["
+                + sourceCanonicalResult.canonicalType + "]: " + relationship);
     }
 
     /**
@@ -506,12 +615,8 @@ public class TypeGraph {
         combinedBindings
                 .putAll(updateMapLabels(expectedEntry.getValue(), "_d"));
 
-        Exp newCondition =
-                pathStrategy.getValidTypeConditionsBetween(foundValue,
-                        foundEntry.getKey(), expectedEntry.getKey(),
-                        combinedBindings);
-
-        return newCondition;
+        return pathStrategy.getValidTypeConditionsBetween(foundValue, foundEntry.getKey(),
+                expectedEntry.getKey(), combinedBindings);
     }
 
     /**
