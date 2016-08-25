@@ -35,6 +35,9 @@ public class Populator extends TreeWalkerVisitor {
     // Member Fields
     // ===========================================================
 
+    /** <p>Toggle this flag on if you want TypeGraph/Populator debug messages.</p> */
+    private static final boolean PRINT_DEBUG = false;
+
     /**
      * <p>A {@link TypeComparison} for to find exact domain match between a
      * {@link AbstractFunctionExp} and a {@link MTType}.</p>
@@ -101,7 +104,9 @@ public class Populator extends TreeWalkerVisitor {
      * @param msg Message to be displayed.
      */
     public static void emitDebug(String msg) {
-
+        if (PRINT_DEBUG) {
+            System.out.println(msg);
+        }
     }
 
     // ===========================================================
