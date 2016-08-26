@@ -15,8 +15,16 @@ package edu.clemson.cs.rsrg.typeandpopulate;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.AbstractFunctionExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.LambdaExp;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -63,6 +71,9 @@ public class Populator extends TreeWalkerVisitor {
     private final TypeComparison<Exp, MTType> INEXACT_PARAMETER_MATCH =
             new InexactParameterMatch();
 
+    /** <p>The symbol table we are currently building.</p> */
+    private final MathSymbolTableBuilder myBuilder;
+
     /**
      * <p>This is the math type graph that indicates relationship
      * between different math types.</p>
@@ -81,7 +92,7 @@ public class Populator extends TreeWalkerVisitor {
     public Populator(MathSymbolTableBuilder builder) {
         //myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
         myTypeGraph = builder.getTypeGraph();
-        //myBuilder = builder;
+        myBuilder = builder;
         //myFacilityQualifier = null;
     }
 
@@ -112,6 +123,102 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method that returns the built-in <code>Character</code>
+     * program type.</p>
+     *
+     * @param l A {@link Location} in file.
+     *
+     * @return A {@link PTType}.
+     */
+    private PTType getCharProgramType(Location l) {
+        PTType result;
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, "Character",
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(l);
+
+            result = type.getProgramType();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No program Character type in scope???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>An helper method that returns the built-in <code>Char_Str</code>
+     * program type.</p>
+     *
+     * @param l A {@link Location} in file.
+     *
+     * @return A {@link PTType}.
+     */
+    private PTType getStringProgramType(Location l) {
+        PTType result;
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, "Char_Str",
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(l);
+
+            result = type.getProgramType();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No program String type in scope???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>An helper method that returns the built-in <code>Integer</code>
+     * program type.</p>
+     *
+     * @param l A {@link Location} in file.
+     *
+     * @return A {@link PTType}.
+     */
+    private PTType getIntegerProgramType(Location l) {
+        PTType result;
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, "Integer",
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(l);
+
+            result = type.getProgramType();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No program Integer type in scope???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+
+        return result;
+    }
 
     // ===========================================================
     // Helper Constructs
