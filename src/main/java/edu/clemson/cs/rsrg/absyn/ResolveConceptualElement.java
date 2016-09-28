@@ -225,7 +225,7 @@ public abstract class ResolveConceptualElement
 
     /**
      * <p>In most situations, this method simply calls the {@link Location#clone()}
-     * method. However, there are {@link ResolveConceptualElement}s that
+     * method. However, there are {@link ResolveConceptualElement ResolveConceptualElements} that
      * the compiler creates internally that does not belong to a location
      * in a {@link ResolveFile}. In this case, we simply return {@code null}.</p>
      *
