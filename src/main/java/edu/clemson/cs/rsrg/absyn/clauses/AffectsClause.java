@@ -42,7 +42,9 @@ public class AffectsClause extends ResolveConceptualElement {
      * <p>This constructs an {@code affects} clause.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param affectedExps
+     * @param affectedExps The list of expressions that are listed
+     *                     to be affected by an initialization/finalization
+     *                     item or an operation.
      */
     public AffectsClause(Location l, List<Exp> affectedExps) {
         super(l);
@@ -118,7 +120,7 @@ public class AffectsClause extends ResolveConceptualElement {
      * {@inheritDoc}
      */
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return myAffectedExps.hashCode();
     }
 
