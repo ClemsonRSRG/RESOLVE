@@ -281,7 +281,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * @return {@code true} <strong>iff</strong> both string are {@code null};
      * or both are not {@code null} and represent the same string.
      */
-    public final static boolean stringEquivalent(String s1, String s2) {
+    public static boolean stringEquivalent(String s1, String s2) {
         //The first line makes sure that either both s1 and s2 are null or
         //neither is.  If not, we short circuit with "false".
         //The second line short circuits and returns "true" if both are null.
