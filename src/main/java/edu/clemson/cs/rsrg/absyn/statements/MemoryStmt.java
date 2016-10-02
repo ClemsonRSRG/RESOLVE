@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.absyn.statements;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the remember/forget statements
+ * <p>This is the class for all the {@code Remember/Forget} statements
  * that the compiler builds from the ANTLR4 AST tree or
  * generated during the VC Generation step.</p>
  *
@@ -27,6 +27,11 @@ public class MemoryStmt extends Statement {
     // StatementType
     // ===========================================================
 
+    /**
+     * <p>This defines the different kinds of memory statements.</p>
+     *
+     * @version 2.0
+     */
     public enum StatementType {
         FORGET {
 
@@ -58,7 +63,7 @@ public class MemoryStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a confirm statement.</p>
+     * <p>This constructs a memory statement.</p>
      *
      * @param l A {@link Location} representation object.
      * @param type This enum indicates whether this is a remember
