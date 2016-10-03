@@ -77,7 +77,6 @@ public class ProgramCharExp extends ProgramLiteralExp {
         ProgramCharExp that = (ProgramCharExp) o;
 
         return myCharacter.equals(that.myCharacter);
-
     }
 
     /**

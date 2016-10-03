@@ -84,7 +84,6 @@ public abstract class ProgramVariableExp extends ProgramExp {
 
         return myQualifier != null ? myQualifier.equals(that.myQualifier)
                 : that.myQualifier == null;
-
     }
 
     /**

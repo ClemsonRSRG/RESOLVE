@@ -156,7 +156,6 @@ public class ProgramFunctionExp extends ProgramExp {
         if (!myOperationName.equals(that.myOperationName))
             return false;
         return myExpressionArgs.equals(that.myExpressionArgs);
-
     }
 
     /**
