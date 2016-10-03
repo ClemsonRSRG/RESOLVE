@@ -77,7 +77,6 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
         ProgramIntegerExp that = (ProgramIntegerExp) o;
 
         return myInteger.equals(that.myInteger);
-
     }
 
     /**
