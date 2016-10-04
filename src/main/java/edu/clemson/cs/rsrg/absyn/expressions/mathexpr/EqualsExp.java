@@ -32,6 +32,11 @@ public class EqualsExp extends InfixExp {
     // Operators
     // ===========================================================
 
+    /**
+     * <p>This defines both the equals and not equals operator.</p>
+     *
+     * @version 2.0
+     */
     public enum Operator {
         EQUAL {
 
