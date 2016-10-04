@@ -186,7 +186,6 @@ public class FunctionExp extends AbstractFunctionExp {
                 : that.myFuncNameCaratExp != null)
             return false;
         return myArguments.equals(that.myArguments);
-
     }
 
     /**
@@ -303,6 +302,7 @@ public class FunctionExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
+        // TODO: May have to change the type of myFuncNameExp to allow non-variable names.
         VarExp newNameExp;
         if (myFuncNameExp instanceof VarExp){
             newNameExp = myFuncNameExp.remember();

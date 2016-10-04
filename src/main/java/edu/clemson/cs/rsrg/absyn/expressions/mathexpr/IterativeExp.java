@@ -203,7 +203,6 @@ public class IterativeExp extends MathExp {
                 : that.myWhereExp != null)
             return false;
         return myBodyExp.equals(that.myBodyExp);
-
     }
 
     /**

@@ -84,7 +84,7 @@ public class QuantExp extends MathExp {
             if (myQuantification == SymbolTableEntry.Quantification.UNIVERSAL) {
                 quantificationAsString = "For all ";
             }
-            else if (myQuantification == SymbolTableEntry.Quantification.UNIVERSAL) {
+            else if (myQuantification == SymbolTableEntry.Quantification.EXISTENTIAL) {
                 quantificationAsString = "There exist ";
             }
             else {
@@ -163,7 +163,6 @@ public class QuantExp extends MathExp {
                 : quantExp.myWhereExp != null)
             return false;
         return myBodyExp.equals(quantExp.myBodyExp);
-
     }
 
     /**

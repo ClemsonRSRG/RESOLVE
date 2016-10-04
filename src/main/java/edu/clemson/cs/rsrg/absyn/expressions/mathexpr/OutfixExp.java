@@ -235,7 +235,6 @@ public class OutfixExp extends AbstractFunctionExp {
         if (myOperator != outfixExp.myOperator)
             return false;
         return myArgument.equals(outfixExp.myArgument);
-
     }
 
     /**

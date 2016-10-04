@@ -139,7 +139,6 @@ public class CrossTypeExp extends MathExp {
         CrossTypeExp that = (CrossTypeExp) o;
 
         return myTagsToFields.equals(that.myTagsToFields);
-
     }
 
     /**

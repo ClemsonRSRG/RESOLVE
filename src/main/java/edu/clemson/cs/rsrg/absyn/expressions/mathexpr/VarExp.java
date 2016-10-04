@@ -143,7 +143,6 @@ public class VarExp extends MathExp {
         if (!myName.equals(varExp.myName))
             return false;
         return myQuantification == varExp.myQuantification;
-
     }
 
     /**

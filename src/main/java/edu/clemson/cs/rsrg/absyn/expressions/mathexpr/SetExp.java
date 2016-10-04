@@ -131,7 +131,6 @@ public class SetExp extends MathExp {
                 : setExp.myWhereExp != null)
             return false;
         return myBodyExp.equals(setExp.myBodyExp);
-
     }
 
     /**

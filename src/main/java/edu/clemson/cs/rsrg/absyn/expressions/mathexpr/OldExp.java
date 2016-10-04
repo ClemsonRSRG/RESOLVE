@@ -122,7 +122,6 @@ public class OldExp extends MathExp {
         OldExp oldExp = (OldExp) o;
 
         return myOrigExp.equals(oldExp.myOrigExp);
-
     }
 
     /**

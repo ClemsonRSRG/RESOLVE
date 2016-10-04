@@ -79,7 +79,6 @@ public class DoubleExp extends LiteralExp {
         DoubleExp doubleExp = (DoubleExp) o;
 
         return Double.compare(doubleExp.myDouble, myDouble) == 0;
-
     }
 
     /**

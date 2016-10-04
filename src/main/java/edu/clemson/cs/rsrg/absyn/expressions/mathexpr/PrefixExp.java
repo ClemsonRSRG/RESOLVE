@@ -106,7 +106,6 @@ public class PrefixExp extends AbstractFunctionExp {
         if (!myOperationName.equals(prefixExp.myOperationName))
             return false;
         return myArgument.equals(prefixExp.myArgument);
-
     }
 
     /**

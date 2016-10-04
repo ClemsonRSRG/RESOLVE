@@ -134,7 +134,6 @@ public class SetCollectionExp extends MathExp {
         SetCollectionExp that = (SetCollectionExp) o;
 
         return myMembers.equals(that.myMembers);
-
     }
 
     /**
