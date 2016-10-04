@@ -80,7 +80,6 @@ public abstract class AbstractFunctionExp extends MathExp {
                 : that.myQualifier != null)
             return false;
         return myQuantification == that.myQuantification;
-
     }
 
     /**
@@ -106,7 +105,7 @@ public abstract class AbstractFunctionExp extends MathExp {
      *
      * @return A subset of the actual function type.
      */
-    public MTFunction getConservativePreApplicationType(TypeGraph g) {
+    public final MTFunction getConservativePreApplicationType(TypeGraph g) {
         List<Exp> params = this.getSubExpressions();
         List<MTType> subTypes = new LinkedList<>();
 

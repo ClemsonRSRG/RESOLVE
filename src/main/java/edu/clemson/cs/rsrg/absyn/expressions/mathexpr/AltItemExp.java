@@ -131,7 +131,6 @@ public class AltItemExp extends MathExp {
             return false;
         return myAssignmentExp != null ? myAssignmentExp
                 .equals(that.myAssignmentExp) : that.myAssignmentExp == null;
-
     }
 
     /**

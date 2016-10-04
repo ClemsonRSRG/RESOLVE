@@ -91,7 +91,6 @@ public class IntegerExp extends LiteralExp {
                 : that.myQualifier != null)
             return false;
         return myInteger.equals(that.myInteger);
-
     }
 
     /**

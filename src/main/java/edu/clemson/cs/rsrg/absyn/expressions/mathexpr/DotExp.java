@@ -133,7 +133,6 @@ public class DotExp extends MathExp {
         DotExp dotExp = (DotExp) o;
 
         return mySegmentExps.equals(dotExp.mySegmentExps);
-
     }
 
     /**

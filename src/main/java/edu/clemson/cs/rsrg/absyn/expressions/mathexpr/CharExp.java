@@ -77,7 +77,6 @@ public class CharExp extends LiteralExp {
         CharExp charExp = (CharExp) o;
 
         return myCharacter.equals(charExp.myCharacter);
-
     }
 
     /**

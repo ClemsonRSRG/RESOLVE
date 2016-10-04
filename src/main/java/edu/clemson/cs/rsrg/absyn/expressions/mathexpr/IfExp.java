@@ -145,7 +145,6 @@ public class IfExp extends MathExp {
             return false;
         return myElseExp != null ? myElseExp.equals(ifExp.myElseExp)
                 : ifExp.myElseExp == null;
-
     }
 
     /**

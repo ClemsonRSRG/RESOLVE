@@ -79,14 +79,13 @@ public class StringExp extends LiteralExp {
         StringExp stringExp = (StringExp) o;
 
         return myString.equals(stringExp.myString);
-
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = (e instanceof StringExp);
         if (retval) {
             StringExp eAsStringExp = (StringExp) e;

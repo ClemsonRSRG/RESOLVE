@@ -132,7 +132,6 @@ public class LambdaExp extends MathExp {
         if (!myParameters.equals(lambdaExp.myParameters))
             return false;
         return myBodyExp.equals(lambdaExp.myBodyExp);
-
     }
 
     /**

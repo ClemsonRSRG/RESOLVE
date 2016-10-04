@@ -165,7 +165,6 @@ public class InfixExp extends AbstractFunctionExp {
         if (!myOperationName.equals(infixExp.myOperationName))
             return false;
         return myRightHandSide.equals(infixExp.myRightHandSide);
-
     }
 
     /**
@@ -400,7 +399,7 @@ public class InfixExp extends AbstractFunctionExp {
     /**
      * {@inheritDoc}
      */
-    // TODO: Understand this and put more inline comments!
+    // TODO: To be removed when we introduce sequents.
     @Override
     public List<InfixExp> split(MathExp assumpts, boolean single) {
         List<InfixExp> lst = new ArrayList<>();
