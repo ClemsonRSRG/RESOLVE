@@ -28,6 +28,11 @@ public class MathAssertionDec extends Dec {
     // TheoremSubtype
     // ===========================================================
 
+    /**
+     * <p>This defines the various different theorem subtypes.</p>
+     *
+     * @version 2.0
+     */
     public enum TheoremSubtype {
         NONE {
 
@@ -59,6 +64,11 @@ public class MathAssertionDec extends Dec {
     // AssertionType
     // ===========================================================
 
+    /**
+     * <p>This defines the various different mathematical assertion types.</p>
+     *
+     * @version 2.0
+     */
     public enum AssertionType {
         AXIOM {
 
