@@ -110,7 +110,6 @@ public class MathCategoricalDefinitionDec extends Dec {
         if (!myDefinitions.equals(that.myDefinitions))
             return false;
         return myRelatedByExp.equals(that.myRelatedByExp);
-
     }
 
     /**

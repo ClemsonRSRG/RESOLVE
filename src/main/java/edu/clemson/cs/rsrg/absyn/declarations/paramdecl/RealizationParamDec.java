@@ -79,7 +79,6 @@ public class RealizationParamDec extends Dec implements ModuleParameter {
         RealizationParamDec that = (RealizationParamDec) o;
 
         return myConceptName.equals(that.myConceptName);
-
     }
 
     /**

@@ -108,7 +108,6 @@ public class MathTypeTheoremDec extends Dec {
         if (!myUniversalVars.equals(that.myUniversalVars))
             return false;
         return myAssertion.equals(that.myAssertion);
-
     }
 
     /**

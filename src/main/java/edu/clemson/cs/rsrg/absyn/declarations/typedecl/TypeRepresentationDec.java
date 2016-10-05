@@ -117,7 +117,6 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
         if (!myTypeInitItem.equals(that.myTypeInitItem))
             return false;
         return myTypeFinalItem.equals(that.myTypeFinalItem);
-
     }
 
     /**

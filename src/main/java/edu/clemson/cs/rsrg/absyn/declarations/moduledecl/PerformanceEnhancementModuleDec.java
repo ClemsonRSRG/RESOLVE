@@ -144,7 +144,6 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
         if (!myConceptProfileName.equals(that.myConceptProfileName))
             return false;
         return myRequires.equals(that.myRequires);
-
     }
 
     /**

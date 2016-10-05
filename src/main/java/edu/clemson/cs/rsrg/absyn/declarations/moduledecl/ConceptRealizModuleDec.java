@@ -123,7 +123,6 @@ public class ConceptRealizModuleDec extends ModuleDec {
         if (!myConceptName.equals(that.myConceptName))
             return false;
         return myRequires.equals(that.myRequires);
-
     }
 
     /**

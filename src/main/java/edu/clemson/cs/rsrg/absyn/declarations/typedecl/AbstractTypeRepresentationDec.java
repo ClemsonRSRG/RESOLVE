@@ -79,7 +79,6 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
         if (!myTy.equals(that.myTy))
             return false;
         return myConvention.equals(that.myConvention);
-
     }
 
     /**

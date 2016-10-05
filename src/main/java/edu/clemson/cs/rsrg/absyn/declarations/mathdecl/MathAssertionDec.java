@@ -201,7 +201,6 @@ public class MathAssertionDec extends Dec {
         if (!myAssertion.equals(that.myAssertion))
             return false;
         return myTheoremSubtype == that.myTheoremSubtype;
-
     }
 
     /**
