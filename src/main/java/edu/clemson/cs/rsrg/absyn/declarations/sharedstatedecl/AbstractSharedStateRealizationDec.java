@@ -82,7 +82,6 @@ public abstract class AbstractSharedStateRealizationDec extends Dec {
         if (!myStateVars.equals(that.myStateVars))
             return false;
         return myConvention.equals(that.myConvention);
-
     }
 
     /**

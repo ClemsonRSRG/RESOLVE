@@ -77,7 +77,6 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
         ModuleParameterDec<?> that = (ModuleParameterDec<?>) o;
 
         return myWrappedDec.equals(that.myWrappedDec);
-
     }
 
     /**
@@ -103,7 +102,7 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
      * {@inheritDoc}
      */
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         int result = super.hashCode();
         result = 31 * result + myWrappedDec.hashCode();
         return result;

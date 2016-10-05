@@ -158,7 +158,6 @@ public class OperationDec extends Dec implements ModuleParameter {
         if (!myRequires.equals(that.myRequires))
             return false;
         return myEnsures.equals(that.myEnsures);
-
     }
 
     /**

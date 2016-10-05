@@ -137,7 +137,6 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
             return false;
         return myBodyItem != null ? myBodyItem.equals(that.myBodyItem)
                 : that.myBodyItem == null;
-
     }
 
     /**

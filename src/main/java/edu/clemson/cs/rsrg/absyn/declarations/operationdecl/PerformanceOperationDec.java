@@ -112,7 +112,6 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
             return false;
         return myManipDisp != null ? myManipDisp.equals(that.myManipDisp)
                 : that.myManipDisp == null;
-
     }
 
     /**

@@ -130,7 +130,6 @@ public class SharedStateDec extends Dec {
         if (!myStateInitItem.equals(that.myStateInitItem))
             return false;
         return myStateFinalItem.equals(that.myStateFinalItem);
-
     }
 
     /**

@@ -135,7 +135,6 @@ public class TypeFamilyDec extends Dec {
         if (!myTypeInitItem.equals(that.myTypeInitItem))
             return false;
         return myTypeFinalItem.equals(that.myTypeFinalItem);
-
     }
 
     /**

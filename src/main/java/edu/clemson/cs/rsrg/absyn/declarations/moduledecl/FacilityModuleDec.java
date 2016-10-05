@@ -98,7 +98,6 @@ public class FacilityModuleDec extends ModuleDec {
         FacilityModuleDec that = (FacilityModuleDec) o;
 
         return myRequires.equals(that.myRequires);
-
     }
 
     /**

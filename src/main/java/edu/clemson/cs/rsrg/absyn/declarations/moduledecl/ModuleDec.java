@@ -90,7 +90,6 @@ public abstract class ModuleDec extends Dec {
         if (!myParameterDecs.equals(moduleDec.myParameterDecs))
             return false;
         return myUsesItems.equals(moduleDec.myUsesItems);
-
     }
 
     /**

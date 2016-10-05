@@ -122,7 +122,6 @@ public class ConceptModuleDec extends ModuleDec {
         if (!myRequires.equals(that.myRequires))
             return false;
         return myConstraints.equals(that.myConstraints);
-
     }
 
     /**
