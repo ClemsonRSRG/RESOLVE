@@ -370,9 +370,7 @@ public class ResolveCompiler {
                 else {
                     // The remaining arguments must be filenames, so we add those
                     // to our list of files to compile.
-                    for (String arg : remainingArgs) {
-                        myArgumentFileList.add(arg);
-                    }
+                    Collections.addAll(myArgumentFileList, remainingArgs);
                 }
 
                 // Store the symbol table and type graph
