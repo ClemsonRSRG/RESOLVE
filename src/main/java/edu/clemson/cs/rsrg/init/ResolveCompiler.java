@@ -238,7 +238,8 @@ public class ResolveCompiler {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      *
-     * @throws CompilerException
+     * @throws CompilerException This catches all sorts of exceptions thrown by
+     * the compiler.
      */
     private void compileArbitraryFiles(List<String> fileArgList,
             CompileEnvironment compileEnvironment) throws CompilerException {
@@ -283,7 +284,8 @@ public class ResolveCompiler {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      *
-     * @throws CompilerException
+     * @throws CompilerException This catches all sorts of exceptions thrown by
+     * the compiler.
      */
     private void compileRealFiles(List<String> fileArgList,
             CompileEnvironment compileEnvironment) throws CompilerException {
