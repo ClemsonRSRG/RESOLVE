@@ -119,7 +119,7 @@ public class Controller {
      *
      * @param file The compiling RESOLVE file.
      */
-    public void compileTargetFile(ResolveFile file) {
+    public final void compileTargetFile(ResolveFile file) {
         try {
             // Use ANTLR4 to build the AST
             ModuleDec targetModule = createModuleAST(file);
@@ -201,7 +201,7 @@ public class Controller {
      *
      * @param m The compiling module.
      *
-     * @throws MiscErrorException
+     * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
     private void addFilesForExternalImports(ModuleDec m) {
         List<UsesItem> allUsesItems = m.getUsesItems();
@@ -237,10 +237,10 @@ public class Controller {
      *
      * @param file The RESOLVE file that we are going to compile.
      *
-     * @return The inner representation for a module. See {link ModuleDec}.
+     * @return The inner representation for a module. See {@link ModuleDec}.
      *
-     * @throws MiscErrorException
-     * @throws SourceErrorException
+     * @throws MiscErrorException Some how we couldn't instantiate an {@link ANTLRInputStream}.
+     * @throws SourceErrorException There are errors in the source file.
      */
     private ModuleDec createModuleAST(ResolveFile file) {
         ANTLRInputStream input = file.getInputStream();
@@ -273,9 +273,8 @@ public class Controller {
                 new TreeBuildingListener(file, myCompileEnvironment
                         .getTypeGraph());
         ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
-        ModuleDec result = v.getModule();
 
-        return result;
+        return v.getModule();
     }
 
     /**
@@ -285,9 +284,10 @@ public class Controller {
      * @param g The compilation's file dependency graph.
      * @param root Current compiling module.
      *
-     * @throws CircularDependencyException
-     * @throws ImportException
-     * @throws SourceErrorException
+     * @throws CircularDependencyException Some of the source files form a
+     * circular dependency.
+     * @throws ImportException Incorrect import type.
+     * @throws SourceErrorException There are errors in the source file.
      */
     private void findDependencies(DefaultDirectedGraph g, ModuleDec root) {
         List<UsesItem> allUsesItems = root.getUsesItems();
@@ -340,7 +340,7 @@ public class Controller {
      *
      * @return A <code>ResolveFile</code> object that is used by the compiler.
      *
-     * @throws MiscErrorException
+     * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
     private ResolveFile findResolveFile(String baseName) {
         // First check to see if this is a user created
@@ -376,7 +376,7 @@ public class Controller {
      *
      * @param g The compilation's file dependency graph.
      *
-     * @return An ordered list of <code>ModuleIdentifiers</code>.
+     * @return An ordered list of {@link ModuleIdentifier ModuleIdentifiers}.
      */
     private List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph g) {
         List<ModuleIdentifier> result = new ArrayList<>();
@@ -401,7 +401,7 @@ public class Controller {
      * @param src The source file module.
      * @param dest The destination file module.
      *
-     * @return True if there is a cycle, false otherwise.
+     * @return {@code true} if there is a cycle, {@code false} otherwise.
      */
     private boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier src,
             ModuleIdentifier dest) {
