@@ -114,8 +114,9 @@ public class CompileEnvironment {
      * @param compilerVersion The current compiler version.
      * @param statusHandler A status handler to display debug or error messages.
      *
-     * @throws FlagDependencyException
-     * @throws IOException
+     * @throws FlagDependencyException There was some kind of dependency error
+     * with the user specified flags.
+     * @throws IOException There was an error creating the specified error log file.
      */
     public CompileEnvironment(String[] args, String compilerVersion,
             StatusHandler statusHandler)
