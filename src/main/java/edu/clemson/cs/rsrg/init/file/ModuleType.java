@@ -96,8 +96,7 @@ public class ModuleType {
     }
 
     /**
-     * <p>Obtains the description of the extension as a
-     * <code>String</code>.</p>
+     * <p>Obtains the description of the extension as a {@code String}.</p>
      *
      * @return The extension's description.
      */
@@ -106,8 +105,7 @@ public class ModuleType {
     }
 
     /**
-     * <p>Obtains the name of the extension as a
-     * <code>String</code>.</p>
+     * <p>Obtains the name of the extension as a {@code String}.</p>
      *
      * @return The extension's name.
      */

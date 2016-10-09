@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.init.file;
 
 import edu.clemson.cs.rsrg.misc.Utilities;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -89,7 +88,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      *
      * @return The matching file.
      */
-    public final File getFile() throws IOException {
+    public final File getFile() throws NoSuchFileException {
         if (myMatches.size() == 0) {
             throw new NoSuchFileException("File matching name '" + myPattern
                     + "' could not be found");
@@ -99,9 +98,6 @@ public class FileLocator extends SimpleFileVisitor<Path> {
 
     /**
      * <p>Returns a single file matching the supplied pattern.</p>
-     *
-     * @throws NoSuchFileException If a file matching pattern could
-     *         not be found.
      *
      * @return The matching file.
      */
