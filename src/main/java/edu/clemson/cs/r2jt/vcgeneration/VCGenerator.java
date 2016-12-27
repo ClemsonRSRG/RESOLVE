@@ -2500,8 +2500,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // of duplicate spec and real variables
         List<Exp> undRepList = new ArrayList<Exp>();
         List<Exp> replList = new ArrayList<Exp>();
-		
-		// TODO: Modify the following logic to match the proof rules.
+
+        // TODO: Modify the following logic to match the proof rules.
         // Replace postcondition variables in the ensures clause
         for (int i = 0; i < argList.size(); i++) {
             ParameterVarDec varDec = paramList.get(i);
