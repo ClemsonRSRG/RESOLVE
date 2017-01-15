@@ -12,17 +12,19 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate;
 
+import edu.clemson.cs.r2jt.misc.Utils;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.AbstractFunctionExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.LambdaExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
@@ -160,13 +162,16 @@ public class Populator extends TreeWalkerVisitor {
      *
      * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q, ResolveConceptualElement definingElement, MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
+    private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q,
+                                        ResolveConceptualElement definingElement, MTType type, MTType typeValue,
+                                        Map<String, MTType> schematicTypes) {
         if (type == null) {
             throw new NullPointerException();
         }
         else {
             try {
-                return myBuilder.getInnermostActiveScope().addBinding(name, q, definingElement, type, typeValue, schematicTypes, myGenericTypes);
+                return myBuilder.getInnermostActiveScope().addBinding(name, q, definingElement, type, typeValue,
+                        schematicTypes, myGenericTypes);
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(name, l);
@@ -187,8 +192,10 @@ public class Populator extends TreeWalkerVisitor {
      *
      * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement, MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
-        return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type, typeValue, schematicTypes);
+    private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement,
+                                        MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
+        return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type,
+                typeValue, schematicTypes);
     }
 
     /**
@@ -204,7 +211,9 @@ public class Populator extends TreeWalkerVisitor {
      *
      * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q, ResolveConceptualElement definingElement, MTType type, Map<String, MTType> schematicTypes) {
+    private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q,
+                                        ResolveConceptualElement definingElement, MTType type,
+                                        Map<String, MTType> schematicTypes) {
         return addBinding(name, l, q, definingElement, type, null, schematicTypes);
     }
 
@@ -220,9 +229,55 @@ public class Populator extends TreeWalkerVisitor {
      *
      * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement, MTType type, Map<String, MTType> schematicTypes) {
-        return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type, null, schematicTypes);
+    private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement,
+                                        MTType type, Map<String, MTType> schematicTypes) {
+        return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type,
+                null, schematicTypes);
     }
+
+    /**
+     * <p>Applies the provided mathematical type to a {@link FunctionExp}.</p>
+     *
+     * @param functionSegment A function expression.
+     * @param type The type to be applied.
+     *
+     * @return The resulting mathematical type.
+     */
+    // TODO: Fix the various different errors.
+    /*private MTType applyFunction(FunctionExp functionSegment, MTType type) {
+        MTType result;
+
+        try {
+            MTFunction functionType = (MTFunction) type;
+
+            //Ok, we need to type check our arguments before we can
+            //continue
+            Iterator<Exp> args = functionSegment.argumentIterator();
+            while (args.hasNext()) {
+                TreeWalker.visit(this, args.next());
+            }
+
+            if (!INEXACT_DOMAIN_MATCH.compare(functionSegment, functionSegment
+                            .getConservativePreApplicationType(myTypeGraph),
+                    functionType)) {
+                throw new SourceErrorException("Parameters do not "
+                        + "match function range.\n\nExpected: "
+                        + functionType.getDomain()
+                        + "\nFound:    "
+                        + functionSegment.getConservativePreApplicationType(
+                        myTypeGraph).getDomain(), functionSegment
+                        .getLocation());
+            }
+
+            result = functionType.getRange();
+        }
+        catch (ClassCastException cce) {
+            throw new SourceErrorException("Not a function.", functionSegment
+                    .getLocation());
+        }
+
+        return result;
+    }*/
 
     /**
      * <p>An helper method that indicates we are beginning to evaluate a type value node.</p>
@@ -230,6 +285,158 @@ public class Populator extends TreeWalkerVisitor {
     private void enteringTypeValueNode() {
         myTypeValueDepth++;
     }
+
+    /**
+     * <p>Returns the name component of a {@link VarExp} or {@link FunctionExp}.</p>
+     *
+     * @param e Expression to be evaluated.
+     *
+     * @return The expression name as a string.
+     */
+    private String getName(Exp e) {
+        String result;
+
+        if (e instanceof VarExp) {
+            result = ((VarExp) e).getName().getName();
+        }
+        else if (e instanceof FunctionExp) {
+            result = getName(((FunctionExp) e).getName());
+        }
+        else {
+            throw new RuntimeException("Not a VarExp or FunctionExp:  " + e
+                    + " (" + e.getClass() + ")");
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>This method has to do an annoying amount of work, so pay attention:
+     * takes an iterator over segments as returned from DotExp.getSegments().
+     * Either the first segment or first two segments will be advanced over
+     * from the iterator, depending on whether this method determines the DotExp
+     * refers to a local value (one segment), is a qualified name referring to
+     * a value in another module (two segments), or is a Conc expression (two
+     * segments).  The segments will receive appropriate types.  The data field
+     * of lastGood will be set with the location of the last segment read.
+     * Then, the <code>MathSymbolEntry</code> corresponding to the correct
+     * top-level value will be returned.</p>
+     *
+     * @param segments An iterator for the various segments of an {@link Exp}.
+     * @param lastGood An object that indirectly refer to the last good segment.
+     */
+    // TODO: Fix the various different errors.
+    /*private MathSymbolEntry getTopLevelValue(Iterator<Exp> segments, Indirect<Exp> lastGood) {
+        MathSymbolEntry result;
+
+        Exp first = segments.next();
+
+        PosSymbol firstName;
+        if (first instanceof OldExp) {
+            firstName = ((VarExp) ((OldExp) first).getExp()).getName();
+        }
+        else if (first instanceof VarExp) {
+            firstName = ((VarExp) first).getName();
+        }
+        else {
+            throw new RuntimeException("DotExp must start with VarExp or "
+                    + "OldExp, found: " + first + " (" + first.getClass() + ")");
+        }
+
+        //First, we'll see if we're a Conc expression
+        if (firstName.getName().equals("Conc")) {
+            //Awesome.  We better be in a type definition and our second segment
+            //better refer to the exemplar
+            VarExp second = (VarExp) segments.next();
+
+            if (!second.toString().equals(
+                    myTypeDefinitionEntry.getProgramType().getExemplarName())) {
+                throw new RuntimeException("No idea what's going on here.");
+            }
+
+            //The Conc segment doesn't have a sensible type, but we'll set one
+            //for completeness.
+            first.setMathType(myTypeGraph.BOOLEAN);
+
+            second.setMathType(myTypeDefinitionEntry.getModelType());
+
+            result = myTypeDefinitionEntry.getExemplar();
+
+            lastGood.data = second;
+        }
+        else {
+            //Next, we'll see if there's a locally-accessible symbol with this
+            //name
+            try {
+                result =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameQuery(
+                                                null,
+                                                firstName,
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true)).toMathSymbolEntry(
+                                first.getLocation());
+
+                //There is.  Cool.  We type it and we're done
+                lastGood.data = first;
+                first.setMathType(result.getType());
+                try {
+                    first.setMathTypeValue(result.getTypeValue());
+                }
+                catch (SymbolNotOfKindTypeException snokte) {
+
+                }
+            }
+            catch (NoSuchSymbolException nsse) {
+                //No such luck.  Maybe firstName identifies a module and the
+                //second segment (which had better be a VarExp) is the name of
+                //the value we want
+                VarExp second = (VarExp) segments.next();
+
+                try {
+                    result =
+                            myBuilder.getInnermostActiveScope().queryForOne(
+                                    new NameQuery(firstName, second.getName(),
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_IGNORE,
+                                            true)).toMathSymbolEntry(
+                                    first.getLocation());
+
+                    //A qualifier doesn't have a sensible type, but we'll set one
+                    //for completeness.
+                    first.setMathType(myTypeGraph.BOOLEAN);
+
+                    //Now the value itself
+                    lastGood.data = second;
+                    second.setMathType(result.getType());
+                    try {
+                        second.setMathTypeValue(result.getTypeValue());
+                    }
+                    catch (SymbolNotOfKindTypeException snokte) {
+
+                    }
+                }
+                catch (NoSuchSymbolException nsse2) {
+                    noSuchSymbol(firstName, second.getName());
+                    throw new RuntimeException(); //This will never fire
+                }
+                catch (DuplicateSymbolException dse) {
+                    //This shouldn't be possible--there can only be one symbol
+                    //with the given name inside a particular module
+                    throw new RuntimeException();
+                }
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(firstName);
+                throw new RuntimeException(); //This will never fire
+            }
+        }
+
+        return result;
+    }*/
 
     /**
      * <p>An helper method that indicates we are leaving a type value node.</p>
