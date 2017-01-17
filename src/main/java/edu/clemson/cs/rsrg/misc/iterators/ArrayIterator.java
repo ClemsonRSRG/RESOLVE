@@ -76,13 +76,17 @@ public class ArrayIterator<E> implements Iterator<E> {
      */
     @Override
     public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         ArrayIterator<?> that = (ArrayIterator<?>) o;
 
-        if (myFirstUnincludedIndex != that.myFirstUnincludedIndex) return false;
-        if (myCursor != that.myCursor) return false;
+        if (myFirstUnincludedIndex != that.myFirstUnincludedIndex)
+            return false;
+        if (myCursor != that.myCursor)
+            return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(myArray, that.myArray);
     }
