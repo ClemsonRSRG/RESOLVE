@@ -76,16 +76,22 @@ public class ChainingIterator<T> implements Iterator<T> {
      */
     @Override
     public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         ChainingIterator<?> that = (ChainingIterator<?>) o;
 
-        if (myStartHasNext != that.myStartHasNext) return false;
-        if (myLastFromStartFlag != that.myLastFromStartFlag) return false;
-        if (myStartIterator != null ? !myStartIterator.equals(that.myStartIterator) : that.myStartIterator != null)
+        if (myStartHasNext != that.myStartHasNext)
             return false;
-        return myEndIterator != null ? myEndIterator.equals(that.myEndIterator) : that.myEndIterator == null;
+        if (myLastFromStartFlag != that.myLastFromStartFlag)
+            return false;
+        if (myStartIterator != null ? !myStartIterator
+                .equals(that.myStartIterator) : that.myStartIterator != null)
+            return false;
+        return myEndIterator != null ? myEndIterator.equals(that.myEndIterator)
+                : that.myEndIterator == null;
     }
 
     /**
@@ -95,7 +101,10 @@ public class ChainingIterator<T> implements Iterator<T> {
     public final int hashCode() {
         int result = myStartIterator != null ? myStartIterator.hashCode() : 0;
         result = 31 * result + (myStartHasNext ? 1 : 0);
-        result = 31 * result + (myEndIterator != null ? myEndIterator.hashCode() : 0);
+        result =
+                31
+                        * result
+                        + (myEndIterator != null ? myEndIterator.hashCode() : 0);
         result = 31 * result + (myLastFromStartFlag ? 1 : 0);
         return result;
     }

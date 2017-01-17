@@ -59,12 +59,15 @@ public class SingletonIterator<T> implements Iterator<T> {
      */
     @Override
     public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         SingletonIterator<?> that = (SingletonIterator<?>) o;
 
-        if (myReturnedFlag != that.myReturnedFlag) return false;
+        if (myReturnedFlag != that.myReturnedFlag)
+            return false;
         return myElement.equals(that.myElement);
     }
 
