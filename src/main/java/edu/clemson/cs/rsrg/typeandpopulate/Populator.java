@@ -22,6 +22,7 @@ import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
@@ -250,8 +251,7 @@ public class Populator extends TreeWalkerVisitor {
      *
      * @return The resulting mathematical type.
      */
-    // TODO: Fix the various different errors.
-    /*private MTType applyFunction(FunctionExp functionSegment, MTType type) {
+    private MTType applyFunction(FunctionExp functionSegment, MTType type) {
         MTType result;
 
         try {
@@ -259,9 +259,8 @@ public class Populator extends TreeWalkerVisitor {
 
             //Ok, we need to type check our arguments before we can
             //continue
-            Iterator<Exp> args = functionSegment.argumentIterator();
-            while (args.hasNext()) {
-                TreeWalker.visit(this, args.next());
+            for (Exp exp : functionSegment.getArguments()) {
+                TreeWalker.visit(this, exp);
             }
 
             if (!INEXACT_DOMAIN_MATCH.compare(functionSegment, functionSegment
@@ -284,7 +283,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         return result;
-    }*/
+    }
 
     /**
      * <p>An helper method that indicates we are beginning to evaluate a type value node.</p>
