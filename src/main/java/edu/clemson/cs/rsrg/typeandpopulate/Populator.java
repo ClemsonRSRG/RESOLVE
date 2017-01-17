@@ -12,23 +12,24 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate;
 
-import edu.clemson.cs.r2jt.misc.Utils;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
-import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.TypeFamilyEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
@@ -37,7 +38,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
-
 import java.util.*;
 
 /**
@@ -89,6 +89,13 @@ public class Populator extends TreeWalkerVisitor {
      * types that bound their possible values.</p>
      */
     private final Map<String, MTType> myGenericTypes = new HashMap<>();
+
+    /**
+     * <p>When parsing a type realization declaration, this is set to the
+     * entry corresponding to the conceptual declaration from the concept. When
+     * not inside such a declaration, this will be null.</p>
+     */
+    private TypeFamilyEntry myTypeFamilyEntry;
 
     /**
      * <p>This is the math type graph that indicates relationship
@@ -325,8 +332,7 @@ public class Populator extends TreeWalkerVisitor {
      * @param segments An iterator for the various segments of an {@link Exp}.
      * @param lastGood An object that indirectly refer to the last good segment.
      */
-    // TODO: Fix the various different errors.
-    /*private MathSymbolEntry getTopLevelValue(Iterator<Exp> segments, Indirect<Exp> lastGood) {
+    private MathSymbolEntry getTopLevelValue(Iterator<Exp> segments, Indirect<Exp> lastGood) {
         MathSymbolEntry result;
 
         Exp first = segments.next();
@@ -350,7 +356,7 @@ public class Populator extends TreeWalkerVisitor {
             VarExp second = (VarExp) segments.next();
 
             if (!second.toString().equals(
-                    myTypeDefinitionEntry.getProgramType().getExemplarName())) {
+                    myTypeFamilyEntry.getProgramType().getExemplarName())) {
                 throw new RuntimeException("No idea what's going on here.");
             }
 
@@ -358,9 +364,9 @@ public class Populator extends TreeWalkerVisitor {
             //for completeness.
             first.setMathType(myTypeGraph.BOOLEAN);
 
-            second.setMathType(myTypeDefinitionEntry.getModelType());
+            second.setMathType(myTypeFamilyEntry.getModelType());
 
-            result = myTypeDefinitionEntry.getExemplar();
+            result = myTypeFamilyEntry.getExemplar();
 
             lastGood.data = second;
         }
@@ -436,7 +442,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         return result;
-    }*/
+    }
 
     /**
      * <p>An helper method that indicates we are leaving a type value node.</p>
