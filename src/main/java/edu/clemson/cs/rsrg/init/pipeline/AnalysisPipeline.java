@@ -12,7 +12,10 @@
  */
 package edu.clemson.cs.rsrg.init.pipeline;
 
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
@@ -42,18 +45,17 @@ public class AnalysisPipeline extends AbstractPipeline {
      * {@inheritDoc}
      */
     @Override
-    public void process(ModuleIdentifier currentTarget) {
-    /* PopulatingVisitor populator = new PopulatingVisitor(mySymbolTable);
+    public final void process(ModuleIdentifier currentTarget) {
+        ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
+        Populator populator = new Populator(mySymbolTable);
+        myCompileEnvironment.setTypeGraph(populator.getTypeGraph());
+        TreeWalker.visit(populator, moduleDec);
 
-     if (!myCompileEnvironment.containsID(currentTarget)) {
-         throw new IllegalStateException("module ast null");
-     }
-     ModuleAST moduleTarget =
-             myCompileEnvironment.getModuleAST(currentTarget);
-     //TreeWalker.walk(populator, moduleTarget);
+        System.err.flush();
+        System.out.flush();
 
-     PopulatingVisitor.emitDebug("Type Graph:\n\n"
-             + mySymbolTable.getTypeGraph().toString());*/
+        Populator.emitDebug("Type Graph:\n\n"
+                + mySymbolTable.getTypeGraph().toString());
     }
 
 }
