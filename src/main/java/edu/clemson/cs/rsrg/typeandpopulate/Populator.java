@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.typeandpopulate;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -37,6 +38,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.*;
@@ -85,6 +87,9 @@ public class Populator extends TreeWalkerVisitor {
     /** <p>The symbol table we are currently building.</p> */
     private final MathSymbolTableBuilder myBuilder;
 
+    /** <p>The current scope for the module we are currently building.</p> */
+    private ModuleScopeBuilder myCurModuleScope;
+
     /**
      * <p>A mapping from generic types that appear in the module to the math
      * types that bound their possible values.</p>
@@ -130,8 +135,31 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
 
     // -----------------------------------------------------------
-    // ModuleDec
+    // Module Declarations
     // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ModuleDec}.</p>
+     *
+     * @param node A module declaration.
+     */
+    @Override
+    public void preModuleDec(ModuleDec node) {
+        Populator.emitDebug("----------------------\nModule: "
+                + node.getName().getName() + "\n----------------------");
+        myCurModuleScope = myBuilder.startModuleScope(node);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
+     *
+     * @param node A module declaration.
+     */
+    @Override
+    public void postModuleDec(ModuleDec node) {
+        myBuilder.endScope();
+        Populator.emitDebug("END POPULATOR\n----------------------\n");
+    }
 
     // ===========================================================
     // Public Methods
