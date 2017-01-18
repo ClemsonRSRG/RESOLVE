@@ -149,6 +149,15 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
+    /**
+     * <p>The type graph containing all the type relationships.</p>
+     *
+     * @return The type graph for the compiler.
+     */
+    public final TypeGraph getTypeGraph() {
+        return myTypeGraph;
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
