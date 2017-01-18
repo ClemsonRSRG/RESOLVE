@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.init.pipeline.AnalysisPipeline;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
 import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
@@ -133,12 +134,11 @@ public class Controller {
                     new DefaultDirectedGraph<>(
                             DefaultEdge.class);
             g.addVertex(new ModuleIdentifier(targetModule));
-            // TODO: Uncomment this line when we can build all decs.
-            //findDependencies(g, targetModule);
+            findDependencies(g, targetModule);
 
             // Begin analyzing the file
-            //AnalysisPipeline analysisPipe =
-            //        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
+            AnalysisPipeline analysisPipe =
+                    new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
                 // DEBUG: Print the entire ModuleDec
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
@@ -158,7 +158,8 @@ public class Controller {
                     astOutputPipe.process(m);
                 }
 
-                //analysisPipe.process(m);
+                // Type and populate symbol table
+                analysisPipe.process(m);
 
                 // Complete compilation for this module
                 myCompileEnvironment.completeRecord(m);
