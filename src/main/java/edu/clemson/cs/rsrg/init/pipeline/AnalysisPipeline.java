@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.init.pipeline;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -47,14 +48,12 @@ public class AnalysisPipeline extends AbstractPipeline {
     @Override
     public final void process(ModuleIdentifier currentTarget) {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
-        Populator populator = new Populator(mySymbolTable);
+        StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
+        Populator populator = new Populator(mySymbolTable, statusHandler);
         myCompileEnvironment.setTypeGraph(populator.getTypeGraph());
         TreeWalker.visit(populator, moduleDec);
 
-        System.err.flush();
-        System.out.flush();
-
-        Populator.emitDebug("Type Graph:\n\n"
+        statusHandler.info(null, "Type Graph:\n\n"
                 + mySymbolTable.getTypeGraph().toString());
     }
 

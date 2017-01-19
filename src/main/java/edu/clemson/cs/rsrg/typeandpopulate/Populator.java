@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
@@ -98,6 +99,11 @@ public class Populator extends TreeWalkerVisitor {
     private final Map<String, MTType> myGenericTypes = new HashMap<>();
 
     /**
+     * <p>This is the status handler for the RESOLVE compiler.</p>
+     */
+    private final StatusHandler myStatusHandler;
+
+    /**
      * <p>When parsing a type realization declaration, this is set to the
      * entry corresponding to the conceptual declaration from the concept. When
      * not inside such a declaration, this will be null.</p>
@@ -141,11 +147,13 @@ public class Populator extends TreeWalkerVisitor {
      * TODO: Refactor this and add JavaDoc.
      *
      * @param builder A scope builder for a symbol table.
+     * @param statusHandler A status handler to display debug or error messages.
      */
-    public Populator(MathSymbolTableBuilder builder) {
+    public Populator(MathSymbolTableBuilder builder, StatusHandler statusHandler) {
         //myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
         myTypeGraph = builder.getTypeGraph();
         myBuilder = builder;
+        myStatusHandler = statusHandler;
         //myFacilityQualifier = null;
     }
 
@@ -164,7 +172,7 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public void preModuleDec(ModuleDec node) {
-        Populator.emitDebug("----------------------\nModule: "
+        myStatusHandler.info(node.getLocation(), "----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
     }
@@ -177,7 +185,8 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postModuleDec(ModuleDec node) {
         myBuilder.endScope();
-        Populator.emitDebug("END POPULATOR\n----------------------\n");
+        myStatusHandler.info(node.getLocation(),
+                "END POPULATOR\n----------------------\n");
     }
 
     // ===========================================================
