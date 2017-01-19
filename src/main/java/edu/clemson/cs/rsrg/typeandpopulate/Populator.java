@@ -20,7 +20,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
+import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -142,6 +144,10 @@ public class Populator extends TreeWalkerVisitor {
     public static final Flag FLAG_POPULATOR_DEBUG =
             new Flag(FLAG_POPULATOR_NAME, "populatorDebug",
                     FLAG_POPULATOR_DEBUG_INFO);
+
+    public static final void setUpFlags() {
+        FlagDependencies.addImplies(FLAG_POPULATOR_DEBUG, ResolveCompiler.FLAG_DEBUG);
+    }
 
     // ===========================================================
     // Constructors
