@@ -30,6 +30,7 @@ import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.misc.Utilities;
+import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -420,13 +421,14 @@ public class ResolveCompiler {
     private synchronized void setUpFlagDependencies() {
         if (!FlagDependencies.isSealed()) {
             setUpFlags();
-            Prover.setUpFlags();
+            /*Prover.setUpFlags();
             JavaTranslator.setUpFlags();
             CTranslator.setUpFlags();
             Archiver.setUpFlags();
             VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
-            CongruenceClassProver.setUpFlags();
+            CongruenceClassProver.setUpFlags();*/
+            Populator.setUpFlags();
             FlagDependencies.seal();
         }
     }
