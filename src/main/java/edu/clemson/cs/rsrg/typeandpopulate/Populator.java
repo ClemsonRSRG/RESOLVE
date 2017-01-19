@@ -184,7 +184,7 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public void preModuleDec(ModuleDec node) {
-        emitDebug(node.getLocation(), "----------------------\nModule: "
+        emitDebug(null, "----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
     }
@@ -197,7 +197,7 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postModuleDec(ModuleDec node) {
         myBuilder.endScope();
-        emitDebug(node.getLocation(), "END POPULATOR\n----------------------\n");
+        emitDebug(null, "END POPULATOR\n----------------------\n");
     }
 
     // ===========================================================
