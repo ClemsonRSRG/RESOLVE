@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -58,9 +59,6 @@ public class Populator extends TreeWalkerVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>Toggle this flag on if you want TypeGraph/Populator debug messages.</p> */
-    private static final boolean PRINT_DEBUG = false;
-
     /**
      * <p>A {@link TypeComparison} for to find exact domain match between a
      * {@link AbstractFunctionExp} and a {@link MTType}.</p>
@@ -88,6 +86,12 @@ public class Populator extends TreeWalkerVisitor {
 
     /** <p>The symbol table we are currently building.</p> */
     private final MathSymbolTableBuilder myBuilder;
+
+    /**
+     * <p>The current job's compilation environment
+     * that stores all necessary objects and flags.</p>
+     */
+    private final CompileEnvironment myCompileEnvironment;
 
     /** <p>The current scope for the module we are currently building.</p> */
     private ModuleScopeBuilder myCurModuleScope;
@@ -147,13 +151,15 @@ public class Populator extends TreeWalkerVisitor {
      * TODO: Refactor this and add JavaDoc.
      *
      * @param builder A scope builder for a symbol table.
-     * @param statusHandler A status handler to display debug or error messages.
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      */
-    public Populator(MathSymbolTableBuilder builder, StatusHandler statusHandler) {
+    public Populator(MathSymbolTableBuilder builder, CompileEnvironment compileEnvironment) {
         //myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
         myTypeGraph = builder.getTypeGraph();
         myBuilder = builder;
-        myStatusHandler = statusHandler;
+        myCompileEnvironment = compileEnvironment;
+        myStatusHandler = myCompileEnvironment.getStatusHandler();
         //myFacilityQualifier = null;
     }
 
@@ -172,7 +178,7 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public void preModuleDec(ModuleDec node) {
-        myStatusHandler.info(node.getLocation(), "----------------------\nModule: "
+        emitDebug(node.getLocation(), "----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
     }
@@ -185,25 +191,12 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postModuleDec(ModuleDec node) {
         myBuilder.endScope();
-        myStatusHandler.info(node.getLocation(),
-                "END POPULATOR\n----------------------\n");
+        emitDebug(node.getLocation(), "END POPULATOR\n----------------------\n");
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-
-    /**
-     * <p>This method prints debugging messages if that flag is
-     * enabled by the user.</p>
-     *
-     * @param msg Message to be displayed.
-     */
-    public static void emitDebug(String msg) {
-        if (PRINT_DEBUG) {
-            System.out.println(msg);
-        }
-    }
 
     /**
      * <p>The type graph containing all the type relationships.</p>
@@ -217,6 +210,23 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    // -----------------------------------------------------------
+    // General
+    // -----------------------------------------------------------
+
+    /**
+     * <p>An helper method to print debugging messages if the debug
+     * flag is on.</p>
+     *
+     * @param l Location that generated the message.
+     * @param message The message to be outputted.
+     */
+    private void emitDebug(Location l, String message) {
+        if (myCompileEnvironment.flags.isFlagSet(FLAG_POPULATOR_DEBUG)) {
+            myStatusHandler.info(l, message);
+        }
+    }
 
     // -----------------------------------------------------------
     // Math Type-Related

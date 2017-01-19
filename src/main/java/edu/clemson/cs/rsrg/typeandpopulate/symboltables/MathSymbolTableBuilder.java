@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.typeandpopulate.symboltables;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchModuleException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchScopeException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
@@ -72,9 +73,12 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     /**
      * <p>This creates a new, empty <code>MathSymbolTableBuilder</code> with no
      * open scopes.</p>
+     *
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      */
-    public MathSymbolTableBuilder() {
-        myTypeGraph = new TypeGraph();
+    public MathSymbolTableBuilder(CompileEnvironment compileEnvironment) {
+        myTypeGraph = new TypeGraph(compileEnvironment);
 
         //The only things in global scope are built-in things
         ScopeBuilder globalScope =
