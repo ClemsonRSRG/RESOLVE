@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -113,6 +114,24 @@ public class Populator extends TreeWalkerVisitor {
      * <p>An helper value that helps evaluate mathematical type values.</p>
      */
     private int myTypeValueDepth = 0;
+
+    // ===========================================================
+    // Flag Strings
+    // ===========================================================
+
+    private static final String FLAG_POPULATOR_NAME = "Populator";
+    private static final String FLAG_POPULATOR_DEBUG_INFO = "Populator Debug Flag";
+
+    // ===========================================================
+    // Flags
+    // ===========================================================
+
+    /**
+     * <p>Tells the compiler to print out Populator/Typegraph information messages.</p>
+     */
+    public static final Flag FLAG_POPULATOR_DEBUG =
+            new Flag(FLAG_POPULATOR_NAME, "populatorDebug",
+                    FLAG_POPULATOR_DEBUG_INFO);
 
     // ===========================================================
     // Constructors
