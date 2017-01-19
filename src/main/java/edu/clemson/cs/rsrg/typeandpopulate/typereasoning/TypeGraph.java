@@ -308,8 +308,14 @@ public class TypeGraph {
 
         // Print debugging messages if the flag is on.
         if (myCompileEnvironment.flags.isFlagSet(Populator.FLAG_POPULATOR_DEBUG)) {
-            myStatusHandler.info(null, "Added relationship to type node ["
-                    + sourceCanonicalResult.canonicalType + "]: " + relationship);
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n---------------New Type Relationship---------------\n\n");
+            sb.append("Added relationship to type node [");
+            sb.append(sourceCanonicalResult.canonicalType);
+            sb.append("]: ");
+            sb.append(relationship);
+            sb.append("\n---------------New Type Relationship---------------\n");
+            myStatusHandler.info(null, sb.toString());
         }
     }
 

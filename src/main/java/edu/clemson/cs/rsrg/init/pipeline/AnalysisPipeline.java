@@ -56,8 +56,11 @@ public class AnalysisPipeline extends AbstractPipeline {
 
         if (myCompileEnvironment.flags
                 .isFlagSet(Populator.FLAG_POPULATOR_DEBUG)) {
-            statusHandler.info(null, "Type Graph:\n\n"
-                    + mySymbolTable.getTypeGraph().toString());
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n---------------Current Type Graph---------------\n\n");
+            sb.append(mySymbolTable.getTypeGraph().toString());
+            sb.append("\n---------------Current Type Graph---------------\n");
+            statusHandler.info(null, sb.toString());
         }
     }
 
