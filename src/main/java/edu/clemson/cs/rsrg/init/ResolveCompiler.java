@@ -375,7 +375,7 @@ public class ResolveCompiler {
 
                 // Store the symbol table and type graph
                 MathSymbolTableBuilder symbolTable =
-                        new MathSymbolTableBuilder();
+                        new MathSymbolTableBuilder(compileEnvironment);
                 compileEnvironment.setSymbolTable(symbolTable);
                 compileEnvironment.setTypeGraph(symbolTable.getTypeGraph());
             }

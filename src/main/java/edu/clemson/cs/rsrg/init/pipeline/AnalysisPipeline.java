@@ -49,12 +49,16 @@ public class AnalysisPipeline extends AbstractPipeline {
     public final void process(ModuleIdentifier currentTarget) {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
         StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
-        Populator populator = new Populator(mySymbolTable, statusHandler);
+        Populator populator =
+                new Populator(mySymbolTable, myCompileEnvironment);
         myCompileEnvironment.setTypeGraph(populator.getTypeGraph());
         TreeWalker.visit(populator, moduleDec);
 
-        statusHandler.info(null, "Type Graph:\n\n"
-                + mySymbolTable.getTypeGraph().toString());
+        if (myCompileEnvironment.flags
+                .isFlagSet(Populator.FLAG_POPULATOR_DEBUG)) {
+            statusHandler.info(null, "Type Graph:\n\n"
+                    + mySymbolTable.getTypeGraph().toString());
+        }
     }
 
 }

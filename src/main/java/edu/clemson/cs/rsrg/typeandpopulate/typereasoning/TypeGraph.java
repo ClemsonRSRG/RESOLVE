@@ -14,7 +14,9 @@ package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
@@ -72,6 +74,17 @@ public class TypeGraph {
     /** <p>This contains all established relationships for mathematical elements.</p> */
     private final Set<EstablishedRelationship> myEstablishedElements =
             new HashSet<>();
+
+    /**
+     * <p>The current job's compilation environment
+     * that stores all necessary objects and flags.</p>
+     */
+    private final CompileEnvironment myCompileEnvironment;
+
+    /**
+     * <p>This is the status handler for the RESOLVE compiler.</p>
+     */
+    private final StatusHandler myStatusHandler;
 
     // ===========================================================
     // Global Mathematical Types
@@ -163,9 +176,14 @@ public class TypeGraph {
 
     /**
      * <p>This creates a mathematical type graph.</p>
+     *
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      */
-    public TypeGraph() {
+    public TypeGraph(CompileEnvironment compileEnvironment) {
         myTypeNodes = new HashMap<>();
+        myCompileEnvironment = compileEnvironment;
+        myStatusHandler = myCompileEnvironment.getStatusHandler();
     }
 
     // ===========================================================
@@ -285,11 +303,14 @@ public class TypeGraph {
         TypeNode sourceNode = getTypeNode(sourceCanonicalResult.canonicalType);
         sourceNode.addRelationship(relationship);
 
-        //We'd like to force the presence of the destination node
+        // We'd like to force the presence of the destination node
         getTypeNode(destinationCanonicalResult.canonicalType);
 
-        Populator.emitDebug("Added relationship to type node ["
-                + sourceCanonicalResult.canonicalType + "]: " + relationship);
+        // Print debugging messages if the flag is on.
+        if (myCompileEnvironment.flags.isFlagSet(Populator.FLAG_POPULATOR_DEBUG)) {
+            myStatusHandler.info(null, "Added relationship to type node ["
+                    + sourceCanonicalResult.canonicalType + "]: " + relationship);
+        }
     }
 
     /**
