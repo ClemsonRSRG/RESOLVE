@@ -14,7 +14,7 @@ package edu.clemson.cs.rsrg.typeandpopulate;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -46,6 +46,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+
 import java.util.*;
 
 /**
@@ -178,15 +180,128 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
+     * <p>Code that gets executed before visiting a {@link ConceptRealizModuleDec}.</p>
+     *
+     * @param conceptRealization A concept realization module declaration.
+     */
+    @Override
+    public final void preConceptRealizModuleDec(ConceptRealizModuleDec conceptRealization) {
+        // Concept Module Identifier
+        ModuleIdentifier id =
+                new ModuleIdentifier(conceptRealization.getConceptName().getName());
+
+        // Check if the concept realization implements all operations specified
+        // by the concept.
+        try {
+            ConceptModuleDec concept =
+                    (ConceptModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+            implementAllOper(conceptRealization.getLocation(), concept.getDecList(),
+                    conceptRealization.getDecList());
+        }
+        catch (NoSuchSymbolException e) {
+            noSuchModule(conceptRealization.getConceptName());
+        }
+
+        // Concept realizations implicitly import the concepts they realize
+        myCurModuleScope.addImport(id);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link EnhancementModuleDec}.</p>
+     *
+     * @param enhancement An enhancement module declaration.
+     */
+    @Override
+    public final void preEnhancementModuleDec(EnhancementModuleDec enhancement) {
+        // Enhancements implicitly import the concepts they enhance
+        myCurModuleScope.addImport(new ModuleIdentifier(enhancement
+                .getConceptName().getName()));
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link EnhancementRealizModuleDec}.</p>
+     *
+     * @param enhancementRealization An enhancement realization module declaration.
+     */
+    @Override
+    public final void preEnhancementRealizModuleDec(EnhancementRealizModuleDec enhancementRealization) {
+        // Concept Module Identifier
+        ModuleIdentifier coId =
+                new ModuleIdentifier(enhancementRealization.getConceptName()
+                        .getName());
+
+        // Enhancement Module Identifier
+        ModuleIdentifier enId =
+                new ModuleIdentifier(enhancementRealization
+                        .getEnhancementName().getName());
+
+        // Check if the enhancement realization implements all operations specified
+        // by the enhancement.
+        try {
+            EnhancementModuleDec enhancement =
+                    (EnhancementModuleDec) myBuilder.getModuleScope(enId)
+                            .getDefiningElement();
+            implementAllOper(enhancementRealization.getLocation(), enhancement.getDecList(),
+                    enhancementRealization.getDecList());
+        }
+        catch (NoSuchSymbolException e) {
+            noSuchModule(enhancementRealization.getEnhancementName());
+        }
+
+        // Enhancement realizations implicitly import the concepts they enhance
+        // and the enhancements they realize
+        myCurModuleScope.addImport(coId);
+        myCurModuleScope.addImport(enId);
+
+        // Enhancement realizations implicitly import the performance profiles
+        // if they are specified.
+        PosSymbol profileName = enhancementRealization.getProfileName();
+        if (profileName != null) {
+            myCurModuleScope.addImport(new ModuleIdentifier(profileName
+                    .getName()));
+        }
+    }
+
+    /**
      * <p>Code that gets executed before visiting a {@link ModuleDec}.</p>
      *
      * @param node A module declaration.
      */
     @Override
-    public void preModuleDec(ModuleDec node) {
+    public final void preModuleDec(ModuleDec node) {
         emitDebug(null, "----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link PerformanceConceptModuleDec}.</p>
+     *
+     * @param conceptProfile A concept profile module declaration.
+     */
+    @Override
+    public final void prePerformanceConceptModuleDec(PerformanceConceptModuleDec conceptProfile) {
+        // Concept performance profiles implicitly import the concepts they are profiling
+        myCurModuleScope.addImport(new ModuleIdentifier(conceptProfile.
+                getConceptName().getName()));
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link PerformanceEnhancementModuleDec}.</p>
+     *
+     * @param enhancementProfile An enhancement profile module declaration.
+     */
+    @Override
+    public final void prePerformanceEnhancementModuleDec(PerformanceEnhancementModuleDec enhancementProfile) {
+        // Enhancement performance profiles implicitly import the concepts,
+        // concept profile and enhancement they are profiling.
+        myCurModuleScope.addImport(new ModuleIdentifier(enhancementProfile.
+                getConceptName().getName()));
+        myCurModuleScope.addImport(new ModuleIdentifier(enhancementProfile.
+                getConceptProfileName().getName()));
+        myCurModuleScope.addImport(new ModuleIdentifier(enhancementProfile.
+                getEnhancementName().getName()));
     }
 
     /**
@@ -195,7 +310,7 @@ public class Populator extends TreeWalkerVisitor {
      * @param node A module declaration.
      */
     @Override
-    public void postModuleDec(ModuleDec node) {
+    public final void postModuleDec(ModuleDec node) {
         myBuilder.endScope();
         emitDebug(null, "END POPULATOR\n----------------------\n");
     }
