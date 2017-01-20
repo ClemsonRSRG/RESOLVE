@@ -40,6 +40,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeExceptio
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.sanitychecking.ImplementAllOperChecker;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -196,8 +197,9 @@ public class Populator extends TreeWalkerVisitor {
             ConceptModuleDec concept =
                     (ConceptModuleDec) myBuilder.getModuleScope(id)
                             .getDefiningElement();
-            implementAllOper(conceptRealization.getLocation(), concept.getDecList(),
-                    conceptRealization.getDecList());
+            ImplementAllOperChecker allOperChecker = new ImplementAllOperChecker(conceptRealization.getLocation(),
+                    concept.getDecList(), conceptRealization.getDecList());
+            allOperChecker.implementAllOper();
         }
         catch (NoSuchSymbolException e) {
             noSuchModule(conceptRealization.getConceptName());
@@ -242,8 +244,9 @@ public class Populator extends TreeWalkerVisitor {
             EnhancementModuleDec enhancement =
                     (EnhancementModuleDec) myBuilder.getModuleScope(enId)
                             .getDefiningElement();
-            implementAllOper(enhancementRealization.getLocation(), enhancement.getDecList(),
-                    enhancementRealization.getDecList());
+            ImplementAllOperChecker allOperChecker = new ImplementAllOperChecker(enhancementRealization.getLocation(),
+                    enhancement.getDecList(), enhancementRealization.getDecList());
+            allOperChecker.implementAllOper();
         }
         catch (NoSuchSymbolException e) {
             noSuchModule(enhancementRealization.getEnhancementName());
@@ -744,54 +747,6 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         return result;
-    }
-
-    // -----------------------------------------------------------
-    // Operation-Related
-    // -----------------------------------------------------------
-
-    /**
-     * <p>Obtains the list of all <code>OperationDec</code> and
-     * <code>ProcedureDec</code>.</p>
-     *
-     * @param decs List of all declarations.
-     *
-     * @return List containing only operations.
-     */
-    private List<Dec> getOperationDecs(List<Dec> decs) {
-        List<Dec> decList = new LinkedList<>();
-        for (Dec d : decs) {
-            if (d instanceof OperationDec || d instanceof ProcedureDec) {
-                decList.add(d);
-            }
-        }
-        return decList;
-    }
-
-    /**
-     * <p>Checks to see if all operation specified by concept/enhancement
-     * are implemented by the corresponding realization.</p>
-     *
-     * @param location The module that called this method.
-     * @param specDecs List of decs of the Concept/Enhancement
-     * @param realizationDecs List of decs of the realization.
-     */
-    private void implementAllOper(Location location, List<Dec> specDecs, List<Dec> realizationDecs) {
-        List<Dec> opDecList1 = getOperationDecs(specDecs);
-        List<Dec> opDecList2 = getOperationDecs(realizationDecs);
-
-        for (Dec d1 : opDecList1) {
-            boolean inRealization = false;
-            for (Dec d2 : opDecList2) {
-                if (d1.getName().equals(d2.getName())) {
-                    inRealization = true;
-                }
-            }
-            if (!inRealization) {
-                throw new SourceErrorException("Operation " + d1.getName()
-                        + " not implemented by the realization.", location);
-            }
-        }
     }
 
     // -----------------------------------------------------------
