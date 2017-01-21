@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
@@ -336,6 +337,20 @@ public class Populator extends TreeWalkerVisitor {
                 getConceptProfileName().getName()));
         myCurModuleScope.addImport(new ModuleIdentifier(enhancementProfile.
                 getEnhancementName().getName()));
+    }
+
+    // -----------------------------------------------------------
+    // Uses Items (Imports)
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link UsesItem}.</p>
+     *
+     * @param uses An uses item declaration.
+     */
+    @Override
+    public final void postUsesItem(UsesItem uses) {
+        myCurModuleScope.addImport(new ModuleIdentifier(uses));
     }
 
     // ===========================================================
