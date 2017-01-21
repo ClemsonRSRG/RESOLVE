@@ -181,6 +181,33 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
+     * <p>Code that gets executed before visiting a {@link ModuleDec}.</p>
+     *
+     * @param node A module declaration.
+     */
+    @Override
+    public final void preModuleDec(ModuleDec node) {
+        emitDebug(null, "----------------------\nModule: "
+                + node.getName().getName() + "\n----------------------");
+        myCurModuleScope = myBuilder.startModuleScope(node);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
+     *
+     * @param node A module declaration.
+     */
+    @Override
+    public final void postModuleDec(ModuleDec node) {
+        myBuilder.endScope();
+        emitDebug(null, "END POPULATOR\n----------------------\n");
+    }
+
+    // -----------------------------------------------------------
+    // Concept Realization Module
+    // -----------------------------------------------------------
+
+    /**
      * <p>Code that gets executed before visiting a {@link ConceptRealizModuleDec}.</p>
      *
      * @param conceptRealization A concept realization module declaration.
@@ -209,6 +236,10 @@ public class Populator extends TreeWalkerVisitor {
         myCurModuleScope.addImport(id);
     }
 
+    // -----------------------------------------------------------
+    // Enhancement Module
+    // -----------------------------------------------------------
+
     /**
      * <p>Code that gets executed before visiting a {@link EnhancementModuleDec}.</p>
      *
@@ -220,6 +251,10 @@ public class Populator extends TreeWalkerVisitor {
         myCurModuleScope.addImport(new ModuleIdentifier(enhancement
                 .getConceptName().getName()));
     }
+
+    // -----------------------------------------------------------
+    // Enhancement Realization Module
+    // -----------------------------------------------------------
 
     /**
      * <p>Code that gets executed before visiting a {@link EnhancementRealizModuleDec}.</p>
@@ -266,17 +301,9 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
-    /**
-     * <p>Code that gets executed before visiting a {@link ModuleDec}.</p>
-     *
-     * @param node A module declaration.
-     */
-    @Override
-    public final void preModuleDec(ModuleDec node) {
-        emitDebug(null, "----------------------\nModule: "
-                + node.getName().getName() + "\n----------------------");
-        myCurModuleScope = myBuilder.startModuleScope(node);
-    }
+    // -----------------------------------------------------------
+    // Performance Profile Module for Concepts
+    // -----------------------------------------------------------
 
     /**
      * <p>Code that gets executed before visiting a {@link PerformanceConceptModuleDec}.</p>
@@ -289,6 +316,10 @@ public class Populator extends TreeWalkerVisitor {
         myCurModuleScope.addImport(new ModuleIdentifier(conceptProfile.
                 getConceptName().getName()));
     }
+
+    // -----------------------------------------------------------
+    // Performance Profile Module for Enhancements
+    // -----------------------------------------------------------
 
     /**
      * <p>Code that gets executed before visiting a {@link PerformanceEnhancementModuleDec}.</p>
@@ -305,17 +336,6 @@ public class Populator extends TreeWalkerVisitor {
                 getConceptProfileName().getName()));
         myCurModuleScope.addImport(new ModuleIdentifier(enhancementProfile.
                 getEnhancementName().getName()));
-    }
-
-    /**
-     * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
-     *
-     * @param node A module declaration.
-     */
-    @Override
-    public final void postModuleDec(ModuleDec node) {
-        myBuilder.endScope();
-        emitDebug(null, "END POPULATOR\n----------------------\n");
     }
 
     // ===========================================================
