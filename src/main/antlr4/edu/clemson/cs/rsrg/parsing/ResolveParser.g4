@@ -67,7 +67,7 @@ shortFacilityModule
 // concept module
 
 conceptModule
-    :   CONCEPT name=IDENTIFIER (moduleParameterList)? SEMICOLON
+    :   (SHARED)? CONCEPT name=IDENTIFIER (moduleParameterList)? SEMICOLON
         (usesList)?
         (requiresClause)?
         (conceptItems)?
@@ -317,7 +317,7 @@ performanceTypeModelDecl
 // shared state rules
 
 sharedStateDecl
-    :   SHAREDSTATE name=IDENTIFIER
+    :   SHAREDVARIABLES name=IDENTIFIER
         (moduleStateVariableDecl)+
         (constraintClause)?
         (specModelInit)?
@@ -326,7 +326,7 @@ sharedStateDecl
     ;
 
 sharedStateRepresentationDecl
-    :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
+    :   SHAREDVARIABLES name=IDENTIFIER IS REALIZED BY
         (variableDecl)+
         (conventionClause)?
         (correspondenceClause)?
@@ -336,7 +336,7 @@ sharedStateRepresentationDecl
     ;
 
 facilitySharedStateRepresentationDecl
-    :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
+    :   SHAREDVARIABLES name=IDENTIFIER IS REALIZED BY
         (variableDecl)+
         (conventionClause)?
         (facilityRepresentationInit)?

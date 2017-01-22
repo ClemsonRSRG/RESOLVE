@@ -445,8 +445,12 @@ RESTORES
     |   'restores'
     ;
 
-SHAREDSTATE
-    :   'Shared State'
+SHARED
+    :   'Shared'
+    ;
+
+SHAREDVARIABLES
+    :   'Shared Variables'
     ;
 
 SHORT_FOR
