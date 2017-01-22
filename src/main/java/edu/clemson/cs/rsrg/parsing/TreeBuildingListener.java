@@ -467,10 +467,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
         }
 
+        // Check to see if this is a sharing concept
+        boolean isSharingConcept = false;
+        if (ctx.SHARED() != null) {
+            isSharingConcept = true;
+        }
+
         ConceptModuleDec concept =
                 new ConceptModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls, uses,
-                        requires, constraints, decls);
+                        requires, constraints, decls, isSharingConcept);
         myNodes.put(ctx, concept);
     }
 
