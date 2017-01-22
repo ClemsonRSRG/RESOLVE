@@ -46,6 +46,9 @@ public class ConceptModuleDec extends ModuleDec {
      */
     private final List<AssertionClause> myConstraints;
 
+    /** <p>This flag indicates whether or not this is a sharing concept.</p> */
+    private final boolean mySharingConceptFlag;
+
     // ===========================================================
     // Constructor
     // ===========================================================
@@ -62,14 +65,16 @@ public class ConceptModuleDec extends ModuleDec {
      * @param constraints The list of {@link AssertionClause} representing the concept
      *                    level constraints.
      * @param decs The list of {@link Dec} objects.
+     * @param isSharingConcept Indicates whether or not this is a sharing concept.
      */
     public ConceptModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             AssertionClause requires, List<AssertionClause> constraints,
-            List<Dec> decs) {
+            List<Dec> decs, boolean isSharingConcept) {
         super(l, name, parameterDecs, usesItems, decs);
         myConstraints = constraints;
         myRequires = requires;
+        mySharingConceptFlag = isSharingConcept;
     }
 
     // ===========================================================
@@ -174,6 +179,6 @@ public class ConceptModuleDec extends ModuleDec {
         Collections.copy(newConstraints, myConstraints);
 
         return new ConceptModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
-                newUsesItems, myRequires.clone(), newConstraints, newDecs);
+                newUsesItems, myRequires.clone(), newConstraints, newDecs, mySharingConceptFlag);
     }
 }
