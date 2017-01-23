@@ -467,18 +467,28 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
         }
 
-        // Check to see if this is a sharing concept
+        // Check to see if it is actually a sharing concept
+        // i.e. Has a shared variables block and/or definition variable
         boolean isSharingConcept = false;
+        boolean hasSharingConstructs = hasSharingConstructs(decls);
         if (ctx.SHARED() != null) {
-            // Check to see if it is actually a sharing concept
-            // i.e. Has a shared variables block and/or definition variable
-            if (!isLegitSharingConcept(decls)) {
+            // Throw an error if we can't find any sharing constructs
+            if (!hasSharingConstructs) {
                 throw new SourceErrorException(
                         "This sharing concept does not have any sharing constructs declared!",
                         createPosSymbol(ctx.name), new IllegalArgumentException());
             }
 
             isSharingConcept = true;
+        }
+        else {
+            // Throw an error if we found sharing constructs, but the concept wasn't
+            // declared as shared.
+            if (hasSharingConstructs) {
+                throw new SourceErrorException(
+                        "The concept has sharing constructs declared, but isn't declared as shared!",
+                        createPosSymbol(ctx.name), new IllegalArgumentException());
+            }
         }
 
         ConceptModuleDec concept =
@@ -5153,15 +5163,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
-     * <p>This sanity checks to make sure that a concept that has been declared to be
-     * sharing, actually has items that are shared.</p>
+     * <p>This checks to see if we have a sharing construct.</p>
      *
      * @param conceptDecls List of all declarations in a concept.
      *
      * @return {@code true} if there is a shared variables block and/or a type family
      * with a definition variable, {@code false} otherwise.
      */
-    private boolean isLegitSharingConcept(List<Dec> conceptDecls) {
+    private boolean hasSharingConstructs(List<Dec> conceptDecls) {
         boolean retval = false;
 
         Iterator<Dec> decIterator = conceptDecls.iterator();
