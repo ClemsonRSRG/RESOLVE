@@ -470,6 +470,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Check to see if this is a sharing concept
         boolean isSharingConcept = false;
         if (ctx.SHARED() != null) {
+            // Check to see if it is actually a sharing concept
+            // i.e. Has a shared variables block and/or definition variable
+            if (!isLegitSharingConcept(decls)) {
+                throw new SourceErrorException(
+                        "This sharing concept does not have any sharing constructs declared!",
+                        createPosSymbol(ctx.name), new IllegalArgumentException());
+            }
+
             isSharingConcept = true;
         }
 
@@ -5142,6 +5150,32 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         return varDecs;
+    }
+
+    /**
+     * <p>This sanity checks to make sure that a concept that has been declared to be
+     * sharing, actually has items that are shared.</p>
+     *
+     * @param conceptDecls List of all declarations in a concept.
+     *
+     * @return {@code true} if there is a shared variables block and/or a type family
+     * with a definition variable, {@code false} otherwise.
+     */
+    private boolean isLegitSharingConcept(List<Dec> conceptDecls) {
+        boolean retval = false;
+
+        Iterator<Dec> decIterator = conceptDecls.iterator();
+        while (decIterator.hasNext() && !retval) {
+            Dec dec = decIterator.next();
+            if (dec instanceof SharedStateDec) {
+                retval = true;
+            }
+            /*else if (dec instanceof TypeFamilyDec) {
+                // TODO: Check type family for definition variables
+            }*/
+        }
+
+        return retval;
     }
 
     // ===========================================================
