@@ -197,6 +197,8 @@ public class ScopeBuilder extends SyntacticScope {
      * defined by the AST node <code>facility</code>.</p>
      *
      * @param facility The AST Node that introduced the symbol.
+     * @param isSharingConceptInstantiation This flag indicates whether or not this {@code facility}
+     *                                      is an instantiation of a {@code sharing concept}.
      *
      * @return A new {@link FacilityEntry}.
      *
@@ -207,7 +209,7 @@ public class ScopeBuilder extends SyntacticScope {
      * @throws IllegalArgumentException Arguments do not meet the entry creation
      * criteria. Most likely, we have passed <code>null</code> objects.
      */
-    public final FacilityEntry addFacility(FacilityDec facility)
+    public final FacilityEntry addFacility(FacilityDec facility, boolean isSharingConceptInstantiation)
             throws DuplicateSymbolException, IllegalArgumentException {
         SymbolTableEntry curLocalEntry =
                 myBindings.get(facility.getName().getName());
@@ -215,8 +217,8 @@ public class ScopeBuilder extends SyntacticScope {
             throw new DuplicateSymbolException("Found two matching entries!", curLocalEntry);
         }
 
-        FacilityEntry entry =
-                new FacilityEntry(facility, myRootModule, getSourceRepository());
+        FacilityEntry entry = new FacilityEntry(facility, isSharingConceptInstantiation,
+                myRootModule, getSourceRepository());
 
         myBindings.put(facility.getName().getName(), entry);
 
