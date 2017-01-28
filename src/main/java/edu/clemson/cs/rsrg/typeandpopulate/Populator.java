@@ -13,10 +13,8 @@
 package edu.clemson.cs.rsrg.typeandpopulate;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
-import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
@@ -49,7 +47,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
-
 import java.util.*;
 
 /**
@@ -351,6 +348,37 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public final void postUsesItem(UsesItem uses) {
         myCurModuleScope.addImport(new ModuleIdentifier(uses));
+    }
+
+    // -----------------------------------------------------------
+    // Facility declarations
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link FacilityDec}.</p>
+     *
+     * @param facility A facility declaration.
+     */
+    @Override
+    public final void postFacilityDec(FacilityDec facility) {
+        // Concept Module Identifier
+        ModuleIdentifier id =
+                new ModuleIdentifier(facility.getConceptName().getName());
+
+        // Check to see if we are instantiating a sharing concept
+        try {
+            ConceptModuleDec concept =
+                    (ConceptModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+            myBuilder.getInnermostActiveScope().addFacility(facility, concept.isSharingConcept());
+        }
+        catch (NoSuchSymbolException e) {
+            noSuchModule(facility.getConceptName());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(facility.getName().getName(), facility.getName()
+                    .getLocation());
+        }
     }
 
     // ===========================================================
