@@ -159,6 +159,16 @@ public class ConceptModuleDec extends ModuleDec {
         return result;
     }
 
+    /**
+     * <p>This method returns the flag that indicates whether or not
+     * this is a {@code sharing concept}.</p>
+     *
+     * @return {@code true} if it is, {@code false} otherwise.
+     */
+    public final boolean isSharingConcept() {
+        return mySharingConceptFlag;
+    }
+
     // ===========================================================
     // Protected Methods
     // ===========================================================
