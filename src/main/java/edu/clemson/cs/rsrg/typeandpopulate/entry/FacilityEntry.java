@@ -36,6 +36,12 @@ public class FacilityEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * <p>A flag that indicates whether or not this entry instantiates
+     * a {@code sharing concept}.</p>
+     */
+    private final boolean myIsSharingConceptInstantiation;
+
+    /**
      * <p>The module specification/realization that this facility
      * entry is instantiating.</p>
      */
@@ -59,13 +65,16 @@ public class FacilityEntry extends SymbolTableEntry {
      * <p>This creates a symbol table entry for a facility declaration.</p>
      *
      * @param facility The element that created this entry.
+     * @param isSharingConceptInstantiation This flag indicates whether or not this {@code facility}
+     *                                      is an instantiation of a {@code sharing concept}.
      * @param sourceModule The module where this entry was created from.
      * @param sourceRepository The scope where this instantiation is happening in.
      */
-    public FacilityEntry(FacilityDec facility, ModuleIdentifier sourceModule,
-                         ScopeRepository sourceRepository) {
+    public FacilityEntry(FacilityDec facility, boolean isSharingConceptInstantiation,
+                         ModuleIdentifier sourceModule, ScopeRepository sourceRepository) {
         super(facility.getName().getName(), facility, sourceModule);
 
+        myIsSharingConceptInstantiation = isSharingConceptInstantiation;
         mySourceRepository = sourceRepository;
 
         ModuleParameterization spec =
@@ -202,6 +211,17 @@ public class FacilityEntry extends SymbolTableEntry {
         //       should be replaced with the corresponding concrete type--but
         //       how?
         return this;
+    }
+
+    /**
+     * <p>This method returns a boolean that indicates whether or not this entry
+     * instantiates a {@code sharing concept}.</p>
+     *
+     * @return {@code true} if it intantiates a {@code sharing concept},
+     * {@code false} otherwise.
+     */
+    public final boolean isSharingConceptInstantion() {
+        return myIsSharingConceptInstantiation;
     }
 
     /**
