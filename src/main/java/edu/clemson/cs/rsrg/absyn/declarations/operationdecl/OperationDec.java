@@ -119,6 +119,7 @@ public class OperationDec extends Dec implements ModuleParameter {
         if (myAffects != null) {
             sb.append(myAffects.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         // requires clause

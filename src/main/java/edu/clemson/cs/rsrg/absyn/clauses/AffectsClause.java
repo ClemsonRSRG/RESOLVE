@@ -73,6 +73,7 @@ public class AffectsClause extends ResolveConceptualElement {
                 sb.append(", ");
             }
         }
+        sb.append(";");
 
         return sb.toString();
     }

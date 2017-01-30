@@ -89,6 +89,10 @@ public class ConceptModuleDec extends ModuleDec {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
 
+        if (mySharingConceptFlag) {
+            sb.append("Shared ");
+        }
+
         sb.append("Concept ");
         sb.append(formNameArgs(0, innerIndentInc));
         sb.append(";\n");

@@ -106,6 +106,7 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
         if (myDuration != null) {
             sb.append(myDuration.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         // manipulative displacement clause

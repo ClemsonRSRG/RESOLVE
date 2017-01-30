@@ -106,6 +106,7 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
         if (myAffects != null) {
             sb.append(myAffects.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         // ensures clause

@@ -80,7 +80,6 @@ public class SharedStateRealizationDec
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("Shared State ");
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(" =\n");
 
@@ -109,7 +108,9 @@ public class SharedStateRealizationDec
                 innerIndentInc));
 
         printSpace(indentSize, sb);
-        sb.append("end;");
+        sb.append("end ");
+        sb.append(myName.asString(0, innerIndentInc));
+        sb.append(";");
 
         return sb.toString();
     }
