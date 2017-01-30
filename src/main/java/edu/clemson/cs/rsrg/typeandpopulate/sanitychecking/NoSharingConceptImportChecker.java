@@ -1,5 +1,5 @@
 /**
- * NoSharingConceptImport.java
+ * NoSharingConceptImportChecker.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -38,7 +38,7 @@ import java.util.Iterator;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class NoSharingConceptImport {
+public class NoSharingConceptImportChecker {
 
     // ===========================================================
     // Member Fields
@@ -65,8 +65,8 @@ public class NoSharingConceptImport {
      * @param moduleDec The module being imported.
      * @param currentScope The current scope.
      */
-    public NoSharingConceptImport(Location location, ModuleDec moduleDec,
-            ScopeBuilder currentScope) {
+    public NoSharingConceptImportChecker(Location location,
+            ModuleDec moduleDec, ScopeBuilder currentScope) {
         myLocation = location;
         myModuleDec = moduleDec;
         myCurrentScope = currentScope;

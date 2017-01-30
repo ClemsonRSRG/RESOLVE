@@ -39,7 +39,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeExceptio
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
-import edu.clemson.cs.rsrg.typeandpopulate.sanitychecking.ImplementAllOperChecker;
+import edu.clemson.cs.rsrg.typeandpopulate.sanitychecking.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -347,7 +347,25 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postUsesItem(UsesItem uses) {
-        myCurModuleScope.addImport(new ModuleIdentifier(uses));
+        // Module Identifier
+        ModuleIdentifier id = new ModuleIdentifier(uses);
+
+        // Check if we are importing a sharing concept.
+        try {
+            ModuleDec moduleDec = myBuilder.getModuleScope(id).getDefiningElement();
+            NoSharingConceptImportChecker checker =
+                    new NoSharingConceptImportChecker(uses.getLocation(),
+                            moduleDec, myBuilder.getInnermostActiveScope());
+            if (checker.importingSharingConcept()) {
+                throw new SourceErrorException("Cannot import a Sharing Concept or a module that " +
+                        "contains an instantiation of a Sharing Concept.", uses.getLocation());
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            noSuchModule(uses.getName());
+        }
+
+        myCurModuleScope.addImport(id);
     }
 
     // -----------------------------------------------------------
