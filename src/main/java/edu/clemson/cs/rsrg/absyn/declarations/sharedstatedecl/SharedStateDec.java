@@ -79,15 +79,15 @@ public class SharedStateDec extends Dec {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("Shared State ");
         sb.append(myName.asString(0, innerIndentInc));
         sb.append("\n");
 
         // List of abstract state vars
         for (MathVarDec varDec : myAbstractStateVars) {
-            sb.append(varDec.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-            sb.append("\n");
+            printSpace(indentSize + innerIndentInc, sb);
+            sb.append("Abstract_Var ");
+            sb.append(varDec.asString(0, innerIndentInc));
+            sb.append(";\n");
         }
 
         // Constraint
@@ -104,7 +104,9 @@ public class SharedStateDec extends Dec {
         sb.append("\n");
 
         printSpace(indentSize, sb);
-        sb.append("end;");
+        sb.append("end ");
+        sb.append(myName.asString(0, innerIndentInc));
+        sb.append(";");
 
         return sb.toString();
     }

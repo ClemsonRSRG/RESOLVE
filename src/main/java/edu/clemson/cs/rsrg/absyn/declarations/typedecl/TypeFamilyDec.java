@@ -84,14 +84,14 @@ public class TypeFamilyDec extends Dec {
         sb.append("Type Family ");
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(" is modeled by ");
-        sb.append(myTy.asString(0, innerIndentInc));
+        sb.append(myTy.asString(0, indentSize + innerIndentInc));
         sb.append(";\n");
 
         // exemplar
         printSpace(indentSize + innerIndentInc, sb);
         sb.append("exemplar ");
         sb.append(myExemplar.asString(0, innerIndentInc));
-        sb.append("\n");
+        sb.append(";\n");
 
         // constraint
         sb.append(myConstraint.asString(indentSize + innerIndentInc,

@@ -74,16 +74,15 @@ public class CrossTypeExp extends MathExp {
 
         Set<PosSymbol> tags = myTagsToFields.keySet();
         for (PosSymbol tag : tags) {
-            sb
-                    .append(tag.asString(indentSize + innerIndentInc,
-                            innerIndentInc));
+            sb.append(tag.asString(indentSize + 2 * innerIndentInc,
+                    innerIndentInc));
             sb.append(": ");
             sb.append(myTagsToFields.get(tag).asString(0, innerIndentInc));
-            sb.append("\n");
+            sb.append(";\n");
         }
 
-        printSpace(indentSize, sb);
-        sb.append("end\n");
+        printSpace(innerIndentInc, sb);
+        sb.append("end");
 
         return sb.toString();
     }
