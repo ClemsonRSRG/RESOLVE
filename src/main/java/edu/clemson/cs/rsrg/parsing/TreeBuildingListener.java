@@ -1675,7 +1675,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.name), abstractStateVars,
+        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.start), abstractStateVars,
                 constraint, initItem, finalItem));
     }
 
@@ -1772,7 +1772,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         SharedStateRealizationDec realizationDec =
-                new SharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars,
+                new SharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
                         convention, correspondence, initItem, finalItem);
         myCopySSRList.add((SharedStateRealizationDec) realizationDec.clone());
 
@@ -1871,7 +1871,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         FacilitySharedStateRealizationDec realizationDec =
-                new FacilitySharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars,
+                new FacilitySharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
                         convention, initItem, finalItem);
         myCopySSRList.add((FacilitySharedStateRealizationDec) realizationDec.clone());
 

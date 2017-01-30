@@ -317,31 +317,31 @@ performanceTypeModelDecl
 // shared state rules
 
 sharedStateDecl
-    :   SHAREDVARIABLES name=IDENTIFIER
+    :   SHAREDVARIABLES
         (moduleStateVariableDecl)+
         (constraintClause)?
         (specModelInit)?
         (specModelFinal)?
-        END SEMICOLON
+        END SHAREDVARIABLES SEMICOLON
     ;
 
 sharedStateRepresentationDecl
-    :   SHAREDVARIABLES name=IDENTIFIER IS REALIZED BY
+    :   SHAREDVARIABLES IS REALIZED BY
         (variableDecl)+
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
         (representationFinal)?
-        END SEMICOLON
+        END SHAREDVARIABLES SEMICOLON
     ;
 
 facilitySharedStateRepresentationDecl
-    :   SHAREDVARIABLES name=IDENTIFIER IS REALIZED BY
+    :   SHAREDVARIABLES IS REALIZED BY
         (variableDecl)+
         (conventionClause)?
         (facilityRepresentationInit)?
         (facilityRepresentationFinal)?
-        END SEMICOLON
+        END SHAREDVARIABLES SEMICOLON
     ;
 
 // initialization, finalization rules
