@@ -37,9 +37,6 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     /** <p>The file that created this token factory.</p> */
     private final ResolveFile myFile;
 
-    /** <p>Input data stream</p> */
-    private final CharStream myInput;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -48,11 +45,9 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
      * <p>This object creates {@link ResolveToken}s rather than the default tokens.</p>
      *
      * @param file Input file.
-     * @param input Input data stream.
      */
-    public ResolveTokenFactory(ResolveFile file, CharStream input) {
+    public ResolveTokenFactory(ResolveFile file) {
         myFile = file;
-        myInput = input;
     }
 
     // ===========================================================
