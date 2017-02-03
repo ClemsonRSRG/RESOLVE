@@ -252,7 +252,7 @@ public class Controller {
 
         // Create a RESOLVE language lexer
         ResolveLexer lexer = new ResolveLexer(input);
-        ResolveTokenFactory factory = new ResolveTokenFactory(file, input);
+        ResolveTokenFactory factory = new ResolveTokenFactory(file);
         lexer.setTokenFactory(factory);
 
         // Create a RESOLVE language parser
