@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.parsing.data;
 
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
@@ -19,9 +20,8 @@ import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
 /**
- * <p>A special token that overrides the "equals" logic present in the default
- * implementation of {@link CommonToken}. Turns out this is functionally
- * equivalent to our now removed PosSymbol class.</p>
+ * <p>A special token that overrides the {@link #equals(Object)}} logic present in the default
+ * implementation of {@link CommonToken}.</p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -29,8 +29,8 @@ import org.antlr.v4.runtime.misc.Pair;
  */
 public class ResolveToken extends CommonToken {
 
-    /** <p>The source location for this token.</p> */
-    protected String mySourceName;
+    /** <p>The source file for this token.</p> */
+    private final ResolveFile mySourceFile;
 
     // ===========================================================
     // Constructors
@@ -39,35 +39,41 @@ public class ResolveToken extends CommonToken {
     /**
      * <p>This creates a RESOLVE identifier token.</p>
      *
+     * @param file Source file.
      * @param text Token text.
      */
-    public ResolveToken(String text) {
+    public ResolveToken(ResolveFile file, String text) {
         super(ResolveLexer.IDENTIFIER, text);
+        mySourceFile = file;
     }
 
     /**
      * <p>This creates a generic RESOLVE token.</p>
      *
+     * @param file Source file.
      * @param type Token type.
      * @param text Token text.
      */
-    public ResolveToken(int type, String text) {
+    public ResolveToken(ResolveFile file, int type, String text) {
         super(type, text);
+        mySourceFile = file;
     }
 
     /**
      * <p>This constructor allows you
      * to create a token from a source pair.</p>
      *
+     * @param file Source file.
      * @param source Token source.
      * @param type Token type.
      * @param channel Channel that this token originated from.
      * @param start Token start location.
      * @param stop Token stop location.
      */
-    public ResolveToken(Pair<TokenSource, CharStream> source, int type,
-            int channel, int start, int stop) {
+    public ResolveToken(ResolveFile file, Pair<TokenSource, CharStream> source,
+            int type, int channel, int start, int stop) {
         super(source, type, channel, start, stop);
+        mySourceFile = file;
     }
 
     // ===========================================================
@@ -98,23 +104,13 @@ public class ResolveToken extends CommonToken {
     }
 
     /**
-     * <p>Returns the location from the token in string format.</p>
+     * <p>Returns the location for the token.</p>
      *
-     * @return Location as a String.
+     * @return The {@link Location} object.
      */
-    public final String getLocation() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(groomFileName(mySourceName));
-        sb.append(" ");
-
-        // Append the line and column number
-        sb.append("(");
-        sb.append(getLine());
-        sb.append(":");
-        sb.append(getCharPositionInLine());
-        sb.append(")");
-
-        return sb.toString();
+    public final Location getLocation() {
+        return new Location(mySourceFile, getLine(), getCharPositionInLine(),
+                "");
     }
 
     /**
@@ -135,25 +131,6 @@ public class ResolveToken extends CommonToken {
     @Override
     public final String toString() {
         return getText();
-    }
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
-
-    /**
-     * <p>Trims all the path information from the filename.</p>
-     *
-     * @param fileName The full path filename.
-     *
-     * @return Filename only.
-     */
-    private String groomFileName(String fileName) {
-        int start = fileName.lastIndexOf("/");
-        if (start == -1) {
-            return fileName;
-        }
-        return fileName.substring(start + 1, fileName.length());
     }
 
 }

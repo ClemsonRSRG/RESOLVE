@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.statushandling;
 
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
 import org.antlr.v4.runtime.*;
 
@@ -80,10 +81,14 @@ public class AntlrErrorListener extends BaseErrorListener {
         String[] lines = input.split("\n");
         String errorLine = lines[line - 1].replaceAll("\t", " ");
 
-        String errorMsg =
-                buildErrorMsg(offendingToken, charPositionInLine, errorLine,
-                        msg);
-        myStatusHandler.error(null, errorMsg);
+        // Obtain the location from the token if it is not null
+        Location location = null;
+        if (offendingToken != null) {
+            location = offendingToken.getLocation();
+        }
+
+        String errorMsg = buildErrorMsg(charPositionInLine, errorLine, msg);
+        myStatusHandler.error(location, errorMsg);
     }
 
     // ===========================================================
@@ -95,20 +100,14 @@ public class AntlrErrorListener extends BaseErrorListener {
      * the ANTLR4 provided message, build the adequate error message
      * to be displayed to the user.</p>
      *
-     * @param offendingToken The offending token.
      * @param charPositionInLine The error position in the line.
      * @param line The text from the line that caused the error.
      * @param msg The error message retrieved from ANTLR4.
      *
      * @return The formatted error message as a String.
      */
-    private String buildErrorMsg(ResolveToken offendingToken,
-            int charPositionInLine, String line, String msg) {
+    private String buildErrorMsg(int charPositionInLine, String line, String msg) {
         StringBuilder sb = new StringBuilder();
-        if (offendingToken != null) {
-            sb.append(offendingToken.getLocation());
-        }
-        sb.append("\n");
         sb.append(line);
         sb.append("\n");
         for (int i = 0; i < charPositionInLine; i++) {
