@@ -70,7 +70,6 @@ public class WriterStatusHandler implements StatusHandler {
                     sb.append(l.toString());
                 }
                 sb.append("\n\n");
-                sb.append("\t");
                 sb.append(msg);
                 sb.append("\n\n");
 
