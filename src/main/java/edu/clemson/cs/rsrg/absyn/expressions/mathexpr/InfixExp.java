@@ -75,7 +75,7 @@ public class InfixExp extends AbstractFunctionExp {
 
         printSpace(indentSize, sb);
         sb.append("(");
-        sb.append(myLeftHandSide.asString(0, innerIndentInc));
+        sb.append(myLeftHandSide.asString(0, indentSize + innerIndentInc));
 
         sb.append(" ");
         if (myQualifier != null) {
@@ -85,7 +85,7 @@ public class InfixExp extends AbstractFunctionExp {
         sb.append(myOperationName.asString(0, innerIndentInc));
         sb.append(" ");
 
-        sb.append(myRightHandSide.asString(0, innerIndentInc));
+        sb.append(myRightHandSide.asString(0, indentSize + innerIndentInc));
         sb.append(")");
 
         return sb.toString();

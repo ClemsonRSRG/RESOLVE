@@ -68,7 +68,9 @@ public class PrefixExp extends AbstractFunctionExp {
         StringBuffer sb = new StringBuffer();
 
         sb.append(myOperationName.asString(indentSize, innerIndentInc));
+        sb.append("(");
         sb.append(myArgument.asString(0, innerIndentInc));
+        sb.append(")");
 
         return sb.toString();
     }
