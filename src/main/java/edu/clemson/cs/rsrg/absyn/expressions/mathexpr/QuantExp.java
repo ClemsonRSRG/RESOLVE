@@ -96,7 +96,7 @@ public class QuantExp extends MathExp {
         Iterator<MathVarDec> i = myVars.iterator();
         while (i.hasNext()) {
             MathVarDec m = i.next();
-            sb.append(m.getName().asString(0, innerIndentInc));
+            sb.append(m.asString(0, innerIndentInc));
 
             if (i.hasNext()) {
                 sb.append(", ");

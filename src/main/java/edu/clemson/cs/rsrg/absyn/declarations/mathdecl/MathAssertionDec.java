@@ -46,7 +46,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "(Associative)";
+                return "(Associative) ";
             }
 
         },
@@ -54,7 +54,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "(Commutative)";
+                return "(Commutative) ";
             }
 
         }
@@ -74,7 +74,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Axiom";
+                return "Axiom ";
             }
 
         },
@@ -82,7 +82,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Theorem";
+                return "Theorem ";
             }
 
         },
@@ -90,7 +90,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Property";
+                return "Property ";
             }
 
         },
@@ -98,7 +98,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Lemma";
+                return "Lemma ";
             }
 
         },
@@ -106,7 +106,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Corollary";
+                return "Corollary ";
             }
 
         }
@@ -180,7 +180,6 @@ public class MathAssertionDec extends Dec {
         sb.append(myAssertionType.toString());
         if (myTheoremSubtype != null) {
             sb.append(myTheoremSubtype.toString());
-            sb.append(" ");
         }
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(":\n");
