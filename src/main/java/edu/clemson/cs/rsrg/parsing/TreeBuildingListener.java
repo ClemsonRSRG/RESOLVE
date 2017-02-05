@@ -2964,9 +2964,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitMathTypeTheoremDecl(
             ResolveParser.MathTypeTheoremDeclContext ctx) {
-        List<MathVarDec> varDecls =
-                Utilities.collect(MathVarDec.class,
-                        ctx.mathVariableDeclGroup(), myNodes);
+        List<MathVarDec> varDecls = new ArrayList<>();
+        List<ResolveParser.MathVariableDeclGroupContext> variableDeclGroupContexts = ctx.mathVariableDeclGroup();
+        for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroupContexts) {
+            // Get each math variable declaration
+            List<TerminalNode> idents = context.IDENTIFIER();
+            for (TerminalNode ident : idents) {
+                varDecls.add((MathVarDec) myNodes.removeFrom(ident));
+            }
+        }
         Exp assertionExp = (Exp) myNodes.removeFrom(ctx.mathImpliesExp());
 
         myNodes.put(ctx, new MathTypeTheoremDec(createPosSymbol(ctx.name),
