@@ -249,11 +249,11 @@ INDUCTIVE
     ;
 
 INDUCTIVE_BASE_NUM
-    :   '(i).'
+    :   '(i.)'
     ;
 
 INDUCTIVE_HYP_NUM
-    :   '(ii).'
+    :   '(ii.)'
     ;
 
 INITIALIZATION
