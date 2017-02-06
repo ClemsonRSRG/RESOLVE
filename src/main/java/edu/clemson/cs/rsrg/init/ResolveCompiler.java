@@ -60,7 +60,7 @@ public class ResolveCompiler {
     /**
      * <p>This indicates the current compiler version.</p>
      */
-    private final String myCompilerVersion = "Fall 2016";
+    private final String myCompilerVersion = "Spring 2017";
 
     /**
      * <p>This stores all the file names specified in the argument
@@ -74,12 +74,14 @@ public class ResolveCompiler {
 
     private static final String FLAG_DESC_DEBUG =
             "Print debugging statements from the compiler output.";
+    private static final String FLAG_DESC_PRINT_MODULE =
+            "Print the modules we are compiling.";
     private static final String FLAG_DESC_EXPORT_AST =
-            "exports the AST for the target file as a .dot file that can be viewed in Graphviz";
+            "Exports the AST for the target file as a .dot file that can be viewed in Graphviz";
     private static final String FLAG_DESC_WORKSPACE_DIR =
             "Changes the workspace directory path.";
     private static final String FLAG_SECTION_GENERAL = "General";
-    private static final String FLAG_SECTION_NAME = "Output";
+    private static final String FLAG_SECTION_DEBUG = "Debugging";
 
     private static final String[] WORKSPACE_DIR_ARG_NAME = { "Path" };
 
@@ -108,27 +110,34 @@ public class ResolveCompiler {
      * output.</p>
      */
     public static final Flag FLAG_DEBUG =
-            new Flag(FLAG_SECTION_NAME, "debug", FLAG_DESC_DEBUG);
+            new Flag(FLAG_SECTION_DEBUG, "debug", FLAG_DESC_DEBUG);
 
     /**
      * <p>Tells the compiler to print debugging messages from the compiler
      * output to a file.</p>
      */
     public static final Flag FLAG_DEBUG_FILE_OUT =
-            new Flag(FLAG_SECTION_NAME, "debugOutToFile", FLAG_DESC_DEBUG);
+            new Flag(FLAG_SECTION_DEBUG, "debugOutToFile", FLAG_DESC_DEBUG);
 
     /**
      * <p>Tells the compiler to print compiler exception's stack traces.</p>
      */
     public static final Flag FLAG_DEBUG_STACK_TRACE =
-            new Flag(FLAG_SECTION_NAME, "stacktrace", FLAG_DESC_DEBUG);
+            new Flag(FLAG_SECTION_DEBUG, "stacktrace", FLAG_DESC_DEBUG,
+                    Flag.Type.HIDDEN);
 
     /**
-     * <p>The main web interface flag.  Tells the compiler to modify
-     * some of the output to be more user-friendly for the web.</p>
+     * <p>Tells the compiler to print the module we are compiling.</p>
+     */
+    public static final Flag FLAG_PRINT_MODULE =
+            new Flag(FLAG_SECTION_DEBUG, "printModule", FLAG_DESC_PRINT_MODULE,
+                    Flag.Type.HIDDEN);
+
+    /**
+     * <p>Tell the compiler to output a Graphviz model for our AST.</p>
      */
     public static final Flag FLAG_EXPORT_AST =
-            new Flag(FLAG_SECTION_NAME, "exportAST", FLAG_DESC_EXPORT_AST,
+            new Flag(FLAG_SECTION_GENERAL, "exportAST", FLAG_DESC_EXPORT_AST,
                     Flag.Type.HIDDEN);
 
     /**
@@ -446,5 +455,8 @@ public class ResolveCompiler {
 
         // Stack traces implies debug flag is on
         FlagDependencies.addImplies(FLAG_DEBUG_STACK_TRACE, FLAG_DEBUG);
+
+        // Print modules implies debug flag is on
+        FlagDependencies.addImplies(FLAG_PRINT_MODULE, FLAG_DEBUG);
     }
 }
