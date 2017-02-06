@@ -66,9 +66,7 @@ public class MathCategoricalDefinitionDec extends Dec {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("Categorical Definition ");
-        sb.append(myName.asString(0, innerIndentInc));
-        sb.append(" introduces\n");
+        sb.append("Categorical Definition introduces\n");
 
         Iterator<MathDefinitionDec> it = myDefinitions.iterator();
         while (it.hasNext()) {
@@ -88,7 +86,7 @@ public class MathCategoricalDefinitionDec extends Dec {
         sb.append("related by\n");
         sb.append(myRelatedByExp.asString(indentSize + innerIndentInc,
                 innerIndentInc));
-        sb.append("\n");
+        sb.append(";");
 
         return sb.toString();
     }
