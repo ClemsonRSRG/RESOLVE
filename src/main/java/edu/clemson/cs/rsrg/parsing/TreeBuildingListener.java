@@ -3116,11 +3116,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // the categorical definition
         List<MathDefinitionDec> definitionDecls = new ArrayList<>();
         for (DefinitionMembers members : myDefinitionMemberList) {
-            definitionDecls.add(new MathDefinitionDec(members.name, members.params, members.rawType, null, false));
+            definitionDecls.add(new MathDefinitionDec(members.name, members.params,
+                    members.rawType, null, false));
         }
         myDefinitionMemberList = null;
 
-        myNodes.put(ctx, new MathCategoricalDefinitionDec(createPosSymbol(ctx.name), definitionDecls, (Exp) myNodes.removeFrom(ctx.mathExp())));
+        myNodes.put(ctx, new MathCategoricalDefinitionDec(new PosSymbol(createLocation(ctx.start), ""),
+                definitionDecls, (Exp) myNodes.removeFrom(ctx.mathExp())));
     }
 
     /**
