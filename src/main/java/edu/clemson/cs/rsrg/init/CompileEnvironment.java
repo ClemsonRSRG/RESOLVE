@@ -144,7 +144,7 @@ public class CompileEnvironment {
             SimpleDateFormat dateFormat =
                     new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
             File errorFile =
-                    new File(myCompileDir, "Error-Log-"
+                    new File(myCompileDir, "Debug-Log-"
                             + dateFormat.format(date) + ".log");
 
             statusHandler =
@@ -183,7 +183,7 @@ public class CompileEnvironment {
 
         // Print out debugging message
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myStatusHandler.info(null, "Completed record: " + mid.toString());
+            myStatusHandler.info(null, "Done Compiling: " + mid.toString());
         }
     }
 
@@ -206,7 +206,7 @@ public class CompileEnvironment {
 
         // Print out debugging message
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myStatusHandler.info(null, "Construct record: " + mid.toString());
+            myStatusHandler.info(null, "Begin Compiling: " + mid.toString());
         }
     }
 
