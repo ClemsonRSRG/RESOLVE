@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-maven-plugin</artifactId>
-            <version>4.5</version>
+            <version>4.6</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
@@ -160,7 +160,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.5</version>
+                <version>4.6</version>
                 <configuration>
                     <sourceDirectory>src/main/antlr4</sourceDirectory>
                     <arguments>
