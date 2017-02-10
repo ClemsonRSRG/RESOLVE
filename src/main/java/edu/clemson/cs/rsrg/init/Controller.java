@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -256,12 +257,30 @@ public class Controller {
         lexer.setTokenFactory(factory);
 
         // Create a RESOLVE language parser
-        TokenStream tokenStream = new CommonTokenStream(lexer);
-        ResolveParser parser = new ResolveParser(tokenStream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ResolveParser parser = new ResolveParser(tokens);
         parser.removeErrorListeners();
         parser.addErrorListener(myAntlrErrorListener);
         parser.setTokenFactory(factory);
-        ParserRuleContext rootModuleCtx = parser.module();
+
+        // Two-Stage Parsing
+        // Reason: Currently our expression parser is really slow.
+        // The solution proposed by the ANTLR folks (found here:
+        // https://github.com/antlr/antlr4/blob/master/doc/faq/general.md)
+        // is to use SLL prediction mode first and switch to LL if it fails.
+        ParserRuleContext rootModuleCtx;
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+        try {
+            rootModuleCtx = parser.module();
+        }
+        catch (Exception ex) {
+            tokens.reset();
+            parser.reset();
+            parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+            rootModuleCtx = parser.module();
+        }
+
+        // Check for any parsing errors
         int numParserErrors = parser.getNumberOfSyntaxErrors();
         if (numParserErrors != 0) {
             throw new MiscErrorException("Found " + numParserErrors
