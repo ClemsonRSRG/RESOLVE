@@ -3821,12 +3821,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitMathAddingExp(ResolveParser.MathAddingExpContext ctx) {
         ResolveConceptualElement newElement;
 
-        // Create an addition expression if needed
-        List<ResolveParser.MathMultiplyingExpContext> mathExps =
-                ctx.mathMultiplyingExp();
-        if (mathExps.size() > 1) {
+        // Create a repeated expression if needed
+        if (ctx.mathRepeatAddExp() != null) {
+            ResolveParser.MathRepeatAddExpContext mathRepeatAddExpContext =
+                    ctx.mathRepeatAddExp();
+            List<ResolveParser.MathMultiplyingExpContext> mathExps =
+                    mathRepeatAddExpContext.mathMultiplyingExp();
+
             // Obtain all the expressions
             List<Exp> exps = new ArrayList<>();
+            exps.add((Exp) myNodes.removeFrom(ctx.mathMultiplyingExp()));
             for (ResolveParser.MathMultiplyingExpContext context : mathExps) {
                 exps.add((Exp) myNodes.removeFrom(context));
             }
@@ -3837,13 +3841,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 Exp rightExp = exps.remove(0);
 
                 PosSymbol qualifier = null;
-                if (ctx.qualifier != null) {
-                    qualifier = createPosSymbol(ctx.qualifier);
+                if (mathRepeatAddExpContext.qualifier != null) {
+                    qualifier = createPosSymbol(mathRepeatAddExpContext.qualifier);
                 }
 
                 // Form an infix expression using the operator
                 Exp newFirstExp = new InfixExp(leftExp.getLocation().clone(), leftExp,
-                        qualifier, createPosSymbol(ctx.op), rightExp);
+                        qualifier, createPosSymbol(mathRepeatAddExpContext.op), rightExp);
 
                 // Add it back to the list for the next iteration of the loop
                 exps.add(0, newFirstExp);
@@ -3853,7 +3857,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             newElement = exps.remove(0);
         }
         else {
-            newElement = myNodes.removeFrom(mathExps.remove(0));
+            newElement = myNodes.removeFrom(ctx.mathMultiplyingExp());
         }
 
         myNodes.put(ctx, newElement);
@@ -3872,12 +3876,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             ResolveParser.MathMultiplyingExpContext ctx) {
         ResolveConceptualElement newElement;
 
-        // Create a multiplication expression if needed
-        List<ResolveParser.MathExponentialExpContext> mathExps =
-                ctx.mathExponentialExp();
-        if (mathExps.size() != 1) {
+        // Create a repeated expression if needed
+        if (ctx.mathRepeatMultExp() != null) {
+            ResolveParser.MathRepeatMultExpContext mathRepeatMultExpContext =
+                    ctx.mathRepeatMultExp();
+            List<ResolveParser.MathExponentialExpContext> mathExps =
+                    mathRepeatMultExpContext.mathExponentialExp();
+
             // Obtain all the expressions
             List<Exp> exps = new ArrayList<>();
+            exps.add((Exp) myNodes.removeFrom(ctx.mathExponentialExp()));
             for (ResolveParser.MathExponentialExpContext context : mathExps) {
                 exps.add((Exp) myNodes.removeFrom(context));
             }
@@ -3888,21 +3896,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 Exp rightExp = exps.remove(0);
 
                 PosSymbol qualifier = null;
-                if (ctx.qualifier != null) {
-                    qualifier = createPosSymbol(ctx.qualifier);
+                if (mathRepeatMultExpContext.qualifier != null) {
+                    qualifier = createPosSymbol(mathRepeatMultExpContext.qualifier);
                 }
 
                 // Form an infix expression using the operator and
                 // add it back to the list for the next iteration of the loop
                 exps.add(0, new InfixExp(leftExp.getLocation().clone(), leftExp,
-                        qualifier, createPosSymbol(ctx.op), rightExp));
+                        qualifier, createPosSymbol(mathRepeatMultExpContext.op), rightExp));
             }
 
             // Remove the final element from the list
             newElement = exps.remove(0);
         }
         else {
-            newElement = myNodes.removeFrom(mathExps.remove(0));
+            newElement = myNodes.removeFrom(ctx.mathExponentialExp());
         }
 
         myNodes.put(ctx, newElement);
