@@ -782,22 +782,30 @@ mathFunctionTypeExp
 
 mathAddingExp
     :   mathMultiplyingExp
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=PLUS mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=MINUS mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=CONCAT mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=UNION mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=INTERSECT mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=WITHOUT mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=TILDE mathMultiplyingExp)+
+    |   mathMultiplyingExp mathRepeatAddExp
+    ;
+
+mathRepeatAddExp
+    :   ((qualifier=IDENTIFIER QUALIFIER)? op=PLUS mathMultiplyingExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=MINUS mathMultiplyingExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=CONCAT mathMultiplyingExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=UNION mathMultiplyingExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=INTERSECT mathMultiplyingExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=WITHOUT mathMultiplyingExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=TILDE mathMultiplyingExp)+
     ;
 
 mathMultiplyingExp
     :   mathExponentialExp
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=MULTIPLY mathExponentialExp)+
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=DIVIDE mathExponentialExp)+
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=MOD mathExponentialExp)+
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=REM mathExponentialExp)+
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=DIV mathExponentialExp)+
+    |   mathExponentialExp mathRepeatMultExp
+    ;
+
+mathRepeatMultExp
+    :   ((qualifier=IDENTIFIER QUALIFIER)? op=MULTIPLY mathExponentialExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=DIVIDE mathExponentialExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=MOD mathExponentialExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=REM mathExponentialExp)+
+    |   ((qualifier=IDENTIFIER QUALIFIER)? op=DIV mathExponentialExp)+
     ;
 
 mathExponentialExp
@@ -873,7 +881,7 @@ mathOutfixExp
 
 mathSetExp
     :   LBRACE mathVariableDecl (mathWhereExp)? BAR mathExp RBRACE       #mathSetBuilderExp
-    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE                       #mathSetCollectionExp
+    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE                        #mathSetCollectionExp
     ;
 
 mathTupleExp
