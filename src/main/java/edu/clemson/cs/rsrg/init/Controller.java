@@ -264,7 +264,7 @@ public class Controller {
         parser.setTokenFactory(factory);
 
         // Two-Stage Parsing
-        // Reason: Currently our expression parser is really slow.
+        // Reason: We might not need the full power of LL.
         // The solution proposed by the ANTLR folks (found here:
         // https://github.com/antlr/antlr4/blob/master/doc/faq/general.md)
         // is to use SLL prediction mode first and switch to LL if it fails.

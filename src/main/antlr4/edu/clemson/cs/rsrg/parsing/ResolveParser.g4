@@ -816,7 +816,6 @@ mathPrimaryExp
     |   mathIteratedExp
     |   mathLiteralExp
     |   mathDotExp
-    |   mathFunctionApplicationExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
