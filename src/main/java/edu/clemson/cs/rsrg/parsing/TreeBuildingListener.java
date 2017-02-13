@@ -3819,48 +3819,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathAddingExp(ResolveParser.MathAddingExpContext ctx) {
-        ResolveConceptualElement newElement;
+        // Our left most expression
+        Exp exp = (Exp) myNodes.removeFrom(ctx.mathMultiplyingExp());
 
         // Create a repeated expression if needed
-        if (ctx.mathRepeatAddExp() != null) {
-            ResolveParser.MathRepeatAddExpContext mathRepeatAddExpContext =
-                    ctx.mathRepeatAddExp();
-            List<ResolveParser.MathMultiplyingExpContext> mathExps =
-                    mathRepeatAddExpContext.mathMultiplyingExp();
-
-            // Obtain all the expressions
-            List<Exp> exps = new ArrayList<>();
-            exps.add((Exp) myNodes.removeFrom(ctx.mathMultiplyingExp()));
-            for (ResolveParser.MathMultiplyingExpContext context : mathExps) {
-                exps.add((Exp) myNodes.removeFrom(context));
+        List<ResolveParser.MathRepeatAddExpContext> mathRepeatAddExpContexts =
+                ctx.mathRepeatAddExp();
+        for (ResolveParser.MathRepeatAddExpContext context : mathRepeatAddExpContexts) {
+            PosSymbol qualifier = null;
+            if (context.qualifier != null) {
+                qualifier = createPosSymbol(context.qualifier);
             }
 
-            // Reduce the expressions until we have 1 left
-            while (exps.size() > 1) {
-                Exp leftExp = exps.remove(0);
-                Exp rightExp = exps.remove(0);
+            // Obtain the left and right expressions
+            Exp leftExp = exp;
+            Exp rightExp =
+                    (Exp) myNodes.removeFrom(context.mathMultiplyingExp());
 
-                PosSymbol qualifier = null;
-                if (mathRepeatAddExpContext.qualifier != null) {
-                    qualifier = createPosSymbol(mathRepeatAddExpContext.qualifier);
-                }
-
-                // Form an infix expression using the operator
-                Exp newFirstExp = new InfixExp(leftExp.getLocation().clone(), leftExp,
-                        qualifier, createPosSymbol(mathRepeatAddExpContext.op), rightExp);
-
-                // Add it back to the list for the next iteration of the loop
-                exps.add(0, newFirstExp);
-            }
-
-            // Remove the final element from the list
-            newElement = exps.remove(0);
-        }
-        else {
-            newElement = myNodes.removeFrom(ctx.mathMultiplyingExp());
+            // Form an infix expression using the operator
+            exp =
+                    new InfixExp(leftExp.getLocation().clone(), leftExp,
+                            qualifier, createPosSymbol(context.op), rightExp);
         }
 
-        myNodes.put(ctx, newElement);
+        myNodes.put(ctx, exp);
     }
 
     /**
@@ -3874,46 +3856,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitMathMultiplyingExp(
             ResolveParser.MathMultiplyingExpContext ctx) {
-        ResolveConceptualElement newElement;
+        // Our left most expression
+        Exp exp = (Exp) myNodes.removeFrom(ctx.mathExponentialExp());
 
         // Create a repeated expression if needed
-        if (ctx.mathRepeatMultExp() != null) {
-            ResolveParser.MathRepeatMultExpContext mathRepeatMultExpContext =
-                    ctx.mathRepeatMultExp();
-            List<ResolveParser.MathExponentialExpContext> mathExps =
-                    mathRepeatMultExpContext.mathExponentialExp();
-
-            // Obtain all the expressions
-            List<Exp> exps = new ArrayList<>();
-            exps.add((Exp) myNodes.removeFrom(ctx.mathExponentialExp()));
-            for (ResolveParser.MathExponentialExpContext context : mathExps) {
-                exps.add((Exp) myNodes.removeFrom(context));
+        List<ResolveParser.MathRepeatMultExpContext> mathRepeatMultExpContexts =
+                ctx.mathRepeatMultExp();
+        for (ResolveParser.MathRepeatMultExpContext context : mathRepeatMultExpContexts) {
+            PosSymbol qualifier = null;
+            if (context.qualifier != null) {
+                qualifier = createPosSymbol(context.qualifier);
             }
 
-            // Reduce the expressions until we have 1 left
-            while (exps.size() > 1) {
-                Exp leftExp = exps.remove(0);
-                Exp rightExp = exps.remove(0);
+            // Obtain the left and right expressions
+            Exp leftExp = exp;
+            Exp rightExp =
+                    (Exp) myNodes.removeFrom(context.mathExponentialExp());
 
-                PosSymbol qualifier = null;
-                if (mathRepeatMultExpContext.qualifier != null) {
-                    qualifier = createPosSymbol(mathRepeatMultExpContext.qualifier);
-                }
-
-                // Form an infix expression using the operator and
-                // add it back to the list for the next iteration of the loop
-                exps.add(0, new InfixExp(leftExp.getLocation().clone(), leftExp,
-                        qualifier, createPosSymbol(mathRepeatMultExpContext.op), rightExp));
-            }
-
-            // Remove the final element from the list
-            newElement = exps.remove(0);
-        }
-        else {
-            newElement = myNodes.removeFrom(ctx.mathExponentialExp());
+            // Form an infix expression using the operator
+            exp =
+                    new InfixExp(leftExp.getLocation().clone(), leftExp,
+                            qualifier, createPosSymbol(context.op), rightExp);
         }
 
-        myNodes.put(ctx, newElement);
+        myNodes.put(ctx, exp);
     }
 
     /**
