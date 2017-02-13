@@ -782,30 +782,24 @@ mathFunctionTypeExp
 
 mathAddingExp
     :   mathMultiplyingExp
-    |   mathMultiplyingExp mathRepeatAddExp
+    |   mathMultiplyingExp mathRepeatAddExp+
     ;
 
 mathRepeatAddExp
-    :   ((qualifier=IDENTIFIER QUALIFIER)? op=PLUS mathMultiplyingExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=MINUS mathMultiplyingExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=CONCAT mathMultiplyingExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=UNION mathMultiplyingExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=INTERSECT mathMultiplyingExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=WITHOUT mathMultiplyingExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=TILDE mathMultiplyingExp)+
+    :   (qualifier=IDENTIFIER QUALIFIER)?
+        op=(PLUS | MINUS | CONCAT | UNION | INTERSECT | WITHOUT | TILDE)
+        mathMultiplyingExp
     ;
 
 mathMultiplyingExp
     :   mathExponentialExp
-    |   mathExponentialExp mathRepeatMultExp
+    |   mathExponentialExp mathRepeatMultExp+
     ;
 
 mathRepeatMultExp
-    :   ((qualifier=IDENTIFIER QUALIFIER)? op=MULTIPLY mathExponentialExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=DIVIDE mathExponentialExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=MOD mathExponentialExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=REM mathExponentialExp)+
-    |   ((qualifier=IDENTIFIER QUALIFIER)? op=DIV mathExponentialExp)+
+    :   (qualifier=IDENTIFIER QUALIFIER)?
+        op=(MULTIPLY | DIVIDE | MOD | REM | DIV)
+        mathExponentialExp
     ;
 
 mathExponentialExp
