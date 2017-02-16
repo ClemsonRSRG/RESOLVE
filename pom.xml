@@ -281,6 +281,13 @@
 
         <!-- Source directory for test files -->
         <testSourceDirectory>test/java</testSourceDirectory>
+
+        <!-- Resources directory for test files -->
+        <testResources>
+            <testResource>
+                <directory>test/resources</directory>
+            </testResource>
+        </testResources>
     </build>
 
 </project>
