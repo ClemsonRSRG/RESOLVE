@@ -1,0 +1,43 @@
+Facility RevStack;
+	uses String_Theory;
+	
+	Facility Rev_Stack_Fac is Stack_Template(Char_Str, 1)
+		realized by Init_Array_Realiz;
+
+	Operation Read_Stack(replaces S: Stack);
+	Procedure
+		Var CS: Char_Str;
+
+		Clear(S);
+		While ( 1 <= Rem_Capacity(S) )
+			changing CS, S;
+			decreasing 1 + (-|S|);
+		do
+			Read(CS);
+			Push(CS, S);
+		end;
+	end Read_Stack;
+
+	Operation Write_Stack(clears S: Stack);
+	Procedure
+		Var CS: Char_Str;
+
+		While ( 1 <= Depth(S) )
+			changing CS, S;
+			decreasing |S|;
+		do
+			Pop(CS, S);
+			Write_Line(CS);
+		end;
+	end Write_Stack; 
+
+	Operation Main();
+	Procedure
+		Var S: Stack;
+		Read_Stack(S);
+		Write_Line("REVERSED ORDER");
+		Write_Stack(S);
+		Write_Line("CLEARED STACK");
+		Write_Stack(S);
+	end Main; 
+end RevStack;
