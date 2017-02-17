@@ -2,7 +2,7 @@ Facility RevStack;
 	uses String_Theory;
 	
 	Facility Rev_Stack_Fac is Stack_Template(Char_Str, 1)
-		realized by Init_Array_Realiz;
+		realized by Array_Realiz;
 
 	Operation Read_Stack(replaces S: Stack);
 	Procedure
