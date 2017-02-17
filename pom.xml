@@ -205,6 +205,7 @@
                         <exclude>src/main/antlr4/**</exclude>
                         <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
                         <exclude>src/resources/**</exclude>
+                        <exclude>test/resources/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>
