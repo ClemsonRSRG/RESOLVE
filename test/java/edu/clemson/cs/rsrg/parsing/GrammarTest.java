@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.junit.Test;
@@ -122,9 +123,9 @@ public class GrammarTest {
         parser.removeErrorListeners();
 
         // Check to see if there are any ambiguities in our language
-        parser.addErrorListener(new DiagnosticErrorListener());
-        parser.getInterpreter().setPredictionMode(
-                PredictionMode.LL_EXACT_AMBIG_DETECTION);
+        parser.addErrorListener(new DiagnosticErrorListener(true));
+        parser.addErrorListener(new ConsoleErrorListener());
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         parser.module();
 
         return parser.getNumberOfSyntaxErrors();
