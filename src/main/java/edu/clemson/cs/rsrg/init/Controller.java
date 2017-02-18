@@ -152,8 +152,9 @@ public class Controller {
                     myStatusHandler.info(null, sb.toString());
                 }
 
-                // Output AST to Graphviz dot file.
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_EXPORT_AST)) {
+                // Output AST to Graphviz dot file. (Only for argument files)
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_EXPORT_AST) &&
+                        m.equals(new ModuleIdentifier(targetModule))) {
                     ASTOutputPipeline astOutputPipe =
                             new ASTOutputPipeline(myCompileEnvironment, mySymbolTable);
                     astOutputPipe.process(m);
