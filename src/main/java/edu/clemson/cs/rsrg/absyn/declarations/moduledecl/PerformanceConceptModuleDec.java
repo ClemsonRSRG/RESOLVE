@@ -63,12 +63,16 @@ public class PerformanceConceptModuleDec extends ModuleDec {
      * @param requires A {@link AssertionClause} representing the concept's
      *                 requires clause.
      * @param decs The list of {@link Dec} objects.
+     * @param moduleDependencyList A list of {@link PosSymbol} that indicates
+     *                             all the modules that this module declaration
+     *                             depends on.
      */
     public PerformanceConceptModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol profileLongName,
             PosSymbol conceptName, List<UsesItem> usesItems,
-            AssertionClause requires, List<Dec> decs) {
-        super(l, name, parameterDecs, usesItems, decs);
+            AssertionClause requires, List<Dec> decs,
+            List<PosSymbol> moduleDependencyList) {
+        super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
         myConceptName = conceptName;
         myProfileLongName = profileLongName;
         myRequires = requires;
@@ -181,9 +185,11 @@ public class PerformanceConceptModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
+        List<PosSymbol> newModuleDependencies = new ArrayList<>(myModuleDependencyList.size());
+        Collections.copy(newModuleDependencies, myModuleDependencyList);
 
         return new PerformanceConceptModuleDec(cloneLocation(), myName.clone(),
                 newParameterDecs, myProfileLongName.clone(), myConceptName.clone(),
-                newUsesItems, myRequires.clone(), newDecs);
+                newUsesItems, myRequires.clone(), newDecs, newModuleDependencies);
     }
 }

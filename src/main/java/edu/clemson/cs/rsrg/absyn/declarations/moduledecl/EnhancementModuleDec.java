@@ -55,11 +55,15 @@ public class EnhancementModuleDec extends ModuleDec {
      * @param requires A {@link AssertionClause} representing the concept's
      *                 requires clause.
      * @param decs The list of {@link Dec} objects.
+     * @param moduleDependencyList A list of {@link PosSymbol} that indicates
+     *                             all the modules that this module declaration
+     *                             depends on.
      */
     public EnhancementModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol conceptName,
-            List<UsesItem> usesItems, AssertionClause requires, List<Dec> decs) {
-        super(l, name, parameterDecs, usesItems, decs);
+            List<UsesItem> usesItems, AssertionClause requires, List<Dec> decs,
+            List<PosSymbol> moduleDependencyList) {
+        super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
         myConceptName = conceptName;
         myRequires = requires;
     }
@@ -156,8 +160,11 @@ public class EnhancementModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
+        List<PosSymbol> newModuleDependencies = new ArrayList<>(myModuleDependencyList.size());
+        Collections.copy(newModuleDependencies, myModuleDependencyList);
 
         return new EnhancementModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
-                myConceptName.clone(), newUsesItems, myRequires.clone(), newDecs);
+                myConceptName.clone(), newUsesItems, myRequires.clone(),
+                newDecs, newModuleDependencies);
     }
 }
