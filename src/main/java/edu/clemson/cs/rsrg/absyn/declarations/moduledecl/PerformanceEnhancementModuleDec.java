@@ -82,7 +82,8 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
             List<ModuleParameterDec> parameterDecs, PosSymbol profileLongName,
             PosSymbol enhancementName, PosSymbol conceptName,
             PosSymbol conceptProfileName, List<UsesItem> usesItems,
-            AssertionClause requires, List<Dec> decs, List<PosSymbol> moduleDependencyList) {
+            AssertionClause requires, List<Dec> decs,
+            List<PosSymbol> moduleDependencyList) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
         myConceptName = conceptName;
         myConceptProfileName = conceptProfileName;

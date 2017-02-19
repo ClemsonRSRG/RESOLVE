@@ -57,7 +57,8 @@ public class FacilityModuleDec extends ModuleDec {
      */
     public FacilityModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            AssertionClause requires, List<Dec> decs, List<PosSymbol> moduleDependencyList) {
+            AssertionClause requires, List<Dec> decs,
+            List<PosSymbol> moduleDependencyList) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
         myRequires = requires;
     }

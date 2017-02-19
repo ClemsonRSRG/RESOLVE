@@ -67,7 +67,8 @@ public class ConceptRealizModuleDec extends ModuleDec {
     public ConceptRealizModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol profileName,
             PosSymbol conceptName, List<UsesItem> usesItems,
-            AssertionClause requires, List<Dec> decs, List<PosSymbol> moduleDependencyList) {
+            AssertionClause requires, List<Dec> decs,
+            List<PosSymbol> moduleDependencyList) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
         myConceptName = conceptName;
         myProfileName = profileName;
