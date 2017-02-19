@@ -83,15 +83,21 @@ public abstract class ModuleDec extends Dec {
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         ModuleDec moduleDec = (ModuleDec) o;
 
-        if (!myDecs.equals(moduleDec.myDecs)) return false;
-        if (!myParameterDecs.equals(moduleDec.myParameterDecs)) return false;
-        if (!myUsesItems.equals(moduleDec.myUsesItems)) return false;
+        if (!myDecs.equals(moduleDec.myDecs))
+            return false;
+        if (!myParameterDecs.equals(moduleDec.myParameterDecs))
+            return false;
+        if (!myUsesItems.equals(moduleDec.myUsesItems))
+            return false;
         return myModuleDependencyList.equals(moduleDec.myModuleDependencyList);
     }
 

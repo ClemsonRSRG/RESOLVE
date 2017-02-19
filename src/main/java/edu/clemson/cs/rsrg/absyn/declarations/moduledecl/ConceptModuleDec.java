@@ -73,7 +73,8 @@ public class ConceptModuleDec extends ModuleDec {
     public ConceptModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             AssertionClause requires, List<AssertionClause> constraints,
-            List<Dec> decs, boolean isSharingConcept, List<PosSymbol> moduleDependencyList) {
+            List<Dec> decs, boolean isSharingConcept,
+            List<PosSymbol> moduleDependencyList) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
         myConstraints = constraints;
         myRequires = requires;

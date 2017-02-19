@@ -94,5 +94,4 @@ public class ShortFacilityModuleDec extends ModuleDec {
         return new ShortFacilityModuleDec(cloneLocation(), myName.clone(),
                 (FacilityDec) myDecs.get(0).clone(), newModuleDependencies);
     }
-
 }
