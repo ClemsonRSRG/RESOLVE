@@ -43,6 +43,9 @@ public abstract class ModuleDec extends Dec {
     /** <p>The current module's import objects.</p> */
     protected final List<UsesItem> myUsesItems;
 
+    /** <p>The current module's import objects.</p> */
+    protected final List<PosSymbol> myModuleDependencyList;
+
     // ===========================================================
     // Constructor
     // ===========================================================
@@ -57,14 +60,18 @@ public abstract class ModuleDec extends Dec {
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
+     * @param moduleDependencyList A list of {@link PosSymbol} that indicates
+     *                             all the modules that this module declaration
+     *                             depends on.
      */
     protected ModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            List<Dec> decs) {
+            List<Dec> decs, List<PosSymbol> moduleDependencyList) {
         super(l, name);
         myParameterDecs = parameterDecs;
         myUsesItems = usesItems;
         myDecs = decs;
+        myModuleDependencyList = moduleDependencyList;
     }
 
     // ===========================================================
@@ -76,20 +83,16 @@ public abstract class ModuleDec extends Dec {
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        if (!super.equals(o))
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
         ModuleDec moduleDec = (ModuleDec) o;
 
-        if (!myDecs.equals(moduleDec.myDecs))
-            return false;
-        if (!myParameterDecs.equals(moduleDec.myParameterDecs))
-            return false;
-        return myUsesItems.equals(moduleDec.myUsesItems);
+        if (!myDecs.equals(moduleDec.myDecs)) return false;
+        if (!myParameterDecs.equals(moduleDec.myParameterDecs)) return false;
+        if (!myUsesItems.equals(moduleDec.myUsesItems)) return false;
+        return myModuleDependencyList.equals(moduleDec.myModuleDependencyList);
     }
 
     /**
@@ -131,6 +134,7 @@ public abstract class ModuleDec extends Dec {
         result = 31 * result + myDecs.hashCode();
         result = 31 * result + myParameterDecs.hashCode();
         result = 31 * result + myUsesItems.hashCode();
+        result = 31 * result + myModuleDependencyList.hashCode();
         return result;
     }
 

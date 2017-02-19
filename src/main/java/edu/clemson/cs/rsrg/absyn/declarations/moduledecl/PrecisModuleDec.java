@@ -42,11 +42,14 @@ public class PrecisModuleDec extends ModuleDec {
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
+     * @param moduleDependencyList A list of {@link PosSymbol} that indicates
+     *                             all the modules that this module declaration
+     *                             depends on.
      */
     public PrecisModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            List<Dec> decs) {
-        super(l, name, parameterDecs, usesItems, decs);
+            List<Dec> decs, List<PosSymbol> moduleDependencyList) {
+        super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
     }
 
     // ===========================================================
@@ -87,7 +90,10 @@ public class PrecisModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
+        List<PosSymbol> newModuleDependencies = new ArrayList<>(myModuleDependencyList.size());
+        Collections.copy(newModuleDependencies, myModuleDependencyList);
 
-        return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs, newUsesItems, newDecs);
+        return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
+                newUsesItems, newDecs, newModuleDependencies);
     }
 }
