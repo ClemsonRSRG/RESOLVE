@@ -136,7 +136,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private int myNewElementCounter;
 
     /** <p>All the different modules that the current file depend on.</p> */
-    private final Set<PosSymbol> myModuleDependencyList;
+    private final Set<PosSymbol> myModuleDependencies;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -175,7 +175,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myCopyTRList = new ArrayList<>();
         myCopySSRList = new ArrayList<>();
         myNewElementCounter = 0;
-        myModuleDependencyList = new HashSet<>();
+        myModuleDependencies = new HashSet<>();
     }
 
     // ===========================================================
@@ -245,7 +245,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 ctx.precisItems() != null ? ctx.precisItems().precisItem() : new ArrayList<ParseTree>(), myNodes);
 
         PrecisModuleDec precis = new PrecisModuleDec(createLocation(ctx),
-                createPosSymbol(ctx.name), parameterDecls, uses, decls, myModuleDependencyList);
+                createPosSymbol(ctx.name), parameterDecls, uses, decls, myModuleDependencies);
 
         myNodes.put(ctx, precis);
     }
@@ -356,7 +356,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         FacilityModuleDec facility =
                 new FacilityModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
-                        uses, requires, decls, myModuleDependencyList);
+                        uses, requires, decls, myModuleDependencies);
         myNodes.put(ctx, facility);
     }
 
@@ -391,7 +391,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 (FacilityDec) myNodes.removeFrom(ctx.facilityDecl());
         ShortFacilityModuleDec shortFacility =
                 new ShortFacilityModuleDec(createLocation(ctx), facilityDec
-                        .getName(), facilityDec, myModuleDependencyList);
+                        .getName(), facilityDec, myModuleDependencies);
 
         myNodes.put(ctx, shortFacility);
     }
@@ -498,7 +498,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         ConceptModuleDec concept =
                 new ConceptModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls, uses,
-                        requires, constraints, decls, isSharingConcept, myModuleDependencyList);
+                        requires, constraints, decls, isSharingConcept, myModuleDependencies);
         myNodes.put(ctx, concept);
     }
 
@@ -617,7 +617,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 new ConceptRealizModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
                         profileName, createPosSymbol(ctx.concept),
-                        uses, requires, decls, myModuleDependencyList);
+                        uses, requires, decls, myModuleDependencies);
         myNodes.put(ctx, realization);
     }
 
@@ -706,7 +706,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 new EnhancementModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
                         createPosSymbol(ctx.concept), uses, requires, decls,
-                        myModuleDependencyList);
+                        myModuleDependencies);
         myNodes.put(ctx, enhancement);
     }
 
@@ -805,7 +805,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         createPosSymbol(ctx.name), parameterDecls, profileName,
                         createPosSymbol(ctx.enhancement),
                         createPosSymbol(ctx.concept), uses, requires, decls,
-                        myModuleDependencyList);
+                        myModuleDependencies);
         myNodes.put(ctx, realization);
     }
 
@@ -896,7 +896,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         createPosSymbol(ctx.name), parameterDecls,
                         createPosSymbol(ctx.fullName),
                         createPosSymbol(ctx.concept), uses, requires, decls,
-                        myModuleDependencyList);
+                        myModuleDependencies);
         myNodes.put(ctx, performance);
     }
 
@@ -991,7 +991,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         createPosSymbol(ctx.enhancement),
                         createPosSymbol(ctx.concept),
                         createPosSymbol(ctx.conceptProfile), uses, requires,
-                        decls, myModuleDependencyList);
+                        decls, myModuleDependencies);
         myNodes.put(ctx, performance);
     }
 
