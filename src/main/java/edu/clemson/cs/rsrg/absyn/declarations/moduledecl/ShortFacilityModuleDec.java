@@ -18,10 +18,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>This is the class for the short facility module declarations
@@ -41,15 +38,15 @@ public class ShortFacilityModuleDec extends ModuleDec {
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
      * @param facilityDec A {@link FacilityDec} representation object.
-     * @param moduleDependencyList A list of {@link PosSymbol} that indicates
-     *                             all the modules that this module declaration
-     *                             depends on.
+     * @param moduleDependencies A set of {@link PosSymbol} that indicates
+     *                           all the modules that this module declaration
+     *                           depends on.
      */
     public ShortFacilityModuleDec(Location l, PosSymbol name,
-            FacilityDec facilityDec, List<PosSymbol> moduleDependencyList) {
+            FacilityDec facilityDec, Set<PosSymbol> moduleDependencies) {
         super(l, name, new ArrayList<ModuleParameterDec>(),
                 new ArrayList<UsesItem>(), new ArrayList<Dec>(Arrays
-                        .asList(facilityDec)), moduleDependencyList);
+                        .asList(facilityDec)), moduleDependencies);
     }
 
     // ===========================================================
@@ -88,8 +85,8 @@ public class ShortFacilityModuleDec extends ModuleDec {
      */
     @Override
     protected final ShortFacilityModuleDec copy() {
-        List<PosSymbol> newModuleDependencies = new ArrayList<>(myModuleDependencyList.size());
-        Collections.copy(newModuleDependencies, myModuleDependencyList);
+        Set<PosSymbol> newModuleDependencies = new HashSet<>(myModuleDependencies.size());
+        newModuleDependencies.addAll(myModuleDependencies);
 
         return new ShortFacilityModuleDec(cloneLocation(), myName.clone(),
                 (FacilityDec) myDecs.get(0).clone(), newModuleDependencies);
