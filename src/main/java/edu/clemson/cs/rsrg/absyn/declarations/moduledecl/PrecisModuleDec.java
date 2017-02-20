@@ -17,10 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>This is the class for the precis module declarations
@@ -42,14 +39,14 @@ public class PrecisModuleDec extends ModuleDec {
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
-     * @param moduleDependencyList A list of {@link PosSymbol} that indicates
-     *                             all the modules that this module declaration
-     *                             depends on.
+     * @param moduleDependencies A set of {@link PosSymbol} that indicates
+     *                           all the modules that this module declaration
+     *                           depends on.
      */
     public PrecisModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            List<Dec> decs, List<PosSymbol> moduleDependencyList) {
-        super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
+            List<Dec> decs, Set<PosSymbol> moduleDependencies) {
+        super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
     }
 
     // ===========================================================
@@ -90,8 +87,8 @@ public class PrecisModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        List<PosSymbol> newModuleDependencies = new ArrayList<>(myModuleDependencyList.size());
-        Collections.copy(newModuleDependencies, myModuleDependencyList);
+        Set<PosSymbol> newModuleDependencies = new HashSet<>(myModuleDependencies.size());
+        newModuleDependencies.addAll(myModuleDependencies);
 
         return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newUsesItems, newDecs, newModuleDependencies);

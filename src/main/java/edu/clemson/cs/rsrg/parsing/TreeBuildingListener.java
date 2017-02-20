@@ -136,7 +136,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private int myNewElementCounter;
 
     /** <p>All the different modules that the current file depend on.</p> */
-    private final List<PosSymbol> myModuleDependencyList;
+    private final Set<PosSymbol> myModuleDependencyList;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -175,7 +175,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myCopyTRList = new ArrayList<>();
         myCopySSRList = new ArrayList<>();
         myNewElementCounter = 0;
-        myModuleDependencyList = new ArrayList<>();
+        myModuleDependencyList = new HashSet<>();
     }
 
     // ===========================================================

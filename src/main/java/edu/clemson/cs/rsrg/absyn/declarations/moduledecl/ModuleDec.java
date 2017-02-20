@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>This is the abstract base class for all the module declaration objects
@@ -44,7 +45,7 @@ public abstract class ModuleDec extends Dec {
     protected final List<UsesItem> myUsesItems;
 
     /** <p>The current module's import objects.</p> */
-    protected final List<PosSymbol> myModuleDependencyList;
+    protected final Set<PosSymbol> myModuleDependencies;
 
     // ===========================================================
     // Constructor
@@ -60,18 +61,18 @@ public abstract class ModuleDec extends Dec {
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
-     * @param moduleDependencyList A list of {@link PosSymbol} that indicates
-     *                             all the modules that this module declaration
-     *                             depends on.
+     * @param moduleDependencies A set of {@link PosSymbol} that indicates
+     *                           all the modules that this module declaration
+     *                           depends on.
      */
     protected ModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            List<Dec> decs, List<PosSymbol> moduleDependencyList) {
+            List<Dec> decs, Set<PosSymbol> moduleDependencies) {
         super(l, name);
         myParameterDecs = parameterDecs;
         myUsesItems = usesItems;
         myDecs = decs;
-        myModuleDependencyList = moduleDependencyList;
+        myModuleDependencies = moduleDependencies;
     }
 
     // ===========================================================
@@ -98,7 +99,7 @@ public abstract class ModuleDec extends Dec {
             return false;
         if (!myUsesItems.equals(moduleDec.myUsesItems))
             return false;
-        return myModuleDependencyList.equals(moduleDec.myModuleDependencyList);
+        return myModuleDependencies.equals(moduleDec.myModuleDependencies);
     }
 
     /**
@@ -140,7 +141,7 @@ public abstract class ModuleDec extends Dec {
         result = 31 * result + myDecs.hashCode();
         result = 31 * result + myParameterDecs.hashCode();
         result = 31 * result + myUsesItems.hashCode();
-        result = 31 * result + myModuleDependencyList.hashCode();
+        result = 31 * result + myModuleDependencies.hashCode();
         return result;
     }
 

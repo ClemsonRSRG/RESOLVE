@@ -32,6 +32,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * <p>The <code>HardCoded</code> class defines all mathematical symbols
@@ -68,7 +69,7 @@ public class HardCoded {
                     new FacilityModuleDec(null, new PosSymbol(null, "native"),
                             new ArrayList<ModuleParameterDec>(),
                             new ArrayList<UsesItem>(), requires,
-                            new ArrayList<Dec>(), new ArrayList<PosSymbol>());
+                            new ArrayList<Dec>(), new HashSet<PosSymbol>());
 
             VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
             ScopeBuilder s = b.startModuleScope(module);

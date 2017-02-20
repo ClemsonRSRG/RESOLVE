@@ -18,9 +18,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>This is the class for the performance profiles for enhancement module
@@ -74,17 +72,17 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
      * @param requires A {@link AssertionClause} representing the concept's
      *                 requires clause.
      * @param decs The list of {@link Dec} objects.
-     * @param moduleDependencyList A list of {@link PosSymbol} that indicates
-     *                             all the modules that this module declaration
-     *                             depends on.
+     * @param moduleDependencies A set of {@link PosSymbol} that indicates
+     *                           all the modules that this module declaration
+     *                           depends on.
      */
     public PerformanceEnhancementModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol profileLongName,
             PosSymbol enhancementName, PosSymbol conceptName,
             PosSymbol conceptProfileName, List<UsesItem> usesItems,
             AssertionClause requires, List<Dec> decs,
-            List<PosSymbol> moduleDependencyList) {
-        super(l, name, parameterDecs, usesItems, decs, moduleDependencyList);
+            Set<PosSymbol> moduleDependencies) {
+        super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
         myConceptName = conceptName;
         myConceptProfileName = conceptProfileName;
         myEnhancementName = enhancementName;
@@ -230,8 +228,8 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        List<PosSymbol> newModuleDependencies = new ArrayList<>(myModuleDependencyList.size());
-        Collections.copy(newModuleDependencies, myModuleDependencyList);
+        Set<PosSymbol> newModuleDependencies = new HashSet<>(myModuleDependencies.size());
+        newModuleDependencies.addAll(myModuleDependencies);
 
         return new PerformanceEnhancementModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 myProfileLongName.clone(), myEnhancementName.clone(), myConceptName.clone(),
