@@ -2611,6 +2611,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             profileName = createPosSymbol(ctx.profile);
         }
 
+        // Add the facility's concept/concept realization/concept profiles as module dependencies
+        myModuleDependencies.add(createPosSymbol(ctx.concept));
+        myModuleDependencies.add(createPosSymbol(ctx.impl));
+        if (ctx.profile != null) {
+            myModuleDependencies.add(createPosSymbol(ctx.profile));
+        }
+
         myNodes.put(ctx, new FacilityDec(createPosSymbol(ctx.name),
                 createPosSymbol(ctx.concept), conceptArgs,
                 enhancements,
@@ -2639,6 +2646,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 enhancementArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
             }
         }
+
+        // Add the concept enhancement as a module dependency
+        myModuleDependencies.add(createPosSymbol(ctx.spec));
 
         myNodes.put(ctx, new EnhancementSpecItem(createPosSymbol(ctx.spec), enhancementArgs));
     }
@@ -2676,6 +2686,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             for (ResolveParser.ModuleArgumentContext context : enhancementRealizArgContext) {
                 enhancementRealizArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
             }
+        }
+
+        // Add the facility's enhancement/enhancement realization/enhancement profiles as module dependencies
+        myModuleDependencies.add(createPosSymbol(ctx.spec));
+        myModuleDependencies.add(createPosSymbol(ctx.impl));
+        if (ctx.profile != null) {
+            myModuleDependencies.add(createPosSymbol(ctx.profile));
         }
 
         myNodes.put(ctx, new EnhancementSpecRealizItem(createPosSymbol(ctx.spec), enhancementArgs,
