@@ -613,6 +613,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
         }
 
+        // Add concept as a module dependency
+        myModuleDependencies.add(createPosSymbol(ctx.concept));
+
         ConceptRealizModuleDec realization =
                 new ConceptRealizModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
@@ -701,6 +704,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 ctx.enhancementItems() != null ? ctx
                                         .enhancementItems().enhancementItem()
                                         : new ArrayList<ParseTree>(), myNodes);
+
+        // Add concept as a module dependency
+        myModuleDependencies.add(createPosSymbol(ctx.concept));
 
         EnhancementModuleDec enhancement =
                 new EnhancementModuleDec(createLocation(ctx),
@@ -800,6 +806,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .implItems().implItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add concept and enhancement as module dependencies
+        myModuleDependencies.add(createPosSymbol(ctx.concept));
+        myModuleDependencies.add(createPosSymbol(ctx.enhancement));
+
         EnhancementRealizModuleDec realization =
                 new EnhancementRealizModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls, profileName,
@@ -890,6 +900,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .conceptPerformanceItems()
                                 .conceptPerformanceItem()
                                 : new ArrayList<ParseTree>(), myNodes);
+
+        // Add concept as a module dependency
+        myModuleDependencies.add(createPosSymbol(ctx.concept));
 
         PerformanceConceptModuleDec performance =
                 new PerformanceConceptModuleDec(createLocation(ctx),
@@ -983,6 +996,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .enhancementPerformanceItems()
                                 .enhancementPerformanceItem()
                                 : new ArrayList<ParseTree>(), myNodes);
+
+        // Add concept/concept profile/enhancement as module dependencies
+        myModuleDependencies.add(createPosSymbol(ctx.concept));
+        myModuleDependencies.add(createPosSymbol(ctx.conceptProfile));
+        myModuleDependencies.add(createPosSymbol(ctx.enhancement));
 
         PerformanceEnhancementModuleDec performance =
                 new PerformanceEnhancementModuleDec(createLocation(ctx),
