@@ -615,6 +615,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         // Add concept as a module dependency
         myModuleDependencies.add(createPosSymbol(ctx.concept));
+        if (ctx.profile != null) {
+            myModuleDependencies.add(createPosSymbol(ctx.profile));
+        }
 
         ConceptRealizModuleDec realization =
                 new ConceptRealizModuleDec(createLocation(ctx),
@@ -809,6 +812,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Add concept and enhancement as module dependencies
         myModuleDependencies.add(createPosSymbol(ctx.concept));
         myModuleDependencies.add(createPosSymbol(ctx.enhancement));
+        if (ctx.profile != null) {
+            myModuleDependencies.add(createPosSymbol(ctx.profile));
+        }
 
         EnhancementRealizModuleDec realization =
                 new EnhancementRealizModuleDec(createLocation(ctx),
