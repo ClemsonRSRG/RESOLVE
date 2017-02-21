@@ -1041,6 +1041,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
+        // Add the module we are importing as module dependency
+        myModuleDependencies.add(createPosSymbol(ctx.getStart()));
+
         myNodes.put(ctx, new UsesItem(createPosSymbol(ctx.getStart())));
     }
 
