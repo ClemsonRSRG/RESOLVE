@@ -2613,7 +2613,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         // Add the facility's concept/concept realization/concept profiles as module dependencies
         myModuleDependencies.add(createPosSymbol(ctx.concept));
-        myModuleDependencies.add(createPosSymbol(ctx.impl));
+        if (!externallyRealized) {
+            myModuleDependencies.add(createPosSymbol(ctx.impl));
+        }
         if (ctx.profile != null) {
             myModuleDependencies.add(createPosSymbol(ctx.profile));
         }
