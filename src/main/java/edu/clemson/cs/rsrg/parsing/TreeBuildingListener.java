@@ -4861,6 +4861,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         moduleArgumentItems.add(new ModuleArgumentItem(lowerBound));
         moduleArgumentItems.add(new ModuleArgumentItem(upperBound));
 
+        // Add Static_Array_Template as module dependency
+        myModuleDependencies.add(new PosSymbol(l.clone(), "Static_Array_Template"));
+
         return new FacilityDec(new PosSymbol(l.clone(), newTy.getName().getName()),
                 new PosSymbol(l.clone(), "Static_Array_Template"),
                 moduleArgumentItems, new ArrayList<EnhancementSpecItem>(),
