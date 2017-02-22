@@ -113,6 +113,16 @@ public abstract class ModuleDec extends Dec {
     }
 
     /**
+     * <p>This method returns the names of all modules dependencies associated
+     * with this module.</p>
+     *
+     * @return A list of {@link Dec} objects.
+     */
+    public final Set<PosSymbol> getModuleDependencies() {
+        return myModuleDependencies;
+    }
+
+    /**
      * <p>This method gets all the object parameter declarations associated
      * with this module.</p>
      *
