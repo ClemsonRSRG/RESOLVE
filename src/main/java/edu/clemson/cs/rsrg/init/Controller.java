@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.init;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.pipeline.AnalysisPipeline;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
 import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
@@ -311,11 +312,10 @@ public class Controller {
      * @throws SourceErrorException There are errors in the source file.
      */
     private void findDependencies(DefaultDirectedGraph g, ModuleDec root) {
-        List<UsesItem> allUsesItems = root.getUsesItems();
-        for (UsesItem importRequest : allUsesItems) {
-            ResolveFile file =
-                    findResolveFile(importRequest.getName().getName());
-            ModuleIdentifier id = new ModuleIdentifier(importRequest);
+        Set<PosSymbol> allImports = root.getModuleDependencies();
+        for (PosSymbol importRequest : allImports) {
+            ResolveFile file = findResolveFile(importRequest.getName());
+            ModuleIdentifier id = new ModuleIdentifier(importRequest.getName());
             ModuleIdentifier rootId = new ModuleIdentifier(root);
             ModuleDec module;
 
