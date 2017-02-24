@@ -792,9 +792,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Get the constraint with all the proper substitutions.
                         constraintExp =
-                                Utilities.retrieveConstraint(ensures.getLocation(),
-                                        typeAsExp, parameterExp,
-                                        myCurrentModuleScope);
+                                Utilities.retrieveConstraint(ensures
+                                        .getLocation(), typeAsExp,
+                                        parameterExp, myCurrentModuleScope);
                     }
                 }
                 else {
