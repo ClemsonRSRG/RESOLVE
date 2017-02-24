@@ -776,20 +776,26 @@ public class VCGenerator extends TreeWalkerVisitor {
                 if (varDec.getTy() instanceof NameTy) {
                     // Represent ty as an Exp
                     NameTy tyAsNameTy = (NameTy) varDec.getTy();
-                    VarExp typeAsExp =
-                            new VarExp(null, tyAsNameTy.getQualifier(),
-                                    tyAsNameTy.getName());
+                    PTType ptType = tyAsNameTy.getProgramTypeValue();
 
-                    // Convert varDec to a VarExp
-                    VarExp parameterExp =
-                            new VarExp(null, null, varDec.getName());
-                    parameterExp.setMathType(tyAsNameTy.getMathTypeValue());
+                    // Only deal with actual types and don't deal
+                    // with generic entry types.
+                    if (!(ptType instanceof PTGeneric)) {
+                        VarExp typeAsExp =
+                                new VarExp(null, tyAsNameTy.getQualifier(),
+                                        tyAsNameTy.getName());
 
-                    // Get the constraint with all the proper substitutions.
-                    constraintExp =
-                            Utilities.retrieveConstraint(ensures.getLocation(),
-                                    typeAsExp, parameterExp,
-                                    myCurrentModuleScope);
+                        // Convert varDec to a VarExp
+                        VarExp parameterExp =
+                                new VarExp(null, null, varDec.getName());
+                        parameterExp.setMathType(tyAsNameTy.getMathTypeValue());
+
+                        // Get the constraint with all the proper substitutions.
+                        constraintExp =
+                                Utilities.retrieveConstraint(ensures.getLocation(),
+                                        typeAsExp, parameterExp,
+                                        myCurrentModuleScope);
+                    }
                 }
                 else {
                     // TODO: Handle other ty's.
