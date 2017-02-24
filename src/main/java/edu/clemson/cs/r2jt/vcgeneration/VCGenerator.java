@@ -756,6 +756,61 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>Used by the call statement rule to add constraints as givens for alters,
+     * replaces and updates modes.</p>
+     *
+     * @param ensures The ensures clause from the calling statement.
+     * @param parameterVarDecs List of parameters for the calling statement.
+     *
+     * @return The modified ensures clause.
+     */
+    private Exp addConstraintsToEnsures(Exp ensures,
+            List<ParameterVarDec> parameterVarDecs) {
+        for (ParameterVarDec varDec : parameterVarDecs) {
+            if (varDec.getMode() == Mode.ALTERS
+                    || varDec.getMode() == Mode.REPLACES
+                    || varDec.getMode() == Mode.UPDATES) {
+                Exp constraintExp = null;
+
+                // Ty is NameTy
+                if (varDec.getTy() instanceof NameTy) {
+                    // Represent ty as an Exp
+                    NameTy tyAsNameTy = (NameTy) varDec.getTy();
+                    VarExp typeAsExp =
+                            new VarExp(null, tyAsNameTy.getQualifier(),
+                                    tyAsNameTy.getName());
+
+                    // Convert varDec to a VarExp
+                    VarExp parameterExp =
+                            new VarExp(null, null, varDec.getName());
+                    parameterExp.setMathType(tyAsNameTy.getMathTypeValue());
+
+                    // Get the constraint with all the proper substitutions.
+                    constraintExp =
+                            Utilities.retrieveConstraint(ensures.getLocation(),
+                                    typeAsExp, parameterExp,
+                                    myCurrentModuleScope);
+                }
+                else {
+                    // TODO: Handle other ty's.
+                    Utilities
+                            .tyNotHandled(varDec.getTy(), varDec.getLocation());
+                }
+
+                // If we have a constraint, then we add it to our ensures clause
+                if (constraintExp != null) {
+                    Location newEnsuresLoc =
+                            (Location) ensures.getLocation().clone();
+                    ensures = myTypeGraph.formConjunct(ensures, constraintExp);
+                    ensures.setLocation(newEnsuresLoc);
+                }
+            }
+        }
+
+        return ensures;
+    }
+
+    /**
      * <p>Loop through the list of <code>VarDec</code>, search
      * for their corresponding <code>ProgramVariableEntry</code>
      * and add the result to the list of free variables.</p>
@@ -3017,6 +3072,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         ensures =
                 modifyEnsuresByParameter(ensures, stmt.getLocation(), opDec
                         .getName().getName(), opDec.getParameters(), isLocal);
+
+        // Add constraints for alters, replaces and updates modes.
+        ensures = addConstraintsToEnsures(ensures, opDec.getParameters());
 
         // Replace PreCondition variables in the requires clause
         requires =
