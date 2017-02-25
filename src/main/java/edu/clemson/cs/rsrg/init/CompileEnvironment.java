@@ -180,11 +180,6 @@ public class CompileEnvironment {
         assert myCompilingModules.containsKey(mid) : "We haven't seen a module with this ID yet!";
         assert myIncompleteModules.contains(mid) : "We already completed compilation for a module with this ID!";
         myIncompleteModules.remove(mid);
-
-        // Print out debugging message
-        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myStatusHandler.info(null, "Done Compiling: " + mid.toString());
-        }
     }
 
     /**
@@ -203,11 +198,6 @@ public class CompileEnvironment {
                 new AbstractMap.SimpleEntry<>(moduleDec,
                         file));
         myIncompleteModules.add(mid);
-
-        // Print out debugging message
-        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myStatusHandler.info(null, "Begin Compiling: " + mid.toString());
-        }
     }
 
     /**

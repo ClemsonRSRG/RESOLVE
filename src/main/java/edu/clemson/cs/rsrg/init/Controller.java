@@ -129,6 +129,9 @@ public class Controller {
 
             // Add this file to our compile environment
             myCompileEnvironment.constructRecord(file, targetModule);
+            if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                myStatusHandler.info(null, "Begin Compiling: " + targetModule.getName().getName());
+            }
 
             // Create a dependencies graph and search for import
             // dependencies.
@@ -166,6 +169,9 @@ public class Controller {
 
                 // Complete compilation for this module
                 myCompileEnvironment.completeRecord(m);
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                    myStatusHandler.info(null, "Done Compiling: " + m.toString());
+                }
             }
         }
         catch (Throwable e) {
@@ -323,6 +329,13 @@ public class Controller {
             if (!myCompileEnvironment.containsID(id)) {
                 module = createModuleAST(file);
                 myCompileEnvironment.constructRecord(file, module);
+
+                // Print out debugging message
+                if (myCompileEnvironment.flags
+                        .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                    myStatusHandler.info(null, "Import Module: "
+                            + id.toString());
+                }
             }
             else {
                 module = myCompileEnvironment.getModuleAST(id);
