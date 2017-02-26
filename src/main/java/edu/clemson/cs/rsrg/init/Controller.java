@@ -214,12 +214,11 @@ public class Controller {
      * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
     private void addFilesForExternalImports(ModuleDec m) {
-        List<UsesItem> allUsesItems = m.getUsesItems();
-        for (UsesItem importItem : allUsesItems) {
+        Set<PosSymbol> allImports = m.getModuleDependencies();
+        for (PosSymbol importItem : allImports) {
             try {
                 FileLocator l =
-                        new FileLocator(importItem.getName().getName(),
-                                NON_NATIVE_EXT);
+                        new FileLocator(importItem.getName(), NON_NATIVE_EXT);
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 Files.walkFileTree(workspaceDir.toPath(), l);
 
@@ -227,12 +226,12 @@ public class Controller {
                 List<File> foundFiles = l.getFiles();
                 if (foundFiles.size() == 1) {
                     myCompileEnvironment.addExternalRealizFile(
-                            new ModuleIdentifier(importItem), l.getFile());
+                            new ModuleIdentifier(importItem.getName()), l.getFile());
                 }
                 else if (foundFiles.size() > 1) {
                     throw new ImportException(
                             "Found more than one external import with the name "
-                                    + importItem.getName().getName() + ";");
+                                    + importItem.getName() + ";");
                 }
             }
             catch (IOException ioe) {
@@ -333,7 +332,7 @@ public class Controller {
                 // Print out debugging message
                 if (myCompileEnvironment.flags
                         .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                    myStatusHandler.info(null, "Import Module: "
+                    myStatusHandler.info(null, "Importing New Module: "
                             + id.toString());
                 }
             }
@@ -422,7 +421,11 @@ public class Controller {
                 new TopologicalOrderIterator<>(
                         reversed);
         while (dependencies.hasNext()) {
-            result.add(dependencies.next());
+            // Ignore the modules that have been compiled
+            ModuleIdentifier next = dependencies.next();
+            if (!myCompileEnvironment.isCompleteModule(next)) {
+                result.add(next);
+            }
         }
         return result;
     }
