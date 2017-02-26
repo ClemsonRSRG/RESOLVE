@@ -19,9 +19,11 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * <p>This is the abstract base class for all the module declaration objects
@@ -45,7 +47,7 @@ public abstract class ModuleDec extends Dec {
     protected final List<UsesItem> myUsesItems;
 
     /** <p>The current module's import objects.</p> */
-    protected final Set<PosSymbol> myModuleDependencies;
+    protected final Map<PosSymbol, Boolean> myModuleDependencies;
 
     // ===========================================================
     // Constructor
@@ -61,13 +63,13 @@ public abstract class ModuleDec extends Dec {
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
-     * @param moduleDependencies A set of {@link PosSymbol} that indicates
-     *                           all the modules that this module declaration
-     *                           depends on.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     protected ModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            List<Dec> decs, Set<PosSymbol> moduleDependencies) {
+            List<Dec> decs, Map<PosSymbol, Boolean> moduleDependencies) {
         super(l, name);
         myParameterDecs = parameterDecs;
         myUsesItems = usesItems;
@@ -118,7 +120,7 @@ public abstract class ModuleDec extends Dec {
      *
      * @return A list of {@link Dec} objects.
      */
-    public final Set<PosSymbol> getModuleDependencies() {
+    public final Map<PosSymbol, Boolean> getModuleDependencies() {
         return myModuleDependencies;
     }
 
@@ -168,6 +170,20 @@ public abstract class ModuleDec extends Dec {
     protected ModuleDec copy() {
         throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
                 + this.getClass(), new CloneNotSupportedException());
+    }
+
+    /**
+     * <p>An helper method that deep copies all the module dependencies.</p>
+     *
+     * @return A new module dependencies map.
+     */
+    protected final Map<PosSymbol, Boolean> copyModuleDependencies() {
+        Map<PosSymbol, Boolean> newModuleDependencies = new HashMap<>(myModuleDependencies.size());
+        for (PosSymbol name : myModuleDependencies.keySet()) {
+            newModuleDependencies.put(name.clone(), myModuleDependencies.get(name));
+        }
+
+        return newModuleDependencies;
     }
 
     /**

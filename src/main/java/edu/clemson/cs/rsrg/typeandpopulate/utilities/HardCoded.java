@@ -32,6 +32,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -69,7 +70,8 @@ public class HardCoded {
                     new FacilityModuleDec(null, new PosSymbol(null, "native"),
                             new ArrayList<ModuleParameterDec>(),
                             new ArrayList<UsesItem>(), requires,
-                            new ArrayList<Dec>(), new HashSet<PosSymbol>());
+                            new ArrayList<Dec>(),
+                            new HashMap<PosSymbol, Boolean>());
 
             VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
             ScopeBuilder s = b.startModuleScope(module);
