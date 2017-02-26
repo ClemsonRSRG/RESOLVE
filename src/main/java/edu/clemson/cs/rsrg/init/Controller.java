@@ -209,39 +209,44 @@ public class Controller {
      * supplied files and add them to the compile environment for
      * future use.</p>
      *
-     * @param m The compiling module.
+     * @param importItem A filename that we have labeled as externally import
      *
      * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
-    private void addFilesForExternalImports(ModuleDec m) {
-        Set<PosSymbol> allImports = m.getModuleDependencies();
-        for (PosSymbol importItem : allImports) {
-            try {
-                FileLocator l =
-                        new FileLocator(importItem.getName(), NON_NATIVE_EXT);
-                File workspaceDir = myCompileEnvironment.getWorkspaceDir();
-                Files.walkFileTree(workspaceDir.toPath(), l);
+    private void addFileAsExternalImport(PosSymbol importItem) {
+        try {
+            FileLocator l =
+                    new FileLocator(importItem.getName(), NON_NATIVE_EXT);
+            File workspaceDir = myCompileEnvironment.getWorkspaceDir();
+            Files.walkFileTree(workspaceDir.toPath(), l);
 
-                // Only attempt to add
-                List<File> foundFiles = l.getFiles();
-                if (foundFiles.size() == 1) {
-                    myCompileEnvironment.addExternalRealizFile(
-                            new ModuleIdentifier(importItem.getName()), l.getFile());
-                }
-                else if (foundFiles.size() > 1) {
-                    throw new ImportException(
-                            "Found more than one external import with the name "
-                                    + importItem.getName() + ";");
+            // Only attempt to add
+            List<File> foundFiles = l.getFiles();
+            if (foundFiles.size() == 1) {
+                myCompileEnvironment
+                        .addExternalRealizFile(new ModuleIdentifier(importItem
+                                .getName()), l.getFile());
+
+                // Print out debugging message
+                if (myCompileEnvironment.flags
+                        .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                    myStatusHandler.info(null, "Skipping External Import: "
+                            + importItem.getName());
                 }
             }
-            catch (IOException ioe) {
-                throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
+            else if (foundFiles.size() > 1) {
+                throw new ImportException(
+                        "Found more than one external import with the name "
+                                + importItem.getName() + ";");
             }
+        }
+        catch (IOException ioe) {
+            throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
         }
     }
 
     /**
-     * <p>This method uses the <code>ResolveFile</code> provided
+     * <p>This method uses the {@link ResolveFile} provided
      * to construct a parser and create an ANTLR4 module AST.</p>
      *
      * @param file The RESOLVE file that we are going to compile.
@@ -317,52 +322,59 @@ public class Controller {
      * @throws SourceErrorException There are errors in the source file.
      */
     private void findDependencies(DefaultDirectedGraph g, ModuleDec root) {
-        Set<PosSymbol> allImports = root.getModuleDependencies();
-        for (PosSymbol importRequest : allImports) {
-            ResolveFile file = findResolveFile(importRequest.getName());
-            ModuleIdentifier id = new ModuleIdentifier(importRequest.getName());
-            ModuleIdentifier rootId = new ModuleIdentifier(root);
-            ModuleDec module;
+        Map<PosSymbol, Boolean> allImports = root.getModuleDependencies();
+        for (PosSymbol importRequest : allImports.keySet()) {
+            // Check to see if this import has been labeled as externally realized
+            // or not. If yes, we add it as an external import and move on.
+            // If no, we add it as a new dependency that must be imported.
+            if (!allImports.get(importRequest)) {
+                ResolveFile file = findResolveFile(importRequest.getName());
+                ModuleIdentifier id =
+                        new ModuleIdentifier(importRequest.getName());
+                ModuleIdentifier rootId = new ModuleIdentifier(root);
+                ModuleDec module;
 
-            // Search for the file in our processed modules
-            if (!myCompileEnvironment.containsID(id)) {
-                module = createModuleAST(file);
-                myCompileEnvironment.constructRecord(file, module);
+                // Search for the file in our processed modules
+                if (!myCompileEnvironment.containsID(id)) {
+                    module = createModuleAST(file);
+                    myCompileEnvironment.constructRecord(file, module);
 
-                // Print out debugging message
-                if (myCompileEnvironment.flags
-                        .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                    myStatusHandler.info(null, "Importing New Module: "
-                            + id.toString());
+                    // Print out debugging message
+                    if (myCompileEnvironment.flags
+                            .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                        myStatusHandler.info(null, "Importing New Module: "
+                                + id.toString());
+                    }
                 }
+                else {
+                    module = myCompileEnvironment.getModuleAST(id);
+                }
+
+                // Import error
+                if (module == null) {
+                    throw new ImportException("Invalid import "
+                            + importRequest.toString()
+                            + "; Cannot import module of " + "type: "
+                            + file.getModuleType().getExtension());
+                }
+
+                // Check for circular dependency
+                if (pathExists(g, id, rootId)) {
+                    throw new CircularDependencyException(
+                            "Circular dependency detected.");
+                }
+
+                // Add new edge to our graph indicating the relationship between
+                // the two files.
+                Graphs.addEdgeWithVertices(g, rootId, id);
+
+                // Now check this new module for dependencies
+                findDependencies(g, module);
             }
             else {
-                module = myCompileEnvironment.getModuleAST(id);
+                addFileAsExternalImport(importRequest);
             }
-
-            // Import error
-            if (module == null) {
-                throw new ImportException("Invalid import "
-                        + importRequest.toString()
-                        + "; Cannot import module of " + "type: "
-                        + file.getModuleType().getExtension());
-            }
-
-            // Check for circular dependency
-            if (pathExists(g, id, rootId)) {
-                throw new CircularDependencyException(
-                        "Circular dependency detected.");
-            }
-
-            // Add new edge to our graph indicating the relationship between
-            // the two files.
-            Graphs.addEdgeWithVertices(g, rootId, id);
-
-            // Now check this new module for dependencies
-            findDependencies(g, module);
         }
-
-        addFilesForExternalImports(root);
     }
 
     /**

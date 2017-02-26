@@ -39,13 +39,13 @@ public class PrecisModuleDec extends ModuleDec {
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
-     * @param moduleDependencies A set of {@link PosSymbol} that indicates
-     *                           all the modules that this module declaration
-     *                           depends on.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     public PrecisModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            List<Dec> decs, Set<PosSymbol> moduleDependencies) {
+            List<Dec> decs, Map<PosSymbol, Boolean> moduleDependencies) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
     }
 
@@ -87,8 +87,7 @@ public class PrecisModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Set<PosSymbol> newModuleDependencies = new HashSet<>(myModuleDependencies.size());
-        newModuleDependencies.addAll(myModuleDependencies);
+        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
 
         return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newUsesItems, newDecs, newModuleDependencies);

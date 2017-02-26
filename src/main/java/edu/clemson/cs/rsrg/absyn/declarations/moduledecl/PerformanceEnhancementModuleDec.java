@@ -72,16 +72,16 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
      * @param requires A {@link AssertionClause} representing the concept's
      *                 requires clause.
      * @param decs The list of {@link Dec} objects.
-     * @param moduleDependencies A set of {@link PosSymbol} that indicates
-     *                           all the modules that this module declaration
-     *                           depends on.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     public PerformanceEnhancementModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol profileLongName,
             PosSymbol enhancementName, PosSymbol conceptName,
             PosSymbol conceptProfileName, List<UsesItem> usesItems,
             AssertionClause requires, List<Dec> decs,
-            Set<PosSymbol> moduleDependencies) {
+            Map<PosSymbol, Boolean> moduleDependencies) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
         myConceptName = conceptName;
         myConceptProfileName = conceptProfileName;
@@ -228,8 +228,7 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Set<PosSymbol> newModuleDependencies = new HashSet<>(myModuleDependencies.size());
-        newModuleDependencies.addAll(myModuleDependencies);
+        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
 
         return new PerformanceEnhancementModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 myProfileLongName.clone(), myEnhancementName.clone(), myConceptName.clone(),

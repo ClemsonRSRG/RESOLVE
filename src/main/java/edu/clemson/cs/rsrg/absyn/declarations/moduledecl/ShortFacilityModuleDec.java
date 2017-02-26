@@ -38,12 +38,12 @@ public class ShortFacilityModuleDec extends ModuleDec {
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
      * @param facilityDec A {@link FacilityDec} representation object.
-     * @param moduleDependencies A set of {@link PosSymbol} that indicates
-     *                           all the modules that this module declaration
-     *                           depends on.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     public ShortFacilityModuleDec(Location l, PosSymbol name,
-            FacilityDec facilityDec, Set<PosSymbol> moduleDependencies) {
+            FacilityDec facilityDec, Map<PosSymbol, Boolean> moduleDependencies) {
         super(l, name, new ArrayList<ModuleParameterDec>(),
                 new ArrayList<UsesItem>(), new ArrayList<Dec>(Arrays
                         .asList(facilityDec)), moduleDependencies);
@@ -85,8 +85,8 @@ public class ShortFacilityModuleDec extends ModuleDec {
      */
     @Override
     protected final ShortFacilityModuleDec copy() {
-        Set<PosSymbol> newModuleDependencies = new HashSet<>(myModuleDependencies.size());
-        newModuleDependencies.addAll(myModuleDependencies);
+        Map<PosSymbol, Boolean> newModuleDependencies =
+                copyModuleDependencies();
 
         return new ShortFacilityModuleDec(cloneLocation(), myName.clone(),
                 (FacilityDec) myDecs.get(0).clone(), newModuleDependencies);

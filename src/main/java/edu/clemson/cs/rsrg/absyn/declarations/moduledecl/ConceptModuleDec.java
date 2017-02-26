@@ -64,15 +64,15 @@ public class ConceptModuleDec extends ModuleDec {
      *                    level constraints.
      * @param decs The list of {@link Dec} objects.
      * @param isSharingConcept Indicates whether or not this is a sharing concept.
-     * @param moduleDependencies A set of {@link PosSymbol} that indicates
-     *                           all the modules that this module declaration
-     *                           depends on.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     public ConceptModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             AssertionClause requires, List<AssertionClause> constraints,
             List<Dec> decs, boolean isSharingConcept,
-            Set<PosSymbol> moduleDependencies) {
+            Map<PosSymbol, Boolean> moduleDependencies) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
         myConstraints = constraints;
         myRequires = requires;
@@ -193,8 +193,7 @@ public class ConceptModuleDec extends ModuleDec {
         Collections.copy(newDecs, myDecs);
         List<AssertionClause> newConstraints = new ArrayList<>(myConstraints.size());
         Collections.copy(newConstraints, myConstraints);
-        Set<PosSymbol> newModuleDependencies = new HashSet<>(myModuleDependencies.size());
-        newModuleDependencies.addAll(myModuleDependencies);
+        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
 
         return new ConceptModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newUsesItems, myRequires.clone(), newConstraints, newDecs,
