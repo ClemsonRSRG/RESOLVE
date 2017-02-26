@@ -56,7 +56,7 @@ public class CompileEnvironment {
 
     /**
      * <p>This map stores all externally realizations for a particular concept.
-     * The <code>Archiver</code> should be the only one that cares about these files.</p>
+     * The {@code Archiver} should be the only one that cares about these files.</p>
      */
     private final Map<ModuleIdentifier, File> myExternalRealizFiles;
 
@@ -170,7 +170,17 @@ public class CompileEnvironment {
     // ===========================================================
 
     /**
-     * <p>Remove the module associated with the <code>ModuleIdentifier</code>
+     * <p>Adds this file as an externally realized file.</p>
+     *
+     * @param id The ID for the {@link ResolveFile} that we want to set as externally realized.
+     * @param file The externally realized file.
+     */
+    public final void addExternalRealizFile(ModuleIdentifier id, File file) {
+        myExternalRealizFiles.put(id, file);
+    }
+
+    /**
+     * <p>Remove the module associated with the {@link ModuleIdentifier}
      * from our incomplete module stack. This indicates the completion of
      * this module.</p>
      *
@@ -204,7 +214,7 @@ public class CompileEnvironment {
      * <p>Returns true if the specified module is present in the compilation
      * environment, has an associated file and a valid module dec.</p>
      *
-     * @param id The ID for the <code>ResolveFile</code> we want to search for.
+     * @param id The ID for the {@link ResolveFile} we want to search for.
      */
     public final boolean containsID(ModuleIdentifier id) {
         return myCompilingModules.containsKey(id);
@@ -213,60 +223,19 @@ public class CompileEnvironment {
     /**
      * <p>Returns the file associated with the specified id.</p>
      *
-     * @param id The ID for the <code>ResolveFile</code> we want to search for.
+     * @param id The ID for the {@link ResolveFile} we want to search for.
      */
     public final ResolveFile getFile(ModuleIdentifier id) {
         return myCompilingModules.get(id).getValue();
     }
 
     /**
-     * <pReturns the <code>ModuleDec</code> associated with the specified id.></p>
+     * <pReturns the {@link ModuleDec} associated with the specified id.></p>
      *
-     * @param id The ID for the <code>ResolveFile</code> we want to search for.
+     * @param id The ID for the {@link ResolveFile} we want to search for.
      */
     public final ModuleDec getModuleAST(ModuleIdentifier id) {
         return myCompilingModules.get(id).getKey();
-    }
-
-    /**
-     * <p>Adds this file as an externally realized file.</p>
-     *
-     * @param id The ID for the <code>ResolveFile</code> that we want to set as externally realized.
-     * @param file The externally realized file.
-     */
-    public final void addExternalRealizFile(ModuleIdentifier id, File file) {
-        myExternalRealizFiles.put(id, file);
-    }
-
-    /**
-     * <p>This checks to see if the module associated with this id is an externally
-     * realized file.</p>
-     *
-     * @param id The ID for the <code>File</code> we want to search for.
-     *
-     * @return True if it is externally realized. False otherwise.
-     */
-    public final boolean isExternalRealizFile(ModuleIdentifier id) {
-        return myExternalRealizFiles.containsKey(id);
-    }
-
-    /**
-     * <p>Returns the compiler's status handler object.</p>
-     *
-     * @return A {@link StatusHandler} object.
-     */
-    public final StatusHandler getStatusHandler() {
-        return myStatusHandler;
-    }
-
-    /**
-     * <p>Returns a pointer to the current
-     * RESOLVE workspace directory.</p>
-     *
-     * @return A <code>File</code> object
-     */
-    public final File getWorkspaceDir() {
-        return myCompileDir;
     }
 
     /**
@@ -277,6 +246,15 @@ public class CompileEnvironment {
      */
     public final String[] getRemainingArgs() {
         return flags.getRemainingArgs();
+    }
+
+    /**
+     * <p>Returns the compiler's status handler object.</p>
+     *
+     * @return A {@link StatusHandler} object.
+     */
+    public final StatusHandler getStatusHandler() {
+        return myStatusHandler;
     }
 
     /**
@@ -298,16 +276,50 @@ public class CompileEnvironment {
     }
 
     /**
-     * <p>Returns <code>ResolveFile</code> for the specified string
+     * <p>Returns {@link ResolveFile} for the specified string
      * object. Notice that the pre-condition for this method is that
      * the key exist in the map.</p>
      *
      * @param key Name of the file.
      *
-     * @return The <code>ResolveFile</code> object for the specified key.
+     * @return The {@link ResolveFile} object for the specified key.
      */
     public final ResolveFile getUserFileFromMap(String key) {
         return myUserFileMap.get(key);
+    }
+
+    /**
+     * <p>Returns a pointer to the current
+     * RESOLVE workspace directory.</p>
+     *
+     * @return A {@link File} object
+     */
+    public final File getWorkspaceDir() {
+        return myCompileDir;
+    }
+
+    /**
+     * <p>This checks to see if the module associated with this id is an externally
+     * realized file.</p>
+     *
+     * @param id The ID for the {@link ResolveFile} we want to search for.
+     *
+     * @return {@code true} if it is externally realized, {@code false} otherwise.
+     */
+    public final boolean isExternalRealizFile(ModuleIdentifier id) {
+        return myExternalRealizFiles.containsKey(id);
+    }
+
+    /**
+     * <p>This checks to see if the module associated with this id has been
+     * compiled or not.</p>
+     *
+     * @param id The ID for the {@link ResolveFile} we want to search for.
+     *
+     * @return {@code true} if is incomplete, {@code false} otherwise.
+     */
+    public final boolean isCompleteModule(ModuleIdentifier id) {
+        return containsID(id) && !myIncompleteModules.contains(id);
     }
 
     /**
@@ -316,8 +328,8 @@ public class CompileEnvironment {
      *
      * @param key Name of the file.
      *
-     * @return True if it is a user created file from the WebIDE/WebAPI.
-     * False otherwise.
+     * @return {@code true} if it is a user created file from the WebIDE/WebAPI,
+     * {@code false} otherwise.
      */
     public final boolean isMetaFile(String key) {
         return myUserFileMap.containsKey(key);
