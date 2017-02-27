@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn.declarations.mathdecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 
 /**
@@ -96,12 +97,21 @@ public class MathDefVariableDec extends Dec {
     }
 
     /**
+     * <p>This method returns the definition expression of a standard definition.</p>
+     *
+     * @return An {@code Exp} representing the definition expression or {@code null}.
+     */
+    public final Exp getDefinition() {
+        return myBodyItem == null ? null : myBodyItem.getDefinition();
+    }
+
+    /**
      * <p>This method returns the math variable associated with this
      * definition declaration.</p>
      *
      * @return A {@link MathVarDec} representation object.
      */
-    public final MathVarDec gerVariable() {
+    public final MathVarDec getVariable() {
         return myVariable;
     }
 
