@@ -17,10 +17,7 @@ import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathCategoricalDefinitionDec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
@@ -1335,6 +1332,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
         Ty mathTy = (Ty) myNodes.removeFrom(ctx.mathTypeExp());
 
+        List<MathDefVariableDec> mathDefVariableDecs = new ArrayList<>();
+        if (ctx.definitionVariable().size() > 0) {
+            mathDefVariableDecs = Utilities.collect(MathDefVariableDec.class,
+                    ctx.definitionVariable(), myNodes);
+        }
+
         AssertionClause constraint;
         if (ctx.constraintClause() != null) {
             constraint =
@@ -1376,8 +1379,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         myNodes
                 .put(ctx, new TypeFamilyDec(createPosSymbol(ctx.name), mathTy,
-                        createPosSymbol(ctx.exemplar), constraint, initItem,
-                        finalItem));
+                        createPosSymbol(ctx.exemplar), mathDefVariableDecs,
+                        constraint, initItem, finalItem));
     }
 
     /**
@@ -1910,6 +1913,32 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myCopySSRList.add((FacilitySharedStateRealizationDec) realizationDec.clone());
 
         myNodes.put(ctx, realizationDec);
+    }
+
+    // -----------------------------------------------------------
+    // Definition Variable
+    // -----------------------------------------------------------
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>This method generates a new definition variable for a type model.</p>
+     *
+     * @param ctx Definition variable node in ANTLR4 AST.
+     */
+    @Override
+    public void exitDefinitionVariable(
+            ResolveParser.DefinitionVariableContext ctx) {
+        MathVarDec varDec =
+                (MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl());
+        DefinitionBodyItem bodyItem = null;
+        if (ctx.mathExp() != null) {
+            bodyItem =
+                    new DefinitionBodyItem((Exp) myNodes.removeFrom(ctx
+                            .mathExp()));
+        }
+
+        myNodes.put(ctx, new MathDefVariableDec(varDec, bodyItem));
     }
 
     // -----------------------------------------------------------
@@ -5231,9 +5260,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             if (dec instanceof SharedStateDec) {
                 retval = true;
             }
-            /*else if (dec instanceof TypeFamilyDec) {
-                // TODO: Check type family for definition variables
-            }*/
+            else if (dec instanceof TypeFamilyDec) {
+                if (((TypeFamilyDec) dec).getDefinitionVarList().size() > 0) {
+                    retval = true;
+                }
+            }
         }
 
         return retval;

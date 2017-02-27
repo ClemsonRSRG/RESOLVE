@@ -316,8 +316,7 @@ performanceTypeModelDecl
     ;
 
 definitionVariable
-    :   DEFINITION VARIABLE mathVariableDecl
-        (EQL mathExp)? SEMICOLON
+    :   DEFINITION VAR mathVariableDecl (EQL mathExp)? SEMICOLON
     ;
 
 // shared state rules
