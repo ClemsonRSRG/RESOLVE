@@ -217,7 +217,7 @@ public class FacilityEntry extends SymbolTableEntry {
      * <p>This method returns a boolean that indicates whether or not this entry
      * instantiates a {@code sharing concept}.</p>
      *
-     * @return {@code true} if it intantiates a {@code sharing concept},
+     * @return {@code true} if it instantiates a {@code sharing concept},
      * {@code false} otherwise.
      */
     public final boolean isSharingConceptInstantion() {

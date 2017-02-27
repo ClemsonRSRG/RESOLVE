@@ -283,6 +283,7 @@ programRecordType
 typeModelDecl
     :   TYPE FAMILY name=IDENTIFIER IS MODELED BY mathTypeExp SEMICOLON
         EXEMPLAR exemplar=IDENTIFIER SEMICOLON
+        (definitionVariable)*
         (constraintClause)?
         (specModelInit)?
         (specModelFinal)?
@@ -312,6 +313,11 @@ performanceTypeModelDecl
         (performanceSpecModelInit)?
         (performanceSpecModelFinal)?
         END SEMICOLON
+    ;
+
+definitionVariable
+    :   DEFINITION VARIABLE mathVariableDecl
+        (EQL mathExp)? SEMICOLON
     ;
 
 // shared state rules
