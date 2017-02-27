@@ -166,6 +166,24 @@ public class TypeFamilyDec extends Dec {
     }
 
     /**
+     * <p>Returns the list of definition variables for this type family.</p>
+     *
+     * @return A list of {@link MathDefVariableDec} representation objects.
+     */
+    public final List<MathDefVariableDec> getDefinitionVarList() {
+        return myDefVarList;
+    }
+
+    /**
+     * <p>Returns the exemplar for this type family.</p>
+     *
+     * @return The exemplar in {@link PosSymbol} format.
+     */
+    public final PosSymbol getExemplar() {
+        return myExemplar;
+    }
+
+    /**
      * <p>Returns the finalization block for this type family.</p>
      *
      * @return All relevant verification for finalization
@@ -183,15 +201,6 @@ public class TypeFamilyDec extends Dec {
      */
     public final SpecInitFinalItem getInitialization() {
         return myTypeInitItem;
-    }
-
-    /**
-     * <p>Returns the exemplar for this type family.</p>
-     *
-     * @return The exemplar in {@link PosSymbol} format.
-     */
-    public final PosSymbol getExemplar() {
-        return myExemplar;
     }
 
     /**
