@@ -146,7 +146,8 @@ public class Controller {
                     new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
                 // Print the entire ModuleDec
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_PRINT_MODULE)) {
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_PRINT_MODULE) &&
+                        m.equals(new ModuleIdentifier(targetModule))) {
                     ModuleDec dec = myCompileEnvironment.getModuleAST(m);
 
                     StringBuffer sb = new StringBuffer();
