@@ -15,9 +15,14 @@ package edu.clemson.cs.rsrg.typeandpopulate;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
@@ -29,14 +34,13 @@ import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.TypeFamilyEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTElement;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.sanitychecking.*;
@@ -366,6 +370,78 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         myCurModuleScope.addImport(id);
+    }
+
+    // -----------------------------------------------------------
+    // Module parameter declarations
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ModuleParameterDec}.</p>
+     *
+     * @param d A module parameter declaration.
+     */
+    @Override
+    public final void postModuleParameterDec(ModuleParameterDec d) {
+        if (!(d.getWrappedDec() instanceof OperationDec)) {
+            if (d.getWrappedDec().getMathType() == null) {
+                throw new NullMathTypeException(d.getWrappedDec().getClass()
+                        + " has null type");
+            }
+
+            d.setMathType(d.getWrappedDec().getMathType());
+        }
+        else {
+            MTType t = (d.getWrappedDec()).getMathType();
+            if (t == null) {
+                t = myTypeGraph.VOID;
+            }
+            d.setMathType(t);
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ConceptTypeParamDec}.</p>
+     *
+     * @param param A concept type parameter declaration.
+     */
+    @Override
+    public final void postConceptTypeParamDec(ConceptTypeParamDec param) {
+        try {
+            String paramName = param.getName().getName();
+
+            myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
+                    param, ProgramParameterEntry.ParameterMode.TYPE, new PTElement(myTypeGraph));
+
+            myGenericTypes.put(paramName, myTypeGraph.CLS);
+            param.setMathType(myTypeGraph.CLS);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(param.getName().getName(), param.getName()
+                    .getLocation());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ConstantParamDec}.</p>
+     *
+     * @param param A constant parameter declaration.
+     */
+    @Override
+    public final void postConstantParamDec(ConstantParamDec param) {
+        try {
+            String paramName = param.getName().getName();
+
+            Ty rawType = param.getVarDec().getTy();
+            myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
+                    param, ProgramParameterEntry.ParameterMode.EVALUATES,
+                    rawType.getProgramType());
+            param.setMathType(rawType.getMathTypeValue());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(param.getName().getName(), param.getName()
+                    .getLocation());
+        }
     }
 
     // -----------------------------------------------------------
