@@ -15,10 +15,11 @@ package edu.clemson.cs.rsrg.typeandpopulate;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
-import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
@@ -42,12 +43,15 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeExceptio
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTElement;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTVoid;
+import edu.clemson.cs.rsrg.typeandpopulate.query.NameAndEntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.sanitychecking.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScopeBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -65,6 +69,31 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /** <p>The symbol table we are currently building.</p> */
+    private final MathSymbolTableBuilder myBuilder;
+
+    /**
+     * <p>The current job's compilation environment
+     * that stores all necessary objects and flags.</p>
+     */
+    private final CompileEnvironment myCompileEnvironment;
+
+    /** <p>The current scope for the module we are currently building.</p> */
+    private ModuleScopeBuilder myCurModuleScope;
+
+    /** <p>This is the status handler for the RESOLVE compiler.</p> */
+    private final StatusHandler myStatusHandler;
+
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
+    // -----------------------------------------------------------
+    // Type Domain-Related
+    // -----------------------------------------------------------
 
     /**
      * <p>A {@link TypeComparison} for to find exact domain match between a
@@ -91,17 +120,56 @@ public class Populator extends TreeWalkerVisitor {
     private final TypeComparison<Exp, MTType> INEXACT_PARAMETER_MATCH =
             new InexactParameterMatch();
 
-    /** <p>The symbol table we are currently building.</p> */
-    private final MathSymbolTableBuilder myBuilder;
+    // -----------------------------------------------------------
+    // Operation Declaration-Related
+    // -----------------------------------------------------------
 
     /**
-     * <p>The current job's compilation environment
-     * that stores all necessary objects and flags.</p>
+     * <p>While walking a procedure, this is set to the entry for the operation
+     * or FacilityOperation that the procedure is attempting to implement.</p>
+     *
+     * <p><strong>INVARIANT:</strong>
+     * <code>myCorrespondingOperation != null</code> <em>implies</em>
+     * <code>myCurrentParameters != null</code>.</p>
      */
-    private final CompileEnvironment myCompileEnvironment;
+    private OperationEntry myCorrespondingOperation;
 
-    /** <p>The current scope for the module we are currently building.</p> */
-    private ModuleScopeBuilder myCurModuleScope;
+    /**
+     * <p>While we walk the children of an operation, FacilityOperation, or
+     * procedure, this list will contain all formal parameters encountered so
+     * far, otherwise it will be null.  Since none of these structures can be
+     * be nested, there's no need for a stack.</p>
+     *
+     * <p>If you need to distinguish if you're in the middle of an
+     * operation/FacilityOperation or a procedure, check
+     * myCorrespondingOperation.</p>
+     */
+    private List<ProgramParameterEntry> myCurrentParameters;
+
+    /**
+     * <p>While we walk the children of a {@link OperationProcedureDec},
+     * this will be set to the {@link OperationProcedureDec}.
+     * Otherwise it will be {@code null}.</p>
+     */
+    private OperationProcedureDec myCurrentLocalProcedure;
+
+    /**
+     * <p>While we walk the children of a {@link OperationProcedureDec}, this will be set
+     * to the scope prior to the {@link OperationProcedureDec} scope.
+     * Otherwise it will be {@code null}.</p>
+     */
+    private ScopeBuilder myPreOperationProcedureDecScope;
+
+    /**
+     * <p>While we walk the children of a {@link OperationProcedureDec} or {@link ProcedureDec}, this will
+     * initially be set to {@code null}. If we detect a recursive call to itself, this will
+     * be set to the location of the first recursive call.</p>
+     */
+    private Location myRecursiveCallLocation;
+
+    // -----------------------------------------------------------
+    // Math Typing-Related
+    // -----------------------------------------------------------
 
     /**
      * <p>A mapping from generic types that appear in the module to the math
@@ -110,22 +178,11 @@ public class Populator extends TreeWalkerVisitor {
     private final Map<String, MTType> myGenericTypes = new HashMap<>();
 
     /**
-     * <p>This is the status handler for the RESOLVE compiler.</p>
-     */
-    private final StatusHandler myStatusHandler;
-
-    /**
      * <p>When parsing a type realization declaration, this is set to the
      * entry corresponding to the conceptual declaration from the concept. When
      * not inside such a declaration, this will be null.</p>
      */
     private TypeFamilyEntry myTypeFamilyEntry;
-
-    /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
-     */
-    private final TypeGraph myTypeGraph;
 
     /**
      * <p>An helper value that helps evaluate mathematical type values.</p>
@@ -445,7 +502,7 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
-    // Facility declarations
+    // Facility Declaration-Related
     // -----------------------------------------------------------
 
     /**
@@ -473,6 +530,432 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(facility.getName().getName(), facility.getName()
                     .getLocation());
         }
+    }
+
+    // -----------------------------------------------------------
+    // Operation Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link OperationProcedureDec}.</p>
+     *
+     * @param dec A local operation with procedure declaration.
+     */
+    @Override
+    public final void preOperationProcedureDec(OperationProcedureDec dec) {
+        // Store the innermost active scope for future use.
+        myPreOperationProcedureDecScope = myBuilder.getInnermostActiveScope();
+
+        myBuilder.startScope(dec);
+        myCurrentLocalProcedure = dec;
+
+        // This will be set to a location if we are recursively calling ourselves.
+        // Once we finish walking all the children, we will make sure this dec
+        // is declared as recursive.
+        myRecursiveCallLocation = null;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link OperationProcedureDec}.</p>
+     *
+     * @param dec A local operation with procedure declaration.
+     */
+    @Override
+    public final void postOperationProcedureDec(OperationProcedureDec dec) {
+        myBuilder.endScope();
+
+        // If the local operation has not been declared as recursive,
+        // we need to make sure that none of the statements is
+        // a recursive call to itself.
+        if (!dec.getRecursive() && myRecursiveCallLocation != null) {
+            throw new SourceErrorException(
+                    "Local operation not declared as recursive, "
+                            + "but makes a recursive call to itself.",
+                    myRecursiveCallLocation);
+        }
+
+        myPreOperationProcedureDecScope = null;
+        myCurrentLocalProcedure = null;
+        myRecursiveCallLocation = null;
+    }
+
+    /**
+     * <p>Code that gets executed before visiting an {@link OperationDec}.</p>
+     *
+     * @param dec An operation declaration.
+     */
+    @Override
+    public final void preOperationDec(OperationDec dec) {
+        // If this is not an OperationDec wrapped inside a OperationProcedureDec,
+        // then we need to start a new scope
+        if (myCurrentLocalProcedure == null) {
+            myBuilder.startScope(dec);
+        }
+
+        // Create a new list for parameter entries.
+        myCurrentParameters = new LinkedList<>();
+    }
+
+    /**
+     * <p>Code that gets executed in between visiting items inside {@link OperationDec}.</p>
+     *
+     * @param node An operation declaration.
+     * @param prevChild The previous child item visited.
+     * @param nextChild The next child item to be visited.
+     */
+    @Override
+    public final void midOperationDec(OperationDec node, ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+        // If this is not an OperationDec wrapped inside a OperationProcedureDec,
+        // then we need to add the return variable as a mathematical symbol to the OperationDec scope.
+        if (myCurrentLocalProcedure == null) {
+            if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
+                try {
+                    //Inside the operation's assertions, the name of the operation
+                    //refers to its return value
+                    myBuilder.getInnermostActiveScope().addBinding(
+                            node.getName().getName(), node,
+                            node.getReturnTy().getMathTypeValue());
+                }
+                catch (DuplicateSymbolException dse) {
+                    //This shouldn't be possible--the operation declaration has a
+                    //scope all its own and we're the first ones to get to
+                    //introduce anything
+                    throw new RuntimeException(dse);
+                }
+            }
+        }
+        // Else we need to add the return variable as a programming variable to the OperationProcedureDec scope.
+        else {
+            if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
+                try {
+                    //Inside the operation's assertions, the name of the operation
+                    //refers to its return value
+                    myBuilder.getInnermostActiveScope().addProgramVariable(
+                            node.getName().getName(), node,
+                            node.getReturnTy().getProgramType());
+                }
+                catch (DuplicateSymbolException dse) {
+                    //This shouldn't be possible--the operation declaration has a
+                    //scope all its own and we're the first ones to get to
+                    //introduce anything
+                    throw new RuntimeException(dse);
+                }
+            }
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link OperationDec}.</p>
+     *
+     * @param dec An operation declaration.
+     */
+    @Override
+    public final void postOperationDec(OperationDec dec) {
+        // If this is not an OperationDec wrapped inside a FacilityOperationDec,
+        // we need to end the current scope, add the operation declaration using
+        // the inner most active scope and set the parameter list to null.
+        if (myCurrentLocalProcedure == null) {
+            myBuilder.endScope();
+
+            putOperationLikeThingInSymbolTable(dec.getName(),
+                    dec.getReturnTy(), dec, myBuilder.getInnermostActiveScope());
+
+            myCurrentParameters = null;
+        }
+        // Else we need to add the FacilityOperationDec to the SymbolTable
+        // using the stored pre-FacilityOperationDec scope.
+        else {
+            putOperationLikeThingInSymbolTable(dec.getName(),
+                    dec.getReturnTy(), myCurrentLocalProcedure,
+                    myPreOperationProcedureDecScope);
+
+            // Similar to preProcedureDec, need to store the OperationEntry for
+            // walking the statements.
+            try {
+                // Figure out what Operation we correspond to (we don't use
+                // OperationQuery because we want to check parameter types
+                // separately in postProcedureDec)
+                myCorrespondingOperation =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameAndEntryTypeQuery<>(
+                                                null,
+                                                dec.getName(),
+                                                OperationEntry.class,
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                false)).toOperationEntry(
+                                dec.getLocation());
+            }
+            catch (NoSuchSymbolException nsse) {
+                //We just added this, so this is not possible.
+                throw new RuntimeException(
+                        "Cannot find an Operation with name "
+                                + dec.getName().getName() + "?");
+            }
+            catch (DuplicateSymbolException dse) {
+                //We should have caught this before now, like when we defined the
+                //duplicate Operation
+                throw new RuntimeException("Duplicate Operations for "
+                        + dec.getName().getName() + "?");
+            }
+        }
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProcedureDec}.</p>
+     *
+     * @param dec A procedure declaration.
+     */
+    @Override
+    public final void preProcedureDec(ProcedureDec dec) {
+        try {
+            //Figure out what Operation we correspond to (we don't use
+            //OperationQuery because we want to check parameter types
+            //separately in postProcedureDec)
+            myCorrespondingOperation =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameAndEntryTypeQuery<>(null, dec.getName(),
+                                    OperationEntry.class,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, false))
+                            .toOperationEntry(dec.getLocation());
+
+            myBuilder.startScope(dec);
+
+            myCurrentParameters = new LinkedList<>();
+
+            // This will be set to a location if we are recursively calling ourselves.
+            // Once we finish walking all the children, we will make sure this dec
+            // is declared as recursive.
+            myRecursiveCallLocation = null;
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SourceErrorException("Procedure "
+                    + dec.getName().getName()
+                    + " does not implement any known operation.", dec.getName()
+                    .getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            //We should have caught this before now, like when we defined the
+            //duplicate Operation
+            throw new RuntimeException("Duplicate Operations for "
+                    + dec.getName().getName() + "?");
+        }
+    }
+
+    /**
+     * <p>Code that gets executed in between visiting items inside {@link ProcedureDec}.</p>
+     *
+     * @param node An operation declaration.
+     * @param prevChild The previous child item visited.
+     * @param nextChild The next child item to be visited.
+     */
+    @Override
+    public final void midProcedureDec(ProcedureDec node,
+            ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+        if (prevChild != null && prevChild == node.getReturnTy()) {
+            try {
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        node.getName().getName(), node,
+                        node.getReturnTy().getProgramType());
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(node.getName().getName(), node.getName()
+                        .getLocation());
+            }
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProcedureDec}.</p>
+     *
+     * @param dec A procedure declaration.
+     */
+    @Override
+    public final void postProcedureDec(ProcedureDec dec) {
+        myBuilder.endScope();
+
+        //We're about to throw away all information about procedure parameters,
+        //since they're redundant anyway.  So we sanity-check them first.
+        Ty returnTy = dec.getReturnTy();
+        PTType returnType;
+        if (returnTy == null) {
+            returnType = PTVoid.getInstance(myTypeGraph);
+        }
+        else {
+            returnType = returnTy.getProgramType();
+        }
+
+        if (!returnType.equals(myCorrespondingOperation.getReturnType())) {
+            throw new SourceErrorException("Procedure return type does "
+                    + "not correspond to the return type of the operation "
+                    + "it implements.  \n\nExpected type: "
+                    + myCorrespondingOperation.getReturnType() + " ("
+                    + myCorrespondingOperation.getSourceModuleIdentifier()
+                    + "." + myCorrespondingOperation.getName() + ")\n\n"
+                    + "Found type: " + returnType, dec.getLocation());
+        }
+
+        if (myCorrespondingOperation.getParameters().size() != myCurrentParameters
+                .size()) {
+            throw new SourceErrorException("Procedure parameter count "
+                    + "does not correspond to the parameter count of the "
+                    + "operation it implements. \n\nExpected count: "
+                    + myCorrespondingOperation.getParameters().size() + " ("
+                    + myCorrespondingOperation.getSourceModuleIdentifier()
+                    + "." + myCorrespondingOperation.getName() + ")\n\n"
+                    + "Found count: " + myCurrentParameters.size(), dec
+                    .getLocation());
+        }
+
+        Iterator<ProgramParameterEntry> opParams =
+                myCorrespondingOperation.getParameters().iterator();
+        Iterator<ProgramParameterEntry> procParams =
+                myCurrentParameters.iterator();
+        ProgramParameterEntry curOpParam, curProcParam;
+        while (opParams.hasNext()) {
+            curOpParam = opParams.next();
+            curProcParam = procParams.next();
+
+            if (!curOpParam.getParameterMode().canBeImplementedWith(
+                    curProcParam.getParameterMode())) {
+                throw new SourceErrorException(curOpParam.getParameterMode()
+                        + "-mode parameter "
+                        + "cannot be implemented with "
+                        + curProcParam.getParameterMode()
+                        + " mode.  "
+                        + "Select one of these valid modes instead: "
+                        + Arrays.toString(curOpParam.getParameterMode()
+                        .getValidImplementationModes()), curProcParam
+                        .getDefiningElement().getLocation());
+            }
+
+            if (!curProcParam.getDeclaredType().acceptableFor(
+                    curOpParam.getDeclaredType())) {
+                throw new SourceErrorException("Parameter type does not "
+                        + "match corresponding operation parameter type."
+                        + "\n\nExpected: " + curOpParam.getDeclaredType()
+                        + " (" + curOpParam.getSourceModuleIdentifier() + "."
+                        + myCorrespondingOperation.getName() + ")\n\n"
+                        + "Found: " + curProcParam.getDeclaredType(),
+                        curProcParam.getDefiningElement().getLocation());
+            }
+
+            if (!curOpParam.getName().equals(curProcParam.getName())) {
+                throw new SourceErrorException("Parameter name does not "
+                        + "match corresponding operation parameter name."
+                        + "\n\nExpected name: " + curOpParam.getName() + " ("
+                        + curOpParam.getSourceModuleIdentifier() + "."
+                        + myCorrespondingOperation.getName() + ")\n\n"
+                        + "Found name: " + curProcParam.getName(), curProcParam
+                        .getDefiningElement().getLocation());
+            }
+        }
+
+        // If the procedure has not been declared as recursive, we need to
+        // make sure that none of the statements is a recursive call to itself.
+        if (!dec.getRecursive() && myRecursiveCallLocation != null) {
+            throw new SourceErrorException(
+                    "Procedure not declared as recursive, "
+                            + "but makes a recursive call to itself.",
+                    myRecursiveCallLocation);
+        }
+
+        try {
+            myBuilder.getInnermostActiveScope().addProcedure(
+                    dec.getName().getName(), dec, myCorrespondingOperation);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+
+        myCurrentParameters = null;
+        myRecursiveCallLocation = null;
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link PerformanceOperationDec}.</p>
+     *
+     * @param dec A performance operation declaration.
+     */
+    @Override
+    public final void prePerformanceOperationDec(PerformanceOperationDec dec) {
+        try {
+            // Figure out what Operation we correspond to (we don't use
+            // OperationQuery because we want to check parameter types
+            // separately in postProcedureDec)
+            myCorrespondingOperation =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameAndEntryTypeQuery<>(null, dec.getName(),
+                                    OperationEntry.class,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, false))
+                            .toOperationEntry(dec.getLocation());
+
+            myBuilder.startScope(dec);
+
+            myCurrentParameters = new LinkedList<>();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SourceErrorException("Operation Profile "
+                    + dec.getName().getName()
+                    + " does not profile any known operation.", dec.getName()
+                    .getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            //We should have caught this before now, like when we defined the
+            //duplicate Operation
+            throw new RuntimeException("Duplicate Operation Profiles for "
+                    + dec.getName().getName() + "?");
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link PerformanceOperationDec}.</p>
+     *
+     * @param dec A performance operation declaration.
+     */
+    @Override
+    public final void postPerformanceOperationDec(PerformanceOperationDec dec) {
+        myBuilder.endScope();
+
+        try {
+            myBuilder.getInnermostActiveScope().addOperationProfile(
+                    dec.getName().getName(), dec, myCorrespondingOperation);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+    }
+
+    // -----------------------------------------------------------
+    // Variable Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ParameterVarDec}.</p>
+     *
+     * @param dec A parameter declaration.
+     */
+    @Override
+    public final void postParameterVarDec(ParameterVarDec dec) {
+        try {
+            ProgramParameterEntry paramEntry =
+                    myBuilder.getInnermostActiveScope().addFormalParameter(
+                            dec.getName().getName(), dec, dec.getMode(),
+                            dec.getTy().getProgramType());
+            myCurrentParameters.add(paramEntry);
+        }
+        catch (DuplicateSymbolException e) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+
+        dec.setMathType(dec.getTy().getMathTypeValue());
     }
 
     // ===========================================================
@@ -506,6 +989,38 @@ public class Populator extends TreeWalkerVisitor {
     private void emitDebug(Location l, String message) {
         if (myCompileEnvironment.flags.isFlagSet(FLAG_POPULATOR_DEBUG)) {
             myStatusHandler.info(l, message);
+        }
+    }
+
+    // -----------------------------------------------------------
+    // Operation-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This is an helper method that puts operation-like item ({@link OperationDec}
+     * or {@link ProcedureDec}) into the symbol table.</p>
+     *
+     * @param name Name of the operation.
+     * @param returnTy The return value for the operation.
+     * @param dec The defining element.
+     * @param innermostActiveScope The current scope.
+     */
+    private void putOperationLikeThingInSymbolTable(PosSymbol name, Ty returnTy,
+            ResolveConceptualElement dec, ScopeBuilder innermostActiveScope) {
+        try {
+            PTType returnType;
+            if (returnTy == null) {
+                returnType = PTVoid.getInstance(myTypeGraph);
+            }
+            else {
+                returnType = returnTy.getProgramType();
+            }
+
+            innermostActiveScope.addOperation(name.getName(), dec,
+                    myCurrentParameters, returnType);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(name.getName(), name.getLocation());
         }
     }
 
