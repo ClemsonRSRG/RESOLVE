@@ -564,15 +564,10 @@ public class Populator extends TreeWalkerVisitor {
     public final void postOperationProcedureDec(OperationProcedureDec dec) {
         myBuilder.endScope();
 
-        // If the local operation has not been declared as recursive,
-        // we need to make sure that none of the statements is
-        // a recursive call to itself.
-        if (!dec.getRecursive() && myRecursiveCallLocation != null) {
-            throw new SourceErrorException(
-                    "Local operation not declared as recursive, "
-                            + "but makes a recursive call to itself.",
-                    myRecursiveCallLocation);
-        }
+        // Sanity checks to make sure it is a valid recursive procedure
+        ValidOperationDeclChecker validOperationDeclChecker =
+                new ValidOperationDeclChecker(dec.getLocation(), myCorrespondingOperation, myCurrentParameters);
+        validOperationDeclChecker.isValidRecursiveProcedure(dec.getRecursive(), myRecursiveCallLocation);
 
         myPreOperationProcedureDecScope = null;
         myCurrentLocalProcedure = null;
@@ -777,8 +772,8 @@ public class Populator extends TreeWalkerVisitor {
     public final void postProcedureDec(ProcedureDec dec) {
         myBuilder.endScope();
 
-        //We're about to throw away all information about procedure parameters,
-        //since they're redundant anyway.  So we sanity-check them first.
+        // We're about to throw away all information about procedure parameters,
+        // since they're redundant anyway.  So we sanity-check them first.
         Ty returnTy = dec.getReturnTy();
         PTType returnType;
         if (returnTy == null) {
@@ -788,80 +783,13 @@ public class Populator extends TreeWalkerVisitor {
             returnType = returnTy.getProgramType();
         }
 
-        if (!returnType.equals(myCorrespondingOperation.getReturnType())) {
-            throw new SourceErrorException("Procedure return type does "
-                    + "not correspond to the return type of the operation "
-                    + "it implements.  \n\nExpected type: "
-                    + myCorrespondingOperation.getReturnType() + " ("
-                    + myCorrespondingOperation.getSourceModuleIdentifier()
-                    + "." + myCorrespondingOperation.getName() + ")\n\n"
-                    + "Found type: " + returnType, dec.getLocation());
-        }
-
-        if (myCorrespondingOperation.getParameters().size() != myCurrentParameters
-                .size()) {
-            throw new SourceErrorException("Procedure parameter count "
-                    + "does not correspond to the parameter count of the "
-                    + "operation it implements. \n\nExpected count: "
-                    + myCorrespondingOperation.getParameters().size() + " ("
-                    + myCorrespondingOperation.getSourceModuleIdentifier()
-                    + "." + myCorrespondingOperation.getName() + ")\n\n"
-                    + "Found count: " + myCurrentParameters.size(), dec
-                    .getLocation());
-        }
-
-        Iterator<ProgramParameterEntry> opParams =
-                myCorrespondingOperation.getParameters().iterator();
-        Iterator<ProgramParameterEntry> procParams =
-                myCurrentParameters.iterator();
-        ProgramParameterEntry curOpParam, curProcParam;
-        while (opParams.hasNext()) {
-            curOpParam = opParams.next();
-            curProcParam = procParams.next();
-
-            if (!curOpParam.getParameterMode().canBeImplementedWith(
-                    curProcParam.getParameterMode())) {
-                throw new SourceErrorException(curOpParam.getParameterMode()
-                        + "-mode parameter "
-                        + "cannot be implemented with "
-                        + curProcParam.getParameterMode()
-                        + " mode.  "
-                        + "Select one of these valid modes instead: "
-                        + Arrays.toString(curOpParam.getParameterMode()
-                        .getValidImplementationModes()), curProcParam
-                        .getDefiningElement().getLocation());
-            }
-
-            if (!curProcParam.getDeclaredType().acceptableFor(
-                    curOpParam.getDeclaredType())) {
-                throw new SourceErrorException("Parameter type does not "
-                        + "match corresponding operation parameter type."
-                        + "\n\nExpected: " + curOpParam.getDeclaredType()
-                        + " (" + curOpParam.getSourceModuleIdentifier() + "."
-                        + myCorrespondingOperation.getName() + ")\n\n"
-                        + "Found: " + curProcParam.getDeclaredType(),
-                        curProcParam.getDefiningElement().getLocation());
-            }
-
-            if (!curOpParam.getName().equals(curProcParam.getName())) {
-                throw new SourceErrorException("Parameter name does not "
-                        + "match corresponding operation parameter name."
-                        + "\n\nExpected name: " + curOpParam.getName() + " ("
-                        + curOpParam.getSourceModuleIdentifier() + "."
-                        + myCorrespondingOperation.getName() + ")\n\n"
-                        + "Found name: " + curProcParam.getName(), curProcParam
-                        .getDefiningElement().getLocation());
-            }
-        }
-
-        // If the procedure has not been declared as recursive, we need to
-        // make sure that none of the statements is a recursive call to itself.
-        if (!dec.getRecursive() && myRecursiveCallLocation != null) {
-            throw new SourceErrorException(
-                    "Procedure not declared as recursive, "
-                            + "but makes a recursive call to itself.",
-                    myRecursiveCallLocation);
-        }
+        // Various different sanity checks
+        ValidOperationDeclChecker validOperationDeclChecker =
+                new ValidOperationDeclChecker(dec.getLocation(), myCorrespondingOperation, myCurrentParameters);
+        validOperationDeclChecker.isSameReturnType(returnType);
+        validOperationDeclChecker.isSameNumberOfParameters();
+        validOperationDeclChecker.hasValidParameterModesImpl();
+        validOperationDeclChecker.isValidRecursiveProcedure(dec.getRecursive(), myRecursiveCallLocation);
 
         try {
             myBuilder.getInnermostActiveScope().addProcedure(
