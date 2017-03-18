@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.*;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
@@ -166,6 +167,31 @@ public class Populator extends TreeWalkerVisitor {
     private Location myRecursiveCallLocation;
 
     // -----------------------------------------------------------
+    // Type Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>When parsing a type family declaration, this is set to the
+     * entry corresponding to the exemplar. When
+     * not inside such a declaration, this will be null.</p>
+     */
+    private MathSymbolEntry myExemplarEntry;
+
+    /**
+     * <p>When parsing a type realization declaration, this is set to the
+     * entry corresponding to the conceptual declaration from the concept. When
+     * not inside such a declaration, this will be null.</p>
+     */
+    private TypeFamilyEntry myTypeFamilyEntry;
+
+    /**
+     * <p>When parsing a type realization declaration, this is set to its
+     * representation entry obtained from its children. When
+     * not inside such a declaration, this will be null.</p>
+     */
+    private PTRepresentation myPTRepresentationType;
+
+    // -----------------------------------------------------------
     // Math Typing-Related
     // -----------------------------------------------------------
 
@@ -174,13 +200,6 @@ public class Populator extends TreeWalkerVisitor {
      * types that bound their possible values.</p>
      */
     private final Map<String, MTType> myGenericTypes = new HashMap<>();
-
-    /**
-     * <p>When parsing a type realization declaration, this is set to the
-     * entry corresponding to the conceptual declaration from the concept. When
-     * not inside such a declaration, this will be null.</p>
-     */
-    private TypeFamilyEntry myTypeFamilyEntry;
 
     /**
      * <p>An helper value that helps evaluate mathematical type values.</p>
@@ -882,6 +901,185 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         dec.setMathType(dec.getTy().getMathTypeValue());
+    }
+
+    // -----------------------------------------------------------
+    // Type Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link TypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept}.
+     */
+    @Override
+    public final void preTypeFamilyDec(TypeFamilyDec dec) {
+        myBuilder.startScope(dec);
+    }
+
+    /**
+     * <p>Code that gets executed in between visiting items inside {@link TypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept}.
+     * @param prevChild The previous child item visited.
+     * @param nextChild The next child item to be visited.
+     */
+    @Override
+    public final void midTypeFamilyDec(TypeFamilyDec dec,
+            ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+        if (prevChild == dec.getModel()) {
+            // We've parsed the model, but nothing else, so we can add our
+            // exemplar to scope
+            PosSymbol exemplar = dec.getExemplar();
+
+            try {
+                myExemplarEntry =
+                        myBuilder.getInnermostActiveScope().addBinding(
+                                exemplar.getName(), dec,
+                                dec.getModel().getMathTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the type declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept}.
+     */
+    @Override
+    public final void postTypeFamilyDec(TypeFamilyDec dec) {
+        myBuilder.endScope();
+
+        try {
+            myBuilder.getInnermostActiveScope().addProgramTypeDefinition(
+                    dec.getName().getName(), dec,
+                    dec.getModel().getMathTypeValue(), myExemplarEntry);
+
+            myExemplarEntry = null;
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link TypeRepresentationDec}.</p>
+     *
+     * @param r A type representation declared in a {@code Concept Realization}.
+     */
+    @Override
+    public final void preTypeRepresentationDec(TypeRepresentationDec r) {
+        myBuilder.startScope(r);
+
+        PosSymbol type = r.getName();
+
+        List<SymbolTableEntry> es =
+                myBuilder.getInnermostActiveScope().query(
+                        new NameQuery(null, type, ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_IGNORE, false));
+
+        if (es.isEmpty()) {
+            noSuchSymbol(null, type);
+        }
+        else if (es.size() > 1) {
+            ambiguousSymbol(type, es);
+        }
+        else {
+            myTypeFamilyEntry =
+                    es.get(0).toTypeFamilyEntry(r.getLocation());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed in between visiting items inside {@link TypeRepresentationDec}.</p>
+     *
+     * @param r A type representation declared in a {@code Concept Realization}.
+     * @param prevChild The previous child item visited.
+     * @param nextChild The next child item to be visited.
+     */
+    @Override
+    public final void midTypeRepresentationDec(TypeRepresentationDec r,
+            ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+        if (prevChild instanceof Ty) {
+            // We've finished the representation and are about to parse
+            // conventions, etc.  We introduce the exemplar gets added as
+            // a program variable with the appropriate type.
+            myPTRepresentationType =
+                    new PTRepresentation(myTypeGraph, (PTInstantiated) ((Ty) prevChild)
+                            .getProgramType(), myTypeFamilyEntry);
+            try {
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        myTypeFamilyEntry.getProgramType()
+                                .getExemplarName(), r, myPTRepresentationType);
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the type declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeRepresentationDec}.</p>
+     *
+     * @param r A type representation declared in a {@code Concept Realization}.
+     */
+    @Override
+    public final void postTypeRepresentationDec(TypeRepresentationDec r) {
+        myBuilder.endScope();
+
+        try {
+            myBuilder.getInnermostActiveScope().addRepresentationTypeEntry(
+                    r.getName().getName(), r, myTypeFamilyEntry,
+                    myPTRepresentationType, r.getConvention(),
+                    r.getCorrespondence());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(r.getName());
+        }
+
+        myPTRepresentationType = null;
+        myTypeFamilyEntry = null;
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link FacilityTypeRepresentationDec}.</p>
+     *
+     * @param e A type representation declared in a facility.
+     */
+    @Override
+    public final void preFacilityTypeRepresentationDec(FacilityTypeRepresentationDec e) {
+        myBuilder.startScope(e);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link FacilityTypeRepresentationDec}.</p>
+     *
+     * @param e A type representation declared in a facility.
+     */
+    @Override
+    public final void postFacilityTypeRepresentationDec(FacilityTypeRepresentationDec e) {
+        myBuilder.endScope();
+
+        try {
+            // Since FacilityTypeRepresentation can only exist inside Facilities,
+            // so any type we use to implement it must be an instantiated type.
+            myBuilder.getInnermostActiveScope().addFacilityRepresentationEntry(
+                    e.getName().getName(), e, (PTInstantiated) e.getRepresentation().getProgramType(),
+                    e.getConvention());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
     }
 
     // -----------------------------------------------------------
