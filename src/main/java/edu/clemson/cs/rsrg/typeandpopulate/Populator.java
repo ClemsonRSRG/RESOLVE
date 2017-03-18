@@ -19,11 +19,11 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.*;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
-import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.absyn.rawtypes.*;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
@@ -41,9 +41,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
-import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTElement;
-import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTVoid;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameAndEntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.sanitychecking.*;
@@ -884,6 +882,69 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         dec.setMathType(dec.getTy().getMathTypeValue());
+    }
+
+    // -----------------------------------------------------------
+    // Raw Type-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link NameTy}.</p>
+     *
+     * @param ty A raw named type.
+     */
+    @Override
+    public final void postNameTy(NameTy ty) {
+        // Note that all mathematical types are ArbitraryExpTys, so this must
+        // be in a program-type syntactic slot.
+        PosSymbol tySymbol = ty.getName();
+        PosSymbol tyQualifier = ty.getQualifier();
+        Location tyLocation = tySymbol.getLocation();
+        String tyName = tySymbol.getName();
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            tyQualifier,
+                                            tySymbol,
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toProgramTypeEntry(
+                            tyLocation);
+
+            ty.setProgramType(type.getProgramType());
+            ty.setMathType(myTypeGraph.CLS);
+            ty.setMathTypeValue(type.getModelType());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(tyQualifier, tyName, tyLocation);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(ty.getName().getName(), ty.getLocation());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link RecordTy}.</p>
+     *
+     * @param ty A raw record type.
+     */
+    @Override
+    public final void postRecordTy(RecordTy ty) {
+        Map<String, PTInstantiated> fieldMap = new HashMap<>();
+        List<VarDec> fields = ty.getFields();
+        for (VarDec field : fields) {
+            fieldMap.put(field.getName().getName(), (PTInstantiated) field.getTy().getProgramType());
+        }
+
+        PTRecord record = new PTRecord(myTypeGraph, fieldMap);
+
+        ty.setProgramType(record);
+        ty.setMathType(myTypeGraph.CLS);
+        ty.setMathTypeValue(record.toMath());
     }
 
     // ===========================================================
