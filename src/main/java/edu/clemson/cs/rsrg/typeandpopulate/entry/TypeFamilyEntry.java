@@ -14,13 +14,16 @@ package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>This creates a symbol table entry for a {@code Type Family}.</p>
@@ -39,6 +42,9 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     /** <p>The mathematical type constraint for this entry.</p> */
     private final AssertionClause myConstraint;
 
+    /** <p>The list of mathematical definition variables for the new type family.</p> */
+    private final List<MathDefVariableDec> myDefVarList;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -54,16 +60,19 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
      * @param programType The program type assigned to this entry.
      * @param exemplarEntry The exemplar for this entry.
      * @param constraint The constraint for this entry.
+     * @param defVariableDecs The list of math definition declarations
+     *                        for this entry.
      */
     public TypeFamilyEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, MTType modelType,
             PTFamily programType, MathSymbolEntry exemplarEntry,
-            AssertionClause constraint) {
+            AssertionClause constraint, List<MathDefVariableDec> defVariableDecs) {
         super(g, name, definingElement, sourceModule, modelType, programType);
 
         myExemplar = exemplarEntry;
         myConstraint = constraint;
+        myDefVarList = defVariableDecs;
     }
 
     // ===========================================================
@@ -78,6 +87,21 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
      */
     public final AssertionClause getConstraint() {
         return myConstraint.clone();
+    }
+
+    /**
+     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
+     * therefore this method returns a deep copy of all the definition variables.</p>
+     *
+     * @return A list of {@link MathDefVariableDec} representation objects.
+     */
+    public final List<MathDefVariableDec> getDefinitionVarList() {
+        List<MathDefVariableDec> newMathDefVarDecs = new ArrayList<>(myDefVarList.size());
+        for (MathDefVariableDec variableDec : myDefVarList) {
+            newMathDefVarDecs.add((MathDefVariableDec) variableDec.clone());
+        }
+
+        return myDefVarList;
     }
 
     /**

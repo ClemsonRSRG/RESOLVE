@@ -39,6 +39,7 @@ public class TypeFamilyDec extends Dec {
     /** <p>The exemplar for the new type family.</p> */
     private final PosSymbol myExemplar;
 
+    /** <p>The list of mathematical definition variables for the new type family.</p> */
     private final List<MathDefVariableDec> myDefVarList;
 
     /** <p>The constraint clause for the new type family.</p> */
