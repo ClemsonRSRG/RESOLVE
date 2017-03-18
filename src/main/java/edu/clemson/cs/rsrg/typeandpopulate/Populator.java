@@ -934,10 +934,10 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postRecordTy(RecordTy ty) {
-        Map<String, PTInstantiated> fieldMap = new HashMap<>();
+        Map<String, PTType> fieldMap = new HashMap<>();
         List<VarDec> fields = ty.getFields();
         for (VarDec field : fields) {
-            fieldMap.put(field.getName().getName(), (PTInstantiated) field.getTy().getProgramType());
+            fieldMap.put(field.getName().getName(), field.getTy().getProgramType());
         }
 
         PTRecord record = new PTRecord(myTypeGraph, fieldMap);
