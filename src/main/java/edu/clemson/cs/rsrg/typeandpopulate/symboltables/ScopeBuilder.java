@@ -432,7 +432,7 @@ public class ScopeBuilder extends SyntacticScope {
         ProgramTypeEntry entry = new TypeFamilyEntry(myTypeGraph, name, definingElement,
                 myRootModule, model, new PTFamily(model, name, exemplarSymbol.getName(),
                 definingElement.getConstraint(), initEnsures, finalizationEnsures),
-                exemplarEntry, definingElement.getConstraint());
+                exemplarEntry, definingElement.getConstraint(), definingElement.getDefinitionVarList());
 
         myBindings.put(name, entry);
 
