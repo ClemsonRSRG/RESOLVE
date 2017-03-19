@@ -13,10 +13,11 @@
 package edu.clemson.cs.rsrg.typeandpopulate.exception;
 
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 
 /**
  * <p>An {@code TypeMismatchException} indicates we encountered two
- * {@link MTType}s that are not compatible.</p>
+ * {@link MTType}s or {@link PTType} that are not compatible.</p>
  *
  * @version 2.0
  */
@@ -40,7 +41,7 @@ public class TypeMismatchException extends SymbolTableException {
      * @param message Message to be displayed when the exception is thrown.
      */
     public TypeMismatchException(String message) {
-        super(message, (Throwable) null);
+        super(message, null);
     }
 
 }
