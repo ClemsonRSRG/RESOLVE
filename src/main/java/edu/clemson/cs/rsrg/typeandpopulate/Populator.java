@@ -37,10 +37,7 @@ import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
-import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
-import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
-import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
-import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.*;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameAndEntryTypeQuery;
@@ -251,6 +248,34 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
     // Visitor Methods
     // ===========================================================
+
+    /**
+     * <p>Code that gets executed after visiting any {@link ResolveConceptualElement}.</p>
+     *
+     * @param e Any element that inherits from {@link ResolveConceptualElement}.
+     */
+    @Override
+    public final void postAny(ResolveConceptualElement e) {
+        if (e instanceof Ty) {
+            Ty eTy = (Ty) e;
+            if (eTy.getMathTypeValue() == null) {
+                throw new NullMathTypeException(
+                        "Ty "
+                                + e
+                                + " ("
+                                + e.getClass()
+                                + ", "
+                                + e.getLocation()
+                                + ") got through the populator with no math type value.");
+            }
+            if (!(e instanceof ArbitraryExpTy)
+                    && eTy.getProgramType() == null) {
+                throw new NullProgramTypeException("Ty " + e + " (" + e.getClass()
+                        + ", " + e.getLocation() + ") got through the "
+                        + "populator with no program type value.");
+            }
+        }
+    }
 
     // -----------------------------------------------------------
     // Module Declarations
@@ -711,8 +736,8 @@ public class Populator extends TreeWalkerVisitor {
                                 + dec.getName().getName() + "?");
             }
             catch (DuplicateSymbolException dse) {
-                //We should have caught this before now, like when we defined the
-                //duplicate Operation
+                // We should have caught this before now, like when we defined the
+                // duplicate Operation
                 throw new RuntimeException("Duplicate Operations for "
                         + dec.getName().getName() + "?");
             }
@@ -855,8 +880,8 @@ public class Populator extends TreeWalkerVisitor {
                     .getLocation());
         }
         catch (DuplicateSymbolException dse) {
-            //We should have caught this before now, like when we defined the
-            //duplicate Operation
+            // We should have caught this before now, like when we defined the
+            // duplicate Operation
             throw new RuntimeException("Duplicate Operation Profiles for "
                     + dec.getName().getName() + "?");
         }
@@ -947,9 +972,9 @@ public class Populator extends TreeWalkerVisitor {
                                 dec.getModel().getMathTypeValue());
             }
             catch (DuplicateSymbolException dse) {
-                //This shouldn't be possible--the type declaration has a
-                //scope all its own and we're the first ones to get to
-                //introduce anything
+                // This shouldn't be possible--the type declaration has a
+                // scope all its own and we're the first ones to get to
+                // introduce anything
                 throw new RuntimeException(dse);
             }
         }
@@ -1092,9 +1117,9 @@ public class Populator extends TreeWalkerVisitor {
                                 .getExemplarName(), r, myPTRepresentationType);
             }
             catch (DuplicateSymbolException dse) {
-                //This shouldn't be possible--the type declaration has a
-                //scope all its own and we're the first ones to get to
-                //introduce anything
+                // This shouldn't be possible--the type declaration has a
+                // scope all its own and we're the first ones to get to
+                // introduce anything
                 throw new RuntimeException(dse);
             }
         }
