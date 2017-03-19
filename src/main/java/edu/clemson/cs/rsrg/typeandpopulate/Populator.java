@@ -519,6 +519,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Mathematical Assertion/Theorem-Related
+    // -----------------------------------------------------------
+
+    // -----------------------------------------------------------
     // Facility Declaration-Related
     // -----------------------------------------------------------
 
@@ -878,6 +882,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Statement-Related
+    // -----------------------------------------------------------
+
+    // -----------------------------------------------------------
     // Variable Declaration-Related
     // -----------------------------------------------------------
 
@@ -967,6 +975,70 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(dec.getName().getName(), dec.getName()
                     .getLocation());
         }
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link PerformanceTypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept} performance profile.
+     */
+    @Override
+    public final void prePerformanceTypeFamilyDec(PerformanceTypeFamilyDec dec) {
+        myBuilder.startScope(dec);
+
+        try {
+            ProgramTypeEntry correspondingTypeDeclaration =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameAndEntryTypeQuery<>(null, dec.getName(),
+                                    ProgramTypeEntry.class,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, false))
+                            .toProgramTypeEntry(null);
+
+            TypeFamilyDec typeFamilyDec =
+                    (TypeFamilyDec) correspondingTypeDeclaration.getDefiningElement();
+
+            // Sanity check the raw types to make sure they are the same
+            if (!typeFamilyDec.getModel().equals(dec.getModel())) {
+                throw new SourceErrorException(
+                        "Type declared in the profile does not match the type declared in the concept.",
+                        dec.getModel().getLocation());
+            }
+
+            PosSymbol exemplar = typeFamilyDec.getExemplar();
+            if (exemplar != null) {
+                try {
+                    myBuilder.getInnermostActiveScope().addBinding(
+                            exemplar.getName(), typeFamilyDec,
+                            typeFamilyDec.getModel().getMathTypeValue());
+                }
+                catch (DuplicateSymbolException dse) {
+                    // This shouldn't be possible--the type declaration has a
+                    // scope all its own and we're the first ones to get to
+                    // introduce anything
+                    throw new RuntimeException(dse);
+                }
+            }
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new SourceErrorException("Multiple types named "
+                    + dec.getName() + ".", dec.getName().getLocation());
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SourceErrorException(
+                    "No corresponding type definition for \"" + dec.getName()
+                            + "\".", dec.getName().getLocation());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link PerformanceTypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept} performance profile.
+     */
+    @Override
+    public final void postPerformanceTypeFamilyDec(PerformanceTypeFamilyDec dec) {
+        myBuilder.endScope();
     }
 
     /**
@@ -1081,6 +1153,14 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(e.getName());
         }
     }
+
+    // -----------------------------------------------------------
+    // Math Expression-Related
+    // -----------------------------------------------------------
+
+    // -----------------------------------------------------------
+    // Program Expression-Related
+    // -----------------------------------------------------------
 
     // -----------------------------------------------------------
     // Raw Type-Related
