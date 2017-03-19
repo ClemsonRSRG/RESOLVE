@@ -23,6 +23,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.*;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -42,6 +44,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameAndEntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.sanitychecking.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
@@ -1186,6 +1189,44 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Program Expression-Related
     // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProgramFunctionExp}.</p>
+     *
+     * @param exp A programming function call
+     */
+    @Override
+    public final void postProgramFunctionExp(ProgramFunctionExp exp) {
+        PosSymbol qualifier = exp.getQualifier();
+        PosSymbol name = exp.getName();
+        List<ProgramExp> args = exp.getArguments();
+
+        List<PTType> argTypes = new LinkedList<>();
+        for (ProgramExp arg : args) {
+            argTypes.add(arg.getProgramType());
+        }
+
+        try {
+            OperationEntry op =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new OperationQuery(qualifier, name, argTypes));
+
+            // Check to see if we are recursively calling ourselves
+            if (myCorrespondingOperation != null
+                    && myCorrespondingOperation.equals(op)
+                    && myRecursiveCallLocation == null) {
+                myRecursiveCallLocation = exp.getName().getLocation();
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SourceErrorException("No operation found corresponding "
+                    + "the call with the specified arguments: ", exp
+                    .getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(exp.getName().getName(), exp.getLocation());
+        }
+    }
 
     // -----------------------------------------------------------
     // Raw Type-Related
