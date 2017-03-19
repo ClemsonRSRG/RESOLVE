@@ -27,6 +27,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
+import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
+import edu.clemson.cs.rsrg.absyn.statements.SwapStmt;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
@@ -912,6 +914,30 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Statement-Related
     // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link FuncAssignStmt}.</p>
+     *
+     * @param stmt A function assignment statement.
+     */
+    @Override
+    public final void postFuncAssignStmt(FuncAssignStmt stmt) {
+        // Sanity check to make sure left and right program types are the same.
+        SameProgTypeChecker checker = new SameProgTypeChecker(stmt.getVariableExp(), stmt.getAssignExp());
+        checker.hasSameProgrammingType();
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link SwapStmt}.</p>
+     *
+     * @param stmt A swap statement.
+     */
+    @Override
+    public final void postSwapStmt(SwapStmt stmt) {
+        // Sanity check to make sure left and right program types are the same.
+        SameProgTypeChecker checker = new SameProgTypeChecker(stmt.getLeft(), stmt.getRight());
+        checker.hasSameProgrammingType();
+    }
 
     // -----------------------------------------------------------
     // Variable Declaration-Related
