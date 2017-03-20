@@ -1031,6 +1031,49 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
+     * <p>Code that gets executed after visiting a {@link MathVarDec}.</p>
+     *
+     * @param dec A mathematical variable declaration.
+     */
+    @Override
+    public final void postMathVarDec(MathVarDec dec) {
+        MTType mathTypeValue = dec.getTy().getMathTypeValue();
+        String varName = dec.getName().getName();
+
+        if (myCurrentDirectDefinition != null
+                && mathTypeValue.isKnownToContainOnlyMTypes()
+                && myDefinitionNamedTypes.contains(varName)) {
+
+            throw new SourceErrorException("Introduction of type "
+                    + "parameter must precede any use of that variable "
+                    + "name.", dec.getLocation());
+        }
+
+        if ((myDefinitionParameterSectionFlag || (myActiveQuantifications
+                .size() > 0 && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE))
+                && mathTypeValue.isKnownToContainOnlyMTypes()) {
+
+            myDefinitionSchematicTypes.put(varName, mathTypeValue);
+        }
+
+        dec.setMathType(mathTypeValue);
+
+        SymbolTableEntry.Quantification q;
+        if (myDefinitionParameterSectionFlag && myTypeValueDepth == 0) {
+            q = SymbolTableEntry.Quantification.UNIVERSAL;
+        }
+        else {
+            q = myActiveQuantifications.peek();
+        }
+
+        addBinding(varName, dec.getName().getLocation(), q, dec,
+                mathTypeValue, null);
+
+        emitDebug(dec.getLocation(), "  New variable: " + varName + " of type "
+                + mathTypeValue.toString() + " with quantification " + q + ".");
+    }
+
+    /**
      * <p>Code that gets executed after visiting a {@link ParameterVarDec}.</p>
      *
      * @param dec A parameter declaration.
@@ -1050,6 +1093,29 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         dec.setMathType(dec.getTy().getMathTypeValue());
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link VarDec}.</p>
+     *
+     * @param dec A variable declaration.
+     */
+    @Override
+    public final void postVarDec(VarDec dec) {
+        MTType mathTypeValue = dec.getTy().getMathTypeValue();
+        String varName = dec.getName().getName();
+
+        dec.setMathType(mathTypeValue);
+        try {
+            myBuilder.getInnermostActiveScope().addProgramVariable(varName,
+                    dec, dec.getTy().getProgramType());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(varName, dec.getLocation());
+        }
+
+        emitDebug(dec.getLocation(), "  New program variable: " + varName + " of type "
+                + mathTypeValue.toString() + " with quantification NONE");
     }
 
     // -----------------------------------------------------------
