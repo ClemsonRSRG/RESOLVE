@@ -191,9 +191,8 @@ public class Controller {
             else {
                 CompilerException see = (CompilerException) cause;
                 myStatusHandler.error(see.getErrorLocation(), e.getMessage());
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)
-                        && myStatusHandler instanceof StdErrHandler) {
-                   e.printStackTrace();
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)) {
+                   myStatusHandler.printStackTrace(see);
                 }
                 myStatusHandler.stopLogging();
             }

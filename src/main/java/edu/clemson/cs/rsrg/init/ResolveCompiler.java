@@ -192,7 +192,7 @@ public class ResolveCompiler {
             statusHandler = compileEnvironment.getStatusHandler();
             statusHandler.error(null, e.getMessage());
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
-                e.printStackTrace();
+                statusHandler.printStackTrace(e);
             }
             statusHandler.stopLogging();
         }
@@ -227,9 +227,8 @@ public class ResolveCompiler {
             // YS - The status handler object might have changed.
             statusHandler = compileEnvironment.getStatusHandler();
             statusHandler.error(null, e.getMessage());
-            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
-                    && statusHandler instanceof StdErrHandler) {
-                e.printStackTrace();
+            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
+                statusHandler.printStackTrace(e);
             }
             statusHandler.stopLogging();
         }
