@@ -87,7 +87,9 @@ public class VarExp extends MathExp {
         printSpace(indentSize, sb);
 
         if (myQuantification != SymbolTableEntry.Quantification.NONE) {
+            sb.append("[");
             sb.append(myQuantification);
+            sb.append("] ");
         }
 
         if (myQualifier != null) {
