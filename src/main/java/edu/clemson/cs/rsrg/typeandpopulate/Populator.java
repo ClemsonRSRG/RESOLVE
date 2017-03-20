@@ -670,7 +670,7 @@ public class Populator extends TreeWalkerVisitor {
 
         myDefinitionSchematicTypes.clear();
 
-        emitDebug(dec.getLocation(), "New theorem: " + name);
+        emitDebug(dec.getLocation(), "\tNew theorem: " + name);
     }
 
     /**
@@ -749,7 +749,7 @@ public class Populator extends TreeWalkerVisitor {
         addBinding(definitionSymbol, dec.getName().getLocation(), dec,
                 declaredType, typeValue, myDefinitionSchematicTypes);
 
-        emitDebug(dec.getLocation(), "New definition: " + definitionSymbol + " of type "
+        emitDebug(dec.getLocation(), "\tNew definition: " + definitionSymbol + " of type "
                 + declaredType
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
@@ -794,7 +794,7 @@ public class Populator extends TreeWalkerVisitor {
         addBinding(definitionSymbol, dec.getName().getLocation(), dec,
                 declaredType, typeValue, myDefinitionSchematicTypes);
 
-        emitDebug(dec.getLocation(), "New definition variable: " + definitionSymbol + " of type "
+        emitDebug(dec.getLocation(), "\tNew definition variable: " + definitionSymbol + " of type "
                 + declaredType
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
@@ -1304,7 +1304,7 @@ public class Populator extends TreeWalkerVisitor {
         addBinding(varName, dec.getName().getLocation(), q, dec,
                 mathTypeValue, null);
 
-        emitDebug(dec.getLocation(), "  New variable: " + varName + " of type "
+        emitDebug(dec.getLocation(), "\tNew variable: " + varName + " of type "
                 + mathTypeValue.toString() + " with quantification " + q + ".");
     }
 
@@ -1349,7 +1349,7 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(varName, dec.getLocation());
         }
 
-        emitDebug(dec.getLocation(), "  New program variable: " + varName + " of type "
+        emitDebug(dec.getLocation(), "\tNew program variable: " + varName + " of type "
                 + mathTypeValue.toString() + " with quantification NONE");
     }
 
@@ -1647,7 +1647,7 @@ public class Populator extends TreeWalkerVisitor {
         MTFunction foundExpType;
         foundExpType = exp.getConservativePreApplicationType(myTypeGraph);
 
-        emitDebug(exp.getLocation(), "Expression: " + exp.toString() + "("
+        emitDebug(exp.getLocation(), " Expression: " + exp.toString() + "("
                 + exp.getLocation() + ") " + " of type "
                 + foundExpType.toString());
 
@@ -1902,7 +1902,7 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public final void preLambdaExp(LambdaExp exp) {
         myBuilder.startScope(exp);
-        emitDebug(exp.getLocation(), "Lambda Expression: " + exp);
+        emitDebug(exp.getLocation(), " Lambda Expression: " + exp);
     }
 
     /**
@@ -1941,7 +1941,7 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void preQuantExp(QuantExp exp) {
-        emitDebug(exp.getLocation(), "Entering preQuantExp...");
+        emitDebug(exp.getLocation(), " Entering preQuantExp...");
         myBuilder.startScope(exp);
     }
 
@@ -1968,7 +1968,7 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public final boolean walkQuantExp(QuantExp exp) {
         preQuantExp(exp);
-        emitDebug(exp.getLocation(), "Entering walkQuantExp...");
+        emitDebug(exp.getLocation(), " Entering walkQuantExp...");
 
         List<MathVarDec> vars = exp.getVars();
         SymbolTableEntry.Quantification quantification = exp.getQuantification();
@@ -1982,7 +1982,7 @@ public class Populator extends TreeWalkerVisitor {
         TreeWalker.visit(this, exp.getBody());
         myActiveQuantifications.pop();
 
-        emitDebug(exp.getLocation(), "Exiting walkQuantExp.");
+        emitDebug(exp.getLocation(), " Exiting walkQuantExp.");
         postQuantExp(exp);
 
         return true;
@@ -2121,7 +2121,7 @@ public class Populator extends TreeWalkerVisitor {
                     myDefinitionSchematicTypes.put(nodeExp.getName().getName(),
                             exp.getAssertedTy().getMathType());
 
-                    emitDebug(exp.getLocation(), "Added schematic variable: "
+                    emitDebug(exp.getLocation(), " Added schematic variable: "
                             + nodeExp.getName().getName());
                 }
                 catch (DuplicateSymbolException dse) {
@@ -2729,7 +2729,7 @@ public class Populator extends TreeWalkerVisitor {
                                             .getInnermostActiveScope(),
                                     myDefinitionSchematicTypes);
                     candidateType = (MTFunction) candidate.getType();
-                    emitDebug(e.getLocation(), candidate.getType() + " deschematizes to "
+                    emitDebug(e.getLocation(), " " + candidate.getType() + " deschematizes to "
                             + candidateType);
 
                     if (comparison.compare(e, eType, candidateType)) {
@@ -2749,7 +2749,7 @@ public class Populator extends TreeWalkerVisitor {
                 }
                 catch (NoSolutionException nse) {
                     //couldn't deschematize--try the next one
-                    emitDebug(e.getLocation(), candidate.getType() + " doesn't deschematize "
+                    emitDebug(e.getLocation(), " " + candidate.getType() + " doesn't deschematize "
                             + "against " + e.getParameters());
                 }
             }
@@ -2862,7 +2862,7 @@ public class Populator extends TreeWalkerVisitor {
 
         MTFunction intendedEntryType = (MTFunction) intendedEntry.getType();
 
-        emitDebug(e.getLocation(), "Matching " + eOperatorString + " : " + eType
+        emitDebug(e.getLocation(), " Matching " + eOperatorString + " : " + eType
                 + " to " + intendedEntry.getName() + " : " + intendedEntryType
                 + ".");
 
@@ -3187,7 +3187,7 @@ public class Populator extends TreeWalkerVisitor {
                             + node.getMathTypeValue().getClass() + ")";
         }
 
-        emitDebug(node.getLocation(), "Processed symbol " + symbolName +
+        emitDebug(node.getLocation(), " Processed symbol " + symbolName +
                 " with type " + node.getMathType() + typeValueDesc);
 
         return intendedEntry;

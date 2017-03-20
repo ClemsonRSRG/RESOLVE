@@ -314,7 +314,7 @@ public class TypeGraph {
             sb.append(sourceCanonicalResult.canonicalType);
             sb.append("]: ");
             sb.append(relationship);
-            sb.append("\n---------------New Type Relationship---------------\n");
+            sb.append("\n\n---------------New Type Relationship---------------\n");
             myStatusHandler.info(null, sb.toString());
         }
     }
