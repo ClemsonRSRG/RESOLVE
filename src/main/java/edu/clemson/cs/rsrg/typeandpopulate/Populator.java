@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.*;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
 import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
@@ -354,6 +355,9 @@ public class Populator extends TreeWalkerVisitor {
         if (node.getParent() instanceof LambdaExp) {
             myDefinitionParameterSectionFlag = true;
         }
+        else if (node.getParent() instanceof MathDefinitionDec) {
+            myDefinitionParameterSectionFlag = true;
+        }
     }
 
     /**
@@ -366,6 +370,13 @@ public class Populator extends TreeWalkerVisitor {
     public final void postVirtualListNode(VirtualListNode node) {
         if (node.getParent() instanceof LambdaExp) {
             myDefinitionParameterSectionFlag = false;
+        }
+        else if (node.getParent() instanceof MathDefinitionDec) {
+            myDefinitionParameterSectionFlag = false;
+        }
+        else if (node.getParent() instanceof MathTypeTheoremDec) {
+            myInTypeTheoremBindingExpFlag = true;
+            myActiveQuantifications.pop();
         }
     }
 
@@ -638,6 +649,226 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Mathematical Assertion/Theorem-Related
     // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link MathAssertionDec}.</p>
+     *
+     * @param dec A mathematical assertion declaration.
+     */
+    @Override
+    public final void postMathAssertionDec(MathAssertionDec dec) {
+        expectType(dec.getAssertion(), myTypeGraph.BOOLEAN);
+
+        String name = dec.getName().getName();
+        try {
+
+            myBuilder.getInnermostActiveScope().addTheorem(name, dec);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(name, dec.getName().getLocation());
+        }
+
+        myDefinitionSchematicTypes.clear();
+
+        emitDebug(dec.getLocation(), "New theorem: " + name);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link MathDefinitionDec}.</p>
+     *
+     * @param dec A mathematical definition declaration.
+     */
+    @Override
+    public final void preMathDefinitionDec(MathDefinitionDec dec) {
+        myBuilder.startScope(dec);
+
+        if (!dec.getIsInductiveFlag()) {
+            myCurrentDirectDefinition = dec;
+        }
+
+        myDefinitionSchematicTypes.clear();
+        myDefinitionNamedTypes.clear();
+    }
+
+    /**
+     * <p>Code that gets executed in between visiting items inside {@link MathDefinitionDec}.</p>
+     *
+     * @param dec A mathematical definition declaration.
+     * @param prevChild The previous child item visited.
+     * @param nextChild The next child item to be visited.
+     */
+    @Override
+    public final void midMathDefinitionDec(MathDefinitionDec dec,
+            ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+        if (dec.getIsInductiveFlag() && nextChild instanceof DefinitionBodyItem) {
+            try {
+                myBuilder.getInnermostActiveScope().addBinding(
+                        dec.getName().getName(), dec,
+                        new MTFunction(myTypeGraph, dec));
+            }
+            catch (DuplicateSymbolException e) {
+                // we tried!
+            }
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link MathDefinitionDec}.</p>
+     *
+     * @param dec A mathematical definition declaration.
+     */
+    @Override
+    public final void postMathDefinitionDec(MathDefinitionDec dec) {
+        myBuilder.endScope();
+
+        MTType declaredType = dec.getReturnTy().getMathTypeValue();
+
+        if (dec.getDefinition() != null) {
+            expectType(dec.getDefinition(), declaredType);
+        }
+        else if (dec.getIsInductiveFlag()) {
+            expectType(dec.getBase(), myTypeGraph.BOOLEAN);
+            expectType(dec.getHypothesis(), myTypeGraph.BOOLEAN);
+        }
+
+        List<MathVarDec> listVarDec = dec.getParameters();
+        if (listVarDec != null) {
+            declaredType = new MTFunction(myTypeGraph, dec);
+        }
+
+        String definitionSymbol = dec.getName().getName();
+
+        MTType typeValue = null;
+        if (dec.getDefinition() != null) {
+            typeValue = dec.getDefinition().getMathTypeValue();
+        }
+
+        // Note that, even if typeValue is null at this point, if declaredType
+        // returns true from knownToContainOnlyMTypes(), a new type value will
+        // still be created by the symbol table
+        addBinding(definitionSymbol, dec.getName().getLocation(), dec,
+                declaredType, typeValue, myDefinitionSchematicTypes);
+
+        emitDebug(dec.getLocation(), "New definition: " + definitionSymbol + " of type "
+                + declaredType
+                + ((typeValue != null) ? " with type value " + typeValue : ""));
+
+        myCurrentDirectDefinition = null;
+        myDefinitionSchematicTypes.clear();
+
+        dec.setMathType(declaredType);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link MathDefVariableDec}.</p>
+     *
+     * @param dec A mathematical definition variable declaration.
+     */
+    @Override
+    public final void preMathDefVariableDec(MathDefVariableDec dec) {
+        myDefinitionSchematicTypes.clear();
+        myDefinitionNamedTypes.clear();
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link MathDefVariableDec}.</p>
+     *
+     * @param dec A mathematical definition variable declaration.
+     */
+    @Override
+    public final void postMathDefVariableDec(MathDefVariableDec dec) {
+        MTType declaredType = dec.getVariable().getMathType();
+        if (dec.getDefinition() != null) {
+            expectType(dec.getDefinition(), declaredType);
+        }
+
+        String definitionSymbol = dec.getVariable().getName().getName();
+        MTType typeValue = null;
+        if (dec.getDefinition() != null) {
+            typeValue = dec.getDefinition().getMathTypeValue();
+        }
+
+        // Note that, even if typeValue is null at this point, if declaredType
+        // returns true from knownToContainOnlyMTypes(), a new type value will
+        // still be created by the symbol table
+        addBinding(definitionSymbol, dec.getName().getLocation(), dec,
+                declaredType, typeValue, myDefinitionSchematicTypes);
+
+        emitDebug(dec.getLocation(), "New definition variable: " + definitionSymbol + " of type "
+                + declaredType
+                + ((typeValue != null) ? " with type value " + typeValue : ""));
+
+        myCurrentDirectDefinition = null;
+        myDefinitionSchematicTypes.clear();
+
+        dec.setMathType(declaredType);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link MathTypeTheoremDec}.</p>
+     *
+     * @param dec A mathematical type theorem declaration.
+     */
+    @Override
+    public final void preMathTypeTheoremDec(MathTypeTheoremDec dec) {
+        myBuilder.startScope(dec);
+        myInTypeTheoremBindingExpFlag = false;
+        myActiveQuantifications.push(SymbolTableEntry.Quantification.UNIVERSAL);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link MathTypeTheoremDec}.</p>
+     *
+     * @param dec A mathematical type theorem declaration.
+     */
+    @Override
+    public final void postMathTypeTheoremDec(MathTypeTheoremDec dec) {
+        dec.setMathType(myTypeGraph.BOOLEAN);
+
+        Exp assertion = dec.getAssertion();
+        Exp condition;
+        Exp bindingExpression;
+        ArbitraryExpTy typeExp;
+        try {
+            if (assertion instanceof InfixExp) {
+                InfixExp assertionsAsInfixExp = (InfixExp) assertion;
+                String operator = assertionsAsInfixExp.getOperatorAsString();
+
+                if (operator.equals("implies")) {
+                    condition = assertionsAsInfixExp.getLeft();
+                    assertion = assertionsAsInfixExp.getRight();
+                }
+                else {
+                    throw new ClassCastException();
+                }
+            }
+            else {
+                condition = MathExp.getTrueVarExp(dec.getLocation(), myTypeGraph);
+            }
+
+            TypeAssertionExp assertionAsTAE = (TypeAssertionExp) assertion;
+
+            bindingExpression = assertionAsTAE.getExp();
+            typeExp = assertionAsTAE.getAssertedTy();
+
+            try {
+                myTypeGraph.addRelationship(bindingExpression, typeExp
+                        .getMathTypeValue(), condition, myBuilder
+                        .getInnermostActiveScope());
+            }
+            catch (IllegalArgumentException iae) {
+                throw new SourceErrorException(iae.getMessage(), dec
+                        .getLocation());
+            }
+        }
+        catch (ClassCastException cse) {
+            throw new SourceErrorException("top level of type theorem "
+                    + "assertion must be 'implies' or ':'", assertion
+                    .getLocation());
+        }
+
+        myBuilder.endScope();
+    }
 
     // -----------------------------------------------------------
     // Facility Declaration-Related
