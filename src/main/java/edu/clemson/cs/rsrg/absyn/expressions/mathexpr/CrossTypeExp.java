@@ -243,7 +243,7 @@ public class CrossTypeExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        Map<PosSymbol, ArbitraryExpTy> newTagsToFields = new HashMap<>();
+        Map<PosSymbol, ArbitraryExpTy> newTagsToFields = new LinkedHashMap<>();
         Set<PosSymbol> tags = myTagsToFields.keySet();
         for (PosSymbol tag : tags) {
             PosSymbol newTag = tag.clone();

@@ -3672,10 +3672,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         if (ctx.getStart().getType() == ResolveLexer.IF) {
             Exp testExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(0));
             Exp thenExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(1));
-            Exp elseExp = null;
-            if (ctx.mathLogicalExp().size() > 2) {
-                elseExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(2));
-            }
+            Exp elseExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(2));
 
             newElement =
                     new IfExp(createLocation(ctx), testExp, thenExp, elseExp);
@@ -4423,7 +4420,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             ResolveParser.MathTaggedCartProdTypeExpContext ctx) {
         // Construct the various variables inside the cartesian product
         List<ResolveParser.MathVariableDeclGroupContext> variableDeclGroups = ctx.mathVariableDeclGroup();
-        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = new HashMap<>();
+        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = new LinkedHashMap<>();
         for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroups) {
             // Get each math variable declaration
             List<TerminalNode> idents = context.IDENTIFIER();
