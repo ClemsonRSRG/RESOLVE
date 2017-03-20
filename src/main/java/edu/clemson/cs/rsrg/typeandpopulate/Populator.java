@@ -650,6 +650,10 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postFacilityDec(FacilityDec facility) {
+        // Sanity check the facility declaration
+        ValidFacilityDeclChecker facilityDeclChecker = new ValidFacilityDeclChecker(facility, myBuilder);
+        facilityDeclChecker.hasValidModuleArgumentItems();
+
         // Concept Module Identifier
         ModuleIdentifier id =
                 new ModuleIdentifier(facility.getConceptName().getName());
