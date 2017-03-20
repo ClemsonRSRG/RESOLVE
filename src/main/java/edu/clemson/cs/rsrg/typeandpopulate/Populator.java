@@ -23,8 +23,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.*;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
 import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
@@ -44,9 +43,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.*;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
-import edu.clemson.cs.rsrg.typeandpopulate.query.NameAndEntryTypeQuery;
-import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
-import edu.clemson.cs.rsrg.typeandpopulate.query.OperationQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.query.*;
 import edu.clemson.cs.rsrg.typeandpopulate.sanitychecking.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
@@ -220,13 +217,16 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>Tells the compiler to print out Populator/Typegraph information messages.</p>
+     * <p>Tells the compiler to print out {@code Populator}/{@code TypeGraph} information messages.</p>
      */
     public static final Flag FLAG_POPULATOR_DEBUG =
             new Flag(FLAG_POPULATOR_NAME, "populatorDebug",
                     FLAG_POPULATOR_DEBUG_INFO);
 
-    public static final void setUpFlags() {
+    /**
+     * <p>Add all the required and implied flags for the {@code Populator}.</p>
+     */
+    public static void setUpFlags() {
         FlagDependencies.addImplies(FLAG_POPULATOR_DEBUG, ResolveCompiler.FLAG_DEBUG);
     }
 
@@ -235,7 +235,8 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * TODO: Refactor this and add JavaDoc.
+     * <p>This creates an object that overrides methods to populate and analyze
+     * a generated {@link ModuleDec}.</p>
      *
      * @param builder A scope builder for a symbol table.
      * @param compileEnvironment The current job's compilation environment
@@ -1217,6 +1218,22 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
+     * <p>Code that gets executed after visiting a {@link ProgramCharExp}.</p>
+     *
+     * @param exp A programming character expression.
+     */
+    @Override
+    public final void postProgramCharExp(ProgramCharExp exp) {
+        // YS: We need to set the PTType to Character
+        // and the MathType to N. Not sure if this the right fix,
+        // but I simply got the the math type of the PTType (Character),
+        // which has N as its math type.
+        PTType ptType = getCharProgramType(exp.getLocation());
+        exp.setProgramType(ptType);
+        exp.setMathType(ptType.toMath());
+    }
+
+    /**
      * <p>Code that gets executed after visiting a {@link ProgramFunctionExp}.</p>
      *
      * @param exp A programming function call
@@ -1252,6 +1269,163 @@ public class Populator extends TreeWalkerVisitor {
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(exp.getName().getName(), exp.getLocation());
         }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProgramIntegerExp}.</p>
+     *
+     * @param exp A programming integer expression.
+     */
+    @Override
+    public final void postProgramIntegerExp(ProgramIntegerExp exp) {
+        // YS: We need to set the PTType to Integer
+        // and the MathType to Z. Not sure if this the right fix,
+        // but I simply got the the math type of the PTType (Integer),
+        // which has Z as its math type.
+        PTType ptType = getIntegerProgramType(exp.getLocation());
+        exp.setProgramType(ptType);
+        exp.setMathType(ptType.toMath());
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProgramIntegerExp}.</p>
+     *
+     * @param exp A programming string expression.
+     */
+    @Override
+    public final void postProgramStringExp(ProgramStringExp exp) {
+        // YS: Hampton wanted Str(N) to be the math type.
+        // Not sure if this the right fix, but I simply got the
+        // the math type of the PTType (Char_Str), which has
+        // Str(N) as its math type.
+        PTType ptType = getStringProgramType(exp.getLocation());
+        exp.setProgramType(ptType);
+        exp.setMathType(ptType.toMath());
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProgramVariableArrayExp}.</p>
+     *
+     * @param exp A programming variable array expression.
+     */
+    @Override
+    public final void preProgramVariableArrayExp(ProgramVariableArrayExp exp) {
+        // This should have been converted when constructing our AST, so nothing should
+        // be a ProgramVariableArrayExp. This check is to make sure we don't accidentally
+        // construct one in the future.
+        throw new SourceErrorException("This array expression should have been converted an operation call.",
+                exp.getLocation(), new IllegalStateException());
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProgramVariableNameExp}.</p>
+     *
+     * @param exp A programming variable name expression.
+     */
+    @Override
+    public final void postProgramVariableNameExp(ProgramVariableNameExp exp) {
+        try {
+            ProgramVariableEntry entry =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new ProgramVariableQuery(exp.getQualifier(), exp.getName()));
+            exp.setProgramType(entry.getProgramType());
+
+            // Handle math typing stuff
+            postSymbolExp(exp.getQualifier(), exp.getName().getName(), exp);
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(exp.getQualifier(), exp.getName().getName(), exp.getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(exp.getName());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProgramVariableDotExp}.</p>
+     *
+     * @param exp A programming variable dotted expression.
+     */
+    @Override
+    public final void preProgramVariableDotExp(ProgramVariableDotExp exp) {
+        //Dot expressions are handled ridiculously, even for this compiler, so
+        //this method just deals with the cases we've encountered so far and
+        //lots of assumptions are made.  Expect it to break frequently when you
+        //encounter some new case
+
+        PosSymbol firstNamePos =
+                ((ProgramVariableNameExp) exp.getSegments().get(0)).getName();
+        String firstName = firstNamePos.getName();
+
+        try {
+            ProgramVariableEntry eEntry =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, firstName))
+                            .toProgramVariableEntry(firstNamePos.getLocation());
+            exp.getSegments().get(0).setProgramType(eEntry.getProgramType());
+            exp.getSegments().get(0)
+                    .setMathType(eEntry.getProgramType().toMath());
+
+            PTType eType = eEntry.getProgramType();
+
+            if (eType instanceof PTRepresentation) {
+                eType = ((PTRepresentation) eType).getBaseType();
+            }
+
+            if (eType instanceof PTFacilityRepresentation) {
+                eType = ((PTFacilityRepresentation) eType).getBaseType();
+            }
+
+            PTRecord recordType = (PTRecord) eType;
+
+            String fieldName =
+                    ((ProgramVariableNameExp) exp.getSegments().get(1)).getName().getName();
+
+            PTType fieldType = recordType.getFieldType(fieldName);
+
+            if (fieldType == null) {
+                throw new NullProgramTypeException("Could not retrieve type of "
+                        + " field '" + fieldName
+                        + "'. Either it doesn't exist "
+                        + "in the record or it's missing a type.");
+            }
+
+            exp.getSegments().get(1).setProgramType(fieldType);
+            exp.setProgramType(fieldType);
+
+            exp.getSegments().get(1).setMathType(fieldType.toMath());
+            exp.setMathType(fieldType.toMath());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, firstNamePos);
+        }
+        catch (DuplicateSymbolException dse) {
+            // This flavor of name query shouldn't be able to throw this--we're
+            // only looking in the local module so there's no overloading
+            throw new RuntimeException(dse);
+        }
+    }
+
+    /**
+     * <p>This method redefines how a {@link ProgramVariableDotExp} should be walked.</p>
+     *
+     * @param exp A programming variable dotted expression.
+     */
+    @Override
+    public final boolean walkProgramVariableDotExp(ProgramVariableDotExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preProgramExp(exp);
+        preProgramVariableExp(exp);
+        preProgramVariableDotExp(exp);
+
+        postProgramVariableDotExp(exp);
+        postProgramVariableExp(exp);
+        postProgramExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
     }
 
     // -----------------------------------------------------------
@@ -1401,8 +1575,8 @@ public class Populator extends TreeWalkerVisitor {
      * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
     private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q,
-                                        ResolveConceptualElement definingElement, MTType type, MTType typeValue,
-                                        Map<String, MTType> schematicTypes) {
+            ResolveConceptualElement definingElement, MTType type, MTType typeValue,
+            Map<String, MTType> schematicTypes) {
         if (type == null) {
             throw new NullPointerException();
         }
@@ -1431,7 +1605,7 @@ public class Populator extends TreeWalkerVisitor {
      * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
     private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement,
-                                        MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
+            MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
         return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type,
                 typeValue, schematicTypes);
     }
@@ -1450,8 +1624,8 @@ public class Populator extends TreeWalkerVisitor {
      * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
     private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q,
-                                        ResolveConceptualElement definingElement, MTType type,
-                                        Map<String, MTType> schematicTypes) {
+            ResolveConceptualElement definingElement, MTType type,
+            Map<String, MTType> schematicTypes) {
         return addBinding(name, l, q, definingElement, type, null, schematicTypes);
     }
 
@@ -1468,7 +1642,7 @@ public class Populator extends TreeWalkerVisitor {
      * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
     private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement,
-                                        MTType type, Map<String, MTType> schematicTypes) {
+            MTType type, Map<String, MTType> schematicTypes) {
         return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type,
                 null, schematicTypes);
     }
@@ -1741,7 +1915,7 @@ public class Populator extends TreeWalkerVisitor {
             throw new RuntimeException("No program Integer type in scope???");
         }
         catch (DuplicateSymbolException dse) {
-            //Shouldn't be possible--NameQuery can't throw this
+            // Shouldn't be possible--NameQuery can't throw this
             throw new RuntimeException(dse);
         }
 
@@ -1778,6 +1952,100 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         return result;
+    }
+
+    // -----------------------------------------------------------
+    // Math and Program Type-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>An helper method that retrieves the mathematical symbol entry
+     * using the provided information.</p>
+     *
+     * @param qualifier Qualifier for the expression.
+     * @param symbolName The symbol name.
+     * @param node The expression encountered.
+     *
+     * @return A {@link MathSymbolEntry} that is associated with the provided information.
+     */
+    private MathSymbolEntry getIntendedEntry(PosSymbol qualifier, String symbolName, Exp node) {
+        MathSymbolEntry result;
+
+        try {
+            result =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new MathSymbolQuery(qualifier, symbolName, node
+                                    .getLocation()));
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(symbolName, node.getLocation());
+            throw new RuntimeException(); //This will never fire
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(qualifier, symbolName, node.getLocation());
+            throw new RuntimeException(); //This will never fire
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>An helper method that handles the additional logic that happens
+     * after we encounter a symbol expression.</p>
+     *
+     * @param qualifier Qualifier for the expression.
+     * @param symbolName The symbol name.
+     * @param node The expression encountered.
+     *
+     * @return A typed {@link MathSymbolEntry} that is associated with the provided information.
+     */
+    private MathSymbolEntry postSymbolExp(PosSymbol qualifier, String symbolName, Exp node) {
+        MathSymbolEntry intendedEntry =
+                getIntendedEntry(qualifier, symbolName, node);
+        node.setMathType(intendedEntry.getType());
+
+        setSymbolTypeValue(node, symbolName, intendedEntry);
+
+        String typeValueDesc = "";
+
+        if (node.getMathTypeValue() != null) {
+            typeValueDesc =
+                    ", referencing math type " + node.getMathTypeValue() + " ("
+                            + node.getMathTypeValue().getClass() + ")";
+        }
+
+        emitDebug(node.getLocation(), "Processed symbol " + symbolName +
+                " with type " + node.getMathType() + typeValueDesc);
+
+        return intendedEntry;
+    }
+
+    /**
+     * <p>An helper method that handles the logic for assigning the mathematical
+     * type value for a given expression.</p>
+     *
+     * @param node The expression encountered.
+     * @param symbolName The symbol name.
+     * @param intendedEntry An untyped {@link MathSymbolEntry} that is associated with the
+     *                      provided information.
+     */
+    private void setSymbolTypeValue(Exp node, String symbolName, MathSymbolEntry intendedEntry) {
+        try {
+            if (intendedEntry.getQuantification() == SymbolTableEntry.Quantification.NONE) {
+                node.setMathTypeValue(intendedEntry.getTypeValue());
+            }
+            else {
+                if (intendedEntry.getType().isKnownToContainOnlyMTypes()) {
+                    node.setMathTypeValue(new MTNamed(myTypeGraph, symbolName));
+                }
+            }
+        }
+        catch (SymbolNotOfKindTypeException snokte) {
+            if (myTypeValueDepth > 0) {
+                // I had better identify a type
+                notAType(intendedEntry, node.getLocation());
+            }
+        }
     }
 
     // -----------------------------------------------------------
