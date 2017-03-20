@@ -223,6 +223,19 @@ public abstract class AbstractFunctionExp extends MathExp {
         myQualifier = qualifier;
     }
 
+    /**
+     * <p>Sets the quantification for this expression.</p>
+     *
+     * @param q The quantification type for this expression.
+     */
+    public final void setQuantification(SymbolTableEntry.Quantification q) {
+        if (!q.equals(SymbolTableEntry.Quantification.NONE)) {
+            throw new UnsupportedOperationException("The function "
+                    + getOperatorAsString() + " does not support "
+                    + "quantification.");
+        }
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================

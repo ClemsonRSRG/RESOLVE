@@ -751,7 +751,7 @@ mathImpliesExp
     :   mathLogicalExp (op=(IMPLIES | IFF) mathLogicalExp)?
     |   IF mathLogicalExp
         THEN mathLogicalExp
-        (ELSE mathLogicalExp)?
+        ELSE mathLogicalExp
     ;
 
 mathLogicalExp

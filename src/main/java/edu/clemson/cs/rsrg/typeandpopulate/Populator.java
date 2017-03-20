@@ -13,7 +13,9 @@
 package edu.clemson.cs.rsrg.typeandpopulate;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.VirtualListNode;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
@@ -52,6 +54,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.HardCoded;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.*;
 
@@ -191,14 +194,72 @@ public class Populator extends TreeWalkerVisitor {
     private PTRepresentation myPTRepresentationType;
 
     // -----------------------------------------------------------
-    // Math Typing-Related
+    // Math/Program Typing-Related
     // -----------------------------------------------------------
+
+    /**
+     * <p>Any quantification-introducing syntactic node (like, e.g., a
+     * {@link QuantExp}), introduces a level to this stack to reflect the quantification
+     * that should be applied to named variables as they are encountered.  Note
+     * that this may change as the children of the node are processed--for
+     * example, {@link MathVarDec MathVarDecs} found in the declaration portion of a {@link QuantExp}
+     * should have quantification (universal or existential) applied, while
+     * those found in the body of the {@link QuantExp} should have no quantification
+     * (unless there is an embedded {@link QuantExp}).  In this case, {@link QuantExp} should
+     * <em>not</em> remove its layer, but rather change it to
+     * MathSymbolTableEntry.None.</p>
+     *
+     * <p>This stack is never empty, but rather the bottom layer is always
+     * MathSymbolTableEntry.None.</p>
+     */
+    private final Deque<SymbolTableEntry.Quantification> myActiveQuantifications = new LinkedList<>();
+
+    /**
+     * <p>While we walk the children of a direct definition, this will be set
+     * with a pointer to the definition declaration we are walking, otherwise
+     * it will be null.  Note that definitions cannot be nested, so there's
+     * no need for a stack.</p>
+     */
+    private MathDefinitionDec myCurrentDirectDefinition;
+
+    /**
+     * <p>This simply enables an error check--as a definition uses named types,
+     * we keep track of them, and when an implicit type is introduced, we make
+     * sure that it hasn't been "used" yet, thus leading to a confusing scenario
+     * where some instances of the name should refer to a type already in scope
+     * as the definition is declared and other instance refer to the implicit
+     * type parameter.</p>
+     */
+    private final Set<String> myDefinitionNamedTypes = new HashSet<>();
+
+    /**
+     * <p>While walking the parameters of a definition, this flag will be set
+     * to true.</p>
+     */
+    private boolean myDefinitionParameterSectionFlag = false;
+
+    /**
+     * <p>A mapping for definition defined schematic types.</p>
+     */
+    private final Map<String, MTType> myDefinitionSchematicTypes = new HashMap<>();
 
     /**
      * <p>A mapping from generic types that appear in the module to the math
      * types that bound their possible values.</p>
      */
     private final Map<String, MTType> myGenericTypes = new HashMap<>();
+
+    /**
+     * <p>An helper value that helps evaluate how deep is the expression
+     * we are trying to evaluate.</p>
+     */
+    private int myExpressionDepth = 0;
+
+    /**
+     * <p>A flag that indicates whether or not we are binding an expression
+     * inside a type theorem.</p>
+     */
+    private boolean myInTypeTheoremBindingExpFlag = false;
 
     /**
      * <p>An helper value that helps evaluate mathematical type values.</p>
@@ -243,12 +304,11 @@ public class Populator extends TreeWalkerVisitor {
      *                           that stores all necessary objects and flags.
      */
     public Populator(MathSymbolTableBuilder builder, CompileEnvironment compileEnvironment) {
-        //myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
+        myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
         myTypeGraph = builder.getTypeGraph();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
         myStatusHandler = myCompileEnvironment.getStatusHandler();
-        //myFacilityQualifier = null;
     }
 
     // ===========================================================
@@ -280,6 +340,32 @@ public class Populator extends TreeWalkerVisitor {
                         + ", " + e.getLocation() + ") got through the "
                         + "populator with no program type value.");
             }
+        }
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a virtual node generated from
+     * a list of {@link ResolveConceptualElement}.</p>
+     *
+     * @param node A virtual node that contains a list of {@link ResolveConceptualElement}.
+     */
+    @Override
+    public final void preVirtualListNode(VirtualListNode node) {
+        if (node.getParent() instanceof LambdaExp) {
+            myDefinitionParameterSectionFlag = true;
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a virtual node generated from
+     * a list of {@link ResolveConceptualElement}.</p>
+     *
+     * @param node A virtual node that contains a list of {@link ResolveConceptualElement}.
+     */
+    @Override
+    public final void postVirtualListNode(VirtualListNode node) {
+        if (node.getParent() instanceof LambdaExp) {
+            myDefinitionParameterSectionFlag = false;
         }
     }
 
@@ -1210,8 +1296,593 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Expression-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link Exp}.</p>
+     *
+     * @param exp An expression.
+     */
+    @Override
+    public final void preExp(Exp exp) {
+        myExpressionDepth++;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link Exp}.</p>
+     *
+     * @param exp An expression.
+     */
+    @Override
+    public final void postExp(Exp exp) {
+        if (exp.getMathType() == null) {
+            throw new NullMathTypeException("Exp " + exp + " (" + exp.getClass()
+                    + ", " + exp.getLocation()
+                    + ") got through the populator " + "with no math type.");
+        }
+
+        if (exp instanceof ProgramExp
+                && ((ProgramExp) exp).getProgramType() == null) {
+            throw new NullProgramTypeException("Exp " + exp + " (" + exp.getClass()
+                    + ", " + exp.getLocation()
+                    + ") got through the populator " + "with no program type.");
+        }
+
+        myExpressionDepth--;
+    }
+
+    // -----------------------------------------------------------
     // Math Expression-Related
     // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AbstractFunctionExp}.</p>
+     *
+     * @param exp An abstract function expression.
+     */
+    @Override
+    public final void postAbstractFunctionExp(AbstractFunctionExp exp) {
+        MTFunction foundExpType;
+        foundExpType = exp.getConservativePreApplicationType(myTypeGraph);
+
+        emitDebug(exp.getLocation(), "Expression: " + exp.toString() + "("
+                + exp.getLocation() + ") " + " of type "
+                + foundExpType.toString());
+
+        MathSymbolEntry intendedEntry = getIntendedFunction(exp);
+
+        MTFunction expectedType = (MTFunction) intendedEntry.getType();
+
+        // We know we match expectedType--otherwise the above would have thrown
+        // an exception.
+
+        exp.setMathType(expectedType.getRange());
+        exp.setQuantification(intendedEntry.getQuantification());
+
+        if (myTypeValueDepth > 0) {
+            //I had better identify a type
+            MTFunction entryType = (MTFunction) intendedEntry.getType();
+
+            List<MTType> arguments = new LinkedList<>();
+            MTType argTypeValue;
+            for (Exp arg : exp.getParameters()) {
+                argTypeValue = arg.getMathTypeValue();
+
+                if (argTypeValue == null) {
+                    notAType(arg);
+                }
+
+                arguments.add(argTypeValue);
+            }
+
+            exp.setMathTypeValue(entryType.getApplicationType(
+                    intendedEntry.getName(), arguments));
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AlternativeExp}.</p>
+     *
+     * @param exp An alternative expression.
+     */
+    @Override
+    public final void postAlternativeExp(AlternativeExp exp) {
+        MTType establishedType = null;
+        MTType establishedTypeValue = null;
+        for (AltItemExp alt : exp.getAlternatives()) {
+            if (establishedType == null) {
+                establishedType = alt.getAssignment().getMathType();
+                establishedTypeValue = alt.getAssignment().getMathTypeValue();
+            }
+            else {
+                expectType(alt, establishedType);
+            }
+        }
+
+        exp.setMathType(establishedType);
+        exp.setMathTypeValue(establishedTypeValue);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AltItemExp}.</p>
+     *
+     * @param exp An alternative item expression.
+     */
+    @Override
+    public final void postAltItemExp(AltItemExp exp) {
+        if (exp.getTest() != null) {
+            expectType(exp.getTest(), myTypeGraph.BOOLEAN);
+        }
+
+        exp.setMathType(exp.getAssignment().getMathType());
+        exp.setMathTypeValue(exp.getAssignment().getMathTypeValue());
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link CrossTypeExp}.</p>
+     *
+     * @param exp A cartesian product expression.
+     */
+    @Override
+    public final void preCrossTypeExp(CrossTypeExp exp) {
+        myTypeValueDepth++;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link CrossTypeExp}.</p>
+     *
+     * @param exp A cartesian product expression.
+     */
+    @Override
+    public final void postCrossTypeExp(CrossTypeExp exp) {
+        List<MTCartesian.Element> fieldTypes = new LinkedList<>();
+
+        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = exp.getTagsToFieldsMap();
+        for (PosSymbol psTag : tagsToFieldsMap.keySet()) {
+            fieldTypes.add(new MTCartesian.Element(psTag.getName(), tagsToFieldsMap.get(psTag).getMathTypeValue()));
+        }
+
+        exp.setMathType(myTypeGraph.CLS);
+        exp.setMathTypeValue(new MTCartesian(myTypeGraph, fieldTypes));
+
+        myTypeValueDepth--;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link DotExp}.</p>
+     *
+     * @param exp A dotted expression.
+     */
+    @Override
+    public final void postDotExp(DotExp exp) {
+        // Might already have been set in preDotExp(), in which case our children
+        // weren't visited
+        if (exp.getMathType() == null) {
+            List<Exp> segments = exp.getSegments();
+
+            Exp lastSeg = segments.get(segments.size() - 1);
+
+            exp.setMathType(lastSeg.getMathType());
+            exp.setMathTypeValue(lastSeg.getMathTypeValue());
+        }
+    }
+
+    /**
+     * <p>This method redefines how a {@link DotExp} should be walked.</p>
+     *
+     * @param exp A dotted expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkDotExp(DotExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preDotExp(exp);
+
+        Indirect<Exp> lastGoodOut = new Indirect<>();
+        Iterator<Exp> segments = exp.getSegments().iterator();
+        MathSymbolEntry entry = getTopLevelValue(segments, lastGoodOut);
+
+        Location lastGood = lastGoodOut.data.getLocation();
+
+        MTType curType = entry.getType();
+        MTCartesian curTypeCartesian;
+        Exp nextSegment = lastGoodOut.data, lastSegment;
+        while (segments.hasNext()) {
+            lastSegment = nextSegment;
+            nextSegment = segments.next();
+            String segmentName = getName(nextSegment);
+
+            try {
+                curTypeCartesian = (MTCartesian) curType;
+                curType = curTypeCartesian.getFactor(segmentName);
+            }
+            catch (ClassCastException cce) {
+                curType =
+                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
+                                segmentName);
+
+                if (curType == null) {
+                    throw new SourceErrorException("Value not a tuple.",
+                            lastGood);
+                }
+            }
+            catch (NoSuchElementException nsee) {
+                curType =
+                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
+                                segmentName);
+
+                if (curType == null) {
+                    throw new SourceErrorException("No such factor.", lastGood);
+                }
+            }
+
+            //getName() would have thrown an exception if nextSegment wasn't
+            //a VarExp or a FunctionExp.  In the former case, we're good to
+            //go--but in the latter case, we still need to typecheck
+            //parameters, assure they match the signature, and adjust
+            //curType to reflect the RANGE of the function type rather than
+            //the entire type
+            if (nextSegment instanceof FunctionExp) {
+                curType = applyFunction((FunctionExp) nextSegment, curType);
+            }
+
+            nextSegment.setMathType(curType);
+            lastGood = nextSegment.getLocation();
+        }
+
+        postDotExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link IfExp}.</p>
+     *
+     * @param exp An if expression.
+     */
+    @Override
+    public final void postIfExp(IfExp exp) {
+        // An "if expression" is a functional condition, as in the following
+        // example:
+        //   x = (if (y > 0) then y else -y)
+        // Its condition had better be a boolean.  Its type resolves to the
+        // shared type of its branches.
+        expectType(exp.getTest(), myTypeGraph.BOOLEAN);
+
+        Exp ifClause = exp.getThen();
+        Exp elseClause = exp.getElse();
+
+        MTType ifType = ifClause.getMathType();
+        MTType elseType = elseClause.getMathType();
+
+        boolean ifIsSuperType = myTypeGraph.isSubtype(elseType, ifType);
+
+        // One of these had better be a (non-strict) subtype of the other
+        if (!ifIsSuperType && !myTypeGraph.isSubtype(ifType, elseType)) {
+            throw new SourceErrorException("Branches must share a type.\n"
+                    + "If branch:   " + ifType + "\n" + "Else branch: "
+                    + elseType, exp.getLocation());
+        }
+
+        MTType finalType, finalTypeValue;
+        if (ifIsSuperType) {
+            finalType = ifType;
+            finalTypeValue = ifClause.getMathTypeValue();
+        }
+        else {
+            finalType = elseType;
+            finalTypeValue = elseClause.getMathTypeValue();
+        }
+
+        exp.setMathType(finalType);
+        exp.setMathTypeValue(finalTypeValue);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link IntegerExp}.</p>
+     *
+     * @param exp An integer expression.
+     */
+    @Override
+    public final void postIntegerExp(IntegerExp exp) {
+        postSymbolExp(exp.getQualifier(), "" + exp.getValue(), exp);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link LambdaExp}.</p>
+     *
+     * @param exp A lambda expression.
+     */
+    @Override
+    public final void preLambdaExp(LambdaExp exp) {
+        myBuilder.startScope(exp);
+        emitDebug(exp.getLocation(), "Lambda Expression: " + exp);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link LambdaExp}.</p>
+     *
+     * @param exp A lambda expression.
+     */
+    @Override
+    public final void postLambdaExp(LambdaExp exp) {
+        myBuilder.endScope();
+
+        List<MTType> parameterTypes = new LinkedList<>();
+        for (MathVarDec p : exp.getParameters()) {
+            parameterTypes.add(p.getTy().getMathTypeValue());
+        }
+
+        exp.setMathType(new MTFunction(myTypeGraph, exp.getBody().getMathType(),
+                parameterTypes));
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link OldExp}.</p>
+     *
+     * @param exp An {@code old} expression.
+     */
+    @Override
+    public final void postOldExp(OldExp exp) {
+        exp.setMathType(exp.getExp().getMathType());
+        exp.setMathTypeValue(exp.getExp().getMathTypeValue());
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link QuantExp}.</p>
+     *
+     * @param exp A quantified expression.
+     */
+    @Override
+    public final void preQuantExp(QuantExp exp) {
+        emitDebug(exp.getLocation(), "Entering preQuantExp...");
+        myBuilder.startScope(exp);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link QuantExp}.</p>
+     *
+     * @param exp A quantified expression.
+     */
+    @Override
+    public final void postQuantExp(QuantExp exp) {
+        myBuilder.endScope();
+
+        expectType(exp.getBody(), myTypeGraph.BOOLEAN);
+        exp.setMathType(myTypeGraph.BOOLEAN);
+    }
+
+    /**
+     * <p>This method redefines how a {@link QuantExp} should be walked.</p>
+     *
+     * @param exp A quantified expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkQuantExp(QuantExp exp) {
+        preQuantExp(exp);
+        emitDebug(exp.getLocation(), "Entering walkQuantExp...");
+
+        List<MathVarDec> vars = exp.getVars();
+        SymbolTableEntry.Quantification quantification = exp.getQuantification();
+        myActiveQuantifications.push(quantification);
+        for (MathVarDec v : vars) {
+            TreeWalker.visit(this, v);
+        }
+        myActiveQuantifications.pop();
+
+        myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
+        TreeWalker.visit(this, exp.getBody());
+        myActiveQuantifications.pop();
+
+        emitDebug(exp.getLocation(), "Exiting walkQuantExp.");
+        postQuantExp(exp);
+
+        return true;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link SetExp}.</p>
+     *
+     * @param exp A set expression.
+     */
+    @Override
+    public final void postSetExp(SetExp exp) {
+        MathVarDec varDec = exp.getVar();
+        MTType varType = varDec.getMathType();
+
+        Exp body = exp.getBody();
+
+        expectType(body, myTypeGraph.BOOLEAN);
+
+        if (exp.getWhere() != null) {
+            body = MathExp.formConjunct(exp.getLocation(), exp.getWhere(), body);
+        }
+
+        exp.setMathType(new MTSetRestriction(myTypeGraph, varType, varDec
+                .getName().getName(), body));
+        exp.setMathTypeValue(new MTPowertypeApplication(myTypeGraph, varType));
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link SetCollectionExp}.</p>
+     *
+     * @param exp A set collection expression.
+     */
+    @Override
+    public final void postSetCollectionExp(SetCollectionExp exp) {
+        // Make sure that everything in the set collection has the same expected type
+        MTType setType = null;
+        for (MathExp mathExp : exp.getVars()) {
+            if (setType != null) {
+                expectType(mathExp, setType);
+            }
+            else {
+                setType = mathExp.getMathType();
+            }
+        }
+
+        // This must be our type
+        exp.setMathType(setType);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TupleExp}.</p>
+     *
+     * @param exp A tuple expression.
+     */
+    @Override
+    public final void postTupleExp(TupleExp exp) {
+        // See the note in TupleExp on why TupleExp isn't an AbstractFunctionExp
+        List<Exp> fields = exp.getFields();
+        List<MTCartesian.Element> fieldTypes = new LinkedList<>();
+        for (Exp field : fields) {
+            fieldTypes.add(new MTCartesian.Element(field.getMathType()));
+        }
+
+        exp.setMathType(new MTCartesian(myTypeGraph, fieldTypes));
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeAssertionExp}.</p>
+     *
+     * @param exp A type assertion expression.
+     */
+    @Override
+    public final void postTypeAssertionExp(TypeAssertionExp exp) {
+        if (myTypeValueDepth == 0
+                && (myExpressionDepth > 2 || !myInTypeTheoremBindingExpFlag)) {
+            throw new SourceErrorException("This construct only permitted in "
+                    + "type declarations or in expressions matching: \n\n"
+                    + "   Type Theorem <name>: <quantifiers>, \n"
+                    + "       [<condition> implies] <expression> : "
+                    + "<assertedType>", exp.getLocation());
+        }
+        else if (myActiveQuantifications.size() > 0
+                && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE) {
+            throw new SourceErrorException(
+                    "Implicit types are not permitted inside "
+                            + "quantified variable declarations. \n"
+                            + "Quantify the type explicitly instead.", exp
+                    .getLocation());
+        }
+        //Note that postTypeTheoremDec() checks the "form" of a type theorem at
+        //the top two levels.  So all we're checking for here is that the type
+        //assertion didn't happen deeper than that (where it shouldn't appear).
+
+        //If we're the assertion of a type theorem, then postTypeTheoremDec()
+        //will take care of any logic.  If we're part of a type declaration,
+        //on the other hand, we've got some bookkeeping to do...
+        if (myTypeValueDepth > 0) {
+            try {
+                VarExp nodeExp = (VarExp) exp.getExp();
+                try {
+                    myBuilder.getInnermostActiveScope().addBinding(
+                            nodeExp.getName().getName(),
+                            SymbolTableEntry.Quantification.UNIVERSAL, exp,
+                            exp.getAssertedTy().getMathType());
+                    exp.setMathType(exp.getAssertedTy().getMathType());
+                    exp.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
+                            .getName().getName()));
+
+                    //See walkTypeAssertionExp(): we are responsible for
+                    //setting the VarExp's type.
+                    nodeExp.setMathType(exp.getAssertedTy().getMathType());
+                    exp.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
+                            .getName().getName()));
+
+                    if (myDefinitionNamedTypes.contains(nodeExp.getName()
+                            .getName())) {
+                        //Regardless of where in the expression it appears, an
+                        //implicit type parameter exists at the top level of a
+                        //definition, and thus a definition that contains, e.g.,
+                        //an implicit type parameter T cannot make reference
+                        //to some existing type with that name (except via full
+                        //qualification), thus the introduction of an implicit
+                        //type parameter must precede any use of that
+                        //parameter's name, even if the name exists in-scope
+                        //before the parameter is declared
+                        throw new SourceErrorException("Introduction of "
+                                + "implicit type parameter must precede any "
+                                + "use of that variable name.", nodeExp
+                                .getLocation());
+                    }
+
+                    //Note that a redundantly named type parameter would be
+                    //caught when we add a symbol to the symbol table, so no
+                    //need to check here
+                    myDefinitionSchematicTypes.put(nodeExp.getName().getName(),
+                            exp.getAssertedTy().getMathType());
+
+                    emitDebug(exp.getLocation(), "Added schematic variable: "
+                            + nodeExp.getName().getName());
+                }
+                catch (DuplicateSymbolException dse) {
+                    duplicateSymbol(nodeExp.getName().getName(), nodeExp
+                            .getLocation());
+                }
+            }
+            catch (ClassCastException cce) {
+                throw new SourceErrorException("Must be a variable name.", exp
+                        .getExp().getLocation());
+            }
+        }
+        else {
+            exp.setMathType(myTypeGraph.BOOLEAN);
+        }
+    }
+
+    /**
+     * <p>This method redefines how a {@link TypeAssertionExp} should be walked.</p>
+     *
+     * @param exp A type assertion expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkTypeAssertionExp(TypeAssertionExp exp) {
+        preTypeAssertionExp(exp);
+
+        //If we exist as an implicit type parameter, there's no way our
+        //expression can know its own type (that's defined by the asserted Ty),
+        //so we skip walking it and let postTypeAssertionExp() set its type for
+        //it
+        if (myTypeValueDepth == 0) {
+            TreeWalker.visit(this, exp.getExp());
+        }
+
+        TreeWalker.visit(this, exp.getAssertedTy());
+        postTypeAssertionExp(exp);
+
+        return true;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link VarExp}.</p>
+     *
+     * @param exp A variable expression.
+     */
+    @Override
+    public final void postVarExp(VarExp exp) {
+        MathSymbolEntry intendedEntry =
+                postSymbolExp(exp.getQualifier(), exp.getName().getName(), exp);
+
+        if (myTypeValueDepth > 0 && exp.getQualifier() == null) {
+            try {
+                intendedEntry.getTypeValue();
+                myDefinitionNamedTypes.add(intendedEntry.getName());
+            }
+            catch (SymbolNotOfKindTypeException snokte) {
+                //No problem, just don't need to add it
+            }
+        }
+    }
 
     // -----------------------------------------------------------
     // Program Expression-Related
@@ -1410,6 +2081,8 @@ public class Populator extends TreeWalkerVisitor {
      * <p>This method redefines how a {@link ProgramVariableDotExp} should be walked.</p>
      *
      * @param exp A programming variable dotted expression.
+     *
+     * @return {@code true}
      */
     @Override
     public final boolean walkProgramVariableDotExp(ProgramVariableDotExp exp) {
@@ -1431,6 +2104,36 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Raw Type-Related
     // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link ArbitraryExpTy}.</p>
+     *
+     * @param ty A raw arbitrary type.
+     */
+    @Override
+    public final void preArbitraryExpTy(ArbitraryExpTy ty) {
+        enteringTypeValueNode();
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link ArbitraryExpTy}.</p>
+     *
+     * @param ty A raw arbitrary type.
+     */
+    @Override
+    public final void postArbitraryExpTy(ArbitraryExpTy ty) {
+        leavingTypeValueNode();
+
+        Exp typeExp = ty.getArbitraryExp();
+        MTType mathType = typeExp.getMathType();
+        MTType mathTypeValue = typeExp.getMathTypeValue();
+        if (mathTypeValue == null) {
+            notAType(typeExp);
+        }
+
+        ty.setMathType(mathType);
+        ty.setMathTypeValue(mathTypeValue);
+    }
 
     /**
      * <p>Code that gets executed after visiting a {@link NameTy}.</p>
@@ -1694,6 +2397,175 @@ public class Populator extends TreeWalkerVisitor {
      */
     private void enteringTypeValueNode() {
         myTypeValueDepth++;
+    }
+
+    /**
+     * <p>Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
+     * candidates to find the {@link MathSymbolEntry} that match the given expression
+     * using a type comparison algorithm.</p>
+     *
+     * @param e The expression we are searching for.
+     * @param candidates List of candidate symbol table entries.
+     *
+     * @return The corresponding {@link MathSymbolEntry}.
+     *
+     * @throws NoSolutionException We simply couldn't find it.
+     */
+    private MathSymbolEntry getDomainTypeMatch(AbstractFunctionExp e,
+            List<MathSymbolEntry> candidates, TypeComparison<AbstractFunctionExp, MTFunction> comparison)
+            throws NoSolutionException {
+        MTFunction eType = e.getConservativePreApplicationType(myTypeGraph);
+
+        MathSymbolEntry match = null;
+
+        MTFunction candidateType;
+        for (MathSymbolEntry candidate : candidates) {
+            if (candidate.getType() instanceof MTFunction) {
+
+                try {
+                    candidate =
+                            candidate.deschematize(e.getParameters(), myBuilder
+                                            .getInnermostActiveScope(),
+                                    myDefinitionSchematicTypes);
+                    candidateType = (MTFunction) candidate.getType();
+                    emitDebug(e.getLocation(), candidate.getType() + " deschematizes to "
+                            + candidateType);
+
+                    if (comparison.compare(e, eType, candidateType)) {
+                        if (match != null) {
+                            throw new SourceErrorException("Multiple "
+                                    + comparison.description() + " domain "
+                                    + "matches.  For example, "
+                                    + match.getName() + " : " + match.getType()
+                                    + " and " + candidate.getName() + " : "
+                                    + candidate.getType()
+                                    + ".  Consider explicitly qualifying.", e
+                                    .getLocation());
+                        }
+
+                        match = candidate;
+                    }
+                }
+                catch (NoSolutionException nse) {
+                    //couldn't deschematize--try the next one
+                    emitDebug(e.getLocation(), candidate.getType() + " doesn't deschematize "
+                            + "against " + e.getParameters());
+                }
+            }
+        }
+
+        if (match == null) {
+            throw new NoSolutionException("Could not find a symbol entry for: " + e, null);
+        }
+
+        return match;
+    }
+
+    /**
+     * <p>Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
+     * candidates to find the {@link MathSymbolEntry} that match the given expression
+     * using an exact domain match.</p>
+     *
+     * @param e The expression we are searching for.
+     * @param candidates List of candidate symbol table entries.
+     *
+     * @return The corresponding {@link MathSymbolEntry}.
+     *
+     * @throws NoSolutionException We simply couldn't find it.
+     */
+    private MathSymbolEntry getExactDomainTypeMatch(AbstractFunctionExp e,
+            List<MathSymbolEntry> candidates) throws NoSolutionException {
+        return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
+    }
+
+    /**
+     * <p>Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
+     * candidates to find the {@link MathSymbolEntry} that match the given expression
+     * using an inexact domain match.</p>
+     *
+     * @param e The expression we are searching for.
+     * @param candidates List of candidate symbol table entries.
+     *
+     * @return The corresponding {@link MathSymbolEntry}.
+     *
+     * @throws NoSolutionException We simply couldn't find it.
+     */
+    private MathSymbolEntry getInexactDomainTypeMatch(AbstractFunctionExp e,
+            List<MathSymbolEntry> candidates) throws NoSolutionException {
+        return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
+    }
+
+    /**
+     * <p>For a given {@link AbstractFunctionExp}, finds the entry in the
+     * symbol table to which it refers.</p>
+     *
+     * @param e The expression we are searching for.
+     *
+     * @return The corresponding {@link MathSymbolEntry}.
+     */
+    private MathSymbolEntry getIntendedFunction(AbstractFunctionExp e) {
+        MTFunction eType = e.getConservativePreApplicationType(myTypeGraph);
+
+        PosSymbol eOperator = e.getOperatorAsPosSymbol();
+        String eOperatorString = eOperator.getName();
+
+        List<MathSymbolEntry> sameNameFunctions =
+                myBuilder.getInnermostActiveScope().query(
+                        new MathFunctionNamedQuery(e.getQualifier(), e
+                                .getOperatorAsPosSymbol()));
+
+        if (sameNameFunctions.isEmpty()) {
+            throw new SourceErrorException("No such function.", e.getLocation());
+        }
+
+        MathSymbolEntry intendedEntry;
+        try {
+            intendedEntry = getExactDomainTypeMatch(e, sameNameFunctions);
+        }
+        catch (NoSolutionException nse) {
+            try {
+                intendedEntry = getInexactDomainTypeMatch(e, sameNameFunctions);
+            }
+            catch (NoSolutionException nsee2) {
+                boolean foundOne = false;
+                String errorMessage =
+                        "No function applicable for " + "domain: "
+                                + eType.getDomain() + "\n\nCandidates:\n";
+
+                for (SymbolTableEntry entry : sameNameFunctions) {
+
+                    if (entry instanceof MathSymbolEntry
+                            && ((MathSymbolEntry) entry).getType() instanceof MTFunction) {
+                        errorMessage +=
+                                "\t" + entry.getName() + " : "
+                                        + ((MathSymbolEntry) entry).getType()
+                                        + "\n";
+
+                        foundOne = true;
+                    }
+                }
+
+                if (!foundOne) {
+                    throw new SourceErrorException("No such function.", e
+                            .getLocation());
+                }
+
+                throw new SourceErrorException(errorMessage, e.getLocation());
+            }
+        }
+
+        if (intendedEntry.getDefiningElement() == myCurrentDirectDefinition) {
+            throw new SourceErrorException("Direct definition cannot "
+                    + "contain recursive call.", e.getLocation());
+        }
+
+        MTFunction intendedEntryType = (MTFunction) intendedEntry.getType();
+
+        emitDebug(e.getLocation(), "Matching " + eOperatorString + " : " + eType
+                + " to " + intendedEntry.getName() + " : " + intendedEntryType
+                + ".");
+
+        return intendedEntry;
     }
 
     /**
