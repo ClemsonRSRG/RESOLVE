@@ -265,8 +265,9 @@ public class FunctionExp extends AbstractFunctionExp {
     @Override
     public final List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
-        list.add(myFuncNameExp);
-        list.add(myFuncNameCaratExp);
+        if (myFuncNameCaratExp != null) {
+            list.add(myFuncNameCaratExp);
+        }
         list.addAll(copyExps());
 
         return list;

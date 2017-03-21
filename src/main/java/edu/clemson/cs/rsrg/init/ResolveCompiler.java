@@ -12,14 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.archiving.Archiver;
-import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
-import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
-import edu.clemson.cs.r2jt.rewriteprover.Prover;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
-import edu.clemson.cs.r2jt.translation.CTranslator;
-import edu.clemson.cs.r2jt.translation.JavaTranslator;
-import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;

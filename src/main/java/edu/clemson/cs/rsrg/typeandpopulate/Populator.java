@@ -1778,6 +1778,7 @@ public class Populator extends TreeWalkerVisitor {
     public final boolean walkDotExp(DotExp exp) {
         preAny(exp);
         preExp(exp);
+        preMathExp(exp);
         preDotExp(exp);
 
         Indirect<Exp> lastGoodOut = new Indirect<>();
@@ -1833,6 +1834,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         postDotExp(exp);
+        postMathExp(exp);
         postExp(exp);
         postAny(exp);
 
@@ -1848,6 +1850,10 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final boolean walkFunctionExp(FunctionExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preAbstractFunctionExp(exp);
         preFunctionExp(exp);
         emitDebug(exp.getLocation(), "\tEntering walkFunctionExp...");
 
@@ -1864,6 +1870,10 @@ public class Populator extends TreeWalkerVisitor {
 
         emitDebug(exp.getLocation(), "\tExiting walkFunctionExp.");
         postFunctionExp(exp);
+        postAbstractFunctionExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
 
         return true;
     }
@@ -2016,6 +2026,9 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final boolean walkQuantExp(QuantExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
         preQuantExp(exp);
         emitDebug(exp.getLocation(), "\tEntering walkQuantExp...");
 
@@ -2033,6 +2046,9 @@ public class Populator extends TreeWalkerVisitor {
 
         emitDebug(exp.getLocation(), "\tExiting walkQuantExp.");
         postQuantExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
 
         return true;
     }

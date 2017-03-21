@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.mathtypes;
 
-import edu.clemson.cs.r2jt.typeandpopulate.SyntacticSubtypeChecker;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.SyntacticSubtypeChecker;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
 import java.util.*;
 
