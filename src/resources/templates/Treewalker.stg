@@ -41,6 +41,21 @@ public void post<name>(<if(isMember)><qualName><else><name><endif> e) {}
 
 >>
 
+walkerVirtualListMethods(name, qualClassName, className, isMember) ::= <<
+
+public boolean walk<name>(<if(isMember)><qualClassName><else><className><endif> e) {
+    return false;
+}
+
+public void pre<name>(<if(isMember)><qualClassName><else><className><endif> e) {}
+
+public void mid<name>(<if(isMember)><qualClassName><else><className><endif> e,
+    ResolveConceptualElement previous, ResolveConceptualElement next) {}
+
+public void post<name>(<if(isMember)><qualClassName><else><className><endif> e) {}
+
+>>
+
 walkerStackImplementation(pkgName, className, parentClassName, imports) ::= <<
 package <pkgName>;
 
