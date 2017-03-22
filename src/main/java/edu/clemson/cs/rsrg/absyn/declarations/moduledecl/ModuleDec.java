@@ -37,14 +37,14 @@ public abstract class ModuleDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The current module's declaration objects.</p> */
-    protected final List<Dec> myDecs;
-
     /** <p>The current module's parameter declaration objects.</p> */
     protected final List<ModuleParameterDec> myParameterDecs;
 
     /** <p>The current module's import objects.</p> */
     protected final List<UsesItem> myUsesItems;
+
+    /** <p>The current module's declaration objects.</p> */
+    protected final List<Dec> myDecs;
 
     /** <p>The current module's import objects.</p> */
     protected final Map<PosSymbol, Boolean> myModuleDependencies;

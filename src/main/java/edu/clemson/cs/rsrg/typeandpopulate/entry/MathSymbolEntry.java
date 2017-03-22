@@ -156,9 +156,11 @@ public class MathSymbolEntry extends SymbolTableEntry {
      *
      * @throws NoSolutionException
      */
-    public final MathSymbolEntry deschematize(List<Exp> arguments, Scope callingContext, Map<String, MTType> definitionSchematicTypes) throws NoSolutionException {
+    public final MathSymbolEntry deschematize(List<Exp> arguments, Scope callingContext,
+            Map<String, MTType> definitionSchematicTypes) throws NoSolutionException {
         if (!(myType instanceof MTFunction)) {
-            throw new NoSolutionException("Expecting MTFunction, found: " + myType.getClass().getSimpleName(), new IllegalStateException());
+            throw new NoSolutionException("Expecting MTFunction, found: " + myType.getClass().getSimpleName(),
+                    new IllegalStateException());
         }
 
         List<MTType> formalParameterTypes =

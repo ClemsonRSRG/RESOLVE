@@ -228,7 +228,12 @@ public class TreeWalker {
                 }
                 catch (InvocationTargetException ite) {
                     //An exception was thrown inside the corresponding walk method
-                    throw new MiscErrorException("Target invocation error for class: " + c.getSimpleName(), ite);
+                    Throwable throwable = ite.getTargetException();
+                    while (throwable instanceof MiscErrorException && throwable.getCause() != null) {
+                        throwable = throwable.getCause();
+                    }
+
+                    throw new MiscErrorException("Target invocation error for class: " + c.getSimpleName(), throwable);
                 }
             }
         }
