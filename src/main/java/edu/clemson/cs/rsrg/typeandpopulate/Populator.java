@@ -267,12 +267,6 @@ public class Populator extends TreeWalkerVisitor {
      */
     private int myTypeValueDepth = 0;
 
-    /**
-     * <p>A flag that indicates whether or not we are visiting the function's
-     * name expression.</p>
-     */
-    private boolean myIsVisitingFunctionNameExpFlag = false;
-
     // ===========================================================
     // Flag Strings
     // ===========================================================
@@ -724,7 +718,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         List<MathVarDec> listVarDec = dec.getParameters();
-        if (listVarDec != null) {
+        if (listVarDec.size() > 0) {
             declaredType = new MTFunction(myTypeGraph, dec);
         }
 
@@ -1291,7 +1285,6 @@ public class Populator extends TreeWalkerVisitor {
         if ((myDefinitionParameterSectionFlag || (myActiveQuantifications
                 .size() > 0 && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE))
                 && mathTypeValue.isKnownToContainOnlyMTypes()) {
-
             myDefinitionSchematicTypes.put(varName, mathTypeValue);
         }
 
@@ -2794,7 +2787,6 @@ public class Populator extends TreeWalkerVisitor {
         MTFunction candidateType;
         for (MathSymbolEntry candidate : candidates) {
             if (candidate.getType() instanceof MTFunction) {
-
                 try {
                     candidate =
                             candidate.deschematize(e.getParameters(), myBuilder
@@ -2903,16 +2895,14 @@ public class Populator extends TreeWalkerVisitor {
                 boolean foundOne = false;
                 String errorMessage =
                         "No function applicable for " + "domain: "
-                                + eType.getDomain() + "\n\nCandidates:\n";
+                                + eType.getDomain() + "\t[" + e.getLocation() + "]\n\nCandidates:\n";
 
                 for (SymbolTableEntry entry : sameNameFunctions) {
-
                     if (entry instanceof MathSymbolEntry
                             && ((MathSymbolEntry) entry).getType() instanceof MTFunction) {
                         errorMessage +=
-                                "\t" + entry.getName() + " : "
-                                        + ((MathSymbolEntry) entry).getType()
-                                        + "\n";
+                                "\t[" + entry.getDefiningElement().getLocation() + "]\t" +
+                                        entry.getName() + " : " + ((MathSymbolEntry) entry).getType() + "\n";
 
                         foundOne = true;
                     }
@@ -2923,7 +2913,7 @@ public class Populator extends TreeWalkerVisitor {
                             .getLocation());
                 }
 
-                throw new SourceErrorException(errorMessage, e.getLocation());
+                throw new SourceErrorException(errorMessage, (Location) null);
             }
         }
 
