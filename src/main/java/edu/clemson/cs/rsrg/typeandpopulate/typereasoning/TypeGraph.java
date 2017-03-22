@@ -505,9 +505,14 @@ public class TypeGraph {
     public final String toString() {
         StringBuilder str = new StringBuilder();
 
-        Set<MTType> keys = myTypeNodes.keySet();
-        for (MTType key : keys) {
-            str.append(myTypeNodes.get(key).toString());
+        Iterator<MTType> keysIterator = myTypeNodes.keySet().iterator();
+        while (keysIterator.hasNext()) {
+            MTType next = keysIterator.next();
+            str.append(myTypeNodes.get(next).toString());
+
+            if (keysIterator.hasNext()) {
+                str.append("\n\n");
+            }
         }
 
         return str.toString();
