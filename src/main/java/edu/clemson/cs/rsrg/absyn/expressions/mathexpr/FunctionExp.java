@@ -224,9 +224,9 @@ public class FunctionExp extends AbstractFunctionExp {
     /**
      * <p>This method returns the function name expression.</p>
      *
-     * @return The {@link Exp} representation object.
+     * @return The {@link VarExp} representation object.
      */
-    public final Exp getName() {
+    public final VarExp getName() {
         return myFuncNameExp;
     }
 
@@ -335,6 +335,15 @@ public class FunctionExp extends AbstractFunctionExp {
         }
 
         return new FunctionExp(cloneLocation(), qualifier, newNameExp, newCaratExp, newArgs);
+    }
+
+    /**
+     * <p>Sets the quantification for this expression.</p>
+     *
+     * @param q The quantification type for this expression.
+     */
+    public final void setQuantification(SymbolTableEntry.Quantification q) {
+        myQuantification = q;
     }
 
     /**
