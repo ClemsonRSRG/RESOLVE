@@ -267,6 +267,12 @@ public class Populator extends TreeWalkerVisitor {
      */
     private int myTypeValueDepth = 0;
 
+    /**
+     * <p>A flag that indicates whether or not we are visiting the function's
+     * name expression.</p>
+     */
+    private boolean myIsVisitingFunctionNameExpFlag = false;
+
     // ===========================================================
     // Flag Strings
     // ===========================================================
@@ -1866,7 +1872,8 @@ public class Populator extends TreeWalkerVisitor {
             TreeWalker.visit(this, exp.getCaratExp());
         }
 
-        TreeWalker.visit(this, exp.getName());
+        VarExp name = exp.getName();
+        name.setMathType(new MTNamed(myTypeGraph, name.getName().getName()));
 
         emitDebug(exp.getLocation(), "\tExiting walkFunctionExp.");
         postFunctionExp(exp);
@@ -3240,17 +3247,9 @@ public class Populator extends TreeWalkerVisitor {
     private MathSymbolEntry postSymbolExp(PosSymbol qualifier, String symbolName, Exp node) {
         MathSymbolEntry intendedEntry =
                 getIntendedEntry(qualifier, symbolName, node);
+        node.setMathType(intendedEntry.getType());
 
-        // Since we changed FunctionExp to use a VarExp as a name, this will need to type
-        // it somehow. We don't want the type for the name to be MTFunction, so we simply
-        // assign it an MTNamed.
-        if (node instanceof VarExp && intendedEntry.getType() instanceof MTFunction) {
-            node.setMathType(new MTNamed(myTypeGraph, symbolName));
-        }
-        else {
-            node.setMathType(intendedEntry.getType());
-            setSymbolTypeValue(node, symbolName, intendedEntry);
-        }
+        setSymbolTypeValue(node, symbolName, intendedEntry);
 
         String typeValueDesc = "";
 
