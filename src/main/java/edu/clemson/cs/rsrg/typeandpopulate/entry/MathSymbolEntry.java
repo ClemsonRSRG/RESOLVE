@@ -87,7 +87,9 @@ public class MathSymbolEntry extends SymbolTableEntry {
      *                       map.
      * @param sourceModule The module where this entry was created from.
      */
-    public MathSymbolEntry(TypeGraph g, String name, Quantification q, ResolveConceptualElement definingElement, MTType type, MTType typeValue, Map<String, MTType> schematicTypes, Map<String, MTType> genericsInDefiningContext, ModuleIdentifier sourceModule) {
+    public MathSymbolEntry(TypeGraph g, String name, Quantification q, ResolveConceptualElement definingElement,
+            MTType type, MTType typeValue, Map<String, MTType> schematicTypes,
+            Map<String, MTType> genericsInDefiningContext, ModuleIdentifier sourceModule) {
         super(name, definingElement, sourceModule);
 
         if (genericsInDefiningContext != null) {
@@ -211,7 +213,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
             }
         }
         catch (BindingException be) {
-            throw new NoSolutionException("Error while attempting to bind the actual arguments to the formal parameters.", new IllegalStateException());
+            throw new NoSolutionException("Error while attempting to bind the actual arguments to the formal parameters.",
+                    new IllegalStateException());
         }
 
         MTType newTypeValue = null;
@@ -381,29 +384,6 @@ public class MathSymbolEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This method returns the mathematical types associated with
-     * the provided arguments.</p>
-     *
-     * @param arguments The arguments to a mathematical function.
-     *
-     * @return A list of {@link MTType}s.
-     */
-    private static List<MTType> getArgumentTypes(List<Exp> arguments) {
-        List<MTType> result;
-
-        if (arguments.size() == 1) {
-            result = expandAsNeeded(arguments.get(0).getMathType());
-        } else {
-            result = new LinkedList<>();
-            for (Exp e : arguments) {
-                result.add(e.getMathType());
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * <p>Given {@code t}, we check to see if this type is
      * contained in any of our schematic types.</p>
      *
@@ -443,6 +423,29 @@ public class MathSymbolEntry extends SymbolTableEntry {
         else {
             if (!t.equals(t.getTypeGraph().VOID)) {
                 result.add(t);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>This method returns the mathematical types associated with
+     * the provided arguments.</p>
+     *
+     * @param arguments The arguments to a mathematical function.
+     *
+     * @return A list of {@link MTType}s.
+     */
+    private static List<MTType> getArgumentTypes(List<Exp> arguments) {
+        List<MTType> result;
+
+        if (arguments.size() == 1) {
+            result = expandAsNeeded(arguments.get(0).getMathType());
+        } else {
+            result = new LinkedList<>();
+            for (Exp e : arguments) {
+                result.add(e.getMathType());
             }
         }
 
