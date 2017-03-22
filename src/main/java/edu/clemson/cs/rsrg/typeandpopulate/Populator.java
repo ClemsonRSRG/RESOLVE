@@ -2794,7 +2794,7 @@ public class Populator extends TreeWalkerVisitor {
                                     myDefinitionSchematicTypes);
                     candidateType = (MTFunction) candidate.getType();
                     emitDebug(e.getLocation(), "\t" + candidate.getType() + " deschematizes to "
-                            + candidateType);
+                            + candidateType + " using " + comparison.description());
 
                     if (comparison.compare(e, eType, candidateType)) {
                         if (match != null) {
@@ -2814,7 +2814,7 @@ public class Populator extends TreeWalkerVisitor {
                 catch (NoSolutionException nse) {
                     //couldn't deschematize--try the next one
                     emitDebug(e.getLocation(), "\t" + candidate.getType() + " doesn't deschematize "
-                            + "against " + e.getParameters());
+                            + "against " + e.getParameters() + " using " + comparison.description());
                 }
             }
         }
@@ -3475,7 +3475,7 @@ public class Populator extends TreeWalkerVisitor {
          */
         @Override
         public final String description() {
-            return "exact";
+            return "Exact Domain Match";
         }
 
     }
@@ -3512,7 +3512,7 @@ public class Populator extends TreeWalkerVisitor {
          */
         @Override
         public final String description() {
-            return "inexact";
+            return "Inexact Domain Match";
         }
 
     }
@@ -3595,7 +3595,7 @@ public class Populator extends TreeWalkerVisitor {
          */
         @Override
         public final String description() {
-            return "inexact";
+            return "Inexact Parameter Match";
         }
 
     }
