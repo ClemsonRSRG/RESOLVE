@@ -522,10 +522,13 @@ public class TypeGraph {
         Iterator<MTType> keysIterator = myTypeNodes.keySet().iterator();
         while (keysIterator.hasNext()) {
             MTType next = keysIterator.next();
+            str.append("----> Type Node: ");
+            str.append(next.toString());
+            str.append("\n");
             str.append(myTypeNodes.get(next).toString());
 
             if (keysIterator.hasNext()) {
-                str.append("\n\n");
+                str.append("\n");
             }
         }
 

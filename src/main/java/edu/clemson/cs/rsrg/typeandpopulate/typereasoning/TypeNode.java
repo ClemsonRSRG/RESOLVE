@@ -128,7 +128,12 @@ public class TypeNode {
         for (Set<TypeRelationship> target : myRelationships.values()) {
             for (TypeRelationship rel : target) {
                 str.append(rel);
+                str.append("\n\n");
             }
+        }
+
+        if (myRelationships.values().isEmpty()) {
+            str.append("\n");
         }
 
         return str.toString();

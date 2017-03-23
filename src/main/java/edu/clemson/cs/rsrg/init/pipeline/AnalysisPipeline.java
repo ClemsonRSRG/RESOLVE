@@ -59,7 +59,7 @@ public class AnalysisPipeline extends AbstractPipeline {
             StringBuffer sb = new StringBuffer();
             sb.append("\n---------------Current Type Graph---------------\n\n");
             sb.append(mySymbolTable.getTypeGraph().toString());
-            sb.append("\n\n---------------Current Type Graph---------------\n");
+            sb.append("\n---------------Current Type Graph---------------\n");
             statusHandler.info(null, sb.toString());
         }
     }
