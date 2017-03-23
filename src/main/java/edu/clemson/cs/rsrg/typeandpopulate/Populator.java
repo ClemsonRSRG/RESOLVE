@@ -13,7 +13,6 @@
 package edu.clemson.cs.rsrg.typeandpopulate;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.VirtualListNode;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
@@ -2248,6 +2247,10 @@ public class Populator extends TreeWalkerVisitor {
                 //No problem, just don't need to add it
             }
         }
+
+        // Our quantifier might have changed, so set it using the
+        // corresponding MathSymbolEntry
+        exp.setQuantification(intendedEntry.getQuantification());
     }
 
     // -----------------------------------------------------------
@@ -3307,25 +3310,23 @@ public class Populator extends TreeWalkerVisitor {
      * @param <T> A type that extends from {@link SymbolTableEntry}.
      */
     private <T extends SymbolTableEntry> void ambiguousSymbol(String symbolName, Location l, List<T> candidates) {
-        String message = "Ambiguous symbol.  Candidates: ";
+        StringBuffer sb = new StringBuffer();
 
+        sb.append("Ambiguous symbol.  Candidates: ");
         boolean first = true;
         for (SymbolTableEntry candidate : candidates) {
             if (first) {
                 first = false;
             }
             else {
-                message += ", ";
+                sb.append(", ");
             }
 
-            message +=
-                    candidate.getSourceModuleIdentifier()
-                            .fullyQualifiedRepresentation(symbolName);
+            sb.append(candidate.getSourceModuleIdentifier().fullyQualifiedRepresentation(symbolName));
         }
+        sb.append(".  Consider qualifying.");
 
-        message += ".  Consider qualifying.";
-
-        throw new SourceErrorException(message, l);
+        throw new SourceErrorException(sb.toString(), l);
     }
 
     /**
