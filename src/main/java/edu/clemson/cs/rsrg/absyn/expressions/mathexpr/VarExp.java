@@ -39,7 +39,7 @@ public class VarExp extends MathExp {
     private final PosSymbol myName;
 
     /** <p>The object's quantification (if any).</p> */
-    private final SymbolTableEntry.Quantification myQuantification;
+    private SymbolTableEntry.Quantification myQuantification;
 
     // ===========================================================
     // Constructors
@@ -231,6 +231,15 @@ public class VarExp extends MathExp {
      */
     public final void setQualifier(PosSymbol qualifier) {
         myQualifier = qualifier;
+    }
+
+    /**
+     * <p>Sets the quantification for this expression.</p>
+     *
+     * @param q The quantification type for this expression.
+     */
+    public final void setQuantification(SymbolTableEntry.Quantification q) {
+        myQuantification = q;
     }
 
     /**
