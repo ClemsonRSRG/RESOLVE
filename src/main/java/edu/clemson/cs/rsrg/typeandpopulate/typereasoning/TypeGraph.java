@@ -312,7 +312,7 @@ public class TypeGraph {
             sb.append("\n---------------New Type Relationship---------------\n\n");
             sb.append("Added relationship to type node [");
             sb.append(sourceCanonicalResult.canonicalType);
-            sb.append("]: ");
+            sb.append("]:\n");
             sb.append(relationship);
             sb.append("\n\n---------------New Type Relationship---------------\n");
             myStatusHandler.info(null, sb.toString());
