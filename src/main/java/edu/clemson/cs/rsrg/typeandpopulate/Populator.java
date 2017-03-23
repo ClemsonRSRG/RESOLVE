@@ -1717,6 +1717,16 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Code that gets executed after visiting an {@link BetweenExp}.</p>
+     *
+     * @param exp A conjunct expression.
+     */
+    @Override
+    public final void postBetweenExp(BetweenExp exp) {
+        exp.setMathType(myTypeGraph.BOOLEAN);
+    }
+
+    /**
      * <p>Code that gets executed before visiting a {@link CrossTypeExp}.</p>
      *
      * @param exp A cartesian product expression.
