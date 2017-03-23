@@ -469,6 +469,20 @@ public class TypeGraph {
                             || myEstablishedSubtypes.contains(r)
                             || subtype.equals(supertype)
                             || subtype.isSyntacticSubtypeOf(supertype);
+
+            // Attempt to see if the subtype's type is a subtype of
+            // the supertype. This comes up in a categorical definition
+            // when the parameters have been introduced, but not yet added
+            // to the type graph. - YS
+            if (!result && subtype.getType() != null) {
+                MTType subtypetype = subtype.getType();
+                EstablishedRelationship r2 =
+                        new EstablishedRelationship(subtypetype, supertype);
+                result =
+                        myEstablishedSubtypes.contains(r2)
+                                || subtypetype.equals(subtype)
+                                || subtypetype.isSyntacticSubtypeOf(supertype);
+            }
         }
         catch (NoSuchElementException nsee) {
             //Syntactic subtype checker freaks out (rightly) if there are
