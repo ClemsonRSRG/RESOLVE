@@ -324,7 +324,9 @@ public class Controller {
      * @throws ImportException Incorrect import type.
      * @throws SourceErrorException There are errors in the source file.
      */
-    private void findDependencies(DefaultDirectedGraph g, ModuleDec root) {
+    private void findDependencies(
+            DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
+            ModuleDec root) {
         Map<PosSymbol, Boolean> allImports = root.getModuleDependencies();
         for (PosSymbol importRequest : allImports.keySet()) {
             // Check to see if this import has been labeled as externally realized
@@ -426,7 +428,7 @@ public class Controller {
      *
      * @return An ordered list of {@link ModuleIdentifier ModuleIdentifiers}.
      */
-    private List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph g) {
+    private List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g) {
         List<ModuleIdentifier> result = new ArrayList<>();
 
         EdgeReversedGraph<ModuleIdentifier, DefaultEdge> reversed =
@@ -442,6 +444,7 @@ public class Controller {
                 result.add(next);
             }
         }
+
         return result;
     }
 
@@ -455,8 +458,8 @@ public class Controller {
      *
      * @return {@code true} if there is a cycle, {@code false} otherwise.
      */
-    private boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier src,
-            ModuleIdentifier dest) {
+    private boolean pathExists(DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
+            ModuleIdentifier src, ModuleIdentifier dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
         if (!g.containsVertex(src)) {
