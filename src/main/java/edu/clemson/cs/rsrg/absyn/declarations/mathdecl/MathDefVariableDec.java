@@ -101,8 +101,17 @@ public class MathDefVariableDec extends Dec {
      *
      * @return An {@code Exp} representing the definition expression or {@code null}.
      */
-    public final Exp getDefinition() {
+    public final Exp getDefinitionAsExp() {
         return myBodyItem == null ? null : myBodyItem.getDefinition();
+    }
+
+    /**
+     * <p>This method returns the definition expression of a standard definition.</p>
+     *
+     * @return An {@code Exp} representing the definition expression or {@code null}.
+     */
+    public final DefinitionBodyItem getDefinitionItem() {
+        return myBodyItem;
     }
 
     /**
