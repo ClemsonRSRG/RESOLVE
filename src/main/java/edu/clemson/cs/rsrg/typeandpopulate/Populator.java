@@ -2147,11 +2147,11 @@ public class Populator extends TreeWalkerVisitor {
                             + "Quantify the type explicitly instead.", exp
                     .getLocation());
         }
-        //Note that postTypeTheoremDec() checks the "form" of a type theorem at
+        //Note that postMathTypeTheoremDec() checks the "form" of a type theorem at
         //the top two levels.  So all we're checking for here is that the type
         //assertion didn't happen deeper than that (where it shouldn't appear).
 
-        //If we're the assertion of a type theorem, then postTypeTheoremDec()
+        //If we're the assertion of a type theorem, then postMathTypeTheoremDec()
         //will take care of any logic.  If we're part of a type declaration,
         //on the other hand, we've got some bookkeeping to do...
         if (myTypeValueDepth > 0) {
@@ -2822,6 +2822,26 @@ public class Populator extends TreeWalkerVisitor {
                         }
 
                         match = candidate;
+                    }
+                    // YS: eType's domain could be a function application that generates
+                    // the candidate type, therefore we will need check the function inside
+                    // the function application to see if it matches.
+                    else if (eType.getDomain() instanceof MTFunctionApplication) {
+                        MTFunctionApplication eTypeDomainType = (MTFunctionApplication) eType.getDomain();
+                        if (comparison.compare(e, eTypeDomainType.getFunction(), candidateType)) {
+                            if (match != null) {
+                                throw new SourceErrorException("Multiple "
+                                        + comparison.description() + " domain "
+                                        + "matches.  For example, "
+                                        + match.getName() + " : " + match.getType()
+                                        + " and " + candidate.getName() + " : "
+                                        + candidate.getType()
+                                        + ".  Consider explicitly qualifying.", e
+                                        .getLocation());
+                            }
+
+                            match = candidate;
+                        }
                     }
                 }
                 catch (NoSolutionException nse) {
