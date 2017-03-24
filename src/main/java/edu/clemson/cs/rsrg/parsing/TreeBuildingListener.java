@@ -317,7 +317,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Add any auto import files if needed
         PosSymbol moduleName = createPosSymbol(ctx.name);
         if (!inNoAutoImportExceptionList(moduleName)) {
-            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+            uses = addToUsesList(uses, generateAutoImportUsesItems(moduleName.getLocation()));
         }
 
         // Module requires (if any)
@@ -451,7 +451,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Add any auto import files if needed
         PosSymbol moduleName = createPosSymbol(ctx.name);
         if (!inNoAutoImportExceptionList(moduleName)) {
-            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+            uses = addToUsesList(uses, generateAutoImportUsesItems(moduleName.getLocation()));
         }
 
         // Module requires (if any)
@@ -583,7 +583,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Add any auto import files if needed
         PosSymbol moduleName = createPosSymbol(ctx.name);
         if (!inNoAutoImportExceptionList(moduleName)) {
-            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+            uses = addToUsesList(uses, generateAutoImportUsesItems(moduleName.getLocation()));
         }
 
         // Module requires (if any)
@@ -707,7 +707,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Add any auto import files if needed
         PosSymbol moduleName = createPosSymbol(ctx.name);
         if (!inNoAutoImportExceptionList(moduleName)) {
-            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+            uses =
+                    addToUsesList(uses, generateAutoImportUsesItems(moduleName
+                            .getLocation()));
         }
 
         // Module requires (if any)
@@ -810,7 +812,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Add any auto import files if needed
         PosSymbol moduleName = createPosSymbol(ctx.name);
         if (!inNoAutoImportExceptionList(moduleName)) {
-            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+            uses =
+                    addToUsesList(uses, generateAutoImportUsesItems(moduleName
+                            .getLocation()));
         }
 
         // Module requires (if any)
@@ -918,7 +922,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Add any auto import files if needed
         PosSymbol moduleName = createPosSymbol(ctx.name);
         if (!inNoAutoImportExceptionList(moduleName)) {
-            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+            uses =
+                    addToUsesList(uses, generateAutoImportUsesItems(moduleName
+                            .getLocation()));
         }
 
         // Module requires (if any)
@@ -1020,7 +1026,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Add any auto import files if needed
         PosSymbol moduleName = createPosSymbol(ctx.name);
         if (!inNoAutoImportExceptionList(moduleName)) {
-            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+            uses =
+                    addToUsesList(uses, generateAutoImportUsesItems(moduleName
+                            .getLocation()));
         }
 
         // Module requires (if any)
@@ -4914,6 +4922,32 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         if (!myModuleDependencies.containsKey(name)) {
             myModuleDependencies.put(name, isExternallyRealiz);
         }
+    }
+
+    /**
+     * <p>An helper method that adds elements from {@code newItems} if
+     * it doesn't exist already.</p>
+     *
+     * @param usesList The original uses list.
+     * @param newItems The new elements to be added.
+     *
+     * @return The modified uses list.
+     */
+    private List<UsesItem> addToUsesList(List<UsesItem> usesList, List<UsesItem> newItems) {
+        // Get the modules we import as a string
+        List<String> importAsStrings = new ArrayList<>(usesList.size());
+        for (UsesItem item: usesList) {
+            importAsStrings.add(item.getName().getName());
+        }
+
+        // Add the new items if they aren't declared already
+        for (UsesItem newItem: newItems) {
+            if (!importAsStrings.contains(newItem.getName().getName())) {
+                usesList.add(newItem);
+            }
+        }
+
+        return usesList;
     }
 
     /**
