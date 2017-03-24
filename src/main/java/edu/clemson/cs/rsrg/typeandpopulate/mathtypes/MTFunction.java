@@ -743,20 +743,59 @@ public class MTFunction extends MTAbstract<MTFunction> {
                         .getCopyWithVariablesSubstituted(accumulatedConcreteValues);
 
         if (formalParameterType.isKnownToContainOnlyMTypes()) {
+            MTType actualParameterMathType = actualParameter.getMathType();
             MTType actualParameterMathTypeValue =
                     actualParameter.getMathTypeValue();
 
-            if (actualParameterMathTypeValue == null
-                    || !myTypeGraph.isKnownToBeIn(actualParameterMathTypeValue,
+            // YS - Not sure if this is the right fix, but below is the explanation for my logic:
+            // If our actual parameter's math type is equal to the formal parameter type,
+            // there is nothing to deschematize. We add it to our accumulated concrete values
+            // and move on.
+            // TODO: Is isKnownToBeIn(actualParameterMathType, formalParameterType) a condition we need to consider?
+            if (!actualParameterMathType.equals(formalParameterType)) {
+                // YS - So we know the actual parameter's type doesn't match formal
+                // parameter type. We then proceed to check if the actual parameter's math type
+                // is a MTFunctionApplication.
+                if (actualParameterMathType instanceof MTFunctionApplication) {
+                    // YS - Now we check to see if this function application generates the formal
+                    // parameter type. If yes, our actual parameter type value is simply the
+                    // function application itself. Otherwise, we throw an error.
+                    // TODO: Is isKnownToBeIn(appliedFunctionType.getRange(), formalParameterType) a condition we need to consider?
+                    MTFunction appliedFunctionType =
+                            ((MTFunctionApplication) actualParameterMathType)
+                                    .getFunction();
+                    if (!appliedFunctionType.getRange().equals(
                             formalParameterType)) {
-                throw new NoSolutionException(
-                        "Parameter is not known to be in: "
-                                + actualParameterMathTypeValue,
-                        new IllegalArgumentException());
+                        throw new NoSolutionException(
+                                "Parameter has a function application that generated an unexpected type: "
+                                        + appliedFunctionType.getRange(),
+                                new IllegalArgumentException());
+                    }
+                    else {
+                        actualParameterMathTypeValue = actualParameterMathType;
+                    }
+                }
+                else {
+                    // YS - For all other math types, we check its type value. If the type value is null or
+                    // is not known to be in the formal parameter type, it is an error.
+                    // Otherwise we use the type value and add it as a new concrete value.
+                    if (actualParameterMathTypeValue == null) {
+                        throw new NoSolutionException(
+                                "Parameter has a null type value.",
+                                new IllegalArgumentException());
+                    }
+                    else if (!myTypeGraph.isKnownToBeIn(
+                            actualParameterMathTypeValue, formalParameterType)) {
+                        throw new NoSolutionException(
+                                "Parameter is not known to be in: "
+                                        + actualParameterMathTypeValue,
+                                new IllegalArgumentException());
+                    }
+                }
             }
 
-            accumulatedConcreteValues.put(formalParameterName, actualParameter
-                    .getMathTypeValue());
+            accumulatedConcreteValues.put(formalParameterName,
+                    actualParameterMathTypeValue);
         }
     }
 
