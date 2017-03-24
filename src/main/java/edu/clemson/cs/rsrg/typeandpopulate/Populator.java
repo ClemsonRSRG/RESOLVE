@@ -516,8 +516,10 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postUsesItem(UsesItem uses) {
-        // Module Identifier
+        // We add the module identifier to the current module scope
+        // because we might need to search our imports.
         ModuleIdentifier id = new ModuleIdentifier(uses);
+        myCurModuleScope.addImport(id);
 
         // Check if we are importing a sharing concept.
         try {
@@ -533,8 +535,6 @@ public class Populator extends TreeWalkerVisitor {
         catch (NoSuchSymbolException e) {
             noSuchModule(uses.getName());
         }
-
-        myCurModuleScope.addImport(id);
     }
 
     // -----------------------------------------------------------

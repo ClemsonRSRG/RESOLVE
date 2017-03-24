@@ -62,6 +62,30 @@ public class ResolveCompiler {
     private final List<String> myArgumentFileList;
 
     // ===========================================================
+    // Objects
+    // ===========================================================
+
+    /**
+     * <p>The list of files that we automatically import to any {@code Concept},
+     * {@code Concept Realization}, {@code Enhancement}, {@code Enhancement Realizations},
+     * {@code Facilities}. If you don't want this behavior to happen to a specific file,
+     * add it to {@link #NO_AUTO_IMPORT_EXCEPTION_LIST}</p>
+     */
+    public static final List<String> AUTO_IMPORT_FILES =
+            Collections
+                    .unmodifiableList(Arrays.asList("Std_Boolean_Fac",
+                            "Std_Integer_Fac", "Std_Character_Fac",
+                            "Std_Char_Str_Fac"));
+
+    /**
+     * <p>The list of files that we ignore the {@link #AUTO_IMPORT_FILES} list.</p>
+     */
+    public static final List<String> NO_AUTO_IMPORT_EXCEPTION_LIST =
+            Collections.unmodifiableList(Arrays.asList("Boolean_Template",
+                    "Integer_Template", "Character_Template",
+                    "Char_Str_Template"));
+
+    // ===========================================================
     // Flag Strings
     // ===========================================================
 

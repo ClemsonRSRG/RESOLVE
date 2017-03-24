@@ -48,6 +48,7 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.*;
+import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -313,6 +314,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -441,6 +448,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -567,6 +580,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -611,9 +630,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         // Add concept as a module dependency
-        myModuleDependencies.put(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(createPosSymbol(ctx.concept), false);
         if (ctx.profile != null) {
-            myModuleDependencies.put(createPosSymbol(ctx.profile), false);
+            addNewModuleDependency(createPosSymbol(ctx.profile), false);
         }
 
         ConceptRealizModuleDec realization =
@@ -684,6 +703,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
+
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+        }
 
         // Module requires (if any)
         AssertionClause requires;
@@ -781,6 +806,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
+
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+        }
 
         // Module requires (if any)
         AssertionClause requires;
@@ -884,6 +915,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -979,6 +1016,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 Utilities.collect(UsesItem.class, ctx.usesList() != null ? ctx
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
+
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses.addAll(generateAutoImportUsesItems(moduleName.getLocation()));
+        }
 
         // Module requires (if any)
         AssertionClause requires;
@@ -5103,6 +5146,28 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
+     * <p>An helper method that creates new {@link UsesItem UseItem(s)}
+     * using the auto import list.</p>
+     *
+     * @param loc An location object that will be used to create
+     *            the new {@link UsesItem UseItem(s)}.
+     *
+     * @return A list containing the new {@link UsesItem UsesItem(s)}.
+     */
+    private List<UsesItem> generateAutoImportUsesItems(Location loc) {
+        List<UsesItem> autoImportUsesItems = new ArrayList<>(ResolveCompiler.AUTO_IMPORT_FILES.size());
+        for (String name : ResolveCompiler.AUTO_IMPORT_FILES) {
+            PosSymbol nameAsPosSymbol = new PosSymbol(loc.clone(), name);
+            autoImportUsesItems.add(new UsesItem(nameAsPosSymbol));
+
+            // Clone the name so we don't have aliasing.
+            addNewModuleDependency(nameAsPosSymbol.clone(), false);
+        }
+
+        return autoImportUsesItems;
+    }
+
+    /**
      * <p>An helper method to retrieve the facility declarations (including any newly
      * declared array facilities).</p>
      *
@@ -5232,7 +5297,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
-     * <p>This checks to see if we have a sharing construct.</p>
+     * <p>An helper method that checks to see if we have a sharing construct.</p>
      *
      * @param conceptDecls List of all declarations in a concept.
      *
@@ -5252,6 +5317,29 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 if (((TypeFamilyDec) dec).getDefinitionVarList().size() > 0) {
                     retval = true;
                 }
+            }
+        }
+
+        return retval;
+    }
+
+    /**
+     * <p>An helper method that checks to see if the current module is
+     * part of the no auto import list.</p>
+     *
+     * @param name Current module name.
+     *
+     * @return {@code true} if the no auto import list contains this module,
+     * {@code false} otherwise.
+     */
+    private boolean inNoAutoImportExceptionList(PosSymbol name) {
+        boolean retval = false;
+        Iterator<String> it =
+                ResolveCompiler.NO_AUTO_IMPORT_EXCEPTION_LIST.iterator();
+        while (it.hasNext() && !retval) {
+            String nextModuleName = it.next();
+            if (nextModuleName.equals(name.getName())) {
+                retval = true;
             }
         }
 
