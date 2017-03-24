@@ -423,15 +423,8 @@ public class ScopeBuilder extends SyntacticScope {
             throw new IllegalArgumentException("Null exemplar.");
         }
 
-        SpecInitFinalItem init = definingElement.getInitialization();
-        SpecInitFinalItem finalization = definingElement.getFinalization();
-
-        AssertionClause initEnsures = init.getEnsures();
-        AssertionClause finalizationEnsures = finalization.getEnsures();
-
         ProgramTypeEntry entry = new TypeFamilyEntry(myTypeGraph, name, definingElement,
-                myRootModule, model, new PTFamily(model, name, exemplarSymbol.getName(),
-                definingElement.getConstraint(), initEnsures, finalizationEnsures),
+                myRootModule, model, new PTFamily(model, name, exemplarSymbol.getName()),
                 exemplarEntry, definingElement.getConstraint(), definingElement.getDefinitionVarList());
 
         myBindings.put(name, entry);

@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
@@ -350,24 +351,59 @@ public class Populator extends TreeWalkerVisitor {
     /**
      * <p>Code that gets executed before visiting a {@link ModuleDec}.</p>
      *
-     * @param node A module declaration.
+     * @param dec A module declaration.
      */
     @Override
-    public final void preModuleDec(ModuleDec node) {
+    public final void preModuleDec(ModuleDec dec) {
         emitDebug(null, "----------------------\nModule: "
-                + node.getName().getName() + "\n----------------------");
-        myCurModuleScope = myBuilder.startModuleScope(node);
+                + dec.getName().getName() + "\n----------------------");
+        myCurModuleScope = myBuilder.startModuleScope(dec);
     }
 
     /**
      * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
      *
-     * @param node A module declaration.
+     * @param dec A module declaration.
      */
     @Override
-    public final void postModuleDec(ModuleDec node) {
+    public final void postModuleDec(ModuleDec dec) {
         myBuilder.endScope();
         emitDebug(null, "END POPULATOR\n----------------------\n");
+    }
+
+    /**
+     * <p>This method redefines how a {@link ModuleDec} should be walked.</p>
+     *
+     * @param dec A module declaration.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkModuleDec(ModuleDec dec) {
+        preAny(dec);
+        preDec(dec);
+        preModuleDec(dec);
+
+        // Walk our uses list first! Our parameters might need this
+        for (UsesItem item : dec.getUsesItems()) {
+            TreeWalker.visit(this, item);
+        }
+
+        // Walk our parameters
+        for (ModuleParameterDec varDec : dec.getParameterDecs()) {
+            TreeWalker.visit(this, varDec);
+        }
+
+        // Walk our declarations
+        for (Dec innerDecl : dec.getDecList()) {
+            TreeWalker.visit(this, innerDecl);
+        }
+
+        postModuleDec(dec);
+        postDec(dec);
+        postAny(dec);
+
+        return true;
     }
 
     // -----------------------------------------------------------
@@ -609,6 +645,32 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
+    /**
+     * <p>This method redefines how a {@link ConstantParamDec} should be walked.</p>
+     *
+     * @param param A constant parameter declaration.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkConstantParamDec(ConstantParamDec param) {
+        preAny(param);
+        preDec(param);
+        preConstantParamDec(param);
+
+        // YS - Since ConstantParamDec uses a ParameterVarDec as its inner
+        // representation, we don't want to walk ParameterVarDec object.
+        // The reason is because ParameterVarDec contains additional logic
+        // for Operation-like items. Instead, we simply walk the raw type.
+        TreeWalker.visit(this, param.getVarDec().getTy());
+
+        postConstantParamDec(param);
+        postDec(param);
+        postAny(param);
+
+        return true;
+    }
+
     // -----------------------------------------------------------
     // Mathematical Assertion/Theorem-Related
     // -----------------------------------------------------------
@@ -762,31 +824,68 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postMathDefVariableDec(MathDefVariableDec dec) {
-        MTType declaredType = dec.getVariable().getMathType();
-        if (dec.getDefinition() != null) {
-            expectType(dec.getDefinition(), declaredType);
+        MathVarDec varDec = dec.getVariable();
+        String definitionSymbol = varDec.getName().getName();
+
+        try {
+            // Since we didn't walk MathVarDec, we will need to store the math type.
+            MTType rawTyTypeValue = varDec.getTy().getMathTypeValue();
+            if (rawTyTypeValue == null) {
+                throw new NullMathTypeException(varDec.getTy() +
+                        " cannot be used as a type for " + varDec.getName());
+            }
+            varDec.setMathType(rawTyTypeValue);
+
+            if (dec.getDefinitionAsExp() != null) {
+                expectType(dec.getDefinitionAsExp(), rawTyTypeValue);
+            }
+
+            // Note 1: A math definition variable shouldn't be generating a type value.
+            // Note 2: We want to add this variable binding to the module scope.
+            myCurModuleScope.addBinding(definitionSymbol, SymbolTableEntry.Quantification.NONE,
+                    dec, rawTyTypeValue, null, myDefinitionSchematicTypes, myGenericTypes);
+            emitDebug(dec.getLocation(), "\t\tNew definition variable: "
+                    + definitionSymbol + " of type " + rawTyTypeValue);
+
+            myCurrentDirectDefinition = null;
+            myDefinitionSchematicTypes.clear();
+
+            // This Def Var declaration should have the same type
+            // as the MathVarDec that it contains.
+            dec.setMathType(rawTyTypeValue);
         }
-
-        String definitionSymbol = dec.getVariable().getName().getName();
-        MTType typeValue = null;
-        if (dec.getDefinition() != null) {
-            typeValue = dec.getDefinition().getMathTypeValue();
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(definitionSymbol, dec.getName().getLocation());
         }
+    }
 
-        // Note that, even if typeValue is null at this point, if declaredType
-        // returns true from knownToContainOnlyMTypes(), a new type value will
-        // still be created by the symbol table
-        addBinding(definitionSymbol, dec.getName().getLocation(), dec,
-                declaredType, typeValue, myDefinitionSchematicTypes);
+    /**
+     * <p>This method redefines how a {@link MathDefVariableDec} should be walked.</p>
+     *
+     * @param dec A mathematical definition variable declaration.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkMathDefVariableDec(MathDefVariableDec dec) {
+        preAny(dec);
+        preDec(dec);
+        preMathDefVariableDec(dec);
 
-        emitDebug(dec.getLocation(), "\t\tNew definition variable: " + definitionSymbol + " of type "
-                + declaredType
-                + ((typeValue != null) ? " with type value " + typeValue : ""));
+        // YS - Since MathDefVariableDec uses a MathVarDec as its inner
+        // representation, we don't want to walk MathVarDec object.
+        // The reason is because MathVarDec will add a binding for
+        // the math variable. Instead, we only walk the raw type
+        // and the definition item. The definition variable binding
+        // will happen during postMathDefVariableDec
+        TreeWalker.visit(this, dec.getVariable().getTy());
+        TreeWalker.visit(this, dec.getDefinitionItem());
 
-        myCurrentDirectDefinition = null;
-        myDefinitionSchematicTypes.clear();
+        postMathDefVariableDec(dec);
+        postDec(dec);
+        postAny(dec);
 
-        dec.setMathType(declaredType);
+        return true;
     }
 
     /**
@@ -939,6 +1038,7 @@ public class Populator extends TreeWalkerVisitor {
                 new ValidOperationDeclChecker(dec.getLocation(), myCorrespondingOperation, myCurrentParameters);
         validOperationDeclChecker.isValidRecursiveProcedure(dec.getRecursive(), myRecursiveCallLocation);
 
+        myCurrentParameters = null;
         myPreOperationProcedureDecScope = null;
         myCurrentLocalProcedure = null;
         myRecursiveCallLocation = null;
@@ -1027,8 +1127,8 @@ public class Populator extends TreeWalkerVisitor {
 
             myCurrentParameters = null;
         }
-        // Else we need to add the FacilityOperationDec to the SymbolTable
-        // using the stored pre-FacilityOperationDec scope.
+        // Else we need to add the OperationProcedureDec to the SymbolTable
+        // using the stored pre-OperationProcedureDec scope.
         else {
             putOperationLikeThingInSymbolTable(dec.getName(),
                     dec.getReturnTy(), myCurrentLocalProcedure,
@@ -1228,6 +1328,8 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(dec.getName().getName(), dec.getName()
                     .getLocation());
         }
+
+        myCurrentParameters = null;
     }
 
     // -----------------------------------------------------------
@@ -1754,6 +1856,37 @@ public class Populator extends TreeWalkerVisitor {
         exp.setMathTypeValue(new MTCartesian(myTypeGraph, fieldTypes));
 
         myTypeValueDepth--;
+    }
+
+    /**
+     * <p>This method redefines how a {@link CrossTypeExp} should be walked.</p>
+     *
+     * @param exp A cartesian product expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkCrossTypeExp(CrossTypeExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preCrossTypeExp(exp);
+
+        // YS - Originally we keep both a mapping from the name to the ArbitraryTy AND
+        // a list containing just the ArbitraryTys just so that the TreeWalker
+        // would detect it as a list and walk it. We could in theory add maps to the
+        // TreeWalker logic, but this is easier...
+        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = exp.getTagsToFieldsMap();
+        for (PosSymbol psTag : tagsToFieldsMap.keySet()) {
+            TreeWalker.visit(this, tagsToFieldsMap.get(psTag));
+        }
+
+        postCrossTypeExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
     }
 
     /**
@@ -2709,24 +2842,6 @@ public class Populator extends TreeWalkerVisitor {
             ResolveConceptualElement definingElement, MTType type,
             Map<String, MTType> schematicTypes) {
         return addBinding(name, l, q, definingElement, type, null, schematicTypes);
-    }
-
-    /**
-     * <p>Add a new binding for a {@link ResolveConceptualElement} with no quantification
-     * and no mathematical type value.</p>
-     *
-     * @param name Name of the entry.
-     * @param l Location where this element was found.
-     * @param definingElement The object that is receiving the binding.
-     * @param type The mathematical type associated with the object.
-     * @param schematicTypes The schematic types associated with the object.
-     *
-     * @return A new {@link SymbolTableEntry} with the types bound to the object.
-     */
-    private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement,
-            MTType type, Map<String, MTType> schematicTypes) {
-        return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type,
-                null, schematicTypes);
     }
 
     /**

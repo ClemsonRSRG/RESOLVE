@@ -130,14 +130,11 @@ public class NoSharingConceptImportChecker {
 
         try {
             entry =
-                    myCurrentScope
-                            .queryForOne(
-                                    new NameQuery(
-                                            null,
-                                            name,
-                                            ImportStrategy.IMPORT_RECURSIVE,
-                                            FacilityStrategy.FACILITY_GENERIC,
-                                            true)).toFacilityEntry(myLocation);
+                    myCurrentScope.queryForOne(
+                            new NameQuery(null, name,
+                                    ImportStrategy.IMPORT_RECURSIVE,
+                                    FacilityStrategy.FACILITY_GENERIC, true))
+                            .toFacilityEntry(myLocation);
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException(
