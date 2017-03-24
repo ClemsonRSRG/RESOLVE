@@ -756,6 +756,67 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>Used by the call statement rule to add constraints as givens for alters,
+     * replaces and updates modes.</p>
+     *
+     * @param ensures The ensures clause from the calling statement.
+     * @param parameterVarDecs List of parameters for the calling statement.
+     *
+     * @return The modified ensures clause.
+     */
+    private Exp addConstraintsToEnsures(Exp ensures,
+            List<ParameterVarDec> parameterVarDecs) {
+        for (ParameterVarDec varDec : parameterVarDecs) {
+            if (varDec.getMode() == Mode.ALTERS
+                    || varDec.getMode() == Mode.REPLACES
+                    || varDec.getMode() == Mode.UPDATES) {
+                Exp constraintExp = null;
+
+                // Ty is NameTy
+                if (varDec.getTy() instanceof NameTy) {
+                    // Represent ty as an Exp
+                    NameTy tyAsNameTy = (NameTy) varDec.getTy();
+                    PTType ptType = tyAsNameTy.getProgramTypeValue();
+
+                    // Only deal with actual types and don't deal
+                    // with generic entry types.
+                    if (!(ptType instanceof PTGeneric)) {
+                        VarExp typeAsExp =
+                                new VarExp(null, tyAsNameTy.getQualifier(),
+                                        tyAsNameTy.getName());
+
+                        // Convert varDec to a VarExp
+                        VarExp parameterExp =
+                                new VarExp(null, null, varDec.getName());
+                        parameterExp.setMathType(tyAsNameTy.getMathTypeValue());
+
+                        // Get the constraint with all the proper substitutions.
+                        constraintExp =
+                                Utilities.retrieveConstraint(ensures
+                                        .getLocation(), typeAsExp,
+                                        parameterExp, myCurrentModuleScope);
+                    }
+                }
+                else {
+                    // TODO: Handle other ty's.
+                    Utilities
+                            .tyNotHandled(varDec.getTy(), varDec.getLocation());
+                }
+
+                // If we have a constraint, then we add it to our ensures clause
+                if (constraintExp != null) {
+                    Location newEnsuresLoc =
+                            (Location) ensures.getLocation().clone();
+                    ensures = myTypeGraph.formConjunct(ensures, constraintExp);
+                    ensures.setLocation(newEnsuresLoc);
+                }
+            }
+        }
+
+        return ensures;
+    }
+
+    /**
      * <p>Loop through the list of <code>VarDec</code>, search
      * for their corresponding <code>ProgramVariableEntry</code>
      * and add the result to the list of free variables.</p>
@@ -2501,85 +2562,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         List<Exp> undRepList = new ArrayList<Exp>();
         List<Exp> replList = new ArrayList<Exp>();
 
-        // Replace state variables in the ensures clause
-        // and create new confirm statements if needed.
-        for (int i = 0; i < stateVarList.size(); i++) {
-            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
-            newConfirm = confirmStmt.getAssertion();
-            AffectsItem stateVar = stateVarList.get(i);
-
-            // Only deal with Alters/Reassigns/Replaces/Updates modes
-            if (stateVar.getMode() == Mode.ALTERS
-                    || stateVar.getMode() == Mode.REASSIGNS
-                    || stateVar.getMode() == Mode.REPLACES
-                    || stateVar.getMode() == Mode.UPDATES) {
-                // Obtain the variable from our free variable list
-                Exp globalFreeVar =
-                        myCurrentAssertiveCode.getFreeVar(stateVar.getName(),
-                                true);
-                if (globalFreeVar != null) {
-                    VarExp oldNamesVar = new VarExp();
-                    oldNamesVar.setName(stateVar.getName());
-
-                    // Create a local free variable if it is not there
-                    Exp localFreeVar =
-                            myCurrentAssertiveCode.getFreeVar(stateVar
-                                    .getName(), false);
-                    if (localFreeVar == null) {
-                        // TODO: Don't have a type for state variables?
-                        localFreeVar =
-                                new VarExp(null, null, stateVar.getName());
-                        localFreeVar =
-                                Utilities.createQuestionMarkVariable(
-                                        myTypeGraph.formConjunct(ensures,
-                                                newConfirm),
-                                        (VarExp) localFreeVar);
-                        myCurrentAssertiveCode.addFreeVar(localFreeVar);
-                    }
-                    else {
-                        localFreeVar =
-                                Utilities.createQuestionMarkVariable(
-                                        myTypeGraph.formConjunct(ensures,
-                                                newConfirm),
-                                        (VarExp) localFreeVar);
-                    }
-
-                    // Creating "#" expressions and replace these in the
-                    // ensures clause.
-                    OldExp osVar = new OldExp(null, Exp.copy(globalFreeVar));
-                    OldExp oldNameOSVar =
-                            new OldExp(null, Exp.copy(oldNamesVar));
-                    ensures =
-                            Utilities.replace(ensures, oldNamesVar,
-                                    globalFreeVar);
-                    ensures = Utilities.replace(ensures, oldNameOSVar, osVar);
-
-                    // If it is not simple replacement, replace all ensures clauses
-                    // with the appropriate expressions.
-                    if (!isSimple) {
-                        ensures =
-                                Utilities.replace(ensures, globalFreeVar,
-                                        localFreeVar);
-                        ensures =
-                                Utilities
-                                        .replace(ensures, osVar, globalFreeVar);
-                        newConfirm =
-                                Utilities.replace(newConfirm, globalFreeVar,
-                                        localFreeVar);
-                    }
-
-                    // Set newConfirm as our new final confirm statement
-                    myCurrentAssertiveCode.setFinalConfirm(newConfirm,
-                            confirmStmt.getSimplify());
-                }
-                // Error: Why isn't it a free variable.
-                else {
-                    Utilities.notInFreeVarList(stateVar.getName(), stateVar
-                            .getLocation());
-                }
-            }
-        }
-
+        // TODO: Modify the following logic to match the proof rules.
         // Replace postcondition variables in the ensures clause
         for (int i = 0; i < argList.size(); i++) {
             ParameterVarDec varDec = paramList.get(i);
@@ -3095,6 +3078,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         ensures =
                 modifyEnsuresByParameter(ensures, stmt.getLocation(), opDec
                         .getName().getName(), opDec.getParameters(), isLocal);
+
+        // Add constraints for alters, replaces and updates modes.
+        ensures = addConstraintsToEnsures(ensures, opDec.getParameters());
 
         // Replace PreCondition variables in the requires clause
         requires =
