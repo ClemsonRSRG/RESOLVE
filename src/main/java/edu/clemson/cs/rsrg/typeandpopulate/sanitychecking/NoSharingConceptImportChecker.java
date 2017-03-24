@@ -93,9 +93,8 @@ public class NoSharingConceptImportChecker {
         else if (myModuleDec instanceof ShortFacilityModuleDec) {
             // Check the only facility declaration inside this short facility module dec
             FacilityEntry facilityEntry =
-                    getFacilityEntry(null,
-                            ((ShortFacilityModuleDec) myModuleDec).getDec()
-                                    .getName());
+                    getFacilityEntry(((ShortFacilityModuleDec) myModuleDec)
+                            .getDec().getName());
             retval = facilityEntry.isSharingConceptInstantion();
         }
         else if (myModuleDec instanceof FacilityModuleDec) {
@@ -105,7 +104,7 @@ public class NoSharingConceptImportChecker {
                 Dec dec = facilityDecIt.next();
                 if (dec instanceof FacilityDec) {
                     FacilityEntry facilityEntry =
-                            getFacilityEntry(null, dec.getName());
+                            getFacilityEntry(dec.getName());
                     retval = facilityEntry.isSharingConceptInstantion();
                 }
             }
@@ -121,13 +120,12 @@ public class NoSharingConceptImportChecker {
     /**
      * <p>An helper method for querying for a facility entry.</p>
      *
-     * @param qualifier A qualifier for the facility declaration.
      * @param name A name for the facility declaration.
      *
      * @return A {@link FacilityEntry} if found. Otherwise a {@link SourceErrorException}
      * will be thrown.
      */
-    private FacilityEntry getFacilityEntry(PosSymbol qualifier, PosSymbol name) {
+    private FacilityEntry getFacilityEntry(PosSymbol name) {
         FacilityEntry entry;
 
         try {
@@ -135,19 +133,19 @@ public class NoSharingConceptImportChecker {
                     myCurrentScope
                             .queryForOne(
                                     new NameQuery(
-                                            qualifier,
+                                            null,
                                             name,
                                             ImportStrategy.IMPORT_RECURSIVE,
-                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                            FacilityStrategy.FACILITY_GENERIC,
                                             true)).toFacilityEntry(myLocation);
         }
         catch (NoSuchSymbolException nsse) {
-            throw new SourceErrorException("No operation found corresponding "
-                    + "the call with the specified arguments: ", myLocation);
+            throw new SourceErrorException(
+                    "No module found with the given name: " + name, myLocation);
         }
         catch (DuplicateSymbolException dse) {
-            throw new SourceErrorException("Duplicate symbol: " + name,
-                    myLocation);
+            throw new SourceErrorException("Duplicate symbol: " + name
+                    + ". Consider qualifying.", myLocation);
         }
 
         return entry;

@@ -13,11 +13,9 @@
 package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
-import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.pipeline.AnalysisPipeline;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
-import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
 import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.statushandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
@@ -89,7 +87,7 @@ public class Controller {
      * accepted by the RESOLVE compiler. When adding a new type of
      * extension, simply add the extension name into the list.</p>
      */
-    public static final List<String> NON_NATIVE_EXT =
+    private static final List<String> NON_NATIVE_EXT =
             Collections.unmodifiableList(Arrays.asList("java", "c", "h"));
 
     // ===========================================================
@@ -182,7 +180,7 @@ public class Controller {
             }
 
             if (cause == null) {
-                // TODO: Check to see if ever get here. All exceptions should extend the CompilerException class.
+                // All exceptions should extend the CompilerException class.
                 if (e instanceof RuntimeException) {
                     throw (RuntimeException) e;
                 }
@@ -223,15 +221,20 @@ public class Controller {
             // Only attempt to add
             List<File> foundFiles = l.getFiles();
             if (foundFiles.size() == 1) {
-                myCompileEnvironment
-                        .addExternalRealizFile(new ModuleIdentifier(importItem
-                                .getName()), l.getFile());
+                ModuleIdentifier externalImport =
+                        new ModuleIdentifier(importItem.getName());
 
-                // Print out debugging message
-                if (myCompileEnvironment.flags
-                        .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                    myStatusHandler.info(null, "Skipping External Import: "
-                            + importItem.getName());
+                // Add this as an external realiz file if it is not already declared to be one.
+                if (!myCompileEnvironment.isExternalRealizFile(externalImport)) {
+                    myCompileEnvironment.addExternalRealizFile(externalImport,
+                            l.getFile());
+
+                    // Print out debugging message
+                    if (myCompileEnvironment.flags
+                            .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                        myStatusHandler.info(null, "Skipping External Import: "
+                                + importItem.getName());
+                    }
                 }
             }
             else if (foundFiles.size() > 1) {
