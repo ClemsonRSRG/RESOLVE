@@ -55,6 +55,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.ContainsNamedTypeChecker;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.HardCoded;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.*;
@@ -2968,7 +2969,8 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         if (match == null) {
-            throw new NoSolutionException("Could not find a symbol entry for: " + e, null);
+            throw new NoSolutionException("Could not find a symbol entry for: "
+                    + e + " using " + comparison.description(), null);
         }
 
         return match;
@@ -3037,6 +3039,7 @@ public class Populator extends TreeWalkerVisitor {
         }
         catch (NoSolutionException nse) {
             try {
+                emitDebug(e.getLocation(), "\t" + nse.getMessage());
                 intendedEntry = getInexactDomainTypeMatch(e, sameNameFunctions);
             }
             catch (NoSolutionException nsee2) {

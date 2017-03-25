@@ -295,7 +295,7 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
-        List<Element> newElements = new LinkedList<Element>(myElements);
+        List<Element> newElements = new LinkedList<>(myElements);
         newElements.set(index, new Element(newElements.get(index).myTag,
                 newType));
 
