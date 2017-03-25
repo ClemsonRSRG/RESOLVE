@@ -793,6 +793,9 @@ public class MTFunction extends MTAbstract<MTFunction> {
                     }
                 }
             }
+            else {
+                actualParameterMathTypeValue = actualParameterMathType;
+            }
 
             accumulatedConcreteValues.put(formalParameterName,
                     actualParameterMathTypeValue);
