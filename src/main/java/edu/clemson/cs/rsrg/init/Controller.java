@@ -188,7 +188,7 @@ public class Controller {
             }
             else {
                 CompilerException see = (CompilerException) cause;
-                myStatusHandler.error(see.getErrorLocation(), e.getMessage());
+                myStatusHandler.error(see.getErrorLocation(), see.getMessage());
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)) {
                    myStatusHandler.printStackTrace(see);
                 }
