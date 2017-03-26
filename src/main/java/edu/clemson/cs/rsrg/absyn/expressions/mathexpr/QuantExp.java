@@ -189,8 +189,8 @@ public class QuantExp extends MathExp {
                 retval &= (!thisVars.hasNext()) && (!eVars.hasNext());
             }
 
-            retval &= myWhereExp.equivalent(eAsQuantExp.myWhereExp);
-            retval &= myBodyExp.equivalent(eAsQuantExp.myBodyExp);
+            retval &= equivalent(myWhereExp, eAsQuantExp.myWhereExp);
+            retval &= equivalent(myBodyExp, eAsQuantExp.myBodyExp);
         }
 
         return retval;
@@ -220,7 +220,9 @@ public class QuantExp extends MathExp {
     @Override
     public final List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
-        list.add(myWhereExp);
+        if (myWhereExp != null) {
+            list.add(myWhereExp);
+        }
         list.add(myBodyExp);
 
         return list;
@@ -267,7 +269,10 @@ public class QuantExp extends MathExp {
      */
     @Override
     public final Exp remember() {
-        Exp newWhere = ((MathExp) myWhereExp).remember();
+        Exp newWhere = null;
+        if (myWhereExp != null) {
+            newWhere = ((MathExp) myWhereExp).remember();
+        }
         Exp newBody = ((MathExp) myBodyExp).remember();
 
         return new QuantExp(cloneLocation(), myQuantification, copyVars(),
