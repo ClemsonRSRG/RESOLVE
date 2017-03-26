@@ -743,7 +743,10 @@ public class MTFunction extends MTAbstract<MTFunction> {
                         .getCopyWithVariablesSubstituted(accumulatedConcreteValues);
 
         if (formalParameterType.isKnownToContainOnlyMTypes()) {
-            MTType actualParameterMathType = actualParameter.getMathType();
+            MTType actualParameterMathType =
+                    actualParameter.getMathType()
+                            .getCopyWithVariablesSubstituted(
+                                    accumulatedConcreteValues);
             MTType actualParameterMathTypeValue =
                     actualParameter.getMathTypeValue();
 

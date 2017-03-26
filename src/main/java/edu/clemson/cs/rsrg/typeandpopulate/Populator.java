@@ -2900,17 +2900,18 @@ public class Populator extends TreeWalkerVisitor {
      * using a type comparison algorithm.</p>
      *
      * @param e The expression we are searching for.
+     * @param eType The expression's type.
+     *              (<em>Note:</em> It might be different from calling {@code e.getMathType()}.)
      * @param candidates List of candidate symbol table entries.
+     * @param comparison The domain type comparator to be used.
      *
      * @return The corresponding {@link MathSymbolEntry}.
      *
      * @throws NoSolutionException We simply couldn't find it.
      */
-    private MathSymbolEntry getDomainTypeMatch(AbstractFunctionExp e,
+    private MathSymbolEntry getDomainTypeMatch(AbstractFunctionExp e, MTFunction eType,
             List<MathSymbolEntry> candidates, TypeComparison<AbstractFunctionExp, MTFunction> comparison)
             throws NoSolutionException {
-        MTFunction eType = e.getConservativePreApplicationType(myTypeGraph);
-
         MathSymbolEntry match = null;
 
         MTFunction candidateType;
@@ -2982,15 +2983,17 @@ public class Populator extends TreeWalkerVisitor {
      * using an exact domain match.</p>
      *
      * @param e The expression we are searching for.
+     * @param eType The expression's type.
+     *              (<em>Note:</em> It might be different from calling {@code e.getMathType()}.)
      * @param candidates List of candidate symbol table entries.
      *
      * @return The corresponding {@link MathSymbolEntry}.
      *
      * @throws NoSolutionException We simply couldn't find it.
      */
-    private MathSymbolEntry getExactDomainTypeMatch(AbstractFunctionExp e,
+    private MathSymbolEntry getExactDomainTypeMatch(AbstractFunctionExp e, MTFunction eType,
             List<MathSymbolEntry> candidates) throws NoSolutionException {
-        return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
+        return getDomainTypeMatch(e, eType, candidates, EXACT_DOMAIN_MATCH);
     }
 
     /**
@@ -2999,15 +3002,17 @@ public class Populator extends TreeWalkerVisitor {
      * using an inexact domain match.</p>
      *
      * @param e The expression we are searching for.
+     * @param eType The expression's type.
+     *              (<em>Note:</em> It might be different from calling {@code e.getMathType()}.)
      * @param candidates List of candidate symbol table entries.
      *
      * @return The corresponding {@link MathSymbolEntry}.
      *
      * @throws NoSolutionException We simply couldn't find it.
      */
-    private MathSymbolEntry getInexactDomainTypeMatch(AbstractFunctionExp e,
+    private MathSymbolEntry getInexactDomainTypeMatch(AbstractFunctionExp e, MTFunction eType,
             List<MathSymbolEntry> candidates) throws NoSolutionException {
-        return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
+        return getDomainTypeMatch(e, eType, candidates, INEXACT_DOMAIN_MATCH);
     }
 
     /**
@@ -3035,36 +3040,60 @@ public class Populator extends TreeWalkerVisitor {
 
         MathSymbolEntry intendedEntry;
         try {
-            intendedEntry = getExactDomainTypeMatch(e, sameNameFunctions);
+            intendedEntry = getExactDomainTypeMatch(e, eType, sameNameFunctions);
         }
         catch (NoSolutionException nse) {
             try {
                 emitDebug(e.getLocation(), "\t" + nse.getMessage());
-                intendedEntry = getInexactDomainTypeMatch(e, sameNameFunctions);
+                intendedEntry = getInexactDomainTypeMatch(e, eType, sameNameFunctions);
             }
             catch (NoSolutionException nsee2) {
-                boolean foundOne = false;
-                String errorMessage =
-                        "No function applicable for " + "domain: "
-                                + eType.getDomain() + "\t[" + e.getLocation() + "]\n\nCandidates:\n";
+                try {
+                    if (myDefinitionSchematicTypes != null) {
+                        // Create a copy of the original expression and assign it the conservative type
+                        AbstractFunctionExp eCopy = (AbstractFunctionExp) e.clone();
+                        eCopy.setMathType(eType);
 
-                for (SymbolTableEntry entry : sameNameFunctions) {
-                    if (entry instanceof MathSymbolEntry
-                            && ((MathSymbolEntry) entry).getType() instanceof MTFunction) {
-                        errorMessage +=
-                                "\t[" + entry.getDefiningElement().getLocation() + "]\t" +
-                                        entry.getName() + " : " + ((MathSymbolEntry) entry).getType() + "\n";
+                        // Obtain a new AbstractFunctionExp with the schematic types replaced.
+                        eCopy = (AbstractFunctionExp) TypeGraph.getCopyWithVariablesSubstituted(
+                                eCopy, myDefinitionSchematicTypes);
+                        MTFunction eCopyType = (MTFunction) eCopy.getMathType();
 
-                        foundOne = true;
+                        emitDebug(eCopy.getLocation(), "\tReplaced schematic types in expression: "
+                                + eCopy.toString() + "("
+                                + eCopy.getLocation() + ") " + " with new type "
+                                + eCopyType.toString());
+
+                        intendedEntry = getInexactDomainTypeMatch(eCopy, eCopyType, sameNameFunctions);
+                    }
+                    else {
+                        throw new NoSolutionException("No schematic types", null);
                     }
                 }
+                catch (NoSolutionException nsee3) {
+                    boolean foundOne = false;
+                    String errorMessage =
+                            "No function applicable for " + "domain: "
+                                    + eType.getDomain() + "\t[" + e.getLocation() + "]\n\nCandidates:\n";
 
-                if (!foundOne) {
-                    throw new SourceErrorException("No such function.", e
-                            .getLocation());
+                    for (SymbolTableEntry entry : sameNameFunctions) {
+                        if (entry instanceof MathSymbolEntry
+                                && ((MathSymbolEntry) entry).getType() instanceof MTFunction) {
+                            errorMessage +=
+                                    "\t[" + entry.getDefiningElement().getLocation() + "]\t" +
+                                            entry.getName() + " : " + ((MathSymbolEntry) entry).getType() + "\n";
+
+                            foundOne = true;
+                        }
+                    }
+
+                    if (!foundOne) {
+                        throw new SourceErrorException("No such function.", e
+                                .getLocation());
+                    }
+
+                    throw new SourceErrorException(errorMessage, (Location) null);
                 }
-
-                throw new SourceErrorException(errorMessage, (Location) null);
             }
         }
 
@@ -3732,6 +3761,23 @@ public class Populator extends TreeWalkerVisitor {
                                 && myTypeGraph.isKnownToBeIn(foundValueAsLambda
                                         .getBody(), expectedTypeAsFunction
                                         .getRange());
+            }
+
+            // YS: Not sure if this is quite right, but here is the explanation:
+            // If "foundValue" happens to be a VarExp. Then we proceed to check if there
+            // is a type value. If there is one and it is an MTNamed that has the same name as
+            // the parameter and "foundType" is a subtype of "expectedType", then it must be a
+            // schematic type, so we let it through.
+            if (!result && foundValue instanceof VarExp) {
+                VarExp foundValueAsVarExp = (VarExp) foundValue;
+                if (foundValueAsVarExp.getMathTypeValue() != null
+                        && foundValueAsVarExp.getMathTypeValue() instanceof MTNamed) {
+                    String foundValueName = foundValueAsVarExp.getName().getName();
+                    String foundTypeValueAsString =
+                            ((MTNamed) foundValueAsVarExp.getMathTypeValue()).getName();
+                    result = foundTypeValueAsString.equals(foundValueName)
+                            && foundType.isSubtypeOf(expectedType);
+                }
             }
 
             return result;

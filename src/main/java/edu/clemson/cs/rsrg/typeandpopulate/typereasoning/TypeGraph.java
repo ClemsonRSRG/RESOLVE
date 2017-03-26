@@ -341,15 +341,13 @@ public class TypeGraph {
      *
      * @param original Original expression.
      * @param substitutions A map of substitutions.
-     * @param <T> The class type for {@code original}.
      *
      * @return A modified {@link Exp}.
      */
-    public static <T extends Exp> T getCopyWithVariablesSubstituted(T original,
+    public static Exp getCopyWithVariablesSubstituted(Exp original,
             Map<String, MTType> substitutions) {
 
-        @SuppressWarnings("unchecked")
-        T result = (T) original.clone();
+        Exp result = original.clone();
         result.setMathType(result.getMathType()
                 .getCopyWithVariablesSubstituted(substitutions));
 
@@ -359,7 +357,7 @@ public class TypeGraph {
             newChildrenExp.put(currentChildExp.clone(),
                     TypeGraph.getCopyWithVariablesSubstituted(currentChildExp.clone(), substitutions));
         }
-        result.substitute(newChildrenExp);
+        result = result.substitute(newChildrenExp);
 
         return result;
     }
