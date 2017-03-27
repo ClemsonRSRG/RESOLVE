@@ -29,11 +29,12 @@ public class StdErrHandler extends WriterStatusHandler implements StatusHandler 
     // ===========================================================
 
     /**
-     * <p>This constructor will create an output handler that
-     * always output to standard err.</p>
+     * <p>This constructor will create an output handler that displays
+     * all information and warning output to {@link System#out} and
+     * all error output to {@link System#err}.</p>
      */
     public StdErrHandler() {
-        super(new PrintWriter(System.err, true));
+        super(new PrintWriter(System.out), new PrintWriter(System.err, true));
     }
 
     // ===========================================================
