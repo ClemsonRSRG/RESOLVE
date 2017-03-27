@@ -21,7 +21,12 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry.Quantification;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
@@ -31,9 +36,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import org.antlr.v4.runtime.ANTLRInputStream;
 
 /**
  * <p>The <code>HardCoded</code> class defines all mathematical symbols
@@ -42,6 +49,25 @@ import java.util.HashSet;
  * @version 2.0
  */
 public class HardCoded {
+
+    /**
+     * <p>Since all of our {@link StatusHandler} requires a {@link Location} to work
+     * properly, we create an object pointing to an input stream that is empty.
+     * Subsequently, we use this object to create all of our built in type information.</p>
+     */
+    private static final Location NATIVE_FILE_FAKE_LOCATION;
+
+    static {
+        try {
+            NATIVE_FILE_FAKE_LOCATION =
+                    new Location(new ResolveFile("native", ModuleType.THEORY,
+                            new ANTLRInputStream(new StringReader("")),
+                            new ArrayList<String>(), ""), 0, 0, "");
+        }
+        catch (IOException e) {
+            throw new MiscErrorException("Error instantiating native file", e);
+        }
+    }
 
     /**
      * <p>This method establishes all built-in relationships of the symbol table.</p>
@@ -64,16 +90,20 @@ public class HardCoded {
             //       f : D1 -> R1;
 
             AssertionClause requires =
-                    new AssertionClause(null, ClauseType.REQUIRES, VarExp
-                            .getTrueVarExp(null, g));
+                    new AssertionClause(NATIVE_FILE_FAKE_LOCATION,
+                            ClauseType.REQUIRES, VarExp.getTrueVarExp(
+                                    NATIVE_FILE_FAKE_LOCATION, g));
             ModuleDec module =
-                    new FacilityModuleDec(null, new PosSymbol(null, "native"),
+                    new FacilityModuleDec(NATIVE_FILE_FAKE_LOCATION,
+                            new PosSymbol(NATIVE_FILE_FAKE_LOCATION, "native"),
                             new ArrayList<ModuleParameterDec>(),
                             new ArrayList<UsesItem>(), requires,
                             new ArrayList<Dec>(),
                             new HashMap<PosSymbol, Boolean>());
 
-            VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
+            VarExp v =
+                    new VarExp(NATIVE_FILE_FAKE_LOCATION, null, new PosSymbol(
+                            NATIVE_FILE_FAKE_LOCATION, "native"));
             ScopeBuilder s = b.startModuleScope(module);
 
             s.addBinding("D1", Quantification.UNIVERSAL, v, g.CLS);
@@ -111,7 +141,9 @@ public class HardCoded {
      * @param b The current scope repository builder.
      */
     public static void addBuiltInSymbols(TypeGraph g, ScopeBuilder b) {
-        VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
+        VarExp v =
+                new VarExp(NATIVE_FILE_FAKE_LOCATION, null, new PosSymbol(
+                        NATIVE_FILE_FAKE_LOCATION, "native"));
 
         try {
             b.addBinding("Entity", v, g.CLS, g.ENTITY);
