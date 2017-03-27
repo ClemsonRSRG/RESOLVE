@@ -276,10 +276,6 @@ IS
     :   'is'
     ;
 
-IS_IN
-    :   'is_in'
-    ;
-
 ITERATE
     :   'Iterate'
     ;
