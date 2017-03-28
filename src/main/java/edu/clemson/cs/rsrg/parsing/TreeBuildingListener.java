@@ -4104,8 +4104,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitMathAlternativeExpItem(
             ResolveParser.MathAlternativeExpItemContext ctx) {
         Exp testExp = null;
-        if (ctx.mathRelationalExp() != null) {
-            testExp = (Exp) myNodes.removeFrom(ctx.mathRelationalExp());
+        if (ctx.mathLogicalExp() != null) {
+            testExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp());
         }
 
         myNodes.put(ctx, new AltItemExp(createLocation(ctx), testExp,
