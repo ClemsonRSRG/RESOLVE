@@ -143,14 +143,19 @@ public class CompileEnvironment {
             Date date = new Date();
             SimpleDateFormat dateFormat =
                     new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            File infoFile =
+                    new File(myCompileDir, "Log-"
+                            + dateFormat.format(date) + ".log");
             File errorFile =
                     new File(myCompileDir, "Debug-Log-"
                             + dateFormat.format(date) + ".log");
 
             statusHandler =
-                    new WriterStatusHandler(new BufferedWriter(
-                            new OutputStreamWriter(new FileOutputStream(
-                                    errorFile), "utf-8")));
+                    new WriterStatusHandler(
+                            new BufferedWriter(new OutputStreamWriter(
+                                    new FileOutputStream(infoFile), "utf-8")),
+                            new BufferedWriter(new OutputStreamWriter(
+                                    new FileOutputStream(errorFile), "utf-8")));
         }
         myStatusHandler = statusHandler;
 

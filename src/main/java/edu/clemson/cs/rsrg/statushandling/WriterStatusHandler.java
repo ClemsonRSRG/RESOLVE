@@ -32,8 +32,11 @@ public class WriterStatusHandler implements StatusHandler {
     // Member Fields
     // ===========================================================
 
-    /** <p>This is the output writer object.</p> */
+    /** <p>Writer for information output.</p> */
     private final Writer myOutputWriter;
+
+    /** <p>Writer for warning and error output.</p> */
+    private final Writer myErrorWriter;
 
     /** <p>Boolean flag to check to see if we are still logging.</p> */
     protected boolean stopLogging;
@@ -43,13 +46,16 @@ public class WriterStatusHandler implements StatusHandler {
     // ===========================================================
 
     /**
-     * <p>This constructor takes a Java <code>Writer</code> object
-     * that will be used to display the information.</p>
+     * <p>This constructor takes in two {@link Writer} objects
+     * that will be used to display the various information, warning
+     * and error messages provided by the compiler.</p>
      *
-     * @param outWriter A <code>Writer</code> object.
+     * @param outWriter A writer for general information output.
+     * @param errorWriter A writer for warning/error output.
      */
-    public WriterStatusHandler(Writer outWriter) {
+    public WriterStatusHandler(Writer outWriter, Writer errorWriter) {
         myOutputWriter = outWriter;
+        myErrorWriter = errorWriter;
         stopLogging = false;
     }
 
@@ -76,8 +82,8 @@ public class WriterStatusHandler implements StatusHandler {
                 sb.append(msg);
                 sb.append("\n\n");
 
-                myOutputWriter.write(sb.toString());
-                myOutputWriter.flush();
+                myErrorWriter.write(sb.toString());
+                myErrorWriter.flush();
             }
             else {
                 throw new RuntimeException("Error handler has been stopped.");
@@ -166,8 +172,8 @@ public class WriterStatusHandler implements StatusHandler {
                     }
                 }
 
-                myOutputWriter.write(sb.toString());
-                myOutputWriter.flush();
+                myErrorWriter.write(sb.toString());
+                myErrorWriter.flush();
             }
             else {
                 throw new RuntimeException("Error handler has been stopped.");
@@ -192,6 +198,7 @@ public class WriterStatusHandler implements StatusHandler {
 
         try {
             myOutputWriter.close();
+            myErrorWriter.close();
         }
         catch (IOException e) {
             System.err.println("Error closing the output stream.");
@@ -218,8 +225,8 @@ public class WriterStatusHandler implements StatusHandler {
                 sb.append(msg);
                 sb.append("\n");
 
-                myOutputWriter.write(sb.toString());
-                myOutputWriter.flush();
+                myErrorWriter.write(sb.toString());
+                myErrorWriter.flush();
             }
             else {
                 throw new RuntimeException("Error handler has been stopped.");
