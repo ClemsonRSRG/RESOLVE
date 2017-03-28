@@ -78,6 +78,14 @@ CLEARS
     |   'clears'
     ;
 
+CLS_INTERSECTION
+    :   'cls_intersection'
+    ;
+
+CLS_UNION
+    :   'cls_union'
+    ;
+
 COMPLEMENT
     :   'complement'
     ;
@@ -142,8 +150,7 @@ ELAPSED_TIME
     ;
 
 ELSE
-    :   'Else'
-    |   'else'
+    :   'else'
     ;
 
 END
@@ -264,8 +271,8 @@ INSTANTIATION
     :   'instantiation'
     ;
 
-INTERSECT
-    :   'intersect'
+INTERSECTION
+    :   'intersection'
     ;
 
 INTRODUCES
