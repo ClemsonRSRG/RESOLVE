@@ -665,8 +665,9 @@ prefixOp
 
 infixOp
     :   op=(IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | EXP | MOD | REM | DIV |
-         IMPLIES | IFF | RANGE | AND | OR | UNION | INTERSECT | IN | NOT_IN | GT | LT |
-         GT_EQL | LT_EQL | EQL | NOT_EQL)
+         IMPLIES | IFF | RANGE | AND | OR | UNION | INTERSECTION | CLS_UNION | CLS_INTERSECTION |
+         IN | NOT_IN | SUBSET | NOT_SUBSET | PROP_SUBSET | NOT_PROP_SUBSET | SUBSTR | NOT_SUBSTR |
+         WITHOUT | GT | LT | GT_EQL | LT_EQL | EQL | NOT_EQL)
     ;
 
 definitionParameterList
@@ -792,7 +793,7 @@ mathAddingExp
 
 mathRepeatAddExp
     :   (qualifier=IDENTIFIER QUALIFIER)?
-        op=(PLUS | MINUS | CONCAT | UNION | INTERSECT | WITHOUT | TILDE)
+        op=(PLUS | MINUS | CONCAT | UNION | INTERSECTION | WITHOUT | TILDE)
         mathMultiplyingExp
     ;
 
