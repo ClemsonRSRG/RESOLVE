@@ -20,7 +20,7 @@ import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
-import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
+import edu.clemson.cs.rsrg.statushandling.SystemStdHandler;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
@@ -168,7 +168,7 @@ public class ResolveCompiler {
      */
     public void invokeCompiler() {
         // Create a status handler
-        StatusHandler statusHandler = new StdErrHandler();
+        StatusHandler statusHandler = new SystemStdHandler();
 
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment =
@@ -219,7 +219,7 @@ public class ResolveCompiler {
             statusHandler = compileEnvironment.getStatusHandler();
             statusHandler.error(null, e.getMessage());
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
-                    && statusHandler instanceof StdErrHandler) {
+                    && statusHandler instanceof SystemStdHandler) {
                 e.printStackTrace();
             }
             statusHandler.stopLogging();
@@ -386,7 +386,7 @@ public class ResolveCompiler {
             statusHandler = compileEnvironment.getStatusHandler();
             statusHandler.error(null, e.getMessage());
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
-                    && statusHandler instanceof StdErrHandler) {
+                    && statusHandler instanceof SystemStdHandler) {
                 e.printStackTrace();
             }
             statusHandler.stopLogging();

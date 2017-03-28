@@ -1,5 +1,5 @@
 /**
- * StdErrHandler.java
+ * SystemStdHandler.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -15,14 +15,15 @@ package edu.clemson.cs.rsrg.statushandling;
 import java.io.PrintWriter;
 
 /**
- * <p>This class outputs all debugging, errors and/or
- * other information coming from the compiler to standard err
- * file descriptor.</p>
+ * <p>This class outputs all information and warning to {@link System#out} and
+ * all errors to {@link System#err} file descriptors.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class StdErrHandler extends WriterStatusHandler implements StatusHandler {
+public class SystemStdHandler extends WriterStatusHandler
+        implements
+            StatusHandler {
 
     // ===========================================================
     // Constructors
@@ -33,7 +34,7 @@ public class StdErrHandler extends WriterStatusHandler implements StatusHandler 
      * all information and warning output to {@link System#out} and
      * all error output to {@link System#err}.</p>
      */
-    public StdErrHandler() {
+    public SystemStdHandler() {
         super(new PrintWriter(System.out), new PrintWriter(System.err, true));
     }
 

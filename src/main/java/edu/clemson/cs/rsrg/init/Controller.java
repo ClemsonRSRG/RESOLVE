@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.init;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
-import edu.clemson.cs.rsrg.statushandling.StdErrHandler;
+import edu.clemson.cs.rsrg.statushandling.SystemStdHandler;
 import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.statushandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
@@ -181,7 +181,7 @@ public class Controller {
                 CompilerException see = (CompilerException) cause;
                 myStatusHandler.error(see.getErrorLocation(), e.getMessage());
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)
-                        && myStatusHandler instanceof StdErrHandler) {
+                        && myStatusHandler instanceof SystemStdHandler) {
                    e.printStackTrace();
                 }
                 myStatusHandler.stopLogging();
