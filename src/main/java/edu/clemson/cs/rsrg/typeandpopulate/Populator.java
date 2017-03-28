@@ -2226,19 +2226,28 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postSetCollectionExp(SetCollectionExp exp) {
-        // Make sure that everything in the set collection has the same expected type
-        MTType setType = null;
-        for (MathExp mathExp : exp.getVars()) {
-            if (setType != null) {
-                expectType(mathExp, setType);
-            }
-            else {
-                setType = mathExp.getMathType();
+        MTType setType = myTypeGraph.SET;
+        MTType setTypeValue;
+
+        // Check to see if have any elements in the set. If we don't, it is
+        // simply the empty set!
+        if (exp.getVars().isEmpty()) {
+            setTypeValue = myTypeGraph.EMPTY_SET;
+        }
+        else {
+            // Else make sure that everything in the set collection has the same
+            // expected type. If they are, we use it to build a Powerset application
+            // of the elements in the set.
+            Iterator<MathExp> setVarIt = exp.getVars().iterator();
+            setTypeValue = setVarIt.next().getMathType();
+            while (setVarIt.hasNext()) {
+                expectType(setVarIt.next(), setTypeValue);
             }
         }
 
-        // This must be our type
+        // This must be our type and type value
         exp.setMathType(setType);
+        exp.setMathTypeValue(setTypeValue);
     }
 
     /**

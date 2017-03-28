@@ -103,6 +103,7 @@ public abstract class ResolveConceptualElement
      *
      * @return A list containing all the children.
      */
+    @SuppressWarnings("unchecked")
     public List<ResolveConceptualElement> getChildren() {
         //We'd like to hit the fields in the order they appear in the class,
         //starting with the most general class and getting more specific.  So,
