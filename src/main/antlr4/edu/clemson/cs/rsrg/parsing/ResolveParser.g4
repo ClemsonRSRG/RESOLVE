@@ -837,7 +837,7 @@ mathAlternativeExp
 
 mathAlternativeExpItem
     :   mathAddingExp
-        (IF mathRelationalExp | OTHERWISE)
+        (IF mathLogicalExp | OTHERWISE)
         SEMICOLON
     ;
 
