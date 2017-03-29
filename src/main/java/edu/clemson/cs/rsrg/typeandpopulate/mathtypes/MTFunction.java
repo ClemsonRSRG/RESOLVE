@@ -778,6 +778,27 @@ public class MTFunction extends MTAbstract<MTFunction> {
                         actualParameterMathTypeValue = actualParameterMathType;
                     }
                 }
+                // YS - We might need to check the case where the formalParameterType is a
+                // MTFunctionApplication
+                else if (formalParameterType instanceof MTFunctionApplication) {
+                    // YS - Now we check to see if the function application can use the
+                    // actualParameter's type. If yes, our actual parameter type value is simply the
+                    // function application itself. Otherwise, we throw an error.
+                    // TODO: Is isKnownToBeIn(actualParameterMathType, appliedFunctionType.getRange()) a condition we need to consider?
+                    MTFunction appliedFunctionType =
+                            ((MTFunctionApplication) formalParameterType)
+                                    .getFunction();
+                    if (!myTypeGraph.isKnownToBeIn(actualParameter,
+                            appliedFunctionType.getRange())) {
+                        throw new NoSolutionException(
+                                "Parameter has a function application that generated an unexpected type: "
+                                        + appliedFunctionType.getRange(),
+                                new IllegalArgumentException());
+                    }
+                    else {
+                        actualParameterMathTypeValue = formalParameterType;
+                    }
+                }
                 else {
                     // YS - For all other math types, we check its type value. If the type value is null or
                     // is not known to be in the formal parameter type, it is an error.

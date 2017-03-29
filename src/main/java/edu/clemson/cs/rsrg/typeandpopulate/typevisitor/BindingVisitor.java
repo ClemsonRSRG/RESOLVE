@@ -187,6 +187,11 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
             //So long as the inner expression binds, this is ok
             myMatchSoFarFlag = visit(t1, ((MTBigUnion) t2).getExpression());
         }
+        else if (t2 instanceof MTFunctionApplication) {
+            //So long as the value returned by the function binds, this is ok
+            MTFunction functionApplied = ((MTFunctionApplication) t2).getFunction();
+            myMatchSoFarFlag = visit(t1, functionApplied.getRange());
+        }
         else {
             myMatchSoFarFlag = false;
         }
