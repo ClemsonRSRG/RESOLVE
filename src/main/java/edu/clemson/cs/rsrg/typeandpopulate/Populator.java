@@ -2235,19 +2235,63 @@ public class Populator extends TreeWalkerVisitor {
             setTypeValue = myTypeGraph.EMPTY_SET;
         }
         else {
-            // Else make sure that everything in the set collection has the same
-            // expected type. If they are, we use it to build a Powerset application
+            // Else make sure that everything in the set collection is known to be in
+            // some super type. If they are, we use it to build a Powerset application
             // of the elements in the set.
-            Iterator<MathExp> setVarIt = exp.getVars().iterator();
-            setTypeValue = setVarIt.next().getMathType();
-            while (setVarIt.hasNext()) {
-                expectType(setVarIt.next(), setTypeValue);
+            MathExp expContainingSuperType = null;
+            MTType superTypeOfAllElementsInSet = null;
+            Set<MathExp> vars = exp.getVars();
+            for (MathExp v : vars) {
+                MTType vType = v.getMathType();
+                if (superTypeOfAllElementsInSet == null ||
+                        superTypeOfAllElementsInSet.isSubtypeOf(vType)) {
+                    expContainingSuperType = v;
+                    superTypeOfAllElementsInSet = vType;
+                }
             }
+
+            for (MathExp v : vars) {
+                if (!v.equals(expContainingSuperType)) {
+                    expectType(v, superTypeOfAllElementsInSet);
+                }
+            }
+
+            setTypeValue = new MTPowertypeApplication(myTypeGraph, superTypeOfAllElementsInSet);
         }
 
         // This must be our type and type value
         exp.setMathType(setType);
         exp.setMathTypeValue(setTypeValue);
+    }
+
+    /**
+     * <p>This method redefines how a {@link SetCollectionExp} should be walked.</p>
+     *
+     * @param exp A set collection expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkSetCollectionExp(SetCollectionExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preSetCollectionExp(exp);
+        emitDebug(exp.getLocation(), "\tEntering walkSetCollectionExp...");
+
+        // Walk each of the expressions inside SetCollectionExp
+        Set<MathExp> vars = exp.getVars();
+        for (MathExp v : vars) {
+            TreeWalker.visit(this, v);
+        }
+
+        emitDebug(exp.getLocation(), "\tExiting walkSetCollectionExp.");
+        postSetCollectionExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
     }
 
     /**
