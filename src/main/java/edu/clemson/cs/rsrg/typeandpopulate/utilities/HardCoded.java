@@ -147,6 +147,7 @@ public class HardCoded {
 
         try {
             b.addBinding("Entity", v, g.CLS, g.ENTITY);
+            b.addBinding("Element", v, g.CLS, g.ELEMENT);
             b.addBinding("Cls", v, g.CLS, g.CLS);
 
             b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
