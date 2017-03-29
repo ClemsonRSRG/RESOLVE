@@ -49,7 +49,7 @@ public class SystemStdHandler extends WriterStatusHandler
      * is over or has been aborted due to an error.)</p>
      */
     @Override
-    public final void stopLogging() {
+    public synchronized final void stopLogging() {
         stopLogging = true;
     }
 

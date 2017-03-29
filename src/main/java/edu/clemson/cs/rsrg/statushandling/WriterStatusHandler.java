@@ -70,7 +70,7 @@ public class WriterStatusHandler implements StatusHandler {
      * @param msg Message to be displayed.
      */
     @Override
-    public final void error(Location l, String msg) {
+    public synchronized final void error(Location l, String msg) {
         try {
             if (!hasStopped()) {
                 StringBuilder sb = new StringBuilder();
@@ -113,7 +113,7 @@ public class WriterStatusHandler implements StatusHandler {
      * @param msg A compilation message.
      */
     @Override
-    public final void info(Location l, String msg) {
+    public synchronized final void info(Location l, String msg) {
         try {
             if (!hasStopped()) {
                 StringBuilder sb = new StringBuilder();
@@ -144,7 +144,7 @@ public class WriterStatusHandler implements StatusHandler {
      * @param e The encountered compiler exception.
      */
     @Override
-    public final void printStackTrace(CompilerException e) {
+    public synchronized final void printStackTrace(CompilerException e) {
         try {
             if (!hasStopped()) {
                 StringBuilder sb = new StringBuilder();
@@ -193,7 +193,7 @@ public class WriterStatusHandler implements StatusHandler {
      * is over or has been aborted due to an error.)</p>
      */
     @Override
-    public void stopLogging() {
+    public synchronized void stopLogging() {
         stopLogging = true;
 
         try {
@@ -213,7 +213,7 @@ public class WriterStatusHandler implements StatusHandler {
      * @param msg Message to be displayed.
      */
     @Override
-    public final void warning(Location l, String msg) {
+    public synchronized final void warning(Location l, String msg) {
         try {
             if (!hasStopped()) {
                 StringBuilder sb = new StringBuilder();
