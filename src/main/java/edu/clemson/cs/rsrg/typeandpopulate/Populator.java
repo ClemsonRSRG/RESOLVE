@@ -3833,6 +3833,26 @@ public class Populator extends TreeWalkerVisitor {
                 }
             }
 
+            // YS: Not sure if this is quite right, but here is the explanation:
+            // If the expectedType happens to be a function application, then check to see
+            // if the foundValue is known to be in the range of the function.
+            if (!result && expectedType instanceof MTFunctionApplication) {
+                MTFunction expectedTypeAsFunction =
+                        ((MTFunctionApplication) expectedType).getFunction();
+                result = myTypeGraph.isKnownToBeIn(foundValue,
+                        expectedTypeAsFunction.getRange());
+            }
+
+            // YS: Not sure if this is quite right, but here is the explanation:
+            // If the foundType happens to be a function application, then check to see
+            // if the range of the function applied is a subtype of the expectedType.
+            if (!result && foundType instanceof MTFunctionApplication) {
+                MTFunction foundTypeAsFunction =
+                        ((MTFunctionApplication) foundType).getFunction();
+                result = myTypeGraph.isSubtype(foundTypeAsFunction.getRange(),
+                        expectedType);
+            }
+
             return result;
         }
 
