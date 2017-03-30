@@ -31,7 +31,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry.Quantification
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTNamed;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTPowertypeApplication;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTPowerclassApplication;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
@@ -83,9 +83,9 @@ public class HardCoded {
             //(it requires itself to typecheck):
 
             //Type Theorem Function_Subtypes:
-            //   For all D1, R1 : MType,
-            //   For all D2 : Powerset(D1),
-            //   For all R2 : Powerset(R1),
+            //   For all D1, R1 : Cls,
+            //   For all D2 : Powerclass(D1),
+            //   For all R2 : Powerclass(R1),
             //   For all f : D2 -> R2,
             //       f : D1 -> R1;
 
@@ -110,9 +110,9 @@ public class HardCoded {
             s.addBinding("R1", Quantification.UNIVERSAL, v, g.CLS);
 
             s.addBinding("D2", Quantification.UNIVERSAL, v,
-                    new MTPowertypeApplication(g, new MTNamed(g, "D1")));
+                    new MTPowerclassApplication(g, new MTNamed(g, "D1")));
             s.addBinding("R2", Quantification.UNIVERSAL, v,
-                    new MTPowertypeApplication(g, new MTNamed(g, "R1")));
+                    new MTPowerclassApplication(g, new MTNamed(g, "R1")));
 
             s.addBinding("f", Quantification.UNIVERSAL, v, new MTFunction(g,
                     new MTNamed(g, "R2"), new MTNamed(g, "D2")));
@@ -158,7 +158,7 @@ public class HardCoded {
             // built-in symbols that are defined as a function
             b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
                     g.ENTITY));
-            b.addBinding("Powerset", v, g.POWERTYPE);
+            b.addBinding("Powerset", v, g.POWERSET);
             b.addBinding("Powerclass", v, g.POWERCLASS);
             b.addBinding("cls_union", v, g.UNION);
             b.addBinding("cls_intersection", v, g.INTERSECT);

@@ -87,6 +87,34 @@ public class TypeGraph {
     private final StatusHandler myStatusHandler;
 
     // ===========================================================
+    // Function Factories
+    // ===========================================================
+
+    /** <p>Factory for creating <code>Powerclass</code> applications.</p> */
+    private final static FunctionApplicationFactory POWERCLASS_APPLICATION =
+            new PowerclassApplicationFactory();
+
+    /** <p>Factory for creating <code>Powerset</code> applications.</p> */
+    private final static FunctionApplicationFactory POWERSET_APPLICATION =
+            new PowersetApplicationFactory();
+
+    /** <p>Factory for creating <code>Union</code> applications.</p> */
+    private final static FunctionApplicationFactory UNION_APPLICATION =
+            new UnionApplicationFactory();
+
+    /** <p>Factory for creating <code>Intersection</code> applications.</p> */
+    private final static FunctionApplicationFactory INTERSECT_APPLICATION =
+            new IntersectApplicationFactory();
+
+    /** <p>Factory for creating <code>Function</code> constructor applications.</p> */
+    private final static FunctionApplicationFactory FUNCTION_CONSTRUCTOR_APPLICATION =
+            new FunctionConstructorApplicationFactory();
+
+    /** <p>Factory for creating <code>Cartesian Product</code> applications.</p> */
+    private final static FunctionApplicationFactory CARTESIAN_PRODUCT_APPLICATION =
+            new CartesianProductApplicationFactory();
+
+    // ===========================================================
     // Global Mathematical Types
     // ===========================================================
 
@@ -114,41 +142,21 @@ public class TypeGraph {
     /** <p><code>Void</code></p> */
     public final MTProper VOID = new MTProper(this, CLS, false, "Void");
 
-    /** <p><code>Empty_Set</code></p> */
-    public final MTProper EMPTY_SET =
-            new MTProper(this, SSET, false, "Empty_Set");
-
     /** <p><code>Empty_Class</code></p> */
     public final MTProper EMPTY_CLASS =
             new MTProper(this, CLS, false, "Empty_Class");
 
-    /** <p>Factory for creating <code>PowerType</code> applications.</p> */
-    private final static FunctionApplicationFactory POWERTYPE_APPLICATION =
-            new PowertypeApplicationFactory();
+    /** <p><code>Empty_Set</code></p> */
+    public final MTProper EMPTY_SET =
+            new MTProper(this, SSET, false, "Empty_Set");
 
-    /** <p>Factory for creating <code>Union</code> applications.</p> */
-    private final static FunctionApplicationFactory UNION_APPLICATION =
-            new UnionApplicationFactory();
-
-    /** <p>Factory for creating <code>Intersection</code> applications.</p> */
-    private final static FunctionApplicationFactory INTERSECT_APPLICATION =
-            new IntersectApplicationFactory();
-
-    /** <p>Factory for creating <code>Function</code> constructor applications.</p> */
-    private final static FunctionApplicationFactory FUNCTION_CONSTRUCTOR_APPLICATION =
-            new FunctionConstructorApplicationFactory();
-
-    /** <p>Factory for creating <code>Cartesian Product</code> applications.</p> */
-    private final static FunctionApplicationFactory CARTESIAN_PRODUCT_APPLICATION =
-            new CartesianProductApplicationFactory();
-
-    /** <p><code>PowerType</code> function</p> */
-    public final MTFunction POWERTYPE =
-            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
-
-    /** <p><code>PowerClass</code> function</p> */
+    /** <p><code>Powerclass</code> function</p> */
     public final MTFunction POWERCLASS =
-            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+            new MTFunction(this, true, POWERCLASS_APPLICATION, CLS, CLS);
+
+    /** <p><code>Powerset</code> function</p> */
+    public final MTFunction POWERSET =
+            new MTFunction(this, true, POWERSET_APPLICATION, SSET, SSET);
 
     /** <p><code>Union</code> function</p> */
     public final MTFunction UNION =
@@ -490,7 +498,7 @@ public class TypeGraph {
             try {
                 Exp conditions =
                         getValidTypeConditions(subtype,
-                                new MTPowertypeApplication(this, supertype));
+                                new MTPowerclassApplication(this, supertype));
                 result = MathExp.isLiteralTrue(conditions);
             }
             catch (TypeMismatchException e) {
@@ -813,21 +821,21 @@ public class TypeGraph {
             //Every CLS is in CLS except for Entity and CLS, itself
             result = MathExp.getTrueVarExp(null, this);
         }
-        else if (expected instanceof MTPowertypeApplication) {
-            if (value.equals(EMPTY_SET)) {
-                //The empty set is in all powertypes
+        else if (expected instanceof MTPowerclassApplication) {
+            if (value.equals(EMPTY_CLASS)) {
+                //The empty class is in all powerclasses
                 result = MathExp.getTrueVarExp(null, this);
             }
             else {
                 //If "expected" happens to be Power(t) for some t, we can
                 //"demote" value to an INSTANCE of itself (provided it is not
                 //the empty set), and expected to just t
-                MTPowertypeApplication expectedAsPowertypeApplication =
-                        (MTPowertypeApplication) expected;
+                MTPowerclassApplication expectedAsPowerclassApplication =
+                        (MTPowerclassApplication) expected;
 
                 DummyExp memberOfValue = new DummyExp(null, value);
 
-                if (isKnownToBeIn(memberOfValue, expectedAsPowertypeApplication
+                if (isKnownToBeIn(memberOfValue, expectedAsPowerclassApplication
                         .getArgument(0))) {
                     result = MathExp.getTrueVarExp(null, this);
                 }
@@ -1346,9 +1354,9 @@ public class TypeGraph {
     }
 
     /**
-     * <p>This creates a {@link MTPowertypeApplication} type.</p>
+     * <p>This creates a {@link MTPowerclassApplication} type.</p>
      */
-    private static class PowertypeApplicationFactory
+    private static class PowerclassApplicationFactory
             implements
                 FunctionApplicationFactory {
 
@@ -1366,7 +1374,33 @@ public class TypeGraph {
         @Override
         public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
                 String calledAsName, List<MTType> arguments) {
-            return new MTPowertypeApplication(g, arguments.get(0));
+            return new MTPowerclassApplication(g, arguments.get(0));
+        }
+
+    }
+
+    /**
+     * <p>This creates a {@link MTPowersetApplication} type.</p>
+     */
+    private static class PowersetApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        /**
+         * <p>This method returns a {@link MTType} resulting from a
+         * function application.</p>
+         *
+         * @param g The current type graph.
+         * @param f The function to be applied.
+         * @param calledAsName The name for this function application type.
+         * @param arguments List of arguments for applying the function.
+         *
+         * @return A function application {@link MTType}.
+         */
+        @Override
+        public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
+                String calledAsName, List<MTType> arguments) {
+            return new MTPowersetApplication(g, arguments.get(0));
         }
 
     }
