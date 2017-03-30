@@ -615,8 +615,8 @@ public class Populator extends TreeWalkerVisitor {
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
                     param, ProgramParameterEntry.ParameterMode.TYPE, new PTElement(myTypeGraph));
 
-            myGenericTypes.put(paramName, myTypeGraph.CLS);
-            param.setMathType(myTypeGraph.CLS);
+            myGenericTypes.put(paramName, myTypeGraph.SSET);
+            param.setMathType(myTypeGraph.SSET);
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(param.getName().getName(), param.getName()
