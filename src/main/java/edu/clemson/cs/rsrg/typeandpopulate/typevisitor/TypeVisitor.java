@@ -165,23 +165,43 @@ public abstract class TypeVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * a {@link MTPowertypeApplication}.</p>
+     * a {@link MTPowerclassApplication}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
      * @param t A math type.
      */
-    public void beginMTPowertypeApplication(MTPowertypeApplication t) {}
+    public void beginMTPowerclassApplication(MTPowerclassApplication t) {}
 
     /**
      * <p>This method adds additional logic after we visit
-     * a {@link MTPowertypeApplication}.</p>
+     * a {@link MTPowerclassApplication}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
      * @param t A math type.
      */
-    public void endMTPowertypeApplication(MTPowertypeApplication t) {}
+    public void endMTPowerclassApplication(MTPowerclassApplication t) {}
+
+    /**
+     * <p>This method adds additional logic before we visit
+     * a {@link MTPowersetApplication}.</p>
+     *
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param t A math type.
+     */
+    public void beginMTPowersetApplication(MTPowersetApplication t) {}
+
+    /**
+     * <p>This method adds additional logic after we visit
+     * a {@link MTPowersetApplication}.</p>
+     *
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param t A math type.
+     */
+    public void endMTPowersetApplication(MTPowersetApplication t) {}
 
     /**
      * <p>This method adds additional logic before we visit

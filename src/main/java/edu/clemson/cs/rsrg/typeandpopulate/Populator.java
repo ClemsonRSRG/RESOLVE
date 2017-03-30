@@ -2216,7 +2216,7 @@ public class Populator extends TreeWalkerVisitor {
 
         exp.setMathType(new MTSetRestriction(myTypeGraph, varType, varDec
                 .getName().getName(), body));
-        exp.setMathTypeValue(new MTPowertypeApplication(myTypeGraph, varType));
+        exp.setMathTypeValue(new MTPowersetApplication(myTypeGraph, varType));
     }
 
     /**
@@ -2256,7 +2256,7 @@ public class Populator extends TreeWalkerVisitor {
                 }
             }
 
-            setTypeValue = new MTPowertypeApplication(myTypeGraph, superTypeOfAllElementsInSet);
+            setTypeValue = new MTPowersetApplication(myTypeGraph, superTypeOfAllElementsInSet);
         }
 
         // This must be our type and type value
