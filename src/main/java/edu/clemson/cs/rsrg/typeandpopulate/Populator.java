@@ -2226,7 +2226,7 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postSetCollectionExp(SetCollectionExp exp) {
-        MTType setType = myTypeGraph.SET;
+        MTType setType = myTypeGraph.SSET;
         MTType setTypeValue;
 
         // Check to see if have any elements in the set. If we don't, it is

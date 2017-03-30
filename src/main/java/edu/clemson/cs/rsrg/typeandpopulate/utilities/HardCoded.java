@@ -146,34 +146,38 @@ public class HardCoded {
                         NATIVE_FILE_FAKE_LOCATION, "native"));
 
         try {
+            // built-in symbols
             b.addBinding("Entity", v, g.CLS, g.ENTITY);
             b.addBinding("Element", v, g.CLS, g.ELEMENT);
             b.addBinding("Cls", v, g.CLS, g.CLS);
+            b.addBinding("SSet", v, g.CLS, g.SSET);
+            b.addBinding("B", v, g.CLS, g.BOOLEAN);
+            b.addBinding("Empty_Class", v, g.CLS, g.EMPTY_CLASS);
+            b.addBinding("Empty_Set", v, g.SSET, g.EMPTY_SET);
 
+            // built-in symbols that are defined as a function
             b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
                     g.ENTITY));
-
-            b.addBinding("SSet", v, g.CLS, g.SET);
-            b.addBinding("B", v, g.CLS, g.BOOLEAN);
-
-            b.addBinding("Empty_Set", v, g.CLS, g.EMPTY_SET);
             b.addBinding("Powerset", v, g.POWERTYPE);
             b.addBinding("Powerclass", v, g.POWERCLASS);
-            b.addBinding("true", v, g.BOOLEAN);
-            b.addBinding("false", v, g.BOOLEAN);
             b.addBinding("cls_union", v, g.UNION);
             b.addBinding("cls_intersection", v, g.INTERSECT);
             b.addBinding("->", v, g.FUNCTION);
-            b.addBinding("and", v, g.AND);
-            b.addBinding("not", v, g.NOT);
             b.addBinding("*", v, g.CROSS);
 
+            // TODO: Candidates for removal and add to Boolean_Theory? -YS
+            b.addBinding("true", v, g.BOOLEAN);
+            b.addBinding("false", v, g.BOOLEAN);
+            b.addBinding("and", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
+                    g.BOOLEAN));
+            b.addBinding("not", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
+                    g.BOOLEAN));
+            b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
+                    g.BOOLEAN));
             b.addBinding("=", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
                     g.ENTITY));
             b.addBinding("/=", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
                     g.ENTITY));
-            b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
-                    g.BOOLEAN));
         }
         catch (DuplicateSymbolException dse) {
             //Not possible--we're the first ones to add anything

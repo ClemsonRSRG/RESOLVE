@@ -100,7 +100,7 @@ public class TypeGraph {
     public final MTProper CLS = new MTProper(this, null, true, "Cls");
 
     /** <p><code>SSet</code></p> */
-    public final MTProper SET = new MTProper(this, CLS, true, "SSet");
+    public final MTProper SSET = new MTProper(this, CLS, true, "SSet");
 
     /** <p><code>Boolean</code></p> */
     public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
@@ -116,7 +116,11 @@ public class TypeGraph {
 
     /** <p><code>Empty_Set</code></p> */
     public final MTProper EMPTY_SET =
-            new MTProper(this, CLS, false, "Empty_Set");
+            new MTProper(this, SSET, false, "Empty_Set");
+
+    /** <p><code>Empty_Class</code></p> */
+    public final MTProper EMPTY_CLASS =
+            new MTProper(this, CLS, false, "Empty_Class");
 
     /** <p>Factory for creating <code>PowerType</code> applications.</p> */
     private final static FunctionApplicationFactory POWERTYPE_APPLICATION =
@@ -162,13 +166,6 @@ public class TypeGraph {
     /** <p><code>Cartesian Product</code> function</p> */
     public final MTFunction CROSS =
             new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
-
-    /** <p>Logical <code>And</code> function</p> */
-    public final MTFunction AND =
-            new MTFunction(this, BOOLEAN, BOOLEAN, BOOLEAN);
-
-    /** <p>Logical <code>Not</code> function</p> */
-    public final MTFunction NOT = new MTFunction(this, BOOLEAN, BOOLEAN);
 
     // ===========================================================
     // Constructors
