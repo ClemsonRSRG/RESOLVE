@@ -168,9 +168,8 @@ public class HardCoded {
             // TODO: Candidates for removal and add to Boolean_Theory? -YS
             b.addBinding("true", v, g.BOOLEAN);
             b.addBinding("false", v, g.BOOLEAN);
+            b.addBinding("not", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN));
             b.addBinding("and", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
-                    g.BOOLEAN));
-            b.addBinding("not", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
                     g.BOOLEAN));
             b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
                     g.BOOLEAN));
