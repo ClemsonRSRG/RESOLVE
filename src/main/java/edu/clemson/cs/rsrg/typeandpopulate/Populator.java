@@ -2976,8 +2976,8 @@ public class Populator extends TreeWalkerVisitor {
                                             .getInnermostActiveScope(),
                                     myDefinitionSchematicTypes);
                     candidateType = (MTFunction) candidate.getType();
-                    emitDebug(e.getLocation(), "\t" + candidate.getType() + " deschematizes to "
-                            + candidateType + " using " + comparison.description());
+                    emitDebug(e.getLocation(), "\t" + candidate.getType()
+                            + " deschematizes to " + candidateType);
 
                     if (comparison.compare(e, eType, candidateType)) {
                         if (match != null) {
@@ -3026,6 +3026,8 @@ public class Populator extends TreeWalkerVisitor {
             throw new NoSolutionException("Could not find a symbol entry for: "
                     + e + " using " + comparison.description(), null);
         }
+
+        emitDebug(e.getLocation(), "\tFound a match using " + comparison.description());
 
         return match;
     }
