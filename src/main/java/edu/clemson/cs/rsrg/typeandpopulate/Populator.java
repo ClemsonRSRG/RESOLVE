@@ -2697,6 +2697,12 @@ public class Populator extends TreeWalkerVisitor {
             notAType(typeExp);
         }
 
+        // YS: If we happen to have any concept type parameters
+        // we might need to substitute any instances of the concept
+        // type with its actual math type.
+        mathTypeValue =
+                TypeGraph.getCopyWithVariablesSubstituted(mathTypeValue, myGenericTypes);
+
         ty.setMathType(mathType);
         ty.setMathTypeValue(mathTypeValue);
     }
@@ -3118,7 +3124,7 @@ public class Populator extends TreeWalkerVisitor {
 
                         emitDebug(eCopy.getLocation(), "\tReplaced schematic types in expression: "
                                 + eCopy.toString() + "("
-                                + eCopy.getLocation() + ") " + " with new type "
+                                + eCopy.getLocation() + ") with new type "
                                 + eCopyType.toString());
 
                         intendedEntry = getInexactDomainTypeMatch(eCopy, eCopyType, sameNameFunctions);
