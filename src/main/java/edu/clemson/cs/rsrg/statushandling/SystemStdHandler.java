@@ -35,7 +35,7 @@ public class SystemStdHandler extends WriterStatusHandler
      * all error output to {@link System#err}.</p>
      */
     public SystemStdHandler() {
-        super(new PrintWriter(System.out), new PrintWriter(System.err, true));
+        super(new PrintWriter(System.out), new PrintWriter(System.err));
     }
 
     // ===========================================================
