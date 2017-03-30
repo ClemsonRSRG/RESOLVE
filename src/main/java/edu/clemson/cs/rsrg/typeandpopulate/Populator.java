@@ -3104,6 +3104,8 @@ public class Populator extends TreeWalkerVisitor {
             }
             catch (NoSolutionException nsee2) {
                 try {
+                    emitDebug(e.getLocation(), "\t" + nsee2.getMessage());
+
                     if (myDefinitionSchematicTypes != null) {
                         // Create a copy of the original expression and assign it the conservative type
                         AbstractFunctionExp eCopy = (AbstractFunctionExp) e.clone();
@@ -3126,6 +3128,8 @@ public class Populator extends TreeWalkerVisitor {
                     }
                 }
                 catch (NoSolutionException nsee3) {
+                    emitDebug(e.getLocation(), "\t" + nsee3.getMessage());
+
                     boolean foundOne = false;
                     String errorMessage =
                             "No function applicable for " + "domain: "
