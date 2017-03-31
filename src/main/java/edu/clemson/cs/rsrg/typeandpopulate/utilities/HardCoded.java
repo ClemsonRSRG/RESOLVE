@@ -199,8 +199,10 @@ public class HardCoded {
     public static MTType getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
         MTType result = null;
 
-        if (e.getMathTypeValue() != null && metaSegment.equals("Is_Initial")) {
-            result = new MTFunction(g, g.BOOLEAN, g.ENTITY);
+        if (e.getMathTypeValue() != null) {
+            if (metaSegment.equals("Is_Initial")) {
+                result = new MTFunction(g, g.BOOLEAN, e.getMathTypeValue());
+            }
         }
 
         return result;
