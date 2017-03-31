@@ -2361,14 +2361,19 @@ public class Populator extends TreeWalkerVisitor {
                             nodeExp.getName().getName(),
                             SymbolTableEntry.Quantification.UNIVERSAL, exp,
                             exp.getAssertedTy().getMathType());
-                    exp.setMathType(exp.getAssertedTy().getMathType());
+
+                    // YS: So we don't really care about what the raw type's
+                    // math type is. What we really care about is what type
+                    // it will produce, so we use its type value!
+                    exp.setMathType(exp.getAssertedTy().getMathTypeValue());
                     exp.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
                             .getName().getName()));
 
-                    //See walkTypeAssertionExp(): we are responsible for
-                    //setting the VarExp's type.
-                    nodeExp.setMathType(exp.getAssertedTy().getMathType());
-                    exp.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
+                    // See walkTypeAssertionExp(): we are responsible for
+                    // setting the VarExp's type.
+                    // YS: The variable simply is an MTNamed that has the
+                    // same name as its name.
+                    nodeExp.setMathType(new MTNamed(myTypeGraph, nodeExp
                             .getName().getName()));
 
                     if (myDefinitionNamedTypes.contains(nodeExp.getName()
@@ -2388,14 +2393,16 @@ public class Populator extends TreeWalkerVisitor {
                                 .getLocation());
                     }
 
-                    //Note that a redundantly named type parameter would be
-                    //caught when we add a symbol to the symbol table, so no
-                    //need to check here
+                    // Note that a redundantly named type parameter would be
+                    // caught when we add a symbol to the symbol table, so no
+                    // need to check here. Simply store the name and its type
+                    // into our current definition's schematic type map.
                     myDefinitionSchematicTypes.put(nodeExp.getName().getName(),
-                            exp.getAssertedTy().getMathType());
+                            nodeExp.getMathType());
 
                     emitDebug(exp.getLocation(), "\tAdded schematic variable: "
-                            + nodeExp.getName().getName());
+                            + nodeExp.getName().getName() + " with type: " + exp.getMathType()
+                            + " and type value: " + exp.getMathTypeValue());
                 }
                 catch (DuplicateSymbolException dse) {
                     duplicateSymbol(nodeExp.getName().getName(), nodeExp
