@@ -1747,7 +1747,7 @@ public class Populator extends TreeWalkerVisitor {
         foundExpType = exp.getConservativePreApplicationType(myTypeGraph);
 
         emitDebug(exp.getLocation(), "\tExpression: " + exp.toString() + "("
-                + exp.getLocation() + ") " + " of type "
+                + exp.getLocation() + ") of type "
                 + foundExpType.toString());
 
         MathSymbolEntry intendedEntry = getIntendedFunction(exp);
@@ -1950,6 +1950,12 @@ public class Populator extends TreeWalkerVisitor {
                     throw new SourceErrorException("Value not a tuple.",
                             lastGood);
                 }
+                // YS: Make sure we don't have more segments to process after a
+                // MetaFieldType. In other words, this is illegal: Entry.Is_Initial(x).Foo
+                else if (segments.hasNext()) {
+                    throw new SourceErrorException("Illegal dotted expression following: "
+                            + segmentName, nextSegment.getLocation());
+                }
             }
             catch (NoSuchElementException nsee) {
                 curType =
@@ -1958,6 +1964,12 @@ public class Populator extends TreeWalkerVisitor {
 
                 if (curType == null) {
                     throw new SourceErrorException("No such factor.", lastGood);
+                }
+                // YS: Make sure we don't have more segments to process after a
+                // MetaFieldType. In other words, this is illegal: Entry.Is_Initial(x).Foo
+                else if (segments.hasNext()) {
+                    throw new SourceErrorException("Illegal dotted expression following: "
+                            + segmentName, nextSegment.getLocation());
                 }
             }
 
