@@ -78,14 +78,6 @@ CLEARS
     |   'clears'
     ;
 
-CLS_INTERSECTION
-    :   'cls_intersection'
-    ;
-
-CLS_UNION
-    :   'cls_union'
-    ;
-
 COMPLEMENT
     :   'complement'
     ;

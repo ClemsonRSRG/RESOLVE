@@ -221,7 +221,7 @@ public class HardCoded {
             b.addBinding("Element", v, g.CLS, g.ELEMENT);
             b.addBinding("Cls", v, g.CLS, g.CLS);
             b.addBinding("SSet", v, g.CLS, g.SSET);
-            b.addBinding("B", v, g.CLS, g.BOOLEAN);
+            b.addBinding("B", v, g.SSET, g.BOOLEAN);
             b.addBinding("Empty_Class", v, g.CLS, g.EMPTY_CLASS);
             b.addBinding("Empty_Set", v, g.SSET, g.EMPTY_SET);
             b.addBinding("true", v, g.BOOLEAN);
@@ -232,8 +232,6 @@ public class HardCoded {
                     g.ENTITY));
             b.addBinding("Powerset", v, g.POWERSET);
             b.addBinding("Powerclass", v, g.POWERCLASS);
-
-            // TODO: Candidates for removal and add to Boolean_Theory? -YS
             b.addBinding("not", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN));
             b.addBinding("and", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
                     g.BOOLEAN));
