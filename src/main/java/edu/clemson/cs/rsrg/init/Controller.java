@@ -329,55 +329,58 @@ public class Controller {
             ModuleDec root) {
         Map<PosSymbol, Boolean> allImports = root.getModuleDependencies();
         for (PosSymbol importRequest : allImports.keySet()) {
-            // Check to see if this import has been labeled as externally realized
-            // or not. If yes, we add it as an external import and move on.
-            // If no, we add it as a new dependency that must be imported.
-            if (!allImports.get(importRequest)) {
-                ResolveFile file = findResolveFile(importRequest.getName());
-                ModuleIdentifier id =
-                        new ModuleIdentifier(importRequest.getName());
-                ModuleIdentifier rootId = new ModuleIdentifier(root);
-                ModuleDec module;
+            // Don't try to import the built-in Cls_Theory
+            if (!importRequest.getName().equals("Cls_Theory")) {
+                // Check to see if this import has been labeled as externally realized
+                // or not. If yes, we add it as an external import and move on.
+                // If no, we add it as a new dependency that must be imported.
+                if (!allImports.get(importRequest)) {
+                    ResolveFile file = findResolveFile(importRequest.getName());
+                    ModuleIdentifier id =
+                            new ModuleIdentifier(importRequest.getName());
+                    ModuleIdentifier rootId = new ModuleIdentifier(root);
+                    ModuleDec module;
 
-                // Search for the file in our processed modules
-                if (!myCompileEnvironment.containsID(id)) {
-                    module = createModuleAST(file);
-                    myCompileEnvironment.constructRecord(file, module);
+                    // Search for the file in our processed modules
+                    if (!myCompileEnvironment.containsID(id)) {
+                        module = createModuleAST(file);
+                        myCompileEnvironment.constructRecord(file, module);
 
-                    // Print out debugging message
-                    if (myCompileEnvironment.flags
-                            .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                        myStatusHandler.info(null, "Importing New Module: "
-                                + id.toString());
+                        // Print out debugging message
+                        if (myCompileEnvironment.flags
+                                .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                            myStatusHandler.info(null, "Importing New Module: "
+                                    + id.toString());
+                        }
                     }
+                    else {
+                        module = myCompileEnvironment.getModuleAST(id);
+                    }
+
+                    // Import error
+                    if (module == null) {
+                        throw new ImportException("Invalid import "
+                                + importRequest.toString()
+                                + "; Cannot import module of " + "type: "
+                                + file.getModuleType().getExtension());
+                    }
+
+                    // Check for circular dependency
+                    if (pathExists(g, id, rootId)) {
+                        throw new CircularDependencyException(
+                                "Circular dependency detected.");
+                    }
+
+                    // Add new edge to our graph indicating the relationship between
+                    // the two files.
+                    Graphs.addEdgeWithVertices(g, rootId, id);
+
+                    // Now check this new module for dependencies
+                    findDependencies(g, module);
                 }
                 else {
-                    module = myCompileEnvironment.getModuleAST(id);
+                    addFileAsExternalImport(importRequest);
                 }
-
-                // Import error
-                if (module == null) {
-                    throw new ImportException("Invalid import "
-                            + importRequest.toString()
-                            + "; Cannot import module of " + "type: "
-                            + file.getModuleType().getExtension());
-                }
-
-                // Check for circular dependency
-                if (pathExists(g, id, rootId)) {
-                    throw new CircularDependencyException(
-                            "Circular dependency detected.");
-                }
-
-                // Add new edge to our graph indicating the relationship between
-                // the two files.
-                Graphs.addEdgeWithVertices(g, rootId, id);
-
-                // Now check this new module for dependencies
-                findDependencies(g, module);
-            }
-            else {
-                addFileAsExternalImport(importRequest);
             }
         }
     }
