@@ -2356,28 +2356,25 @@ public class Populator extends TreeWalkerVisitor {
         if (myTypeValueDepth > 0) {
             try {
                 VarExp nodeExp = (VarExp) exp.getExp();
+                String nodeExpName = nodeExp.getName().getName();
                 try {
-                    myBuilder.getInnermostActiveScope().addBinding(
-                            nodeExp.getName().getName(),
-                            SymbolTableEntry.Quantification.UNIVERSAL, exp,
-                            exp.getAssertedTy().getMathType());
+                    MTType expType = exp.getAssertedTy().getMathTypeValue();
+                    myBuilder.getInnermostActiveScope().addBinding(nodeExpName,
+                            SymbolTableEntry.Quantification.UNIVERSAL, exp, expType);
 
                     // YS: So we don't really care about what the raw type's
                     // math type is. What we really care about is what type
                     // it will produce, so we use its type value!
-                    exp.setMathType(exp.getAssertedTy().getMathTypeValue());
-                    exp.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
-                            .getName().getName()));
+                    exp.setMathType(expType);
+                    exp.setMathTypeValue(new MTNamed(myTypeGraph, nodeExpName));
 
                     // See walkTypeAssertionExp(): we are responsible for
                     // setting the VarExp's type.
                     // YS: The variable simply is an MTNamed that has the
                     // same name as its name.
-                    nodeExp.setMathType(new MTNamed(myTypeGraph, nodeExp
-                            .getName().getName()));
+                    nodeExp.setMathType(new MTNamed(myTypeGraph, nodeExpName));
 
-                    if (myDefinitionNamedTypes.contains(nodeExp.getName()
-                            .getName())) {
+                    if (myDefinitionNamedTypes.contains(nodeExpName)) {
                         //Regardless of where in the expression it appears, an
                         //implicit type parameter exists at the top level of a
                         //definition, and thus a definition that contains, e.g.,
@@ -2397,16 +2394,14 @@ public class Populator extends TreeWalkerVisitor {
                     // caught when we add a symbol to the symbol table, so no
                     // need to check here. Simply store the name and its type
                     // into our current definition's schematic type map.
-                    myDefinitionSchematicTypes.put(nodeExp.getName().getName(),
-                            nodeExp.getMathType());
+                    myDefinitionSchematicTypes.put(nodeExpName, nodeExp.getMathType());
 
                     emitDebug(exp.getLocation(), "\tAdded schematic variable: "
-                            + nodeExp.getName().getName() + " with type: " + exp.getMathType()
+                            + nodeExpName + " with type: " + exp.getMathType()
                             + " and type value: " + exp.getMathTypeValue());
                 }
                 catch (DuplicateSymbolException dse) {
-                    duplicateSymbol(nodeExp.getName().getName(), nodeExp
-                            .getLocation());
+                    duplicateSymbol(nodeExpName, nodeExp.getLocation());
                 }
             }
             catch (ClassCastException cce) {
@@ -3001,7 +2996,7 @@ public class Populator extends TreeWalkerVisitor {
                                             .getInnermostActiveScope(),
                                     myDefinitionSchematicTypes);
                     candidateType = (MTFunction) candidate.getType();
-                    emitDebug(e.getLocation(), "\t" + candidate.getType()
+                    emitDebug(e.getLocation(), "\t" + eType
                             + " deschematizes to " + candidateType);
 
                     if (comparison.compare(e, eType, candidateType)) {

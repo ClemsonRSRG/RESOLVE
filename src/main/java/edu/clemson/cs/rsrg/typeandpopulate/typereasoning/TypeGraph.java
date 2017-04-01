@@ -131,7 +131,7 @@ public class TypeGraph {
     public final MTProper SSET = new MTProper(this, CLS, true, "SSet");
 
     /** <p><code>Boolean</code></p> */
-    public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
+    public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
 
     /** <p><code>R</code></p> */
     public final MTProper R = new MTProper(this, CLS, false, "R");
