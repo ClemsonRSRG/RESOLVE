@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.TupleExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
@@ -257,19 +258,32 @@ public class HardCoded {
      * expression's meta-segment.</p>
      *
      * @param g The current type graph.
-     * @param e An {@link Exp}.
-     * @param metaSegment A string representing a meta-segment for
-     *                    <code>e</code>.
+     * @param lastExp The last typed {@link Exp} in a {@link DotExp}.
+     * @param currentExp The current {@link Exp} we are trying to type.
+     * @param currentExpName Name of {@code currentExp}.
      *
-     * @return A {@link MTType} if we can establish its type,
+     * @return A {@link MTType} if it is one of the special meta segments,
      * <code>null</code> otherwise.
      */
-    public static MTType getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
+    public static MTType getMetaFieldType(TypeGraph g, Exp lastExp,
+            Exp currentExp, String currentExpName) {
         MTType result = null;
 
-        if (e.getMathTypeValue() != null) {
-            if (metaSegment.equals("Is_Initial")) {
-                result = new MTFunction(g, g.BOOLEAN, e.getMathTypeValue());
+        if (lastExp.getMathTypeValue() != null) {
+            switch (currentExpName) {
+            case "Is_Initial":
+                result =
+                        new MTFunction(g, g.BOOLEAN, lastExp.getMathTypeValue());
+                break;
+            case "Receptacles":
+                currentExp.setMathTypeValue(new MTNamed(g, "Receptacles"));
+                result = g.SSET;
+                break;
+            case "Val_in":
+                result =
+                        new MTFunction(g, new MTPowersetApplication(g, lastExp
+                                .getMathType()), new MTNamed(g, "Receptacles"));
+                break;
             }
         }
 

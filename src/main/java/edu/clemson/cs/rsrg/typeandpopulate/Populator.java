@@ -1944,7 +1944,7 @@ public class Populator extends TreeWalkerVisitor {
             catch (ClassCastException cce) {
                 curType =
                         HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
-                                segmentName);
+                                nextSegment, segmentName);
 
                 if (curType == null) {
                     throw new SourceErrorException("Value not a tuple.",
@@ -1960,7 +1960,7 @@ public class Populator extends TreeWalkerVisitor {
             catch (NoSuchElementException nsee) {
                 curType =
                         HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
-                                segmentName);
+                                nextSegment, segmentName);
 
                 if (curType == null) {
                     throw new SourceErrorException("No such factor.", lastGood);
