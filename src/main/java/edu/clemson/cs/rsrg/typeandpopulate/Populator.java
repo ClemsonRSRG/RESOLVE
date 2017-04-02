@@ -1375,6 +1375,12 @@ public class Populator extends TreeWalkerVisitor {
         MTType mathTypeValue = dec.getTy().getMathTypeValue();
         String varName = dec.getName().getName();
 
+        // YS: If this is a function application, we really want to store
+        // the inner function as this dec's type.
+        if (mathTypeValue instanceof MTFunctionApplication) {
+            mathTypeValue = ((MTFunctionApplication) mathTypeValue).getFunction();
+        }
+
         if (myCurrentDirectDefinition != null
                 && mathTypeValue.isKnownToContainOnlyMTypes()
                 && myDefinitionNamedTypes.contains(varName)) {
@@ -2394,7 +2400,7 @@ public class Populator extends TreeWalkerVisitor {
                     // caught when we add a symbol to the symbol table, so no
                     // need to check here. Simply store the name and its type
                     // into our current definition's schematic type map.
-                    myDefinitionSchematicTypes.put(nodeExpName, nodeExp.getMathType());
+                    myDefinitionSchematicTypes.put(nodeExpName, expType);
 
                     emitDebug(exp.getLocation(), "\tAdded schematic variable: "
                             + nodeExpName + " with type: " + exp.getMathType()
