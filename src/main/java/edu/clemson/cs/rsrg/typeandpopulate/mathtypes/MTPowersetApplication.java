@@ -88,7 +88,7 @@ public class MTPowersetApplication extends MTFunctionApplication {
      */
     @Override
     public final boolean isKnownToContainOnlyMTypes() {
-        //The powertype is, by definition, a container of containers
+        //The powerset is, by definition, a container of containers
         return true;
     }
 
