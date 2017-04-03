@@ -863,6 +863,36 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This method redefines how a {@link MathDefVariableDec} should be walked.</p>
+     *
+     * @param dec A mathematical definition variable declaration.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkMathDefVariableDec(MathDefVariableDec dec) {
+        preAny(dec);
+        preDec(dec);
+        preMathDefVariableDec(dec);
+
+        // YS - Since MathDefVariableDec uses a MathVarDec as its inner
+        // representation, we don't want to walk MathVarDec object.
+        // The reason is because MathVarDec will add a binding for
+        // the math variable in the wrong place and will contain random
+        // type values. Instead, we only walk the raw type
+        // and the definition item. The definition variable binding
+        // will happen during postMathDefVariableDec
+        TreeWalker.visit(this, dec.getVariable().getTy());
+        TreeWalker.visit(this, dec.getDefinitionItem());
+
+        postMathDefVariableDec(dec);
+        postDec(dec);
+        postAny(dec);
+
+        return true;
+    }
+
+    /**
      * <p>Code that gets executed before visiting a {@link MathTypeTheoremDec}.</p>
      *
      * @param dec A mathematical type theorem declaration.
