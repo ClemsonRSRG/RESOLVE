@@ -814,6 +814,7 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void preMathDefVariableDec(MathDefVariableDec dec) {
+        myBuilder.startScope(dec);
         myDefinitionSchematicTypes.clear();
         myDefinitionNamedTypes.clear();
     }
@@ -825,68 +826,40 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postMathDefVariableDec(MathDefVariableDec dec) {
+        myBuilder.endScope();
+
+        // The return type for this definition variable is inside
+        // the inner MathVarDec.
         MathVarDec varDec = dec.getVariable();
+        MTType declaredType = varDec.getTy().getMathTypeValue();
+
+        // Make sure that our definition matches the declared type
+        if (dec.getDefinitionAsExp() != null) {
+            expectType(dec.getDefinitionAsExp(), declaredType);
+        }
+
         String definitionSymbol = varDec.getName().getName();
 
-        try {
-            // Since we didn't walk MathVarDec, we will need to store the math type.
-            MTType rawTyTypeValue = varDec.getTy().getMathTypeValue();
-            if (rawTyTypeValue == null) {
-                throw new NullMathTypeException(varDec.getTy() +
-                        " cannot be used as a type for " + varDec.getName());
-            }
-            varDec.setMathType(rawTyTypeValue);
-
-            if (dec.getDefinitionAsExp() != null) {
-                expectType(dec.getDefinitionAsExp(), rawTyTypeValue);
-            }
-
-            // Note 1: A math definition variable shouldn't be generating a type value.
-            // Note 2: We want to add this variable binding to the module scope.
-            myCurModuleScope.addBinding(definitionSymbol, SymbolTableEntry.Quantification.NONE,
-                    dec, rawTyTypeValue, null, myDefinitionSchematicTypes, myGenericTypes);
-            emitDebug(dec.getLocation(), "\t\tNew definition variable: "
-                    + definitionSymbol + " of type " + rawTyTypeValue);
-
-            myCurrentDirectDefinition = null;
-            myDefinitionSchematicTypes.clear();
-
-            // This Def Var declaration should have the same type
-            // as the MathVarDec that it contains.
-            dec.setMathType(rawTyTypeValue);
+        MTType typeValue = null;
+        if (dec.getDefinitionAsExp() != null) {
+            typeValue = dec.getDefinitionAsExp().getMathTypeValue();
         }
-        catch (DuplicateSymbolException dse) {
-            duplicateSymbol(definitionSymbol, dec.getName().getLocation());
-        }
-    }
 
-    /**
-     * <p>This method redefines how a {@link MathDefVariableDec} should be walked.</p>
-     *
-     * @param dec A mathematical definition variable declaration.
-     *
-     * @return {@code true}
-     */
-    @Override
-    public final boolean walkMathDefVariableDec(MathDefVariableDec dec) {
-        preAny(dec);
-        preDec(dec);
-        preMathDefVariableDec(dec);
+        // Note that, even if typeValue is null at this point, if declaredType
+        // returns true from knownToContainOnlyMTypes(), a new type value will
+        // still be created by the symbol table
+        myCurModuleScope.addBinding(definitionSymbol, SymbolTableEntry.Quantification.NONE,
+                dec, declaredType, typeValue, myDefinitionSchematicTypes, myGenericTypes);
 
-        // YS - Since MathDefVariableDec uses a MathVarDec as its inner
-        // representation, we don't want to walk MathVarDec object.
-        // The reason is because MathVarDec will add a binding for
-        // the math variable. Instead, we only walk the raw type
-        // and the definition item. The definition variable binding
-        // will happen during postMathDefVariableDec
-        TreeWalker.visit(this, dec.getVariable().getTy());
-        TreeWalker.visit(this, dec.getDefinitionItem());
+        emitDebug(dec.getLocation(), "\t\tNew definition variable: "
+                + definitionSymbol + " of type "
+                + declaredType
+                + ((typeValue != null) ? " with type value " + typeValue : ""));
 
-        postMathDefVariableDec(dec);
-        postDec(dec);
-        postAny(dec);
+        myCurrentDirectDefinition = null;
+        myDefinitionSchematicTypes.clear();
 
-        return true;
+        dec.setMathType(declaredType);
     }
 
     /**
@@ -3632,7 +3605,19 @@ public class Populator extends TreeWalkerVisitor {
      */
     private void expectType(Exp e, MTType expectedType) {
         if (!myTypeGraph.isKnownToBeIn(e, expectedType)) {
-            expected(e, expectedType);
+            // YS: Our expected type might be the generic program type, so
+            // we replace it and try to see if it is known to be in.
+            if (!myGenericTypes.isEmpty()) {
+                MTType newExpectedType =
+                        expectedType.getCopyWithVariablesSubstituted(myGenericTypes);
+
+                if (!myTypeGraph.isKnownToBeIn(e, newExpectedType)) {
+                    expected(e, newExpectedType);
+                }
+            }
+            else {
+                expected(e, expectedType);
+            }
         }
     }
 

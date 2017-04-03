@@ -70,6 +70,16 @@ public class MTPowersetApplication extends MTFunctionApplication {
     }
 
     /**
+     * <p>Returns the type stored inside this type.</p>
+     *
+     * @return The {@link MTType} type object.
+     */
+    @Override
+    public final MTType getType() {
+        return myTypeGraph.SSET;
+    }
+
+    /**
      * <p>Indicates that this type is known to contain only elements <em>that
      * are themselves</em> types. Practically, this answers the question, "can
      * an instance of this type itself be used as a type?"</p>
