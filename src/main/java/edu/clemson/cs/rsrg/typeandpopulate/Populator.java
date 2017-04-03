@@ -3134,6 +3134,13 @@ public class Populator extends TreeWalkerVisitor {
                         // Obtain a new AbstractFunctionExp with the schematic types replaced.
                         eCopy = (AbstractFunctionExp) TypeGraph.getCopyWithVariablesSubstituted(
                                 eCopy, myDefinitionSchematicTypes);
+
+                        // If we happen to have any generic program types, replace those as well
+                        if (!myGenericTypes.isEmpty()) {
+                            eCopy = (AbstractFunctionExp) TypeGraph.getCopyWithVariablesSubstituted(
+                                    eCopy, myGenericTypes);
+                        }
+
                         MTFunction eCopyType = (MTFunction) eCopy.getMathType();
 
                         emitDebug(eCopy.getLocation(), "\tReplaced schematic types in expression: "
