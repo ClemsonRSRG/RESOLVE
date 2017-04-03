@@ -87,10 +87,13 @@ public class HardCoded {
                             classTheoryLoc.clone(), "Cls_Theory"));
 
             // Built-in functions
+            s.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
+                    g.ENTITY));
+            s.addBinding("Powerclass", v, g.POWERCLASS);
             s.addBinding("union", v, g.UNION);
             s.addBinding("intersection", v, g.INTERSECT);
-            s.addBinding("->", v, g.FUNCTION);
-            s.addBinding("*", v, g.CROSS);
+            s.addBinding("->", v, g.CLS_FUNCTION);
+            s.addBinding("*", v, g.CLS_CROSS);
 
             // This is just a hard-coded version of this theoretical type theorem
             // that can't actually appear in a theory because it won't type-check
@@ -229,10 +232,10 @@ public class HardCoded {
             b.addBinding("false", v, g.BOOLEAN);
 
             // built-in symbols that are defined as a function
-            b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
-                    g.ENTITY));
+            // These must be built in for our compiler to function correctly.
             b.addBinding("Powerset", v, g.POWERSET);
-            b.addBinding("Powerclass", v, g.POWERCLASS);
+            b.addBinding("->", v, g.SSET_FUNCTION);
+            b.addBinding("*", v, g.SSET_CROSS);
             b.addBinding("not", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN));
             b.addBinding("and", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
                     g.BOOLEAN));

@@ -150,30 +150,46 @@ public class TypeGraph {
     public final MTProper EMPTY_SET =
             new MTProper(this, SSET, false, "Empty_Set");
 
-    /** <p><code>Powerclass</code> function</p> */
+    // ===========================================================
+    // CLS Functions
+    // ===========================================================
+
+    /** <p>{@code Powerclass} function</p> */
     public final MTFunction POWERCLASS =
             new MTFunction(this, true, POWERCLASS_APPLICATION, CLS, CLS);
 
-    /** <p><code>Powerset</code> function</p> */
-    public final MTFunction POWERSET =
-            new MTFunction(this, true, POWERSET_APPLICATION, SSET, SSET);
-
-    /** <p><code>Union</code> function</p> */
+    /** <p>{@code CLS} union function</p> */
     public final MTFunction UNION =
             new MTFunction(this, UNION_APPLICATION, CLS, CLS, CLS);
 
-    /** <p><code>Intersection</code> function</p> */
+    /** <p>{@code CLS} intersection function</p> */
     public final MTFunction INTERSECT =
             new MTFunction(this, INTERSECT_APPLICATION, CLS, CLS, CLS);
 
-    /** <p>Mathematical <code>Function</code></p> */
-    public final MTFunction FUNCTION =
+    /** <p>{@code CLS} function operator</p> */
+    public final MTFunction CLS_FUNCTION =
             new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS,
                     CLS);
 
-    /** <p><code>Cartesian Product</code> function</p> */
-    public final MTFunction CROSS =
+    /** <p>{@code CLS} Cartesian product function</p> */
+    public final MTFunction CLS_CROSS =
             new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
+
+    // ===========================================================
+    // SSet Functions
+    // ===========================================================
+
+    /** <p>{@code Powerset} function</p> */
+    public final MTFunction POWERSET =
+            new MTFunction(this, true, POWERSET_APPLICATION, SSET, SSET);
+
+    /** <p>{@code SSet} function operator</p> */
+    public final MTFunction SSET_FUNCTION =
+            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, SSET, SSET, SSET);
+
+    /** <p>{@code SSet} Cartesian product function</p> */
+    public final MTFunction SSET_CROSS =
+            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, SSET, SSET, SSET);
 
     // ===========================================================
     // Constructors
@@ -319,7 +335,7 @@ public class TypeGraph {
             sb.append(sourceCanonicalResult.canonicalType);
             sb.append("]:\n");
             sb.append(relationship);
-            sb.append("\n\n---------------New Type Relationship---------------\n");
+            sb.append("\n\n---------------End New Type Relationship---------------\n");
             myStatusHandler.info(null, sb.toString());
         }
     }
