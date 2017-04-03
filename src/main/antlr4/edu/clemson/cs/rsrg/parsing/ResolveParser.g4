@@ -794,7 +794,7 @@ mathAddingExp
 mathRepeatAddExp
     :   (qualifier=IDENTIFIER QUALIFIER)?
         op=(PLUS | MINUS | CONCAT | UNION | INTERSECTION |
-            CLS_UNION | CLS_INTERSECTION | WITHOUT | TILDE)
+            WITHOUT | TILDE)
         mathMultiplyingExp
     ;
 
