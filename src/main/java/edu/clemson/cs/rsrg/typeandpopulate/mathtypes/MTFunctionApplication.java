@@ -162,15 +162,6 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method allow us to add a new argument to this type.</p>
-     *
-     * @param argument A new {@link MTType} to be used as argument.
-     */
-    public final void addArgument(MTType argument) {
-        myArguments.add(argument);
-    }
-
-    /**
      * <p>This method returns the argument at the specified index.</p>
      *
      * @param i An index.
@@ -189,16 +180,6 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
      */
     public final List<MTType> getArguments() {
         return Collections.unmodifiableList(myArguments);
-    }
-
-    /**
-     * <p>This method returns the number of arguments used in
-     * this function application type.</p>
-     *
-     * @return The number of arguments.
-     */
-    public final int getArgumentCount() {
-        return myArguments.size();
     }
 
     /**

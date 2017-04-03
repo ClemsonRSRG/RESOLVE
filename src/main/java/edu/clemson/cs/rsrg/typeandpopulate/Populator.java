@@ -1375,12 +1375,6 @@ public class Populator extends TreeWalkerVisitor {
         MTType mathTypeValue = dec.getTy().getMathTypeValue();
         String varName = dec.getName().getName();
 
-        // YS: If this is a function application, we really want to store
-        // the inner function as this dec's type.
-        if (mathTypeValue instanceof MTFunctionApplication) {
-            mathTypeValue = ((MTFunctionApplication) mathTypeValue).getFunction();
-        }
-
         if (myCurrentDirectDefinition != null
                 && mathTypeValue.isKnownToContainOnlyMTypes()
                 && myDefinitionNamedTypes.contains(varName)) {
