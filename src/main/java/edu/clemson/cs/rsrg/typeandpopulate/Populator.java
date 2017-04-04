@@ -55,7 +55,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeComparison;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
-import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.ContainsNamedTypeChecker;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.HardCoded;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.*;
@@ -173,13 +172,6 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Type Declaration-Related
     // -----------------------------------------------------------
-
-    /**
-     * <p>When parsing a type family declaration, this is set to the
-     * entry corresponding to the exemplar. When
-     * not inside such a declaration, this will be null.</p>
-     */
-    private MathSymbolEntry myExemplarEntry;
 
     /**
      * <p>When parsing a type realization declaration, this is set to the
@@ -1483,9 +1475,10 @@ public class Populator extends TreeWalkerVisitor {
             // We've parsed the model, but nothing else, so we can add our
             // exemplar to scope
             PosSymbol exemplar = dec.getExemplar();
+            MathSymbolEntry exemplarEntry;
 
             try {
-                myExemplarEntry =
+                exemplarEntry =
                         myBuilder.getInnermostActiveScope().addBinding(
                                 exemplar.getName(), dec,
                                 dec.getModel().getMathTypeValue());
@@ -1495,6 +1488,19 @@ public class Populator extends TreeWalkerVisitor {
                 // scope all its own and we're the first ones to get to
                 // introduce anything
                 throw new RuntimeException(dse);
+            }
+
+            // YS: The logical thing to do is to add the new program type
+            // after we finish walking the TypeFamilyDec. However, we could have
+            // definition variables that needs that in the symbol table. So
+            // we add it here to the current module scope.
+            try {
+                myCurModuleScope.addProgramTypeDefinition(dec.getName().getName(),
+                        dec, dec.getModel().getMathTypeValue(), exemplarEntry);
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(dec.getName().getName(), dec.getName()
+                        .getLocation());
             }
         }
     }
@@ -1507,18 +1513,6 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public final void postTypeFamilyDec(TypeFamilyDec dec) {
         myBuilder.endScope();
-
-        try {
-            myBuilder.getInnermostActiveScope().addProgramTypeDefinition(
-                    dec.getName().getName(), dec,
-                    dec.getModel().getMathTypeValue(), myExemplarEntry);
-
-            myExemplarEntry = null;
-        }
-        catch (DuplicateSymbolException dse) {
-            duplicateSymbol(dec.getName().getName(), dec.getName()
-                    .getLocation());
-        }
     }
 
     /**
