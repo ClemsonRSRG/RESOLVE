@@ -1978,7 +1978,18 @@ public class Populator extends TreeWalkerVisitor {
             //curType to reflect the RANGE of the function type rather than
             //the entire type
             if (nextSegment instanceof FunctionExp) {
-                curType = applyFunction((FunctionExp) nextSegment, curType);
+                FunctionExp nextSegmentAsFunctionExp = (FunctionExp) nextSegment;
+
+                // YS: If we happen to encounter a "Val_in" function, we will need to
+                // typecheck it differently than an "Is_Initial" function.
+                if (nextSegmentAsFunctionExp.getOperatorAsString().equals("Val_in")) {
+                    curType =
+                            applyValInFunction(lastSegment, nextSegmentAsFunctionExp, curType);
+                }
+                else {
+                    curType =
+                            applyFunction(nextSegmentAsFunctionExp, curType);
+                }
             }
 
             nextSegment.setMathType(curType);
@@ -2959,6 +2970,49 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Applies the provided mathematical type to the {@code Val_in} function.</p>
+     *
+     * @param lastSegment The segment that contains the type information for
+     *                    the {@code Val_in} function.
+     * @param functionSegment A function expression.
+     * @param type The type to be applied.
+     *
+     * @return The resulting mathematical type.
+     */
+    private MTType applyValInFunction(Exp lastSegment, FunctionExp functionSegment, MTType type) {
+        MTType result;
+
+        try {
+            MTFunction functionType = (MTFunction) type;
+
+            // Val_in only takes in one argument
+            List<Exp> functionArguments = functionSegment.getArguments();
+            if (functionArguments.size() != 1) {
+                throw new SourceErrorException("Wrong number of arguments.",
+                        functionSegment.getLocation());
+            }
+            else {
+                // Ok, we need to type check our argument before we can
+                // continue
+                Exp argExp = functionArguments.get(0);
+                TreeWalker.visit(this, argExp);
+
+                // Sanity check to make sure the argument is valid
+                ValidVal_inChecker checker = new ValidVal_inChecker(myTypeGraph, myBuilder);
+                checker.validArgument(lastSegment, argExp);
+            }
+
+            result = functionType.getRange();
+        }
+        catch (ClassCastException cce) {
+            throw new SourceErrorException("Not a function.", functionSegment
+                    .getLocation());
+        }
+
+        return result;
+    }
+
+    /**
      * <p>An helper method that indicates we are beginning to evaluate a type value node.</p>
      */
     private void enteringTypeValueNode() {
@@ -3343,39 +3397,43 @@ public class Populator extends TreeWalkerVisitor {
                 //No such luck.  Maybe firstName identifies a module and the
                 //second segment (which had better be a VarExp) is the name of
                 //the value we want
-                VarExp second = (VarExp) segments.next();
+                Exp second = segments.next();
+                if (second instanceof VarExp) {
+                    VarExp secondAsVarExp = (VarExp) second;
 
-                try {
-                    result =
-                            myBuilder.getInnermostActiveScope().queryForOne(
-                                    new NameQuery(firstName, second.getName(),
-                                            ImportStrategy.IMPORT_NAMED,
-                                            FacilityStrategy.FACILITY_IGNORE,
-                                            true)).toMathSymbolEntry(
-                                    first.getLocation());
-
-                    //A qualifier doesn't have a sensible type, but we'll set one
-                    //for completeness.
-                    first.setMathType(myTypeGraph.BOOLEAN);
-
-                    //Now the value itself
-                    lastGood.data = second;
-                    second.setMathType(result.getType());
                     try {
-                        second.setMathTypeValue(result.getTypeValue());
-                    }
-                    catch (SymbolNotOfKindTypeException snokte) {
+                        result =
+                                myBuilder.getInnermostActiveScope().queryForOne(
+                                        new NameQuery(firstName, secondAsVarExp.getName(),
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true)).toMathSymbolEntry(
+                                        first.getLocation());
 
+                        //A qualifier doesn't have a sensible type, but we'll set one
+                        //for completeness.
+                        first.setMathType(myTypeGraph.BOOLEAN);
+
+                        //Now the value itself
+                        lastGood.data = second;
+                        second.setMathType(result.getType());
+                        try {
+                            second.setMathTypeValue(result.getTypeValue());
+                        } catch (SymbolNotOfKindTypeException snokte) {
+
+                        }
+                    } catch (NoSuchSymbolException nsse2) {
+                        noSuchSymbol(firstName, secondAsVarExp.getName());
+                        throw new RuntimeException(); //This will never fire
+                    } catch (DuplicateSymbolException dse) {
+                        //This shouldn't be possible--there can only be one symbol
+                        //with the given name inside a particular module
+                        throw new RuntimeException();
                     }
                 }
-                catch (NoSuchSymbolException nsse2) {
-                    noSuchSymbol(firstName, second.getName());
-                    throw new RuntimeException(); //This will never fire
-                }
-                catch (DuplicateSymbolException dse) {
-                    //This shouldn't be possible--there can only be one symbol
-                    //with the given name inside a particular module
-                    throw new RuntimeException();
+                else {
+                    throw new SourceErrorException("Expecting a VarExp.\nFound: "
+                            + second.getClass().getSimpleName(), second.getLocation());
                 }
             }
             catch (DuplicateSymbolException dse) {

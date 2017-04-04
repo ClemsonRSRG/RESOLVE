@@ -285,7 +285,7 @@ public class HardCoded {
             case "Val_in":
                 result =
                         new MTFunction(g, new MTPowersetApplication(g, lastExp
-                                .getMathType()), g.RECEPTACLES);
+                                .getMathTypeValue()), g.RECEPTACLES);
                 break;
             }
         }
