@@ -150,6 +150,10 @@ public class TypeGraph {
     public final MTProper EMPTY_SET =
             new MTProper(this, SSET, false, "Empty_Set");
 
+    /** <p><code>Receptacles</code></p> */
+    public final MTProper RECEPTACLES =
+            new MTProper(this, SSET, false, "Receptacles");
+
     // ===========================================================
     // CLS Functions
     // ===========================================================
