@@ -279,13 +279,13 @@ public class HardCoded {
                         new MTFunction(g, g.BOOLEAN, lastExp.getMathTypeValue());
                 break;
             case "Receptacles":
-                currentExp.setMathTypeValue(new MTNamed(g, "Receptacles"));
+                currentExp.setMathTypeValue(g.RECEPTACLES);
                 result = g.SSET;
                 break;
             case "Val_in":
                 result =
                         new MTFunction(g, new MTPowersetApplication(g, lastExp
-                                .getMathType()), new MTNamed(g, "Receptacles"));
+                                .getMathType()), g.RECEPTACLES);
                 break;
             }
         }

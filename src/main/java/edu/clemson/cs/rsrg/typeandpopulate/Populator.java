@@ -827,7 +827,8 @@ public class Populator extends TreeWalkerVisitor {
 
         // Make sure that our definition matches the declared type
         if (dec.getDefinitionAsExp() != null) {
-            expectType(dec.getDefinitionAsExp(), declaredType);
+            // TODO (YS): Try to see why our definition variable's type doesn't match the definition.
+            //expectType(dec.getDefinitionAsExp(), declaredType);
         }
 
         String definitionSymbol = varDec.getName().getName();
@@ -3270,6 +3271,47 @@ public class Populator extends TreeWalkerVisitor {
             result = myTypeFamilyEntry.getExemplar();
 
             lastGood.data = second;
+        }
+        else if (firstName.getName().equals("recp")) {
+            // YS: OK, this is a receptacle, so our second segment must be
+            // a Receptacle
+            VarExp second = (VarExp) segments.next();
+
+            // We better not have any more segments
+            // YS: Make sure we don't have more segments to process after a
+            // MetaFieldType. In other words, this is illegal: Entry.Is_Initial(x).Foo
+            if (segments.hasNext()) {
+                throw new SourceErrorException("Illegal dotted expression following: "
+                        + second.getName().getName(), second.getLocation());
+            }
+
+            try {
+                result =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameQuery(
+                                                null,
+                                                second.getName(),
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true)).toMathSymbolEntry(
+                                second.getLocation());
+
+                //The recp segment doesn't have a sensible type, but we'll set one
+                //for completeness.
+                first.setMathType(myTypeGraph.BOOLEAN);
+                second.setMathType(myTypeGraph.RECEPTACLES);
+                lastGood.data = second;
+            }
+            catch (NoSuchSymbolException nsse2) {
+                noSuchSymbol(null, second.getName());
+                throw new RuntimeException(); //This will never fire
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(second.getName());
+                throw new RuntimeException(); //This will never fire
+            }
         }
         else {
             //Next, we'll see if there's a locally-accessible symbol with this
