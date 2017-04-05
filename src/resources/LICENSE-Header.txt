@@ -1,6 +1,6 @@
 ${file.name}
 ---------------------------------
-Copyright (c) 2016
+Copyright (c) ${year}
 RESOLVE Software Research Group
 School of Computing
 Clemson University
