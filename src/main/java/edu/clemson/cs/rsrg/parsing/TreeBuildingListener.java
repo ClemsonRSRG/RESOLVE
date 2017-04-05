@@ -3172,6 +3172,24 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     // -----------------------------------------------------------
+    // Mathematical type definitions
+    // -----------------------------------------------------------
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>This method generates a type definition declaration.</p>
+     *
+     * @param ctx Type definition declaration node in ANTLR4 AST.
+     */
+    @Override
+    public void exitMathTypeDefinitionDecl(
+            ResolveParser.MathTypeDefinitionDeclContext ctx) {
+        myNodes.put(ctx, new TypeDefinitionDec(createPosSymbol(ctx.name),
+                (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
+    }
+
+    // -----------------------------------------------------------
     // Mathematical definitions
     // -----------------------------------------------------------
 

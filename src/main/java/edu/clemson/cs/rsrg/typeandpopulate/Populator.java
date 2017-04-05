@@ -665,6 +665,49 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Mathematical Type Definition
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link TypeDefinitionDec}.</p>
+     *
+     * @param dec A mathematical type definition declaration.
+     */
+    @Override
+    public final void preTypeDefinitionDec(TypeDefinitionDec dec) {
+        myBuilder.startScope(dec);
+
+        myDefinitionSchematicTypes.clear();
+        myDefinitionNamedTypes.clear();
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeDefinitionDec}.</p>
+     *
+     * @param dec A mathematical type definition declaration.
+     */
+    @Override
+    public final void postTypeDefinitionDec(TypeDefinitionDec dec) {
+        myBuilder.endScope();
+
+        String definitionSymbol = dec.getName().getName();
+        MTType declaredType = myTypeGraph.SSET;
+        MTType typeValue = dec.getModel().getMathTypeValue();
+
+        addBinding(definitionSymbol, dec.getName().getLocation(), dec,
+                declaredType, typeValue, myDefinitionSchematicTypes);
+
+        emitDebug(dec.getLocation(), "\t\tNew type definition: "
+                + definitionSymbol + " of type " + declaredType
+                + " with type value " + typeValue);
+
+        myCurrentDirectDefinition = null;
+        myDefinitionSchematicTypes.clear();
+
+        dec.setMathType(declaredType);
+    }
+
+    // -----------------------------------------------------------
     // Mathematical Assertion/Theorem-Related
     // -----------------------------------------------------------
 
