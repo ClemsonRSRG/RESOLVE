@@ -31,6 +31,7 @@ precisItems
 
 precisItem
     :   mathTypeTheoremDecl
+    |   mathTypeDefinitionDecl
     |   mathDefinitionDecl
     |   mathAssertionDecl
     ;
@@ -596,6 +597,12 @@ mathTheoremIdent
     :   IDENTIFIER
     |   INTEGER_LITERAL
     |   REAL_LITERAL
+    ;
+
+// mathematical type definitions
+
+mathTypeDefinitionDecl
+    :   DEFINITION name=IDENTIFIER (EQL | IS REPRESENTED BY) mathTypeExp SEMICOLON
     ;
 
 // mathematical definitions
