@@ -36,7 +36,7 @@ public abstract class AbstractTypeInitFinalItem
     // ===========================================================
 
     /**
-     * <p>This defines both an item type for initialization and finalization.</p>
+     * <p>This defines the various different programming item types.</p>
      *
      * @version 2.0
      */

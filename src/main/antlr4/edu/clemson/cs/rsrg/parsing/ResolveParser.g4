@@ -67,7 +67,7 @@ shortFacilityModule
 // concept module
 
 conceptModule
-    :   CONCEPT name=IDENTIFIER (moduleParameterList)? SEMICOLON
+    :   (SHARED)? CONCEPT name=IDENTIFIER (moduleParameterList)? SEMICOLON
         (usesList)?
         (requiresClause)?
         (conceptItems)?
@@ -283,6 +283,7 @@ programRecordType
 typeModelDecl
     :   TYPE FAMILY name=IDENTIFIER IS MODELED BY mathTypeExp SEMICOLON
         EXEMPLAR exemplar=IDENTIFIER SEMICOLON
+        (definitionVariable)*
         (constraintClause)?
         (specModelInit)?
         (specModelFinal)?
@@ -314,34 +315,38 @@ performanceTypeModelDecl
         END SEMICOLON
     ;
 
+definitionVariable
+    :   DEFINITION VAR mathVariableDecl (EQL mathExp)? SEMICOLON
+    ;
+
 // shared state rules
 
 sharedStateDecl
-    :   SHAREDSTATE name=IDENTIFIER
+    :   SHAREDVARIABLES
         (moduleStateVariableDecl)+
         (constraintClause)?
         (specModelInit)?
         (specModelFinal)?
-        END SEMICOLON
+        END SHAREDVARIABLES SEMICOLON
     ;
 
 sharedStateRepresentationDecl
-    :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
+    :   SHAREDVARIABLES IS REALIZED BY
         (variableDecl)+
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
         (representationFinal)?
-        END SEMICOLON
+        END SHAREDVARIABLES SEMICOLON
     ;
 
 facilitySharedStateRepresentationDecl
-    :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
+    :   SHAREDVARIABLES IS REALIZED BY
         (variableDecl)+
         (conventionClause)?
         (facilityRepresentationInit)?
         (facilityRepresentationFinal)?
-        END SEMICOLON
+        END SHAREDVARIABLES SEMICOLON
     ;
 
 // initialization, finalization rules
@@ -607,7 +612,7 @@ mathDefinitionDecl
     ;
 
 mathCategoricalDecl
-    :   CATEGORICAL DEFINITION name=IDENTIFIER INTRODUCES categoricalDefinitionSignature
+    :   CATEGORICAL DEFINITION INTRODUCES categoricalDefinitionSignature
         RELATED BY mathExp SEMICOLON
     ;
 
@@ -660,8 +665,9 @@ prefixOp
 
 infixOp
     :   op=(IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | EXP | MOD | REM | DIV |
-         IMPLIES | IFF | RANGE | AND | OR | UNION | INTERSECT | IN | NOT_IN | GT | LT |
-         GT_EQL | LT_EQL | EQL | NOT_EQL)
+         IMPLIES | IFF | FUNCARROW | RANGE | AND | OR | UNION | INTERSECTION |
+         IN | NOT_IN | SUBSET | NOT_SUBSET | PROP_SUBSET | NOT_PROP_SUBSET | SUBSTR | NOT_SUBSTR |
+         WITHOUT | GT | LT | GT_EQL | LT_EQL | EQL | NOT_EQL)
     ;
 
 definitionParameterList
@@ -746,7 +752,7 @@ mathImpliesExp
     :   mathLogicalExp (op=(IMPLIES | IFF) mathLogicalExp)?
     |   IF mathLogicalExp
         THEN mathLogicalExp
-        (ELSE mathLogicalExp)?
+        ELSE mathLogicalExp
     ;
 
 mathLogicalExp
@@ -782,22 +788,25 @@ mathFunctionTypeExp
 
 mathAddingExp
     :   mathMultiplyingExp
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=PLUS mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=MINUS mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=CONCAT mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=UNION mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=INTERSECT mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=WITHOUT mathMultiplyingExp)+
-    |   mathMultiplyingExp ((qualifier=IDENTIFIER QUALIFIER)? op=TILDE mathMultiplyingExp)+
+    |   mathMultiplyingExp mathRepeatAddExp+
+    ;
+
+mathRepeatAddExp
+    :   (qualifier=IDENTIFIER QUALIFIER)?
+        op=(PLUS | MINUS | CONCAT | UNION | INTERSECTION |
+            WITHOUT | TILDE)
+        mathMultiplyingExp
     ;
 
 mathMultiplyingExp
     :   mathExponentialExp
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=MULTIPLY mathExponentialExp)+
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=DIVIDE mathExponentialExp)+
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=MOD mathExponentialExp)+
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=REM mathExponentialExp)+
-    |   mathExponentialExp ((qualifier=IDENTIFIER QUALIFIER)? op=DIV mathExponentialExp)+
+    |   mathExponentialExp mathRepeatMultExp+
+    ;
+
+mathRepeatMultExp
+    :   (qualifier=IDENTIFIER QUALIFIER)?
+        op=(MULTIPLY | DIVIDE | MOD | REM | DIV)
+        mathExponentialExp
     ;
 
 mathExponentialExp
@@ -814,7 +823,6 @@ mathPrimaryExp
     |   mathIteratedExp
     |   mathLiteralExp
     |   mathDotExp
-    |   mathFunctionApplicationExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
@@ -829,7 +837,7 @@ mathAlternativeExp
 
 mathAlternativeExpItem
     :   mathAddingExp
-        (IF mathRelationalExp | OTHERWISE)
+        (IF mathLogicalExp | OTHERWISE)
         SEMICOLON
     ;
 
@@ -873,7 +881,7 @@ mathOutfixExp
 
 mathSetExp
     :   LBRACE mathVariableDecl (mathWhereExp)? BAR mathExp RBRACE       #mathSetBuilderExp
-    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE                       #mathSetCollectionExp
+    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE                        #mathSetCollectionExp
     ;
 
 mathTupleExp

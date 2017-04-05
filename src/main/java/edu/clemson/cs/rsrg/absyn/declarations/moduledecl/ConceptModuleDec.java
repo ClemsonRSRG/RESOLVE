@@ -18,9 +18,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>This is the class for the concept module declarations
@@ -46,6 +44,9 @@ public class ConceptModuleDec extends ModuleDec {
      */
     private final List<AssertionClause> myConstraints;
 
+    /** <p>This flag indicates whether or not this is a sharing concept.</p> */
+    private final boolean mySharingConceptFlag;
+
     // ===========================================================
     // Constructor
     // ===========================================================
@@ -62,14 +63,20 @@ public class ConceptModuleDec extends ModuleDec {
      * @param constraints The list of {@link AssertionClause} representing the concept
      *                    level constraints.
      * @param decs The list of {@link Dec} objects.
+     * @param isSharingConcept Indicates whether or not this is a sharing concept.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     public ConceptModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             AssertionClause requires, List<AssertionClause> constraints,
-            List<Dec> decs) {
-        super(l, name, parameterDecs, usesItems, decs);
+            List<Dec> decs, boolean isSharingConcept,
+            Map<PosSymbol, Boolean> moduleDependencies) {
+        super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
         myConstraints = constraints;
         myRequires = requires;
+        mySharingConceptFlag = isSharingConcept;
     }
 
     // ===========================================================
@@ -83,6 +90,10 @@ public class ConceptModuleDec extends ModuleDec {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
+
+        if (mySharingConceptFlag) {
+            sb.append("Shared ");
+        }
 
         sb.append("Concept ");
         sb.append(formNameArgs(0, innerIndentInc));
@@ -122,7 +133,6 @@ public class ConceptModuleDec extends ModuleDec {
         if (!myRequires.equals(that.myRequires))
             return false;
         return myConstraints.equals(that.myConstraints);
-
     }
 
     /**
@@ -155,6 +165,16 @@ public class ConceptModuleDec extends ModuleDec {
         return result;
     }
 
+    /**
+     * <p>This method returns the flag that indicates whether or not
+     * this is a {@code sharing concept}.</p>
+     *
+     * @return {@code true} if it is, {@code false} otherwise.
+     */
+    public final boolean isSharingConcept() {
+        return mySharingConceptFlag;
+    }
+
     // ===========================================================
     // Protected Methods
     // ===========================================================
@@ -173,8 +193,10 @@ public class ConceptModuleDec extends ModuleDec {
         Collections.copy(newDecs, myDecs);
         List<AssertionClause> newConstraints = new ArrayList<>(myConstraints.size());
         Collections.copy(newConstraints, myConstraints);
+        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
 
         return new ConceptModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
-                newUsesItems, myRequires.clone(), newConstraints, newDecs);
+                newUsesItems, myRequires.clone(), newConstraints, newDecs,
+                mySharingConceptFlag, newModuleDependencies);
     }
 }

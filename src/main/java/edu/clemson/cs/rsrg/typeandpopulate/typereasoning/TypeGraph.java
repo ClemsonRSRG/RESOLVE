@@ -14,7 +14,9 @@ package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
@@ -73,41 +75,28 @@ public class TypeGraph {
     private final Set<EstablishedRelationship> myEstablishedElements =
             new HashSet<>();
 
+    /**
+     * <p>The current job's compilation environment
+     * that stores all necessary objects and flags.</p>
+     */
+    private final CompileEnvironment myCompileEnvironment;
+
+    /**
+     * <p>This is the status handler for the RESOLVE compiler.</p>
+     */
+    private final StatusHandler myStatusHandler;
+
     // ===========================================================
-    // Global Mathematical Types
+    // Function Factories
     // ===========================================================
 
-    /** <p><code>Element</code></p> */
-    public final MTType ELEMENT = new MTProper(this, "Element");
+    /** <p>Factory for creating <code>Powerclass</code> applications.</p> */
+    private final static FunctionApplicationFactory POWERCLASS_APPLICATION =
+            new PowerclassApplicationFactory();
 
-    /** <p><code>Entity</code></p> */
-    public final MTType ENTITY = new MTProper(this, "Entity");
-
-    /** <p><code>Class</code></p> */
-    public final MTProper CLS = new MTProper(this, null, true, "Cls");
-
-    /** <p><code>SSet</code></p> */
-    public final MTProper SET = new MTProper(this, CLS, true, "SSet");
-
-    /** <p><code>Boolean</code></p> */
-    public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
-
-    /** <p><code>R</code></p> */
-    public final MTProper R = new MTProper(this, CLS, false, "R");
-
-    /** <p><code>Atom</code></p> */
-    public final MTProper ATOM = new MTProper(this, CLS, false, "Atom");
-
-    /** <p><code>Void</code></p> */
-    public final MTProper VOID = new MTProper(this, CLS, false, "Void");
-
-    /** <p><code>Empty_Set</code></p> */
-    public final MTProper EMPTY_SET =
-            new MTProper(this, CLS, false, "Empty_Set");
-
-    /** <p>Factory for creating <code>PowerType</code> applications.</p> */
-    private final static FunctionApplicationFactory POWERTYPE_APPLICATION =
-            new PowertypeApplicationFactory();
+    /** <p>Factory for creating <code>Powerset</code> applications.</p> */
+    private final static FunctionApplicationFactory POWERSET_APPLICATION =
+            new PowersetApplicationFactory();
 
     /** <p>Factory for creating <code>Union</code> applications.</p> */
     private final static FunctionApplicationFactory UNION_APPLICATION =
@@ -125,37 +114,86 @@ public class TypeGraph {
     private final static FunctionApplicationFactory CARTESIAN_PRODUCT_APPLICATION =
             new CartesianProductApplicationFactory();
 
-    /** <p><code>PowerType</code> function</p> */
-    public final MTFunction POWERTYPE =
-            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+    // ===========================================================
+    // Global Mathematical Types
+    // ===========================================================
 
-    /** <p><code>PowerClass</code> function</p> */
+    /** <p><code>Element</code></p> */
+    public final MTType ELEMENT = new MTProper(this, "Element");
+
+    /** <p><code>Entity</code></p> */
+    public final MTType ENTITY = new MTProper(this, "Entity");
+
+    /** <p><code>Class</code></p> */
+    public final MTProper CLS = new MTProper(this, null, true, "Cls");
+
+    /** <p><code>SSet</code></p> */
+    public final MTProper SSET = new MTProper(this, CLS, true, "SSet");
+
+    /** <p><code>Boolean</code></p> */
+    public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
+
+    /** <p><code>R</code></p> */
+    public final MTProper R = new MTProper(this, CLS, false, "R");
+
+    /** <p><code>Atom</code></p> */
+    public final MTProper ATOM = new MTProper(this, CLS, false, "Atom");
+
+    /** <p><code>Void</code></p> */
+    public final MTProper VOID = new MTProper(this, CLS, false, "Void");
+
+    /** <p><code>Empty_Class</code></p> */
+    public final MTProper EMPTY_CLASS =
+            new MTProper(this, CLS, false, "Empty_Class");
+
+    /** <p><code>Empty_Set</code></p> */
+    public final MTProper EMPTY_SET =
+            new MTProper(this, SSET, false, "Empty_Set");
+
+    /** <p><code>Receptacles</code></p> */
+    public final MTProper RECEPTACLES =
+            new MTProper(this, SSET, false, "Receptacles");
+
+    // ===========================================================
+    // CLS Functions
+    // ===========================================================
+
+    /** <p>{@code Powerclass} function</p> */
     public final MTFunction POWERCLASS =
-            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+            new MTFunction(this, true, POWERCLASS_APPLICATION, CLS, CLS);
 
-    /** <p><code>Union</code> function</p> */
+    /** <p>{@code CLS} union function</p> */
     public final MTFunction UNION =
             new MTFunction(this, UNION_APPLICATION, CLS, CLS, CLS);
 
-    /** <p><code>Intersection</code> function</p> */
+    /** <p>{@code CLS} intersection function</p> */
     public final MTFunction INTERSECT =
             new MTFunction(this, INTERSECT_APPLICATION, CLS, CLS, CLS);
 
-    /** <p>Mathematical <code>Function</code></p> */
-    public final MTFunction FUNCTION =
+    /** <p>{@code CLS} function operator</p> */
+    public final MTFunction CLS_FUNCTION =
             new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS,
                     CLS);
 
-    /** <p><code>Cartesian Product</code> function</p> */
-    public final MTFunction CROSS =
+    /** <p>{@code CLS} Cartesian product function</p> */
+    public final MTFunction CLS_CROSS =
             new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
 
-    /** <p>Logical <code>And</code> function</p> */
-    public final MTFunction AND =
-            new MTFunction(this, BOOLEAN, BOOLEAN, BOOLEAN);
+    // ===========================================================
+    // SSet Functions
+    // ===========================================================
 
-    /** <p>Logical <code>Not</code> function</p> */
-    public final MTFunction NOT = new MTFunction(this, BOOLEAN, BOOLEAN);
+    /** <p>{@code Powerset} function</p> */
+    public final MTFunction POWERSET =
+            new MTFunction(this, true, POWERSET_APPLICATION, SSET, SSET);
+
+    /** <p>{@code SSet} function operator</p> */
+    public final MTFunction SSET_FUNCTION =
+            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, SSET, SSET, SSET);
+
+    /** <p>{@code SSet} Cartesian product function</p> */
+    public final MTFunction SSET_CROSS =
+            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, SSET, SSET, SSET);
 
     // ===========================================================
     // Constructors
@@ -163,9 +201,14 @@ public class TypeGraph {
 
     /**
      * <p>This creates a mathematical type graph.</p>
+     *
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      */
-    public TypeGraph() {
+    public TypeGraph(CompileEnvironment compileEnvironment) {
         myTypeNodes = new HashMap<>();
+        myCompileEnvironment = compileEnvironment;
+        myStatusHandler = myCompileEnvironment.getStatusHandler();
     }
 
     // ===========================================================
@@ -285,11 +328,20 @@ public class TypeGraph {
         TypeNode sourceNode = getTypeNode(sourceCanonicalResult.canonicalType);
         sourceNode.addRelationship(relationship);
 
-        //We'd like to force the presence of the destination node
+        // We'd like to force the presence of the destination node
         getTypeNode(destinationCanonicalResult.canonicalType);
 
-        Populator.emitDebug("Added relationship to type node ["
-                + sourceCanonicalResult.canonicalType + "]: " + relationship);
+        // Print debugging messages if the flag is on.
+        if (myCompileEnvironment.flags.isFlagSet(Populator.FLAG_POPULATOR_DEBUG)) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n---------------New Type Relationship---------------\n\n");
+            sb.append("Added relationship to type node [");
+            sb.append(sourceCanonicalResult.canonicalType);
+            sb.append("]:\n");
+            sb.append(relationship);
+            sb.append("\n\n---------------End New Type Relationship---------------\n");
+            myStatusHandler.info(null, sb.toString());
+        }
     }
 
     /**
@@ -314,15 +366,13 @@ public class TypeGraph {
      *
      * @param original Original expression.
      * @param substitutions A map of substitutions.
-     * @param <T> The class type for {@code original}.
      *
      * @return A modified {@link Exp}.
      */
-    public static <T extends Exp> T getCopyWithVariablesSubstituted(T original,
+    public static Exp getCopyWithVariablesSubstituted(Exp original,
             Map<String, MTType> substitutions) {
 
-        @SuppressWarnings("unchecked")
-        T result = (T) original.clone();
+        Exp result = original.clone();
         result.setMathType(result.getMathType()
                 .getCopyWithVariablesSubstituted(substitutions));
 
@@ -332,7 +382,7 @@ public class TypeGraph {
             newChildrenExp.put(currentChildExp.clone(),
                     TypeGraph.getCopyWithVariablesSubstituted(currentChildExp.clone(), substitutions));
         }
-        result.substitute(newChildrenExp);
+        result = result.substitute(newChildrenExp);
 
         return result;
     }
@@ -442,6 +492,20 @@ public class TypeGraph {
                             || myEstablishedSubtypes.contains(r)
                             || subtype.equals(supertype)
                             || subtype.isSyntacticSubtypeOf(supertype);
+
+            // Attempt to see if the subtype's type is a subtype of
+            // the supertype. This comes up in a categorical definition
+            // when the parameters have been introduced, but not yet added
+            // to the type graph. - YS
+            if (!result && subtype.getType() != null) {
+                MTType subtypetype = subtype.getType();
+                EstablishedRelationship r2 =
+                        new EstablishedRelationship(subtypetype, supertype);
+                result =
+                        myEstablishedSubtypes.contains(r2)
+                                || subtypetype.equals(subtype)
+                                || subtypetype.isSyntacticSubtypeOf(supertype);
+            }
         }
         catch (NoSuchElementException nsee) {
             //Syntactic subtype checker freaks out (rightly) if there are
@@ -454,7 +518,7 @@ public class TypeGraph {
             try {
                 Exp conditions =
                         getValidTypeConditions(subtype,
-                                new MTPowertypeApplication(this, supertype));
+                                new MTPowerclassApplication(this, supertype));
                 result = MathExp.isLiteralTrue(conditions);
             }
             catch (TypeMismatchException e) {
@@ -478,9 +542,17 @@ public class TypeGraph {
     public final String toString() {
         StringBuilder str = new StringBuilder();
 
-        Set<MTType> keys = myTypeNodes.keySet();
-        for (MTType key : keys) {
-            str.append(myTypeNodes.get(key).toString());
+        Iterator<MTType> keysIterator = myTypeNodes.keySet().iterator();
+        while (keysIterator.hasNext()) {
+            MTType next = keysIterator.next();
+            str.append("----> Type Node: ");
+            str.append(next.toString());
+            str.append("\n");
+            str.append(myTypeNodes.get(next).toString());
+
+            if (keysIterator.hasNext()) {
+                str.append("\n");
+            }
         }
 
         return str.toString();
@@ -769,21 +841,21 @@ public class TypeGraph {
             //Every CLS is in CLS except for Entity and CLS, itself
             result = MathExp.getTrueVarExp(null, this);
         }
-        else if (expected instanceof MTPowertypeApplication) {
-            if (value.equals(EMPTY_SET)) {
-                //The empty set is in all powertypes
+        else if (expected instanceof MTPowerclassApplication) {
+            if (value.equals(EMPTY_CLASS)) {
+                //The empty class is in all powerclasses
                 result = MathExp.getTrueVarExp(null, this);
             }
             else {
                 //If "expected" happens to be Power(t) for some t, we can
                 //"demote" value to an INSTANCE of itself (provided it is not
                 //the empty set), and expected to just t
-                MTPowertypeApplication expectedAsPowertypeApplication =
-                        (MTPowertypeApplication) expected;
+                MTPowerclassApplication expectedAsPowerclassApplication =
+                        (MTPowerclassApplication) expected;
 
                 DummyExp memberOfValue = new DummyExp(null, value);
 
-                if (isKnownToBeIn(memberOfValue, expectedAsPowertypeApplication
+                if (isKnownToBeIn(memberOfValue, expectedAsPowerclassApplication
                         .getArgument(0))) {
                     result = MathExp.getTrueVarExp(null, this);
                 }
@@ -1302,9 +1374,9 @@ public class TypeGraph {
     }
 
     /**
-     * <p>This creates a {@link MTPowertypeApplication} type.</p>
+     * <p>This creates a {@link MTPowerclassApplication} type.</p>
      */
-    private static class PowertypeApplicationFactory
+    private static class PowerclassApplicationFactory
             implements
                 FunctionApplicationFactory {
 
@@ -1322,7 +1394,33 @@ public class TypeGraph {
         @Override
         public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
                 String calledAsName, List<MTType> arguments) {
-            return new MTPowertypeApplication(g, arguments.get(0));
+            return new MTPowerclassApplication(g, arguments.get(0));
+        }
+
+    }
+
+    /**
+     * <p>This creates a {@link MTPowersetApplication} type.</p>
+     */
+    private static class PowersetApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        /**
+         * <p>This method returns a {@link MTType} resulting from a
+         * function application.</p>
+         *
+         * @param g The current type graph.
+         * @param f The function to be applied.
+         * @param calledAsName The name for this function application type.
+         * @param arguments List of arguments for applying the function.
+         *
+         * @return A function application {@link MTType}.
+         */
+        @Override
+        public final MTType buildFunctionApplication(TypeGraph g, MTFunction f,
+                String calledAsName, List<MTType> arguments) {
+            return new MTPowersetApplication(g, arguments.get(0));
         }
 
     }

@@ -12,12 +12,8 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.programtypes;
 
-import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTNamed;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.Map;
 
@@ -43,15 +39,6 @@ public class PTFamily extends PTType {
     /** <p>Exemplar associated with this type.</p> */
     private final String myExemplarName;
 
-    /** <p>Constraint associated with this type.</p> */
-    private final AssertionClause myConstraint;
-
-    /** <p>Initialization ensures associated with this type.</p> */
-    private final AssertionClause myInitializationEnsures;
-
-    /** <p>Finalization ensures associated with this type.</p> */
-    private final AssertionClause myFinalizationEnsures;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -62,21 +49,13 @@ public class PTFamily extends PTType {
      * @param model The type family's mathematical model.
      * @param familyName The type family's name.
      * @param exemplarName The type family's exemplar name.
-     * @param constraint The type family's type constraint.
-     * @param initializationEnsures The type family's initialization ensures clause.
-     * @param finalizationEnsures The type family's finalization ensures clause.
      */
-    public PTFamily(MTType model, String familyName, String exemplarName,
-            AssertionClause constraint, AssertionClause initializationEnsures,
-            AssertionClause finalizationEnsures) {
+    public PTFamily(MTType model, String familyName, String exemplarName) {
         super(model.getTypeGraph());
 
         myName = familyName;
         myModel = model;
         myExemplarName = exemplarName;
-        myConstraint = constraint;
-        myInitializationEnsures = initializationEnsures;
-        myFinalizationEnsures = finalizationEnsures;
     }
 
     // ===========================================================
@@ -101,25 +80,10 @@ public class PTFamily extends PTType {
                     (myModel.equals(oAsPTFamily.myModel))
                             && (myName.equals(oAsPTFamily.myName))
                             && (myExemplarName
-                                    .equals(oAsPTFamily.myExemplarName))
-                            && (myConstraint.equals(oAsPTFamily.myConstraint))
-                            && (myInitializationEnsures
-                                    .equals(oAsPTFamily.myInitializationEnsures))
-                            && (myFinalizationEnsures
-                                    .equals(oAsPTFamily.myFinalizationEnsures));
+                                    .equals(oAsPTFamily.myExemplarName));
         }
 
         return result;
-    }
-
-    /**
-     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
-     * therefore this method returns a deep copy of the constraint clause.</p>
-     *
-     * @return A {@link AssertionClause} representation object.
-     */
-    public final AssertionClause getConstraint() {
-        return myConstraint.clone();
     }
 
     /**
@@ -129,26 +93,6 @@ public class PTFamily extends PTType {
      */
     public final String getExemplarName() {
         return myExemplarName;
-    }
-
-    /**
-     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
-     * therefore this method returns a deep copy of the finalization ensures clause.</p>
-     *
-     * @return A {@link AssertionClause} representation object.
-     */
-    public final AssertionClause getFinalizationEnsures() {
-        return myFinalizationEnsures.clone();
-    }
-
-    /**
-     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
-     * therefore this method returns a deep copy of the initialization ensures clause.</p>
-     *
-     * @return A {@link AssertionClause} representation object.
-     */
-    public final AssertionClause getInitializationEnsures() {
-        return myInitializationEnsures.clone();
     }
 
     /**
@@ -177,23 +121,10 @@ public class PTFamily extends PTType {
         Map<String, MTType> stringToMathType =
                 SymbolTableEntry.buildMathTypeGenerics(genericInstantiations);
 
-        Map<MTNamed, MTType> mathTypeToMathType =
-                MTNamed.toMTNamedMap(getTypeGraph(), stringToMathType);
-
         MTType newModel =
                 myModel.getCopyWithVariablesSubstituted(stringToMathType);
 
-        // Obtain the new assertion clauses with the new types.
-        AssertionClause newConstraint =
-                withTypesSubstituted(myConstraint, mathTypeToMathType);
-        AssertionClause newInitializationEnsures =
-                withTypesSubstituted(myInitializationEnsures,
-                        mathTypeToMathType);
-        AssertionClause newFinalizationEnsures =
-                withTypesSubstituted(myFinalizationEnsures, mathTypeToMathType);
-
-        return new PTFamily(newModel, myName, myExemplarName, newConstraint,
-                newInitializationEnsures, newFinalizationEnsures);
+        return new PTFamily(newModel, myName, myExemplarName);
     }
 
     /**
@@ -214,42 +145,6 @@ public class PTFamily extends PTType {
     @Override
     public final String toString() {
         return myName;
-    }
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
-
-    /**
-     * <p>This is a helper method to that creates a new {@link AssertionClause} with the
-     * provided instantiated types.</p>
-     *
-     * @param original Original assertion clause.
-     * @param mathTypeToMathType A map of generic to instantiated types.
-     *
-     * @return A new {@link AssertionClause} with the new types.
-     */
-    private AssertionClause withTypesSubstituted(AssertionClause original,
-            Map<MTNamed, MTType> mathTypeToMathType) {
-        Exp originalExp = original.getAssertionExp();
-        Exp newExp = originalExp.clone();
-        MTNamed oldType = (MTNamed) originalExp.getMathType();
-        newExp.setMathType(mathTypeToMathType.get(oldType));
-
-        // TODO: Figure out what to do when the MathTypeValue is not null
-        if (originalExp.getMathTypeValue() != null) {
-            throw new NoSolutionException("Don't know what to do here!",
-                    new IllegalStateException());
-        }
-
-        // Clone the which_entails clause if there is one
-        Exp newWhichEntails = null;
-        if (original.getWhichEntailsExp() != null) {
-            newWhichEntails = original.getWhichEntailsExp().clone();
-        }
-
-        return new AssertionClause(original.getLocation().clone(), original
-                .getClauseType(), newExp, newWhichEntails);
     }
 
 }

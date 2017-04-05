@@ -13,14 +13,19 @@
 package edu.clemson.cs.rsrg.treewalk;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
-import java.io.*;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * <p>This class generates a Java abstract class containing dummy implementations
@@ -174,6 +179,37 @@ public class WalkerCodeGenerator {
                             e.getCanonicalName()).add("isMember",
                             e.isMemberClass());
             walkerClass.add("methods", defaultImplementations);
+
+            // Generate methods for before visiting a list of items.
+            // This way we can add some logic before visiting elements inside the list.
+            Set<Field> fields = ReflectionUtils.getAllFields(e);
+            for (Field field : fields) {
+                if (!Modifier.isStatic(field.getModifiers())) {
+                    Class<?> fieldType = field.getType();
+
+                    try {
+                        // is this member a list of ResolveConceptualElements?
+                        // if so, create a visit method for it
+                        if (java.util.List.class.isAssignableFrom(fieldType)) {
+                            Class<?> listOf =
+                                    (Class<?>) ((ParameterizedType) field
+                                            .getGenericType())
+                                            .getActualTypeArguments()[0];
+                            if (ResolveConceptualElement.class.isAssignableFrom(listOf)) {
+                                ST listDefaultImplementations =
+                                        GROUP.getInstanceOf("walkerVirtualListMethods").add("name",
+                                                e.getSimpleName() + toCamelCase(field.getName())).add("qualClassName",
+                                                e.getCanonicalName()).add("className", e.getSimpleName()).add("isMember",
+                                                e.isMemberClass());
+                                walkerClass.add("methods", listDefaultImplementations);
+                            }
+                        }
+                    }
+                    catch (RuntimeException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
         }
 
         return walkerClass;
@@ -232,6 +268,25 @@ public class WalkerCodeGenerator {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * <p>Applies proper camel casing to the string passed in.</p>
+     *
+     * @param s Original string.
+     *
+     * @return Modified string.
+     */
+    private static String toCamelCase(String s) {
+        StringBuilder buffer = new StringBuilder();
+        StringTokenizer tokens = new StringTokenizer(s, "_");
+        while (tokens.hasMoreTokens()) {
+            String token = tokens.nextToken();
+            buffer.append(Character.toUpperCase(token.charAt(0)));
+            buffer.append(token.substring(1));
+        }
+
+        return buffer.toString();
     }
 
 }

@@ -69,7 +69,6 @@ public abstract class AbstractVarDec extends Dec {
         AbstractVarDec that = (AbstractVarDec) o;
 
         return myTy.equals(that.myTy);
-
     }
 
     /**

@@ -130,7 +130,6 @@ public class BetweenExp extends MathExp {
         BetweenExp that = (BetweenExp) o;
 
         return myJoiningExps.equals(that.myJoiningExps);
-
     }
 
     /**

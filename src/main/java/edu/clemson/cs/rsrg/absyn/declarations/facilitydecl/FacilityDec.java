@@ -58,7 +58,7 @@ public class FacilityDec extends Dec {
     private final List<EnhancementSpecRealizItem> myEnhancementRealizPairs;
 
     /** <p>Profile name for this facility.</p> */
-    private PosSymbol myProfileName;
+    private final PosSymbol myProfileName;
 
     /**
      * <p>Tells us whether or not the facility's realization
@@ -208,7 +208,6 @@ public class FacilityDec extends Dec {
             return false;
         return myProfileName != null ? myProfileName.equals(that.myProfileName)
                 : that.myProfileName == null;
-
     }
 
     /**

@@ -87,7 +87,6 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
         ProgramVariableNameExp that = (ProgramVariableNameExp) o;
 
         return myVarName.equals(that.myVarName);
-
     }
 
     /**

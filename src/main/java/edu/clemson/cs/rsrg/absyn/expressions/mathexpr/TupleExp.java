@@ -149,7 +149,6 @@ public class TupleExp extends MathExp {
         if (mySize != tupleExp.mySize)
             return false;
         return myFields.equals(tupleExp.myFields);
-
     }
 
     /**

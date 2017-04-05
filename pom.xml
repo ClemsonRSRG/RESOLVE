@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>Summer16a</version>
+    <version>Spring17a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -84,17 +84,17 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-maven-plugin</artifactId>
-            <version>4.5</version>
+            <version>4.6</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>0.9.0</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -124,7 +124,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.6.1</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -133,7 +133,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -152,7 +152,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
-                <version>1.9</version>
+                <version>1.9.5</version>
                 <configuration>
                     <connectionType>developerConnection</connectionType>
                 </configuration>
@@ -160,12 +160,9 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.5</version>
+                <version>4.6</version>
                 <configuration>
                     <sourceDirectory>src/main/antlr4</sourceDirectory>
-                    <arguments>
-                        <argument>-visitor</argument>
-                    </arguments>
                 </configuration>
                 <executions>
                     <execution>
@@ -193,7 +190,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.0</version>
                 <configuration>
                     <header>${license.url}</header>
                     <excludes>
@@ -208,6 +205,7 @@
                         <exclude>src/main/antlr4/**</exclude>
                         <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
                         <exclude>src/resources/**</exclude>
+                        <exclude>test/resources/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -242,7 +240,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>2.10.4</version>
                 <configuration>
                     <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
                     <sourcepath>${project.basedir}/src/main/java/edu/clemson/cs/rsrg</sourcepath>
@@ -251,7 +249,7 @@
             <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.0.0</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -284,6 +282,13 @@
 
         <!-- Source directory for test files -->
         <testSourceDirectory>test/java</testSourceDirectory>
+
+        <!-- Resources directory for test files -->
+        <testResources>
+            <testResource>
+                <directory>test/resources</directory>
+            </testResource>
+        </testResources>
     </build>
 
 </project>

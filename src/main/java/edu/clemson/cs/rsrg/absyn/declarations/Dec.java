@@ -87,7 +87,6 @@ public abstract class Dec extends ResolveConceptualElement {
                 : dec.myMathType != null)
             return false;
         return myName.equals(dec.myName);
-
     }
 
     /**

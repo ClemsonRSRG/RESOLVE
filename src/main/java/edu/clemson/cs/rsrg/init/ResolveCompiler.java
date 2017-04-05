@@ -12,14 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.archiving.Archiver;
-import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
-import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
-import edu.clemson.cs.r2jt.rewriteprover.Prover;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
-import edu.clemson.cs.r2jt.translation.CTranslator;
-import edu.clemson.cs.r2jt.translation.JavaTranslator;
-import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.statushandling.SystemStdHandler;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
@@ -30,8 +23,8 @@ import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.misc.Utilities;
+import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -60,7 +53,7 @@ public class ResolveCompiler {
     /**
      * <p>This indicates the current compiler version.</p>
      */
-    private final String myCompilerVersion = "Summer 2016";
+    private final String myCompilerVersion = "Spring 2017";
 
     /**
      * <p>This stores all the file names specified in the argument
@@ -69,17 +62,43 @@ public class ResolveCompiler {
     private final List<String> myArgumentFileList;
 
     // ===========================================================
+    // Objects
+    // ===========================================================
+
+    /**
+     * <p>The list of files that we automatically import to any {@code Concept},
+     * {@code Concept Realization}, {@code Enhancement}, {@code Enhancement Realizations},
+     * {@code Facilities}. If you don't want this behavior to happen to a specific file,
+     * add it to {@link #NO_AUTO_IMPORT_EXCEPTION_LIST}</p>
+     */
+    public static final List<String> AUTO_IMPORT_FILES =
+            Collections
+                    .unmodifiableList(Arrays.asList("Std_Boolean_Fac",
+                            "Std_Integer_Fac", "Std_Character_Fac",
+                            "Std_Char_Str_Fac"));
+
+    /**
+     * <p>The list of files that we ignore the {@link #AUTO_IMPORT_FILES} list.</p>
+     */
+    public static final List<String> NO_AUTO_IMPORT_EXCEPTION_LIST =
+            Collections.unmodifiableList(Arrays.asList("Boolean_Template",
+                    "Integer_Template", "Character_Template",
+                    "Char_Str_Template"));
+
+    // ===========================================================
     // Flag Strings
     // ===========================================================
 
     private static final String FLAG_DESC_DEBUG =
             "Print debugging statements from the compiler output.";
+    private static final String FLAG_DESC_PRINT_MODULE =
+            "Print the modules we are compiling.";
     private static final String FLAG_DESC_EXPORT_AST =
-            "exports the AST for the target file as a .dot file that can be viewed in Graphviz";
+            "Exports the AST for the target file as a .dot file that can be viewed in Graphviz";
     private static final String FLAG_DESC_WORKSPACE_DIR =
             "Changes the workspace directory path.";
     private static final String FLAG_SECTION_GENERAL = "General";
-    private static final String FLAG_SECTION_NAME = "Output";
+    private static final String FLAG_SECTION_DEBUG = "Debugging";
 
     private static final String[] WORKSPACE_DIR_ARG_NAME = { "Path" };
 
@@ -108,27 +127,34 @@ public class ResolveCompiler {
      * output.</p>
      */
     public static final Flag FLAG_DEBUG =
-            new Flag(FLAG_SECTION_NAME, "debug", FLAG_DESC_DEBUG);
+            new Flag(FLAG_SECTION_DEBUG, "debug", FLAG_DESC_DEBUG);
 
     /**
      * <p>Tells the compiler to print debugging messages from the compiler
      * output to a file.</p>
      */
     public static final Flag FLAG_DEBUG_FILE_OUT =
-            new Flag(FLAG_SECTION_NAME, "debugOutToFile", FLAG_DESC_DEBUG);
+            new Flag(FLAG_SECTION_DEBUG, "debugOutToFile", FLAG_DESC_DEBUG);
 
     /**
      * <p>Tells the compiler to print compiler exception's stack traces.</p>
      */
     public static final Flag FLAG_DEBUG_STACK_TRACE =
-            new Flag(FLAG_SECTION_NAME, "stacktrace", FLAG_DESC_DEBUG);
+            new Flag(FLAG_SECTION_DEBUG, "stacktrace", FLAG_DESC_DEBUG,
+                    Flag.Type.HIDDEN);
 
     /**
-     * <p>The main web interface flag.  Tells the compiler to modify
-     * some of the output to be more user-friendly for the web.</p>
+     * <p>Tells the compiler to print the module we are compiling.</p>
+     */
+    public static final Flag FLAG_PRINT_MODULE =
+            new Flag(FLAG_SECTION_DEBUG, "printModule", FLAG_DESC_PRINT_MODULE,
+                    Flag.Type.HIDDEN);
+
+    /**
+     * <p>Tell the compiler to output a Graphviz model for our AST.</p>
      */
     public static final Flag FLAG_EXPORT_AST =
-            new Flag(FLAG_SECTION_NAME, "exportAST", FLAG_DESC_EXPORT_AST,
+            new Flag(FLAG_SECTION_GENERAL, "exportAST", FLAG_DESC_EXPORT_AST,
                     Flag.Type.HIDDEN);
 
     /**
@@ -183,7 +209,7 @@ public class ResolveCompiler {
             statusHandler = compileEnvironment.getStatusHandler();
             statusHandler.error(null, e.getMessage());
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
-                e.printStackTrace();
+                statusHandler.printStackTrace(e);
             }
             statusHandler.stopLogging();
         }
@@ -218,9 +244,8 @@ public class ResolveCompiler {
             // YS - The status handler object might have changed.
             statusHandler = compileEnvironment.getStatusHandler();
             statusHandler.error(null, e.getMessage());
-            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
-                    && statusHandler instanceof SystemStdHandler) {
-                e.printStackTrace();
+            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
+                statusHandler.printStackTrace(e);
             }
             statusHandler.stopLogging();
         }
@@ -239,7 +264,8 @@ public class ResolveCompiler {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      *
-     * @throws CompilerException
+     * @throws CompilerException This catches all sorts of exceptions thrown by
+     * the compiler.
      */
     private void compileArbitraryFiles(List<String> fileArgList,
             CompileEnvironment compileEnvironment) throws CompilerException {
@@ -284,7 +310,8 @@ public class ResolveCompiler {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      *
-     * @throws CompilerException
+     * @throws CompilerException This catches all sorts of exceptions thrown by
+     * the compiler.
      */
     private void compileRealFiles(List<String> fileArgList,
             CompileEnvironment compileEnvironment) throws CompilerException {
@@ -369,14 +396,12 @@ public class ResolveCompiler {
                 else {
                     // The remaining arguments must be filenames, so we add those
                     // to our list of files to compile.
-                    for (String arg : remainingArgs) {
-                        myArgumentFileList.add(arg);
-                    }
+                    Collections.addAll(myArgumentFileList, remainingArgs);
                 }
 
                 // Store the symbol table and type graph
                 MathSymbolTableBuilder symbolTable =
-                        new MathSymbolTableBuilder();
+                        new MathSymbolTableBuilder(compileEnvironment);
                 compileEnvironment.setSymbolTable(symbolTable);
                 compileEnvironment.setTypeGraph(symbolTable.getTypeGraph());
             }
@@ -421,13 +446,14 @@ public class ResolveCompiler {
     private synchronized void setUpFlagDependencies() {
         if (!FlagDependencies.isSealed()) {
             setUpFlags();
-            Prover.setUpFlags();
+            /*Prover.setUpFlags();
             JavaTranslator.setUpFlags();
             CTranslator.setUpFlags();
             Archiver.setUpFlags();
             VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
-            CongruenceClassProver.setUpFlags();
+            CongruenceClassProver.setUpFlags();*/
+            Populator.setUpFlags();
             FlagDependencies.seal();
         }
     }
@@ -445,5 +471,8 @@ public class ResolveCompiler {
 
         // Stack traces implies debug flag is on
         FlagDependencies.addImplies(FLAG_DEBUG_STACK_TRACE, FLAG_DEBUG);
+
+        // Print modules implies debug flag is on
+        FlagDependencies.addImplies(FLAG_PRINT_MODULE, FLAG_DEBUG);
     }
 }

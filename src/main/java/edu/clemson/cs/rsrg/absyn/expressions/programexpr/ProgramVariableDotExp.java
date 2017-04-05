@@ -89,7 +89,6 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
         ProgramVariableDotExp that = (ProgramVariableDotExp) o;
 
         return mySegmentExps.equals(that.mySegmentExps);
-
     }
 
     /**

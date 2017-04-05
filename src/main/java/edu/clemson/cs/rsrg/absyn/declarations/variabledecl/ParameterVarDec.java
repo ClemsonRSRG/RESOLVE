@@ -81,7 +81,6 @@ public class ParameterVarDec extends AbstractVarDec {
         ParameterVarDec that = (ParameterVarDec) o;
 
         return myMode == that.myMode;
-
     }
 
     /**

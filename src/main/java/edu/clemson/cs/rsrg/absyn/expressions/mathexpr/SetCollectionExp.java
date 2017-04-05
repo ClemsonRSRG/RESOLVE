@@ -134,7 +134,6 @@ public class SetCollectionExp extends MathExp {
         SetCollectionExp that = (SetCollectionExp) o;
 
         return myMembers.equals(that.myMembers);
-
     }
 
     /**
@@ -172,10 +171,8 @@ public class SetCollectionExp extends MathExp {
      */
     @Override
     public final List<Exp> getSubExpressions() {
-        List<Exp> subExpList = new ArrayList<>();
-        for (MathExp m : myMembers) {
-            subExpList.add(m);
-        }
+        List<Exp> subExpList = new ArrayList<>(myMembers.size());
+        subExpList.addAll(myMembers);
 
         return subExpList;
     }

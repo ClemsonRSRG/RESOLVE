@@ -12,34 +12,46 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.utilities;
 
-import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.FacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.TupleExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry.Quantification;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTNamed;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTPowertypeApplication;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import org.antlr.v4.runtime.ANTLRInputStream;
 
 /**
  * <p>The <code>HardCoded</code> class defines all mathematical symbols
- * and relationships that cannot be put into a {@code Precis} module.</p>
+ * and relationships that are built into the compiler and acts as the base
+ * for where types, definitions, theorems, etc.</p>
  *
  * @version 2.0
  */
 public class HardCoded {
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     /**
      * <p>This method establishes all built-in relationships of the symbol table.</p>
@@ -50,54 +62,141 @@ public class HardCoded {
     public static void addBuiltInRelationships(TypeGraph g,
             MathSymbolTableBuilder b) {
         try {
-            //This is just a hard-coded version of this theoretical type theorem
-            //that can't actually appear in a theory because it won't type-check
-            //(it requires itself to typecheck):
-
-            //Type Theorem Function_Subtypes:
-            //   For all D1, R1 : MType,
-            //   For all D2 : Powerset(D1),
-            //   For all R2 : Powerset(R1),
-            //   For all f : D2 -> R2,
-            //       f : D1 -> R1;
-
-            AssertionClause requires =
-                    new AssertionClause(null, ClauseType.REQUIRES, VarExp
-                            .getTrueVarExp(null, g));
+            // YS: Everything we build here could be written in a file called Cls_Theory,
+            // but since right now the whole math theory files and type system is still
+            // being hashed out, we hard code these. At some point someone should revisit
+            // this and see if it can be moved to a physical file.
+            Location classTheoryLoc =
+                    new Location(new ResolveFile("Cls_Theory",
+                            ModuleType.THEORY, new ANTLRInputStream(
+                            new StringReader("")),
+                            new ArrayList<String>(), ""),
+                            0, 0, "");
             ModuleDec module =
-                    new FacilityModuleDec(null, new PosSymbol(null, "native"),
+                    new PrecisModuleDec(classTheoryLoc.clone(), new PosSymbol(
+                            classTheoryLoc.clone(), "Cls_Theory"),
                             new ArrayList<ModuleParameterDec>(),
-                            new ArrayList<UsesItem>(), requires,
-                            new ArrayList<Dec>());
-
-            VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
+                            new ArrayList<UsesItem>(), new ArrayList<Dec>(),
+                            new HashMap<PosSymbol, Boolean>());
             ScopeBuilder s = b.startModuleScope(module);
 
-            s.addBinding("D1", Quantification.UNIVERSAL, v, g.CLS);
-            s.addBinding("R1", Quantification.UNIVERSAL, v, g.CLS);
+            // Since adding a binding require something of ResolveConceptualElement,
+            // we associate everything with a VarExp.
+            VarExp v =
+                    new VarExp(classTheoryLoc.clone(), null, new PosSymbol(
+                            classTheoryLoc.clone(), "Cls_Theory"));
 
-            s.addBinding("D2", Quantification.UNIVERSAL, v,
-                    new MTPowertypeApplication(g, new MTNamed(g, "D1")));
-            s.addBinding("R2", Quantification.UNIVERSAL, v,
-                    new MTPowertypeApplication(g, new MTNamed(g, "R1")));
+            // Built-in functions
+            s.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
+                    g.ENTITY));
+            s.addBinding("Powerclass", v, g.POWERCLASS);
+            s.addBinding("union", v, g.UNION);
+            s.addBinding("intersection", v, g.INTERSECT);
+            s.addBinding("->", v, g.CLS_FUNCTION);
+            s.addBinding("*", v, g.CLS_CROSS);
 
-            s.addBinding("f", Quantification.UNIVERSAL, v, new MTFunction(g,
+            // This is just a hard-coded version of this theoretical type theorem
+            // that can't actually appear in a theory because it won't type-check
+            // (it requires itself to typecheck):
+
+            //Type Theorem Function_Subtypes:
+            //   For all D1, R1 : Cls,
+            //   For all D2 : Powerclass(D1),
+            //   For all R2 : Powerclass(R1),
+            //   For all f : D2 -> R2,
+            //       f : D1 -> R1;
+            VarExp typeTheorem1 =
+                    new VarExp(classTheoryLoc.clone(), null, new PosSymbol(
+                            classTheoryLoc.clone(), "Function_Subtypes"));
+            ScopeBuilder typeTheorem1Scope = b.startScope(typeTheorem1);
+
+            // Various binding
+            typeTheorem1Scope.addBinding("D1", Quantification.UNIVERSAL, v, g.CLS);
+            typeTheorem1Scope.addBinding("R1", Quantification.UNIVERSAL, v, g.CLS);
+            typeTheorem1Scope.addBinding("D2", Quantification.UNIVERSAL, v,
+                    new MTPowerclassApplication(g, new MTNamed(g, "D1")));
+            typeTheorem1Scope.addBinding("R2", Quantification.UNIVERSAL, v,
+                    new MTPowerclassApplication(g, new MTNamed(g, "R1")));
+            typeTheorem1Scope.addBinding("f", Quantification.UNIVERSAL, v, new MTFunction(g,
                     new MTNamed(g, "R2"), new MTNamed(g, "D2")));
 
+            // VarExp refering to function f
             VarExp f =
-                    new VarExp(null, null, new PosSymbol(null, "f"),
+                    new VarExp(classTheoryLoc.clone(), null,
+                            new PosSymbol(classTheoryLoc.clone(), "f"),
                             Quantification.UNIVERSAL);
             f.setMathType(new MTFunction(g, new MTNamed(g, "R2"), new MTNamed(
                     g, "D2")));
 
+            // Add relationship and close typeTheorem21 scope
             g.addRelationship(f, new MTFunction(g, new MTNamed(g, "R1"),
-                    new MTNamed(g, "D1")), null, s);
+                    new MTNamed(g, "D1")), null, typeTheorem1Scope);
+            b.endScope();
 
+            //Type Theorem Card_Prod_Thingy:
+            //   For all T1, T2 : Cls,
+            //   For all R1 : Powerclass(T1),
+            //   For all R2 : Powerclass(T2),
+            //   For all r1 : R1,
+            //   For all r2 : R2,
+            //       (r1, r2) : (T1 * T2);
+            VarExp typeTheorem2 =
+                    new VarExp(classTheoryLoc.clone(), null, new PosSymbol(
+                            classTheoryLoc.clone(), "Card_Prod_Thingy"));
+            ScopeBuilder typeTheorem2Scope = b.startScope(typeTheorem2);
+
+            // Various binding
+            typeTheorem2Scope.addBinding("T1", Quantification.UNIVERSAL, v, g.CLS);
+            typeTheorem2Scope.addBinding("T2", Quantification.UNIVERSAL, v, g.CLS);
+            typeTheorem2Scope.addBinding("R1", Quantification.UNIVERSAL, v,
+                    new MTPowerclassApplication(g, new MTNamed(g, "T1")));
+            typeTheorem2Scope.addBinding("R2", Quantification.UNIVERSAL, v,
+                    new MTPowerclassApplication(g, new MTNamed(g, "T2")));
+            typeTheorem2Scope.addBinding("r1", Quantification.UNIVERSAL, v, new MTNamed(g, "R1"));
+            typeTheorem2Scope.addBinding("r2", Quantification.UNIVERSAL, v, new MTNamed(g, "R2"));
+
+            // Binding type
+            List<MTCartesian.Element> bindingTypeElements = new LinkedList<>();
+            bindingTypeElements.add(new MTCartesian.Element(new MTNamed(g, "T1")));
+            bindingTypeElements.add(new MTCartesian.Element(new MTNamed(g, "T2")));
+            MTCartesian bindingType = new MTCartesian(g, bindingTypeElements);
+
+            // Fields inside the tuple
+            List<Exp> tupleExps = new LinkedList<>();
+            VarExp r1 = new VarExp(classTheoryLoc.clone(), null,
+                    new PosSymbol(classTheoryLoc.clone(), "r1"),
+                    Quantification.UNIVERSAL);
+            r1.setMathType(new MTNamed(g, "R1"));
+            tupleExps.add(r1);
+
+            VarExp r2 = new VarExp(classTheoryLoc.clone(), null,
+                    new PosSymbol(classTheoryLoc.clone(), "r2"),
+                    Quantification.UNIVERSAL);
+            r2.setMathType(new MTNamed(g, "R2"));
+            tupleExps.add(r2);
+
+            // Create the tuple and create it's type
+            TupleExp tupleExp = new TupleExp(classTheoryLoc.clone(), tupleExps);
+            List<MTCartesian.Element> fieldTypes = new LinkedList<>();
+            fieldTypes.add(new MTCartesian.Element(new MTNamed(g, "R1")));
+            fieldTypes.add(new MTCartesian.Element(new MTNamed(g, "R2")));
+            MTCartesian tupleType = new MTCartesian(g, fieldTypes);
+            tupleExp.setMathType(tupleType);
+
+            // Add relationship and close typeTheorem2 scope
+            g.addRelationship(tupleExp, bindingType, null, typeTheorem2Scope);
+            b.endScope();
+
+            // Close module scope
             b.endScope();
         }
         catch (DuplicateSymbolException dse) {
             //Not possible--we're the first ones to add anything
             throw new RuntimeException(dse);
+        }
+        catch (IOException e) {
+            throw new MiscErrorException(
+                    "Error instantiating built-in relationships", e);
         }
     }
 
@@ -108,40 +207,52 @@ public class HardCoded {
      * @param b The current scope repository builder.
      */
     public static void addBuiltInSymbols(TypeGraph g, ScopeBuilder b) {
-        VarExp v = new VarExp(null, null, new PosSymbol(null, "native"));
-
         try {
+            // YS: Everything we build here lives in a global namespace. This means
+            // that we don't need to import anything to access any of these symbols.
+            // Since adding a binding require something of ResolveConceptualElement,
+            // we associate everything with a VarExp.
+            Location globalSpaceLoc =
+                    new Location(new ResolveFile("Global", ModuleType.THEORY,
+                            new ANTLRInputStream(new StringReader("")),
+                            new ArrayList<String>(), ""), 0, 0, "");
+            VarExp v =
+                    new VarExp(globalSpaceLoc, null, new PosSymbol(
+                            globalSpaceLoc, "Global"));
+
+            // built-in symbols
             b.addBinding("Entity", v, g.CLS, g.ENTITY);
+            b.addBinding("Element", v, g.CLS, g.ELEMENT);
             b.addBinding("Cls", v, g.CLS, g.CLS);
-
-            b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
-                    g.ENTITY));
-
-            b.addBinding("SSet", v, g.CLS, g.CLS);
-            b.addBinding("B", v, g.CLS, g.BOOLEAN);
-
-            b.addBinding("Empty_Set", v, g.CLS, g.EMPTY_SET);
-            b.addBinding("Powerset", v, g.POWERTYPE);
-            b.addBinding("Powerclass", v, g.POWERCLASS);
+            b.addBinding("SSet", v, g.CLS, g.SSET);
+            b.addBinding("B", v, g.SSET, g.BOOLEAN);
+            b.addBinding("Empty_Class", v, g.CLS, g.EMPTY_CLASS);
+            b.addBinding("Empty_Set", v, g.SSET, g.EMPTY_SET);
             b.addBinding("true", v, g.BOOLEAN);
             b.addBinding("false", v, g.BOOLEAN);
-            b.addBinding("cls_union", v, g.UNION);
-            b.addBinding("cls_intersection", v, g.INTERSECT);
-            b.addBinding("->", v, g.FUNCTION);
-            b.addBinding("and", v, g.AND);
-            b.addBinding("not", v, g.NOT);
-            b.addBinding("*", v, g.CROSS);
 
+            // built-in symbols that are defined as a function
+            // These must be built in for our compiler to function correctly.
+            b.addBinding("Powerset", v, g.POWERSET);
+            b.addBinding("->", v, g.SSET_FUNCTION);
+            b.addBinding("*", v, g.SSET_CROSS);
+            b.addBinding("not", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN));
+            b.addBinding("and", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
+                    g.BOOLEAN));
+            b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
+                    g.BOOLEAN));
             b.addBinding("=", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
                     g.ENTITY));
             b.addBinding("/=", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
                     g.ENTITY));
-            b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
-                    g.BOOLEAN));
         }
         catch (DuplicateSymbolException dse) {
             //Not possible--we're the first ones to add anything
             throw new RuntimeException(dse);
+        }
+        catch (IOException e) {
+            throw new MiscErrorException(
+                    "Error instantiating symbols in the global space", e);
         }
     }
 
@@ -150,18 +261,33 @@ public class HardCoded {
      * expression's meta-segment.</p>
      *
      * @param g The current type graph.
-     * @param e An {@link Exp}.
-     * @param metaSegment A string representing a meta-segment for
-     *                    <code>e</code>.
+     * @param lastExp The last typed {@link Exp} in a {@link DotExp}.
+     * @param currentExp The current {@link Exp} we are trying to type.
+     * @param currentExpName Name of {@code currentExp}.
      *
-     * @return A {@link MTType} if we can establish its type,
+     * @return A {@link MTType} if it is one of the special meta segments,
      * <code>null</code> otherwise.
      */
-    public static MTType getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
+    public static MTType getMetaFieldType(TypeGraph g, Exp lastExp,
+            Exp currentExp, String currentExpName) {
         MTType result = null;
 
-        if (e.getMathTypeValue() != null && metaSegment.equals("Is_Initial")) {
-            result = new MTFunction(g, g.BOOLEAN, g.ENTITY);
+        if (lastExp.getMathTypeValue() != null) {
+            switch (currentExpName) {
+            case "Is_Initial":
+                result =
+                        new MTFunction(g, g.BOOLEAN, lastExp.getMathTypeValue());
+                break;
+            case "Receptacles":
+                currentExp.setMathTypeValue(g.RECEPTACLES);
+                result = g.SSET;
+                break;
+            case "Val_in":
+                result =
+                        new MTFunction(g, new MTPowersetApplication(g, lastExp
+                                .getMathTypeValue()), g.RECEPTACLES);
+                break;
+            }
         }
 
         return result;

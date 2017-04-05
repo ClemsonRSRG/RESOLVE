@@ -77,12 +77,10 @@ public class IfExp extends MathExp {
         sb.append("then ");
         sb.append(myThenExp.asString(0, innerIndentInc));
 
-        if (myElseExp != null) {
-            printSpace(indentSize + innerIndentInc, sb);
-            sb.append("else ");
-            sb.append(myElseExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
+        printSpace(indentSize + innerIndentInc, sb);
+        sb.append("else ");
+        sb.append(myElseExp.asString(indentSize + innerIndentInc,
+                innerIndentInc));
 
         return sb.toString();
     }
@@ -143,9 +141,7 @@ public class IfExp extends MathExp {
             return false;
         if (!myThenExp.equals(ifExp.myThenExp))
             return false;
-        return myElseExp != null ? myElseExp.equals(ifExp.myElseExp)
-                : ifExp.myElseExp == null;
-
+        return myElseExp.equals(ifExp.myElseExp);
     }
 
     /**
@@ -214,7 +210,7 @@ public class IfExp extends MathExp {
         int result = super.hashCode();
         result = 31 * result + myTestingExp.hashCode();
         result = 31 * result + myThenExp.hashCode();
-        result = 31 * result + (myElseExp != null ? myElseExp.hashCode() : 0);
+        result = 31 * result + myElseExp.hashCode();
         return result;
     }
 

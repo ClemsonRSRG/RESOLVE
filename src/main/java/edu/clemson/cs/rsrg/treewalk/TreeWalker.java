@@ -170,14 +170,20 @@ public class TreeWalker {
                 //This is fine if we're dealing with a virtual node, otherwise
                 //it shouldn't be possible
                 if (!list) {
-                    throw new MiscErrorException("Cannot locate method", nsme);
+                    throw new RuntimeException("Cannot locate method", nsme);
                 }
             }
             catch (IllegalAccessException iae) {
-                throw new MiscErrorException("Error accessing class: " + currentClass.getSimpleName(), iae.getCause());
+                throw new RuntimeException("Error accessing class: " + currentClass.getSimpleName(), iae);
             }
             catch (InvocationTargetException ite) {
-                throw new MiscErrorException("Target invocation error for class: " + currentClass.getSimpleName(), ite.getTargetException());
+                //An exception was thrown inside the corresponding walk method
+                Throwable throwable = ite.getTargetException();
+                while (throwable instanceof RuntimeException && throwable.getCause() != null) {
+                    throwable = throwable.getCause();
+                }
+
+                throw new RuntimeException("Target invocation error for class: " + currentClass.getSimpleName(), throwable);
             }
         }
 
@@ -220,15 +226,20 @@ public class TreeWalker {
                 }
                 catch (NoSuchMethodException nsme) {
                     //Shouldn't be possible
-                    throw new MiscErrorException("Cannot locate method: " + walkMethodName, nsme);
+                    throw new RuntimeException("Cannot locate method: " + walkMethodName, nsme);
                 }
                 catch (IllegalAccessException iae) {
                     //Shouldn't be possible
-                    throw new MiscErrorException("Error accessing class: " + c.getSimpleName(), iae);
+                    throw new RuntimeException("Error accessing class: " + c.getSimpleName(), iae);
                 }
                 catch (InvocationTargetException ite) {
                     //An exception was thrown inside the corresponding walk method
-                    throw new MiscErrorException("Target invocation error for class: " + c.getSimpleName(), ite);
+                    Throwable throwable = ite.getTargetException();
+                    while (throwable instanceof RuntimeException && throwable.getCause() != null) {
+                        throwable = throwable.getCause();
+                    }
+
+                    throw new RuntimeException("Target invocation error for class: " + c.getSimpleName(), throwable);
                 }
             }
         }

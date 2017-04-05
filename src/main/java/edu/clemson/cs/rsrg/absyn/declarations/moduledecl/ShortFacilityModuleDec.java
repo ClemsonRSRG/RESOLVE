@@ -18,8 +18,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * <p>This is the class for the short facility module declarations
@@ -39,12 +38,15 @@ public class ShortFacilityModuleDec extends ModuleDec {
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
      * @param facilityDec A {@link FacilityDec} representation object.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     public ShortFacilityModuleDec(Location l, PosSymbol name,
-            FacilityDec facilityDec) {
+            FacilityDec facilityDec, Map<PosSymbol, Boolean> moduleDependencies) {
         super(l, name, new ArrayList<ModuleParameterDec>(),
                 new ArrayList<UsesItem>(), new ArrayList<Dec>(Arrays
-                        .asList(facilityDec)));
+                        .asList(facilityDec)), moduleDependencies);
     }
 
     // ===========================================================
@@ -83,8 +85,10 @@ public class ShortFacilityModuleDec extends ModuleDec {
      */
     @Override
     protected final ShortFacilityModuleDec copy() {
-        return new ShortFacilityModuleDec(cloneLocation(), myName.clone(),
-                (FacilityDec) myDecs.get(0).clone());
-    }
+        Map<PosSymbol, Boolean> newModuleDependencies =
+                copyModuleDependencies();
 
+        return new ShortFacilityModuleDec(cloneLocation(), myName.clone(),
+                (FacilityDec) myDecs.get(0).clone(), newModuleDependencies);
+    }
 }

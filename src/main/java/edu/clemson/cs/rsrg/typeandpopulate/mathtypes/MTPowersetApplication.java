@@ -1,5 +1,5 @@
 /**
- * MTPowertypeApplication.java
+ * MTPowersetApplication.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -16,25 +16,24 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
 
 /**
- * A power type application is when we apply apply the {@code Powerset}
- * function to a type.
+ * An application of the {@code Powerset} function.
  *
  * @version 2.0
  */
-public class MTPowertypeApplication extends MTFunctionApplication {
+public class MTPowersetApplication extends MTFunctionApplication {
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a {code Powerset} type from the argument type.</p>
+     * <p>This constructs an application of {@code Powerset} function.</p>
      *
      * @param g The current type graph.
      * @param argument The {@link MTType} to apply the {@code Powerset} function.
      */
-    public MTPowertypeApplication(TypeGraph g, MTType argument) {
-        super(g, g.POWERTYPE, "Powerset", argument);
+    public MTPowersetApplication(TypeGraph g, MTType argument) {
+        super(g, g.POWERSET, "Powerset", argument);
     }
 
     // ===========================================================
@@ -52,7 +51,7 @@ public class MTPowertypeApplication extends MTFunctionApplication {
         v.beginMTType(this);
         v.beginMTAbstract(this);
         v.beginMTFunctionApplication(this);
-        v.beginMTPowertypeApplication(this);
+        v.beginMTPowersetApplication(this);
 
         v.beginChildren(this);
 
@@ -64,10 +63,20 @@ public class MTPowertypeApplication extends MTFunctionApplication {
 
         v.endChildren(this);
 
-        v.endMTPowertypeApplication(this);
+        v.endMTPowersetApplication(this);
         v.endMTFunctionApplication(this);
         v.endMTAbstract(this);
         v.endMTType(this);
+    }
+
+    /**
+     * <p>Returns the type stored inside this type.</p>
+     *
+     * @return The {@link MTType} type object.
+     */
+    @Override
+    public final MTType getType() {
+        return myTypeGraph.SSET;
     }
 
     /**
@@ -79,7 +88,7 @@ public class MTPowertypeApplication extends MTFunctionApplication {
      */
     @Override
     public final boolean isKnownToContainOnlyMTypes() {
-        //The powertype is, by definition, a container of containers
+        //The powerset is, by definition, a container of containers
         return true;
     }
 
@@ -119,7 +128,7 @@ public class MTPowertypeApplication extends MTFunctionApplication {
                             (MTFunction) newType, getArguments());
             break;
         case 1:
-            result = new MTPowertypeApplication(getTypeGraph(), newType);
+            result = new MTPowersetApplication(getTypeGraph(), newType);
             break;
         default:
             throw new IndexOutOfBoundsException("" + index);

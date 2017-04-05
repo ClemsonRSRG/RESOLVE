@@ -15,8 +15,8 @@ package edu.clemson.cs.rsrg.statushandling;
 import java.io.PrintWriter;
 
 /**
- * <p>This class outputs all information and warning to {@link System#out} and
- * all errors to {@link System#err} file descriptors.</p>
+ * <p>This class outputs all information to {@link System#out} and
+ * all warning and errors to {@link System#err} file descriptors.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -35,7 +35,7 @@ public class SystemStdHandler extends WriterStatusHandler
      * all error output to {@link System#err}.</p>
      */
     public SystemStdHandler() {
-        super(new PrintWriter(System.out), new PrintWriter(System.err, true));
+        super(new PrintWriter(System.out), new PrintWriter(System.err));
     }
 
     // ===========================================================
@@ -49,7 +49,7 @@ public class SystemStdHandler extends WriterStatusHandler
      * is over or has been aborted due to an error.)</p>
      */
     @Override
-    public final void stopLogging() {
+    public synchronized final void stopLogging() {
         stopLogging = true;
     }
 

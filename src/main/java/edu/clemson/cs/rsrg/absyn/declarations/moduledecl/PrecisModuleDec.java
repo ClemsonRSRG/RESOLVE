@@ -17,10 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>This is the class for the precis module declarations
@@ -42,11 +39,14 @@ public class PrecisModuleDec extends ModuleDec {
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     public PrecisModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            List<Dec> decs) {
-        super(l, name, parameterDecs, usesItems, decs);
+            List<Dec> decs, Map<PosSymbol, Boolean> moduleDependencies) {
+        super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
     }
 
     // ===========================================================
@@ -65,6 +65,7 @@ public class PrecisModuleDec extends ModuleDec {
         sb.append(formNameArgs(0, innerIndentInc));
         sb.append(";\n");
         sb.append(formUses(indentSize, innerIndentInc));
+        sb.append("\n");
         sb.append(formDecEnd(indentSize, innerIndentInc));
 
         return sb.toString();
@@ -86,7 +87,9 @@ public class PrecisModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
+        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
 
-        return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs, newUsesItems, newDecs);
+        return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
+                newUsesItems, newDecs, newModuleDependencies);
     }
 }

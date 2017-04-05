@@ -146,7 +146,7 @@ public class PosSymbol implements BasicCapabilities {
      */
     @Override
     public final int hashCode() {
-        int result = myLocation.hashCode();
+        int result = myLocation != null ? myLocation.hashCode() : 0;
         result = 31 * result + mySymbol.hashCode();
         return result;
     }

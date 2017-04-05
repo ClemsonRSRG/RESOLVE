@@ -80,7 +80,6 @@ public abstract class ProgramExp extends Exp {
 
         return myProgramType != null ? myProgramType.equals(that.myProgramType)
                 : that.myProgramType == null;
-
     }
 
     /**

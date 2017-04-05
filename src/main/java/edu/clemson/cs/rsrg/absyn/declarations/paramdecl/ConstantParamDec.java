@@ -63,6 +63,15 @@ public class ConstantParamDec extends Dec implements ModuleParameter {
         return myParameterDec.asString(indentSize, innerIndentInc);
     }
 
+    /**
+     * <p>Returns the variable defined in this parameter declaration.</p>
+     *
+     * @return A {@link ParameterVarDec} representation object.
+     */
+    public final ParameterVarDec getVarDec() {
+        return myParameterDec;
+    }
+
     // ===========================================================
     // Protected Methods
     // ===========================================================

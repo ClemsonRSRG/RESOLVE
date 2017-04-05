@@ -12,7 +12,11 @@
  */
 package edu.clemson.cs.rsrg.init.pipeline;
 
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
@@ -42,18 +46,22 @@ public class AnalysisPipeline extends AbstractPipeline {
      * {@inheritDoc}
      */
     @Override
-    public void process(ModuleIdentifier currentTarget) {
-    /* PopulatingVisitor populator = new PopulatingVisitor(mySymbolTable);
+    public final void process(ModuleIdentifier currentTarget) {
+        ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
+        StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
+        Populator populator =
+                new Populator(mySymbolTable, myCompileEnvironment);
+        myCompileEnvironment.setTypeGraph(populator.getTypeGraph());
+        TreeWalker.visit(populator, moduleDec);
 
-     if (!myCompileEnvironment.containsID(currentTarget)) {
-         throw new IllegalStateException("module ast null");
-     }
-     ModuleAST moduleTarget =
-             myCompileEnvironment.getModuleAST(currentTarget);
-     //TreeWalker.walk(populator, moduleTarget);
-
-     PopulatingVisitor.emitDebug("Type Graph:\n\n"
-             + mySymbolTable.getTypeGraph().toString());*/
+        if (myCompileEnvironment.flags
+                .isFlagSet(Populator.FLAG_POPULATOR_DEBUG)) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n---------------Current Type Graph---------------\n\n");
+            sb.append(mySymbolTable.getTypeGraph().toString());
+            sb.append("\n---------------Current Type Graph---------------\n");
+            statusHandler.info(null, sb.toString());
+        }
     }
 
 }

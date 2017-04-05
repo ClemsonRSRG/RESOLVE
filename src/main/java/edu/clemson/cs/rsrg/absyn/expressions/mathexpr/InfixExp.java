@@ -75,7 +75,7 @@ public class InfixExp extends AbstractFunctionExp {
 
         printSpace(indentSize, sb);
         sb.append("(");
-        sb.append(myLeftHandSide.asString(0, innerIndentInc));
+        sb.append(myLeftHandSide.asString(0, indentSize + innerIndentInc));
 
         sb.append(" ");
         if (myQualifier != null) {
@@ -85,7 +85,7 @@ public class InfixExp extends AbstractFunctionExp {
         sb.append(myOperationName.asString(0, innerIndentInc));
         sb.append(" ");
 
-        sb.append(myRightHandSide.asString(0, innerIndentInc));
+        sb.append(myRightHandSide.asString(0, indentSize + innerIndentInc));
         sb.append(")");
 
         return sb.toString();
@@ -165,7 +165,6 @@ public class InfixExp extends AbstractFunctionExp {
         if (!myOperationName.equals(infixExp.myOperationName))
             return false;
         return myRightHandSide.equals(infixExp.myRightHandSide);
-
     }
 
     /**
@@ -400,7 +399,7 @@ public class InfixExp extends AbstractFunctionExp {
     /**
      * {@inheritDoc}
      */
-    // TODO: Understand this and put more inline comments!
+    // TODO: To be removed when we introduce sequents.
     @Override
     public List<InfixExp> split(MathExp assumpts, boolean single) {
         List<InfixExp> lst = new ArrayList<>();

@@ -23,8 +23,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
  * {@code Type}, as it is found in the RESOLVE source code. That is, it is
  * representation of a type in the abstract syntax tree before it is translated 
  * into a true {@code Type}.</p>
- * 
- * <p>It can be converted into a {@code Type} by a type.TypeConverter.</p>
  *
  * @version 2.0
  */

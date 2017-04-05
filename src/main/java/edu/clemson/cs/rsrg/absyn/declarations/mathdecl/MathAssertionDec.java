@@ -28,6 +28,11 @@ public class MathAssertionDec extends Dec {
     // TheoremSubtype
     // ===========================================================
 
+    /**
+     * <p>This defines the various different theorem subtypes.</p>
+     *
+     * @version 2.0
+     */
     public enum TheoremSubtype {
         NONE {
 
@@ -41,7 +46,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "(Associative)";
+                return "(Associative) ";
             }
 
         },
@@ -49,7 +54,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "(Commutative)";
+                return "(Commutative) ";
             }
 
         }
@@ -59,12 +64,17 @@ public class MathAssertionDec extends Dec {
     // AssertionType
     // ===========================================================
 
+    /**
+     * <p>This defines the various different mathematical assertion types.</p>
+     *
+     * @version 2.0
+     */
     public enum AssertionType {
         AXIOM {
 
             @Override
             public String toString() {
-                return "Axiom";
+                return "Axiom ";
             }
 
         },
@@ -72,7 +82,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Theorem";
+                return "Theorem ";
             }
 
         },
@@ -80,7 +90,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Property";
+                return "Property ";
             }
 
         },
@@ -88,7 +98,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Lemma";
+                return "Lemma ";
             }
 
         },
@@ -96,7 +106,7 @@ public class MathAssertionDec extends Dec {
 
             @Override
             public String toString() {
-                return "Corollary";
+                return "Corollary ";
             }
 
         }
@@ -170,7 +180,6 @@ public class MathAssertionDec extends Dec {
         sb.append(myAssertionType.toString());
         if (myTheoremSubtype != null) {
             sb.append(myTheoremSubtype.toString());
-            sb.append(" ");
         }
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(":\n");
@@ -201,7 +210,6 @@ public class MathAssertionDec extends Dec {
         if (!myAssertion.equals(that.myAssertion))
             return false;
         return myTheoremSubtype == that.myTheoremSubtype;
-
     }
 
     /**

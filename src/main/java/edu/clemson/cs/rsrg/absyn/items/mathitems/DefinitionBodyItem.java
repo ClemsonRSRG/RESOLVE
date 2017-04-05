@@ -86,13 +86,13 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
 
             // base case
             printSpace(indentSize, sb);
-            sb.append("(i) ");
+            sb.append("(i.) ");
             sb.append(myBase.asString(0, innerIndentInc));
             sb.append("\n");
 
             // inductive hypothesis
-            printSpace(indentSize + innerIndentInc, sb);
-            sb.append("(ii) ");
+            printSpace(indentSize, sb);
+            sb.append("(ii.) ");
             sb.append(myHypothesis.asString(0, innerIndentInc));
         }
         else {

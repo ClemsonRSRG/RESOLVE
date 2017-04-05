@@ -120,7 +120,6 @@ public class VCVarExp extends MathExp {
         VCVarExp vcVarExp = (VCVarExp) o;
 
         return myOrigExp.equals(vcVarExp.myOrigExp);
-
     }
 
     /**
