@@ -22,18 +22,17 @@ translated to Java and run on the JVM.
 ## Authors and major contributors
 The creation and continual evolution of the RESOLVE language is owed to an
 ongoing joint effort between Clemson University, The Ohio State University, and
-countless educators and researchers from a variety of [other]
-(https://www.cs.clemson.edu/resolve/about.html) institutions.
+countless educators and researchers from a variety of [other](https://www.cs.clemson.edu/resolve/about.html) 
+institutions.
 
 Developers of this particular test/working-iteration of the RESOLVE compiler
 include:
 
-* [RESOLVE Software Research Group (RSRG)]
-(https://www.cs.clemson.edu/resolve/) - School of Computing, Clemson University
+* [RESOLVE Software Research Group (RSRG)](https://www.cs.clemson.edu/resolve/) - School of Computing, Clemson University
 
 ## Copyright and license
 
-Copyright (c) RESOLVE Software Research Group (RSRG), 2017. All rights reserved. 
+Copyright © 2017, [RESOLVE Software Research Group (RSRG)](https://www.cs.clemson.edu/resolve/). All rights reserved. 
 The use and distribution terms for this software are covered by the BSD 3-clause 
 license which can be found in the file `LICENSE.txt` at the root of this repository.
 By using this software in any fashion, you are agreeing to be bound by the terms
