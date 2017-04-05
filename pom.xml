@@ -207,6 +207,12 @@
                         <exclude>src/resources/**</exclude>
                         <exclude>test/resources/**</exclude>
                     </excludes>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                    <properties>
+                        <year>2017</year>
+                    </properties>
                 </configuration>
                 <executions>
                     <execution>

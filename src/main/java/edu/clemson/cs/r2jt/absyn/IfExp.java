@@ -1,7 +1,7 @@
-/**
+/*
  * IfExp.java
  * ---------------------------------
- * Copyright (c) 2016
+ * Copyright (c) 2017
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
