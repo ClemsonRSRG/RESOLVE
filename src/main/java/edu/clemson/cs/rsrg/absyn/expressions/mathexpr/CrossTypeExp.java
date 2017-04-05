@@ -74,16 +74,15 @@ public class CrossTypeExp extends MathExp {
 
         Set<PosSymbol> tags = myTagsToFields.keySet();
         for (PosSymbol tag : tags) {
-            sb
-                    .append(tag.asString(indentSize + innerIndentInc,
-                            innerIndentInc));
+            sb.append(tag.asString(indentSize + 2 * innerIndentInc,
+                    innerIndentInc));
             sb.append(": ");
             sb.append(myTagsToFields.get(tag).asString(0, innerIndentInc));
-            sb.append("\n");
+            sb.append(";\n");
         }
 
-        printSpace(indentSize, sb);
-        sb.append("end\n");
+        printSpace(innerIndentInc, sb);
+        sb.append("end");
 
         return sb.toString();
     }
@@ -139,7 +138,6 @@ public class CrossTypeExp extends MathExp {
         CrossTypeExp that = (CrossTypeExp) o;
 
         return myTagsToFields.equals(that.myTagsToFields);
-
     }
 
     /**
@@ -245,7 +243,7 @@ public class CrossTypeExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        Map<PosSymbol, ArbitraryExpTy> newTagsToFields = new HashMap<>();
+        Map<PosSymbol, ArbitraryExpTy> newTagsToFields = new LinkedHashMap<>();
         Set<PosSymbol> tags = myTagsToFields.keySet();
         for (PosSymbol tag : tags) {
             PosSymbol newTag = tag.clone();

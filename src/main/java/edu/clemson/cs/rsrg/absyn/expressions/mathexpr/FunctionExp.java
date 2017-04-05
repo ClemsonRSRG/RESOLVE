@@ -186,7 +186,6 @@ public class FunctionExp extends AbstractFunctionExp {
                 : that.myFuncNameCaratExp != null)
             return false;
         return myArguments.equals(that.myArguments);
-
     }
 
     /**
@@ -225,9 +224,9 @@ public class FunctionExp extends AbstractFunctionExp {
     /**
      * <p>This method returns the function name expression.</p>
      *
-     * @return The {@link Exp} representation object.
+     * @return The {@link VarExp} representation object.
      */
-    public final Exp getName() {
+    public final VarExp getName() {
         return myFuncNameExp;
     }
 
@@ -266,8 +265,9 @@ public class FunctionExp extends AbstractFunctionExp {
     @Override
     public final List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
-        list.add(myFuncNameExp);
-        list.add(myFuncNameCaratExp);
+        if (myFuncNameCaratExp != null) {
+            list.add(myFuncNameCaratExp);
+        }
         list.addAll(copyExps());
 
         return list;
@@ -303,6 +303,7 @@ public class FunctionExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
+        // TODO: May have to change the type of myFuncNameExp to allow non-variable names.
         VarExp newNameExp;
         if (myFuncNameExp instanceof VarExp){
             newNameExp = myFuncNameExp.remember();
@@ -334,6 +335,15 @@ public class FunctionExp extends AbstractFunctionExp {
         }
 
         return new FunctionExp(cloneLocation(), qualifier, newNameExp, newCaratExp, newArgs);
+    }
+
+    /**
+     * <p>Sets the quantification for this expression.</p>
+     *
+     * @param q The quantification type for this expression.
+     */
+    public final void setQuantification(SymbolTableEntry.Quantification q) {
+        myQuantification = q;
     }
 
     /**

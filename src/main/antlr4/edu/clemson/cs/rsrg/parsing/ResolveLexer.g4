@@ -142,8 +142,7 @@ ELAPSED_TIME
     ;
 
 ELSE
-    :   'Else'
-    |   'else'
+    :   'else'
     ;
 
 END
@@ -249,11 +248,11 @@ INDUCTIVE
     ;
 
 INDUCTIVE_BASE_NUM
-    :   '(i).'
+    :   '(i.)'
     ;
 
 INDUCTIVE_HYP_NUM
-    :   '(ii).'
+    :   '(ii.)'
     ;
 
 INITIALIZATION
@@ -264,8 +263,8 @@ INSTANTIATION
     :   'instantiation'
     ;
 
-INTERSECT
-    :   'intersect'
+INTERSECTION
+    :   'intersection'
     ;
 
 INTRODUCES
@@ -274,10 +273,6 @@ INTRODUCES
 
 IS
     :   'is'
-    ;
-
-IS_IN
-    :   'is_in'
     ;
 
 ITERATE
@@ -445,8 +440,12 @@ RESTORES
     |   'restores'
     ;
 
-SHAREDSTATE
-    :   'Shared State'
+SHARED
+    :   'Shared'
+    ;
+
+SHAREDVARIABLES
+    :   'Shared Variables'
     ;
 
 SHORT_FOR

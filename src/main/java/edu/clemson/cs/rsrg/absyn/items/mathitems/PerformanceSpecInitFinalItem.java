@@ -28,6 +28,11 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     // ItemType
     // ===========================================================
 
+    /**
+     * <p>This defines the various different performance item types.</p>
+     *
+     * @version 2.0
+     */
     public enum ItemType {
         INITIALIZATION {
 
@@ -101,6 +106,7 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
         if (myDuration != null) {
             sb.append(myDuration.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         // manipulative displacement clause

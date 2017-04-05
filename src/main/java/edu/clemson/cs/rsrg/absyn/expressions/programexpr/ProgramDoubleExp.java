@@ -77,7 +77,6 @@ public class ProgramDoubleExp extends ProgramLiteralExp {
         ProgramDoubleExp that = (ProgramDoubleExp) o;
 
         return Double.compare(that.myDouble, myDouble) == 0;
-
     }
 
     /**

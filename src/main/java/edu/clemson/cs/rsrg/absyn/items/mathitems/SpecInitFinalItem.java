@@ -29,6 +29,11 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
     // ItemType
     // ===========================================================
 
+    /**
+     * <p>This defines the various different specification item types.</p>
+     *
+     * @version 2.0
+     */
     public enum ItemType {
         INITIALIZATION {
 
@@ -101,6 +106,7 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
         if (myAffects != null) {
             sb.append(myAffects.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         // ensures clause

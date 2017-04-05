@@ -56,7 +56,7 @@ public class CompileEnvironment {
 
     /**
      * <p>This map stores all externally realizations for a particular concept.
-     * The <code>Archiver</code> should be the only one that cares about these files.</p>
+     * The {@code Archiver} should be the only one that cares about these files.</p>
      */
     private final Map<ModuleIdentifier, File> myExternalRealizFiles;
 
@@ -114,8 +114,9 @@ public class CompileEnvironment {
      * @param compilerVersion The current compiler version.
      * @param statusHandler A status handler to display debug or error messages.
      *
-     * @throws FlagDependencyException
-     * @throws IOException
+     * @throws FlagDependencyException There was some kind of dependency error
+     * with the user specified flags.
+     * @throws IOException There was an error creating the specified error log file.
      */
     public CompileEnvironment(String[] args, String compilerVersion,
             StatusHandler statusHandler)
@@ -146,7 +147,7 @@ public class CompileEnvironment {
                     new File(myCompileDir, "Log-"
                             + dateFormat.format(date) + ".log");
             File errorFile =
-                    new File(myCompileDir, "Error-Log-"
+                    new File(myCompileDir, "Debug-Log-"
                             + dateFormat.format(date) + ".log");
 
             statusHandler =
@@ -174,21 +175,26 @@ public class CompileEnvironment {
     // ===========================================================
 
     /**
-     * <p>Remove the module associated with the <code>ModuleIdentifier</code>
+     * <p>Adds this file as an externally realized file.</p>
+     *
+     * @param id The ID for the {@link ResolveFile} that we want to set as externally realized.
+     * @param file The externally realized file.
+     */
+    public final void addExternalRealizFile(ModuleIdentifier id, File file) {
+        myExternalRealizFiles.put(id, file);
+    }
+
+    /**
+     * <p>Remove the module associated with the {@link ModuleIdentifier}
      * from our incomplete module stack. This indicates the completion of
      * this module.</p>
      *
      * @param mid Completed module's identifier.
      */
-    public void completeRecord(ModuleIdentifier mid) {
+    public final void completeRecord(ModuleIdentifier mid) {
         assert myCompilingModules.containsKey(mid) : "We haven't seen a module with this ID yet!";
         assert myIncompleteModules.contains(mid) : "We already completed compilation for a module with this ID!";
         myIncompleteModules.remove(mid);
-
-        // Print out debugging message
-        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myStatusHandler.info(null, "Completed record: " + mid.toString());
-        }
     }
 
     /**
@@ -200,87 +206,41 @@ public class CompileEnvironment {
      * @param file The original source file.
      * @param moduleDec The module representation declaration.
      */
-    public void constructRecord(ResolveFile file, ModuleDec moduleDec) {
+    public final void constructRecord(ResolveFile file, ModuleDec moduleDec) {
         ModuleIdentifier mid = new ModuleIdentifier(moduleDec);
         assert !myCompilingModules.containsKey(mid) : "We already compiled a module with this ID!";
         myCompilingModules.put(mid,
                 new AbstractMap.SimpleEntry<>(moduleDec,
                         file));
         myIncompleteModules.add(mid);
-
-        // Print out debugging message
-        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myStatusHandler.info(null, "Construct record: " + mid.toString());
-        }
     }
 
     /**
      * <p>Returns true if the specified module is present in the compilation
      * environment, has an associated file and a valid module dec.</p>
      *
-     * @param id The ID for the <code>ResolveFile</code> we want to search for.
+     * @param id The ID for the {@link ResolveFile} we want to search for.
      */
-    public boolean containsID(ModuleIdentifier id) {
+    public final boolean containsID(ModuleIdentifier id) {
         return myCompilingModules.containsKey(id);
     }
 
     /**
      * <p>Returns the file associated with the specified id.</p>
      *
-     * @param id The ID for the <code>ResolveFile</code> we want to search for.
+     * @param id The ID for the {@link ResolveFile} we want to search for.
      */
-    public ResolveFile getFile(ModuleIdentifier id) {
+    public final ResolveFile getFile(ModuleIdentifier id) {
         return myCompilingModules.get(id).getValue();
     }
 
     /**
-     * <pReturns the <code>ModuleDec</code> associated with the specified id.></p>
+     * <pReturns the {@link ModuleDec} associated with the specified id.></p>
      *
-     * @param id The ID for the <code>ResolveFile</code> we want to search for.
+     * @param id The ID for the {@link ResolveFile} we want to search for.
      */
-    public ModuleDec getModuleAST(ModuleIdentifier id) {
+    public final ModuleDec getModuleAST(ModuleIdentifier id) {
         return myCompilingModules.get(id).getKey();
-    }
-
-    /**
-     * <p>Adds this file as an externally realized file.</p>
-     *
-     * @param id The ID for the <code>ResolveFile</code> that we want to set as externally realized.
-     * @param file The externally realized file.
-     */
-    public void addExternalRealizFile(ModuleIdentifier id, File file) {
-        myExternalRealizFiles.put(id, file);
-    }
-
-    /**
-     * <p>This checks to see if the module associated with this id is an externally
-     * realized file.</p>
-     *
-     * @param id The ID for the <code>File</code> we want to search for.
-     *
-     * @return True if it is externally realized. False otherwise.
-     */
-    public boolean isExternalRealizFile(ModuleIdentifier id) {
-        return myExternalRealizFiles.containsKey(id);
-    }
-
-    /**
-     * <p>Returns the compiler's status handler object.</p>
-     *
-     * @return A {@link StatusHandler} object.
-     */
-    public StatusHandler getStatusHandler() {
-        return myStatusHandler;
-    }
-
-    /**
-     * <p>Returns a pointer to the current
-     * RESOLVE workspace directory.</p>
-     *
-     * @return A <code>File</code> object
-     */
-    public File getWorkspaceDir() {
-        return myCompileDir;
     }
 
     /**
@@ -289,8 +249,17 @@ public class CompileEnvironment {
      *
      * @return All the remaining arguments that the caller needs to handle.
      */
-    public String[] getRemainingArgs() {
+    public final String[] getRemainingArgs() {
         return flags.getRemainingArgs();
+    }
+
+    /**
+     * <p>Returns the compiler's status handler object.</p>
+     *
+     * @return A {@link StatusHandler} object.
+     */
+    public final StatusHandler getStatusHandler() {
+        return myStatusHandler;
     }
 
     /**
@@ -298,7 +267,7 @@ public class CompileEnvironment {
      *
      * @return The symbol table for the compiler.
      */
-    public ScopeRepository getSymbolTable() {
+    public final ScopeRepository getSymbolTable() {
         return mySymbolTable;
     }
 
@@ -307,21 +276,55 @@ public class CompileEnvironment {
      *
      * @return The type graph for the compiler.
      */
-    public TypeGraph getTypeGraph() {
+    public final TypeGraph getTypeGraph() {
         return myTypeGraph;
     }
 
     /**
-     * <p>Returns <code>ResolveFile</code> for the specified string
+     * <p>Returns {@link ResolveFile} for the specified string
      * object. Notice that the pre-condition for this method is that
      * the key exist in the map.</p>
      *
      * @param key Name of the file.
      *
-     * @return The <code>ResolveFile</code> object for the specified key.
+     * @return The {@link ResolveFile} object for the specified key.
      */
-    public ResolveFile getUserFileFromMap(String key) {
+    public final ResolveFile getUserFileFromMap(String key) {
         return myUserFileMap.get(key);
+    }
+
+    /**
+     * <p>Returns a pointer to the current
+     * RESOLVE workspace directory.</p>
+     *
+     * @return A {@link File} object
+     */
+    public final File getWorkspaceDir() {
+        return myCompileDir;
+    }
+
+    /**
+     * <p>This checks to see if the module associated with this id is an externally
+     * realized file.</p>
+     *
+     * @param id The ID for the {@link ResolveFile} we want to search for.
+     *
+     * @return {@code true} if it is externally realized, {@code false} otherwise.
+     */
+    public final boolean isExternalRealizFile(ModuleIdentifier id) {
+        return myExternalRealizFiles.containsKey(id);
+    }
+
+    /**
+     * <p>This checks to see if the module associated with this id has been
+     * compiled or not.</p>
+     *
+     * @param id The ID for the {@link ResolveFile} we want to search for.
+     *
+     * @return {@code true} if is incomplete, {@code false} otherwise.
+     */
+    public final boolean isCompleteModule(ModuleIdentifier id) {
+        return containsID(id) && !myIncompleteModules.contains(id);
     }
 
     /**
@@ -330,10 +333,10 @@ public class CompileEnvironment {
      *
      * @param key Name of the file.
      *
-     * @return True if it is a user created file from the WebIDE/WebAPI.
-     * False otherwise.
+     * @return {@code true} if it is a user created file from the WebIDE/WebAPI,
+     * {@code false} otherwise.
      */
-    public boolean isMetaFile(String key) {
+    public final boolean isMetaFile(String key) {
         return myUserFileMap.containsKey(key);
     }
 
@@ -343,7 +346,7 @@ public class CompileEnvironment {
      *
      * @param fMap The map of user created files.
      */
-    public void setFileMap(Map<String, ResolveFile> fMap) {
+    public final void setFileMap(Map<String, ResolveFile> fMap) {
         myUserFileMap = fMap;
     }
 
@@ -353,7 +356,7 @@ public class CompileEnvironment {
      * @param listener The listener object that is going to communicate
      *                 results from/to.
      */
-    public void setProverListener(ProverListener listener) {
+    public final void setProverListener(ProverListener listener) {
         myListener = listener;
     }
 
@@ -362,7 +365,7 @@ public class CompileEnvironment {
      *
      * @param table The newly created and blank symbol table.
      */
-    public void setSymbolTable(ScopeRepository table) {
+    public final void setSymbolTable(ScopeRepository table) {
         if (table == null) {
             throw new MiscErrorException(
                     "Symbol table may not be set to null!",
@@ -382,7 +385,7 @@ public class CompileEnvironment {
      *
      * @param t The newly created type graph.
      */
-    public void setTypeGraph(TypeGraph t) {
+    public final void setTypeGraph(TypeGraph t) {
         myTypeGraph = t;
     }
 

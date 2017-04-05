@@ -147,7 +147,6 @@ public class TypeAssertionExp extends MathExp {
         if (!myExp.equals(that.myExp))
             return false;
         return myAssertedTy.equals(that.myAssertedTy);
-
     }
 
     /**

@@ -31,6 +31,11 @@ public class OutfixExp extends AbstractFunctionExp {
     // Operators
     // ===========================================================
 
+    /**
+     * <p>This defines the various outfix operators.</p>
+     *
+     * @version 2.0
+     */
     public enum Operator {
         ANGLE {
 
@@ -235,7 +240,6 @@ public class OutfixExp extends AbstractFunctionExp {
         if (myOperator != outfixExp.myOperator)
             return false;
         return myArgument.equals(outfixExp.myArgument);
-
     }
 
     /**

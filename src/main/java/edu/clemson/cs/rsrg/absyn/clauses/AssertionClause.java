@@ -148,12 +148,12 @@ public class AssertionClause extends ResolveConceptualElement {
 
     /**
      * <p>This constructs a mathematical assertion clause with a
-     * which_entails assertion.</p>
+     * {@code which_entails} assertion.</p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates which type of assertion clause.
      * @param assertionExp A {@link Exp} representing the mathematical assertion.
-     * @param whichEntailsExp A {@link Exp} representing the which_entails mathematical assertion.
+     * @param whichEntailsExp A {@link Exp} representing the {@code which_entails} mathematical assertion.
      */
     public AssertionClause(Location l, ClauseType type, Exp assertionExp,
             Exp whichEntailsExp) {
@@ -242,10 +242,10 @@ public class AssertionClause extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the which_entails mathematical assertion
+     * <p>This method returns the {@code which_entails} mathematical assertion
      * for this clause.</p>
      *
-     * @return The {@link Exp} representing the which_entails expression.
+     * @return The {@link Exp} representing the {@code which_entails} expression.
      */
     public final Exp getWhichEntailsExp() {
         return myWhichEntailsExp;

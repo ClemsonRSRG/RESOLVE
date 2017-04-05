@@ -21,7 +21,7 @@ import org.antlr.v4.runtime.misc.Pair;
 
 /**
  * <p>A {@code ResolveTokenFactory} produces {@link ResolveToken}s. This
- * can be plugged into to the RESOLVE parser and lexer to outfit the parse tree
+ * can be plugged into to the RESOLVE lexer and parser to outfit the parse tree
  * with {@link ResolveToken}s, as opposed to {@link CommonToken}s.</p>
  *
  * @author Yu-Shan Sun
@@ -37,9 +37,6 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     /** <p>The file that created this token factory.</p> */
     private final ResolveFile myFile;
 
-    /** <p>Input data stream</p> */
-    private final CharStream myInput;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -48,11 +45,9 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
      * <p>This object creates {@link ResolveToken}s rather than the default tokens.</p>
      *
      * @param file Input file.
-     * @param input Input data stream.
      */
-    public ResolveTokenFactory(ResolveFile file, CharStream input) {
+    public ResolveTokenFactory(ResolveFile file) {
         myFile = file;
-        myInput = input;
     }
 
     // ===========================================================
@@ -69,10 +64,7 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
      */
     @Override
     public final ResolveToken create(int type, String text) {
-        ResolveToken t = new ResolveToken(type, text);
-        t.mySourceName = myFile.toString();
-
-        return t;
+        return new ResolveToken(myFile, type, text);
     }
 
     /**
@@ -87,10 +79,10 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     public final ResolveToken create(Pair<TokenSource, CharStream> source,
             int type, String text, int channel, int start, int stop, int line,
             int charPositionInLine) {
-        ResolveToken t = new ResolveToken(source, type, channel, start, stop);
+        ResolveToken t =
+                new ResolveToken(myFile, source, type, channel, start, stop);
         t.setLine(line);
         t.setCharPositionInLine(charPositionInLine);
-        t.mySourceName = myFile.toString();
 
         return t;
     }

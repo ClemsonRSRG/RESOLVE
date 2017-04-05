@@ -74,20 +74,32 @@ public class ResolveFile {
     // Public Methods
     // ===========================================================
 
-    public final boolean equals(ResolveFile f) {
-        boolean result;
-        if (f == null) {
-            result = false;
-        }
-        else {
-            result =
-                    (myModuleFileName.equals(f.myModuleFileName)
-                            && myModuleFileType.equals(f.myModuleFileType)
-                            && myPkgList.equals(f.myPkgList)
-                            && myInputStream.equals(f.myInputStream) && myCreatedJarPath
-                            .equals(f.myCreatedJarPath));
-        }
-        return result;
+    /**
+     * <p>This method overrides the default equals method implementation.</p>
+     *
+     * @param o Object to be compared.
+     *
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     */
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        ResolveFile that = (ResolveFile) o;
+
+        if (!myCreatedJarPath.equals(that.myCreatedJarPath))
+            return false;
+        if (!myInputStream.equals(that.myInputStream))
+            return false;
+        if (!myModuleFileName.equals(that.myModuleFileName))
+            return false;
+        if (!myModuleFileType.equals(that.myModuleFileType))
+            return false;
+
+        return myPkgList.equals(that.myPkgList);
     }
 
     /**
@@ -137,6 +149,22 @@ public class ResolveFile {
      */
     public final List<String> getPkgList() {
         return myPkgList;
+    }
+
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public final int hashCode() {
+        int result = myCreatedJarPath.hashCode();
+        result = 31 * result + myInputStream.hashCode();
+        result = 31 * result + myModuleFileName.hashCode();
+        result = 31 * result + myModuleFileType.hashCode();
+        result = 31 * result + myPkgList.hashCode();
+
+        return result;
     }
 
     /**

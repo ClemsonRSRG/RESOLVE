@@ -13,9 +13,9 @@
 package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
-import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.init.pipeline.AnalysisPipeline;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
-import edu.clemson.cs.rsrg.statushandling.SystemStdHandler;
 import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.statushandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -86,7 +87,7 @@ public class Controller {
      * accepted by the RESOLVE compiler. When adding a new type of
      * extension, simply add the extension name into the list.</p>
      */
-    public static final List<String> NON_NATIVE_EXT =
+    private static final List<String> NON_NATIVE_EXT =
             Collections.unmodifiableList(Arrays.asList("java", "c", "h"));
 
     // ===========================================================
@@ -119,13 +120,16 @@ public class Controller {
      *
      * @param file The compiling RESOLVE file.
      */
-    public void compileTargetFile(ResolveFile file) {
+    public final void compileTargetFile(ResolveFile file) {
         try {
             // Use ANTLR4 to build the AST
             ModuleDec targetModule = createModuleAST(file);
 
             // Add this file to our compile environment
             myCompileEnvironment.constructRecord(file, targetModule);
+            if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                myStatusHandler.info(null, "Begin Compiling: " + targetModule.getName().getName());
+            }
 
             // Create a dependencies graph and search for import
             // dependencies.
@@ -133,15 +137,15 @@ public class Controller {
                     new DefaultDirectedGraph<>(
                             DefaultEdge.class);
             g.addVertex(new ModuleIdentifier(targetModule));
-            // TODO: Uncomment this line when we can build all decs.
-            //findDependencies(g, targetModule);
+            findDependencies(g, targetModule);
 
             // Begin analyzing the file
-            //AnalysisPipeline analysisPipe =
-            //        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
+            AnalysisPipeline analysisPipe =
+                    new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
-                // DEBUG: Print the entire ModuleDec
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                // Print the entire ModuleDec
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_PRINT_MODULE) &&
+                        m.equals(new ModuleIdentifier(targetModule))) {
                     ModuleDec dec = myCompileEnvironment.getModuleAST(m);
 
                     StringBuffer sb = new StringBuffer();
@@ -151,17 +155,22 @@ public class Controller {
                     myStatusHandler.info(null, sb.toString());
                 }
 
-                // Output AST to Graphviz dot file.
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_EXPORT_AST)) {
+                // Output AST to Graphviz dot file. (Only for argument files)
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_EXPORT_AST) &&
+                        m.equals(new ModuleIdentifier(targetModule))) {
                     ASTOutputPipeline astOutputPipe =
                             new ASTOutputPipeline(myCompileEnvironment, mySymbolTable);
                     astOutputPipe.process(m);
                 }
 
-                //analysisPipe.process(m);
+                // Type and populate symbol table
+                analysisPipe.process(m);
 
                 // Complete compilation for this module
                 myCompileEnvironment.completeRecord(m);
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                    myStatusHandler.info(null, "Done Compiling: " + m.toString());
+                }
             }
         }
         catch (Throwable e) {
@@ -171,7 +180,7 @@ public class Controller {
             }
 
             if (cause == null) {
-                // TODO: Check to see if ever get here. All exceptions should extend the CompilerException class.
+                // All exceptions should extend the CompilerException class.
                 if (e instanceof RuntimeException) {
                     throw (RuntimeException) e;
                 }
@@ -179,10 +188,9 @@ public class Controller {
             }
             else {
                 CompilerException see = (CompilerException) cause;
-                myStatusHandler.error(see.getErrorLocation(), e.getMessage());
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)
-                        && myStatusHandler instanceof SystemStdHandler) {
-                   e.printStackTrace();
+                myStatusHandler.error(see.getErrorLocation(), see.getMessage());
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)) {
+                   myStatusHandler.printStackTrace(see);
                 }
                 myStatusHandler.stopLogging();
             }
@@ -199,48 +207,57 @@ public class Controller {
      * supplied files and add them to the compile environment for
      * future use.</p>
      *
-     * @param m The compiling module.
+     * @param importItem A filename that we have labeled as externally import
      *
-     * @throws MiscErrorException
+     * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
-    private void addFilesForExternalImports(ModuleDec m) {
-        List<UsesItem> allUsesItems = m.getUsesItems();
-        for (UsesItem importItem : allUsesItems) {
-            try {
-                FileLocator l =
-                        new FileLocator(importItem.getName().getName(),
-                                NON_NATIVE_EXT);
-                File workspaceDir = myCompileEnvironment.getWorkspaceDir();
-                Files.walkFileTree(workspaceDir.toPath(), l);
+    private void addFileAsExternalImport(PosSymbol importItem) {
+        try {
+            FileLocator l =
+                    new FileLocator(importItem.getName(), NON_NATIVE_EXT);
+            File workspaceDir = myCompileEnvironment.getWorkspaceDir();
+            Files.walkFileTree(workspaceDir.toPath(), l);
 
-                // Only attempt to add
-                List<File> foundFiles = l.getFiles();
-                if (foundFiles.size() == 1) {
-                    myCompileEnvironment.addExternalRealizFile(
-                            new ModuleIdentifier(importItem), l.getFile());
-                }
-                else if (foundFiles.size() > 1) {
-                    throw new ImportException(
-                            "Found more than one external import with the name "
-                                    + importItem.getName().getName() + ";");
+            // Only attempt to add
+            List<File> foundFiles = l.getFiles();
+            if (foundFiles.size() == 1) {
+                ModuleIdentifier externalImport =
+                        new ModuleIdentifier(importItem.getName());
+
+                // Add this as an external realiz file if it is not already declared to be one.
+                if (!myCompileEnvironment.isExternalRealizFile(externalImport)) {
+                    myCompileEnvironment.addExternalRealizFile(externalImport,
+                            l.getFile());
+
+                    // Print out debugging message
+                    if (myCompileEnvironment.flags
+                            .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                        myStatusHandler.info(null, "Skipping External Import: "
+                                + importItem.getName());
+                    }
                 }
             }
-            catch (IOException ioe) {
-                throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
+            else if (foundFiles.size() > 1) {
+                throw new ImportException(
+                        "Found more than one external import with the name "
+                                + importItem.getName() + ";");
             }
+        }
+        catch (IOException ioe) {
+            throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
         }
     }
 
     /**
-     * <p>This method uses the <code>ResolveFile</code> provided
+     * <p>This method uses the {@link ResolveFile} provided
      * to construct a parser and create an ANTLR4 module AST.</p>
      *
      * @param file The RESOLVE file that we are going to compile.
      *
-     * @return The inner representation for a module. See {link ModuleDec}.
+     * @return The inner representation for a module. See {@link ModuleDec}.
      *
-     * @throws MiscErrorException
-     * @throws SourceErrorException
+     * @throws MiscErrorException Some how we couldn't instantiate an {@link ANTLRInputStream}.
+     * @throws SourceErrorException There are errors in the source file.
      */
     private ModuleDec createModuleAST(ResolveFile file) {
         ANTLRInputStream input = file.getInputStream();
@@ -251,16 +268,34 @@ public class Controller {
 
         // Create a RESOLVE language lexer
         ResolveLexer lexer = new ResolveLexer(input);
-        ResolveTokenFactory factory = new ResolveTokenFactory(file, input);
+        ResolveTokenFactory factory = new ResolveTokenFactory(file);
         lexer.setTokenFactory(factory);
 
         // Create a RESOLVE language parser
-        TokenStream tokenStream = new CommonTokenStream(lexer);
-        ResolveParser parser = new ResolveParser(tokenStream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ResolveParser parser = new ResolveParser(tokens);
         parser.removeErrorListeners();
         parser.addErrorListener(myAntlrErrorListener);
         parser.setTokenFactory(factory);
-        ParserRuleContext rootModuleCtx = parser.module();
+
+        // Two-Stage Parsing
+        // Reason: We might not need the full power of LL.
+        // The solution proposed by the ANTLR folks (found here:
+        // https://github.com/antlr/antlr4/blob/master/doc/faq/general.md)
+        // is to use SLL prediction mode first and switch to LL if it fails.
+        ParserRuleContext rootModuleCtx;
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+        try {
+            rootModuleCtx = parser.module();
+        }
+        catch (Exception ex) {
+            tokens.reset();
+            parser.reset();
+            parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+            rootModuleCtx = parser.module();
+        }
+
+        // Check for any parsing errors
         int numParserErrors = parser.getNumberOfSyntaxErrors();
         if (numParserErrors != 0) {
             throw new MiscErrorException("Found " + numParserErrors
@@ -273,9 +308,8 @@ public class Controller {
                 new TreeBuildingListener(file, myCompileEnvironment
                         .getTypeGraph());
         ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
-        ModuleDec result = v.getModule();
 
-        return result;
+        return v.getModule();
     }
 
     /**
@@ -285,51 +319,70 @@ public class Controller {
      * @param g The compilation's file dependency graph.
      * @param root Current compiling module.
      *
-     * @throws CircularDependencyException
-     * @throws ImportException
-     * @throws SourceErrorException
+     * @throws CircularDependencyException Some of the source files form a
+     * circular dependency.
+     * @throws ImportException Incorrect import type.
+     * @throws SourceErrorException There are errors in the source file.
      */
-    private void findDependencies(DefaultDirectedGraph g, ModuleDec root) {
-        List<UsesItem> allUsesItems = root.getUsesItems();
-        for (UsesItem importRequest : allUsesItems) {
-            ResolveFile file =
-                    findResolveFile(importRequest.getName().getName());
-            ModuleIdentifier id = new ModuleIdentifier(importRequest);
-            ModuleIdentifier rootId = new ModuleIdentifier(root);
-            ModuleDec module;
+    private void findDependencies(
+            DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
+            ModuleDec root) {
+        Map<PosSymbol, Boolean> allImports = root.getModuleDependencies();
+        for (PosSymbol importRequest : allImports.keySet()) {
+            // Don't try to import the built-in Cls_Theory
+            if (!importRequest.getName().equals("Cls_Theory")) {
+                // Check to see if this import has been labeled as externally realized
+                // or not. If yes, we add it as an external import and move on.
+                // If no, we add it as a new dependency that must be imported.
+                if (!allImports.get(importRequest)) {
+                    ResolveFile file = findResolveFile(importRequest.getName());
+                    ModuleIdentifier id =
+                            new ModuleIdentifier(importRequest.getName());
+                    ModuleIdentifier rootId = new ModuleIdentifier(root);
+                    ModuleDec module;
 
-            // Search for the file in our processed modules
-            if (!myCompileEnvironment.containsID(id)) {
-                module = createModuleAST(file);
-                myCompileEnvironment.constructRecord(file, module);
+                    // Search for the file in our processed modules
+                    if (!myCompileEnvironment.containsID(id)) {
+                        module = createModuleAST(file);
+                        myCompileEnvironment.constructRecord(file, module);
+
+                        // Print out debugging message
+                        if (myCompileEnvironment.flags
+                                .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                            myStatusHandler.info(null, "Importing New Module: "
+                                    + id.toString());
+                        }
+                    }
+                    else {
+                        module = myCompileEnvironment.getModuleAST(id);
+                    }
+
+                    // Import error
+                    if (module == null) {
+                        throw new ImportException("Invalid import "
+                                + importRequest.toString()
+                                + "; Cannot import module of " + "type: "
+                                + file.getModuleType().getExtension());
+                    }
+
+                    // Check for circular dependency
+                    if (pathExists(g, id, rootId)) {
+                        throw new CircularDependencyException(
+                                "Circular dependency detected.");
+                    }
+
+                    // Add new edge to our graph indicating the relationship between
+                    // the two files.
+                    Graphs.addEdgeWithVertices(g, rootId, id);
+
+                    // Now check this new module for dependencies
+                    findDependencies(g, module);
+                }
+                else {
+                    addFileAsExternalImport(importRequest);
+                }
             }
-            else {
-                module = myCompileEnvironment.getModuleAST(id);
-            }
-
-            // Import error
-            if (module == null) {
-                throw new ImportException("Invalid import "
-                        + importRequest.toString()
-                        + "; Cannot import module of " + "type: "
-                        + file.getModuleType().getExtension());
-            }
-
-            // Check for circular dependency
-            if (pathExists(g, id, rootId)) {
-                throw new CircularDependencyException(
-                        "Circular dependency detected.");
-            }
-
-            // Add new edge to our graph indicating the relationship between
-            // the two files.
-            Graphs.addEdgeWithVertices(g, rootId, id);
-
-            // Now check this new module for dependencies
-            findDependencies(g, module);
         }
-
-        addFilesForExternalImports(root);
     }
 
     /**
@@ -340,7 +393,7 @@ public class Controller {
      *
      * @return A <code>ResolveFile</code> object that is used by the compiler.
      *
-     * @throws MiscErrorException
+     * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
     private ResolveFile findResolveFile(String baseName) {
         // First check to see if this is a user created
@@ -376,9 +429,9 @@ public class Controller {
      *
      * @param g The compilation's file dependency graph.
      *
-     * @return An ordered list of <code>ModuleIdentifiers</code>.
+     * @return An ordered list of {@link ModuleIdentifier ModuleIdentifiers}.
      */
-    private List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph g) {
+    private List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g) {
         List<ModuleIdentifier> result = new ArrayList<>();
 
         EdgeReversedGraph<ModuleIdentifier, DefaultEdge> reversed =
@@ -388,8 +441,13 @@ public class Controller {
                 new TopologicalOrderIterator<>(
                         reversed);
         while (dependencies.hasNext()) {
-            result.add(dependencies.next());
+            // Ignore the modules that have been compiled
+            ModuleIdentifier next = dependencies.next();
+            if (!myCompileEnvironment.isCompleteModule(next)) {
+                result.add(next);
+            }
         }
+
         return result;
     }
 
@@ -401,10 +459,10 @@ public class Controller {
      * @param src The source file module.
      * @param dest The destination file module.
      *
-     * @return True if there is a cycle, false otherwise.
+     * @return {@code true} if there is a cycle, {@code false} otherwise.
      */
-    private boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier src,
-            ModuleIdentifier dest) {
+    private boolean pathExists(DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
+            ModuleIdentifier src, ModuleIdentifier dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
         if (!g.containsVertex(src)) {

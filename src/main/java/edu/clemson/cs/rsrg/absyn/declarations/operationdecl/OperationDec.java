@@ -119,6 +119,7 @@ public class OperationDec extends Dec implements ModuleParameter {
         if (myAffects != null) {
             sb.append(myAffects.asString(indentSize + innerIndentInc,
                     innerIndentInc));
+            sb.append("\n");
         }
 
         // requires clause
@@ -158,7 +159,6 @@ public class OperationDec extends Dec implements ModuleParameter {
         if (!myRequires.equals(that.myRequires))
             return false;
         return myEnsures.equals(that.myEnsures);
-
     }
 
     /**

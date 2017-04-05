@@ -17,10 +17,7 @@ import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathCategoricalDefinitionDec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
-import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
@@ -51,6 +48,7 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.*;
+import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -135,6 +133,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private int myNewElementCounter;
 
+    /** <p>All the different modules that the current file depend on.</p> */
+    private final Map<PosSymbol, Boolean> myModuleDependencies;
+
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
 
@@ -172,6 +173,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myCopyTRList = new ArrayList<>();
         myCopySSRList = new ArrayList<>();
         myNewElementCounter = 0;
+        myModuleDependencies = new HashMap<>();
     }
 
     // ===========================================================
@@ -241,7 +243,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 ctx.precisItems() != null ? ctx.precisItems().precisItem() : new ArrayList<ParseTree>(), myNodes);
 
         PrecisModuleDec precis = new PrecisModuleDec(createLocation(ctx),
-                createPosSymbol(ctx.name), parameterDecls, uses, decls);
+                createPosSymbol(ctx.name), parameterDecls, uses, decls, myModuleDependencies);
 
         myNodes.put(ctx, precis);
     }
@@ -312,6 +314,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses = addToUsesList(uses, generateAutoImportUsesItems(moduleName.getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -352,7 +360,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         FacilityModuleDec facility =
                 new FacilityModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
-                        uses, requires, decls);
+                        uses, requires, decls, myModuleDependencies);
         myNodes.put(ctx, facility);
     }
 
@@ -387,7 +395,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 (FacilityDec) myNodes.removeFrom(ctx.facilityDecl());
         ShortFacilityModuleDec shortFacility =
                 new ShortFacilityModuleDec(createLocation(ctx), facilityDec
-                        .getName(), facilityDec);
+                        .getName(), facilityDec, myModuleDependencies);
 
         myNodes.put(ctx, shortFacility);
     }
@@ -440,6 +448,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses = addToUsesList(uses, generateAutoImportUsesItems(moduleName.getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -467,10 +481,34 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
         }
 
+        // Check to see if it is actually a sharing concept
+        // i.e. Has a shared variables block and/or definition variable
+        boolean isSharingConcept = false;
+        boolean hasSharingConstructs = hasSharingConstructs(decls);
+        if (ctx.SHARED() != null) {
+            // Throw an error if we can't find any sharing constructs
+            if (!hasSharingConstructs) {
+                throw new SourceErrorException(
+                        "This sharing concept does not have any sharing constructs declared!",
+                        createPosSymbol(ctx.name), new IllegalArgumentException());
+            }
+
+            isSharingConcept = true;
+        }
+        else {
+            // Throw an error if we found sharing constructs, but the concept wasn't
+            // declared as shared.
+            if (hasSharingConstructs) {
+                throw new SourceErrorException(
+                        "The concept has sharing constructs declared, but isn't declared as shared!",
+                        createPosSymbol(ctx.name), new IllegalArgumentException());
+            }
+        }
+
         ConceptModuleDec concept =
                 new ConceptModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls, uses,
-                        requires, constraints, decls);
+                        requires, constraints, decls, isSharingConcept, myModuleDependencies);
         myNodes.put(ctx, concept);
     }
 
@@ -542,6 +580,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses = addToUsesList(uses, generateAutoImportUsesItems(moduleName.getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -585,11 +629,17 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
         }
 
+        // Add concept as a module dependency
+        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        if (ctx.profile != null) {
+            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+        }
+
         ConceptRealizModuleDec realization =
                 new ConceptRealizModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
                         profileName, createPosSymbol(ctx.concept),
-                        uses, requires, decls);
+                        uses, requires, decls, myModuleDependencies);
         myNodes.put(ctx, realization);
     }
 
@@ -654,6 +704,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses =
+                    addToUsesList(uses, generateAutoImportUsesItems(moduleName
+                            .getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -674,10 +732,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                         .enhancementItems().enhancementItem()
                                         : new ArrayList<ParseTree>(), myNodes);
 
+        // Add concept as a module dependency
+        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+
         EnhancementModuleDec enhancement =
                 new EnhancementModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
-                        createPosSymbol(ctx.concept), uses, requires, decls);
+                        createPosSymbol(ctx.concept), uses, requires, decls,
+                        myModuleDependencies);
         myNodes.put(ctx, enhancement);
     }
 
@@ -747,6 +809,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses =
+                    addToUsesList(uses, generateAutoImportUsesItems(moduleName
+                            .getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -771,11 +841,19 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .implItems().implItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add concept and enhancement as module dependencies
+        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(createPosSymbol(ctx.enhancement), false);
+        if (ctx.profile != null) {
+            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+        }
+
         EnhancementRealizModuleDec realization =
                 new EnhancementRealizModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls, profileName,
                         createPosSymbol(ctx.enhancement),
-                        createPosSymbol(ctx.concept), uses, requires, decls);
+                        createPosSymbol(ctx.concept), uses, requires, decls,
+                        myModuleDependencies);
         myNodes.put(ctx, realization);
     }
 
@@ -841,6 +919,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses =
+                    addToUsesList(uses, generateAutoImportUsesItems(moduleName
+                            .getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -861,11 +947,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .conceptPerformanceItem()
                                 : new ArrayList<ParseTree>(), myNodes);
 
+        // Add concept as a module dependency
+        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+
         PerformanceConceptModuleDec performance =
                 new PerformanceConceptModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
                         createPosSymbol(ctx.fullName),
-                        createPosSymbol(ctx.concept), uses, requires, decls);
+                        createPosSymbol(ctx.concept), uses, requires, decls,
+                        myModuleDependencies);
         myNodes.put(ctx, performance);
     }
 
@@ -933,6 +1023,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .usesList().usesItem() : new ArrayList<ParseTree>(),
                         myNodes);
 
+        // Add any auto import files if needed
+        PosSymbol moduleName = createPosSymbol(ctx.name);
+        if (!inNoAutoImportExceptionList(moduleName)) {
+            uses =
+                    addToUsesList(uses, generateAutoImportUsesItems(moduleName
+                            .getLocation()));
+        }
+
         // Module requires (if any)
         AssertionClause requires;
         if (ctx.requiresClause() != null) {
@@ -953,6 +1051,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 .enhancementPerformanceItem()
                                 : new ArrayList<ParseTree>(), myNodes);
 
+        // Add concept/concept profile/enhancement as module dependencies
+        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(createPosSymbol(ctx.conceptProfile), false);
+        addNewModuleDependency(createPosSymbol(ctx.enhancement), false);
+
         PerformanceEnhancementModuleDec performance =
                 new PerformanceEnhancementModuleDec(createLocation(ctx),
                         createPosSymbol(ctx.name), parameterDecls,
@@ -960,7 +1063,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         createPosSymbol(ctx.enhancement),
                         createPosSymbol(ctx.concept),
                         createPosSymbol(ctx.conceptProfile), uses, requires,
-                        decls);
+                        decls, myModuleDependencies);
         myNodes.put(ctx, performance);
     }
 
@@ -992,6 +1095,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
+        // Add the module we are importing as module dependency
+        addNewModuleDependency(createPosSymbol(ctx.getStart()), false);
+
         myNodes.put(ctx, new UsesItem(createPosSymbol(ctx.getStart())));
     }
 
@@ -1277,6 +1383,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
         Ty mathTy = (Ty) myNodes.removeFrom(ctx.mathTypeExp());
 
+        List<MathDefVariableDec> mathDefVariableDecs = new ArrayList<>();
+        if (ctx.definitionVariable().size() > 0) {
+            mathDefVariableDecs = Utilities.collect(MathDefVariableDec.class,
+                    ctx.definitionVariable(), myNodes);
+        }
+
         AssertionClause constraint;
         if (ctx.constraintClause() != null) {
             constraint =
@@ -1318,8 +1430,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         myNodes
                 .put(ctx, new TypeFamilyDec(createPosSymbol(ctx.name), mathTy,
-                        createPosSymbol(ctx.exemplar), constraint, initItem,
-                        finalItem));
+                        createPosSymbol(ctx.exemplar), mathDefVariableDecs,
+                        constraint, initItem, finalItem));
     }
 
     /**
@@ -1651,7 +1763,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.name), abstractStateVars,
+        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.start), abstractStateVars,
                 constraint, initItem, finalItem));
     }
 
@@ -1748,7 +1860,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         SharedStateRealizationDec realizationDec =
-                new SharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars,
+                new SharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
                         convention, correspondence, initItem, finalItem);
         myCopySSRList.add((SharedStateRealizationDec) realizationDec.clone());
 
@@ -1847,11 +1959,37 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         FacilitySharedStateRealizationDec realizationDec =
-                new FacilitySharedStateRealizationDec(createPosSymbol(ctx.name), sharedStateVars,
+                new FacilitySharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
                         convention, initItem, finalItem);
         myCopySSRList.add((FacilitySharedStateRealizationDec) realizationDec.clone());
 
         myNodes.put(ctx, realizationDec);
+    }
+
+    // -----------------------------------------------------------
+    // Definition Variable
+    // -----------------------------------------------------------
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>This method generates a new definition variable for a type model.</p>
+     *
+     * @param ctx Definition variable node in ANTLR4 AST.
+     */
+    @Override
+    public void exitDefinitionVariable(
+            ResolveParser.DefinitionVariableContext ctx) {
+        MathVarDec varDec =
+                (MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl());
+        DefinitionBodyItem bodyItem = null;
+        if (ctx.mathExp() != null) {
+            bodyItem =
+                    new DefinitionBodyItem((Exp) myNodes.removeFrom(ctx
+                            .mathExp()));
+        }
+
+        myNodes.put(ctx, new MathDefVariableDec(varDec, bodyItem));
     }
 
     // -----------------------------------------------------------
@@ -2553,6 +2691,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             profileName = createPosSymbol(ctx.profile);
         }
 
+        // Add the facility's concept/concept realization/concept profiles as module dependencies
+        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(createPosSymbol(ctx.impl), externallyRealized);
+        if (ctx.profile != null) {
+            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+        }
+
         myNodes.put(ctx, new FacilityDec(createPosSymbol(ctx.name),
                 createPosSymbol(ctx.concept), conceptArgs,
                 enhancements,
@@ -2581,6 +2726,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 enhancementArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
             }
         }
+
+        // Add the concept enhancement as a module dependency
+        addNewModuleDependency(createPosSymbol(ctx.spec), false);
 
         myNodes.put(ctx, new EnhancementSpecItem(createPosSymbol(ctx.spec), enhancementArgs));
     }
@@ -2618,6 +2766,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             for (ResolveParser.ModuleArgumentContext context : enhancementRealizArgContext) {
                 enhancementRealizArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
             }
+        }
+
+        // Add the facility's enhancement/enhancement realization/enhancement profiles as module dependencies
+        addNewModuleDependency(createPosSymbol(ctx.spec), false);
+        addNewModuleDependency(createPosSymbol(ctx.impl), false);
+        if (ctx.profile != null) {
+            addNewModuleDependency(createPosSymbol(ctx.profile), false);
         }
 
         myNodes.put(ctx, new EnhancementSpecRealizItem(createPosSymbol(ctx.spec), enhancementArgs,
@@ -2940,9 +3095,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitMathTypeTheoremDecl(
             ResolveParser.MathTypeTheoremDeclContext ctx) {
-        List<MathVarDec> varDecls =
-                Utilities.collect(MathVarDec.class,
-                        ctx.mathVariableDeclGroup(), myNodes);
+        List<MathVarDec> varDecls = new ArrayList<>();
+        List<ResolveParser.MathVariableDeclGroupContext> variableDeclGroupContexts = ctx.mathVariableDeclGroup();
+        for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroupContexts) {
+            // Get each math variable declaration
+            List<TerminalNode> idents = context.IDENTIFIER();
+            for (TerminalNode ident : idents) {
+                varDecls.add((MathVarDec) myNodes.removeFrom(ident));
+            }
+        }
         Exp assertionExp = (Exp) myNodes.removeFrom(ctx.mathImpliesExp());
 
         myNodes.put(ctx, new MathTypeTheoremDec(createPosSymbol(ctx.name),
@@ -3086,11 +3247,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // the categorical definition
         List<MathDefinitionDec> definitionDecls = new ArrayList<>();
         for (DefinitionMembers members : myDefinitionMemberList) {
-            definitionDecls.add(new MathDefinitionDec(members.name, members.params, members.rawType, null, false));
+            definitionDecls.add(new MathDefinitionDec(members.name, members.params,
+                    members.rawType, null, false));
         }
         myDefinitionMemberList = null;
 
-        myNodes.put(ctx, new MathCategoricalDefinitionDec(createPosSymbol(ctx.name), definitionDecls, (Exp) myNodes.removeFrom(ctx.mathExp())));
+        myNodes.put(ctx, new MathCategoricalDefinitionDec(new PosSymbol(createLocation(ctx.start), ""),
+                definitionDecls, (Exp) myNodes.removeFrom(ctx.mathExp())));
     }
 
     /**
@@ -3229,35 +3392,26 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
         PosSymbol name = createPosSymbol(nameToken);
 
-        List<MathVarDec> varDecls =
-                Utilities.collect(MathVarDec.class, ctx
-                        .definitionParameterList() != null ? ctx
-                        .definitionParameterList().mathVariableDeclGroup()
-                        : new ArrayList<ParseTree>(), myNodes);
-
-        myDefinitionMemberList.add(new DefinitionMembers(name, varDecls,
-                (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>This method stores the math expression representation
-     * generated by its child rules.</p>
-     *
-     * @param ctx Definition parameter list node in ANTLR4 AST.
-     */
-    @Override
-    public void exitDefinitionParameterList(
-            ResolveParser.DefinitionParameterListContext ctx) {
-        List<ResolveParser.MathVariableDeclGroupContext> variableDeclGroups =
-                ctx.mathVariableDeclGroup();
-        for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroups) {
-            List<TerminalNode> identifiers = context.IDENTIFIER();
-            for (TerminalNode id : identifiers) {
-                myNodes.put(context, myNodes.removeFrom(id));
+        // We may have multiple identifiers per MathVariableDeclGroupContext, so
+        // we don't do anything in exitDefinitionParameterListContext and handle the
+        // logic here.
+        List<MathVarDec> paramVarDecls = new ArrayList<>();
+        if (ctx.definitionParameterList() != null) {
+            ResolveParser.DefinitionParameterListContext
+                    definitionParameterListContext = ctx.definitionParameterList();
+            List<ResolveParser.MathVariableDeclGroupContext> variableDeclGroups =
+                    definitionParameterListContext.mathVariableDeclGroup();
+            for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroups) {
+                List<TerminalNode> identifiers = context.IDENTIFIER();
+                for (TerminalNode id : identifiers) {
+                    paramVarDecls.add((MathVarDec) myNodes.removeFrom(id));
+                    myNodes.put(context, myNodes.removeFrom(id));
+                }
             }
         }
+
+        myDefinitionMemberList.add(new DefinitionMembers(name, paramVarDecls,
+                (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
     }
 
     // -----------------------------------------------------------
@@ -3560,10 +3714,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         if (ctx.getStart().getType() == ResolveLexer.IF) {
             Exp testExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(0));
             Exp thenExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(1));
-            Exp elseExp = null;
-            if (ctx.mathLogicalExp().size() > 2) {
-                elseExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(2));
-            }
+            Exp elseExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(2));
 
             newElement =
                     new IfExp(createLocation(ctx), testExp, thenExp, elseExp);
@@ -3787,44 +3938,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathAddingExp(ResolveParser.MathAddingExpContext ctx) {
-        ResolveConceptualElement newElement;
+        // Our left most expression
+        Exp exp = (Exp) myNodes.removeFrom(ctx.mathMultiplyingExp());
 
-        // Create an addition expression if needed
-        List<ResolveParser.MathMultiplyingExpContext> mathExps =
-                ctx.mathMultiplyingExp();
-        if (mathExps.size() > 1) {
-            // Obtain all the expressions
-            List<Exp> exps = new ArrayList<>();
-            for (ResolveParser.MathMultiplyingExpContext context : mathExps) {
-                exps.add((Exp) myNodes.removeFrom(context));
+        // Create a repeated expression if needed
+        List<ResolveParser.MathRepeatAddExpContext> mathRepeatAddExpContexts =
+                ctx.mathRepeatAddExp();
+        for (ResolveParser.MathRepeatAddExpContext context : mathRepeatAddExpContexts) {
+            PosSymbol qualifier = null;
+            if (context.qualifier != null) {
+                qualifier = createPosSymbol(context.qualifier);
             }
 
-            // Reduce the expressions until we have 1 left
-            while (exps.size() > 1) {
-                Exp leftExp = exps.remove(0);
-                Exp rightExp = exps.remove(0);
+            // Obtain the left and right expressions
+            Exp leftExp = exp;
+            Exp rightExp =
+                    (Exp) myNodes.removeFrom(context.mathMultiplyingExp());
 
-                PosSymbol qualifier = null;
-                if (ctx.qualifier != null) {
-                    qualifier = createPosSymbol(ctx.qualifier);
-                }
-
-                // Form an infix expression using the operator
-                Exp newFirstExp = new InfixExp(leftExp.getLocation().clone(), leftExp,
-                        qualifier, createPosSymbol(ctx.op), rightExp);
-
-                // Add it back to the list for the next iteration of the loop
-                exps.add(0, newFirstExp);
-            }
-
-            // Remove the final element from the list
-            newElement = exps.remove(0);
-        }
-        else {
-            newElement = myNodes.removeFrom(mathExps.remove(0));
+            // Form an infix expression using the operator
+            exp =
+                    new InfixExp(leftExp.getLocation().clone(), leftExp,
+                            qualifier, createPosSymbol(context.op), rightExp);
         }
 
-        myNodes.put(ctx, newElement);
+        myNodes.put(ctx, exp);
     }
 
     /**
@@ -3838,42 +3975,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitMathMultiplyingExp(
             ResolveParser.MathMultiplyingExpContext ctx) {
-        ResolveConceptualElement newElement;
+        // Our left most expression
+        Exp exp = (Exp) myNodes.removeFrom(ctx.mathExponentialExp());
 
-        // Create a multiplication expression if needed
-        List<ResolveParser.MathExponentialExpContext> mathExps =
-                ctx.mathExponentialExp();
-        if (mathExps.size() != 1) {
-            // Obtain all the expressions
-            List<Exp> exps = new ArrayList<>();
-            for (ResolveParser.MathExponentialExpContext context : mathExps) {
-                exps.add((Exp) myNodes.removeFrom(context));
+        // Create a repeated expression if needed
+        List<ResolveParser.MathRepeatMultExpContext> mathRepeatMultExpContexts =
+                ctx.mathRepeatMultExp();
+        for (ResolveParser.MathRepeatMultExpContext context : mathRepeatMultExpContexts) {
+            PosSymbol qualifier = null;
+            if (context.qualifier != null) {
+                qualifier = createPosSymbol(context.qualifier);
             }
 
-            // Reduce the expressions until we have 1 left
-            while (exps.size() > 1) {
-                Exp leftExp = exps.remove(0);
-                Exp rightExp = exps.remove(0);
+            // Obtain the left and right expressions
+            Exp leftExp = exp;
+            Exp rightExp =
+                    (Exp) myNodes.removeFrom(context.mathExponentialExp());
 
-                PosSymbol qualifier = null;
-                if (ctx.qualifier != null) {
-                    qualifier = createPosSymbol(ctx.qualifier);
-                }
-
-                // Form an infix expression using the operator and
-                // add it back to the list for the next iteration of the loop
-                exps.add(0, new InfixExp(leftExp.getLocation().clone(), leftExp,
-                        qualifier, createPosSymbol(ctx.op), rightExp));
-            }
-
-            // Remove the final element from the list
-            newElement = exps.remove(0);
-        }
-        else {
-            newElement = myNodes.removeFrom(mathExps.remove(0));
+            // Form an infix expression using the operator
+            exp =
+                    new InfixExp(leftExp.getLocation().clone(), leftExp,
+                            qualifier, createPosSymbol(context.op), rightExp);
         }
 
-        myNodes.put(ctx, newElement);
+        myNodes.put(ctx, exp);
     }
 
     /**
@@ -3979,8 +4104,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitMathAlternativeExpItem(
             ResolveParser.MathAlternativeExpItemContext ctx) {
         Exp testExp = null;
-        if (ctx.mathRelationalExp() != null) {
-            testExp = (Exp) myNodes.removeFrom(ctx.mathRelationalExp());
+        if (ctx.mathLogicalExp() != null) {
+            testExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp());
         }
 
         myNodes.put(ctx, new AltItemExp(createLocation(ctx), testExp,
@@ -4337,7 +4462,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             ResolveParser.MathTaggedCartProdTypeExpContext ctx) {
         // Construct the various variables inside the cartesian product
         List<ResolveParser.MathVariableDeclGroupContext> variableDeclGroups = ctx.mathVariableDeclGroup();
-        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = new HashMap<>();
+        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = new LinkedHashMap<>();
         for (ResolveParser.MathVariableDeclGroupContext context : variableDeclGroups) {
             // Get each math variable declaration
             List<TerminalNode> idents = context.IDENTIFIER();
@@ -4785,6 +4910,47 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     // ===========================================================
 
     /**
+     * <p>An helper method that adds a new module dependency if
+     * it doesn't exist already.</p>
+     *
+     * @param name Name of the module.
+     * @param isExternallyRealiz Boolean that indicates whether or not
+     *                           this is a Non-RESOLVE file.
+     */
+    private void addNewModuleDependency(PosSymbol name,
+            boolean isExternallyRealiz) {
+        if (!myModuleDependencies.containsKey(name)) {
+            myModuleDependencies.put(name, isExternallyRealiz);
+        }
+    }
+
+    /**
+     * <p>An helper method that adds elements from {@code newItems} if
+     * it doesn't exist already.</p>
+     *
+     * @param usesList The original uses list.
+     * @param newItems The new elements to be added.
+     *
+     * @return The modified uses list.
+     */
+    private List<UsesItem> addToUsesList(List<UsesItem> usesList, List<UsesItem> newItems) {
+        // Get the modules we import as a string
+        List<String> importAsStrings = new ArrayList<>(usesList.size());
+        for (UsesItem item: usesList) {
+            importAsStrings.add(item.getName().getName());
+        }
+
+        // Add the new items if they aren't declared already
+        for (UsesItem newItem: newItems) {
+            if (!importAsStrings.contains(newItem.getName().getName())) {
+                usesList.add(newItem);
+            }
+        }
+
+        return usesList;
+    }
+
+    /**
      * <p>Create a {@link FacilityDec} for the current parser rule
      * we are visiting.</p>
      *
@@ -4803,6 +4969,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         moduleArgumentItems.add(new ModuleArgumentItem(new ProgramVariableNameExp(l.clone(), arrayElementTy.getQualifier(), arrayElementTy.getName())));
         moduleArgumentItems.add(new ModuleArgumentItem(lowerBound));
         moduleArgumentItems.add(new ModuleArgumentItem(upperBound));
+
+        // Add Static_Array_Template as module dependency
+        addNewModuleDependency(new PosSymbol(l.clone(), "Static_Array_Template"), false);
+        addNewModuleDependency(new PosSymbol(l.clone(), "Std_Array_Realiz"), true);
 
         return new FacilityDec(new PosSymbol(l.clone(), newTy.getName().getName()),
                 new PosSymbol(l.clone(), "Static_Array_Template"),
@@ -5010,6 +5180,28 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
+     * <p>An helper method that creates new {@link UsesItem UseItem(s)}
+     * using the auto import list.</p>
+     *
+     * @param loc An location object that will be used to create
+     *            the new {@link UsesItem UseItem(s)}.
+     *
+     * @return A list containing the new {@link UsesItem UsesItem(s)}.
+     */
+    private List<UsesItem> generateAutoImportUsesItems(Location loc) {
+        List<UsesItem> autoImportUsesItems = new ArrayList<>(ResolveCompiler.AUTO_IMPORT_FILES.size());
+        for (String name : ResolveCompiler.AUTO_IMPORT_FILES) {
+            PosSymbol nameAsPosSymbol = new PosSymbol(loc.clone(), name);
+            autoImportUsesItems.add(new UsesItem(nameAsPosSymbol));
+
+            // Clone the name so we don't have aliasing.
+            addNewModuleDependency(nameAsPosSymbol.clone(), false);
+        }
+
+        return autoImportUsesItems;
+    }
+
+    /**
      * <p>An helper method to retrieve the facility declarations (including any newly
      * declared array facilities).</p>
      *
@@ -5136,6 +5328,56 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         return varDecs;
+    }
+
+    /**
+     * <p>An helper method that checks to see if we have a sharing construct.</p>
+     *
+     * @param conceptDecls List of all declarations in a concept.
+     *
+     * @return {@code true} if there is a shared variables block and/or a type family
+     * with a definition variable, {@code false} otherwise.
+     */
+    private boolean hasSharingConstructs(List<Dec> conceptDecls) {
+        boolean retval = false;
+
+        Iterator<Dec> decIterator = conceptDecls.iterator();
+        while (decIterator.hasNext() && !retval) {
+            Dec dec = decIterator.next();
+            if (dec instanceof SharedStateDec) {
+                retval = true;
+            }
+            else if (dec instanceof TypeFamilyDec) {
+                if (((TypeFamilyDec) dec).getDefinitionVarList().size() > 0) {
+                    retval = true;
+                }
+            }
+        }
+
+        return retval;
+    }
+
+    /**
+     * <p>An helper method that checks to see if the current module is
+     * part of the no auto import list.</p>
+     *
+     * @param name Current module name.
+     *
+     * @return {@code true} if the no auto import list contains this module,
+     * {@code false} otherwise.
+     */
+    private boolean inNoAutoImportExceptionList(PosSymbol name) {
+        boolean retval = false;
+        Iterator<String> it =
+                ResolveCompiler.NO_AUTO_IMPORT_EXCEPTION_LIST.iterator();
+        while (it.hasNext() && !retval) {
+            String nextModuleName = it.next();
+            if (nextModuleName.equals(name.getName())) {
+                retval = true;
+            }
+        }
+
+        return retval;
     }
 
     // ===========================================================

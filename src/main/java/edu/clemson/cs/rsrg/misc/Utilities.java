@@ -45,6 +45,16 @@ public class Utilities {
     }
 
     /**
+     * <p>An indirect(?) reference to a type.</p>
+     *
+     * @param <T> The type of object that is being referred.
+     */
+    public static class Indirect<T> {
+
+        public T data;
+    }
+
+    /**
      * <p>A two-parameter mapping.</p>
      *
      * @param <I> a parameter argument type.
@@ -112,16 +122,16 @@ public class Utilities {
     }
 
     /**
-     * <p>Converts a regular <code>File</code> object to the
-     * <code>ResolveFile</code> accepted by the compiler.</p>
+     * <p>Converts a regular {@link File} object to the
+     * {@link ResolveFile} accepted by the compiler.</p>
      *
      * @param file The Java File object.
      * @param moduleType The extension of the file.
      * @param workspacePath The current RESOLVE workspace path.
      *
-     * @return A <code>ResolveFile</code> object representing the file.
+     * @return A {@link ResolveFile} object representing the file.
      *
-     * @throws IOException
+     * @throws IOException There was some sort of error during the conversion.
      */
     public static ResolveFile convertToResolveFile(File file,
             ModuleType moduleType, String workspacePath) throws IOException {

@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.statushandling;
 
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 
 /**
  * <p>A common interface that all handlers for debugging,
@@ -46,6 +47,14 @@ public interface StatusHandler {
      * @param msg Message to be displayed.
      */
     void info(Location l, String msg);
+
+    /**
+     * <p>This method prints the stack trace to the desired output
+     * stream.</p>
+     *
+     * @param e The encountered compiler exception.
+     */
+    void printStackTrace(CompilerException e);
 
     /**
      * <p>Stop logging anymore information.

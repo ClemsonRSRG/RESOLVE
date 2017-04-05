@@ -18,9 +18,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>This is the class for the enhancement realization module declarations
@@ -64,12 +62,16 @@ public class EnhancementRealizModuleDec extends ModuleDec {
      * @param requires A {@link AssertionClause} representing the concept's
      *                 requires clause.
      * @param decs The list of {@link Dec} objects.
+     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
+     *                           flags) that indicates all the modules that this module
+     *                           declaration depends on.
      */
     public EnhancementRealizModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol profileName,
             PosSymbol enhancementName, PosSymbol conceptName,
-            List<UsesItem> usesItems, AssertionClause requires, List<Dec> decs) {
-        super(l, name, parameterDecs, usesItems, decs);
+            List<UsesItem> usesItems, AssertionClause requires, List<Dec> decs,
+            Map<PosSymbol, Boolean> moduleDependencies) {
+        super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
         myConceptName = conceptName;
         myEnhancementName = enhancementName;
         myProfileName = profileName;
@@ -132,7 +134,6 @@ public class EnhancementRealizModuleDec extends ModuleDec {
         if (!myConceptName.equals(that.myConceptName))
             return false;
         return myRequires.equals(that.myRequires);
-
     }
 
     /**
@@ -207,6 +208,7 @@ public class EnhancementRealizModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
+        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
 
         // Copy the profile name
         PosSymbol newProfileName = null;
@@ -216,6 +218,6 @@ public class EnhancementRealizModuleDec extends ModuleDec {
 
         return new EnhancementRealizModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newProfileName, myEnhancementName.clone(), myConceptName.clone(),
-                newUsesItems, myRequires.clone(), newDecs);
+                newUsesItems, myRequires.clone(), newDecs, newModuleDependencies);
     }
 }

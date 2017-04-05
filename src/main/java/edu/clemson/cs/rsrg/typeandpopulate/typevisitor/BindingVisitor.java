@@ -117,7 +117,7 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
                 myTypeGraph.isSubtype(t1DeclaredType, t2DeclaredType);
 
         if (!myBindings.containsKey(t2.getName()) && myMatchSoFarFlag) {
-            myBindings.put(t2.getName(), t1);
+            myBindings.put(t2.getName(), t1DeclaredType);
         }
 
         //No need to keep searching if we've already found we don't bind
@@ -186,6 +186,11 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
         else if (t2 instanceof MTBigUnion) {
             //So long as the inner expression binds, this is ok
             myMatchSoFarFlag = visit(t1, ((MTBigUnion) t2).getExpression());
+        }
+        else if (t2 instanceof MTFunctionApplication) {
+            //So long as the value returned by the function binds, this is ok
+            MTFunction functionApplied = ((MTFunctionApplication) t2).getFunction();
+            myMatchSoFarFlag = visit(t1, functionApplied.getRange());
         }
         else {
             myMatchSoFarFlag = false;

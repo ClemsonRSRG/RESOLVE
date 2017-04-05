@@ -32,6 +32,11 @@ public class IterativeExp extends MathExp {
     // Operators
     // ===========================================================
 
+    /**
+     * <p>This defines the various iterable operators.</p>
+     *
+     * @version 2.0
+     */
     public enum Operator {
         SUM {
 
@@ -203,7 +208,6 @@ public class IterativeExp extends MathExp {
                 : that.myWhereExp != null)
             return false;
         return myBodyExp.equals(that.myBodyExp);
-
     }
 
     /**

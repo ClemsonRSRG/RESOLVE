@@ -110,7 +110,6 @@ public class UnaryMinusExp extends MathExp {
         UnaryMinusExp that = (UnaryMinusExp) o;
 
         return myInnerArgumentExp.equals(that.myInnerArgumentExp);
-
     }
 
     /**

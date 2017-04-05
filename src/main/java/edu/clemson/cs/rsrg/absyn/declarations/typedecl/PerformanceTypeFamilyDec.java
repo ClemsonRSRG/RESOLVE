@@ -124,7 +124,6 @@ public class PerformanceTypeFamilyDec extends Dec {
             return false;
         return myTypeFinalItem != null ? myTypeFinalItem
                 .equals(that.myTypeFinalItem) : that.myTypeFinalItem == null;
-
     }
 
     /**

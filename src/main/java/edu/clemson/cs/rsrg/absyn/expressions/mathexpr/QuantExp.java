@@ -84,7 +84,7 @@ public class QuantExp extends MathExp {
             if (myQuantification == SymbolTableEntry.Quantification.UNIVERSAL) {
                 quantificationAsString = "For all ";
             }
-            else if (myQuantification == SymbolTableEntry.Quantification.UNIVERSAL) {
+            else if (myQuantification == SymbolTableEntry.Quantification.EXISTENTIAL) {
                 quantificationAsString = "There exist ";
             }
             else {
@@ -96,7 +96,7 @@ public class QuantExp extends MathExp {
         Iterator<MathVarDec> i = myVars.iterator();
         while (i.hasNext()) {
             MathVarDec m = i.next();
-            sb.append(m.getName().asString(0, innerIndentInc));
+            sb.append(m.asString(0, innerIndentInc));
 
             if (i.hasNext()) {
                 sb.append(", ");
@@ -163,7 +163,6 @@ public class QuantExp extends MathExp {
                 : quantExp.myWhereExp != null)
             return false;
         return myBodyExp.equals(quantExp.myBodyExp);
-
     }
 
     /**
@@ -190,8 +189,8 @@ public class QuantExp extends MathExp {
                 retval &= (!thisVars.hasNext()) && (!eVars.hasNext());
             }
 
-            retval &= myWhereExp.equivalent(eAsQuantExp.myWhereExp);
-            retval &= myBodyExp.equivalent(eAsQuantExp.myBodyExp);
+            retval &= equivalent(myWhereExp, eAsQuantExp.myWhereExp);
+            retval &= equivalent(myBodyExp, eAsQuantExp.myBodyExp);
         }
 
         return retval;
@@ -221,7 +220,9 @@ public class QuantExp extends MathExp {
     @Override
     public final List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
-        list.add(myWhereExp);
+        if (myWhereExp != null) {
+            list.add(myWhereExp);
+        }
         list.add(myBodyExp);
 
         return list;
@@ -268,7 +269,10 @@ public class QuantExp extends MathExp {
      */
     @Override
     public final Exp remember() {
-        Exp newWhere = ((MathExp) myWhereExp).remember();
+        Exp newWhere = null;
+        if (myWhereExp != null) {
+            newWhere = ((MathExp) myWhereExp).remember();
+        }
         Exp newBody = ((MathExp) myBodyExp).remember();
 
         return new QuantExp(cloneLocation(), myQuantification, copyVars(),

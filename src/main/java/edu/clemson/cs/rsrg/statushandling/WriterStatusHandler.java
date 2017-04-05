@@ -13,6 +13,8 @@
 package edu.clemson.cs.rsrg.statushandling;
 
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
+
 import java.io.IOException;
 import java.io.Writer;
 
@@ -30,10 +32,10 @@ public class WriterStatusHandler implements StatusHandler {
     // Member Fields
     // ===========================================================
 
-    /** <p>Writer for information/warning output.</p> */
+    /** <p>Writer for information output.</p> */
     private final Writer myOutputWriter;
 
-    /** <p>Writer for error.</p> */
+    /** <p>Writer for warning and error output.</p> */
     private final Writer myErrorWriter;
 
     /** <p>Boolean flag to check to see if we are still logging.</p> */
@@ -49,7 +51,7 @@ public class WriterStatusHandler implements StatusHandler {
      * and error messages provided by the compiler.</p>
      *
      * @param outWriter A writer for general information output.
-     * @param errorWriter A writer for error output.
+     * @param errorWriter A writer for warning/error output.
      */
     public WriterStatusHandler(Writer outWriter, Writer errorWriter) {
         myOutputWriter = outWriter;
@@ -67,16 +69,16 @@ public class WriterStatusHandler implements StatusHandler {
      * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    public final void error(Location l, String msg) {
+    @Override
+    public synchronized final void error(Location l, String msg) {
         try {
-            if (!stopLogging) {
+            if (!hasStopped()) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\nError: ");
                 if (l != null) {
                     sb.append(l.toString());
                 }
                 sb.append("\n\n");
-                sb.append("\t");
                 sb.append(msg);
                 sb.append("\n\n");
 
@@ -99,6 +101,7 @@ public class WriterStatusHandler implements StatusHandler {
      *
      * @return True if we are done logging, false otherwise.
      */
+    @Override
     public final boolean hasStopped() {
         return stopLogging;
     }
@@ -109,9 +112,10 @@ public class WriterStatusHandler implements StatusHandler {
      * @param l The location where we encountered the error.
      * @param msg A compilation message.
      */
-    public final void info(Location l, String msg) {
+    @Override
+    public synchronized final void info(Location l, String msg) {
         try {
-            if (!stopLogging) {
+            if (!hasStopped()) {
                 StringBuilder sb = new StringBuilder();
                 if (l != null) {
                     sb.append(l.toString());
@@ -134,12 +138,62 @@ public class WriterStatusHandler implements StatusHandler {
     }
 
     /**
+     * <p>This method prints the stack trace to the desired output
+     * stream.</p>
+     *
+     * @param e The encountered compiler exception.
+     */
+    @Override
+    public synchronized final void printStackTrace(CompilerException e) {
+        try {
+            if (!hasStopped()) {
+                StringBuilder sb = new StringBuilder();
+                StackTraceElement[] elements = e.getStackTrace();
+                for (int i = 0; i < elements.length; i++) {
+                    if (i != 0) {
+                        sb.append("\tat ");
+                    }
+                    sb.append(elements[i]);
+                    sb.append("\n");
+                }
+
+                // Print the stack trace for the cause
+                if (e.getCause() != null) {
+                    Throwable cause = e.getCause();
+                    sb.append("Caused by: ");
+                    sb.append(cause);
+                    sb.append("\n");
+
+                    StackTraceElement[] causeElements = cause.getStackTrace();
+                    for (int i = 0; i < causeElements.length; i++) {
+                        sb.append("\tat ");
+                        sb.append(causeElements[i]);
+                        sb.append("\n");
+                    }
+                }
+
+                myErrorWriter.write(sb.toString());
+                myErrorWriter.flush();
+            }
+            else {
+                throw new RuntimeException("Error handler has been stopped.");
+            }
+        }
+        catch (IOException ioe) {
+            System.err
+                    .println("Error writing information to the specified output.");
+            ioe.printStackTrace();
+        }
+    }
+
+    /**
      * <p>Stop logging anymore information.
      *
      * (Note: Should only be called when the compile process
      * is over or has been aborted due to an error.)</p>
      */
-    public void stopLogging() {
+    @Override
+    public synchronized void stopLogging() {
         stopLogging = true;
 
         try {
@@ -158,9 +212,10 @@ public class WriterStatusHandler implements StatusHandler {
      * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    public final void warning(Location l, String msg) {
+    @Override
+    public synchronized final void warning(Location l, String msg) {
         try {
-            if (!stopLogging) {
+            if (!hasStopped()) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\nWarning: ");
                 if (l != null) {
@@ -170,8 +225,8 @@ public class WriterStatusHandler implements StatusHandler {
                 sb.append(msg);
                 sb.append("\n");
 
-                myOutputWriter.write(sb.toString());
-                myOutputWriter.flush();
+                myErrorWriter.write(sb.toString());
+                myErrorWriter.flush();
             }
             else {
                 throw new RuntimeException("Error handler has been stopped.");

@@ -138,7 +138,6 @@ public class AlternativeExp extends MathExp {
         AlternativeExp that = (AlternativeExp) o;
 
         return myAlternatives.equals(that.myAlternatives);
-
     }
 
     /**

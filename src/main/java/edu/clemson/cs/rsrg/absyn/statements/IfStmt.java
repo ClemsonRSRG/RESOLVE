@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class for all the if-else statement objects
+ * <p>This is the class for all the {@code if-else} statement objects
  * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0

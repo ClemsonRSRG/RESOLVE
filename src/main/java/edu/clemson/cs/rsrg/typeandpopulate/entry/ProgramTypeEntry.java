@@ -72,7 +72,7 @@ public class ProgramTypeEntry extends SymbolTableEntry {
         myMathTypeAlterEgo =
                 new MathSymbolEntry(g, name,
                         SymbolTableEntry.Quantification.NONE, definingElement,
-                        g.CLS, modelType, null, null, sourceModule);
+                        g.SSET, modelType, null, null, sourceModule);
         myProgramType = programType;
     }
 

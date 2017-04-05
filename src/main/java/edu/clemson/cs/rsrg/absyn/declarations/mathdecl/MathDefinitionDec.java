@@ -84,6 +84,9 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
         if (myIsImplicitFlag) {
             sb.append("Implicit ");
         }
+        else if (myBodyItem != null && myBodyItem.getIsInductiveFlag()) {
+            sb.append("Inductive ");
+        }
         sb.append("Definition ");
         sb.append(myName.asString(0, innerIndentInc));
 
@@ -137,7 +140,6 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
             return false;
         return myBodyItem != null ? myBodyItem.equals(that.myBodyItem)
                 : that.myBodyItem == null;
-
     }
 
     /**

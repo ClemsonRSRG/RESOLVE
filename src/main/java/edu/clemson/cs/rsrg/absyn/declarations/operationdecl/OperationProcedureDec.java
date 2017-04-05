@@ -196,7 +196,6 @@ public class OperationProcedureDec extends Dec {
         if (!myVariableDecs.equals(that.myVariableDecs))
             return false;
         return myStatements.equals(that.myStatements);
-
     }
 
     /**

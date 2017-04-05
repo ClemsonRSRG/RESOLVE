@@ -80,7 +80,6 @@ public abstract class AbstractFunctionExp extends MathExp {
                 : that.myQualifier != null)
             return false;
         return myQuantification == that.myQuantification;
-
     }
 
     /**
@@ -106,7 +105,7 @@ public abstract class AbstractFunctionExp extends MathExp {
      *
      * @return A subset of the actual function type.
      */
-    public MTFunction getConservativePreApplicationType(TypeGraph g) {
+    public final MTFunction getConservativePreApplicationType(TypeGraph g) {
         List<Exp> params = this.getSubExpressions();
         List<MTType> subTypes = new LinkedList<>();
 
@@ -222,6 +221,19 @@ public abstract class AbstractFunctionExp extends MathExp {
      */
     public final void setQualifier(PosSymbol qualifier) {
         myQualifier = qualifier;
+    }
+
+    /**
+     * <p>Sets the quantification for this expression.</p>
+     *
+     * @param q The quantification type for this expression.
+     */
+    public void setQuantification(SymbolTableEntry.Quantification q) {
+        if (!q.equals(SymbolTableEntry.Quantification.NONE)) {
+            throw new UnsupportedOperationException("The function "
+                    + getOperatorAsString() + " does not support "
+                    + "quantification.");
+        }
     }
 
     // ===========================================================

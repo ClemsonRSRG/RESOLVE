@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.typevisitor;
 
-import edu.clemson.cs.r2jt.typeandpopulate.TypeMismatchException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.FinalizedScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -112,7 +112,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
 
     /** <p>Exception to be thrown when there is a mismatch.</p> */
     private static final IllegalArgumentException MISMATCH =
-            new IllegalArgumentException(TypeMismatchException.INSTANCE);
+            new IllegalArgumentException(new TypeMismatchException(""));
 
     /** <p>A map of current bindings.</p> */
     private Map<String, MTType> myBindings = new HashMap<>();

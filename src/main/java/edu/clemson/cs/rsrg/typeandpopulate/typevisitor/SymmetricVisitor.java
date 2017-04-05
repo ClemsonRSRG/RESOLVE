@@ -149,7 +149,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic before we visit
-     * two {@link MTPowertypeApplication}.</p>
+     * two {@link MTPowerclassApplication}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -158,8 +158,24 @@ abstract class SymmetricVisitor {
      *
      * @return The default implementation always returns {@code true}.
      */
-    public boolean beginMTPowertypeApplication(MTPowertypeApplication t1,
-            MTPowertypeApplication t2) {
+    public boolean beginMTPowerclassApplication(MTPowerclassApplication t1,
+            MTPowerclassApplication t2) {
+        return true;
+    }
+
+    /**
+     * <p>This method adds additional logic before we visit
+     * two {@link MTPowersetApplication}.</p>
+     *
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param t1 A math type.
+     * @param t2 A math type.
+     *
+     * @return The default implementation always returns {@code true}.
+     */
+    public boolean beginMTPowersetApplication(MTPowersetApplication t1,
+            MTPowersetApplication t2) {
         return true;
     }
 
@@ -356,8 +372,24 @@ abstract class SymmetricVisitor {
      *
      * @return The default implementation always returns {@code true}.
      */
-    public boolean midMTPowertypeApplication(MTPowertypeApplication t1,
-            MTPowertypeApplication t2) {
+    public boolean midMTPowerclassApplication(MTPowerclassApplication t1,
+            MTPowerclassApplication t2) {
+        return true;
+    }
+
+    /**
+     * <p>This method adds additional logic after we visit <code>t1</code>
+     * and before we visit <code>t2</code>.</p>
+     *
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param t1 A math type.
+     * @param t2 A math type.
+     *
+     * @return The default implementation always returns {@code true}.
+     */
+    public boolean midMTPowersetApplication(MTPowersetApplication t1,
+            MTPowersetApplication t2) {
         return true;
     }
 
@@ -558,7 +590,7 @@ abstract class SymmetricVisitor {
 
     /**
      * <p>This method adds additional logic after we visit
-     * two {@link MTPowertypeApplication}.</p>
+     * two {@link MTPowerclassApplication}.</p>
      *
      * <p>The default implementation does nothing.</p>
      *
@@ -567,8 +599,24 @@ abstract class SymmetricVisitor {
      *
      * @return The default implementation always returns {@code true}.
      */
-    public boolean endMTPowertypeApplication(MTPowertypeApplication t1,
-            MTPowertypeApplication t2) {
+    public boolean endMTPowerclassApplication(MTPowerclassApplication t1,
+            MTPowerclassApplication t2) {
+        return true;
+    }
+
+    /**
+     * <p>This method adds additional logic after we visit
+     * two {@link MTPowersetApplication}.</p>
+     *
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param t1 A math type.
+     * @param t2 A math type.
+     *
+     * @return The default implementation always returns {@code true}.
+     */
+    public boolean endMTPowersetApplication(MTPowersetApplication t1,
+            MTPowersetApplication t2) {
         return true;
     }
 
@@ -830,16 +878,30 @@ abstract class SymmetricVisitor {
 
         /**
          * <p>This method adds additional logic before we visit
-         * a {@link MTPowertypeApplication} by adding all the logic implemented by the
-         * {@link #beginMTPowertypeApplication(MTPowertypeApplication, MTPowertypeApplication)} method.</p>
+         * a {@link MTPowerclassApplication} by adding all the logic implemented by the
+         * {@link #beginMTPowerclassApplication(MTPowerclassApplication, MTPowerclassApplication)} method.</p>
          *
          * @param t A math type.
          */
         @Override
-        public final void beginMTPowertypeApplication(MTPowertypeApplication t) {
+        public final void beginMTPowerclassApplication(MTPowerclassApplication t) {
             myReturn =
-                    SymmetricVisitor.this.beginMTPowertypeApplication(t,
-                            (MTPowertypeApplication) myOtherType);
+                    SymmetricVisitor.this.beginMTPowerclassApplication(t,
+                            (MTPowerclassApplication) myOtherType);
+        }
+
+        /**
+         * <p>This method adds additional logic before we visit
+         * a {@link MTPowersetApplication} by adding all the logic implemented by the
+         * {@link #beginMTPowersetApplication(MTPowersetApplication, MTPowersetApplication)} method.</p>
+         *
+         * @param t A math type.
+         */
+        @Override
+        public final void beginMTPowersetApplication(MTPowersetApplication t) {
+            myReturn =
+                    SymmetricVisitor.this.beginMTPowersetApplication(t,
+                            (MTPowersetApplication) myOtherType);
         }
 
         /**
@@ -1010,16 +1072,30 @@ abstract class SymmetricVisitor {
 
         /**
          * <p>This method adds additional logic after we visit
-         * a {@link MTPowertypeApplication} by adding all the logic implemented by the
-         * {@link #endMTPowertypeApplication(MTPowertypeApplication, MTPowertypeApplication)} method.</p>
+         * a {@link MTPowerclassApplication} by adding all the logic implemented by the
+         * {@link #endMTPowerclassApplication(MTPowerclassApplication, MTPowerclassApplication)} method.</p>
          *
          * @param t A math type.
          */
         @Override
-        public final void endMTPowertypeApplication(MTPowertypeApplication t) {
+        public final void endMTPowerclassApplication(MTPowerclassApplication t) {
             myReturn =
-                    SymmetricVisitor.this.endMTPowertypeApplication(t,
-                            (MTPowertypeApplication) myOtherType);
+                    SymmetricVisitor.this.endMTPowerclassApplication(t,
+                            (MTPowerclassApplication) myOtherType);
+        }
+
+        /**
+         * <p>This method adds additional logic after we visit
+         * a {@link MTPowersetApplication} by adding all the logic implemented by the
+         * {@link #endMTPowersetApplication(MTPowersetApplication, MTPowersetApplication)} method.</p>
+         *
+         * @param t A math type.
+         */
+        @Override
+        public final void endMTPowersetApplication(MTPowersetApplication t) {
+            myReturn =
+                    SymmetricVisitor.this.endMTPowersetApplication(t,
+                            (MTPowersetApplication) myOtherType);
         }
 
         /**
@@ -1231,16 +1307,30 @@ abstract class SymmetricVisitor {
 
         /**
          * <p>This method adds additional logic before we visit
-         * a {@link MTPowertypeApplication} by adding all the logic implemented by the
-         * {@link #midMTPowertypeApplication(MTPowertypeApplication, MTPowertypeApplication)} method.</p>
+         * a {@link MTPowerclassApplication} by adding all the logic implemented by the
+         * {@link #midMTPowerclassApplication(MTPowerclassApplication, MTPowerclassApplication)} method.</p>
          *
          * @param t A math type.
          */
         @Override
-        public final void beginMTPowertypeApplication(MTPowertypeApplication t) {
+        public final void beginMTPowerclassApplication(MTPowerclassApplication t) {
             myReturn =
-                    midMTPowertypeApplication(t,
-                            (MTPowertypeApplication) myOtherType);
+                    midMTPowerclassApplication(t,
+                            (MTPowerclassApplication) myOtherType);
+        }
+
+        /**
+         * <p>This method adds additional logic before we visit
+         * a {@link MTPowersetApplication} by adding all the logic implemented by the
+         * {@link #midMTPowersetApplication(MTPowersetApplication, MTPowersetApplication)} method.</p>
+         *
+         * @param t A math type.
+         */
+        @Override
+        public final void beginMTPowersetApplication(MTPowersetApplication t) {
+            myReturn =
+                    midMTPowersetApplication(t,
+                            (MTPowersetApplication) myOtherType);
         }
 
         /**

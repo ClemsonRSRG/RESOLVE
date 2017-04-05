@@ -103,8 +103,26 @@ public abstract class CompilerException extends RuntimeException {
      *
      * @return A {@link Location} object.
      */
-    public Location getErrorLocation() {
+    public final Location getErrorLocation() {
         return myErrorLocation;
+    }
+
+    /**
+     * <p>Appending the error location to the end of the message if
+     * we have a {@link Location} object.</p>
+     *
+     * @return A {@link String} object.
+     */
+    @Override
+    public final String getMessage() {
+        StringBuffer sb = new StringBuffer(super.getMessage());
+        if (myErrorLocation != null) {
+            sb.append(" [");
+            sb.append(myErrorLocation.toString());
+            sb.append("]");
+        }
+
+        return sb.toString();
     }
 
 }

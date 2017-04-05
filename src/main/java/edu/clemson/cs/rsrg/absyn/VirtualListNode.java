@@ -75,7 +75,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentInc) {
+    public final String asString(int indentSize, int innerIndentInc) {
         throw new MiscErrorException("Not supported yet.",
                 new UnsupportedOperationException());
     }
@@ -87,7 +87,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      * @return A deep copy of the object.
      */
     @Override
-    public VirtualListNode clone() {
+    public final VirtualListNode clone() {
         List<ResolveConceptualElement> listCopy = new ArrayList<>(myList.size());
         Collections.copy(listCopy, myList);
 
@@ -103,7 +103,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())
@@ -129,12 +129,11 @@ public class VirtualListNode extends ResolveConceptualElement {
      * @return A list containing all the children.
      */
     @Override
-    public List<ResolveConceptualElement> getChildren() {
+    public final List<ResolveConceptualElement> getChildren() {
         List<ResolveConceptualElement> children =
                 new LinkedList<>();
-        Iterator<ResolveConceptualElement> iter = myList.iterator();
-        while (iter.hasNext()) {
-            children.add(ResolveConceptualElement.class.cast(iter.next()));
+        for (ResolveConceptualElement aMyList : myList) {
+            children.add(ResolveConceptualElement.class.cast(aMyList));
         }
 
         return children;
@@ -147,13 +146,18 @@ public class VirtualListNode extends ResolveConceptualElement {
      * @return A {@link Location} representation object.
      */
     @Override
-    public Location getLocation() {
+    public final Location getLocation() {
         throw new MiscErrorException(this.getClass()
                 + " has no location by definition.",
                 new UnsupportedOperationException());
     }
 
-    public Class<?> getListType() {
+    /**
+     * <p>Returns the type stored in this virtual list.</p>
+     *
+     * @return The associated {@link Class} type.
+     */
+    public final Class<?> getListType() {
         return myListType;
     }
 
@@ -163,7 +167,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      *
      * @return Name as a string.
      */
-    public String getNodeName() {
+    public final String getNodeName() {
         return myName;
     }
 
@@ -173,7 +177,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      *
      * @return Name as a string.
      */
-    public ResolveConceptualElement getParent() {
+    public final ResolveConceptualElement getParent() {
         return myParent;
     }
 
@@ -184,7 +188,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      * @return The hash code associated with the object.
      */
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         int result = myList != null ? myList.hashCode() : 0;
         result = 31 * result + (myListType != null ? myListType.hashCode() : 0);
         result = 31 * result + (myName != null ? myName.hashCode() : 0);

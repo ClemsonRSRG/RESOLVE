@@ -105,7 +105,6 @@ public class ProgramVariableArrayExp extends ProgramVariableExp {
         if (!myProgramIndexExp.equals(that.myProgramIndexExp))
             return false;
         return myProgramNameExp.equals(that.myProgramNameExp);
-
     }
 
     /**
