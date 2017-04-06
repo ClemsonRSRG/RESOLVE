@@ -90,9 +90,10 @@ public class ASTOutputPipeline extends AbstractPipeline {
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             StringBuffer sb = new StringBuffer();
             sb.append("\n---------------Output Module AST---------------\n\n");
-            sb.append("Exported ModuleDec to dot file: " + outputFileName
-                    + "\n");
-            sb.append("\n---------------Output Module AST---------------\n");
+            sb.append("Exported ModuleDec to dot file: ");
+            sb.append(outputFileName);
+            sb.append("\n");
+            sb.append("\n---------------End Output Module AST---------------\n");
 
             myCompileEnvironment.getStatusHandler().info(null, sb.toString());
         }
