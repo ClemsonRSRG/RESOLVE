@@ -93,7 +93,8 @@ public class ASTOutputPipeline extends AbstractPipeline {
             sb.append("Exported ModuleDec to dot file: ");
             sb.append(outputFileName);
             sb.append("\n");
-            sb.append("\n---------------End Output Module AST---------------\n");
+            sb
+                    .append("\n---------------End Output Module AST---------------\n");
 
             myCompileEnvironment.getStatusHandler().info(null, sb.toString());
         }
