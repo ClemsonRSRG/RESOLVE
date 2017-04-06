@@ -61,7 +61,7 @@ import java.util.*;
 
 /**
  * <p>This class populates the symbol table and assigns mathematical types to the
- * provided RESOLVE abstract syntax tree. This visitor logic is implemented as a
+ * provided RESOLVE abstract syntax tree. This visitor logic is implemented as
  * a {@link TreeWalkerVisitor}.</p>
  *
  * @version 2.0

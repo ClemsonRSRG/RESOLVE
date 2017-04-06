@@ -25,6 +25,7 @@ import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import java.util.*;
 
 /**
  * <p>This class takes care of all argument processing and creates
- * a <code>CompileEnvironment</code> for the current job.</p>
+ * a {@link CompileEnvironment} for the current job.</p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -110,14 +111,14 @@ public class ResolveCompiler {
      * <p>Tells the compiler to print out a general help message and
      * all the flags.</p>
      */
-    public static final Flag FLAG_HELP =
+    private static final Flag FLAG_HELP =
             new Flag(FLAG_SECTION_GENERAL, "help",
                     "Displays this help information.");
 
     /**
      * <p>Tells the compiler to print out all the flags.</p>
      */
-    public static final Flag FLAG_EXTENDED_HELP =
+    private static final Flag FLAG_EXTENDED_HELP =
             new Flag(FLAG_SECTION_GENERAL, "xhelp",
                     "Displays all flags, including development flags and many others "
                             + "not relevant to most users.");
@@ -133,34 +134,34 @@ public class ResolveCompiler {
      * <p>Tells the compiler to print debugging messages from the compiler
      * output to a file.</p>
      */
-    public static final Flag FLAG_DEBUG_FILE_OUT =
+    static final Flag FLAG_DEBUG_FILE_OUT =
             new Flag(FLAG_SECTION_DEBUG, "debugOutToFile", FLAG_DESC_DEBUG);
 
     /**
      * <p>Tells the compiler to print compiler exception's stack traces.</p>
      */
-    public static final Flag FLAG_DEBUG_STACK_TRACE =
+    static final Flag FLAG_DEBUG_STACK_TRACE =
             new Flag(FLAG_SECTION_DEBUG, "stacktrace", FLAG_DESC_DEBUG,
                     Flag.Type.HIDDEN);
 
     /**
      * <p>Tells the compiler to print the module we are compiling.</p>
      */
-    public static final Flag FLAG_PRINT_MODULE =
+    static final Flag FLAG_PRINT_MODULE =
             new Flag(FLAG_SECTION_DEBUG, "printModule", FLAG_DESC_PRINT_MODULE,
                     Flag.Type.HIDDEN);
 
     /**
      * <p>Tell the compiler to output a Graphviz model for our AST.</p>
      */
-    public static final Flag FLAG_EXPORT_AST =
+    static final Flag FLAG_EXPORT_AST =
             new Flag(FLAG_SECTION_GENERAL, "exportAST", FLAG_DESC_EXPORT_AST,
                     Flag.Type.HIDDEN);
 
     /**
      * <p>Tells the compiler the RESOLVE workspace directory path.</p>
      */
-    public static final Flag FLAG_WORKSPACE_DIR =
+    static final Flag FLAG_WORKSPACE_DIR =
             new Flag(FLAG_SECTION_GENERAL, "workspaceDir",
                     FLAG_DESC_WORKSPACE_DIR, WORKSPACE_DIR_ARG_NAME);
 
@@ -406,15 +407,17 @@ public class ResolveCompiler {
                 compileEnvironment.setTypeGraph(symbolTable.getTypeGraph());
             }
         }
-        catch (FlagDependencyException | IOException e) {
+        catch (FlagDependencyException fde) {
             // YS - The status handler object might have changed.
             statusHandler = compileEnvironment.getStatusHandler();
-            statusHandler.error(null, e.getMessage());
-            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
-                    && statusHandler instanceof SystemStdHandler) {
-                e.printStackTrace();
+            statusHandler.error(null, fde.getMessage());
+            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
+                statusHandler.printStackTrace(fde);
             }
             statusHandler.stopLogging();
+        }
+        catch (IOException | NullPointerException e) {
+            e.printStackTrace();
         }
 
         return compileEnvironment;
@@ -454,6 +457,7 @@ public class ResolveCompiler {
             AlgebraicProver.setUpFlags();
             CongruenceClassProver.setUpFlags();*/
             Populator.setUpFlags();
+            VCGenerator.setUpFlags();
             FlagDependencies.seal();
         }
     }

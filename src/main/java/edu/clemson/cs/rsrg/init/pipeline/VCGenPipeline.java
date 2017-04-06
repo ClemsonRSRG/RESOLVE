@@ -1,5 +1,5 @@
 /*
- * AnalysisPipeline.java
+ * VCGenPipeline.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -14,33 +14,32 @@ package edu.clemson.cs.rsrg.init.pipeline;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
-import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
-import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 
 /**
- * <p>This is pipeline that populates, sanity checks and type checks
- * the RESOLVE AST.</p>
+ * <p>This is pipeline that generates verification conditions (VCs)
+ * using the RESOLVE AST and symbol table.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class AnalysisPipeline extends AbstractPipeline {
+public class VCGenPipeline extends AbstractPipeline {
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This generates a pipeline to populate new symbols and
-     * perform semantic analysis.</p>
+     * <p>This generates a pipeline to generate VCs.</p>
      *
      * @param ce The current compilation environment.
      * @param symbolTable The symbol table.
      */
-    public AnalysisPipeline(CompileEnvironment ce,
+    public VCGenPipeline(CompileEnvironment ce,
             MathSymbolTableBuilder symbolTable) {
         super(ce, symbolTable);
     }
@@ -55,20 +54,27 @@ public class AnalysisPipeline extends AbstractPipeline {
     @Override
     public final void process(ModuleIdentifier currentTarget) {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
-        StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
-        Populator populator =
-                new Populator(mySymbolTable, myCompileEnvironment);
-        myCompileEnvironment.setTypeGraph(populator.getTypeGraph());
-        TreeWalker.visit(populator, moduleDec);
+        VCGenerator vcGenerator =
+                new VCGenerator(mySymbolTable, myCompileEnvironment);
 
-        if (myCompileEnvironment.flags
-                .isFlagSet(Populator.FLAG_POPULATOR_DEBUG)) {
+        if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             StringBuffer sb = new StringBuffer();
-            sb.append("\n---------------Current Type Graph---------------\n\n");
-            sb.append(mySymbolTable.getTypeGraph().toString());
-            sb
-                    .append("\n---------------End Current Type Graph---------------\n");
-            statusHandler.info(null, sb.toString());
+            sb.append("\n---------------Generating VCs---------------\n\n");
+            sb.append("Generating VCs for: ");
+            sb.append(moduleDec.getName());
+            sb.append("\n");
+
+            myCompileEnvironment.getStatusHandler().info(null, sb.toString());
+        }
+
+        // Walk the AST and generate VCs
+        TreeWalker.visit(vcGenerator, moduleDec);
+
+        if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n---------------End Generating VCs---------------\n");
+
+            myCompileEnvironment.getStatusHandler().info(null, sb.toString());
         }
     }
 

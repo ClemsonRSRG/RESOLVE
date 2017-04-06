@@ -1,5 +1,5 @@
 /*
- * AssumeStmt.java
+ * ChangeStmt.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -16,44 +16,43 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- * <p>This is the class that builds the assume statements created by
+ * <p>This is the class that builds the change statements created by
  * the {@link VCGenerator}. Since the user cannot supply their own
- * assume clauses, any instances of this class will solely be created
+ * change statements, any instances of this class will solely be created
  * by the {@link VCGenerator}.</p>
  *
- * @version 2.0
+ * @author Yu-Shan Sun
+ * @version 1.0
  */
-public class AssumeStmt extends Statement {
+public class ChangeStmt extends Statement {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The assume assertion expression</p> */
-    private final Exp myAssertion;
-
-    /** <p>This flag indicates if this is an stipulate assume clause or not</p> */
-    private final boolean myIsStipulate;
+    /** <p>The list of expressions being changed.</p> */
+    private final List<Exp> myChangingVars;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs an assume statement.</p>
+     * <p>This constructs a change statement.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param assertion A {@link Exp} representing the assume statement's
-     *                  assertion expression.
-     * @param isStipulate A flag to indicate whether or not this is a
-     *                    stipulate assume statement.
+     * @param changingVars List of all the variable expressions
+     *                     being changed.
      */
-    public AssumeStmt(Location l, Exp assertion, boolean isStipulate) {
+    public ChangeStmt(Location l, List<Exp> changingVars) {
         super(l);
-        myAssertion = assertion;
-        myIsStipulate = isStipulate;
+        myChangingVars = new ArrayList<>(changingVars);
     }
 
     // ===========================================================
@@ -67,14 +66,17 @@ public class AssumeStmt extends Statement {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
+        sb.append("Change ");
 
-        if (myIsStipulate) {
-            sb.append("Stipulate ");
+        Iterator<Exp> changeVarIt = myChangingVars.iterator();
+        while (changeVarIt.hasNext()) {
+            Exp nextVar = changeVarIt.next();
+            sb.append(nextVar.asString(0, 0));
+
+            if (changeVarIt.hasNext()) {
+                sb.append(", ");
+            }
         }
-        else {
-            sb.append("Assume ");
-        }
-        sb.append(myAssertion.asString(0, innerIndentInc));
         sb.append(";");
 
         return sb.toString();
@@ -90,30 +92,19 @@ public class AssumeStmt extends Statement {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        AssumeStmt that = (AssumeStmt) o;
+        ChangeStmt that = (ChangeStmt) o;
 
-        if (myIsStipulate != that.myIsStipulate)
-            return false;
-        return myAssertion.equals(that.myAssertion);
-
+        return myChangingVars.equals(that.myChangingVars);
     }
 
     /**
-     * <p>This method returns the assumed assertion expression.</p>
+     * <p>This method returns the variable expressions that are
+     * changing.</p>
      *
-     * @return The {@link Exp} representation object.
+     * @return A list of {@link Exp} representation object.
      */
-    public final Exp getAssertion() {
-        return myAssertion;
-    }
-
-    /**
-     * <p>This method checks to see if this is is a stipulate assume statement.</p>
-     *
-     * @return {@code true} if it is a stipulate assume statement, {@code false} otherwise.
-     */
-    public final boolean getIsStipulate() {
-        return myIsStipulate;
+    public final List<Exp> getChangingVars() {
+        return myChangingVars;
     }
 
     /**
@@ -121,9 +112,7 @@ public class AssumeStmt extends Statement {
      */
     @Override
     public final int hashCode() {
-        int result = myAssertion.hashCode();
-        result = 31 * result + (myIsStipulate ? 1 : 0);
-        return result;
+        return myChangingVars.hashCode();
     }
 
     // ===========================================================
@@ -135,8 +124,9 @@ public class AssumeStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new AssumeStmt(cloneLocation(), myAssertion.clone(),
-                myIsStipulate);
-    }
+        List<Exp> newChangingVars = new ArrayList<>(myChangingVars.size());
+        Collections.copy(newChangingVars, myChangingVars);
 
+        return new ChangeStmt(cloneLocation(), newChangingVars);
+    }
 }
