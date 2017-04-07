@@ -22,7 +22,7 @@ Goal(s):
 
 Given(s):
 
-<i>. <antecedents>
+<antecedents : {antecedent | <i> <antecedent>}>
 
 >>
 
