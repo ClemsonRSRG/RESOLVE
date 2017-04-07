@@ -15,13 +15,12 @@ package edu.clemson.cs.rsrg.init.pipeline;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
-import edu.clemson.cs.rsrg.init.astoutput.GenerateGraphvizModel;
+import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
-import java.io.*;
 
 /**
  * <p>This is pipeline that generates graphical representations
@@ -97,27 +96,6 @@ public class ASTOutputPipeline extends AbstractPipeline {
                     .append("\n---------------End Output Module AST---------------\n");
 
             myCompileEnvironment.getStatusHandler().info(null, sb.toString());
-        }
-    }
-
-    /**
-     * <p>Writes the content to the specified filename.</p>
-     *
-     * @param outputFileName Output filename.
-     * @param outputString Contents to be written in file.
-     */
-    private void writeToFile(String outputFileName, String outputString) {
-        try {
-            // Write the contents to file
-            Writer writer =
-                    new BufferedWriter(new FileWriter(new File(outputFileName),
-                            false));
-            writer.write(outputString);
-            writer.close();
-        }
-        catch (IOException ioe) {
-            myCompileEnvironment.getStatusHandler().error(null,
-                    "Error while writing to file: " + outputFileName);
         }
     }
 

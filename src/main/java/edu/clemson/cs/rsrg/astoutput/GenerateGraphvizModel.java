@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.init.astoutput;
+package edu.clemson.cs.rsrg.astoutput;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.VirtualListNode;
@@ -699,7 +699,8 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
-     * <p>Returns the completed model with all the nodes and edges.</p>
+     * <p>This method returns the completed model with all the
+     * nodes and edges.</p>
      *
      * @return String template rendering of the model.
      */
