@@ -1,0 +1,44 @@
+// Template for generating all VCs and the generation details
+outputVCGenFile(fileName, dateGenerated, vcs, details) ::= <<
+VCs for <fileName> generated <dateGenerated>
+
+================================= VC(s): =================================
+
+<vcs; separator = "\n">
+
+<details>
+
+>>
+
+// Individual VC Output
+outputVC(vcNum, location, locationDetail, consequents, antecedents) ::= <<
+VC <vcNum>
+
+<locationDetail>: <location>
+
+Goal(s):
+
+<consequents>
+
+Given(s):
+
+<i>. <antecedents>
+
+>>
+
+// VC Generation Details (Verbose Mode)
+outputVCGenDetails(fileHeader, assertiveCodeBlock) ::= <<
+========================= VC Generation Details  =========================
+
+<fileHeader>
+
+==========================================================================
+
+>>
+
+// Header for enhancement realizations
+outputEnhancementRealizHeader(realizName, enhancementName, conceptName) ::= <<
+    Enhancement Realization Name: <realizName>
+    Enhancement Name: <enhancementName>
+    Concept Name: <conceptName>
+>>
