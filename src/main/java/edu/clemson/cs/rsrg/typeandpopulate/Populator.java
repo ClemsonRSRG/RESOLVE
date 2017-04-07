@@ -364,18 +364,23 @@ public class Populator extends TreeWalkerVisitor {
         emitDebug(null, "END POPULATOR\n----------------------\n");
     }
 
+    // -----------------------------------------------------------
+    // Concept Module
+    // -----------------------------------------------------------
+
     /**
-     * <p>This method redefines how a {@link ModuleDec} should be walked.</p>
+     * <p>This method redefines how a {@link ConceptModuleDec} should be walked.</p>
      *
-     * @param dec A module declaration.
+     * @param dec A concept module declaration.
      *
      * @return {@code true}
      */
     @Override
-    public final boolean walkModuleDec(ModuleDec dec) {
+    public final boolean walkConceptModuleDec(ConceptModuleDec dec) {
         preAny(dec);
         preDec(dec);
         preModuleDec(dec);
+        preConceptModuleDec(dec);
 
         // Walk our uses list first! Our parameters might need this
         for (UsesItem item : dec.getUsesItems()) {
@@ -392,6 +397,7 @@ public class Populator extends TreeWalkerVisitor {
             TreeWalker.visit(this, innerDecl);
         }
 
+        postConceptModuleDec(dec);
         postModuleDec(dec);
         postDec(dec);
         postAny(dec);
@@ -432,12 +438,49 @@ public class Populator extends TreeWalkerVisitor {
         myCurModuleScope.addImport(id);
     }
 
+    /**
+     * <p>This method redefines how a {@link ConceptRealizModuleDec} should be walked.</p>
+     *
+     * @param dec A concept realization module declaration.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkConceptRealizModuleDec(ConceptRealizModuleDec dec) {
+        preAny(dec);
+        preDec(dec);
+        preModuleDec(dec);
+        preConceptRealizModuleDec(dec);
+
+        // Walk our uses list first! Our parameters might need this
+        for (UsesItem item : dec.getUsesItems()) {
+            TreeWalker.visit(this, item);
+        }
+
+        // Walk our parameters
+        for (ModuleParameterDec varDec : dec.getParameterDecs()) {
+            TreeWalker.visit(this, varDec);
+        }
+
+        // Walk our declarations
+        for (Dec innerDecl : dec.getDecList()) {
+            TreeWalker.visit(this, innerDecl);
+        }
+
+        postConceptRealizModuleDec(dec);
+        postModuleDec(dec);
+        postDec(dec);
+        postAny(dec);
+
+        return true;
+    }
+
     // -----------------------------------------------------------
     // Enhancement Module
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link EnhancementModuleDec}.</p>
+     * <p>Code that gets executed before visiting an {@link EnhancementModuleDec}.</p>
      *
      * @param enhancement An enhancement module declaration.
      */
@@ -448,12 +491,49 @@ public class Populator extends TreeWalkerVisitor {
                 .getConceptName().getName()));
     }
 
+    /**
+     * <p>This method redefines how an {@link EnhancementModuleDec} should be walked.</p>
+     *
+     * @param dec An enhancement module declaration.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkEnhancementModuleDec(EnhancementModuleDec dec) {
+        preAny(dec);
+        preDec(dec);
+        preModuleDec(dec);
+        preEnhancementModuleDec(dec);
+
+        // Walk our uses list first! Our parameters might need this
+        for (UsesItem item : dec.getUsesItems()) {
+            TreeWalker.visit(this, item);
+        }
+
+        // Walk our parameters
+        for (ModuleParameterDec varDec : dec.getParameterDecs()) {
+            TreeWalker.visit(this, varDec);
+        }
+
+        // Walk our declarations
+        for (Dec innerDecl : dec.getDecList()) {
+            TreeWalker.visit(this, innerDecl);
+        }
+
+        postEnhancementModuleDec(dec);
+        postModuleDec(dec);
+        postDec(dec);
+        postAny(dec);
+
+        return true;
+    }
+
     // -----------------------------------------------------------
     // Enhancement Realization Module
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link EnhancementRealizModuleDec}.</p>
+     * <p>Code that gets executed before visiting an {@link EnhancementRealizModuleDec}.</p>
      *
      * @param enhancementRealization An enhancement realization module declaration.
      */
@@ -475,8 +555,9 @@ public class Populator extends TreeWalkerVisitor {
             EnhancementModuleDec enhancement =
                     (EnhancementModuleDec) myBuilder.getModuleScope(enId)
                             .getDefiningElement();
-            ImplementAllOperChecker allOperChecker = new ImplementAllOperChecker(enhancementRealization.getLocation(),
-                    enhancement.getDecList(), enhancementRealization.getDecList());
+            ImplementAllOperChecker allOperChecker =
+                    new ImplementAllOperChecker(enhancementRealization.getLocation(),
+                            enhancement.getDecList(), enhancementRealization.getDecList());
             allOperChecker.implementAllOper();
         }
         catch (NoSuchSymbolException e) {
@@ -495,6 +576,43 @@ public class Populator extends TreeWalkerVisitor {
             myCurModuleScope.addImport(new ModuleIdentifier(profileName
                     .getName()));
         }
+    }
+
+    /**
+     * <p>This method redefines how an {@link EnhancementRealizModuleDec} should be walked.</p>
+     *
+     * @param dec An enhancement realization module declaration.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkEnhancementRealizModuleDec(EnhancementRealizModuleDec dec) {
+        preAny(dec);
+        preDec(dec);
+        preModuleDec(dec);
+        preEnhancementRealizModuleDec(dec);
+
+        // Walk our uses list first! Our parameters might need this
+        for (UsesItem item : dec.getUsesItems()) {
+            TreeWalker.visit(this, item);
+        }
+
+        // Walk our parameters
+        for (ModuleParameterDec varDec : dec.getParameterDecs()) {
+            TreeWalker.visit(this, varDec);
+        }
+
+        // Walk our declarations
+        for (Dec innerDecl : dec.getDecList()) {
+            TreeWalker.visit(this, innerDecl);
+        }
+
+        postEnhancementRealizModuleDec(dec);
+        postModuleDec(dec);
+        postDec(dec);
+        postAny(dec);
+
+        return true;
     }
 
     // -----------------------------------------------------------
@@ -2556,6 +2674,8 @@ public class Populator extends TreeWalkerVisitor {
             OperationEntry op =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new OperationQuery(qualifier, name, argTypes));
+            exp.setProgramType(op.getReturnType());
+            exp.setMathType(op.getReturnType().toMath());
 
             // Check to see if we are recursively calling ourselves
             if (myCorrespondingOperation != null
@@ -2801,7 +2921,7 @@ public class Populator extends TreeWalkerVisitor {
                             tyLocation);
 
             ty.setProgramType(type.getProgramType());
-            ty.setMathType(myTypeGraph.CLS);
+            ty.setMathType(myTypeGraph.SSET);
             ty.setMathTypeValue(type.getModelType());
         }
         catch (NoSuchSymbolException nsse) {

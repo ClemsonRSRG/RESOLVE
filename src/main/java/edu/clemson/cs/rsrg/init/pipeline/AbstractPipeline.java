@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.init.pipeline;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import java.io.*;
 
 /**
  * <p>This is the abstract base class for all pipeline objects
@@ -67,5 +68,30 @@ public abstract class AbstractPipeline {
      * @param currentTarget The module identifier
      */
     public abstract void process(ModuleIdentifier currentTarget);
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Writes the content to the specified filename.</p>
+     *
+     * @param outputFileName Output filename.
+     * @param outputString Contents to be written in file.
+     */
+    protected final void writeToFile(String outputFileName, String outputString) {
+        try {
+            // Write the contents to file
+            Writer writer =
+                    new BufferedWriter(new FileWriter(new File(outputFileName),
+                            false));
+            writer.write(outputString);
+            writer.close();
+        }
+        catch (IOException ioe) {
+            myCompileEnvironment.getStatusHandler().error(null,
+                    "Error while writing to file: " + outputFileName);
+        }
+    }
 
 }

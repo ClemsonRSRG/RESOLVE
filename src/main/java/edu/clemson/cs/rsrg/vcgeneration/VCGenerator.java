@@ -16,8 +16,12 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
 
 /**
  * <p>This class generates verification conditions (VCs) using the provided
@@ -42,6 +46,15 @@ public class VCGenerator extends TreeWalkerVisitor {
      * that stores all necessary objects and flags.</p>
      */
     private final CompileEnvironment myCompileEnvironment;
+
+    /** <p>String template for the VC generation model.</p> */
+    private final ST myModel;
+
+    /** <p>String template for the VC generation details model.</p> */
+    private final ST myVCGenDetailsModel;
+
+    /** <p>String template groups for storing all the VC generation details.</p> */
+    private final STGroup mySTGroup;
 
     // ===========================================================
     // Flag Strings
@@ -85,11 +98,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param builder A scope builder for a symbol table.
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
+     * @param stGroup The string template file.
+     * @param model The model we are going be generating.
      */
     public VCGenerator(MathSymbolTableBuilder builder,
-            CompileEnvironment compileEnvironment) {
+            CompileEnvironment compileEnvironment, STGroup stGroup, ST model) {
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
+        myModel = model;
+        mySTGroup = stGroup;
+        myVCGenDetailsModel = mySTGroup.getInstanceOf("outputVCGenDetails");
     }
 
     // ===========================================================
@@ -97,12 +115,52 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     // -----------------------------------------------------------
-    // ConceptBodyModuleDec
+    // Enhancement Realization Module
     // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link EnhancementRealizModuleDec}.</p>
+     *
+     * @param enhancementRealization An enhancement realization module declaration.
+     */
+    @Override
+    public final void preEnhancementRealizModuleDec(
+            EnhancementRealizModuleDec enhancementRealization) {
+        // Concept Module Identifier
+        PosSymbol conceptName = enhancementRealization.getConceptName();
+        ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
+
+        // Enhancement Module Identifier
+        PosSymbol enhancementName = enhancementRealization.getEnhancementName();
+        ModuleIdentifier enId = new ModuleIdentifier(enhancementName.getName());
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputEnhancementRealizHeader").add(
+                        "realizName",
+                        enhancementRealization.getName().getName()).add(
+                        "enhancementName", enhancementName.getName()).add(
+                        "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>This method returns the completed model with all the {@code VCs}
+     * and the generation details.</p>
+     *
+     * @return String template rendering of the model.
+     */
+    public final String getCompleteModel() {
+        // TODO: Add the VC output
+        // Add the VC generation details to the model
+        myModel.add("details", myVCGenDetailsModel.render());
+
+        return myModel.render();
+    }
 
     // -----------------------------------------------------------
     // Prover Mode
