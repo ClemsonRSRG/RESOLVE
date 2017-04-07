@@ -18,13 +18,16 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.TypeRepresentationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
@@ -157,6 +160,44 @@ public class Utilities {
     }
 
     /**
+     * <p>Given the name of an operation check to see if it is a
+     * local operation</p>
+     *
+     * @param name The name of the operation.
+     * @param scope The module scope we are searching.
+     *
+     * @return {@code true} if it is a local operation, {@code false} otherwise.
+     */
+    static boolean isLocationOperation(String name, ModuleScope scope) {
+        boolean isIn;
+
+        // Query for the corresponding operation
+        List<SymbolTableEntry> entries =
+                scope.query(new NameQuery(null, name,
+                        ImportStrategy.IMPORT_NONE,
+                        FacilityStrategy.FACILITY_IGNORE, true));
+
+        // Not found
+        if (entries.size() == 0) {
+            isIn = false;
+        }
+        // Found one
+        else if (entries.size() == 1) {
+            // If the operation is declared here, then it will be an OperationEntry.
+            // Thus it is a local operation.
+            isIn = entries.get(0) instanceof OperationEntry;
+        }
+        // Found more than one
+        else {
+            //This should be caught earlier, when the duplicate symbol is
+            //created
+            throw new RuntimeException();
+        }
+
+        return isIn;
+    }
+
+    /**
      * <p>Given a math symbol name, locate and return
      * the {@link MathSymbolEntry} stored in the
      * symbol table.</p>
@@ -191,6 +232,42 @@ public class Utilities {
         }
 
         return ms;
+    }
+
+    /**
+     * <p>Given the qualifier, name and the list of argument
+     * types, locate and return the {@link OperationEntry}
+     * stored in the symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The qualifier of the operation.
+     * @param name The name of the operation.
+     * @param argTypes The list of argument types.
+     * @param scope The module scope to start our search.
+     *
+     * @return An {@link OperationEntry} from the
+     *         symbol table.
+     */
+    static OperationEntry searchOperation(Location loc, PosSymbol qualifier,
+            PosSymbol name, List<PTType> argTypes, ModuleScope scope) {
+        // Query for the corresponding operation
+        OperationEntry op = null;
+        try {
+            op =
+                    scope.queryForOne(new OperationQuery(qualifier, name,
+                            argTypes));
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, name.getName(), loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+
+        return op;
     }
 
     /**

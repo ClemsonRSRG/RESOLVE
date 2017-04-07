@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
-import java.util.List;
+import java.util.Deque;
 
 /**
  * <p>A common interface that allows the different {@code Proof Rules}
@@ -30,10 +30,10 @@ public interface ProofRuleApplication {
     void applyRule();
 
     /**
-     * <p>This method returns the list of {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
+     * <p>This method returns the {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
      * that resulted from applying the {@code Proof Rule}.</p>
      */
-    List<AssertiveCodeBlock> getAssertiveCodeBlocks();
+    Deque<AssertiveCodeBlock> getAssertiveCodeBlocks();
 
     /**
      * <p>This method returns a description associated with

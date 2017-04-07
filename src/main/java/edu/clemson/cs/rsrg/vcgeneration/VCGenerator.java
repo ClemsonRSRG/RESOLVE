@@ -17,13 +17,19 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
@@ -32,10 +38,12 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
@@ -43,6 +51,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import java.util.*;
@@ -79,6 +88,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      * between different math types.</p>
      */
     private final TypeGraph myTypeGraph;
+
+    // -----------------------------------------------------------
+    // Operation Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>While walking a procedure, this is set to the entry for the operation
+     * or {@link OperationProcedureDec} that the procedure is attempting to implement.</p>
+     */
+    private OperationEntry myCorrespondingOperation;
 
     // -----------------------------------------------------------
     // VC Generation-Related
@@ -295,6 +314,119 @@ public class VCGenerator extends TreeWalkerVisitor {
                         "enhancementName", enhancementName.getName()).add(
                         "conceptName", conceptName.getName());
         myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
+    // Operation-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProcedureDec}.</p>
+     *
+     * @param dec A procedure declaration.
+     */
+    @Override
+    public final void preProcedureDec(ProcedureDec dec) {
+        // Store the associated OperationEntry for future use
+        List<PTType> argTypes = new LinkedList<>();
+        for (ParameterVarDec p : dec.getParameters()) {
+            argTypes.add(p.getTy().getProgramType());
+        }
+        myCorrespondingOperation =
+                Utilities.searchOperation(dec.getLocation(), null, dec
+                        .getName(), argTypes, myCurrentModuleScope);
+
+        // TODO: Add the perfomance logic
+        // Obtain the performance duration clause
+        /*if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            myCurrentOperationProfileEntry =
+                    Utilities.searchOperationProfile(dec.getLocation(), null,
+                            dec.getName(), argTypes, myCurrentModuleScope);
+        }*/
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProcedureDec}.</p>
+     *
+     * @param dec A procedure declaration.
+     */
+    @Override
+    public final void postProcedureDec(ProcedureDec dec) {
+        // Verbose Mode Debug Messages
+        /*myVCBuffer.append("\n=========================");
+        myVCBuffer.append(" Procedure: ");
+        myVCBuffer.append(dec.getName().getName());
+        myVCBuffer.append(" =========================\n");*/
+
+        // Create a new assertive code block
+        AssertiveCodeBlock block = new AssertiveCodeBlock(myTypeGraph, dec);
+
+        // Obtains items from the current operation
+        OperationDec opDec =
+                (OperationDec) myCorrespondingOperation.getDefiningElement();
+        Location loc = dec.getLocation();
+        String name = dec.getName().getName();
+        boolean isLocal =
+                Utilities.isLocationOperation(dec.getName().getName(),
+                        myCurrentModuleScope);
+
+        // TODO: Figure out what works and what doesn't!
+        /*Exp requires =
+                modifyRequiresClause(getRequiresClause(loc, opDec), loc,
+                        myCurrentAssertiveCode, opDec, isLocal);
+        Exp ensures =
+                modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, opDec,
+                        isLocal);
+        List<Statement> statementList = dec.getStatements();
+        List<ParameterVarDec> parameterVarList = dec.getParameters();
+        List<VarDec> variableList = dec.getVariables();
+        AssertionClause decreasing = dec.getDecreasing();
+
+        // NY YS
+        Exp procDur = null;
+        Exp varFinalDur = null;
+        /*if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            procDur = myCurrentOperationProfileEntry.getDurationClause();
+
+            // Loop through local variables to get their finalization duration
+            for (VarDec v : dec.getVariables()) {
+                Exp finalVarDur = Utilities.createFinalizAnyDur(v, BOOLEAN);
+
+                // Create/Add the duration expression
+                if (varFinalDur == null) {
+                    varFinalDur = finalVarDur;
+                }
+                else {
+                    varFinalDur =
+                            new InfixExp((Location) loc.clone(), varFinalDur,
+                                    Utilities.createPosSymbol("+"), finalVarDur);
+                }
+                varFinalDur.setMathType(myTypeGraph.R);
+            }
+        }*/
+
+        // Apply the procedure declaration rule
+        /*applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
+                procDur, varFinalDur, parameterVarList, variableList,
+                statementList, isLocal);
+
+        // Add this to our stack of to be processed assertive codes.
+        myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
+        myIncAssertiveCodeStackInfo.push("");
+
+        // Set the current assertive code to null
+        // YS: (We the modify requires and ensures clause needs to have
+        // and current assertive code to work. Not very clean way to
+        // solve the problem, but should work.)
+        myCurrentAssertiveCode = null;
+
+        // Loop through assertive code stack
+        loopAssertiveCodeStack();
+
+        myOperationDecreasingExp = null;
+        myCurrentOperationProfileEntry = null;*/
+
+        myCorrespondingOperation = null;
     }
 
     // ===========================================================
