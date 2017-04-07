@@ -71,7 +71,7 @@ public class HardCoded {
                             ModuleType.THEORY, new ANTLRInputStream(
                             new StringReader("")),
                             new ArrayList<String>(), ""),
-                            0, 0, "");
+                            0, 0);
             ModuleDec module =
                     new PrecisModuleDec(classTheoryLoc.clone(), new PosSymbol(
                             classTheoryLoc.clone(), "Cls_Theory"),
@@ -215,7 +215,7 @@ public class HardCoded {
             Location globalSpaceLoc =
                     new Location(new ResolveFile("Global", ModuleType.THEORY,
                             new ANTLRInputStream(new StringReader("")),
-                            new ArrayList<String>(), ""), 0, 0, "");
+                            new ArrayList<String>(), ""), 0, 0);
             VarExp v =
                     new VarExp(globalSpaceLoc, null, new PosSymbol(
                             globalSpaceLoc, "Global"));

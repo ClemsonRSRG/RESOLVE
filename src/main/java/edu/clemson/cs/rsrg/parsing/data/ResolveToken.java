@@ -109,8 +109,7 @@ public class ResolveToken extends CommonToken {
      * @return The {@link Location} object.
      */
     public final Location getLocation() {
-        return new Location(mySourceFile, getLine(), getCharPositionInLine(),
-                "");
+        return new Location(mySourceFile, getLine(), getCharPositionInLine());
     }
 
     /**

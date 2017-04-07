@@ -5082,7 +5082,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @return A {@link Location} for the rule.
      */
     private Location createLocation(Token t) {
-        return new Location(myFile, t.getLine(), t.getCharPositionInLine(), "");
+        return new Location(myFile, t.getLine(), t.getCharPositionInLine());
     }
 
     /**

@@ -32,9 +32,6 @@ public class Location implements Cloneable {
     /** <p>The position that this location points to.</p> */
     private final Pos myPosition;
 
-    /** <p>The additional details about this location.</p> */
-    private final String myLocationDetails;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -46,18 +43,10 @@ public class Location implements Cloneable {
      * @param file File that this location points to.
      * @param lineNumber Line number inside the file.
      * @param columnNumber Column number inside the file.
-     * @param locationDetails Additional details about the location.
      */
-    public Location(ResolveFile file, int lineNumber, int columnNumber,
-            String locationDetails) {
+    public Location(ResolveFile file, int lineNumber, int columnNumber) {
         myFile = file;
         myPosition = new Pos(lineNumber, columnNumber);
-
-        if (locationDetails == null) {
-            locationDetails = "";
-        }
-
-        myLocationDetails = locationDetails;
     }
 
     // ===========================================================
@@ -73,7 +62,7 @@ public class Location implements Cloneable {
     @Override
     public final Location clone() {
         return new Location(myFile, myPosition.myCurrline,
-                myPosition.myCurrColumn, myLocationDetails);
+                myPosition.myCurrColumn);
     }
 
     /**
@@ -92,12 +81,8 @@ public class Location implements Cloneable {
 
         Location location = (Location) o;
 
-        if (!myFile.equals(location.myFile))
-            return false;
-        if (!myPosition.equals(location.myPosition))
-            return false;
-        return myLocationDetails.equals(location.myLocationDetails);
-
+        return myFile.equals(location.myFile)
+                && myPosition.equals(location.myPosition);
     }
 
     /**
@@ -107,15 +92,6 @@ public class Location implements Cloneable {
      */
     public final int getColumn() {
         return myPosition.myCurrColumn;
-    }
-
-    /**
-     * <p>Getter for extended details for this location.</p>
-     *
-     * @return Location details
-     */
-    public final String getDetails() {
-        return myLocationDetails;
     }
 
     /**
@@ -155,7 +131,6 @@ public class Location implements Cloneable {
     public final int hashCode() {
         int result = myFile.hashCode();
         result = 31 * result + myPosition.hashCode();
-        result = 31 * result + myLocationDetails.hashCode();
         return result;
     }
 
