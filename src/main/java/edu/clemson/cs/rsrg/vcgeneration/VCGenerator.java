@@ -22,6 +22,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
@@ -87,7 +88,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>A list that stores all the module level {@code constraint}
      * clauses for the various different declarations.</p>
      */
-    private final Map<Dec, AssertionClause> myGlobalConstraints;
+    private final Map<Dec, List<AssertionClause>> myGlobalConstraints;
 
     /**
      * <p>A list that stores all the module level {@code requires}
@@ -223,8 +224,33 @@ public class VCGenerator extends TreeWalkerVisitor {
                             (FacilityDec) s.toFacilityEntry(dec.getLocation())
                                     .getDefiningElement();
 
-                    // TODO: Add the facility declaration rule!
-                    // applyFacilityDeclRule(facDec, false);
+                    // Store all requires/constraint from the imported concept
+                    PosSymbol conceptName = facDec.getConceptName();
+                    ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
+                    storeConceptAssertionClauses(conceptName.getLocation(), coId, true);
+
+                    // Store all requires/constraint from the imported concept realization
+                    // if it is not externally realized
+                    if (!facDec.getExternallyRealizedFlag()) {
+                        PosSymbol conceptRealizName = facDec.getConceptRealizName();
+                        ModuleIdentifier coRealizId = new ModuleIdentifier(conceptRealizName.getName());
+                        storeConceptRealizAssertionClauses(conceptRealizName.getLocation(),
+                                coRealizId, true);
+                    }
+
+                    for (EnhancementSpecRealizItem specRealizItem : facDec.getEnhancementRealizPairs()) {
+                        // Store all requires/constraint from the imported enhancement(s)
+                        PosSymbol enhancementName = specRealizItem.getEnhancementName();
+                        ModuleIdentifier enId = new ModuleIdentifier(enhancementName.getName());
+                        storeEnhancementAssertionClauses(enhancementName.getLocation(),
+                                enId, true);
+
+                        // Store all requires/constraint from the imported enhancement realization(s)
+                        PosSymbol enhancementRealizName = specRealizItem.getEnhancementRealizName();
+                        ModuleIdentifier enRealizId = new ModuleIdentifier(enhancementRealizName.getName());
+                        storeEnhancementRealizAssertionClauses(enhancementRealizName.getLocation(),
+                                enRealizId, true);
+                    }
                 }
             }
         }
@@ -254,12 +280,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Store all requires/constraint from the imported concept
         PosSymbol conceptName = enhancementRealization.getConceptName();
         ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
-        storeConceptAssertionClauses(conceptName.getLocation(), coId);
+        storeConceptAssertionClauses(conceptName.getLocation(), coId, false);
 
         // Store all requires/constraint from the imported enhancement
         PosSymbol enhancementName = enhancementRealization.getEnhancementName();
         ModuleIdentifier enId = new ModuleIdentifier(enhancementName.getName());
-        storeEnhancementAssertionClauses(enhancementName.getLocation(), enId);
+        storeEnhancementAssertionClauses(enhancementName.getLocation(), enId,
+                false);
 
         // Add to VC detail model
         ST header =
@@ -300,19 +327,70 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param loc The location of the imported {@code module}.
      * @param id A {@link ModuleIdentifier} referring to an
      *           importing {@code concept}.
+     * @param isFacilityImport A flag that indicates whether or not
+     *                         we are storing information that originated
+     *                         from a {@link FacilityDec}.
      */
-    private void storeConceptAssertionClauses(Location loc, ModuleIdentifier id) {
+    private void storeConceptAssertionClauses(Location loc,
+            ModuleIdentifier id, boolean isFacilityImport) {
         try {
-            // Store the concept's requires clause
             ConceptModuleDec conceptModuleDec =
                     (ConceptModuleDec) myBuilder.getModuleScope(id)
                             .getDefiningElement();
-            storeRequiresClause(conceptModuleDec.getName().getName(),
-                    conceptModuleDec.getRequires());
 
-            // Store the concept's type constraints from the module parameters
-            storeModuleTypeConstraints(conceptModuleDec.getLocation(),
-                    conceptModuleDec.getParameterDecs());
+            // We only need to store these if they are part of a FacilityDec
+            if (!isFacilityImport) {
+                // Store the concept's requires clause
+                storeRequiresClause(conceptModuleDec.getName().getName(),
+                        conceptModuleDec.getRequires());
+
+                // Store the concept's type constraints from the module parameters
+                storeModuleTypeConstraints(conceptModuleDec.getLocation(),
+                        conceptModuleDec.getParameterDecs());
+            }
+
+            // Store the concept's module constraints
+            if (!conceptModuleDec.getConstraints().isEmpty()) {
+                myGlobalConstraints.put(conceptModuleDec, conceptModuleDec
+                        .getConstraints());
+                myLocationDetails.put(conceptModuleDec.getLocation(),
+                        "Constraint Clause for " + conceptModuleDec.getName());
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(loc);
+        }
+    }
+
+    /**
+     * <p>An helper method for storing the imported {@code concept realization's}
+     * {@code requires} clause and its associated location detail for
+     * future use.</p>
+     *
+     * @param loc The location of the imported {@code module}.
+     * @param id A {@link ModuleIdentifier} referring to an
+     *           importing {@code concept realization}.
+     * @param isFacilityImport A flag that indicates whether or not
+     *                         we are storing information that originated
+     *                         from a {@link FacilityDec}.
+     */
+    private void storeConceptRealizAssertionClauses(Location loc,
+            ModuleIdentifier id, boolean isFacilityImport) {
+        try {
+            ConceptRealizModuleDec realizModuleDec =
+                    (ConceptRealizModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+
+            // We only need to store these if they are part of a FacilityDec
+            if (!isFacilityImport) {
+                // Store the concept realization's requires clause
+                storeRequiresClause(realizModuleDec.getName().getName(),
+                        realizModuleDec.getRequires());
+
+                // Store the concept realization's type constraints from the module parameters
+                storeModuleTypeConstraints(realizModuleDec.getLocation(),
+                        realizModuleDec.getParameterDecs());
+            }
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(loc);
@@ -327,20 +405,62 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param loc The location of the imported {@code module}.
      * @param id A {@link ModuleIdentifier} referring to an
      *           importing {@code enhancement}.
+     * @param isFacilityImport A flag that indicates whether or not
+     *                         we are storing information that originated
+     *                         from a {@link FacilityDec}.
      */
     private void storeEnhancementAssertionClauses(Location loc,
-            ModuleIdentifier id) {
+            ModuleIdentifier id, boolean isFacilityImport) {
         try {
-            // Store the enhancement's requires clause
             EnhancementModuleDec enhancementModuleDec =
                     (EnhancementModuleDec) myBuilder.getModuleScope(id)
                             .getDefiningElement();
-            storeRequiresClause(enhancementModuleDec.getName().getName(),
-                    enhancementModuleDec.getRequires());
 
-            // Store the enhancement's type constraints from the module parameters
-            storeModuleTypeConstraints(enhancementModuleDec.getLocation(),
-                    enhancementModuleDec.getParameterDecs());
+            // We only need to store these if they are part of a FacilityDec
+            if (!isFacilityImport) {
+                // Store the enhancement's requires clause
+                storeRequiresClause(enhancementModuleDec.getName().getName(),
+                        enhancementModuleDec.getRequires());
+
+                // Store the enhancement's type constraints from the module parameters
+                storeModuleTypeConstraints(enhancementModuleDec.getLocation(),
+                        enhancementModuleDec.getParameterDecs());
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(loc);
+        }
+    }
+
+    /**
+     * <p>An helper method for storing the imported {@code enhancement realization's}
+     * {@code requires} clause and its associated location detail for
+     * future use.</p>
+     *
+     * @param loc The location of the imported {@code module}.
+     * @param id A {@link ModuleIdentifier} referring to an
+     *           importing {@code enhancement realization}.
+     * @param isFacilityImport A flag that indicates whether or not
+     *                         we are storing information that originated
+     *                         from a {@link FacilityDec}.
+     */
+    private void storeEnhancementRealizAssertionClauses(Location loc,
+            ModuleIdentifier id, boolean isFacilityImport) {
+        try {
+            EnhancementRealizModuleDec realizModuleDec =
+                    (EnhancementRealizModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+
+            // We only need to store these if they are part of a FacilityDec
+            if (!isFacilityImport) {
+                // Store the enhancement realization's requires clause
+                storeRequiresClause(realizModuleDec.getName().getName(),
+                        realizModuleDec.getRequires());
+
+                // Store the enhancement realization's type constraints from the module parameters
+                storeModuleTypeConstraints(realizModuleDec.getLocation(),
+                        realizModuleDec.getParameterDecs());
+            }
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(loc);
@@ -387,34 +507,36 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // Obtain the original dec from the AST
                         TypeFamilyDec type = (TypeFamilyDec) typeEntry.getDefiningElement();
 
-                        // Create a variable expression from the declared variable
-                        VarExp varDecExp =
-                                Utilities.createVarExp(dec.getLocation(), null,
-                                        dec.getName(),
-                                        typeEntry.getModelType(), null);
+                        if (!VarExp.isLiteralTrue(type.getConstraint().getAssertionExp())) {
+                            // Create a variable expression from the declared variable
+                            VarExp varDecExp =
+                                    Utilities.createVarExp(dec.getLocation(), null,
+                                            dec.getName(),
+                                            typeEntry.getModelType(), null);
 
-                        // Create a variable expression from the type exemplar
-                        VarExp exemplar =
-                                Utilities.createVarExp(type.getLocation(),
-                                        null, type.getExemplar(), typeEntry
-                                                .getModelType(), null);
+                            // Create a variable expression from the type exemplar
+                            VarExp exemplar =
+                                    Utilities.createVarExp(type.getLocation(),
+                                            null, type.getExemplar(), typeEntry
+                                                    .getModelType(), null);
 
-                        // Create a replacement map
-                        Map<Exp, Exp> substitutions = new HashMap<>();
-                        substitutions.put(exemplar, varDecExp);
+                            // Create a replacement map
+                            Map<Exp, Exp> substitutions = new HashMap<>();
+                            substitutions.put(exemplar, varDecExp);
 
-                        // Create new assertion clause by replacing the exemplar with the actual
-                        AssertionClause constraintClause = type.getConstraint();
-                        Location newLoc = dec.getLocation().clone();
-                        Exp constraintWithReplacements =
-                                constraintClause.getAssertionExp().substitute(substitutions);
-                        AssertionClause newConstraintClause =
-                                new AssertionClause(newLoc, ClauseType.CONSTRAINT,
-                                        constraintWithReplacements, constraintClause.getWhichEntailsExp());
+                            // Create new assertion clause by replacing the exemplar with the actual
+                            AssertionClause constraintClause = type.getConstraint();
+                            Location newLoc = dec.getLocation().clone();
+                            Exp constraintWithReplacements =
+                                    constraintClause.getAssertionExp().substitute(substitutions);
+                            AssertionClause newConstraintClause =
+                                    new AssertionClause(newLoc, ClauseType.CONSTRAINT,
+                                            constraintWithReplacements, constraintClause.getWhichEntailsExp());
 
-                        // Store the constraint and its associated location detail for future use
-                        myGlobalConstraints.put(dec, newConstraintClause);
-                        myLocationDetails.put(newLoc, "Constraint Clause for " + dec.getName());
+                            // Store the constraint and its associated location detail for future use
+                            myGlobalConstraints.put(dec, Collections.singletonList(newConstraintClause));
+                            myLocationDetails.put(newLoc, "Constraint Clause for " + dec.getName());
+                        }
                     }
                 }
                 else {
@@ -434,9 +556,11 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void storeRequiresClause(String decName,
             AssertionClause requiresClause) {
-        myGlobalRequires.add(requiresClause);
-        myLocationDetails.put(requiresClause.getLocation(),
-                "Requires Clause for " + decName);
+        if (!VarExp.isLiteralTrue(requiresClause.getAssertionExp())) {
+            myGlobalRequires.add(requiresClause);
+            myLocationDetails.put(requiresClause.getLocation(),
+                    "Requires Clause for " + decName);
+        }
     }
 
 }
