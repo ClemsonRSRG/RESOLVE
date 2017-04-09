@@ -365,7 +365,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }*/
 
         // Create a new assertive code block
-        myCurrentAssertiveCodeBlock = new AssertiveCodeBlock(myTypeGraph, dec);
+        myCurrentAssertiveCodeBlock =
+                new AssertiveCodeBlock(myTypeGraph, dec, dec.getName());
     }
 
     /**

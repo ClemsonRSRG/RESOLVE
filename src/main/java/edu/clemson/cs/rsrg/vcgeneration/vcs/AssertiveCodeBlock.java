@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import java.util.Collections;
@@ -36,6 +37,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /** <p>Name of the {@link ResolveConceptualElement} that created this object.</p> */
+    private final PosSymbol myBlockName;
 
     /** <p>List of free variables.</p> */
     private final List<Exp> myFreeVars;
@@ -72,8 +76,11 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      * @param g The current type graph.
      * @param instantiatingElement The element that created this
      *                             assertive code block.
+     * @param name Name of the element that created this assertive
+     *             code block.
      */
-    public AssertiveCodeBlock(TypeGraph g, ResolveConceptualElement instantiatingElement) {
+    public AssertiveCodeBlock(TypeGraph g, ResolveConceptualElement instantiatingElement, PosSymbol name) {
+        myBlockName = name;
         myFreeVars = new LinkedList<>();
         myInstantiatingElement = instantiatingElement;
         mySequents = new LinkedList<>();
@@ -172,13 +179,38 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     @Override
     public final AssertiveCodeBlock clone() {
         AssertiveCodeBlock newBlock =
-                new AssertiveCodeBlock(myTypeGraph, myInstantiatingElement);
+                new AssertiveCodeBlock(myTypeGraph, myInstantiatingElement,
+                        myBlockName);
 
         Collections.copy(newBlock.myFreeVars, myFreeVars);
         Collections.copy(newBlock.mySequents, mySequents);
         Collections.copy(newBlock.myStatements, myStatements);
 
         return newBlock;
+    }
+
+    /**
+     * <p>This method overrides the default {@code equals} method implementation.</p>
+     *
+     * @param o Object to be compared.
+     *
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     */
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        AssertiveCodeBlock block = (AssertiveCodeBlock) o;
+
+        return myBlockName.equals(block.myBlockName)
+                && myFreeVars.equals(block.myFreeVars)
+                && myInstantiatingElement.equals(block.myInstantiatingElement)
+                && mySequents.equals(block.mySequents)
+                && myStatements.equals(block.myStatements)
+                && myTypeGraph.equals(block.myTypeGraph);
     }
 
     /**
@@ -189,6 +221,16 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      */
     public final ResolveConceptualElement getInstantiatingElement() {
         return myInstantiatingElement;
+    }
+
+    /**
+     * <p>This method returns the name for the instantiating element that created
+     * this assertive code block.</p>
+     *
+     * @return The name as a {@link PosSymbol}.
+     */
+    public final PosSymbol getName() {
+        return myBlockName;
     }
 
     /**
@@ -210,6 +252,23 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      */
     public final boolean hasAnotherAssertion() {
         return (!myStatements.isEmpty());
+    }
+
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public final int hashCode() {
+        int result = myBlockName.hashCode();
+        result = 31 * result + myFreeVars.hashCode();
+        result = 31 * result + myInstantiatingElement.hashCode();
+        result = 31 * result + mySequents.hashCode();
+        result = 31 * result + myStatements.hashCode();
+        result = 31 * result + myTypeGraph.hashCode();
+
+        return result;
     }
 
     /**
