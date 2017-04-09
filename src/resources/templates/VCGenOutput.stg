@@ -1,4 +1,8 @@
-// Template for generating all VCs and the generation details
+/**
+ * The highest level template for storing data about all the VCs
+ * generated, a lot of details on how the assertive code block
+ * got generated and what happens after each proof rule application.
+ */
 outputVCGenFile(fileName, dateGenerated, vcs, details) ::= <<
 VCs for <fileName> generated <dateGenerated>
 
@@ -10,7 +14,9 @@ VCs for <fileName> generated <dateGenerated>
 
 >>
 
-// Individual VC Output
+/**
+ * Template for storing the final set of VCs in a human readable format.
+ */
 outputVC(vcNum, location, locationDetail, consequents, antecedents) ::= <<
 VC <vcNum>
 
@@ -26,19 +32,86 @@ Given(s):
 
 >>
 
-// VC Generation Details (Verbose Mode)
-outputVCGenDetails(fileHeader, assertiveCodeBlock) ::= <<
+/*
+ * Template for VC generation details (aka Verbose Mode)
+ */
+outputVCGenDetails(fileHeader, assertiveCodeBlocks) ::= <<
 ========================= VC Generation Details  =========================
 
 <fileHeader>
 
 ==========================================================================
 
+<assertiveCodeBlocks; separator = "\n">
+
 >>
 
-// Header for enhancement realizations
+/*
+ * Template for concept header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputConceptHeader(conceptName) ::= <<
+    Concept Name: <conceptName>
+>>
+
+/*
+ * Template for concept realization header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputConceptRealizHeader(realizName, conceptName) ::= <<
+    Concept Realization Name: <realizName>
+    Concept Name: <conceptName>
+>>
+
+/*
+ * Template for enhancement header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputEnhancementHeader(enhancementName, conceptName) ::= <<
+    Enhancement Name: <enhancementName>
+    Concept Name: <conceptName>
+>>
+
+/*
+ * Template for enhancement realization header. This gets added to the top
+ * of the verbose mode section.
+ */
 outputEnhancementRealizHeader(realizName, enhancementName, conceptName) ::= <<
     Enhancement Realization Name: <realizName>
     Enhancement Name: <enhancementName>
     Concept Name: <conceptName>
+>>
+
+/*
+ * Template for facility header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputFacilityHeader(facilityName) ::= <<
+    Facility Name: <facilityName>
+>>
+
+/*
+ * Template for displaying the name of a assertive code block and each of
+ * its transformation through proof rule applications.
+ */
+outputAssertiveCodeBlock(blockName, vcGenSteps) ::= <<
+========================= <blockName> =========================
+
+<vcGenSteps; separator = "\n">
+>>
+
+/*
+ * Template for displaying the name for the proof rule applied, the list of
+ * free variables at this step and the resulting assertive code block after
+ * the application of the proof rule.
+ */
+outputVCGenStep(proofRuleName, moreDetails, freeVariables, currentStateOfBlock) ::= <<
+Applied <proofRuleName>: <if(moreDetails)>[<moreDetails>]<endif>
+
+Free Variables: <freeVariables; separator = ",">
+
+<currentStateOfBlock>
+
+_____________________
+
 >>
