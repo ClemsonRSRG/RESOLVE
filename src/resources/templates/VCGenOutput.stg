@@ -105,13 +105,10 @@ outputAssertiveCodeBlock(blockName, vcGenSteps) ::= <<
  * free variables at this step and the resulting assertive code block after
  * the application of the proof rule.
  */
-outputVCGenStep(proofRuleName, moreDetails, freeVariables, currentStateOfBlock) ::= <<
+outputVCGenStep(proofRuleName, moreDetails, currentStateOfBlock) ::= <<
 Applied <proofRuleName>: <if(moreDetails)>[<moreDetails>]<endif>
 
-Free Variables: <freeVariables; separator = ",">
-
 <currentStateOfBlock>
-
 _____________________
 
 >>

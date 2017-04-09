@@ -142,16 +142,11 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         Iterator<Exp> freeVarIt = myFreeVars.iterator();
         while (freeVarIt.hasNext()) {
             Exp current = freeVarIt.next();
-            sb.append(current);
+            sb.append(current.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append(" : ");
             sb.append(current.getMathType());
-
-            if (freeVarIt.hasNext()) {
-                sb.append(", ");
-            }
-            else {
-                sb.append("\n");
-            }
+            sb.append("\n");
         }
         sb.append("\n");
 

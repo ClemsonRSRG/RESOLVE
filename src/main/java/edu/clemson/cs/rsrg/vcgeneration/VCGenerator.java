@@ -16,7 +16,6 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
-import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
@@ -31,7 +30,6 @@ import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
@@ -83,9 +81,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * {@code VCs} for.</p>
      */
     private ModuleScope myCurrentModuleScope;
-
-    /** <p>This is the status handler for the RESOLVE compiler.</p> */
-    private final StatusHandler myStatusHandler;
 
     /**
      * <p>This is the math type graph that indicates relationship
@@ -157,6 +152,9 @@ public class VCGenerator extends TreeWalkerVisitor {
     /** <p>String template for the VC generation details model.</p> */
     private final ST myVCGenDetailsModel;
 
+    /** <p>String template for the each of the assertive code blocks.</p> */
+    private final Map<AssertiveCodeBlock, ST> myAssertiveCodeBlockModels;
+
     /** <p>String template groups for storing all the VC generation details.</p> */
     private final STGroup mySTGroup;
 
@@ -207,6 +205,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     public VCGenerator(MathSymbolTableBuilder builder,
             CompileEnvironment compileEnvironment, STGroup stGroup, ST model) {
+        myAssertiveCodeBlockModels = new LinkedHashMap<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
         myFinalAssertiveCodeBlocks = new LinkedList<>();
@@ -216,7 +215,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         myLocationDetails = new LinkedHashMap<>();
         myModel = model;
         mySTGroup = stGroup;
-        myStatusHandler = myCompileEnvironment.getStatusHandler();
         myTypeGraph = myBuilder.getTypeGraph();
         myVCGenDetailsModel = mySTGroup.getInstanceOf("outputVCGenDetails");
     }
@@ -294,6 +292,21 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(dec.getLocation());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
+     *
+     * @param dec A module declaration.
+     */
+    @Override
+    public final void postModuleDec(ModuleDec dec) {
+        // Loop through our incomplete assertive code blocks
+        for (AssertiveCodeBlock block : myIncompleteAssertiveCodeBlocks) {
+            // TODO: Apply statement rules to each of the incomplete blocks
+            myVCGenDetailsModel.add("assertiveCodeBlocks",
+                    myAssertiveCodeBlockModels.get(block).render());
         }
     }
 
@@ -380,6 +393,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                         myCorrespondingOperation, isLocal),
                 false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+        // Create a new model for this assertive code block
+        ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        blockModel.add("blockName", dec.getName());
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, blockModel);
     }
 
     /**
@@ -389,18 +407,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postProcedureDec(ProcedureDec dec) {
-        // Verbose Mode Debug Messages
-        /*myVCBuffer.append("\n=========================");
-        myVCBuffer.append(" Procedure: ");
-        myVCBuffer.append(dec.getName().getName());
-        myVCBuffer.append(" =========================\n");*/
-
-        // Obtains items from the current operation
-        OperationDec opDec =
-                (OperationDec) myCorrespondingOperation.getDefiningElement();
-        Location loc = dec.getLocation();
-        String name = dec.getName().getName();
-
         // TODO: Figure out what works and what doesn't!
         /*Exp requires =
                 modifyRequiresClause(getRequiresClause(loc, opDec), loc,
@@ -441,22 +447,25 @@ public class VCGenerator extends TreeWalkerVisitor {
                 procDur, varFinalDur, parameterVarList, variableList,
                 statementList, isLocal);
 
-        // Add this to our stack of to be processed assertive codes.
-        myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
-        myIncAssertiveCodeStackInfo.push("");
-
-        // Set the current assertive code to null
-        // YS: (We the modify requires and ensures clause needs to have
-        // and current assertive code to work. Not very clean way to
-        // solve the problem, but should work.)
-        myCurrentAssertiveCode = null;
-
         // Loop through assertive code stack
         loopAssertiveCodeStack();
 
         myOperationDecreasingExp = null;
         myCurrentOperationProfileEntry = null;*/
 
+        // Add the different details to the various different output models
+        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+        stepModel.add("proofRuleName", "Procedure Declaration Rule").add(
+                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        ST blockModel =
+                myAssertiveCodeBlockModels.remove(myCurrentAssertiveCodeBlock);
+        blockModel.add("vcGenSteps", stepModel.render());
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, blockModel);
+
+        // Add this as a new incomplete assertive code block
+        myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
+
+        myCurrentAssertiveCodeBlock = null;
         myCorrespondingOperation = null;
     }
 
