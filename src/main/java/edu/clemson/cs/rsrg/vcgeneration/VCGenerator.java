@@ -13,7 +13,6 @@
 package edu.clemson.cs.rsrg.vcgeneration;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
@@ -24,7 +23,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
-import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -49,6 +47,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import org.stringtemplate.v4.ST;
@@ -364,9 +363,23 @@ public class VCGenerator extends TreeWalkerVisitor {
                             dec.getName(), argTypes, myCurrentModuleScope);
         }*/
 
+        // Check to see if this a local operation
+        boolean isLocal =
+                Utilities.isLocationOperation(dec.getName().getName(),
+                        myCurrentModuleScope);
+
         // Create a new assertive code block
         myCurrentAssertiveCodeBlock =
                 new AssertiveCodeBlock(myTypeGraph, dec, dec.getName());
+
+        // Create the top most level assume statement and
+        // add it to the assertive code block as the first statement
+        AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation(),
+                Utilities.createTopLevelAssumeExps(dec.getLocation(), myCurrentModuleScope,
+                        myCurrentAssertiveCodeBlock, myLocationDetails, myGlobalRequires, myGlobalConstraints,
+                        myCorrespondingOperation, isLocal),
+                false);
+        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
     }
 
     /**
@@ -387,9 +400,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 (OperationDec) myCorrespondingOperation.getDefiningElement();
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
-        boolean isLocal =
-                Utilities.isLocationOperation(dec.getName().getName(),
-                        myCurrentModuleScope);
 
         // TODO: Figure out what works and what doesn't!
         /*Exp requires =
@@ -498,8 +508,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         conceptModuleDec.getRequires());
 
                 // Store the concept's type constraints from the module parameters
-                storeModuleTypeConstraints(conceptModuleDec.getLocation(),
-                        conceptModuleDec.getParameterDecs());
+                storeModuleParameterTypeConstraints(conceptModuleDec
+                        .getLocation(), conceptModuleDec.getParameterDecs());
             }
 
             // Store the concept's module constraints
@@ -541,8 +551,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         realizModuleDec.getRequires());
 
                 // Store the concept realization's type constraints from the module parameters
-                storeModuleTypeConstraints(realizModuleDec.getLocation(),
-                        realizModuleDec.getParameterDecs());
+                storeModuleParameterTypeConstraints(realizModuleDec
+                        .getLocation(), realizModuleDec.getParameterDecs());
             }
         }
         catch (NoSuchSymbolException e) {
@@ -576,8 +586,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         enhancementModuleDec.getRequires());
 
                 // Store the enhancement's type constraints from the module parameters
-                storeModuleTypeConstraints(enhancementModuleDec.getLocation(),
-                        enhancementModuleDec.getParameterDecs());
+                storeModuleParameterTypeConstraints(enhancementModuleDec
+                        .getLocation(), enhancementModuleDec.getParameterDecs());
             }
         }
         catch (NoSuchSymbolException e) {
@@ -611,8 +621,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         realizModuleDec.getRequires());
 
                 // Store the enhancement realization's type constraints from the module parameters
-                storeModuleTypeConstraints(realizModuleDec.getLocation(),
-                        realizModuleDec.getParameterDecs());
+                storeModuleParameterTypeConstraints(realizModuleDec
+                        .getLocation(), realizModuleDec.getParameterDecs());
             }
         }
         catch (NoSuchSymbolException e) {
@@ -628,7 +638,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      *            module parameters.
      * @param moduleParameterDecs A list of {@link ModuleParameterDec}.
      */
-    private void storeModuleTypeConstraints(Location loc, List<ModuleParameterDec> moduleParameterDecs) {
+    private void storeModuleParameterTypeConstraints(Location loc,
+            List<ModuleParameterDec> moduleParameterDecs) {
         for (ModuleParameterDec m : moduleParameterDecs) {
             Dec wrappedDec = m.getWrappedDec();
             if (wrappedDec instanceof ConstantParamDec) {
@@ -658,37 +669,27 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // Make sure we don't have a generic type
                     if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
                         // Obtain the original dec from the AST
-                        TypeFamilyDec type = (TypeFamilyDec) typeEntry.getDefiningElement();
+                        TypeFamilyDec type =
+                                (TypeFamilyDec) typeEntry.getDefiningElement();
 
-                        if (!VarExp.isLiteralTrue(type.getConstraint().getAssertionExp())) {
-                            // Create a variable expression from the declared variable
-                            VarExp varDecExp =
-                                    Utilities.createVarExp(dec.getLocation(), null,
-                                            dec.getName(),
-                                            typeEntry.getModelType(), null);
-
-                            // Create a variable expression from the type exemplar
-                            VarExp exemplar =
-                                    Utilities.createVarExp(type.getLocation(),
-                                            null, type.getExemplar(), typeEntry
+                        if (!VarExp.isLiteralTrue(type.getConstraint()
+                                .getAssertionExp())) {
+                            AssertionClause constraintClause =
+                                    type.getConstraint();
+                            AssertionClause modifiedConstraint =
+                                    Utilities.getTypeConstraintClause(
+                                            constraintClause,
+                                            dec.getLocation(), null, dec
+                                                    .getName(), type
+                                                    .getExemplar(), typeEntry
                                                     .getModelType(), null);
 
-                            // Create a replacement map
-                            Map<Exp, Exp> substitutions = new HashMap<>();
-                            substitutions.put(exemplar, varDecExp);
-
-                            // Create new assertion clause by replacing the exemplar with the actual
-                            AssertionClause constraintClause = type.getConstraint();
-                            Location newLoc = dec.getLocation().clone();
-                            Exp constraintWithReplacements =
-                                    constraintClause.getAssertionExp().substitute(substitutions);
-                            AssertionClause newConstraintClause =
-                                    new AssertionClause(newLoc, ClauseType.CONSTRAINT,
-                                            constraintWithReplacements, constraintClause.getWhichEntailsExp());
-
                             // Store the constraint and its associated location detail for future use
-                            myGlobalConstraints.put(dec, Collections.singletonList(newConstraintClause));
-                            myLocationDetails.put(newLoc, "Constraint Clause for " + dec.getName());
+                            myGlobalConstraints.put(dec, Collections
+                                    .singletonList(modifiedConstraint));
+                            myLocationDetails.put(modifiedConstraint
+                                    .getLocation(), "Constraint Clause for "
+                                    + dec.getName());
                         }
                     }
                 }
@@ -711,8 +712,18 @@ public class VCGenerator extends TreeWalkerVisitor {
             AssertionClause requiresClause) {
         if (!VarExp.isLiteralTrue(requiresClause.getAssertionExp())) {
             myGlobalRequires.add(requiresClause);
-            myLocationDetails.put(requiresClause.getLocation(),
-                    "Requires Clause for " + decName);
+
+            // Add the location details for both the requires and
+            // which_entails expressions (if any).
+            myLocationDetails.put(requiresClause.getAssertionExp()
+                    .getLocation(), "Requires Clause for " + decName);
+            if (requiresClause.getWhichEntailsExp() != null) {
+                myLocationDetails.put(requiresClause.getWhichEntailsExp()
+                        .getLocation(),
+                        "Which_Entails expression for clause located at "
+                                + requiresClause.getWhichEntailsExp()
+                                        .getLocation());
+            }
         }
     }
 
