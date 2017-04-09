@@ -17,7 +17,10 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.FunctionExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -41,6 +44,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +63,79 @@ public class Utilities {
     // ===========================================================
 
     /**
+     * <p>This method returns a {@link FunctionExp} with the specified
+     * name and arguments.</p>
+     *
+     * @param loc Location that wants to create
+     *            this function expression.
+     * @param qualifier Qualifier for the function expression.
+     * @param name Name of the function expression.
+     * @param argExpList List of arguments to the function expression.
+     * @param functionNameType Mathematical type for the function name.
+     * @param funcType Mathematical type for the function expression.
+     *
+     * @return The new {@link FunctionExp}.
+     */
+    public static FunctionExp createFunctionExp(Location loc,
+            PosSymbol qualifier, PosSymbol name, List<Exp> argExpList,
+            MTType functionNameType, MTType funcType) {
+        // Create a VarExp for the function name
+        VarExp functionName =
+                Utilities.createVarExp(loc, qualifier, name, functionNameType,
+                        null);
+
+        // Create the function expression
+        FunctionExp exp = new FunctionExp(loc, functionName, null, argExpList);
+        exp.setMathType(funcType);
+
+        return exp;
+    }
+
+    /**
+     * <p>This method returns a {@link DotExp} with the {@link VarDec}
+     * and its initialization ensures clause.</p>
+     *
+     * @param varDec The declared variable.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return The new {@link DotExp}.
+     */
+    public static DotExp createInitExp(VarDec varDec, MTType booleanType) {
+        // Convert the declared variable into a VarExp
+        VarExp varExp =
+                Utilities.createVarExp(varDec.getLocation(), null, varDec.getName(),
+                        varDec.getTy().getMathTypeValue(), null);
+
+        // Create a VarExp using the type
+        VarExp typeNameExp = null;
+        if (varDec.getTy() instanceof NameTy) {
+            NameTy ty = (NameTy) varDec.getTy();
+            typeNameExp =
+                    Utilities.createVarExp(ty.getLocation(), ty.getQualifier(), ty.getName(),
+                            ty.getMathType(), ty.getMathTypeValue());
+        }
+        else {
+            Utilities.tyNotHandled(varDec.getTy(), varDec.getTy().getLocation());
+        }
+
+        // Create the "Is_Initial" FunctionExp
+        List<Exp> isInitialArgs = new ArrayList<>();
+        isInitialArgs.add(varExp);
+        FunctionExp isInitialExp =
+                createFunctionExp(varDec.getLocation(), null,
+                        new PosSymbol(varDec.getLocation(), "Is_Initial"),
+                        isInitialArgs, varDec.getTy().getMathType(), booleanType);
+
+        // Create the DotExp
+        List<Exp> segments = new ArrayList<>();
+        segments.add(typeNameExp);
+        segments.add(isInitialExp);
+        DotExp exp = new DotExp(varDec.getLocation(), segments);
+
+        return exp;
+    }
+
+    /**
      * <p>This method returns a newly created {@link VarExp}
      * with the {@link PosSymbol} and math type provided.</p>
      *
@@ -68,7 +145,7 @@ public class Utilities {
      * @param type New {@link VarExp VarExp's} math type.
      * @param typeValue New {@link VarExp VarExp's} math type value.
      *
-     * @return The new <code>VarExp</code>.
+     * @return The new {@link VarExp}.
      */
     public static VarExp createVarExp(Location loc, PosSymbol qualifier,
             PosSymbol name, MTType type, MTType typeValue) {

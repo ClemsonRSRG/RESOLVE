@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import java.util.Deque;
+import org.stringtemplate.v4.ST;
 
 /**
  * <p>A common interface that allows the different {@code Proof Rules}
@@ -34,6 +35,12 @@ public interface ProofRuleApplication {
      * that resulted from applying the {@code Proof Rule}.</p>
      */
     Deque<AssertiveCodeBlock> getAssertiveCodeBlocks();
+
+    /**
+     * <p>This method returns the string template associated with the incoming
+     * {@link AssertiveCodeBlock}.</p>
+     */
+    ST getBlockModel();
 
     /**
      * <p>This method returns a description associated with

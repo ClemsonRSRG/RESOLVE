@@ -239,6 +239,15 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>The type graph containing all the type relationships.</p>
+     *
+     * @return The type graph for the compiler.
+     */
+    public final TypeGraph getTypeGraph() {
+        return myTypeGraph;
+    }
+
+    /**
      * <p>Checks if we have {@link Statement Statements} that we still
      * need to apply proof rules to./p>
      *

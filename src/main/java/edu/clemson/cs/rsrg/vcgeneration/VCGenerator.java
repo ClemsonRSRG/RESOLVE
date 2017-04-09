@@ -22,6 +22,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -46,6 +48,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import org.stringtemplate.v4.ST;
@@ -200,7 +204,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param builder A scope builder for a symbol table.
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
-     * @param stGroup The string template file.
+     * @param stGroup The string template group we will be using.
      * @param model The model we are going be generating.
      */
     public VCGenerator(MathSymbolTableBuilder builder,
@@ -467,6 +471,58 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myCurrentAssertiveCodeBlock = null;
         myCorrespondingOperation = null;
+    }
+
+    // -----------------------------------------------------------
+    // Variable Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link VarDec}.</p>
+     *
+     * @param dec A variable declaration.
+     */
+    @Override
+    public final void postVarDec(VarDec dec) {
+        // Ty should always be a NameTy
+        if (dec.getTy() instanceof NameTy) {
+            NameTy nameTy = (NameTy) dec.getTy();
+
+            // Query for the type entry in the symbol table
+            SymbolTableEntry ste =
+                    Utilities.searchProgramType(nameTy.getLocation(), nameTy
+                            .getQualifier(), nameTy.getName(),
+                            myCurrentModuleScope);
+            ProgramTypeEntry typeEntry;
+            if (ste instanceof ProgramTypeEntry) {
+                typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
+            }
+            else {
+                typeEntry =
+                        ste.toTypeRepresentationEntry(nameTy.getLocation())
+                                .getDefiningTypeEntry();
+            }
+            ProofRuleApplication declRule;
+            // Apply known type variable declaration rule
+
+            // Apply generic type variable declaration
+            declRule =
+                    new GenericVariableDeclRule(dec,
+                            myCurrentAssertiveCodeBlock, mySTGroup,
+                            myAssertiveCodeBlockModels
+                                    .remove(myCurrentAssertiveCodeBlock));
+
+            // Update the current assertive code block and its associated block model.
+            myCurrentAssertiveCodeBlock =
+                    declRule.getAssertiveCodeBlocks().getFirst();
+            myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
+                    declRule.getBlockModel());
+        }
+        else {
+            // Shouldn't be possible but just in case it ever happens
+            // by accident.
+            Utilities.tyNotHandled(dec.getTy(), dec.getLocation());
+        }
     }
 
     // ===========================================================
