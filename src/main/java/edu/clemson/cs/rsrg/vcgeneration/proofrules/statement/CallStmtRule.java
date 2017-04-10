@@ -399,7 +399,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Call Statement Rule";
+        return "Call Rule";
     }
 
     // ===========================================================

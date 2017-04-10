@@ -125,7 +125,7 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Confirm Statement Rule";
+        return "Confirm Rule";
     }
 
 }

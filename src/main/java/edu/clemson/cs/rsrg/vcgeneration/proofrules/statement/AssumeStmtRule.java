@@ -112,7 +112,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Assume Statement Rule";
+        return "Assume Rule";
     }
 
     // ===========================================================
