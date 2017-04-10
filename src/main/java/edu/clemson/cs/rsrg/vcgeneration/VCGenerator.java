@@ -29,6 +29,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
+import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt.StatementType;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
@@ -404,12 +406,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
         // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
-        AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation(),
+        AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation().clone(),
                 Utilities.createTopLevelAssumeExps(dec.getLocation(), myCurrentModuleScope,
                         myCurrentAssertiveCodeBlock, myLocationDetails, myGlobalRequires, myGlobalConstraints,
                         myCorrespondingOperation, isLocal),
                 false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+        // Create Remember statement
+        MemoryStmt rememberStmt = new MemoryStmt(dec.getLocation().clone(), StatementType.REMEMBER);
+        myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
 
         // TODO: NY - Add any procedure duration clauses
 

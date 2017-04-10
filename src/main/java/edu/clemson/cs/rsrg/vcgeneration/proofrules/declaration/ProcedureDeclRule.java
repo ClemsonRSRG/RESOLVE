@@ -16,7 +16,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
-import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
@@ -111,12 +110,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Create Remember statement
-        MemoryStmt rememberStmt =
-                new MemoryStmt(myLocation.clone(),
-                        MemoryStmt.StatementType.REMEMBER);
-        myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
-
         // TODO: Assume decreasing expression if it is recursive
 
         // Add all the statements
