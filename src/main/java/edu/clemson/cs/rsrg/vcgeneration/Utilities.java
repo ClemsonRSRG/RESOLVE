@@ -586,6 +586,20 @@ public class Utilities {
     }
 
     /**
+     * <p>An helper method that throws the appropriate message that
+     * the expression type that we found isn't handled.</p>
+     *
+     * @param exp An expression.
+     * @param loc Location where this expression was found.
+     */
+    public static void expNotHandled(Exp exp, Location loc) {
+        String message =
+                "[VCGenerator] Exp type not handled: "
+                        + exp.getClass().getCanonicalName();
+        throw new SourceErrorException(message, loc);
+    }
+
+    /**
      * <p>An helper method that uses the assertion expression and any
      * {@code which_entails} expressions to {@code exp} to form a new
      * conjuncted expression.</p>

@@ -46,8 +46,8 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application for a variable declaration
-     * rule with a known program type.</p>
+     * <p>This creates a new application of the {@code confirm}
+     * rule.</p>
      *
      * @param confirmStmt The {@link ConfirmStmt} we are applying
      *                    the rule to.

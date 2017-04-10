@@ -111,6 +111,7 @@ public class KnownTypeVariableFinalizationRule
                         affectedExp.clone());
             }
         }
+        assumeExp = assumeExp.substitute(substitutions);
 
         AssumeStmt finalAssumeStmt =
                 new AssumeStmt(finalEnsuresClause.getLocation(), assumeExp, false);

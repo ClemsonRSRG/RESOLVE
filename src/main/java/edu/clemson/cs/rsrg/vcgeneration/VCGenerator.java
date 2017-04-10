@@ -60,6 +60,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.AssumeStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.ConfirmStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
@@ -618,6 +619,14 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Apply one of the statement proof rules
             if (statement instanceof AssumeStmt) {
                 // Apply the assume rule.
+                ProofRuleApplication assumeRule =
+                        new AssumeStmtRule((AssumeStmt) statement,
+                                assertiveCodeBlock, mySTGroup, blockModel);
+                assumeRule.applyRule();
+
+                // Assume rule only generates one assertive code block
+                assertiveCodeBlock =
+                        assumeRule.getAssertiveCodeBlocks().getFirst();
             }
             else if (statement instanceof CallStmt) {
                 // Apply the call rule.
