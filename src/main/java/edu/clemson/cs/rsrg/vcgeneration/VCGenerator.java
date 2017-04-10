@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -50,6 +51,7 @@ import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import org.stringtemplate.v4.ST;
@@ -392,6 +394,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
+        // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
         AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation(),
                 Utilities.createTopLevelAssumeExps(dec.getLocation(), myCurrentModuleScope,
                         myCurrentAssertiveCodeBlock, myLocationDetails, myGlobalRequires, myGlobalConstraints,
@@ -399,9 +402,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                 false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
+        // TODO: NY - Add any procedure duration clauses
+
         // Create a new model for this assertive code block
         ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
         blockModel.add("blockName", dec.getName());
+        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+        stepModel.add("proofRuleName", "Procedure Declaration Rule (Part 1)").add(
+                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        blockModel.add("vcGenSteps", stepModel.render());
         myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, blockModel);
     }
 
@@ -412,60 +421,27 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postProcedureDec(ProcedureDec dec) {
-        // TODO: Figure out what works and what doesn't!
-        /*Exp requires =
-                modifyRequiresClause(getRequiresClause(loc, opDec), loc,
-                        myCurrentAssertiveCode, opDec, isLocal);
-        Exp ensures =
-                modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, opDec,
-                        isLocal);
-        List<Statement> statementList = dec.getStatements();
-        List<ParameterVarDec> parameterVarList = dec.getParameters();
-        List<VarDec> variableList = dec.getVariables();
-        AssertionClause decreasing = dec.getDecreasing();
+        // Create the final confirm expression
+        // TODO: Replace facility actuals variables in the ensures clause
+        Exp finalConfirmExp =
+                Utilities.createFinalConfirmExp(dec.getLocation(),
+                        myCurrentModuleScope, myTypeGraph, myLocationDetails,
+                        myCorrespondingOperation);
 
-        // NY YS
-        Exp procDur = null;
-        Exp varFinalDur = null;
-        /*if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
-            procDur = myCurrentOperationProfileEntry.getDurationClause();
+        // Apply procedure declaration rule
+        // TODO: Recheck logic to make sure everything still works!
+        ProofRuleApplication declRule =
+                new ProcedureDeclRule(dec.getLocation(), dec.getStatements(),
+                        finalConfirmExp, myCurrentAssertiveCodeBlock,
+                        mySTGroup, myAssertiveCodeBlockModels
+                                .remove(myCurrentAssertiveCodeBlock));
+        declRule.applyRule();
 
-            // Loop through local variables to get their finalization duration
-            for (VarDec v : dec.getVariables()) {
-                Exp finalVarDur = Utilities.createFinalizAnyDur(v, BOOLEAN);
-
-                // Create/Add the duration expression
-                if (varFinalDur == null) {
-                    varFinalDur = finalVarDur;
-                }
-                else {
-                    varFinalDur =
-                            new InfixExp((Location) loc.clone(), varFinalDur,
-                                    Utilities.createPosSymbol("+"), finalVarDur);
-                }
-                varFinalDur.setMathType(myTypeGraph.R);
-            }
-        }*/
-
-        // Apply the procedure declaration rule
-        /*applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
-                procDur, varFinalDur, parameterVarList, variableList,
-                statementList, isLocal);
-
-        // Loop through assertive code stack
-        loopAssertiveCodeStack();
-
-        myOperationDecreasingExp = null;
-        myCurrentOperationProfileEntry = null;*/
-
-        // Add the different details to the various different output models
-        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-        stepModel.add("proofRuleName", "Procedure Declaration Rule").add(
-                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
-        ST blockModel =
-                myAssertiveCodeBlockModels.remove(myCurrentAssertiveCodeBlock);
-        blockModel.add("vcGenSteps", stepModel.render());
-        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, blockModel);
+        // Update the current assertive code block and its associated block model.
+        myCurrentAssertiveCodeBlock =
+                declRule.getAssertiveCodeBlocks().getFirst();
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, declRule
+                .getBlockModel());
 
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
@@ -784,7 +760,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myGlobalConstraints.put(dec, Collections
                                     .singletonList(modifiedConstraint));
                             myLocationDetails.put(modifiedConstraint
-                                    .getLocation(), "Constraint Clause for "
+                                    .getLocation(), "Constraint Clause of "
                                     + dec.getName());
                         }
                     }
@@ -812,7 +788,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Add the location details for both the requires and
             // which_entails expressions (if any).
             myLocationDetails.put(requiresClause.getAssertionExp()
-                    .getLocation(), "Requires Clause for " + decName);
+                    .getLocation(), "Requires Clause of " + decName);
             if (requiresClause.getWhichEntailsExp() != null) {
                 myLocationDetails.put(requiresClause.getWhichEntailsExp()
                         .getLocation(),

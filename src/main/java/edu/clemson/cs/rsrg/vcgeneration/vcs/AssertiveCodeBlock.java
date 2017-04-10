@@ -151,8 +151,10 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         sb.append("\n");
 
         // Statements
+        sb.append("Statements:\n");
         for (Statement statement : myStatements) {
-            sb.append(statement.asString(indentSize, innerIndentInc));
+            sb.append(statement.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append("\n");
         }
         sb.append("\n");

@@ -14,15 +14,14 @@ package edu.clemson.cs.rsrg.vcgeneration;
 
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.FunctionExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -33,6 +32,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.Parameter
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTCartesian;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
@@ -43,6 +43,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.Facility
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +62,196 @@ public class Utilities {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>This method uses the {@code ensures} clause from the operation entry
+     * and adds in additional {@code ensures} clauses for different parameter modes
+     * and builds the appropriate {@code ensures} clause that will be an
+     * {@link AssertiveCodeBlock AssertiveCodeBlock's} final {@code confirm} statement.</p>
+     *
+     * <p>See the {@code Procedure} declaration rule for more detail.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param scope The module scope to start our search.
+     * @param g The current type graph.
+     * @param locationStringsMap A map containing all the {@link Location} details.
+     * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
+     *
+     * @return The final confirm expression.
+     */
+    public static Exp createFinalConfirmExp(Location loc, ModuleScope scope,
+            TypeGraph g, Map<Location, String> locationStringsMap,
+            OperationEntry correspondingOperationEntry) {
+        Exp retExp = null;
+
+        // Add the operation's ensures clause (and any which_entails clause)
+        AssertionClause ensuresClause =
+                correspondingOperationEntry.getEnsuresClause();
+        Exp ensuresExp = ensuresClause.getAssertionExp().clone();
+        if (!VarExp.isLiteralTrue(ensuresExp)) {
+            retExp = Utilities.formConjunct(loc, retExp, ensuresClause);
+
+            // At the same time add the location details for these expressions.
+            locationStringsMap.put(ensuresExp.getLocation(), "Ensures Clause of "
+                    + correspondingOperationEntry.getName());
+            if (ensuresClause.getWhichEntailsExp() != null) {
+                locationStringsMap.put(ensuresClause.getWhichEntailsExp()
+                                .getLocation(),
+                        "Which_Entails expression for clause located at "
+                                + ensuresClause.getWhichEntailsExp().getLocation());
+            }
+        }
+
+        // Loop through each of the parameters in the operation entry.
+        ImmutableList<ProgramParameterEntry> entries =
+                correspondingOperationEntry.getParameters();
+        for (ProgramParameterEntry entry : entries) {
+            ParameterVarDec parameterVarDec =
+                    (ParameterVarDec) entry.getDefiningElement();
+            ParameterMode parameterMode = entry.getParameterMode();
+            NameTy nameTy = (NameTy) parameterVarDec.getTy();
+
+            // Parameter variable and incoming parameter variable
+            VarExp parameterExp = createVarExp(parameterVarDec.getLocation().clone(), null,
+                    parameterVarDec.getName().clone(), nameTy.getMathTypeValue(), null);
+            OldExp oldParameterExp = new OldExp(parameterVarDec.getLocation().clone(), parameterExp.clone());
+            oldParameterExp.setMathType(nameTy.getMathTypeValue());
+
+            // Query for the type entry in the symbol table
+            SymbolTableEntry ste =
+                    Utilities.searchProgramType(loc, nameTy.getQualifier(),
+                            nameTy.getName(), scope);
+
+            ProgramTypeEntry typeEntry;
+            if (ste instanceof ProgramTypeEntry) {
+                typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
+            } else {
+                typeEntry =
+                        ste.toTypeRepresentationEntry(nameTy.getLocation())
+                                .getDefiningTypeEntry();
+            }
+
+            // The restores mode adds an additional ensures
+            // that the outgoing value is equal to the incoming value.
+            // Ex: w = #w
+            if (parameterMode == ParameterMode.RESTORES) {
+                // Set the details for the new location
+                Location restoresLoc = loc.clone();
+
+                // Need to ensure here that the everything inside the type family
+                // is restored at the end of the operation.
+                Exp restoresConditionExp = null;
+                if (typeEntry.getModelType() instanceof MTCartesian) {
+                    MTCartesian cartesian =
+                            (MTCartesian) typeEntry.getModelType();
+                    List<MTType> elementTypes =
+                            cartesian.getComponentTypes();
+
+                    for (int i = 0; i < cartesian.size(); i++) {
+                        // Create an Exp for the Cartesian product element
+                        VarExp elementExp = Utilities.createVarExp(restoresLoc.clone(), null,
+                                new PosSymbol(restoresLoc.clone(), cartesian.getTag(i)),
+                                elementTypes.get(i), null);
+
+                        // Create a list of segments. The first element should be the original
+                        // parameterExp and oldParameterExp and the second element the cartesian product element.
+                        List<Exp> segments = new ArrayList<>();
+                        List<Exp> oldSegments = new ArrayList<>();
+                        segments.add(parameterExp);
+                        oldSegments.add(oldParameterExp);
+                        segments.add(elementExp);
+                        oldSegments.add(elementExp.clone());
+
+                        // Create the dotted expressions
+                        DotExp elementDotExp = new DotExp(restoresLoc.clone(), segments);
+                        elementDotExp.setMathType(elementExp.getMathType());
+                        DotExp oldElementDotExp = new DotExp(restoresLoc.clone(), oldSegments);
+                        oldElementDotExp.setMathType(elementExp.getMathType());
+
+                        // Create an equality expression
+                        EqualsExp equalsExp = new EqualsExp(restoresLoc.clone(), elementDotExp, null,
+                                Operator.EQUAL, oldElementDotExp);
+                        equalsExp.setMathType(g.BOOLEAN);
+
+                        // Add this to our final equals expression
+                        if (restoresConditionExp == null) {
+                            restoresConditionExp = equalsExp;
+                        }
+                        else {
+                            restoresConditionExp = InfixExp.formConjunct(restoresLoc.clone(),
+                                    restoresConditionExp, equalsExp);
+                        }
+                    }
+                }
+                else {
+                    // Construct an expression using the expression and it's
+                    // old expression equivalent.
+                    restoresConditionExp =
+                            new EqualsExp(restoresLoc.clone(), parameterExp.clone(), null,
+                                    Operator.EQUAL, oldParameterExp.clone());
+                    restoresConditionExp.setMathType(g.BOOLEAN);
+                }
+
+                AssertionClause restoresEnsuresClause = new AssertionClause(restoresLoc.clone(),
+                        ClauseType.ENSURES, restoresConditionExp);
+                retExp = Utilities.formConjunct(restoresLoc.clone(), retExp, restoresEnsuresClause);
+
+                // Add the location details for this expression.
+                locationStringsMap.put(restoresEnsuresClause.getLocation(), "Ensures Clause of "
+                        + correspondingOperationEntry.getName()
+                        + " (Condition from \"" + parameterMode + "\" parameter mode)");
+            }
+            // The clears mode adds an additional ensures
+            // that the outgoing value is the initial value.
+            else if (parameterMode == ParameterMode.CLEARS) {
+                AssertionClause modifiedInitEnsures;
+                if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+                    // Parameter variable with known program type
+                    TypeFamilyDec type =
+                            (TypeFamilyDec) typeEntry.getDefiningElement();
+                    AssertionClause initEnsures =
+                            type.getInitialization().getEnsures();
+                    modifiedInitEnsures =
+                            Utilities.getTypeInitEnsuresClause(initEnsures, loc.clone(), null,
+                                    parameterVarDec.getName(), type.getExemplar(),
+                                    typeEntry.getModelType(), null);
+
+                    // TODO: Logic for types in concept realizations
+                }
+                else {
+                    VarDec parameterAsVarDec =
+                            new VarDec(parameterVarDec.getName(), parameterVarDec.getTy());
+                    modifiedInitEnsures =
+                            new AssertionClause(loc.clone(), ClauseType.ENSURES,
+                                    Utilities.createInitExp(parameterAsVarDec, g.BOOLEAN));
+                }
+
+                retExp = Utilities.formConjunct(loc.clone(), retExp, modifiedInitEnsures);
+
+                // Add the location details for this expression.
+                locationStringsMap.put(modifiedInitEnsures.getLocation(), "Ensures Clause of "
+                        + correspondingOperationEntry.getName()
+                        + " (Condition from \"" + parameterMode + "\" parameter mode)");
+            }
+
+            // TODO: See below!
+            // If the type is a type representation, then our requires clause
+            // should really say something about the conceptual type and not
+            // the variable
+        }
+
+        // Check to see if it is null. If that is the case, then we simply return "true"
+        if (retExp == null) {
+            retExp = VarExp.getTrueVarExp(loc.clone(), g);
+
+            // Add the location details for this expression.
+            locationStringsMap.put(retExp.getLocation(),
+                    "Ensures Clause of " + correspondingOperationEntry.getName());
+        }
+
+        return retExp;
+    }
 
     /**
      * <p>This method returns a {@link FunctionExp} with the specified
@@ -160,8 +351,8 @@ public class Utilities {
     /**
      * <p>This method uses all the {@code requires} and {@code constraint}
      * clauses from the various different sources (see below for complete list)
-     * and builds the appropriate assume clause that goes at the beginning an
-     * {@link AssertiveCodeBlock}.</p>
+     * and builds the appropriate {@code assume} clause that goes at the
+     * beginning an {@link AssertiveCodeBlock}.</p>
      *
      * <p>List of different places where clauses can originate from:</p>
      * <ul>
@@ -195,7 +386,7 @@ public class Utilities {
      * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
      * @param isLocalOperation {@code true} if it is a local operation, {@code false} otherwise.
      *
-     * @return The modified requires clause <code>Exp</code>.
+     * @return The top-level assumed expression.
      */
     public static Exp createTopLevelAssumeExps(Location loc, ModuleScope scope,
             AssertiveCodeBlock currentBlock,
@@ -232,7 +423,7 @@ public class Utilities {
 
             // At the same time add the location details for these expressions.
             locationStringsMap.put(requiresExp.getLocation(),
-                    "Requires Clause for "
+                    "Requires Clause of "
                             + correspondingOperationEntry.getName());
             if (requiresClause.getWhichEntailsExp() != null) {
                 locationStringsMap.put(requiresClause.getWhichEntailsExp()
@@ -295,7 +486,7 @@ public class Utilities {
                         // At the same time add the location details for these expressions.
                         locationStringsMap.put(modifiedConstraintClause
                                 .getAssertionExp().getLocation(),
-                                "Constraint Clause for "
+                                "Constraint Clause of "
                                         + parameterVarDec.getName());
                         if (constraintClause.getWhichEntailsExp() != null) {
                             locationStringsMap.put(modifiedConstraintClause
