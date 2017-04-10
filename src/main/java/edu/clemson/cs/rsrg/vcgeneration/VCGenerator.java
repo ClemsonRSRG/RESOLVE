@@ -23,7 +23,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
-import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -49,7 +48,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericVariableDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import org.stringtemplate.v4.ST;
@@ -63,6 +63,7 @@ import java.util.*;
  *
  * @author Heather Keown Harton
  * @author Yu-Shan Sun
+ * @author Nighat Yasmin
  * @version 3.0
  */
 public class VCGenerator extends TreeWalkerVisitor {
@@ -502,19 +503,49 @@ public class VCGenerator extends TreeWalkerVisitor {
                         ste.toTypeRepresentationEntry(nameTy.getLocation())
                                 .getDefiningTypeEntry();
             }
-            ProofRuleApplication declRule;
-            // Apply known type variable declaration rule
 
-            // Apply generic type variable declaration
-            declRule =
-                    new GenericVariableDeclRule(dec,
-                            myCurrentAssertiveCodeBlock, mySTGroup,
-                            myAssertiveCodeBlockModels
-                                    .remove(myCurrentAssertiveCodeBlock));
+            // Generate the corresponding proof rule
+            ProofRuleApplication declRule;
+            if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+                // Variable declaration rule for known types
+                TypeFamilyDec type =
+                        (TypeFamilyDec) typeEntry.getDefiningElement();
+                AssertionClause initEnsures =
+                        type.getInitialization().getEnsures();
+                AssertionClause modifiedInitEnsures =
+                        Utilities.getTypeInitEnsuresClause(initEnsures, dec
+                                .getLocation(), null, dec.getName(), type
+                                .getExemplar(), typeEntry.getModelType(), null);
+
+                // TODO: Logic for types in concept realizations
+
+                declRule =
+                        new KnownTypeVariableDeclRule(modifiedInitEnsures,
+                                myCurrentAssertiveCodeBlock, mySTGroup,
+                                myAssertiveCodeBlockModels
+                                        .remove(myCurrentAssertiveCodeBlock));
+            }
+            else {
+                // Variable declaration rule for generic types
+                declRule =
+                        new GenericTypeVariableDeclRule(dec,
+                                myCurrentAssertiveCodeBlock, mySTGroup,
+                                myAssertiveCodeBlockModels
+                                        .remove(myCurrentAssertiveCodeBlock));
+            }
+
+            // Apply the variable declaration rule.
+            declRule.applyRule();
+
+            // NY YS
+            // TODO: Initialization duration for this variable
 
             // Update the current assertive code block and its associated block model.
             myCurrentAssertiveCodeBlock =
                     declRule.getAssertiveCodeBlocks().getFirst();
+            myCurrentAssertiveCodeBlock.addFreeVar(Utilities.createVarExp(dec
+                    .getLocation(), null, dec.getName(), dec.getMathType(),
+                    null));
             myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
                     declRule.getBlockModel());
         }

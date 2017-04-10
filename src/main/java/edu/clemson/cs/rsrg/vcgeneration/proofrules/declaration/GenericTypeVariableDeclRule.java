@@ -1,5 +1,5 @@
 /*
- * GenericVariableDeclRule.java
+ * GenericTypeVariableDeclRule.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -22,13 +22,13 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for a generic variable
- * declaration rule.</p>
+ * <p>This class contains the logic for a variable declaration
+ * rule with a generic program type.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class GenericVariableDeclRule extends AbstractProofRuleApplication
+public class GenericTypeVariableDeclRule extends AbstractProofRuleApplication
         implements
             ProofRuleApplication {
 
@@ -44,17 +44,17 @@ public class GenericVariableDeclRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application for the generic variable
-     * declaration rule.</p>
+     * <p>This creates a new application for a variable declaration
+     * rule with a generic program type.</p>
      *
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
      * @param varDec The variable declaration we are applying the
      *               rule to.
+     * @param block The assertive code block that the subclasses are
+     *              applying the rule to.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public GenericVariableDeclRule(VarDec varDec, AssertiveCodeBlock block,
+    public GenericTypeVariableDeclRule(VarDec varDec, AssertiveCodeBlock block,
             STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
         myVarDec = varDec;
@@ -93,7 +93,7 @@ public class GenericVariableDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Generic Variable Declaration Rule";
+        return "Variable Declaration Rule (Generic Program Type)";
     }
 
 }

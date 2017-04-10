@@ -209,7 +209,7 @@ public class Utilities {
         // need to add their location details to the map because
         // it is there already.
         for (AssertionClause clause : moduleLevelRequiresClauses) {
-            retExp = formConjunct(loc, retExp, clause);
+            retExp = Utilities.formConjunct(loc, retExp, clause);
         }
 
         // Add the module level constraint clauses.
@@ -217,7 +217,7 @@ public class Utilities {
         // because it is there already.
         for (Dec dec : moduleLevelConstraintClauses.keySet()) {
             for (AssertionClause clause : moduleLevelConstraintClauses.get(dec)) {
-                retExp = formConjunct(loc, retExp, clause);
+                retExp = Utilities.formConjunct(loc, retExp, clause);
             }
         }
 
@@ -228,7 +228,7 @@ public class Utilities {
                 correspondingOperationEntry.getRequiresClause();
         Exp requiresExp = requiresClause.getAssertionExp().clone();
         if (!VarExp.isLiteralTrue(requiresExp)) {
-            retExp = formConjunct(loc, retExp, requiresClause);
+            retExp = Utilities.formConjunct(loc, retExp, requiresClause);
 
             // At the same time add the location details for these expressions.
             locationStringsMap.put(requiresExp.getLocation(),
@@ -289,7 +289,7 @@ public class Utilities {
                                         typeFamilyDec.getExemplar(), typeEntry
                                                 .getModelType(), null);
                         retExp =
-                                formConjunct(loc, retExp,
+                                Utilities.formConjunct(loc, retExp,
                                         modifiedConstraintClause);
 
                         // At the same time add the location details for these expressions.
@@ -369,6 +369,40 @@ public class Utilities {
                     .getLocation(), null, parameterVarDec.getName(),
                     declaredType.toMath(), null));
 
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>An helper method that uses the assertion expression and any
+     * {@code which_entails} expressions to {@code exp} to form a new
+     * conjuncted expression.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param exp The original expression.
+     * @param clause An {@link AssertionClause}.
+     *
+     * @return A new {@link Exp}.
+     */
+    public static Exp formConjunct(Location loc, Exp exp, AssertionClause clause) {
+        Exp retExp;
+
+        // Add the assertion expression
+        Exp assertionExp = clause.getAssertionExp().clone();
+        if (exp == null) {
+            retExp = assertionExp;
+        }
+        else {
+            retExp = InfixExp.formConjunct(loc, exp, assertionExp);
+        }
+
+        // Add any which_entails
+        if (clause.getWhichEntailsExp() != null) {
+            retExp =
+                    InfixExp.formConjunct(loc, retExp, clause
+                            .getWhichEntailsExp());
         }
 
         return retExp;
@@ -504,6 +538,50 @@ public class Utilities {
         }
 
         return new AssertionClause(newLoc, AssertionClause.ClauseType.CONSTRAINT,
+                constraintWithReplacements, whichEntailsWithReplacements);
+    }
+
+    /**
+     * <p>Given the original {@code initialization ensures} clause, use the provided
+     * information on the actual parameter variable to substitute the {@code exemplar} in
+     * the {@code initialization ensures} clause and create a new {@link AssertionClause}.</p>
+     *
+     * @param originalInitEnsuresClause The {@link AssertionClause} containing the
+     *                                  original {@code initialization ensures} clause.
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The parameter variable's qualifier.
+     * @param name The parameter variable's name.
+     * @param exemplarName The {@code exemplar} name for the corresponding type.
+     * @param type The mathematical type associated with this type.
+     * @param typeValue The mathematical type value associated with this type.
+     *
+     * @return A modified {@link AssertionClause} containing the new
+     * {@code initialization ensures} clause.
+     */
+    static AssertionClause getTypeInitEnsuresClause(AssertionClause originalInitEnsuresClause, Location loc,
+            PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
+        // Create a variable expression from the declared variable
+        VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
+
+        // Create a variable expression from the type exemplar
+        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
+
+        // Create a replacement map
+        Map<Exp, Exp> substitutions = new HashMap<>();
+        substitutions.put(exemplar, varDecExp);
+
+        // Create new assertion clause by replacing the exemplar with the actual
+        Location newLoc = loc.clone();
+        Exp constraintWithReplacements =
+                originalInitEnsuresClause.getAssertionExp().substitute(substitutions);
+        Exp whichEntailsWithReplacements = null;
+        if (originalInitEnsuresClause.getWhichEntailsExp() != null) {
+            whichEntailsWithReplacements =
+                    originalInitEnsuresClause.getWhichEntailsExp().substitute(substitutions);
+        }
+
+        return new AssertionClause(newLoc, AssertionClause.ClauseType.ENSURES,
                 constraintWithReplacements, whichEntailsWithReplacements);
     }
 
@@ -673,40 +751,5 @@ public class Utilities {
     // ===========================================================
     // Private Methods
     // ===========================================================
-
-    /**
-     * <p>An helper method that uses the assertion expression and any
-     * {@code which_entails} expressions to {@code exp} to form a new
-     * conjuncted expression.</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param exp The original expression.
-     * @param clause An {@link AssertionClause}.
-     *
-     * @return A new {@link Exp}.
-     */
-    private static Exp formConjunct(Location loc, Exp exp,
-            AssertionClause clause) {
-        Exp retExp;
-
-        // Add the assertion expression
-        Exp assertionExp = clause.getAssertionExp().clone();
-        if (exp == null) {
-            retExp = assertionExp;
-        }
-        else {
-            retExp = InfixExp.formConjunct(loc, exp, assertionExp);
-        }
-
-        // Add any which_entails
-        if (clause.getWhichEntailsExp() != null) {
-            retExp =
-                    InfixExp.formConjunct(loc, retExp, clause
-                            .getWhichEntailsExp());
-        }
-
-        return retExp;
-    }
 
 }
