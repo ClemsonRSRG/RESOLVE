@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
@@ -25,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -54,9 +56,9 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariable
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
-import java.util.*;
 
 /**
  * <p>This class generates verification conditions (VCs) using the provided
@@ -107,6 +109,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      * or {@link OperationProcedureDec} that the procedure is attempting to implement.</p>
      */
     private OperationEntry myCorrespondingOperation;
+
+    /**
+     * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
+     * {@code finalization} specification item if we were able to generate one.</p>
+     */
+    private final Map<VarDec, SpecInitFinalItem> myVariableSpecFinalItems;
 
     // -----------------------------------------------------------
     // VC Generation-Related
@@ -223,6 +231,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myModel = model;
         mySTGroup = stGroup;
         myTypeGraph = myBuilder.getTypeGraph();
+        myVariableSpecFinalItems = new LinkedHashMap<>();
         myVCGenDetailsModel = mySTGroup.getInstanceOf("outputVCGenDetails");
     }
 
@@ -431,7 +440,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply procedure declaration rule
         // TODO: Recheck logic to make sure everything still works!
         ProofRuleApplication declRule =
-                new ProcedureDeclRule(dec.getLocation(), dec.getStatements(),
+                new ProcedureDeclRule(dec.getLocation(), dec.getVariables(),
+                        myVariableSpecFinalItems, dec.getStatements(),
                         finalConfirmExp, myCurrentAssertiveCodeBlock,
                         mySTGroup, myAssertiveCodeBlockModels
                                 .remove(myCurrentAssertiveCodeBlock));
@@ -446,6 +456,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
 
+        myVariableSpecFinalItems.clear();
         myCurrentAssertiveCodeBlock = null;
         myCorrespondingOperation = null;
     }
@@ -489,7 +500,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 AssertionClause initEnsures =
                         type.getInitialization().getEnsures();
                 AssertionClause modifiedInitEnsures =
-                        Utilities.getTypeInitEnsuresClause(initEnsures, dec
+                        Utilities.getTypeEnsuresClause(initEnsures, dec
                                 .getLocation(), null, dec.getName(), type
                                 .getExemplar(), typeEntry.getModelType(), null);
 
@@ -500,6 +511,22 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 myCurrentAssertiveCodeBlock, mySTGroup,
                                 myAssertiveCodeBlockModels
                                         .remove(myCurrentAssertiveCodeBlock));
+
+                // Store the variable's finalization item for
+                // future use.
+                AffectsClause finalAffects =
+                        type.getFinalization().getAffectedVars();
+                AssertionClause finalEnsures =
+                        type.getFinalization().getEnsures();
+                if (!VarExp.isLiteralTrue(finalEnsures.getAssertionExp())) {
+                    myVariableSpecFinalItems.put(dec, new SpecInitFinalItem(
+                            type.getFinalization().getLocation(), type
+                                    .getFinalization().getClauseType(),
+                            finalAffects, Utilities.getTypeEnsuresClause(
+                                    finalEnsures, dec.getLocation(), null, dec
+                                            .getName(), type.getExemplar(),
+                                    typeEntry.getModelType(), null)));
+                }
             }
             else {
                 // Variable declaration rule for generic types

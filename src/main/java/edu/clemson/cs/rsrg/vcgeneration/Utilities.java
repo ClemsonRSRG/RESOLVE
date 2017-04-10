@@ -44,6 +44,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -213,7 +214,8 @@ public class Utilities {
                     AssertionClause initEnsures =
                             type.getInitialization().getEnsures();
                     modifiedInitEnsures =
-                            Utilities.getTypeInitEnsuresClause(initEnsures, loc.clone(), null,
+                            Utilities.getTypeEnsuresClause(initEnsures,
+                                    loc.clone(), null,
                                     parameterVarDec.getName(), type.getExemplar(),
                                     typeEntry.getModelType(), null);
 
@@ -322,28 +324,6 @@ public class Utilities {
         segments.add(typeNameExp);
         segments.add(isInitialExp);
         DotExp exp = new DotExp(varDec.getLocation(), segments);
-
-        return exp;
-    }
-
-    /**
-     * <p>This method returns a newly created {@link VarExp}
-     * with the {@link PosSymbol} and math type provided.</p>
-     *
-     * @param loc New {@link VarExp VarExp's} {@link Location}.
-     * @param qualifier New {@link VarExp VarExp's} qualifier.
-     * @param name New {@link VarExp VarExp's} name.
-     * @param type New {@link VarExp VarExp's} math type.
-     * @param typeValue New {@link VarExp VarExp's} math type value.
-     *
-     * @return The new {@link VarExp}.
-     */
-    public static VarExp createVarExp(Location loc, PosSymbol qualifier,
-            PosSymbol name, MTType type, MTType typeValue) {
-        // Create the VarExp
-        VarExp exp = new VarExp(loc, qualifier, name);
-        exp.setMathType(type);
-        exp.setMathTypeValue(typeValue);
 
         return exp;
     }
@@ -566,6 +546,46 @@ public class Utilities {
     }
 
     /**
+     * <p>This method returns a newly created {@link VarExp}
+     * with the {@link PosSymbol} and math type provided.</p>
+     *
+     * @param loc New {@link VarExp VarExp's} {@link Location}.
+     * @param qualifier New {@link VarExp VarExp's} qualifier.
+     * @param name New {@link VarExp VarExp's} name.
+     * @param type New {@link VarExp VarExp's} math type.
+     * @param typeValue New {@link VarExp VarExp's} math type value.
+     *
+     * @return The new {@link VarExp}.
+     */
+    public static VarExp createVarExp(Location loc, PosSymbol qualifier,
+            PosSymbol name, MTType type, MTType typeValue) {
+        // Create the VarExp
+        VarExp exp = new VarExp(loc, qualifier, name);
+        exp.setMathType(type);
+        exp.setMathTypeValue(typeValue);
+
+        return exp;
+    }
+
+    /**
+     * <p>An helper method that creates a new "question mark" variable.</p>
+     *
+     * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
+     * @param varExp The original expression.
+     *
+     * @return A {@link VCVarExp}.
+     */
+    public static VCVarExp createVCVarExp(AssertiveCodeBlock currentBlock,
+            Exp varExp) {
+        VCVarExp exp = new VCVarExp(varExp.getLocation(), varExp);
+        if (currentBlock.containsFreeVar(exp)) {
+            exp = createVCVarExp(currentBlock, exp);
+        }
+
+        return exp;
+    }
+
+    /**
      * <p>An helper method that uses the assertion expression and any
      * {@code which_entails} expressions to {@code exp} to form a new
      * conjuncted expression.</p>
@@ -733,12 +753,12 @@ public class Utilities {
     }
 
     /**
-     * <p>Given the original {@code initialization ensures} clause, use the provided
+     * <p>Given the original {@code ensures} clause, use the provided
      * information on the actual parameter variable to substitute the {@code exemplar} in
      * the {@code initialization ensures} clause and create a new {@link AssertionClause}.</p>
      *
-     * @param originalInitEnsuresClause The {@link AssertionClause} containing the
-     *                                  original {@code initialization ensures} clause.
+     * @param originalEnsuresClause The {@link AssertionClause} containing the
+     *                              original {@code ensures} clause.
      * @param loc The location in the AST that we are
      *            currently visiting.
      * @param qualifier The parameter variable's qualifier.
@@ -748,10 +768,11 @@ public class Utilities {
      * @param typeValue The mathematical type value associated with this type.
      *
      * @return A modified {@link AssertionClause} containing the new
-     * {@code initialization ensures} clause.
+     * {@code ensures} clause.
      */
-    static AssertionClause getTypeInitEnsuresClause(AssertionClause originalInitEnsuresClause, Location loc,
-            PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
+    static AssertionClause getTypeEnsuresClause(AssertionClause originalEnsuresClause,
+            Location loc, PosSymbol qualifier, PosSymbol name,
+            PosSymbol exemplarName, MTType type, MTType typeValue) {
         // Create a variable expression from the declared variable
         VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
 
@@ -765,11 +786,11 @@ public class Utilities {
         // Create new assertion clause by replacing the exemplar with the actual
         Location newLoc = loc.clone();
         Exp constraintWithReplacements =
-                originalInitEnsuresClause.getAssertionExp().substitute(substitutions);
+                originalEnsuresClause.getAssertionExp().substitute(substitutions);
         Exp whichEntailsWithReplacements = null;
-        if (originalInitEnsuresClause.getWhichEntailsExp() != null) {
+        if (originalEnsuresClause.getWhichEntailsExp() != null) {
             whichEntailsWithReplacements =
-                    originalInitEnsuresClause.getWhichEntailsExp().substitute(substitutions);
+                    originalEnsuresClause.getWhichEntailsExp().substitute(substitutions);
         }
 
         return new AssertionClause(newLoc, AssertionClause.ClauseType.ENSURES,

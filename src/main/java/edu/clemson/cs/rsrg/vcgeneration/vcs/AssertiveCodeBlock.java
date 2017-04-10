@@ -99,7 +99,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      * @param var A new variable.
      */
     public final void addFreeVar(Exp var) {
-        if (!myFreeVars.contains(var)) {
+        if (!containsFreeVar(var)) {
             myFreeVars.add(var);
         }
     }
@@ -184,6 +184,23 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         Collections.copy(newBlock.myStatements, myStatements);
 
         return newBlock;
+    }
+
+    /**
+     * <p>Checks if there is already a free variable that matches the provided
+     * expression.</p>
+     *
+     * @param var A variable expression to be checked.
+     */
+    public final boolean containsFreeVar(Exp var) {
+        boolean contains = false;
+        Iterator<Exp> freeVarIt = myFreeVars.iterator();
+        while (freeVarIt.hasNext() && !contains) {
+            Exp freeVar = freeVarIt.next();
+            contains = freeVar.equivalent(var);
+        }
+
+        return contains;
     }
 
     /**
