@@ -26,6 +26,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -61,7 +63,9 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariab
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.AssumeStmtRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.CallStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.ConfirmStmtRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.RememberStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import java.util.*;
@@ -616,35 +620,49 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Work our way from the last statement
             Statement statement = assertiveCodeBlock.removeLastSatement();
 
-            // Apply one of the statement proof rules
+            // Generate one of the statement proof rule applications
+            ProofRuleApplication ruleApplication;
             if (statement instanceof AssumeStmt) {
                 // Apply the assume rule.
-                ProofRuleApplication assumeRule =
+                ruleApplication =
                         new AssumeStmtRule((AssumeStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
-                assumeRule.applyRule();
-
-                // Assume rule only generates one assertive code block
-                assertiveCodeBlock =
-                        assumeRule.getAssertiveCodeBlocks().getFirst();
             }
             else if (statement instanceof CallStmt) {
+                CallStmt callStmt = (CallStmt) statement;
+                ProgramFunctionExp functionExp = callStmt.getFunctionExp();
+
+                // Call a method to locate the operation dec for this call
+                List<PTType> argTypes = new LinkedList<>();
+                for (ProgramExp arg : functionExp.getArguments()) {
+                    argTypes.add(arg.getProgramType());
+                }
+                OperationEntry opEntry =
+                        Utilities.searchOperation(callStmt.getLocation(),
+                                functionExp.getQualifier(), functionExp.getName(),
+                                argTypes, myCurrentModuleScope);
+
+                // Find all the replacements that needs to happen to the requires
+                // and ensures clauses
+                List<ProgramExp> callArgs = functionExp.getArguments();
+                List<Exp> replaceArgs = modifyArgumentList(callArgs);
+
                 // Apply the call rule.
+                ruleApplication =
+                        new CallStmtRule(callStmt, opEntry, replaceArgs,
+                                myCurrentModuleScope, assertiveCodeBlock, mySTGroup, blockModel);
             }
             else if (statement instanceof ConfirmStmt) {
                 // Apply the confirm rule.
-                ProofRuleApplication confirmRule =
+                ruleApplication =
                         new ConfirmStmtRule((ConfirmStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
-                confirmRule.applyRule();
-
-                // Confirm rule only generates one assertive code block
-                assertiveCodeBlock =
-                        confirmRule.getAssertiveCodeBlocks().getFirst();
             }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
                     // Apply the remember rule.
+                    ruleApplication =
+                            new RememberStmtRule(assertiveCodeBlock, mySTGroup, blockModel);
                 }
                 else {
                     throw new SourceErrorException(
@@ -652,6 +670,31 @@ public class VCGenerator extends TreeWalkerVisitor {
                             statement.getLocation());
                 }
             }
+            else {
+                throw new SourceErrorException(
+                        "[VCGenerator] Statement type not handled: "
+                                + statement.getClass().getSimpleName(),
+                        statement.getLocation());
+            }
+
+            // Apply the proof rule
+            ruleApplication.applyRule();
+
+            // Some of the proof rules might generate more than more
+            // than one assertive code block. The first one is always
+            // the one we passed in to the rule. We add the rest to the
+            // front of the incomplete stack.
+            Deque<AssertiveCodeBlock> resultingBlocks = ruleApplication.getAssertiveCodeBlocks();
+            assertiveCodeBlock = resultingBlocks.removeFirst();
+            while (!resultingBlocks.isEmpty()) {
+                myIncompleteAssertiveCodeBlocks.addFirst(resultingBlocks.removeLast());
+            }
+
+            // Add any new location details
+            myLocationDetails.putAll(ruleApplication.getNewLocationString());
+
+            // Update our block model
+            blockModel = ruleApplication.getBlockModel();
 
             // Apply each statement rule here.
             /*else if (lastStatement instanceof FuncAssignStmt) {
@@ -672,6 +715,52 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         myAssertiveCodeBlockModels.put(assertiveCodeBlock, blockModel);
+    }
+
+    /**
+     * <p>Modify the argument expression list if we have a
+     * nested function call.</p>
+     *
+     * @param callArgs The original list of arguments.
+     *
+     * @return The modified list of arguments.
+     */
+    private List<Exp> modifyArgumentList(List<ProgramExp> callArgs) {
+        // Find all the replacements that needs to happen to the requires
+        // and ensures clauses
+        List<Exp> replaceArgs = new ArrayList<>();
+        for (ProgramExp p : callArgs) {
+            /* TODO: Add the logic for nested function calls
+            // Check for nested function calls in ProgramDotExp
+            // and ProgramParamExp.
+            if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
+                NestedFuncWalker nfw =
+                        new NestedFuncWalker(myCurrentOperationEntry,
+                                myOperationDecreasingExp, mySymbolTable,
+                                myCurrentModuleScope, myCurrentAssertiveCode,
+                                myInstantiatedFacilityArgMap);
+                TreeWalker tw = new TreeWalker(nfw);
+                tw.visit(p);
+
+                // Add the requires clause as something we need to confirm
+                Exp pRequires = nfw.getRequiresClause();
+                if (!pRequires.isLiteralTrue()) {
+                    myCurrentAssertiveCode.addConfirm(pRequires.getLocation(),
+                            pRequires, false);
+                }
+
+                // Add the modified ensures clause as the new expression we want
+                // to replace in the CallStmt's ensures clause.
+                replaceArgs.add(nfw.getEnsuresClause());
+            }
+            // For all other types of arguments, simply add it to the list to be replaced
+            else {
+                replaceArgs.add(p);
+            }*/
+            replaceArgs.add(p);
+        }
+
+        return replaceArgs;
     }
 
     /**

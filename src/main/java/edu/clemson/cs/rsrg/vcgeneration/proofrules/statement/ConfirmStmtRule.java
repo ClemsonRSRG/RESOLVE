@@ -24,7 +24,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for the {@code confirm}
+ * <p>This class contains the logic for applying the {@code confirm}
  * rule to a {@link ConfirmStmt}.</p>
  *
  * @author Yu-Shan Sun

@@ -22,6 +22,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -63,6 +64,106 @@ public class Utilities {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>Converts the different types of {@link Exp} to the
+     * ones used by the VC Generator.</p>
+     *
+     * @param oldExp The expression to be converted.
+     * @param scope The module scope to start our search.
+     *
+     * @return A modified {@link Exp}.
+     */
+    public static Exp convertExp(Exp oldExp, ModuleScope scope) {
+        Exp retExp;
+
+        // Case #1: ProgramIntegerExp
+        if (oldExp instanceof ProgramIntegerExp) {
+            IntegerExp exp =
+                    new IntegerExp(oldExp.getLocation(), null,
+                            ((ProgramIntegerExp) oldExp).getValue());
+
+            // At this point all programming integer expressions
+            // should be greater than or equals to 0. Negative
+            // numbers should have called the corresponding operation
+            // to convert it to a negative number. Therefore, we
+            // need to locate the type "N" (Natural Number)
+            MathSymbolEntry mse =
+                    searchMathSymbol(exp.getLocation(), "N", scope);
+            try {
+                exp.setMathType(mse.getTypeValue());
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                notAType(mse, exp.getLocation());
+            }
+
+            retExp = exp;
+        }
+        // Case #2: ProgramCharacterExp
+        else if (oldExp instanceof ProgramCharExp) {
+            CharExp exp =
+                    new CharExp(oldExp.getLocation(),
+                            ((ProgramCharExp) oldExp).getValue());
+            exp.setMathType(oldExp.getMathType());
+            retExp = exp;
+        }
+        // Case #3: ProgramStringExp
+        else if (oldExp instanceof ProgramStringExp) {
+            StringExp exp =
+                    new StringExp(oldExp.getLocation(),
+                            ((ProgramStringExp) oldExp).getValue());
+            exp.setMathType(oldExp.getMathType());
+            retExp = exp;
+        }
+        // Case #4: VariableDotExp
+        else if (oldExp instanceof ProgramVariableDotExp) {
+            List<ProgramVariableExp> segments =
+                    ((ProgramVariableDotExp) oldExp).getSegments();
+            List<Exp> newSegments = new ArrayList<>();
+
+            // Need to replace each of the segments in a dot expression
+            MTType lastMathType = null;
+            MTType lastMathTypeValue = null;
+            for (ProgramVariableExp v : segments) {
+                // Can only be a ProgramVariableNameExp. Anything else
+                // is a case we have not handled.
+                if (v instanceof ProgramVariableNameExp) {
+                    VarExp varExp =
+                            new VarExp(v.getLocation(), v.getQualifier(),
+                                    ((ProgramVariableNameExp) v).getName());
+                    varExp.setMathType(v.getMathType());
+                    varExp.setMathTypeValue(v.getMathTypeValue());
+                    lastMathType = v.getMathType();
+                    lastMathTypeValue = v.getMathTypeValue();
+                    newSegments.add(varExp);
+                }
+                else {
+                    expNotHandled(v, v.getLocation());
+                }
+            }
+
+            // Set the segments and the type information.
+            DotExp exp = new DotExp(oldExp.getLocation(), newSegments);
+            exp.setMathType(lastMathType);
+            exp.setMathTypeValue(lastMathTypeValue);
+            retExp = exp;
+        }
+        // Case #5: VariableNameExp
+        else if (oldExp instanceof ProgramVariableNameExp) {
+            VarExp exp =
+                    new VarExp(oldExp.getLocation(), ((ProgramVariableNameExp) oldExp).getQualifier(),
+                            ((ProgramVariableNameExp) oldExp).getName());
+            exp.setMathType(oldExp.getMathType());
+            exp.setMathTypeValue(oldExp.getMathTypeValue());
+            retExp = exp;
+        }
+        // Else simply return oldExp
+        else {
+            retExp = oldExp;
+        }
+
+        return retExp;
+    }
 
     /**
      * <p>This method uses the {@code ensures} clause from the operation entry
@@ -114,7 +215,7 @@ public class Utilities {
             NameTy nameTy = (NameTy) parameterVarDec.getTy();
 
             // Parameter variable and incoming parameter variable
-            VarExp parameterExp = createVarExp(parameterVarDec.getLocation().clone(), null,
+            VarExp parameterExp = Utilities.createVarExp(parameterVarDec.getLocation().clone(), null,
                     parameterVarDec.getName().clone(), nameTy.getMathTypeValue(), null);
             OldExp oldParameterExp = new OldExp(parameterVarDec.getLocation().clone(), parameterExp.clone());
             oldParameterExp.setMathType(nameTy.getMathTypeValue());
@@ -634,6 +735,50 @@ public class Utilities {
     }
 
     /**
+     * <p>Given the original {@code constraint} clause, use the provided information
+     * on the actual parameter variable to substitute the {@code exemplar} in the
+     * {@code constraint} clause and create a new {@link AssertionClause}.</p>
+     *
+     * @param originalConstraintClause The {@link AssertionClause} containing the original
+     *                                 {@code constraint} clause.
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The parameter variable's qualifier.
+     * @param name The parameter variable's name.
+     * @param exemplarName The {@code exemplar} name for the corresponding type.
+     * @param type The mathematical type associated with this type.
+     * @param typeValue The mathematical type value associated with this type.
+     *
+     * @return A modified {@link AssertionClause} containing the new {@code constraint}
+     * clause.
+     */
+    public static AssertionClause getTypeConstraintClause(AssertionClause originalConstraintClause, Location loc,
+            PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
+        // Create a variable expression from the declared variable
+        VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
+
+        // Create a variable expression from the type exemplar
+        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
+
+        // Create a replacement map
+        Map<Exp, Exp> substitutions = new HashMap<>();
+        substitutions.put(exemplar, varDecExp);
+
+        // Create new assertion clause by replacing the exemplar with the actual
+        Location newLoc = loc.clone();
+        Exp constraintWithReplacements =
+                originalConstraintClause.getAssertionExp().substitute(substitutions);
+        Exp whichEntailsWithReplacements = null;
+        if (originalConstraintClause.getWhichEntailsExp() != null) {
+            whichEntailsWithReplacements =
+                    originalConstraintClause.getWhichEntailsExp().substitute(substitutions);
+        }
+
+        return new AssertionClause(newLoc, AssertionClause.ClauseType.CONSTRAINT,
+                constraintWithReplacements, whichEntailsWithReplacements);
+    }
+
+    /**
      * <p>An helper method that throws the appropriate message that
      * the symbol table entry that we found isn't a type.</p>
      *
@@ -683,6 +828,58 @@ public class Utilities {
     }
 
     /**
+     * <p>Given the name of the type locate and return
+     * the {@link SymbolTableEntry} stored in the
+     * symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The qualifier of the type.
+     * @param name The name of the type.
+     * @param scope The module scope to start our search.
+     *
+     * @return A {@link SymbolTableEntry} from the
+     *         symbol table.
+     */
+    public static SymbolTableEntry searchProgramType(Location loc,
+            PosSymbol qualifier, PosSymbol name, ModuleScope scope) {
+        SymbolTableEntry retEntry = null;
+
+        List<SymbolTableEntry> entries =
+                scope.query(new NameQuery(qualifier, name,
+                        ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_INSTANTIATE, true));
+
+        if (entries.size() == 0) {
+            noSuchSymbol(qualifier, name.getName(), loc);
+        }
+        else if (entries.size() == 1) {
+            retEntry = entries.get(0).toProgramTypeEntry(loc);
+        }
+        else {
+            // When we have more than one, it means that we have a
+            // type representation. In that case, we just need the
+            // type representation.
+            for (int i = 0; i < entries.size() && retEntry == null; i++) {
+                SymbolTableEntry ste = entries.get(i);
+                if (ste instanceof TypeRepresentationEntry) {
+                    retEntry = ste.toTypeRepresentationEntry(loc);
+                }
+            }
+
+            // Throw duplicate symbol error if we don't have a type
+            // representation
+            if (retEntry == null) {
+                //This should be caught earlier, when the duplicate type is
+                //created
+                throw new RuntimeException();
+            }
+        }
+
+        return retEntry;
+    }
+
+    /**
      * <p>An helper method that throws the appropriate raw type
      * not handled message.</p>
      *
@@ -720,50 +917,6 @@ public class Utilities {
         }
 
         return Z;
-    }
-
-    /**
-     * <p>Given the original {@code constraint} clause, use the provided information
-     * on the actual parameter variable to substitute the {@code exemplar} in the
-     * {@code constraint} clause and create a new {@link AssertionClause}.</p>
-     *
-     * @param originalConstraintClause The {@link AssertionClause} containing the original
-     *                                 {@code constraint} clause.
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param qualifier The parameter variable's qualifier.
-     * @param name The parameter variable's name.
-     * @param exemplarName The {@code exemplar} name for the corresponding type.
-     * @param type The mathematical type associated with this type.
-     * @param typeValue The mathematical type value associated with this type.
-     *
-     * @return A modified {@link AssertionClause} containing the new {@code constraint}
-     * clause.
-     */
-    static AssertionClause getTypeConstraintClause(AssertionClause originalConstraintClause, Location loc,
-            PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
-        // Create a variable expression from the declared variable
-        VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
-
-        // Create a variable expression from the type exemplar
-        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
-
-        // Create a replacement map
-        Map<Exp, Exp> substitutions = new HashMap<>();
-        substitutions.put(exemplar, varDecExp);
-
-        // Create new assertion clause by replacing the exemplar with the actual
-        Location newLoc = loc.clone();
-        Exp constraintWithReplacements =
-                originalConstraintClause.getAssertionExp().substitute(substitutions);
-        Exp whichEntailsWithReplacements = null;
-        if (originalConstraintClause.getWhichEntailsExp() != null) {
-            whichEntailsWithReplacements =
-                    originalConstraintClause.getWhichEntailsExp().substitute(substitutions);
-        }
-
-        return new AssertionClause(newLoc, AssertionClause.ClauseType.CONSTRAINT,
-                constraintWithReplacements, whichEntailsWithReplacements);
     }
 
     /**
@@ -920,58 +1073,6 @@ public class Utilities {
         }
 
         return op;
-    }
-
-    /**
-     * <p>Given the name of the type locate and return
-     * the {@link SymbolTableEntry} stored in the
-     * symbol table.</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param qualifier The qualifier of the type.
-     * @param name The name of the type.
-     * @param scope The module scope to start our search.
-     *
-     * @return A {@link SymbolTableEntry} from the
-     *         symbol table.
-     */
-    static SymbolTableEntry searchProgramType(Location loc,
-            PosSymbol qualifier, PosSymbol name, ModuleScope scope) {
-        SymbolTableEntry retEntry = null;
-
-        List<SymbolTableEntry> entries =
-                scope.query(new NameQuery(qualifier, name,
-                        ImportStrategy.IMPORT_NAMED,
-                        FacilityStrategy.FACILITY_INSTANTIATE, true));
-
-        if (entries.size() == 0) {
-            noSuchSymbol(qualifier, name.getName(), loc);
-        }
-        else if (entries.size() == 1) {
-            retEntry = entries.get(0).toProgramTypeEntry(loc);
-        }
-        else {
-            // When we have more than one, it means that we have a
-            // type representation. In that case, we just need the
-            // type representation.
-            for (int i = 0; i < entries.size() && retEntry == null; i++) {
-                SymbolTableEntry ste = entries.get(i);
-                if (ste instanceof TypeRepresentationEntry) {
-                    retEntry = ste.toTypeRepresentationEntry(loc);
-                }
-            }
-
-            // Throw duplicate symbol error if we don't have a type
-            // representation
-            if (retEntry == null) {
-                //This should be caught earlier, when the duplicate type is
-                //created
-                throw new RuntimeException();
-            }
-        }
-
-        return retEntry;
     }
 
     // ===========================================================

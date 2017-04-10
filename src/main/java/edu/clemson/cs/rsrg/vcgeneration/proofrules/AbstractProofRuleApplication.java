@@ -12,9 +12,12 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -37,6 +40,12 @@ public abstract class AbstractProofRuleApplication
      * will operate on.</p>
      */
     protected final AssertiveCodeBlock myCurrentAssertiveCodeBlock;
+
+    /**
+     * <p>A map that stores all the details associated with
+     * a particular {@link Location}.</p>
+     */
+    protected final Map<Location, String> myLocationDetails;
 
     /**
      * <p>A double ended queue that contains all the assertive code blocks
@@ -68,6 +77,7 @@ public abstract class AbstractProofRuleApplication
     protected AbstractProofRuleApplication(AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         myResultingAssertiveCodeBlocks = new LinkedList<>();
         myCurrentAssertiveCodeBlock = block;
+        myLocationDetails = new HashMap<>();
         mySTGroup = stGroup;
         myBlockModel = blockModel;
     }
@@ -95,6 +105,16 @@ public abstract class AbstractProofRuleApplication
     @Override
     public final ST getBlockModel() {
         return myBlockModel;
+    }
+
+    /**
+     * <p>This method returns a map containing details about
+     * a {@link Location} object that was generated during the proof
+     * application process.</p>
+     */
+    @Override
+    public final Map<Location, String> getNewLocationString() {
+        return myLocationDetails;
     }
 
 }

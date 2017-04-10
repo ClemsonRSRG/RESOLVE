@@ -28,7 +28,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for the {@code assume}
+ * <p>This class contains the logic for applying the {@code assume}
  * rule to an {@link AssumeStmt}.</p>
  *
  * @author Yu-Shan Sun
