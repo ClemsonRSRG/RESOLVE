@@ -496,7 +496,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // TODO: Logic for types in concept realizations
 
                 declRule =
-                        new KnownTypeVariableDeclRule(modifiedInitEnsures,
+                        new KnownTypeVariableDeclRule(dec, modifiedInitEnsures,
                                 myCurrentAssertiveCodeBlock, mySTGroup,
                                 myAssertiveCodeBlockModels
                                         .remove(myCurrentAssertiveCodeBlock));
@@ -519,9 +519,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Update the current assertive code block and its associated block model.
             myCurrentAssertiveCodeBlock =
                     declRule.getAssertiveCodeBlocks().getFirst();
-            myCurrentAssertiveCodeBlock.addFreeVar(Utilities.createVarExp(dec
-                    .getLocation(), null, dec.getName(), dec.getMathType(),
-                    null));
             myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
                     declRule.getBlockModel());
         }

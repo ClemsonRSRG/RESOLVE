@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.vcgeneration.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
@@ -40,6 +41,9 @@ public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
     /** <p>The variable's {@code initialization ensures} clause.</p> */
     private final AssertionClause myInitEnsuresClause;
 
+    /** <p>The variable declaration we are applying the rule to.</p> */
+    private final VarDec myVarDec;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -48,6 +52,8 @@ public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
      * <p>This creates a new application for a variable declaration
      * rule with a known program type.</p>
      *
+     * @param varDec The variable declaration we are applying the
+     *               rule to.
      * @param initEnsuresClause The initialization ensures clause
      *                          for the variable we are trying to apply
      *                          the rule to.
@@ -56,10 +62,12 @@ public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public KnownTypeVariableDeclRule(AssertionClause initEnsuresClause,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
+    public KnownTypeVariableDeclRule(VarDec varDec,
+            AssertionClause initEnsuresClause, AssertiveCodeBlock block,
+            STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
         myInitEnsuresClause = initEnsuresClause;
+        myVarDec = varDec;
     }
 
     // ===========================================================
@@ -79,6 +87,11 @@ public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
                 new AssumeStmt(myInitEnsuresClause.getLocation(), assumeExp,
                         false);
         myCurrentAssertiveCodeBlock.addStatement(initAssumeStmt);
+
+        // Add this as a free variable
+        myCurrentAssertiveCodeBlock.addFreeVar(Utilities.createVarExp(myVarDec
+                .getLocation(), null, myVarDec.getName(), myVarDec
+                .getMathType(), null));
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
