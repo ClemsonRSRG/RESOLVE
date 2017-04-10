@@ -29,13 +29,17 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
+import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
 import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt.StatementType;
+import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
@@ -56,6 +60,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.ConfirmStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import java.util.*;
@@ -320,11 +325,23 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postModuleDec(ModuleDec dec) {
-        // Loop through our incomplete assertive code blocks
-        for (AssertiveCodeBlock block : myIncompleteAssertiveCodeBlocks) {
-            // TODO: Apply statement rules to each of the incomplete blocks
-            myVCGenDetailsModel.add("assertiveCodeBlocks",
-                    myAssertiveCodeBlockModels.get(block).render());
+        // Loop through our incomplete assertive code blocks until it is empty
+        while (!myIncompleteAssertiveCodeBlocks.isEmpty()) {
+            // Use the first assertive code block in the incomplete blocks list
+            // as our current assertive code block.
+            myCurrentAssertiveCodeBlock =
+                    myIncompleteAssertiveCodeBlocks.removeFirst();
+
+            applyStatementRules(myCurrentAssertiveCodeBlock);
+
+            // Render the assertive block model
+            ST blockModel =
+                    myAssertiveCodeBlockModels
+                            .remove(myCurrentAssertiveCodeBlock);
+            myVCGenDetailsModel.add("assertiveCodeBlocks", blockModel.render());
+
+            // Set the current assertive code block to null
+            myCurrentAssertiveCodeBlock = null;
         }
     }
 
@@ -583,6 +600,70 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>Applies each of the proof rules. This <code>AssertiveCode</code> will be
+     * stored for later use and therefore should be considered immutable after
+     * a call to this method.</p>
+     */
+    private void applyStatementRules(AssertiveCodeBlock assertiveCodeBlock) {
+        // Obtain the assertive code block model
+        ST blockModel = myAssertiveCodeBlockModels.remove(assertiveCodeBlock);
+
+        // Apply a statement proof rule to each of the assertions.
+        while (assertiveCodeBlock.hasMoreStatements()) {
+            // Work our way from the last statement
+            Statement statement = assertiveCodeBlock.removeLastSatement();
+
+            // Apply one of the statement proof rules
+            if (statement instanceof AssumeStmt) {
+                // Apply the assume rule.
+            }
+            else if (statement instanceof CallStmt) {
+                // Apply the call rule.
+            }
+            else if (statement instanceof ConfirmStmt) {
+                // Apply the confirm rule.
+                ProofRuleApplication confirmRule =
+                        new ConfirmStmtRule((ConfirmStmt) statement,
+                                assertiveCodeBlock, mySTGroup, blockModel);
+                confirmRule.applyRule();
+
+                // Confirm rule only generates one assertive code block
+                assertiveCodeBlock =
+                        confirmRule.getAssertiveCodeBlocks().getFirst();
+            }
+            else if (statement instanceof MemoryStmt) {
+                if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
+                    // Apply the remember rule.
+                }
+                else {
+                    throw new SourceErrorException(
+                            "[VCGenerator] Forget statements are not handled.",
+                            statement.getLocation());
+                }
+            }
+
+            // Apply each statement rule here.
+            /*else if (lastStatement instanceof FuncAssignStmt) {
+                applyFuncAssignStmtRule((FuncAssignStmt) statement);
+            }
+            else if (lastStatement instanceof IfStmt) {
+                applyIfStmtRule((IfStmt) statement);
+            }
+            else if (lastStatement instanceof PresumeStmt) {
+                applyPresumeStmtRule((PresumeStmt) statement);
+            }
+            else if (lastStatement instanceof SwapStmt) {
+                applySwapStmtRule((SwapStmt) statement);
+            }
+            else if (lastStatement instanceof WhileStmt) {
+                applyWhileStmtRule((WhileStmt) statement);
+            }*/
+        }
+
+        myAssertiveCodeBlockModels.put(assertiveCodeBlock, blockModel);
+    }
 
     /**
      * <p>An helper method for storing the imported {@code concept's}

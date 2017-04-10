@@ -162,7 +162,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         // Sequents
         sb.append("Sequents:\n");
         for (Sequent sequent : mySequents) {
-            sb.append(sequent.toString());
+            sb.append(sequent.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
+            sb.append("\n");
         }
 
         return sb.toString();
@@ -267,17 +269,6 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>Checks if we have {@link Statement Statements} that we still
-     * need to apply proof rules to./p>
-     *
-     * @return {@code true} if we have more {@link Statement Statements}
-     * that needs to be processed, {@code false} otherwise.
-     */
-    public final boolean hasAnotherAssertion() {
-        return (!myStatements.isEmpty());
-    }
-
-    /**
      * <p>This method overrides the default {@code hashCode} method implementation.</p>
      *
      * @return The hash code associated with the object.
@@ -292,6 +283,17 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         result = 31 * result + myTypeGraph.hashCode();
 
         return result;
+    }
+
+    /**
+     * <p>Checks if we have {@link Statement Statements} that we still
+     * need to apply proof rules to./p>
+     *
+     * @return {@code true} if we have more {@link Statement Statements}
+     * that needs to be processed, {@code false} otherwise.
+     */
+    public final boolean hasMoreStatements() {
+        return (!myStatements.isEmpty());
     }
 
     /**
