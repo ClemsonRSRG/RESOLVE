@@ -24,11 +24,11 @@ VC <vcNum>
 
 Goal(s):
 
-<consequents>
+<consequents; separator = "or">
 
 Given(s):
 
-<antecedents : {antecedent | <i> <antecedent>}>
+<antecedents : {antecedent | <i>. <antecedent>}; separator = "\n">
 
 >>
 

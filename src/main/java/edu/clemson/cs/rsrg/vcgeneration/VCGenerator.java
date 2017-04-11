@@ -599,7 +599,32 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return String template rendering of the model.
      */
     public final String getCompleteModel() {
-        // TODO: Add the VC output
+        // Add the VC output in human readable format
+        int blockCount = 0;
+        for (AssertiveCodeBlock block : myFinalAssertiveCodeBlocks) {
+            // Obtain the final list of sequents
+            int vcCount = 1;
+            List<Sequent> sequents = block.getSequents();
+            for (Sequent s : sequents) {
+                // Create a model for adding all the details
+                // associated with this VC.
+                Location loc = s.getLocation();
+                ST vcModel = mySTGroup.getInstanceOf("outputVC");
+                vcModel.add("vcNum", blockCount + "_" + vcCount);
+                vcModel.add("location", loc);
+                vcModel.add("locationDetail", myLocationDetails.get(loc));
+                vcModel.add("consequents", s.getConcequents());
+                vcModel.add("antecedents", s.getAntecedents());
+
+                // Add the VC to the model and increase the vcCount
+                myModel.add("vcs", vcModel.render());
+                vcCount++;
+            }
+
+            // Increase the block number
+            blockCount++;
+        }
+
         // Add the VC generation details to the model
         myModel.add("details", myVCGenDetailsModel.render());
 
@@ -661,6 +686,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                 ruleApplication =
                         new ConfirmStmtRule((ConfirmStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
+
+                // Since the ConfirmStmt's location might be different than
+                // it's assertion's location. We need to copy over the details
+                // for the inner assertion and set it as the detail for the
+                // ConfirmStmt's location.
+                myLocationDetails.put(statement.getLocation(),
+                        myLocationDetails.get(((ConfirmStmt) statement).getAssertion().getLocation()));
             }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {

@@ -427,7 +427,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
             newConsequents.add(consequent.substitute(substitutions));
         }
 
-        return new Sequent(newAntecedents, newConsequents);
+        return new Sequent(s.getLocation(), newAntecedents, newConsequents);
     }
 
     /**

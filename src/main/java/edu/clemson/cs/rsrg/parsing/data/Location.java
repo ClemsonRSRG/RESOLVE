@@ -147,7 +147,6 @@ public class Location implements Cloneable {
         sb.append(myFile.getName());
         sb.append(".");
         sb.append(myFile.getModuleType().getExtension());
-        sb.append(" ");
 
         // Append the line number and the column number
         sb.append("(");

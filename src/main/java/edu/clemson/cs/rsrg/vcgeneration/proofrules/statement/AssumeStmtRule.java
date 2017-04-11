@@ -219,7 +219,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             }
         }
 
-        return new Sequent(seqAntecedents, seqConsequents);
+        return new Sequent(seq.getLocation(), seqAntecedents, seqConsequents);
     }
 
     /**
@@ -617,6 +617,6 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         }
 
         // Perform the assume application step and return the new sequent
-        return assumeApplicationStep(new Sequent(newAntecedents, newConsequents), remAssumeExpList);
+        return assumeApplicationStep(new Sequent(seq.getLocation(), newAntecedents, newConsequents), remAssumeExpList);
     }
 }

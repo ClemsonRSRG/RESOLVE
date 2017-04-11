@@ -123,6 +123,6 @@ public class RememberStmtRule extends AbstractProofRuleApplication
             }
         }
 
-        return new Sequent(newAntecedents, newConsequents);
+        return new Sequent(s.getLocation(), newAntecedents, newConsequents);
     }
 }

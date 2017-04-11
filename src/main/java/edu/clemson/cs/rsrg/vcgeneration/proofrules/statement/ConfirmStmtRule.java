@@ -95,7 +95,9 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
                     Set<Exp> consequent = new LinkedHashSet<>();
                     consequent.add(consequentExp);
 
-                    newSequents.add(new Sequent(antecedent, consequent));
+                    // Add this new sequent to our sequent list.
+                    newSequents.add(new Sequent(myConfirmStmt.getLocation(),
+                            antecedent, consequent));
                 }
             }
             else {
@@ -103,7 +105,9 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
                 Set<Exp> consequent = new LinkedHashSet<>();
                 consequent.add(confirmExp);
 
-                newSequents.add(new Sequent(antecedent, consequent));
+                // Add this new sequent to our sequent list.
+                newSequents.add(new Sequent(myConfirmStmt.getLocation(),
+                        antecedent, consequent));
             }
 
             // Set this as our new list of sequents
