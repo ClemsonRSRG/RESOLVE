@@ -32,11 +32,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.Parameter
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
-import edu.clemson.cs.rsrg.vcgeneration.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import java.util.*;

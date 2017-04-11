@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration;
+package edu.clemson.cs.rsrg.vcgeneration.utilities;
 
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
@@ -45,6 +45,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import java.util.ArrayList;
@@ -735,6 +736,30 @@ public class Utilities {
     }
 
     /**
+     * <p>Returns the math type for "Z".</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param scope The module scope to start our search.
+     *
+     *
+     * @return The <code>MTType</code> for "Z".
+     */
+    public static MTType getMathTypeZ(Location loc, ModuleScope scope) {
+        // Locate "Z" (Integer)
+        MathSymbolEntry mse = searchMathSymbol(loc, "Z", scope);
+        MTType Z = null;
+        try {
+            Z = mse.getTypeValue();
+        }
+        catch (SymbolNotOfKindTypeException e) {
+            notAType(mse, loc);
+        }
+
+        return Z;
+    }
+
+    /**
      * <p>Given the original {@code constraint} clause, use the provided information
      * on the actual parameter variable to substitute the {@code exemplar} in the
      * {@code constraint} clause and create a new {@link AssertionClause}.</p>
@@ -776,6 +801,89 @@ public class Utilities {
 
         return new AssertionClause(newLoc, AssertionClause.ClauseType.CONSTRAINT,
                 constraintWithReplacements, whichEntailsWithReplacements);
+    }
+
+    /**
+     * <p>Given the original {@code ensures} clause, use the provided
+     * information on the actual parameter variable to substitute the {@code exemplar} in
+     * the {@code initialization ensures} clause and create a new {@link AssertionClause}.</p>
+     *
+     * @param originalEnsuresClause The {@link AssertionClause} containing the
+     *                              original {@code ensures} clause.
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The parameter variable's qualifier.
+     * @param name The parameter variable's name.
+     * @param exemplarName The {@code exemplar} name for the corresponding type.
+     * @param type The mathematical type associated with this type.
+     * @param typeValue The mathematical type value associated with this type.
+     *
+     * @return A modified {@link AssertionClause} containing the new
+     * {@code ensures} clause.
+     */
+    public static AssertionClause getTypeEnsuresClause(AssertionClause originalEnsuresClause,
+            Location loc, PosSymbol qualifier, PosSymbol name,
+            PosSymbol exemplarName, MTType type, MTType typeValue) {
+        // Create a variable expression from the declared variable
+        VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
+
+        // Create a variable expression from the type exemplar
+        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
+
+        // Create a replacement map
+        Map<Exp, Exp> substitutions = new HashMap<>();
+        substitutions.put(exemplar, varDecExp);
+
+        // Create new assertion clause by replacing the exemplar with the actual
+        Location newLoc = loc.clone();
+        Exp constraintWithReplacements =
+                originalEnsuresClause.getAssertionExp().substitute(substitutions);
+        Exp whichEntailsWithReplacements = null;
+        if (originalEnsuresClause.getWhichEntailsExp() != null) {
+            whichEntailsWithReplacements =
+                    originalEnsuresClause.getWhichEntailsExp().substitute(substitutions);
+        }
+
+        return new AssertionClause(newLoc, AssertionClause.ClauseType.ENSURES,
+                constraintWithReplacements, whichEntailsWithReplacements);
+    }
+
+    /**
+     * <p>Given the name of an operation check to see if it is a
+     * local operation</p>
+     *
+     * @param name The name of the operation.
+     * @param scope The module scope we are searching.
+     *
+     * @return {@code true} if it is a local operation, {@code false} otherwise.
+     */
+    public static boolean isLocationOperation(String name, ModuleScope scope) {
+        boolean isIn;
+
+        // Query for the corresponding operation
+        List<SymbolTableEntry> entries =
+                scope.query(new NameQuery(null, name,
+                        ImportStrategy.IMPORT_NONE,
+                        FacilityStrategy.FACILITY_IGNORE, true));
+
+        // Not found
+        if (entries.size() == 0) {
+            isIn = false;
+        }
+        // Found one
+        else if (entries.size() == 1) {
+            // If the operation is declared here, then it will be an OperationEntry.
+            // Thus it is a local operation.
+            isIn = entries.get(0) instanceof OperationEntry;
+        }
+        // Found more than one
+        else {
+            //This should be caught earlier, when the duplicate symbol is
+            //created
+            throw new RuntimeException();
+        }
+
+        return isIn;
     }
 
     /**
@@ -825,6 +933,80 @@ public class Utilities {
         }
 
         throw new SourceErrorException(message, loc);
+    }
+
+    /**
+     * <p>Given a math symbol name, locate and return
+     * the {@link MathSymbolEntry} stored in the
+     * symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param name The string name of the math symbol.
+     * @param scope The module scope to start our search.
+     *
+     * @return A {@link MathSymbolEntry} from the
+     *         symbol table.
+     */
+    public static MathSymbolEntry searchMathSymbol(Location loc, String name,
+            ModuleScope scope) {
+        // Query for the corresponding math symbol
+        MathSymbolEntry ms = null;
+        try {
+            ms =
+                    scope.queryForOne(
+                            new UnqualifiedNameQuery(name,
+                                    ImportStrategy.IMPORT_RECURSIVE,
+                                    FacilityStrategy.FACILITY_IGNORE, true,
+                                    true)).toMathSymbolEntry(loc);
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, name, loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate symbol is
+            //created
+            throw new RuntimeException(dse);
+        }
+
+        return ms;
+    }
+
+    /**
+     * <p>Given the qualifier, name and the list of argument
+     * types, locate and return the {@link OperationEntry}
+     * stored in the symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The qualifier of the operation.
+     * @param name The name of the operation.
+     * @param argTypes The list of argument types.
+     * @param scope The module scope to start our search.
+     *
+     * @return An {@link OperationEntry} from the
+     *         symbol table.
+     */
+    public static OperationEntry searchOperation(Location loc,
+            PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
+            ModuleScope scope) {
+        // Query for the corresponding operation
+        OperationEntry op = null;
+        try {
+            op =
+                    scope.queryForOne(new OperationQuery(qualifier, name,
+                            argTypes));
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, name.getName(), loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+
+        return op;
     }
 
     /**
@@ -889,190 +1071,6 @@ public class Utilities {
     public static void tyNotHandled(Ty ty, Location loc) {
         throw new SourceErrorException("[VCGenerator] Ty not handled: "
                 + ty.toString(), loc);
-    }
-
-    // ===========================================================
-    // Package Private Methods
-    // ===========================================================
-
-    /**
-     * <p>Returns the math type for "Z".</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param scope The module scope to start our search.
-     *
-     *
-     * @return The <code>MTType</code> for "Z".
-     */
-    static MTType getMathTypeZ(Location loc, ModuleScope scope) {
-        // Locate "Z" (Integer)
-        MathSymbolEntry mse = searchMathSymbol(loc, "Z", scope);
-        MTType Z = null;
-        try {
-            Z = mse.getTypeValue();
-        }
-        catch (SymbolNotOfKindTypeException e) {
-            notAType(mse, loc);
-        }
-
-        return Z;
-    }
-
-    /**
-     * <p>Given the original {@code ensures} clause, use the provided
-     * information on the actual parameter variable to substitute the {@code exemplar} in
-     * the {@code initialization ensures} clause and create a new {@link AssertionClause}.</p>
-     *
-     * @param originalEnsuresClause The {@link AssertionClause} containing the
-     *                              original {@code ensures} clause.
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param qualifier The parameter variable's qualifier.
-     * @param name The parameter variable's name.
-     * @param exemplarName The {@code exemplar} name for the corresponding type.
-     * @param type The mathematical type associated with this type.
-     * @param typeValue The mathematical type value associated with this type.
-     *
-     * @return A modified {@link AssertionClause} containing the new
-     * {@code ensures} clause.
-     */
-    static AssertionClause getTypeEnsuresClause(AssertionClause originalEnsuresClause,
-            Location loc, PosSymbol qualifier, PosSymbol name,
-            PosSymbol exemplarName, MTType type, MTType typeValue) {
-        // Create a variable expression from the declared variable
-        VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
-
-        // Create a variable expression from the type exemplar
-        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
-
-        // Create a replacement map
-        Map<Exp, Exp> substitutions = new HashMap<>();
-        substitutions.put(exemplar, varDecExp);
-
-        // Create new assertion clause by replacing the exemplar with the actual
-        Location newLoc = loc.clone();
-        Exp constraintWithReplacements =
-                originalEnsuresClause.getAssertionExp().substitute(substitutions);
-        Exp whichEntailsWithReplacements = null;
-        if (originalEnsuresClause.getWhichEntailsExp() != null) {
-            whichEntailsWithReplacements =
-                    originalEnsuresClause.getWhichEntailsExp().substitute(substitutions);
-        }
-
-        return new AssertionClause(newLoc, AssertionClause.ClauseType.ENSURES,
-                constraintWithReplacements, whichEntailsWithReplacements);
-    }
-
-    /**
-     * <p>Given the name of an operation check to see if it is a
-     * local operation</p>
-     *
-     * @param name The name of the operation.
-     * @param scope The module scope we are searching.
-     *
-     * @return {@code true} if it is a local operation, {@code false} otherwise.
-     */
-    static boolean isLocationOperation(String name, ModuleScope scope) {
-        boolean isIn;
-
-        // Query for the corresponding operation
-        List<SymbolTableEntry> entries =
-                scope.query(new NameQuery(null, name,
-                        ImportStrategy.IMPORT_NONE,
-                        FacilityStrategy.FACILITY_IGNORE, true));
-
-        // Not found
-        if (entries.size() == 0) {
-            isIn = false;
-        }
-        // Found one
-        else if (entries.size() == 1) {
-            // If the operation is declared here, then it will be an OperationEntry.
-            // Thus it is a local operation.
-            isIn = entries.get(0) instanceof OperationEntry;
-        }
-        // Found more than one
-        else {
-            //This should be caught earlier, when the duplicate symbol is
-            //created
-            throw new RuntimeException();
-        }
-
-        return isIn;
-    }
-
-    /**
-     * <p>Given a math symbol name, locate and return
-     * the {@link MathSymbolEntry} stored in the
-     * symbol table.</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param name The string name of the math symbol.
-     * @param scope The module scope to start our search.
-     *
-     * @return A {@link MathSymbolEntry} from the
-     *         symbol table.
-     */
-    static MathSymbolEntry searchMathSymbol(Location loc, String name,
-            ModuleScope scope) {
-        // Query for the corresponding math symbol
-        MathSymbolEntry ms = null;
-        try {
-            ms =
-                    scope.queryForOne(
-                            new UnqualifiedNameQuery(name,
-                                    ImportStrategy.IMPORT_RECURSIVE,
-                                    FacilityStrategy.FACILITY_IGNORE, true,
-                                    true)).toMathSymbolEntry(loc);
-        }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, name, loc);
-        }
-        catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate symbol is
-            //created
-            throw new RuntimeException(dse);
-        }
-
-        return ms;
-    }
-
-    /**
-     * <p>Given the qualifier, name and the list of argument
-     * types, locate and return the {@link OperationEntry}
-     * stored in the symbol table.</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param qualifier The qualifier of the operation.
-     * @param name The name of the operation.
-     * @param argTypes The list of argument types.
-     * @param scope The module scope to start our search.
-     *
-     * @return An {@link OperationEntry} from the
-     *         symbol table.
-     */
-    static OperationEntry searchOperation(Location loc, PosSymbol qualifier,
-            PosSymbol name, List<PTType> argTypes, ModuleScope scope) {
-        // Query for the corresponding operation
-        OperationEntry op = null;
-        try {
-            op =
-                    scope.queryForOne(new OperationQuery(qualifier, name,
-                            argTypes));
-        }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, name.getName(), loc);
-        }
-        catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate operation is
-            //created
-            throw new RuntimeException(dse);
-        }
-
-        return op;
     }
 
     // ===========================================================

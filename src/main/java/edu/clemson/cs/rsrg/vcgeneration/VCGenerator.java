@@ -66,6 +66,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.AssumeStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.CallStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.ConfirmStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.RememberStmtRule;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import java.util.*;
@@ -345,6 +346,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .remove(myCurrentAssertiveCodeBlock);
             myVCGenDetailsModel.add("assertiveCodeBlocks", blockModel.render());
 
+            // Add this to our final assertive code block list
+            myFinalAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
+
             // Set the current assertive code block to null
             myCurrentAssertiveCodeBlock = null;
         }
@@ -408,7 +412,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Utilities.searchOperation(dec.getLocation(), null, dec
                         .getName(), argTypes, myCurrentModuleScope);
 
-        // TODO: Add the perfomance logic
+        // TODO: Add the performance logic
         // Obtain the performance duration clause
         /*if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
             myCurrentOperationProfileEntry =
