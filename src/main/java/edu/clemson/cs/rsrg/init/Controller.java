@@ -353,15 +353,18 @@ public class Controller {
 
                     // Search for the file in our processed modules
                     if (!myCompileEnvironment.containsID(id)) {
-                        module = createModuleAST(file);
-                        myCompileEnvironment.constructRecord(file, module);
-
                         // Print out debugging message
                         if (myCompileEnvironment.flags
                                 .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                             myStatusHandler.info(null, "Importing New Module: "
                                     + id.toString());
                         }
+
+                        module = createModuleAST(file);
+                        myCompileEnvironment.constructRecord(file, module);
+
+                        // Now check this new module for dependencies
+                        findDependencies(g, module);
                     }
                     else {
                         module = myCompileEnvironment.getModuleAST(id);
@@ -384,9 +387,6 @@ public class Controller {
                     // Add new edge to our graph indicating the relationship between
                     // the two files.
                     Graphs.addEdgeWithVertices(g, rootId, id);
-
-                    // Now check this new module for dependencies
-                    findDependencies(g, module);
                 }
                 else {
                     addFileAsExternalImport(importRequest);
