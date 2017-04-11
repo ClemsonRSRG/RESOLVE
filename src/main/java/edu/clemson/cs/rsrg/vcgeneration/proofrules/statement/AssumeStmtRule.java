@@ -140,61 +140,81 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         Set<Exp> seqAntecedents = new LinkedHashSet<>(seq.getAntecedents());
         Set<Exp> seqConsequents = new LinkedHashSet<>(seq.getConcequents());
 
-        for (Exp confirmExp : seqConsequents) {
-            // If it is stipulate clause, keep it no matter what
-            if (myAssumeStmt.getIsStipulate()) {
-                seqAntecedents.addAll(remAssumeExpList);
-            } else {
-                boolean checkList = false;
-                if (remAssumeExpList.size() > 0) {
-                    checkList = true;
+        // If it is stipulate clause, keep it no matter what
+        if (myAssumeStmt.getIsStipulate()) {
+            seqAntecedents.addAll(remAssumeExpList);
+        }
+        else {
+            // This boolean condition will store whether or
+            // not we keep checking the remAssumeExpList for
+            // more potential antecedents. To start of, if
+            // the list is empty, the obvious answer is no.
+            boolean checkForMoreAntecedents = !remAssumeExpList.isEmpty();
+
+            // Loop until we no longer add more expressions or
+            // we have added all expressions in the remaining
+            // assume expression list.
+            while (checkForMoreAntecedents) {
+                List<Exp> tmpExpList = new ArrayList<>();
+
+                // Check to see if we have added something to our
+                // antecedent set.
+                boolean addedToAntecendentSet = false;
+                for (Exp assumeExp : remAssumeExpList) {
+                    // Get the set of symbols in the antecedent
+                    Set<String> symbolsInSeq = new LinkedHashSet<>();
+                    for (Exp antecedentExp : seqAntecedents) {
+                        symbolsInSeq.addAll(getSymbols(antecedentExp));
+                    }
+
+                    // Get the set of symbols in the consequent
+                    for (Exp consequentExp : seqConsequents) {
+                        symbolsInSeq.addAll(getSymbols(consequentExp));
+                    }
+
+                    // Add this as a new antecedent if there are common symbols
+                    // in the assume expression and in the sequent. (Parsimonious step)
+                    Set<String> intersection = new LinkedHashSet<>(symbolsInSeq);
+                    intersection.retainAll(getSymbols(assumeExp));
+
+                    // There are common symbols!
+                    if (!intersection.isEmpty()) {
+                        // Don't add this as an antecedent if we have "Assume true"
+                        if (!VarExp.isLiteralTrue(assumeExp)) {
+                            seqAntecedents.add(assumeExp.clone());
+                            addedToAntecendentSet = true;
+                        }
+                    }
+                    // There are no common symbols!
+                    else {
+                        // Add this as a new antecedent if we have "Assume false"
+                        if (VarExp.isLiteralFalse(assumeExp)) {
+                            seqAntecedents.add(assumeExp.clone());
+                            addedToAntecendentSet = true;
+                        }
+                        // We might need to check this again if in the future
+                        // another expression in remAssumeExpList makes this
+                        // assumeExp have common symbols with anything in our sequent.
+                        else {
+                            tmpExpList.add(assumeExp);
+                        }
+                    }
                 }
 
-                // Loop until we no longer add more expressions or we have added all
-                // expressions in the remaining assume expression list.
-                while (checkList) {
-                    List<Exp> tmpExpList = new ArrayList<>();
-                    boolean addedToAntecendentSet = false;
-
-                    for (Exp assumeExp : remAssumeExpList) {
-                        // Add this as a new antecedent if there are common symbols
-                        // in the assume and in the confirm. (Parsimonious step)
-                        Set<String> intersection = getSymbols(confirmExp);
-                        intersection.retainAll(getSymbols(assumeExp));
-
-                        if (!intersection.isEmpty()) {
-                            // Don't add this as an antecedent if we have "Assume true"
-                            if (!VarExp.isLiteralTrue(assumeExp)) {
-                                seqAntecedents.add(assumeExp.clone());
-                                addedToAntecendentSet = true;
-                            }
-                        } else {
-                            // Add this as a new antecedent if we have "Assume false"
-                            if (VarExp.isLiteralFalse(assumeExp)) {
-                                seqAntecedents.add(assumeExp.clone());
-                                addedToAntecendentSet = true;
-                            } else {
-                                tmpExpList.add(assumeExp);
-                            }
-                        }
-                    }
-
-                    remAssumeExpList = tmpExpList;
-                    if (remAssumeExpList.size() > 0) {
-                        // Check to see if we formed an implication
-                        if (addedToAntecendentSet) {
-                            // Loop again to see if we can form any more implications
-                            checkList = true;
-                        } else {
-                            // If no implications are formed, then none of the remaining
-                            // expressions will be helpful.
-                            checkList = false;
-                        }
-                    } else {
-                        // Since we are done with all assume expressions, we can quit
-                        // out of the loop.
-                        checkList = false;
-                    }
+                // Use whatever we have in tmpExpList as our new
+                // remAssumeExpList
+                remAssumeExpList = tmpExpList;
+                if (remAssumeExpList.size() > 0) {
+                    // Check to see if we added something to as
+                    // a new antecedent. If we did, then we will
+                    // need to loop again to see if we can add any
+                    // more. If we didn't, then none of the remaining
+                    // expressions will be helpful.
+                    checkForMoreAntecedents = addedToAntecendentSet;
+                } else {
+                    // Since we are done with all assume expressions,
+                    // we can quit out of the loop.
+                    checkForMoreAntecedents = false;
                 }
             }
         }
