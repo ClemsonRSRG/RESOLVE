@@ -53,14 +53,12 @@ public class FunctionExp extends AbstractFunctionExp {
      * arguments.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param qualifier A {@link PosSymbol} qualifier name object.
      * @param name A {@link VarExp} name expression object.
      * @param caratExp A {@link Exp} indicating the exponent-like part to the name.
      * @param argList A list of {@link Exp} argument objects.
      */
-    public FunctionExp(Location l, PosSymbol qualifier, VarExp name,
-            Exp caratExp, List<Exp> argList) {
-        super(l, qualifier);
+    public FunctionExp(Location l, VarExp name, Exp caratExp, List<Exp> argList) {
+        super(l, name.getQualifier());
 
         // The qualifier should be part of the function expression
         // and not part of the variable name.
@@ -298,11 +296,6 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     public final FunctionExp remember() {
-        PosSymbol qualifier = null;
-        if (myQualifier != null) {
-            qualifier = myQualifier.clone();
-        }
-
         // TODO: May have to change the type of myFuncNameExp to allow non-variable names.
         VarExp newNameExp;
         if (myFuncNameExp instanceof VarExp){
@@ -334,7 +327,7 @@ public class FunctionExp extends AbstractFunctionExp {
             newArgs.add(copyExp);
         }
 
-        return new FunctionExp(cloneLocation(), qualifier, newNameExp, newCaratExp, newArgs);
+        return new FunctionExp(cloneLocation(), newNameExp, newCaratExp, newArgs);
     }
 
     /**
@@ -365,18 +358,13 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp copy() {
-        PosSymbol qualifier = null;
-        if (myQualifier != null) {
-            qualifier = myQualifier.clone();
-        }
-
         Exp newCaratExp = null;
         if (myFuncNameCaratExp != null) {
             newCaratExp = myFuncNameCaratExp.clone();
         }
 
-        return new FunctionExp(cloneLocation(), qualifier,
-                (VarExp) myFuncNameExp.clone(), newCaratExp, copyExps());
+        return new FunctionExp(cloneLocation(), (VarExp) myFuncNameExp.clone(),
+                newCaratExp, copyExps());
     }
 
     /**
@@ -384,11 +372,6 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        PosSymbol qualifier = null;
-        if (myQualifier != null) {
-            qualifier = myQualifier.clone();
-        }
-
         // YS: I don't think we ever need to substitute this.
         Exp newCaratExp = null;
         if (myFuncNameCaratExp != null) {
@@ -400,9 +383,7 @@ public class FunctionExp extends AbstractFunctionExp {
             newArgs.add(substitute(f, substitutions));
         }
 
-        return new FunctionExp(cloneLocation(), qualifier,
-                (VarExp) substitute(myFuncNameExp, substitutions),
-                newCaratExp, newArgs);
+        return new FunctionExp(cloneLocation(), (VarExp) substitute(myFuncNameExp, substitutions), newCaratExp, newArgs);
     }
 
     // ===========================================================

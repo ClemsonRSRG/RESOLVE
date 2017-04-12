@@ -236,7 +236,12 @@ public class OldExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new OldExp(cloneLocation(), substitute(myOrigExp, substitutions));
+        Exp newOrigExp = null;
+        if (myOrigExp != null) {
+            newOrigExp = myOrigExp.clone();
+        }
+
+        return new OldExp(cloneLocation(), newOrigExp);
     }
 
 }

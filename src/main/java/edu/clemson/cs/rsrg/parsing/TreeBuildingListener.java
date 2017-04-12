@@ -4274,7 +4274,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         // function name
-        VarExp functionNameExp = new VarExp(createLocation(ctx.name), null, createPosSymbol(ctx.name));
+        VarExp functionNameExp =
+                new VarExp(createLocation(ctx.name), qualifier, createPosSymbol(ctx.name));
 
         // exponent-like part to the name
         Exp caratExp = (Exp) myNodes.removeFrom(ctx.mathNestedExp());
@@ -4286,7 +4287,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             functionArgs.add((Exp) myNodes.removeFrom(context));
         }
 
-        myNodes.put(ctx, new FunctionExp(createLocation(ctx), qualifier, functionNameExp, caratExp, functionArgs));
+        myNodes.put(ctx, new FunctionExp(createLocation(ctx),
+                functionNameExp, caratExp, functionArgs));
     }
 
     /**
@@ -5082,7 +5084,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @return A {@link Location} for the rule.
      */
     private Location createLocation(Token t) {
-        return new Location(myFile, t.getLine(), t.getCharPositionInLine(), "");
+        return new Location(myFile, t.getLine(), t.getCharPositionInLine());
     }
 
     /**

@@ -70,9 +70,8 @@ public class VCVarExp extends MathExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("?");
-        sb.append(myOrigExp.asString(0, innerIndentInc));
+        sb.append(myOrigExp.asString(indentSize, innerIndentInc));
+        sb.append("'");
 
         return sb.toString();
     }

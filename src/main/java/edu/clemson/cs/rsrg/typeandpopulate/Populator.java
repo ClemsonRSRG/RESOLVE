@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.*;
@@ -392,9 +393,17 @@ public class Populator extends TreeWalkerVisitor {
             TreeWalker.visit(this, varDec);
         }
 
+        // Walk the requires clause
+        TreeWalker.visit(this, dec.getRequires());
+
         // Walk our declarations
         for (Dec innerDecl : dec.getDecList()) {
             TreeWalker.visit(this, innerDecl);
+        }
+
+        // Walk the list of constraints clauses
+        for (AssertionClause constraintClause : dec.getConstraints()) {
+            TreeWalker.visit(this, constraintClause);
         }
 
         postConceptModuleDec(dec);
@@ -462,6 +471,9 @@ public class Populator extends TreeWalkerVisitor {
             TreeWalker.visit(this, varDec);
         }
 
+        // Walk the requires clause
+        TreeWalker.visit(this, dec.getRequires());
+
         // Walk our declarations
         for (Dec innerDecl : dec.getDecList()) {
             TreeWalker.visit(this, innerDecl);
@@ -514,6 +526,9 @@ public class Populator extends TreeWalkerVisitor {
         for (ModuleParameterDec varDec : dec.getParameterDecs()) {
             TreeWalker.visit(this, varDec);
         }
+
+        // Walk the requires clause
+        TreeWalker.visit(this, dec.getRequires());
 
         // Walk our declarations
         for (Dec innerDecl : dec.getDecList()) {
@@ -601,6 +616,9 @@ public class Populator extends TreeWalkerVisitor {
         for (ModuleParameterDec varDec : dec.getParameterDecs()) {
             TreeWalker.visit(this, varDec);
         }
+
+        // Walk the requires clause
+        TreeWalker.visit(this, dec.getRequires());
 
         // Walk our declarations
         for (Dec innerDecl : dec.getDecList()) {

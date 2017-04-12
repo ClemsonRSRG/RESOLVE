@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import java.util.Collections;
@@ -36,6 +37,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /** <p>Name of the {@link ResolveConceptualElement} that created this object.</p> */
+    private final PosSymbol myBlockName;
 
     /** <p>List of free variables.</p> */
     private final List<Exp> myFreeVars;
@@ -72,8 +76,11 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      * @param g The current type graph.
      * @param instantiatingElement The element that created this
      *                             assertive code block.
+     * @param name Name of the element that created this assertive
+     *             code block.
      */
-    public AssertiveCodeBlock(TypeGraph g, ResolveConceptualElement instantiatingElement) {
+    public AssertiveCodeBlock(TypeGraph g, ResolveConceptualElement instantiatingElement, PosSymbol name) {
+        myBlockName = name;
         myFreeVars = new LinkedList<>();
         myInstantiatingElement = instantiatingElement;
         mySequents = new LinkedList<>();
@@ -92,7 +99,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      * @param var A new variable.
      */
     public final void addFreeVar(Exp var) {
-        if (!myFreeVars.contains(var)) {
+        if (!containsFreeVar(var)) {
             myFreeVars.add(var);
         }
     }
@@ -135,22 +142,19 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         Iterator<Exp> freeVarIt = myFreeVars.iterator();
         while (freeVarIt.hasNext()) {
             Exp current = freeVarIt.next();
-            sb.append(current);
+            sb.append(current.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append(" : ");
             sb.append(current.getMathType());
-
-            if (freeVarIt.hasNext()) {
-                sb.append(", ");
-            }
-            else {
-                sb.append("\n");
-            }
+            sb.append("\n");
         }
         sb.append("\n");
 
         // Statements
+        sb.append("Statements:\n");
         for (Statement statement : myStatements) {
-            sb.append(statement.asString(indentSize, innerIndentInc));
+            sb.append(statement.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append("\n");
         }
         sb.append("\n");
@@ -158,7 +162,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         // Sequents
         sb.append("Sequents:\n");
         for (Sequent sequent : mySequents) {
-            sb.append(sequent.toString());
+            sb.append(sequent.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
+            sb.append("\n");
         }
 
         return sb.toString();
@@ -172,13 +178,55 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     @Override
     public final AssertiveCodeBlock clone() {
         AssertiveCodeBlock newBlock =
-                new AssertiveCodeBlock(myTypeGraph, myInstantiatingElement);
+                new AssertiveCodeBlock(myTypeGraph, myInstantiatingElement,
+                        myBlockName);
 
         Collections.copy(newBlock.myFreeVars, myFreeVars);
         Collections.copy(newBlock.mySequents, mySequents);
         Collections.copy(newBlock.myStatements, myStatements);
 
         return newBlock;
+    }
+
+    /**
+     * <p>Checks if there is already a free variable that matches the provided
+     * expression.</p>
+     *
+     * @param var A variable expression to be checked.
+     */
+    public final boolean containsFreeVar(Exp var) {
+        boolean contains = false;
+        Iterator<Exp> freeVarIt = myFreeVars.iterator();
+        while (freeVarIt.hasNext() && !contains) {
+            Exp freeVar = freeVarIt.next();
+            contains = freeVar.equivalent(var);
+        }
+
+        return contains;
+    }
+
+    /**
+     * <p>This method overrides the default {@code equals} method implementation.</p>
+     *
+     * @param o Object to be compared.
+     *
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     */
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        AssertiveCodeBlock block = (AssertiveCodeBlock) o;
+
+        return myBlockName.equals(block.myBlockName)
+                && myFreeVars.equals(block.myFreeVars)
+                && myInstantiatingElement.equals(block.myInstantiatingElement)
+                && mySequents.equals(block.mySequents)
+                && myStatements.equals(block.myStatements)
+                && myTypeGraph.equals(block.myTypeGraph);
     }
 
     /**
@@ -192,6 +240,16 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method returns the name for the instantiating element that created
+     * this assertive code block.</p>
+     *
+     * @return The name as a {@link PosSymbol}.
+     */
+    public final PosSymbol getName() {
+        return myBlockName;
+    }
+
+    /**
      * <p>This method returns the list of sequents stored inside
      * this assertive code block.</p>
      *
@@ -202,13 +260,39 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>The type graph containing all the type relationships.</p>
+     *
+     * @return The type graph for the compiler.
+     */
+    public final TypeGraph getTypeGraph() {
+        return myTypeGraph;
+    }
+
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public final int hashCode() {
+        int result = myBlockName.hashCode();
+        result = 31 * result + myFreeVars.hashCode();
+        result = 31 * result + myInstantiatingElement.hashCode();
+        result = 31 * result + mySequents.hashCode();
+        result = 31 * result + myStatements.hashCode();
+        result = 31 * result + myTypeGraph.hashCode();
+
+        return result;
+    }
+
+    /**
      * <p>Checks if we have {@link Statement Statements} that we still
      * need to apply proof rules to./p>
      *
      * @return {@code true} if we have more {@link Statement Statements}
      * that needs to be processed, {@code false} otherwise.
      */
-    public final boolean hasAnotherAssertion() {
+    public final boolean hasMoreStatements() {
         return (!myStatements.isEmpty());
     }
 

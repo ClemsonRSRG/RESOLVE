@@ -199,18 +199,7 @@ public class EqualsExp extends InfixExp {
     @Override
     public final List<InfixExp> split(MathExp assumpts, boolean single) {
         List<InfixExp> lst = new ArrayList<>();
-
-        if (myOperator == Operator.EQUAL) {
-            throw new MiscErrorException("Cannot split an EqualsExp!", new IllegalStateException());
-        }
-        else {
-            if (myLeftHandSide != null) {
-                lst.addAll(((MathExp) myLeftHandSide).split(assumpts, single));
-            }
-            if (myRightHandSide != null) {
-                lst.addAll(((MathExp) myRightHandSide).split(assumpts, single));
-            }
-        }
+        lst.add(this);
 
         return lst;
     }
