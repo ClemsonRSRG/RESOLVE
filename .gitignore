@@ -4,6 +4,7 @@
 
 target/
 *.class
+*.tokens
 
 ###########################
 # Generated dot/svg files #
