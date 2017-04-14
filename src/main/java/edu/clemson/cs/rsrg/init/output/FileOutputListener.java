@@ -13,15 +13,13 @@
 package edu.clemson.cs.rsrg.init.output;
 
 import edu.clemson.cs.r2jt.rewriteprover.Metrics;
-import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
-import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
+import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import java.io.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>A listener that contains methods for retrieving compilation
@@ -58,16 +56,14 @@ public class FileOutputListener implements OutputListener {
     // ===========================================================
 
     /**
-     * <p>This method outputs the provided {@code Graphviz} models
+     * <p>This method outputs the provided {@code Graphviz} model generated
      * from the {@link GenerateGraphvizModel}.</p>
      *
-     * @param graphvizModels A map that contains the inner {@code AST} represented
-     *                       in a {@code GraphViz} file format for the specified
-     *                       {@link ResolveFile ResolveFiles}.
+     * @param graphvizModel The inner {@code AST} represented in a {@code GraphViz}
+     *                      file format.
      */
     @Override
-    public final void astGraphvizModelResult(
-            Map<ResolveFile, String> graphvizModels) {
+    public final void astGraphvizModelResult(String graphvizModel) {
         throw new UnsupportedOperationException("Needs to be implemented!");
     }
 
@@ -75,12 +71,10 @@ public class FileOutputListener implements OutputListener {
      * <p>This method outputs the provided the java translation results
      * from the {@code JavaTranslator}.</p>
      *
-     * @param javaTranslations A map that contains the translation
-     *                         to {@code Java} for {@link ResolveFile ResolveFiles}.
+     * @param javaTranslation The translated {@code Java} source code.
      */
     @Override
-    public final void javaTranslationResult(
-            Map<ResolveFile, String> javaTranslations) {
+    public final void javaTranslationResult(String javaTranslation) {
         throw new UnsupportedOperationException("Needs to be implemented!");
     }
 
@@ -94,14 +88,13 @@ public class FileOutputListener implements OutputListener {
     }
 
     /**
-     * <p>This method outputs the provided {@link VC VCs}
+     * <p>This method outputs the provided {@link AssertiveCodeBlock AssertiveCodeBlocks}
      * from the {@link VCGenerator}.</p>
      *
-     * @param vcs A map that contains all the associated {@link VC VCs}
-     *            for {@link ResolveFile ResolveFiles}.
+     * @param blocks A list of final {@link AssertiveCodeBlock AssertiveCodeBlocks}.
      */
     @Override
-    public final void vcGeneratorResult(Map<ResolveFile, List<VC>> vcs) {
+    public void vcGeneratorResult(List<AssertiveCodeBlock> blocks) {
         throw new UnsupportedOperationException("Needs to be implemented!");
     }
 
