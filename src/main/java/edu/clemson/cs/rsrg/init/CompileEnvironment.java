@@ -12,8 +12,9 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.init.output.FileOutputListener;
+import edu.clemson.cs.rsrg.init.output.OutputListener;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.WriterStatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
@@ -71,10 +72,10 @@ public class CompileEnvironment {
     private final List<ModuleIdentifier> myIncompleteModules;
 
     /**
-     * <p>This listener object provides instant feedback to the
-     * interested party as soon as the prover is done processing a VC.</p>
+     * <p>This list stores listener objects that provides instant feedback to the
+     * interested party when we are done with a compilation activity.</p>
      */
-    private ProverListener myListener = null;
+    private final List<OutputListener> myOutputListeners;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -127,6 +128,7 @@ public class CompileEnvironment {
                 new HashMap<>();
         myExternalRealizFiles = new HashMap<>();
         myIncompleteModules = new LinkedList<>();
+        myOutputListeners = new LinkedList<>();
         myUserFileMap = new HashMap<>();
 
         // Check for custom workspace path
@@ -159,6 +161,11 @@ public class CompileEnvironment {
         }
         myStatusHandler = statusHandler;
 
+        // Add a default file listener if we didn't specify no file output
+        if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_FILE_OUTPUT)) {
+            myOutputListeners.add(new FileOutputListener(myStatusHandler));
+        }
+
         // Debugging information
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             synchronized (System.out) {
@@ -182,6 +189,15 @@ public class CompileEnvironment {
      */
     public final void addExternalRealizFile(ModuleIdentifier id, File file) {
         myExternalRealizFiles.put(id, file);
+    }
+
+    /**
+     * <p>Adds a new listener object.</p>
+     *
+     * @param listener A new {@link OutputListener} object.
+     */
+    public final void addOutputListener(OutputListener listener) {
+        myOutputListeners.add(listener);
     }
 
     /**
@@ -251,6 +267,16 @@ public class CompileEnvironment {
      */
     public final String[] getRemainingArgs() {
         return flags.getRemainingArgs();
+    }
+
+    /**
+     * <p>Returns all the output listeners that are interested
+     * in the compilation results.</p>
+     *
+     * @return A list of {@link OutputListener OutputListeners}.
+     */
+    public final List<OutputListener> getOutputListeners() {
+        return myOutputListeners;
     }
 
     /**
@@ -348,16 +374,6 @@ public class CompileEnvironment {
      */
     public final void setFileMap(Map<String, ResolveFile> fMap) {
         myUserFileMap = fMap;
-    }
-
-    /**
-     * <p>Adds a listerner for the prover.</p>
-     *
-     * @param listener The listener object that is going to communicate
-     *                 results from/to.
-     */
-    public final void setProverListener(ProverListener listener) {
-        myListener = listener;
     }
 
     /**
