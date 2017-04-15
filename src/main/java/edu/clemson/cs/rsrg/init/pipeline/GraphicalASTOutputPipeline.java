@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
+import edu.clemson.cs.rsrg.init.output.OutputListener;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -69,15 +70,17 @@ public class GraphicalASTOutputPipeline extends AbstractPipeline {
                         "outputGraphvizGVFile").add("moduleName", moduleName));
         TreeWalker.visit(twv, dec);
 
-        // Write the contents to file
-        String outputFileName = moduleName + "_ModuleDec.gv";
-        writeToFile(outputFileName, twv.getCompleteModel());
+        // Output the contents to listener objects
+        for (OutputListener listener : myCompileEnvironment
+                .getOutputListeners()) {
+            listener.astGraphvizModelResult(dec, twv.getCompleteModel());
+        }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             StringBuffer sb = new StringBuffer();
             sb.append("\n---------------Output Module AST---------------\n\n");
             sb.append("Exported ModuleDec to dot file: ");
-            sb.append(outputFileName);
+            sb.append(moduleName);
             sb.append("\n");
             sb
                     .append("\n---------------End Output Module AST---------------\n");
