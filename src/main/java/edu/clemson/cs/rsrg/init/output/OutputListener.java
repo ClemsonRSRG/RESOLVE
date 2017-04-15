@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.init.output;
 
 import edu.clemson.cs.r2jt.rewriteprover.Metrics;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
@@ -32,32 +33,37 @@ public interface OutputListener {
      * <p>This method outputs the provided {@code Graphviz} model generated
      * from the {@link GenerateGraphvizModel}.</p>
      *
+     * @param dec The module declaration we are currently processing.
      * @param graphvizModel The inner {@code AST} represented in a {@code GraphViz}
      *                      file format.
      */
-    void astGraphvizModelResult(String graphvizModel);
+    void astGraphvizModelResult(ModuleDec dec, String graphvizModel);
 
     /**
      * <p>This method outputs the provided the java translation results
      * from the {@code JavaTranslator}.</p>
      *
+     * @param dec The module declaration we are currently processing.
      * @param javaTranslation The translated {@code Java} source code.
      */
-    void javaTranslationResult(String javaTranslation);
+    void javaTranslationResult(ModuleDec dec, String javaTranslation);
 
     /**
      * <p>This method outputs the provided results
      * from the {@code CCProver}.</p>
+     *
+     * @param dec The module declaration we are currently processing.
      */
-    void proverResult();
+    void proverResult(ModuleDec dec);
 
     /**
      * <p>This method outputs the provided {@link AssertiveCodeBlock AssertiveCodeBlocks}
      * from the {@link VCGenerator}.</p>
      *
+     * @param dec The module declaration we are currently processing.
      * @param blocks A list of final {@link AssertiveCodeBlock AssertiveCodeBlocks}.
      */
-    void vcGeneratorResult(List<AssertiveCodeBlock> blocks);
+    void vcGeneratorResult(ModuleDec dec, List<AssertiveCodeBlock> blocks);
 
     /**
      * <p>This method outputs the prover results for a given {@code VC}.</p>

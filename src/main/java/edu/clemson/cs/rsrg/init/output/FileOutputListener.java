@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.init.output;
 
 import edu.clemson.cs.r2jt.rewriteprover.Metrics;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
@@ -59,31 +60,35 @@ public class FileOutputListener implements OutputListener {
      * <p>This method outputs the provided {@code Graphviz} model generated
      * from the {@link GenerateGraphvizModel}.</p>
      *
+     * @param dec The module declaration we are currently processing.
      * @param graphvizModel The inner {@code AST} represented in a {@code GraphViz}
      *                      file format.
      */
     @Override
-    public final void astGraphvizModelResult(String graphvizModel) {
-        throw new UnsupportedOperationException("Needs to be implemented!");
+    public final void astGraphvizModelResult(ModuleDec dec, String graphvizModel) {
+
     }
 
     /**
      * <p>This method outputs the provided the java translation results
      * from the {@code JavaTranslator}.</p>
      *
+     * @param dec The module declaration we are currently processing.
      * @param javaTranslation The translated {@code Java} source code.
      */
     @Override
-    public final void javaTranslationResult(String javaTranslation) {
+    public final void javaTranslationResult(ModuleDec dec, String javaTranslation) {
         throw new UnsupportedOperationException("Needs to be implemented!");
     }
 
     /**
      * <p>This method outputs the provided results
      * from the {@code CCProver}.</p>
+     *
+     * @param dec The module declaration we are currently processing.
      */
     @Override
-    public final void proverResult() {
+    public final void proverResult(ModuleDec dec) {
         throw new UnsupportedOperationException("Needs to be implemented!");
     }
 
@@ -91,10 +96,11 @@ public class FileOutputListener implements OutputListener {
      * <p>This method outputs the provided {@link AssertiveCodeBlock AssertiveCodeBlocks}
      * from the {@link VCGenerator}.</p>
      *
+     * @param dec The module declaration we are currently processing.
      * @param blocks A list of final {@link AssertiveCodeBlock AssertiveCodeBlocks}.
      */
     @Override
-    public void vcGeneratorResult(List<AssertiveCodeBlock> blocks) {
+    public void vcGeneratorResult(ModuleDec dec, List<AssertiveCodeBlock> blocks) {
         throw new UnsupportedOperationException("Needs to be implemented!");
     }
 
