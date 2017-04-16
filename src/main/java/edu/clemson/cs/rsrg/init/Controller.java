@@ -16,9 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.init.pipeline.AnalysisPipeline;
-import edu.clemson.cs.rsrg.init.pipeline.ASTOutputPipeline;
-import edu.clemson.cs.rsrg.init.pipeline.VCGenPipeline;
+import edu.clemson.cs.rsrg.init.pipeline.*;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.parsing.ResolveLexer;
@@ -53,7 +51,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  * @author Daniel Welch
  * @version 1.0
  */
-public class Controller {
+class Controller {
 
     // ===========================================================
     // Member Fields
@@ -103,7 +101,7 @@ public class Controller {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      */
-    public Controller(CompileEnvironment compileEnvironment) {
+    Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
         myStatusHandler = compileEnvironment.getStatusHandler();
         myAntlrErrorListener = new AntlrErrorListener(myStatusHandler);
@@ -112,7 +110,7 @@ public class Controller {
     }
 
     // ===========================================================
-    // Public Methods
+    // Package Private Methods
     // ===========================================================
 
     /**
@@ -122,7 +120,7 @@ public class Controller {
      *
      * @param file The compiling RESOLVE file.
      */
-    public final void compileTargetFile(ResolveFile file) {
+    final void compileTargetFile(ResolveFile file) {
         try {
             // Use ANTLR4 to build the AST
             ModuleDec targetModule = createModuleAST(file);
@@ -141,31 +139,27 @@ public class Controller {
             g.addVertex(new ModuleIdentifier(targetModule));
             findDependencies(g, targetModule);
 
-            // Begin analyzing the file
-            AnalysisPipeline analysisPipe =
-                    new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
+            // Perform different compilation tasks to each file
             for (ModuleIdentifier m : getCompileOrder(g)) {
                 // Print the entire ModuleDec
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_PRINT_MODULE) &&
                         m.equals(new ModuleIdentifier(targetModule))) {
-                    ModuleDec dec = myCompileEnvironment.getModuleAST(m);
-
-                    StringBuffer sb = new StringBuffer();
-                    sb.append("\n---------------Print Module---------------\n\n");
-                    sb.append(dec.asString(0, 4));
-                    sb.append("\n---------------Print Module---------------\n");
-                    myStatusHandler.info(null, sb.toString());
+                    RawASTOutputPipeline rawASTOutputPipe =
+                            new RawASTOutputPipeline(myCompileEnvironment, mySymbolTable);
+                    rawASTOutputPipe.process(m);
                 }
 
                 // Output AST to Graphviz dot file. (Only for argument files)
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_EXPORT_AST) &&
                         m.equals(new ModuleIdentifier(targetModule))) {
-                    ASTOutputPipeline astOutputPipe =
-                            new ASTOutputPipeline(myCompileEnvironment, mySymbolTable);
+                    GraphicalASTOutputPipeline astOutputPipe =
+                            new GraphicalASTOutputPipeline(myCompileEnvironment, mySymbolTable);
                     astOutputPipe.process(m);
                 }
 
                 // Type and populate symbol table
+                AnalysisPipeline analysisPipe =
+                        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
                 analysisPipe.process(m);
 
                 // Generate VCs

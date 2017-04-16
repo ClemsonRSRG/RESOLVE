@@ -12,17 +12,17 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.flag.Flag;
+import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
+import edu.clemson.cs.rsrg.init.output.OutputListener;
+import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.statushandling.SystemStdHandler;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.init.file.ModuleType;
-import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.init.flag.Flag;
-import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
-import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
@@ -92,6 +92,8 @@ public class ResolveCompiler {
 
     private static final String FLAG_DESC_DEBUG =
             "Print debugging statements from the compiler output.";
+    private static final String FLAG_DESC_NO_FILE_OUTPUT =
+            "Specifies that we do not want the default output to file behavior.";
     private static final String FLAG_DESC_PRINT_MODULE =
             "Print the modules we are compiling.";
     private static final String FLAG_DESC_EXPORT_AST =
@@ -143,6 +145,12 @@ public class ResolveCompiler {
     static final Flag FLAG_DEBUG_STACK_TRACE =
             new Flag(FLAG_SECTION_DEBUG, "stacktrace", FLAG_DESC_DEBUG,
                     Flag.Type.HIDDEN);
+    /**
+     * <p>Tells the compiler not to output anything to file.</p>
+     */
+    static final Flag FLAG_NO_FILE_OUTPUT =
+            new Flag(FLAG_SECTION_GENERAL, "noFileOutput",
+                    FLAG_DESC_NO_FILE_OUTPUT);
 
     /**
      * <p>Tells the compiler to print the module we are compiling.</p>
@@ -222,11 +230,10 @@ public class ResolveCompiler {
      *
      * @param fileMap A map containing all the user modified files.
      * @param statusHandler A status handler to display debug or error messages.
-     * @param proverListener A listener object that needs to be
-     *                       passed to the prover.
+     * @param listener An output listener object.
      */
     public void invokeCompiler(Map<String, ResolveFile> fileMap,
-            StatusHandler statusHandler, ProverListener proverListener) {
+            StatusHandler statusHandler, OutputListener listener) {
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment =
                 handleCompileArgs(statusHandler);
@@ -234,8 +241,8 @@ public class ResolveCompiler {
         // Store the file map
         compileEnvironment.setFileMap(fileMap);
 
-        // Store the listener required by all provers
-        compileEnvironment.setProverListener(proverListener);
+        // Store the new listener object
+        compileEnvironment.addOutputListener(listener);
 
         // Compile files/directories listed in the argument list
         try {

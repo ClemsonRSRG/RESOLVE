@@ -15,6 +15,8 @@ package edu.clemson.cs.rsrg.init.pipeline;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
+import edu.clemson.cs.rsrg.init.output.OutputListener;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -67,6 +69,7 @@ public class VCGenPipeline extends AbstractPipeline {
                                 new Date());
 
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
+        StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
         VCGenerator vcGenerator =
                 new VCGenerator(mySymbolTable, myCompileEnvironment, group,
                         model);
@@ -76,21 +79,25 @@ public class VCGenPipeline extends AbstractPipeline {
             sb.append("Generating VCs for: ");
             sb.append(moduleDec.getName());
 
-            myCompileEnvironment.getStatusHandler().info(null, sb.toString());
+            statusHandler.info(null, sb.toString());
         }
 
         // Walk the AST and generate VCs
         TreeWalker.visit(vcGenerator, moduleDec);
 
-        // Write the contents to file
-        String outputFileName = moduleDec.getName().getName() + ".asrt";
-        writeToFile(outputFileName, vcGenerator.getCompleteModel());
+        // Output the contents to listener objects
+        for (OutputListener listener : myCompileEnvironment
+                .getOutputListeners()) {
+            listener.vcGeneratorResult(moduleDec, vcGenerator
+                    .getFinalAssertiveCodeBlocks(), vcGenerator
+                    .getCompleteModel());
+        }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             StringBuffer sb = new StringBuffer();
             sb.append("\n---------------End Generating VCs---------------\n");
 
-            myCompileEnvironment.getStatusHandler().info(null, sb.toString());
+            statusHandler.info(null, sb.toString());
         }
     }
 

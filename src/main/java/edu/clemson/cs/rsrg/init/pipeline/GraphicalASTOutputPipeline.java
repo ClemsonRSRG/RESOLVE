@@ -1,5 +1,5 @@
 /*
- * ASTOutputPipeline.java
+ * GraphicalASTOutputPipeline.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -16,6 +16,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
+import edu.clemson.cs.rsrg.init.output.OutputListener;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -24,25 +26,25 @@ import org.stringtemplate.v4.STGroupFile;
 
 /**
  * <p>This is pipeline that generates graphical representations
- * of the RESOLVE AST.</p>
+ * of a module AST.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class ASTOutputPipeline extends AbstractPipeline {
+public class GraphicalASTOutputPipeline extends AbstractPipeline {
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This generates a pipeline to generate files that aid the
-     * debugging process.</p>
+     * <p>This generates a pipeline to generate a graphical
+     * representation of a module AST.</p>
      *
      * @param ce The current compilation environment.
      * @param symbolTable The symbol table.
      */
-    public ASTOutputPipeline(CompileEnvironment ce,
+    public GraphicalASTOutputPipeline(CompileEnvironment ce,
             MathSymbolTableBuilder symbolTable) {
         super(ce, symbolTable);
     }
@@ -57,45 +59,33 @@ public class ASTOutputPipeline extends AbstractPipeline {
     @Override
     public final void process(ModuleIdentifier currentTarget) {
         ModuleDec dec = myCompileEnvironment.getModuleAST(currentTarget);
+        StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
         STGroup group = new STGroupFile("templates/ASTOutput.stg");
 
         // Generate DOT File (GV extension)
-        genModuleDecDotFile(dec, group);
-    }
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
-
-    /**
-     * <p>This generates a .dot file representation.</p>
-     *
-     * @param moduleDec A {@link ModuleDec} node.
-     * @param group A string template containing groups for
-     *              generating the Graphviz model.
-     */
-    private void genModuleDecDotFile(ModuleDec moduleDec, STGroup group) {
         // Add all the nodes and edges
-        String moduleName = moduleDec.getName().getName();
+        String moduleName = dec.getName().getName();
         GenerateGraphvizModel twv =
                 new GenerateGraphvizModel(group, group.getInstanceOf(
                         "outputGraphvizGVFile").add("moduleName", moduleName));
-        TreeWalker.visit(twv, moduleDec);
+        TreeWalker.visit(twv, dec);
 
-        // Write the contents to file
-        String outputFileName = moduleName + "_ModuleDec.gv";
-        writeToFile(outputFileName, twv.getCompleteModel());
+        // Output the contents to listener objects
+        for (OutputListener listener : myCompileEnvironment
+                .getOutputListeners()) {
+            listener.astGraphvizModelResult(dec, twv.getCompleteModel());
+        }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             StringBuffer sb = new StringBuffer();
             sb.append("\n---------------Output Module AST---------------\n\n");
             sb.append("Exported ModuleDec to dot file: ");
-            sb.append(outputFileName);
+            sb.append(moduleName);
             sb.append("\n");
             sb
                     .append("\n---------------End Output Module AST---------------\n");
 
-            myCompileEnvironment.getStatusHandler().info(null, sb.toString());
+            statusHandler.info(null, sb.toString());
         }
     }
 

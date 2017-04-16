@@ -631,6 +631,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         return myModel.render();
     }
 
+    /**
+     * <p>This method returns the final {@link AssertiveCodeBlock AssertiveCodeBlocks}
+     * containing the generated {@link Sequent Sequents}.</p>
+     *
+     * @return A list containing {@link AssertiveCodeBlock AssertiveCodeBlocks}.
+     */
+    public final List<AssertiveCodeBlock> getFinalAssertiveCodeBlocks() {
+        return myFinalAssertiveCodeBlocks;
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
