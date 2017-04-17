@@ -74,10 +74,11 @@ public class VCGenPipeline extends AbstractPipeline {
         // Output the contents to listener objects
         for (OutputListener listener : myCompileEnvironment
                 .getOutputListeners()) {
-            listener.vcGeneratorResult(myCompileEnvironment
-                    .getFile(currentTarget), vcGenerator
-                    .getFinalAssertiveCodeBlocks(), vcGenerator
-                    .getLocationDetails(), vcGenerator.getVerboseModeOutput());
+            listener.vcGeneratorResult(myCompileEnvironment.getFile(
+                    currentTarget).toString(), moduleDec.getName().getName(),
+                    vcGenerator.getFinalAssertiveCodeBlocks(), vcGenerator
+                            .getLocationDetails(), vcGenerator
+                            .getVerboseModeOutput());
         }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {

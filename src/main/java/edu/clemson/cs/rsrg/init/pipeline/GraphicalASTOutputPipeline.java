@@ -73,7 +73,8 @@ public class GraphicalASTOutputPipeline extends AbstractPipeline {
         // Output the contents to listener objects
         for (OutputListener listener : myCompileEnvironment
                 .getOutputListeners()) {
-            listener.astGraphvizModelResult(dec, twv.getCompleteModel());
+            listener.astGraphvizModelResult(dec.getName().getName(), twv
+                    .getCompleteModel());
         }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
