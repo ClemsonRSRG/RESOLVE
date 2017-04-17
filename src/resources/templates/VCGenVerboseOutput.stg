@@ -1,0 +1,80 @@
+/*
+ * Template for VC generation details (aka Verbose Mode)
+ */
+outputVCGenDetails(fileHeader, assertiveCodeBlocks) ::= <<
+========================= VC Generation Details  =========================
+
+<fileHeader>
+
+==========================================================================
+
+<assertiveCodeBlocks; separator = "\n">
+
+>>
+
+/*
+ * Template for concept header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputConceptHeader(conceptName) ::= <<
+    Concept Name: <conceptName>
+>>
+
+/*
+ * Template for concept realization header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputConceptRealizHeader(realizName, conceptName) ::= <<
+    Concept Realization Name: <realizName>
+    Concept Name: <conceptName>
+>>
+
+/*
+ * Template for enhancement header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputEnhancementHeader(enhancementName, conceptName) ::= <<
+    Enhancement Name: <enhancementName>
+    Concept Name: <conceptName>
+>>
+
+/*
+ * Template for enhancement realization header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputEnhancementRealizHeader(realizName, enhancementName, conceptName) ::= <<
+    Enhancement Realization Name: <realizName>
+    Enhancement Name: <enhancementName>
+    Concept Name: <conceptName>
+>>
+
+/*
+ * Template for facility header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputFacilityHeader(facilityName) ::= <<
+    Facility Name: <facilityName>
+>>
+
+/*
+ * Template for displaying the name of a assertive code block and each of
+ * its transformation through proof rule applications.
+ */
+outputAssertiveCodeBlock(blockName, vcGenSteps) ::= <<
+========================= <blockName> =========================
+
+<vcGenSteps; separator = "\n">
+>>
+
+/*
+ * Template for displaying the name for the proof rule applied, the list of
+ * free variables at this step and the resulting assertive code block after
+ * the application of the proof rule.
+ */
+outputVCGenStep(proofRuleName, moreDetails, currentStateOfBlock) ::= <<
+Applied <proofRuleName>: <if(moreDetails)>[<moreDetails>]<endif>
+
+<currentStateOfBlock>
+_____________________
+
+>>
