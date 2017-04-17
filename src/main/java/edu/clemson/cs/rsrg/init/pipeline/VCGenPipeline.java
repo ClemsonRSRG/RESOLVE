@@ -77,7 +77,7 @@ public class VCGenPipeline extends AbstractPipeline {
             listener.vcGeneratorResult(myCompileEnvironment
                     .getFile(currentTarget), vcGenerator
                     .getFinalAssertiveCodeBlocks(), vcGenerator
-                    .getVerboseModeOutput());
+                    .getLocationDetails(), vcGenerator.getVerboseModeOutput());
         }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
