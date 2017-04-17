@@ -72,6 +72,7 @@ import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 
 /**
  * <p>This class generates verification conditions (VCs) using the provided
@@ -175,7 +176,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /** <p>String template for the VC generation model.</p> */
-    private final ST myModel;
+    //private final ST myModel;
 
     /** <p>String template for the VC generation details model.</p> */
     private final ST myVCGenDetailsModel;
@@ -228,11 +229,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param builder A scope builder for a symbol table.
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
-     * @param stGroup The string template group we will be using.
-     * @param model The model we are going be generating.
      */
-    public VCGenerator(MathSymbolTableBuilder builder,
-            CompileEnvironment compileEnvironment, STGroup stGroup, ST model) {
+    public VCGenerator(MathSymbolTableBuilder builder, CompileEnvironment compileEnvironment) {
         myAssertiveCodeBlockModels = new LinkedHashMap<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
@@ -241,8 +239,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myGlobalRequires = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
         myLocationDetails = new LinkedHashMap<>();
-        myModel = model;
-        mySTGroup = stGroup;
+        mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
         myVariableSpecFinalItems = new LinkedHashMap<>();
         myVCGenDetailsModel = mySTGroup.getInstanceOf("outputVCGenDetails");
@@ -598,7 +595,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @return String template rendering of the model.
      */
-    public final String getCompleteModel() {
+    /*public final String getCompleteModel() {
         // Add the VC output in human readable format
         int blockCount = 0;
         for (AssertiveCodeBlock block : myFinalAssertiveCodeBlocks) {
@@ -629,7 +626,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myModel.add("details", myVCGenDetailsModel.render());
 
         return myModel.render();
-    }
+    }*/
 
     /**
      * <p>This method returns the final {@link AssertiveCodeBlock AssertiveCodeBlocks}
@@ -639,6 +636,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     public final List<AssertiveCodeBlock> getFinalAssertiveCodeBlocks() {
         return myFinalAssertiveCodeBlocks;
+    }
+
+    /**
+     * <p>This method returns the verbose mode output with how we generated
+     * the {@code VCs} for this {@link ModuleDec}.</p>
+     *
+     * @return A string containing lots of details.
+     */
+    public final String getVerboseModeOutput() {
+        return myVCGenDetailsModel.render();
     }
 
     // ===========================================================
