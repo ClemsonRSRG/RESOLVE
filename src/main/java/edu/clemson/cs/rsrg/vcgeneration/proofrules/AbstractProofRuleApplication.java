@@ -87,8 +87,10 @@ public abstract class AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method returns the list of {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
+     * <p>This method returns the a {@link Deque} of {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
      * that resulted from applying the {@code Proof Rule}.</p>
+     *
+     * @return A {@link Deque} containing all the {@link AssertiveCodeBlock AssertiveCodeBlock(s)}.
      */
     @Override
     public final Deque<AssertiveCodeBlock> getAssertiveCodeBlocks() {
@@ -101,6 +103,8 @@ public abstract class AbstractProofRuleApplication
     /**
      * <p>This method returns the string template associated with the incoming
      * {@link AssertiveCodeBlock}.</p>
+     *
+     * @return A {@link ST} object.
      */
     @Override
     public final ST getBlockModel() {
@@ -111,6 +115,8 @@ public abstract class AbstractProofRuleApplication
      * <p>This method returns a map containing details about
      * a {@link Location} object that was generated during the proof
      * application process.</p>
+     *
+     * @return A map from {@link Location} to location detail strings.
      */
     @Override
     public final Map<Location, String> getNewLocationString() {

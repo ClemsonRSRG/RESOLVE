@@ -12,11 +12,18 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.vcs;
 
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>This class contains logic for reducing a {@link Sequent}.</p>
+ *
+ * @see <a href="https://en.wikipedia.org/wiki/Sequent_calculus">Sequent Calculus</a>
+ * for the history and explanation of each of the reduction rules.
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -26,6 +33,12 @@ public class SequentReduction {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>A map that stores all the details associated with
+     * a particular {@link Location}.</p>
+     */
+    private final Map<Location, String> myLocationDetails;
 
     /** <p>The incoming {@link Sequent} we are trying to reduce.</p> */
     private final Sequent myOriginalSequent;
@@ -44,6 +57,7 @@ public class SequentReduction {
      * @param sequent A {@link Sequent} to be reduced.
      */
     public SequentReduction(Sequent sequent) {
+        myLocationDetails = new HashMap<>();
         myOriginalSequent = sequent;
         myResultingSequents = new ArrayList<>();
     }
@@ -51,6 +65,21 @@ public class SequentReduction {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>This method applies the various different sequent reduction
+     * rules until we can't reduce any further.</p>
+     */
+    public final void applyReduction() {
+        List<Sequent> sequentsToBeReduced = new ArrayList<>();
+        List<Sequent> reducedSequents = new ArrayList<>();
+
+        // Add the original sequent to the sequentsToBeReduced
+        // and begin reducing it!
+        sequentsToBeReduced.add(myOriginalSequent);
+
+        myResultingSequents.addAll(reducedSequents);
+    }
 
     /**
      * <p>This method overrides the default {@code equals} method implementation.</p>
@@ -73,12 +102,29 @@ public class SequentReduction {
     }
 
     /**
+     * <p>This method returns a map containing details about
+     * a {@link Location} object that was generated during the proof
+     * application process.</p>
+     *
+     * @return A map from {@link Location} to location detail strings.
+     */
+    public final Map<Location, String> getNewLocationString() {
+        return myLocationDetails;
+    }
+
+    /**
      * <p>This method returns the {@code sequents} that
      * resulted from applying the reduction rules.</p>
      *
      * @return A list of {@link Sequent Sequents}.
      */
     public final List<Sequent> getResultingSequents() {
+        if (myResultingSequents.isEmpty()) {
+            throw new MiscErrorException(
+                    "Did you forget to call applyReduction?",
+                    new IllegalAccessError());
+        }
+
         return myResultingSequents;
     }
 

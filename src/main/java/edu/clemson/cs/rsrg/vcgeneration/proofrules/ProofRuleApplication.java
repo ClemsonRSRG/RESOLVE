@@ -33,14 +33,18 @@ public interface ProofRuleApplication {
     void applyRule();
 
     /**
-     * <p>This method returns the {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
+     * <p>This method returns the a {@link Deque} of {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
      * that resulted from applying the {@code Proof Rule}.</p>
+     *
+     * @return A {@link Deque} containing all the {@link AssertiveCodeBlock AssertiveCodeBlock(s)}.
      */
     Deque<AssertiveCodeBlock> getAssertiveCodeBlocks();
 
     /**
      * <p>This method returns the string template associated with the incoming
      * {@link AssertiveCodeBlock}.</p>
+     *
+     * @return A {@link ST} object.
      */
     ST getBlockModel();
 
@@ -48,6 +52,8 @@ public interface ProofRuleApplication {
      * <p>This method returns a map containing details about
      * a {@link Location} object that was generated during the proof
      * application process.</p>
+     *
+     * @return A map from {@link Location} to location detail strings.
      */
     Map<Location, String> getNewLocationString();
 
