@@ -102,8 +102,8 @@ public class RememberStmtRule extends AbstractProofRuleApplication
      * @return A modified {@link Sequent}.
      */
     private Sequent createReplacementSequent(Sequent s) {
-        Set<Exp> newAntecedents = new LinkedHashSet<>();
-        Set<Exp> newConsequents = new LinkedHashSet<>();
+        List<Exp> newAntecedents = new ArrayList<>();
+        List<Exp> newConsequents = new ArrayList<>();
 
         for (Exp antencedent : s.getAntecedents()) {
             if (antencedent instanceof MathExp) {

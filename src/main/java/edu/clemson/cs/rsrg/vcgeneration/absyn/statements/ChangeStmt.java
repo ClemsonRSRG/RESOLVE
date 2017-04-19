@@ -16,9 +16,9 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -67,16 +67,7 @@ public class ChangeStmt extends Statement {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
         sb.append("Change ");
-
-        Iterator<Exp> changeVarIt = myChangingVars.iterator();
-        while (changeVarIt.hasNext()) {
-            Exp nextVar = changeVarIt.next();
-            sb.append(nextVar.asString(0, 0));
-
-            if (changeVarIt.hasNext()) {
-                sb.append(", ");
-            }
-        }
+        sb.append(Utilities.expListAsString(myChangingVars));
         sb.append(";");
 
         return sb.toString();

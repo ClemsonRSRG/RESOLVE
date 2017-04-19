@@ -416,8 +416,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
      * @return A modified {@link Sequent}.
      */
     private Sequent createReplacementSequent(Sequent s, Map<Exp, Exp> substitutions) {
-        Set<Exp> newAntecedents = new LinkedHashSet<>();
-        Set<Exp> newConsequents = new LinkedHashSet<>();
+        List<Exp> newAntecedents = new ArrayList<>();
+        List<Exp> newConsequents = new ArrayList<>();
 
         for (Exp antencedent : s.getAntecedents()) {
             newAntecedents.add(antencedent.substitute(substitutions));
