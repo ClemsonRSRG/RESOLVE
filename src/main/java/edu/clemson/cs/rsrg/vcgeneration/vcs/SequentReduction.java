@@ -14,10 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.vcs;
 
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>This class contains logic for reducing a {@link Sequent}.</p>
@@ -71,12 +68,29 @@ public class SequentReduction {
      * rules until we can't reduce any further.</p>
      */
     public final void applyReduction() {
-        List<Sequent> sequentsToBeReduced = new ArrayList<>();
+        Deque<Sequent> sequentsToBeReduced = new LinkedList<>();
         List<Sequent> reducedSequents = new ArrayList<>();
 
         // Add the original sequent to the sequentsToBeReduced
         // and begin reducing it!
         sequentsToBeReduced.add(myOriginalSequent);
+        while (!sequentsToBeReduced.isEmpty()) {
+            Sequent seq = sequentsToBeReduced.getFirst();
+
+            // Apply the left reduction rules
+
+            // Apply the right reduction rules
+
+            // Check to see if we have a sequent with atomic formulas
+            // on both sides. If yes, we are done reducing the sequent.
+            // Otherwise, keep reducing it!
+            /*if (seq.consistOfAtomicFormulas()) {
+                reducedSequents.add(seq);
+            }
+            else {
+                sequentsToBeReduced.addFirst(seq);
+            }*/
+        }
 
         myResultingSequents.addAll(reducedSequents);
     }
@@ -97,7 +111,8 @@ public class SequentReduction {
 
         SequentReduction that = (SequentReduction) o;
 
-        return myOriginalSequent.equals(that.myOriginalSequent)
+        return myLocationDetails.equals(that.myLocationDetails)
+                && myOriginalSequent.equals(that.myOriginalSequent)
                 && myResultingSequents.equals(that.myResultingSequents);
     }
 
@@ -135,7 +150,8 @@ public class SequentReduction {
      */
     @Override
     public final int hashCode() {
-        int result = myOriginalSequent.hashCode();
+        int result = myLocationDetails.hashCode();
+        result = 31 * result + myOriginalSequent.hashCode();
         result = 31 * result + myResultingSequents.hashCode();
         return result;
     }
