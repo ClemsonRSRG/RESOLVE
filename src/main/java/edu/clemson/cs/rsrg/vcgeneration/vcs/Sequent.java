@@ -15,6 +15,8 @@ package edu.clemson.cs.rsrg.vcgeneration.vcs;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import edu.clemson.cs.rsrg.vcgeneration.treewalkers.AtomicFormulaChecker;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -127,7 +129,36 @@ public class Sequent implements BasicCapabilities, Cloneable {
      */
     @Override
     public final Sequent clone() {
-        return new Sequent(myLocation.clone(), new LinkedHashSet<>(myAntecedents), new LinkedHashSet<>(myConcequents));
+        return new Sequent(myLocation.clone(), new LinkedHashSet<>(myAntecedents),
+                new LinkedHashSet<>(myConcequents));
+    }
+
+    /**
+     * <p>This method checks to see if this is a {@code Sequent} that
+     * only contains atomic formulas.</p>
+     *
+     * @return {@code true} if it is, {@code false} otherwise.
+     */
+    public final boolean consistOfAtomicFormulas() {
+        boolean retval = true;
+
+        // First check our antecedents
+        Iterator<Exp> antecedentIt = myAntecedents.iterator();
+        while (antecedentIt.hasNext() && retval) {
+            AtomicFormulaChecker checker = new AtomicFormulaChecker();
+            TreeWalker.visit(checker, antecedentIt.next());
+            retval = checker.getIsAtomicFormula();
+        }
+
+        // Then check our consequents
+        Iterator<Exp> consequentIt = myConcequents.iterator();
+        while (consequentIt.hasNext() && retval) {
+            AtomicFormulaChecker checker = new AtomicFormulaChecker();
+            TreeWalker.visit(checker, consequentIt.next());
+            retval = checker.getIsAtomicFormula();
+        }
+
+        return retval;
     }
 
     /**
