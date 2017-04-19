@@ -14,9 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.treewalkers;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.BetweenExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.PrefixExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
@@ -88,6 +86,30 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This method redefines how a {@link FunctionExp} should be walked.</p>
+     *
+     * @param exp A function expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkFunctionExp(FunctionExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preFunctionExp(exp);
+
+        // Don't walk any of the function parameter expressions.
+
+        postFunctionExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
      * <p>Code that gets executed before visiting an {@link InfixExp}.</p>
      *
      * @param exp An infix expression.
@@ -103,6 +125,30 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
                 || operatorAsString.equals("implies")) {
             myIsAtomicFormulaFlag = false;
         }
+    }
+
+    /**
+     * <p>This method redefines how a {@link LambdaExp} should be walked.</p>
+     *
+     * @param exp A lambda expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkLambdaExp(LambdaExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preLambdaExp(exp);
+
+        // Don't walk any of the lambda parameter expressions.
+
+        postLambdaExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
     }
 
     /**
