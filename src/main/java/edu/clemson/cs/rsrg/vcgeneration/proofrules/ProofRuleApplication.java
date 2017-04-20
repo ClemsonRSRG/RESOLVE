@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import java.util.Deque;
 import java.util.Map;
 import org.stringtemplate.v4.ST;

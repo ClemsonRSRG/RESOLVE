@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.vcs;
+package edu.clemson.cs.rsrg.vcgeneration.utilities;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;

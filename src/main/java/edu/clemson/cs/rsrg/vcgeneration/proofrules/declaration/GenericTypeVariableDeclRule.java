@@ -16,8 +16,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
