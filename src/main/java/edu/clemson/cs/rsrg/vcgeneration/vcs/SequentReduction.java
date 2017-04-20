@@ -77,19 +77,45 @@ public class SequentReduction {
         while (!sequentsToBeReduced.isEmpty()) {
             Sequent seq = sequentsToBeReduced.getFirst();
 
-            // Apply the left reduction rules
-
-            // Apply the right reduction rules
-
-            // Check to see if we have a sequent with atomic formulas
-            // on both sides. If yes, we are done reducing the sequent.
-            // Otherwise, keep reducing it!
-            /*if (seq.consistOfAtomicFormulas()) {
+            // Check to see if have a sequent with atomic formulas.
+            // If we do, then we are done reducing the sequent!
+            if (seq.consistOfAtomicFormulas()) {
                 reducedSequents.add(seq);
             }
+            // Otherwise, apply the left and/or right reduction
+            // rules to reduce it!
             else {
-                sequentsToBeReduced.addFirst(seq);
-            }*/
+                // Try to apply the left reduction rules
+                ReductionResult leftResult = applyLeftReductionRules(seq);
+
+                // If we didn't do any reductions on the left, try applying
+                // the right reduction rules.
+                if (!leftResult.doneReduction) {
+                    ReductionResult rightResult = applyRightReductionRules(seq);
+
+                    // If we didn't do any reductions on the right either, then
+                    // we have an error. Either one of the reduction rules is wrong,
+                    // or we have incorrectly detected this as a sequent that didn't
+                    // contain atomic formulas.
+                    if (!rightResult.doneReduction) {
+                        throw new MiscErrorException("Error encountered during reduction. Sequent: " + seq
+                                + " is contains atomic formulas or one of the reduction rules is wrong!",
+                                new IllegalStateException());
+                    }
+                    else {
+                        Deque<Sequent> newSequentsToBeReduced = rightResult.resultingSequents;
+                        newSequentsToBeReduced.addAll(sequentsToBeReduced);
+                        sequentsToBeReduced = newSequentsToBeReduced;
+                    }
+                }
+                // If we did, then add it back to sequentsToBeReduced for potentially
+                // more reductions.
+                else {
+                    Deque<Sequent> newSequentsToBeReduced = leftResult.resultingSequents;
+                    newSequentsToBeReduced.addAll(sequentsToBeReduced);
+                    sequentsToBeReduced = newSequentsToBeReduced;
+                }
+            }
         }
 
         myResultingSequents.addAll(reducedSequents);
@@ -159,5 +185,83 @@ public class SequentReduction {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    // -----------------------------------------------------------
+    // Left Rules
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This method attempts to apply the left reduction rules
+     * to {@code sequent}.</p>
+     *
+     * @param sequent The sequent to be reduced.
+     *
+     * @return The reduction results.
+     */
+    private ReductionResult applyLeftReductionRules(Sequent sequent) {
+        boolean appliedReduction = false;
+        Deque<Sequent> resultingSeq = new LinkedList<>();
+
+        return new ReductionResult(appliedReduction, resultingSeq);
+    }
+
+    // -----------------------------------------------------------
+    // Right Rules
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This method attempts to apply the right reduction rules
+     * to {@code sequent}.</p>
+     *
+     * @param sequent The sequent to be reduced.
+     *
+     * @return The reduction results.
+     */
+    private ReductionResult applyRightReductionRules(Sequent sequent) {
+        boolean appliedReduction = false;
+        Deque<Sequent> resultingSeq = new LinkedList<>();
+
+        return new ReductionResult(appliedReduction, resultingSeq);
+    }
+
+    // ===========================================================
+    // Helper Constructs
+    // ===========================================================
+
+    /**
+     * <p>An helper class that stores the results from applying the
+     * different reduction rules.</p>
+     */
+    private class ReductionResult {
+
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        /** <p>A boolean flag that indicates whether or not we did a reduction.</p> */
+        final boolean doneReduction;
+
+        /** <p>The {@link Sequent Sequents} that resulted from applying the reduction rules.</p> */
+        final Deque<Sequent> resultingSequents;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This creates an object that is used to store the reduction
+         * results.</p>
+         *
+         * @param result {@code true} if we did some kind of reduction,
+         *               {@code false} otherwise.
+         * @param sequents The {@link Sequent Sequents} that resulted from
+         *                 applying the reduction rules.
+         */
+        ReductionResult(boolean result, Deque<Sequent> sequents) {
+            doneReduction = result;
+            resultingSequents = sequents;
+        }
+
+    }
 
 }
