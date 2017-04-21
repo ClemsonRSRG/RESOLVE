@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules;
 
-import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.List;
 
 /**
@@ -26,24 +26,11 @@ public interface ReductionRuleApplication {
 
     /**
      * <p>This method applies the {@code Sequent Reduction Rule}.</p>
-     */
-    void applyRule();
-
-    /**
-     * <p>This method returns the resulting {@code antecedent}
-     * expressions.</p>
      *
-     * @return A list of {@link Exp Exps}.
+     * @return A list of {@link Sequent Sequents} that resulted
+     * from applying the rule.
      */
-    List<Exp> getResultingAntecedentExps();
-
-    /**
-     * <p>This method returns the resulting {@code consequent}
-     * expressions.</p>
-     *
-     * @return A list of {@link Exp Exps}.
-     */
-    List<Exp> getResultingConsequentExps();
+    List<Sequent> applyRule();
 
     /**
      * <p>This method returns a description associated with

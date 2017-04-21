@@ -13,6 +13,8 @@
 package edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,53 +35,43 @@ public abstract class AbstractReductionRuleApplication
     /** <p>The original expression to be reduced</p> */
     protected final Exp myOriginalExp;
 
-    /** <p>The resulting {@code antecedent} expressions.</p> */
-    protected final List<Exp> myResultingAntecedentExps;
+    /** <p>The original sequent that contains {@code myOriginalExp}.</p> */
+    protected final Sequent myOriginalSequent;
 
-    /** <p>The resulting {@code consequent} expressions.</p> */
-    protected final List<Exp> myResultingConsequentExps;
+    /** <p>The resulting {@code sequents}.</p> */
+    protected final List<Sequent> myResultingSequents;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>An helper constructor that stores {@code originalExp} we
-     * are trying to reduce as well as creating the lists to store
-     * the new {@code antecedent} and {@code consequent} expressions.</p>
+     * <p>An helper constructor that stores the {@code originalSequent}
+     * and the {@code originalExp} we are trying to reduce as well as
+     * creating the list to store the resulting {@link Sequent Sequents}.</p>
      *
+     * @param originalSequent The original {@link Sequent} that contains
+     *                        the expression to be reduced.
      * @param originalExp The {@link Exp} to be reduced.
      */
-    protected AbstractReductionRuleApplication(Exp originalExp) {
+    protected AbstractReductionRuleApplication(Sequent originalSequent, Exp originalExp) {
         myOriginalExp = originalExp;
-        myResultingAntecedentExps = new ArrayList<>();
-        myResultingConsequentExps = new ArrayList<>();
+        myOriginalSequent = originalSequent;
+        myResultingSequents = new ArrayList<>();
     }
 
     // ===========================================================
-    // Public Methods
+    // Protected Methods
     // ===========================================================
 
     /**
-     * <p>This method returns the resulting {@code antecedent}
-     * expressions.</p>
-     *
-     * @return A list of {@link Exp Exps}.
+     * <p>This is an helper method that throws an unexpected expression
+     * error message.</p>
      */
-    @Override
-    public final List<Exp> getResultingAntecedentExps() {
-        return myResultingAntecedentExps;
-    }
-
-    /**
-     * <p>This method returns the resulting {@code consequent}
-     * expressions.</p>
-     *
-     * @return A list of {@link Exp Exps}.
-     */
-    @Override
-    public final List<Exp> getResultingConsequentExps() {
-        return myResultingConsequentExps;
+    protected final void unexpectedExp() {
+        throw new MiscErrorException("Found: " + myOriginalExp + " of type: "
+                + myOriginalExp.getClass().getSimpleName() + " while applying "
+                + getRuleDescription(), new IllegalStateException());
     }
 
 }
