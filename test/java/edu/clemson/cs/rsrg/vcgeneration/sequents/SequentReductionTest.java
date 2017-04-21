@@ -21,10 +21,12 @@ import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.List;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import static org.junit.Assert.*;
 
 /**
  * <p>Unit test for testing the RESOLVE compiler's sequent reduction rules.</p>
@@ -65,21 +67,23 @@ public class SequentReductionTest {
     // ===========================================================
 
     /**
-     * <p>This tests what happens when we call {@link SequentReduction#getResultingSequents()}
-     * without calling {@link SequentReduction#applyReduction()} first.</p>
+     * <p>This tests what happens when we call {@link SequentReduction#applyReduction()}
+     * on an empty {@link Sequent}.</p>
      */
     @Test
-    public final void testNoApplyReductionCall() {
-        // We are expecting a MiscErrorException with the following
-        // message.
-        EXCEPTION_TESTER.expect(MiscErrorException.class);
-        EXCEPTION_TESTER
-                .expectMessage("Did you forget to call applyReduction?");
+    public final void testReductionOnEmptySequent() {
+        Sequent originalSequent =
+                new Sequent(FAKE_LOCATION, new ArrayList<Exp>(),
+                        new ArrayList<Exp>());
+        SequentReduction reduction = new SequentReduction(originalSequent);
+        List<Sequent> resultSequents = reduction.applyReduction();
 
-        SequentReduction reduction =
-                new SequentReduction(new Sequent(FAKE_LOCATION,
-                        new ArrayList<Exp>(), new ArrayList<Exp>()));
-        reduction.getResultingSequents();
+        // Check that we only have 1 sequent in resultSequents
+        assertEquals(resultSequents.size(), 1);
+
+        // Check to see if the element in resultSequents is
+        // originalSequent.
+        assertEquals(originalSequent, resultSequents.get(0));
     }
 
 }

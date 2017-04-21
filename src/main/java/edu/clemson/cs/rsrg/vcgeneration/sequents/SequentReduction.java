@@ -12,8 +12,14 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.sequents;
 
-import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.BetweenExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.PrefixExp;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.ReductionRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.leftrules.*;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.rightrules.*;
 import java.util.*;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -33,12 +39,6 @@ public class SequentReduction {
     // ===========================================================
     // Member Fields
     // ===========================================================
-
-    /**
-     * <p>A map that stores all the details associated with
-     * a particular {@link Location}.</p>
-     */
-    private final Map<Location, String> myLocationDetails;
 
     /** <p>The incoming {@link Sequent} we are trying to reduce.</p> */
     private final Sequent myOriginalSequent;
@@ -60,7 +60,6 @@ public class SequentReduction {
      * @param sequent A {@link Sequent} to be reduced.
      */
     public SequentReduction(Sequent sequent) {
-        myLocationDetails = new HashMap<>();
         myOriginalSequent = sequent;
         myReductionTree = new DefaultDirectedGraph<>(DefaultEdge.class);
         myResultingSequents = new ArrayList<>();
@@ -76,8 +75,10 @@ public class SequentReduction {
     /**
      * <p>This method applies the various different sequent reduction
      * rules until we can't reduce any further.</p>
+     *
+     * @return A list of {@link Sequent Sequents}.
      */
-    public final void applyReduction() {
+    public final List<Sequent> applyReduction() {
         Deque<Sequent> sequentsToBeReduced = new LinkedList<>();
         List<Sequent> reducedSequents = new ArrayList<>();
 
@@ -85,7 +86,7 @@ public class SequentReduction {
         // and begin reducing it!
         sequentsToBeReduced.add(myOriginalSequent);
         while (!sequentsToBeReduced.isEmpty()) {
-            Sequent seq = sequentsToBeReduced.getFirst();
+            Sequent seq = sequentsToBeReduced.removeFirst();
 
             // Check to see if have a sequent with atomic formulas.
             // If we do, then we are done reducing the sequent!
@@ -165,6 +166,8 @@ public class SequentReduction {
         }
 
         myResultingSequents.addAll(reducedSequents);
+
+        return myResultingSequents;
     }
 
     /**
@@ -181,23 +184,11 @@ public class SequentReduction {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        SequentReduction reduction = (SequentReduction) o;
+        SequentReduction that = (SequentReduction) o;
 
-        return myLocationDetails.equals(reduction.myLocationDetails)
-                && myOriginalSequent.equals(reduction.myOriginalSequent)
-                && myResultingSequents.equals(reduction.myResultingSequents)
-                && myReductionTree.equals(reduction.myReductionTree);
-    }
-
-    /**
-     * <p>This method returns a map containing details about
-     * a {@link Location} object that was generated during the proof
-     * application process.</p>
-     *
-     * @return A map from {@link Location} to location detail strings.
-     */
-    public final Map<Location, String> getNewLocationString() {
-        return myLocationDetails;
+        return myOriginalSequent.equals(that.myOriginalSequent)
+                && myResultingSequents.equals(that.myResultingSequents)
+                && myReductionTree.equals(that.myReductionTree);
     }
 
     /**
@@ -211,30 +202,13 @@ public class SequentReduction {
     }
 
     /**
-     * <p>This method returns the {@code sequents} that
-     * resulted from applying the reduction rules.</p>
-     *
-     * @return A list of {@link Sequent Sequents}.
-     */
-    public final List<Sequent> getResultingSequents() {
-        if (myResultingSequents.isEmpty()) {
-            throw new MiscErrorException(
-                    "Did you forget to call applyReduction?",
-                    new IllegalAccessError());
-        }
-
-        return myResultingSequents;
-    }
-
-    /**
      * <p>This method overrides the default {@code hashCode} method implementation.</p>
      *
      * @return The hash code associated with the object.
      */
     @Override
     public final int hashCode() {
-        int result = myLocationDetails.hashCode();
-        result = 31 * result + myOriginalSequent.hashCode();
+        int result = myOriginalSequent.hashCode();
         result = 31 * result + myResultingSequents.hashCode();
         result = 31 * result + myReductionTree.hashCode();
         return result;
@@ -243,6 +217,31 @@ public class SequentReduction {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method that calls a reduction rule and adds the
+     * appropriate nodes and edges to the reduction tree.</p>
+     *
+     * @param sequent The {@link Sequent} being reduced.
+     * @param ruleApplication The {@link ReductionRuleApplication} to be applied.
+     *
+     * @return A list of resulting {@link Sequent Sequents} from the rule
+     * application.
+     */
+    private List<Sequent> applyAndAddToReductionTree(Sequent sequent,
+            ReductionRuleApplication ruleApplication) {
+        List<Sequent> ruleResultingSeqs = ruleApplication.applyRule();
+
+        // Add a vertex for the new sequent. Also add an edge from
+        // the original sequent to each sequent generated by
+        // the reduction rules.
+        for (Sequent resultSeq : ruleResultingSeqs) {
+            myReductionTree.addVertex(resultSeq);
+            myReductionTree.addEdge(sequent, resultSeq);
+        }
+
+        return ruleResultingSeqs;
+    }
 
     // -----------------------------------------------------------
     // Left Rules
@@ -258,6 +257,56 @@ public class SequentReduction {
      */
     private Deque<Sequent> applyLeftReductionRules(Sequent sequent) {
         Deque<Sequent> resultingSeq = new LinkedList<>();
+
+        // Loop until we find an antecedent expression that
+        // can be reduced and call the associated reduction rule.
+        boolean doneReduction = false;
+        Iterator<Exp> antecedentsIt = sequent.getAntecedents().iterator();
+        while (antecedentsIt.hasNext() && !doneReduction) {
+            ReductionRuleApplication ruleApplication = null;
+            Exp exp = antecedentsIt.next();
+
+            if (exp instanceof BetweenExp) {
+                // BetweenExp are joined together by the "and" operator.
+                ruleApplication = new LeftAndRule(sequent, exp);
+            }
+            else if (exp instanceof InfixExp) {
+                // Use the operator to determine which rule to call.
+                String operator = ((InfixExp) exp).getOperatorAsString();
+                switch (operator) {
+                    case "and":
+                        ruleApplication = new LeftAndRule(sequent, exp);
+                        break;
+                    case "or":
+                        ruleApplication = new LeftOrRule(sequent, exp);
+                        break;
+                    case "implies":
+                        ruleApplication = new LeftImpliesRule(sequent, exp);
+                        break;
+                }
+            }
+            // Only call the not reduction rule if the operator is "not"
+            else if (exp instanceof PrefixExp &&
+                    ((PrefixExp) exp).getOperatorAsString().equals("not")) {
+                ruleApplication = new LeftNotRule(sequent, exp);
+            }
+
+            // Apply the reduction rule and add it to the reduction tree
+            // if we generated a reduction rule application.
+            if (ruleApplication != null) {
+                // Add all the sequents that resulted from the rule
+                // to the deque we are returning.
+                resultingSeq.addAll(applyAndAddToReductionTree(sequent, ruleApplication));
+                doneReduction = true;
+            }
+        }
+
+        // If we didn't do any kind of reduction, it is OK.
+        // The formula that needs to be reduced could be in the
+        // consequent, so we simply add the sequent back to resultingSeq
+        if (!doneReduction) {
+            resultingSeq.add(sequent);
+        }
 
         return resultingSeq;
     }
@@ -277,6 +326,49 @@ public class SequentReduction {
     private Deque<Sequent> applyRightReductionRules(Sequent sequent) {
         Deque<Sequent> resultingSeq = new LinkedList<>();
 
+        // Loop until we find an consequent expression that
+        // can be reduced and call the associated reduction rule.
+        boolean doneReduction = false;
+        Iterator<Exp> consequentIt = sequent.getConcequents().iterator();
+        while (consequentIt.hasNext() && !doneReduction) {
+            ReductionRuleApplication ruleApplication = null;
+            Exp exp = consequentIt.next();
+
+            if (exp instanceof InfixExp) {
+                // Use the operator to determine which rule to call.
+                String operator = ((InfixExp) exp).getOperatorAsString();
+                switch (operator) {
+                    case "and":
+                        ruleApplication = new RightAndRule(sequent, exp);
+                        break;
+                    case "or":
+                        ruleApplication = new RightOrRule(sequent, exp);
+                        break;
+                    case "implies":
+                        ruleApplication = new RightImpliesRule(sequent, exp);
+                        break;
+                }
+            }
+            // Only call the not reduction rule if the operator is "not"
+            else if (exp instanceof PrefixExp &&
+                    ((PrefixExp) exp).getOperatorAsString().equals("not")) {
+                ruleApplication = new RightNotRule(sequent, exp);
+            }
+
+            // Apply the reduction rule and add it to the reduction tree
+            // if we generated a reduction rule application.
+            if (ruleApplication != null) {
+                // Add all the sequents that resulted from the rule
+                // to the deque we are returning.
+                resultingSeq.addAll(applyAndAddToReductionTree(sequent, ruleApplication));
+                doneReduction = true;
+            }
+        }
+
+        // If we didn't do any kind of reduction after visiting all
+        // the consequents, it is an error. However, rather than dealing
+        // with the error here, it is best to leave all that to the caller
+        // for this method.
         return resultingSeq;
     }
 }
