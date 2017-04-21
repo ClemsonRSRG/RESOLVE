@@ -61,8 +61,8 @@ public class RightImpliesRule extends AbstractReductionRuleApplication
     public final List<Sequent> applyRule() {
         if (myOriginalExp instanceof InfixExp) {
             InfixExp originalExpAsInfixExp = (InfixExp) myOriginalExp;
-            List<Exp> newAntecedents = new ArrayList<>();
-            List<Exp> newConsequents = new ArrayList<>(myOriginalSequent.getConcequents());
+            List<Exp> newAntecedents = new ArrayList<>(myOriginalSequent.getAntecedents());
+            List<Exp> newConsequents = new ArrayList<>();
             for (Exp exp : myOriginalSequent.getConcequents()) {
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Replace the original "and" expression with its associated
@@ -78,13 +78,13 @@ public class RightImpliesRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newAntecedents.add(exp);
+                    newConsequents.add(exp);
                 }
             }
 
             // Construct a new sequent
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents, myOriginalSequent.getConcequents());
+                    newAntecedents, newConsequents);
             myResultingSequents.add(resultingSequent);
         }
         // This must be an error!
