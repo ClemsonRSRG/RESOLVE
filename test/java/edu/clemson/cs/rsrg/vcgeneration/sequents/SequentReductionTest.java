@@ -99,6 +99,58 @@ public class SequentReductionTest {
 
     /**
      * <p>This tests what happens when we call {@link SequentReduction#applyReduction()}
+     * on a complex {@link Sequent} that needs multiple reductions.</p>
+     */
+    @Test
+    public final void testComplexExample() {
+        // Create sequent: "|- ((p implies r) or (q implies r)) implies ((p and q) implies r)"
+        VarExp p =
+                Utilities.createVarExp(FAKE_LOCATION,
+                        null, new PosSymbol(FAKE_LOCATION, "p"),
+                        FAKE_TYPEGRAPH.BOOLEAN, null);
+        VarExp q =
+                Utilities.createVarExp(FAKE_LOCATION,
+                        null, new PosSymbol(FAKE_LOCATION, "q"),
+                        FAKE_TYPEGRAPH.BOOLEAN, null);
+        VarExp r =
+                Utilities.createVarExp(FAKE_LOCATION,
+                        null, new PosSymbol(FAKE_LOCATION, "r"),
+                        FAKE_TYPEGRAPH.BOOLEAN, null);
+        Exp pImpliesr = MathExp.formImplies(FAKE_LOCATION, p.clone(), r.clone());
+        Exp qImpliesr = MathExp.formImplies(FAKE_LOCATION, q.clone(), r.clone());
+        Exp orExp = MathExp.formDisjunct(FAKE_LOCATION, pImpliesr, qImpliesr);
+        Exp pAndq = MathExp.formConjunct(FAKE_LOCATION, p.clone(), q.clone());
+        Exp pAndqImpliesr = MathExp.formImplies(FAKE_LOCATION, pAndq, r.clone());
+        Exp complexExp = MathExp.formImplies(FAKE_LOCATION, orExp, pAndqImpliesr);
+
+        List<Exp> antecedents = new ArrayList<>();
+
+        List<Exp> consequents = new ArrayList<>();
+        consequents.add(complexExp);
+
+        Sequent originalSequent =
+                new Sequent(FAKE_LOCATION, antecedents, consequents);
+
+        // Reduce the sequent
+        SequentReduction reduction = new SequentReduction(originalSequent);
+        List<Sequent> resultSequents = reduction.applyReduction();
+
+        // Check that we have 4 sequents in resultSequents
+        assertEquals(resultSequents.size(), 4);
+
+        // 1) The sequents must be different.
+        // 2) The result sequent must contain atomic formulas
+        // 3) There must be paths in the reduction tree from the
+        //    original sequent to the sequents in resultSequents.
+        for (Sequent resultSequent : resultSequents) {
+            assertNotEquals(originalSequent, resultSequent);
+            assertTrue(resultSequent.consistOfAtomicFormulas());
+            assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        }
+    }
+
+    /**
+     * <p>This tests what happens when we call {@link SequentReduction#applyReduction()}
      * on a {@link Sequent} that only needs the {@link LeftAndRule}.</p>
      */
     @Test
@@ -113,15 +165,18 @@ public class SequentReductionTest {
                         null, new PosSymbol(FAKE_LOCATION, "B"),
                         FAKE_TYPEGRAPH.BOOLEAN, null);
         Exp AandB = MathExp.formConjunct(FAKE_LOCATION, A, B);
+
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "H"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
         antecedents.add(AandB);
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "G"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -165,15 +220,18 @@ public class SequentReductionTest {
                         null, new PosSymbol(FAKE_LOCATION, "B"),
                         FAKE_TYPEGRAPH.BOOLEAN, null);
         Exp AimpliesB = MathExp.formImplies(FAKE_LOCATION, A, B);
+
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "H"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
         antecedents.add(AimpliesB);
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "G"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -226,15 +284,18 @@ public class SequentReductionTest {
                 new PrefixExp(FAKE_LOCATION, null,
                         new PosSymbol(FAKE_LOCATION, "not"), A);
         notA.setMathType(FAKE_TYPEGRAPH.BOOLEAN);
+
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "H"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
         antecedents.add(notA);
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "G"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -280,15 +341,18 @@ public class SequentReductionTest {
                         null, new PosSymbol(FAKE_LOCATION, "B"),
                         FAKE_TYPEGRAPH.BOOLEAN, null);
         Exp AorB = MathExp.formDisjunct(FAKE_LOCATION, A, B);
+
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "H"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
         antecedents.add(AorB);
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "G"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -342,15 +406,18 @@ public class SequentReductionTest {
                         null, new PosSymbol(FAKE_LOCATION, "B"),
                         FAKE_TYPEGRAPH.BOOLEAN, null);
         Exp AandB = MathExp.formConjunct(FAKE_LOCATION, A, B);
+
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "H"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "G"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
         consequents.add(AandB);
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -404,15 +471,18 @@ public class SequentReductionTest {
                         null, new PosSymbol(FAKE_LOCATION, "B"),
                         FAKE_TYPEGRAPH.BOOLEAN, null);
         Exp AimpliesB = MathExp.formImplies(FAKE_LOCATION, A, B);
+
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "H"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "G"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
         consequents.add(AimpliesB);
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -461,15 +531,18 @@ public class SequentReductionTest {
                 new PrefixExp(FAKE_LOCATION, null,
                         new PosSymbol(FAKE_LOCATION, "not"), A);
         notA.setMathType(FAKE_TYPEGRAPH.BOOLEAN);
+
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "H"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "G"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
         consequents.add(notA);
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -515,15 +588,18 @@ public class SequentReductionTest {
                         null, new PosSymbol(FAKE_LOCATION, "B"),
                         FAKE_TYPEGRAPH.BOOLEAN, null);
         Exp AorB = MathExp.formDisjunct(FAKE_LOCATION, A, B);
+
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "H"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "G"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
         consequents.add(AorB);
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -587,7 +663,9 @@ public class SequentReductionTest {
         // Create a sequent with atomic formulas
         List<Exp> antecedents = new ArrayList<>();
         antecedents.add(VarExp.getTrueVarExp(FAKE_LOCATION, FAKE_TYPEGRAPH));
+
         List<Exp> consequents = new ArrayList<>();
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -611,8 +689,10 @@ public class SequentReductionTest {
     public final void testSequentReductionWithAtomicFormula2() {
         // Create a sequent with atomic formulas
         List<Exp> antecedents = new ArrayList<>();
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(VarExp.getFalseVarExp(FAKE_LOCATION, FAKE_TYPEGRAPH));
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
@@ -639,10 +719,12 @@ public class SequentReductionTest {
         antecedents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "p"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         List<Exp> consequents = new ArrayList<>();
         consequents.add(Utilities.createVarExp(FAKE_LOCATION,
                 null, new PosSymbol(FAKE_LOCATION, "q"),
                 FAKE_TYPEGRAPH.BOOLEAN, null));
+
         Sequent originalSequent =
                 new Sequent(FAKE_LOCATION, antecedents, consequents);
 
