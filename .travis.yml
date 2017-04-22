@@ -8,11 +8,10 @@ branches:
     - master
 
 # Make sure we run most of the tests using JDK7, because the RESOLVE WebIDE-v4 does not
-# support JDK8. However, some of our newer JUnit tests require JDK8, so we need to include
-# both versions and call "jdk_switcher" accordingly.
+# support JDK8. Since some of our newer JUnit tests require JDK8, we will call "jdk_switcher"
+# when we run that script.
 language: java
 jdk:
-  - oraclejdk8
   - oraclejdk7
 
 # Don't run the initial maven install
