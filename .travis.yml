@@ -21,8 +21,8 @@ install: true
 env:
   - SCRIPT=runFormatter
   - SCRIPT=runLicensePlugin
-  - SCRIPT=runCompilerTests
   - SCRIPT=runJUnitTests
+  - SCRIPT=runCompilerTests
 before_script:
   - chmod +x bin/$SCRIPT
 script:
