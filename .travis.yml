@@ -7,12 +7,10 @@ branches:
   only:
     - master
 
-# Make sure we run most of the tests using JDK7, because the RESOLVE WebIDE-v4 does not
-# support JDK8. Since some of our newer JUnit tests require JDK8, we will call "jdk_switcher"
-# when we run that script.
+# Compile and run the tests using JDK8
 language: java
 jdk:
-  - oraclejdk7
+  - oraclejdk8
 
 # Don't run the initial maven install
 install: true
@@ -21,18 +19,14 @@ install: true
 # It also caches things related to Maven. If caching errors occur, please clear the cache on the
 # Travis CI website.
 env:
-  - SCRIPT_JDK7=runFormatter
-  - SCRIPT_JDK7=runLicensePlugin
-  - SCRIPT_JDK7=runCompilerTests
-  - SCRIPT_JDK8=runJUnitTests
+  - SCRIPT=runFormatter
+  - SCRIPT=runLicensePlugin
+  - SCRIPT=runCompilerTests
+  - SCRIPT=runJUnitTests
 before_script:
-  - chmod +x bin/$SCRIPT_JDK7
-  - chmod +x bin/$SCRIPT_JDK8
+  - chmod +x bin/$SCRIPT
 script:
-  - jdk_switcher use oraclejdk7
-  - bin/$SCRIPT_JDK7
-  - jdk_switcher use oraclejdk8
-  - bin/$SCRIPT_JDK8
+  - bin/$SCRIPT
 cache:
   directories:
       - $HOME/.m2
