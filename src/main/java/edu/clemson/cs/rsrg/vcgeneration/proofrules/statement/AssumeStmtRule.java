@@ -20,9 +20,9 @@ import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -137,8 +137,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
      * @return The modified {@link Sequent}.
      */
     private Sequent assumeApplicationStep(Sequent seq, List<Exp> remAssumeExpList) {
-        Set<Exp> seqAntecedents = new LinkedHashSet<>(seq.getAntecedents());
-        Set<Exp> seqConsequents = new LinkedHashSet<>(seq.getConcequents());
+        List<Exp> seqAntecedents = new ArrayList<>(seq.getAntecedents());
+        List<Exp> seqConsequents = new ArrayList<>(seq.getConcequents());
 
         // If it is stipulate clause, keep it no matter what
         if (myAssumeStmt.getIsStipulate()) {
@@ -480,15 +480,15 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
 
     /**
      * <p>This method performs the substitutions on each of the expressions in the
-     * given set.</p>
+     * given list.</p>
      *
-     * @param expressions Set of {@link Exp Exps}.
+     * @param expressions List of {@link Exp Exps}.
      * @param replacements A map of substitutions.
      *
-     * @return A modified set of {@link Exp Exps}.
+     * @return A modified list of {@link Exp Exps}.
      */
-    private Set<Exp> substituteExps(Set<Exp> expressions, Map<Exp, Exp> replacements) {
-        Set<Exp> newExps = new LinkedHashSet<>();
+    private List<Exp> substituteExps(List<Exp> expressions, Map<Exp, Exp> replacements) {
+        List<Exp> newExps = new ArrayList<>();
         for (Exp exp : expressions) {
             newExps.add(exp.substitute(replacements));
         }
@@ -509,8 +509,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
      */
     private Sequent substitutionStep(Sequent seq, List<Exp> assumeExpList) {
         // New antecedent and consequent expressions
-        Set<Exp> newAntecedents = new LinkedHashSet<>(seq.getAntecedents());
-        Set<Exp> newConsequents = new LinkedHashSet<>(seq.getConcequents());
+        List<Exp> newAntecedents = new ArrayList<>(seq.getAntecedents());
+        List<Exp> newConsequents = new ArrayList<>(seq.getConcequents());
 
         // Make a deep copy of the assume expression list
         List<Exp> assumeExpCopyList = new ArrayList<>();
@@ -597,8 +597,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 remAssumeExpList.add(currentAssumeExp.clone());
             }
 
-            Set<Exp> antencedentsSubtituted = substituteExps(newAntecedents, substitutions);
-            Set<Exp> consequentsSubtituted = substituteExps(newConsequents, substitutions);
+            List<Exp> antencedentsSubtituted = substituteExps(newAntecedents, substitutions);
+            List<Exp> consequentsSubtituted = substituteExps(newConsequents, substitutions);
 
             // No substitutions
             if (antencedentsSubtituted.equals(newAntecedents) &&
@@ -617,6 +617,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         }
 
         // Perform the assume application step and return the new sequent
-        return assumeApplicationStep(new Sequent(seq.getLocation(), newAntecedents, newConsequents), remAssumeExpList);
+        return assumeApplicationStep(new Sequent(seq.getLocation(),
+                newAntecedents, newConsequents), remAssumeExpList);
     }
 }

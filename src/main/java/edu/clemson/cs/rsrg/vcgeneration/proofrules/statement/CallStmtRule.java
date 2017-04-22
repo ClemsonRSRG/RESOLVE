@@ -36,9 +36,9 @@ import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -416,8 +416,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
      * @return A modified {@link Sequent}.
      */
     private Sequent createReplacementSequent(Sequent s, Map<Exp, Exp> substitutions) {
-        Set<Exp> newAntecedents = new LinkedHashSet<>();
-        Set<Exp> newConsequents = new LinkedHashSet<>();
+        List<Exp> newAntecedents = new ArrayList<>();
+        List<Exp> newConsequents = new ArrayList<>();
 
         for (Exp antencedent : s.getAntecedents()) {
             newAntecedents.add(antencedent.substitute(substitutions));

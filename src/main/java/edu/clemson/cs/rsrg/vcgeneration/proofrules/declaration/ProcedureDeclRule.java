@@ -21,7 +21,7 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.KnownTypeVariableFinalizationRule;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

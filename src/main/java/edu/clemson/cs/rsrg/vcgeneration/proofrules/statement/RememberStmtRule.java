@@ -16,9 +16,9 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -102,8 +102,8 @@ public class RememberStmtRule extends AbstractProofRuleApplication
      * @return A modified {@link Sequent}.
      */
     private Sequent createReplacementSequent(Sequent s) {
-        Set<Exp> newAntecedents = new LinkedHashSet<>();
-        Set<Exp> newConsequents = new LinkedHashSet<>();
+        List<Exp> newAntecedents = new ArrayList<>();
+        List<Exp> newConsequents = new ArrayList<>();
 
         for (Exp antencedent : s.getAntecedents()) {
             if (antencedent instanceof MathExp) {

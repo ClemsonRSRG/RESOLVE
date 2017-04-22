@@ -1997,7 +1997,7 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link BetweenExp}.</p>
+     * <p>Code that gets executed after visiting a {@link BetweenExp}.</p>
      *
      * @param exp A conjunct expression.
      */

@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -91,8 +91,8 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
                         ((InfixExp) confirmExp).split(null, false);
 
                 for (InfixExp consequentExp : consequentExps) {
-                    Set<Exp> antecedent = new LinkedHashSet<>();
-                    Set<Exp> consequent = new LinkedHashSet<>();
+                    List<Exp> antecedent = new ArrayList<>();
+                    List<Exp> consequent = new ArrayList<>();
                     consequent.add(consequentExp);
 
                     // Add this new sequent to our sequent list.
@@ -101,8 +101,8 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
                 }
             }
             else {
-                Set<Exp> antecedent = new LinkedHashSet<>();
-                Set<Exp> consequent = new LinkedHashSet<>();
+                List<Exp> antecedent = new ArrayList<>();
+                List<Exp> consequent = new ArrayList<>();
                 consequent.add(confirmExp);
 
                 // Add this new sequent to our sequent list.

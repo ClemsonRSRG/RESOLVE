@@ -1,15 +1,16 @@
 #
 # Continuous integration settings for Travis CI
 #
+dist: trusty
 sudo: false
 branches:
   only:
     - master
 
-# Make sure we compile using Java JDK7, because the RESOLVE WebIDE does not support JDK8.
+# Compile and run the tests using JDK8
 language: java
 jdk:
-  - oraclejdk7
+  - oraclejdk8
 
 # Don't run the initial maven install
 install: true

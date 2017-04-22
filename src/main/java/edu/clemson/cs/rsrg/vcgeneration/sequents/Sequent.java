@@ -10,14 +10,17 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.vcs;
+package edu.clemson.cs.rsrg.vcgeneration.sequents;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import edu.clemson.cs.rsrg.vcgeneration.treewalkers.AtomicFormulaChecker;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * <p>This class stores antecedent and consequent expressions for a given
@@ -40,11 +43,11 @@ public class Sequent implements BasicCapabilities, Cloneable {
     /** <p>The location for this {@code Sequent}.</p> */
     private Location myLocation;
 
-    /** <p>Set of all antecedent conditions</p> */
-    private final Set<Exp> myAntecedents;
+    /** <p>List of all antecedent conditions</p> */
+    private final List<Exp> myAntecedents;
 
-    /** <p>Set of all consequent conditions</p> */
-    private final Set<Exp> myConcequents;
+    /** <p>List of all consequent conditions</p> */
+    private final List<Exp> myConcequents;
 
     // ===========================================================
     // Constructors
@@ -58,10 +61,10 @@ public class Sequent implements BasicCapabilities, Cloneable {
      * @param antecedents The antecedents for this sequent.
      * @param consequents The consequents for this sequent.
      */
-    public Sequent(Location loc, Set<Exp> antecedents, Set<Exp> consequents) {
+    public Sequent(Location loc, List<Exp> antecedents, List<Exp> consequents) {
         myLocation = loc;
-        myAntecedents = new LinkedHashSet<>(antecedents);
-        myConcequents = new LinkedHashSet<>(consequents);
+        myAntecedents = new ArrayList<>(antecedents);
+        myConcequents = new ArrayList<>(consequents);
     }
 
     // ===========================================================
@@ -86,36 +89,9 @@ public class Sequent implements BasicCapabilities, Cloneable {
             sb.append(" ");
         }
 
-        sb.append("{");
-        Iterator<Exp> antecedentIt = myAntecedents.iterator();
-        while (antecedentIt.hasNext()) {
-            Exp nextExp = antecedentIt.next();
-            sb.append(nextExp.asString(0, 0));
-
-            if (antecedentIt.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append("}");
-
+        sb.append(Utilities.expListAsString(myAntecedents));
         sb.append(" |- ");
-
-        sb.append("{");
-        if (myConcequents.isEmpty()) {
-            sb.append("true");
-        }
-        else {
-            Iterator<Exp> consequentIt = myConcequents.iterator();
-            while (consequentIt.hasNext()) {
-                Exp nextExp = consequentIt.next();
-                sb.append(nextExp.asString(0, 0));
-
-                if (consequentIt.hasNext()) {
-                    sb.append(", ");
-                }
-            }
-        }
-        sb.append("}");
+        sb.append(Utilities.expListAsString(myConcequents));
 
         return sb.toString();
     }
@@ -127,7 +103,36 @@ public class Sequent implements BasicCapabilities, Cloneable {
      */
     @Override
     public final Sequent clone() {
-        return new Sequent(myLocation.clone(), new LinkedHashSet<>(myAntecedents), new LinkedHashSet<>(myConcequents));
+        return new Sequent(myLocation.clone(), new ArrayList<>(myAntecedents),
+                new ArrayList<>(myConcequents));
+    }
+
+    /**
+     * <p>This method checks to see if this is a {@code Sequent} that
+     * only contains atomic formulas.</p>
+     *
+     * @return {@code true} if it is, {@code false} otherwise.
+     */
+    public final boolean consistOfAtomicFormulas() {
+        boolean retval = true;
+
+        // First check our antecedents
+        Iterator<Exp> antecedentIt = myAntecedents.iterator();
+        while (antecedentIt.hasNext() && retval) {
+            AtomicFormulaChecker checker = new AtomicFormulaChecker();
+            TreeWalker.visit(checker, antecedentIt.next());
+            retval = checker.getIsAtomicFormula();
+        }
+
+        // Then check our consequents
+        Iterator<Exp> consequentIt = myConcequents.iterator();
+        while (consequentIt.hasNext() && retval) {
+            AtomicFormulaChecker checker = new AtomicFormulaChecker();
+            TreeWalker.visit(checker, consequentIt.next());
+            retval = checker.getIsAtomicFormula();
+        }
+
+        return retval;
     }
 
     /**
@@ -155,18 +160,18 @@ public class Sequent implements BasicCapabilities, Cloneable {
     /**
      * <p>This method returns the antecedent in this sequent.</p>
      *
-     * @return A set of {@link Exp} representing the antecedent.
+     * @return A list of {@link Exp} representing the antecedent.
      */
-    public final Set<Exp> getAntecedents() {
+    public final List<Exp> getAntecedents() {
         return myAntecedents;
     }
 
     /**
      * <p>This method returns the consequents in this sequent.</p>
      *
-     * @return A set of {@link Exp} representing the consequent.
+     * @return A list of {@link Exp} representing the consequent.
      */
-    public final Set<Exp> getConcequents() {
+    public final List<Exp> getConcequents() {
         return myConcequents;
     }
 

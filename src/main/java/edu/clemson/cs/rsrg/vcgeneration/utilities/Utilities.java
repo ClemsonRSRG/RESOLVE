@@ -47,11 +47,7 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>This class contains a bunch of utilities methods used by the {@link VCGenerator}
@@ -685,6 +681,29 @@ public class Utilities {
         }
 
         return exp;
+    }
+
+    /**
+     * <p>An helper method to print a list of expressions.</p>
+     *
+     * @param exps A list of {@link Exp Exps}.
+     *
+     * @return A formatted string.
+     */
+    public static String expListAsString(List<Exp> exps) {
+        StringBuffer sb = new StringBuffer();
+
+        Iterator<Exp> expIterator = exps.iterator();
+        while (expIterator.hasNext()) {
+            Exp nextExp = expIterator.next();
+            sb.append(nextExp.asString(0, 0));
+
+            if (expIterator.hasNext()) {
+                sb.append(", ");
+            }
+        }
+
+        return sb.toString();
     }
 
     /**

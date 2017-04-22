@@ -18,7 +18,7 @@ import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
-import edu.clemson.cs.rsrg.vcgeneration.vcs.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import java.util.List;
 import java.util.Map;
 
