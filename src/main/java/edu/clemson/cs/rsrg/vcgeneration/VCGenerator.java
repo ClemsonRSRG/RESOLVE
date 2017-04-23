@@ -70,6 +70,8 @@ import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.*;
+
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -345,6 +347,23 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Set the current assertive code block to null
             myCurrentAssertiveCodeBlock = null;
+        }
+
+        // Assign a name to all of the VCs
+        int blockCount = 0;
+        for (AssertiveCodeBlock block : myFinalAssertiveCodeBlocks) {
+            // Obtain the final list of vcs
+            int vcCount = 1;
+            List<VerificationCondition> vcs = block.getVCs();
+            List<VerificationCondition> namedVCs = new ArrayList<>(vcs.size());
+            for (VerificationCondition vc : vcs) {
+                namedVCs.add(new VerificationCondition(blockCount + "_" + vcCount,
+                        vc.getAssociatedSequents()));
+                vcCount++;
+            }
+
+            // Increase the block number
+            blockCount++;
         }
     }
 

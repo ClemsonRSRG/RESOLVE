@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities;
 
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,9 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     // Member Fields
     // ===========================================================
 
+    /** <p>The location for this {@code Sequent}.</p> */
+    private Location myLocation;
+
     /** <p>Name given to the {@code VC}.</p> */
     private final String myName;
 
@@ -53,11 +57,14 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      * <p>This creates a {@code VC} with a name and associated
      * {@link Sequent Sequents}.</p>
      *
+     * @param loc The location that created this {@code VC}.
      * @param name Name given to this {@code VC}.
      * @param sequents List of {@link Sequent Sequents}
      *                 associated with this {@code VC}.
      */
-    public VerificationCondition(String name, List<Sequent> sequents) {
+    public VerificationCondition(Location loc, String name,
+            List<Sequent> sequents) {
+        myLocation = loc;
         myName = name;
         myAssociatedSequents = sequents;
     }
@@ -66,11 +73,12 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      * <p>This creates a nameless {@code VC} with the associated
      * {@link Sequent Sequents}.</p>
      *
+     * @param loc The location that created this {@code VC}.
      * @param sequents List of {@link Sequent Sequents}
      *                 associated with this {@code VC}.
      */
-    public VerificationCondition(List<Sequent> sequents) {
-        this(null, sequents);
+    public VerificationCondition(Location loc, List<Sequent> sequents) {
+        this(loc, null, sequents);
     }
 
     // ===========================================================
@@ -109,7 +117,8 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     @Override
     public final VerificationCondition clone() {
         VerificationCondition newVerificationCondition =
-                new VerificationCondition(myName, new ArrayList<Sequent>());
+                new VerificationCondition(myLocation.clone(), myName,
+                        new ArrayList<Sequent>());
 
         Collections.copy(newVerificationCondition.myAssociatedSequents,
                 myAssociatedSequents);
@@ -133,18 +142,10 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
 
         VerificationCondition that = (VerificationCondition) o;
 
-        return (myName != null ? myName.equals(that.myName)
-                : that.myName == null)
+        return myLocation.equals(that.myLocation)
+                && (myName != null ? myName.equals(that.myName)
+                        : that.myName == null)
                 && myAssociatedSequents.equals(that.myAssociatedSequents);
-    }
-
-    /**
-     * <p>This method returns the name for this {@code VC}.</p>
-     *
-     * @return A string.
-     */
-    public final String getName() {
-        return myName;
     }
 
     /**
@@ -158,13 +159,33 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method returns the location that created
+     * this {@code VC}.</p>
+     *
+     * @return A {@link Location}.
+     */
+    public final Location getLocation() {
+        return myLocation;
+    }
+
+    /**
+     * <p>This method returns the name for this {@code VC}.</p>
+     *
+     * @return A string.
+     */
+    public final String getName() {
+        return myName;
+    }
+
+    /**
      * <p>This method overrides the default {@code hashCode} method implementation.</p>
      *
      * @return The hash code associated with the object.
      */
     @Override
     public final int hashCode() {
-        int result = myName != null ? myName.hashCode() : 0;
+        int result = myLocation.hashCode();
+        result = 31 * result + (myName != null ? myName.hashCode() : 0);
         result = 31 * result + myAssociatedSequents.hashCode();
         return result;
     }
