@@ -31,11 +31,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
-import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
-import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
-import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt;
+import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt.StatementType;
-import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
@@ -57,7 +54,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
-import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
@@ -69,9 +65,8 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.RememberStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import java.util.*;
-
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -357,7 +352,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             List<VerificationCondition> vcs = block.getVCs();
             List<VerificationCondition> namedVCs = new ArrayList<>(vcs.size());
             for (VerificationCondition vc : vcs) {
-                namedVCs.add(new VerificationCondition(blockCount + "_" + vcCount,
+                namedVCs.add(new VerificationCondition(vc.getLocation(),
+                        blockCount + "_" + vcCount,
                         vc.getAssociatedSequents()));
                 vcCount++;
             }

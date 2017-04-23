@@ -73,7 +73,7 @@ public class RememberStmtRule extends AbstractProofRuleApplication
                 newSequent.add(createReplacementSequent(s));
             }
 
-            newVCs.add(new VerificationCondition(vc.getName(), newSequent));
+            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequent));
         }
 
         // Store the new list of vcs

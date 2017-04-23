@@ -20,8 +20,10 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -32,8 +34,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.Parameter
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
-import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
-import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
@@ -386,7 +386,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 newSequent.add(createReplacementSequent(s, substitutionsForSeq));
             }
 
-            newVCs.add(new VerificationCondition(vc.getName(), newSequent));
+            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequent));
         }
 
         // Store the new list of vcs
