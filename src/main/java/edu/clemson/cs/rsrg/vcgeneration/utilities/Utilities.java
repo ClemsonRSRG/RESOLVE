@@ -47,7 +47,12 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.*;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultEdge;
 
 /**
  * <p>This class contains a bunch of utilities methods used by the {@link VCGenerator}
@@ -952,6 +957,82 @@ public class Utilities {
         }
 
         throw new SourceErrorException(message, loc);
+    }
+
+    /**
+     * <p>This method is used to check for there is a path
+     * in either direction from {@code seq1} to {@code seq2}
+     * in the reduction tree.</p>
+     *
+     * @param g The reduction tree.
+     * @param seq1 A {@link Sequent}.
+     * @param seq2 Another {@link Sequent}.
+     *
+     * @return {@code true} if there is a path in the reduction tree,
+     * {@code false} otherwise.
+     */
+    public static boolean pathExist(DirectedGraph<Sequent, DefaultEdge> g, Sequent seq1, Sequent seq2) {
+        boolean retVal = true;
+
+        // Check to see if the seq1 and seq2 is in the tree.
+        // YS: Should be in here, but just in case it isn't...
+        if (g.containsVertex(seq1) && g.containsVertex(seq2)) {
+            // Check to see if there is a path from seq1 to seq2 or from seq2 to seq1.
+            // YS: We choose to use Dijkstra's algorithm, but we could chose
+            // other ones if needed.
+            ShortestPathAlgorithm<Sequent, DefaultEdge> pathAlgorithm = new DijkstraShortestPath<>(g);
+            if (pathAlgorithm.getPath(seq1, seq2) == null &&
+                    pathAlgorithm.getPath(seq2, seq1) == null) {
+                retVal = false;
+            }
+        }
+        else {
+            retVal = false;
+        }
+
+        return retVal;
+    }
+
+    /**
+     * <p>This method is used to check for there are paths from
+     * {@code originalSequent} to each sequent in {@code resultSequents}
+     * in the reduction tree.</p>
+     *
+     * @param g The reduction tree.
+     * @param originalSequent The original {@link Sequent}.
+     * @param resultSequents The {@link Sequent} that resulted from the
+     *                       sequent reduction applications.
+     *
+     * @return {@code true} if all the {@link Sequent} in {@code resultSequents}
+     * have a path from {@code originalSequent} in the reduction tree,
+     * {@code false} otherwise.
+     */
+    public static boolean pathsExist(DirectedGraph<Sequent, DefaultEdge> g,
+            Sequent originalSequent, List<Sequent> resultSequents) {
+        boolean retVal = true;
+
+        // Check to see if the originalSequent is in the tree.
+        // YS: Should be in here, but just in case it isn't...
+        if (!g.containsVertex(originalSequent)) {
+            retVal = false;
+        }
+
+        // Check to see if there is a path from originalSequent to each
+        // sequent in resultSequents.
+        // YS: We choose to use Dijkstra's algorithm, but we could chose
+        // other ones if needed.
+        ShortestPathAlgorithm<Sequent, DefaultEdge> pathAlgorithm = new DijkstraShortestPath<>(g);
+        Iterator<Sequent> iterator = resultSequents.iterator();
+        while(iterator.hasNext() && retVal) {
+            Sequent next = iterator.next();
+
+            // Check to see if there is a path from
+            if (pathAlgorithm.getPath(originalSequent, next) == null) {
+                retVal = false;
+            }
+        }
+
+        return retVal;
     }
 
     /**

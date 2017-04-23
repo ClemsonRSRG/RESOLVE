@@ -32,13 +32,8 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultEdge;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -145,7 +140,7 @@ public class SequentReductionTest {
         for (Sequent resultSequent : resultSequents) {
             assertNotEquals(originalSequent, resultSequent);
             assertTrue(resultSequent.consistOfAtomicFormulas());
-            assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+            assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
         }
     }
 
@@ -194,7 +189,7 @@ public class SequentReductionTest {
         Sequent resultSequent = resultSequents.get(0);
         assertNotEquals(originalSequent, resultSequent);
         assertTrue(resultSequent.consistOfAtomicFormulas());
-        assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
 
         // AandB cannot be in our sequent
         assertFalse(inSequent(resultSequent, AandB));
@@ -252,7 +247,7 @@ public class SequentReductionTest {
         assertNotEquals(originalSequent, resultSequent2);
         assertTrue(resultSequent1.consistOfAtomicFormulas());
         assertTrue(resultSequent2.consistOfAtomicFormulas());
-        assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
 
         // AimpliesB cannot be in our sequents
         assertFalse(inSequent(resultSequent1, AimpliesB));
@@ -313,7 +308,7 @@ public class SequentReductionTest {
         Sequent resultSequent = resultSequents.get(0);
         assertNotEquals(originalSequent, resultSequent);
         assertTrue(resultSequent.consistOfAtomicFormulas());
-        assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
 
         // notA cannot be in our sequents
         assertFalse(inSequent(resultSequent, notA));
@@ -373,7 +368,7 @@ public class SequentReductionTest {
         assertNotEquals(originalSequent, resultSequent2);
         assertTrue(resultSequent1.consistOfAtomicFormulas());
         assertTrue(resultSequent2.consistOfAtomicFormulas());
-        assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
 
         // AorB cannot be in our sequents
         assertFalse(inSequent(resultSequent1, AorB));
@@ -438,7 +433,7 @@ public class SequentReductionTest {
         assertNotEquals(originalSequent, resultSequent2);
         assertTrue(resultSequent1.consistOfAtomicFormulas());
         assertTrue(resultSequent2.consistOfAtomicFormulas());
-        assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
 
         // AandB cannot be in our sequents
         assertFalse(inSequent(resultSequent1, AandB));
@@ -500,7 +495,7 @@ public class SequentReductionTest {
         Sequent resultSequent = resultSequents.get(0);
         assertNotEquals(originalSequent, resultSequent);
         assertTrue(resultSequent.consistOfAtomicFormulas());
-        assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
 
         // AimpliesB cannot be in our sequents
         assertFalse(inSequent(resultSequent, AimpliesB));
@@ -560,7 +555,7 @@ public class SequentReductionTest {
         Sequent resultSequent = resultSequents.get(0);
         assertNotEquals(originalSequent, resultSequent);
         assertTrue(resultSequent.consistOfAtomicFormulas());
-        assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
 
         // notA cannot be in our sequents
         assertFalse(inSequent(resultSequent, notA));
@@ -617,7 +612,7 @@ public class SequentReductionTest {
         Sequent resultSequent = resultSequents.get(0);
         assertNotEquals(originalSequent, resultSequent);
         assertTrue(resultSequent.consistOfAtomicFormulas());
-        assertTrue(pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
+        assertTrue(Utilities.pathsExist(reduction.getReductionTree(), originalSequent, resultSequents));
 
         // AorB cannot be in our sequent
         assertFalse(inSequent(resultSequent, AorB));
@@ -786,45 +781,4 @@ public class SequentReductionTest {
         return inAntecedentExps(sequent, exp) && inConsequentExps(sequent, exp);
     }
 
-    /**
-     * <p>This method is used to check for there are paths from
-     * {@code originalSequent} to each sequent in {@code resultSequents}
-     * in the reduction tree.</p>
-     *
-     * @param g The reduction tree.
-     * @param originalSequent The original {@link Sequent}.
-     * @param resultSequents The {@link Sequent} that resulted from the
-     *                       sequent reduction applications.
-     *
-     * @return {@code true} if all the {@link Sequent} in {@code resultSequents}
-     * have a path from {@code originalSequent} in the reduction tree,
-     * {@code false} otherwise.
-     */
-    private boolean pathsExist(DirectedGraph<Sequent, DefaultEdge> g,
-            Sequent originalSequent, List<Sequent> resultSequents) {
-        boolean retVal = true;
-
-        // Check to see if the originalSequent is in the tree.
-        // YS: Should be in here, but just in case it isn't...
-        if (!g.containsVertex(originalSequent)) {
-            retVal = false;
-        }
-
-        // Check to see if there is a path from originalSequent to each
-        // sequent in resultSequents.
-        // YS: We choose to use Dijkstra's algorithm, but we could chose
-        // other ones if needed.
-        ShortestPathAlgorithm<Sequent, DefaultEdge> pathAlgorithm = new DijkstraShortestPath<>(g);
-        Iterator<Sequent> iterator = resultSequents.iterator();
-        while(iterator.hasNext() && retVal) {
-            Sequent next = iterator.next();
-
-            // Check to see if there is a path from
-            if (pathAlgorithm.getPath(originalSequent, next) == null) {
-                retVal = false;
-            }
-        }
-
-        return retVal;
-    }
 }
