@@ -19,12 +19,12 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.SequentReduction;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeDotExporter;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeExporter;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
-import java.io.StringWriter;
 import java.util.*;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.graph.DefaultEdge;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -96,8 +96,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             for (VerificationCondition vc : myCurrentAssertiveCodeBlock.getVCs()) {
                 List<Sequent> newSequents = new ArrayList<>();
                 for (Sequent sequent : vc.getAssociatedSequents()) {
-                    // YS: The reducedSequentForm combines both the Substitution Step and
-                    //     Stipulate Application Step.
+                    // YS: The reducedSequentForm combines both the Substitution and
+                    //     Stipulate Application Steps.
                     newSequents.addAll(reducedSequentForm(sequent, assumeExp.clone(), stepModel));
                 }
 
@@ -155,7 +155,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
      *
      * @return A list of reduced {@link Sequent Sequents}.
      */
-    private List<Sequent> reducedSequentForm(Sequent sequent, Exp assumeExp, ST stepModel) {
+    private List<Sequent> reducedSequentForm(Sequent sequent, Exp assumeExp,
+            ST stepModel) {
         // Create the sequent to be reduced.
         List<Exp> newAntecedents = sequent.getAntecedents();
         newAntecedents.add(assumeExp);
@@ -164,16 +165,14 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 new Sequent(sequent.getLocation(), newAntecedents, consequents);
 
         // Apply the various sequent reduction rules.
-        SequentReduction reduction =
-                new SequentReduction(sequentToBeReduced);
+        SequentReduction reduction = new SequentReduction(sequentToBeReduced);
         List<Sequent> resultSequents = reduction.applyReduction();
-        DirectedGraph<Sequent, DefaultEdge> reductionTree = reduction.getReductionTree();
+        DirectedGraph<Sequent, DefaultEdge> reductionTree =
+                reduction.getReductionTree();
 
         // Output the reduction tree as a dot file to the step model
-        StringWriter writer = new StringWriter();
-        DOTExporter<Sequent, DefaultEdge> dotExporter = new DOTExporter<>();
-        dotExporter.exportGraph(reductionTree, writer);
-        stepModel.add("reductionTree", writer.toString());
+        ReductionTreeExporter treeExporter = new ReductionTreeDotExporter();
+        stepModel.add("reductionTrees", treeExporter.output(reductionTree));
 
         return resultSequents;
     }

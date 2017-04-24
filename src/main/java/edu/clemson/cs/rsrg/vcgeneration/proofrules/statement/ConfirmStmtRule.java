@@ -18,13 +18,13 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.SequentReduction;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeDotExporter;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeExporter;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
-import java.io.StringWriter;
 import java.util.*;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.graph.DefaultEdge;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -152,10 +152,8 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
         }
 
         // Output the reduction tree as a dot file to the step model
-        StringWriter writer = new StringWriter();
-        DOTExporter<Sequent, DefaultEdge> dotExporter = new DOTExporter<>();
-        dotExporter.exportGraph(reductionTree, writer);
-        stepModel.add("reductionTree", writer.toString());
+        ReductionTreeExporter treeExporter = new ReductionTreeDotExporter();
+        stepModel.add("reductionTrees", treeExporter.output(reductionTree));
 
         return vcs;
     }

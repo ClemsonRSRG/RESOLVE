@@ -139,9 +139,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
 
         // Free variables
         sb.append("Free Variables:\n");
-        Iterator<Exp> freeVarIt = myFreeVars.iterator();
-        while (freeVarIt.hasNext()) {
-            Exp current = freeVarIt.next();
+        for (Exp current : myFreeVars) {
             sb.append(current.asString(indentSize + innerIndentInc,
                     innerIndentInc));
             sb.append(" : ");
@@ -161,9 +159,14 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
 
         // VCs
         sb.append("VC(s):\n");
-        for (VerificationCondition vc : myVCs) {
+        Iterator<VerificationCondition> conditionIterator = myVCs.iterator();
+        while (conditionIterator.hasNext()) {
+            VerificationCondition vc = conditionIterator.next();
             sb.append(vc.asString(indentSize + innerIndentInc, innerIndentInc));
-            sb.append("\n");
+
+            if (conditionIterator.hasNext()) {
+                sb.append("\n");
+            }
         }
 
         return sb.toString();

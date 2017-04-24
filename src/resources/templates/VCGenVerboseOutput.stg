@@ -71,11 +71,14 @@ outputAssertiveCodeBlock(blockName, vcGenSteps) ::= <<
  * free variables at this step and the resulting assertive code block after
  * the application of the proof rule.
  */
-outputVCGenStep(proofRuleName, moreDetails, currentStateOfBlock, reductionTree) ::= <<
+outputVCGenStep(proofRuleName, moreDetails, currentStateOfBlock, reductionTrees) ::= <<
 Applied <proofRuleName>: <if(moreDetails)>[<moreDetails>]<endif>
 
 <currentStateOfBlock>
-<if(reductionTree)>[<reductionTree>]<endif>
+<if(reductionTrees)>
+Reduction Tree(s):
+    <reductionTrees; separator = "\n">
+<endif>
 _____________________
 
 >>

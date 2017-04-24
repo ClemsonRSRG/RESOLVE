@@ -101,8 +101,7 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
         StringBuffer sb = new StringBuffer();
 
         for (Sequent sequent : myAssociatedSequents) {
-            sb.append(sequent.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(sequent.asString(indentSize, innerIndentInc));
             sb.append("\n");
         }
 
