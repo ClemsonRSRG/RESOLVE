@@ -67,8 +67,8 @@ public class LeftOrRule extends AbstractReductionRuleApplication
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Add the left and right into the different antecedent lists
                     if (originalExpAsInfixExp.getOperatorAsString().equals("or")) {
-                        newAntecedents1.add(originalExpAsInfixExp.getRight());
-                        newAntecedents2.add(originalExpAsInfixExp.getLeft());
+                        newAntecedents1.add(originalExpAsInfixExp.getLeft());
+                        newAntecedents2.add(originalExpAsInfixExp.getRight());
                     }
                     // This must be an error!
                     else {

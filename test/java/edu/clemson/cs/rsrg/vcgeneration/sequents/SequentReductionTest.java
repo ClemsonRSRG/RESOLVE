@@ -374,15 +374,15 @@ public class SequentReductionTest {
         assertFalse(inSequent(resultSequent1, AorB));
         assertFalse(inSequent(resultSequent2, AorB));
 
-        // B must be in resultSequent1's antecedent,
+        // A must be in resultSequent1's antecedent,
         // but not in resultSequent2.
-        assertTrue(inAntecedentExps(resultSequent1, B));
-        assertFalse(inSequent(resultSequent2, B));
+        assertTrue(inAntecedentExps(resultSequent1, A));
+        assertFalse(inSequent(resultSequent2, A));
 
-        // A must be in resultSequent2's antecedent,
+        // B must be in resultSequent2's antecedent,
         // but not in resultSequent1.
-        assertTrue(inAntecedentExps(resultSequent2, A));
-        assertFalse(inSequent(resultSequent1, A));
+        assertTrue(inAntecedentExps(resultSequent2, B));
+        assertFalse(inSequent(resultSequent1, B));
     }
 
     /**
