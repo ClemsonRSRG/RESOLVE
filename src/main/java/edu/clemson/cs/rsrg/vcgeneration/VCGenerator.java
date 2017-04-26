@@ -358,7 +358,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 vcCount++;
             }
 
-            // Increase the block number
+            // Store the named VCs and increase the block number
+            block.setVCs(namedVCs);
             blockCount++;
         }
     }
