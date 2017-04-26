@@ -152,8 +152,11 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
         }
 
         // Output the reduction tree as a dot file to the step model
-        ReductionTreeExporter treeExporter = new ReductionTreeDotExporter();
-        stepModel.add("reductionTrees", treeExporter.output(reductionTree));
+        // only if we did some kind of reduction.
+        if (!reductionTree.edgeSet().isEmpty()) {
+            ReductionTreeExporter treeExporter = new ReductionTreeDotExporter();
+            stepModel.add("reductionTrees", treeExporter.output(reductionTree));
+        }
 
         return vcs;
     }
