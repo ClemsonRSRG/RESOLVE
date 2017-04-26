@@ -23,7 +23,7 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
  * This visitor logic is implemented as a {@link TreeWalkerVisitor}.</p>
  *
  * @author Yu-Shan Sun
- * @version 3.0
+ * @version 1.0
  */
 public class AtomicFormulaChecker extends TreeWalkerVisitor {
 
