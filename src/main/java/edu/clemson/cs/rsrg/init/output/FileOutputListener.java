@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.io.*;
 import java.util.Date;
 import java.util.List;
@@ -126,29 +127,32 @@ public class FileOutputListener implements OutputListener {
                         inputFileName).add("dateGenerated", new Date());
 
         // Add the VC output in human readable format
-        int blockCount = 0;
         for (AssertiveCodeBlock block : blocks) {
-            // Obtain the final list of sequents
-            int vcCount = 1;
-            List<Sequent> sequents = block.getSequents();
-            for (Sequent s : sequents) {
+            // Obtain the final list of vcs
+            List<VerificationCondition> vcs = block.getVCs();
+            for (VerificationCondition vc : vcs) {
                 // Create a model for adding all the details
                 // associated with this VC.
-                Location loc = s.getLocation();
+                Location loc = vc.getLocation();
                 ST vcModel = group.getInstanceOf("outputVC");
-                vcModel.add("vcNum", blockCount + "_" + vcCount);
+                vcModel.add("vcNum", vc.getName());
                 vcModel.add("location", loc);
                 vcModel.add("locationDetail", locationDetails.get(loc));
-                vcModel.add("consequents", s.getConcequents());
-                vcModel.add("antecedents", s.getAntecedents());
 
-                // Add the VC to the model and increase the vcCount
+                // Output each of the associated sequents
+                List<Sequent> sequents = vc.getAssociatedSequents();
+                for (Sequent s : sequents) {
+                    ST sequentModel = group.getInstanceOf("outputSequent");
+                    sequentModel.add("consequents", s.getConcequents());
+                    sequentModel.add("antecedents", s.getAntecedents());
+
+                    // Add this sequent to our vc model
+                    vcModel.add("sequents", sequentModel.render());
+                }
+
+                // Add the VC to the model
                 model.add("vcs", vcModel.render());
-                vcCount++;
             }
-
-            // Increase the block number
-            blockCount++;
         }
 
         // Append the generated VC details from the model

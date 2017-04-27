@@ -13,17 +13,25 @@ VCs for <fileName> generated <dateGenerated>
 /**
  * Template for storing the final set of VCs in a human readable format.
  */
-outputVC(vcNum, location, locationDetail, consequents, antecedents) ::= <<
+outputVC(vcNum, location, locationDetail, sequents) ::= <<
 VC <vcNum>
 
 <locationDetail>: <location>
 
+<sequents; separator = "\n">
+
+>>
+
+/**
+ * Template for storing a sequent in a VC
+ */
+outputSequent(consequents, antecedents) ::= <<
+
 Goal(s):
 
-<consequents; separator = "or">
+<consequents>
 
 Given(s):
 
 <antecedents : {antecedent | <i>. <antecedent>}; separator = "\n">
-
 >>

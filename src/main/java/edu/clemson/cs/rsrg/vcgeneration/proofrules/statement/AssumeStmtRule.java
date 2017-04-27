@@ -12,18 +12,24 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
-import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
-import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.SequentReduction;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeDotExporter;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeExporter;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.UniqueSymbolNameExtractor;
 import java.util.*;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -72,33 +78,88 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
 
     /**
      * <p>This method applies the {@code Proof Rule}.</p>
+     *
+     * TODO: Add the actual proof rule to the JavaDoc.
      */
     @Override
     public final void applyRule() {
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+        String ruleName = getRuleDescription();
 
         // Check to see if this assume can be simplified or not.
         if (VarExp.isLiteralTrue(myAssumeStmt.getAssertion())) {
-            // Add the different details to the various different output models
-            stepModel.add("proofRuleName",
-                    getRuleDescription() + " and Simplified").add(
-                    "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+            // Don't need to do anything here. We simply ignore this
+            // assertion.
+            ruleName = ruleName + " and Simplified";
         }
         else {
+            // This is the stipulate assume rule.
+            if (myAssumeStmt.getIsStipulate()) {
+                ruleName = "Stipulate " + ruleName;
+            }
+
             // Retrieve the expression inside the assume
             Exp assumeExp = myAssumeStmt.getAssertion();
 
-            // TODO: Apply the various sequent reduction rules.
+            // YS: In order to apply the "Substitution Step",
+            // we will need a list of replaceable expressions.
+            // Once we have done the substitutions, if this
+            // statement is a Stipulate Assume, then we keep
+            // the remaining expressions no matter what, else
+            // it will only add it to the sequent if there are
+            // common symbols.
             List<Exp> assumeExps =
                     splitConjunctExp(assumeExp, new ArrayList<Exp>());
 
-            // Set this as our new list of sequents
-            List<Sequent> newSequents = formParsimoniousVC(assumeExps);
-            myCurrentAssertiveCodeBlock.setSequents(newSequents);
+            // YS: We really want to record the split into conjuncts
+            // as some kind of reduction, so we build a reduction tree
+            // ourselves.
+            if (assumeExps.size() != 1) {
+                DirectedGraph<Sequent, DefaultEdge> reductionTree =
+                        new DefaultDirectedGraph<>(DefaultEdge.class);
 
-            stepModel.add("proofRuleName", getRuleDescription()).add(
-                    "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+                // Create a root node using the original assumeExp and
+                // a children node using the assumeExps list. Then create
+                // and edge to indicate a reduction.
+                Sequent rootSequent =
+                        new Sequent(myAssumeStmt.getLocation(),
+                                Collections.singletonList(assumeExp), new ArrayList<Exp>());
+                Sequent updatedSequent =
+                        new Sequent(myAssumeStmt.getLocation(),
+                                assumeExps, new ArrayList<Exp>());
+                reductionTree.addVertex(rootSequent);
+                reductionTree.addVertex(updatedSequent);
+                reductionTree.addEdge(rootSequent, updatedSequent);
+
+                // Export the tree
+                ReductionTreeExporter treeExporter = new ReductionTreeDotExporter();
+                stepModel.add("reductionTrees", treeExporter.output(reductionTree));
+            }
+
+            // Build the new list of VCs
+            List<VerificationCondition> newVCs = new ArrayList<>();
+            for (VerificationCondition vc : myCurrentAssertiveCodeBlock.getVCs()) {
+                List<Sequent> newSequents = new ArrayList<>();
+                for (Sequent sequent : vc.getAssociatedSequents()) {
+                    // YS: The substitutionStep will call applicationStep
+                    Sequent resultSequent =
+                            substitutionStep(sequent, assumeExps);
+
+                    // Reduce the sequent and store this as
+                    // our new list of associated sequents.
+                    newSequents.addAll(reducedSequentForm(resultSequent, stepModel));
+                }
+
+                newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequents));
+            }
+
+            // Set this as our new list of vcs
+            myCurrentAssertiveCodeBlock.setVCs(newVCs);
         }
+
+        // Add the different details to the various different output models
+        stepModel.add("proofRuleName", ruleName).add(
+                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
 
         // Add the different details to the various different output models
         myBlockModel.add("vcGenSteps", stepModel.render());
@@ -121,26 +182,27 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
 
     /**
      * <p>This is a helper method that checks to see if the given assume expression
-     * can be used to prove our confirm expression. This is done by finding the
+     * can be used to prove anything in {@code seq}. This is done by finding the
      * intersection between the set of symbols in the assume expression and
-     * the set of symbols in the confirm expression.</p>
+     * the set of symbols in {@code seq}.</p>
      *
-     * <p>If the assume expressions are part of a stipulate assume clause,
-     * then we keep all the assume expressions no matter what.</p>
+     * <p>For a stipulate assume statement, we keep the remaining
+     * then we keep all the remaining assume expressions no matter what.</p>
      *
-     * <p>If it is not a stipulate assume clause, we loop though keep looping through
-     * all the assume expressions until we stop adding more expression to our antecedent.</p>
+     * <p>For a regular assume statement, we loop though keep looping through
+     * the remaining assume expressions until we stop adding more expression
+     * to our antecedent.</p>
      *
      * @param seq The current {@link Sequent} we are processing.
      * @param remAssumeExpList The list of remaining assume expressions.
      *
      * @return The modified {@link Sequent}.
      */
-    private Sequent assumeApplicationStep(Sequent seq, List<Exp> remAssumeExpList) {
+    private Sequent applicationStep(Sequent seq, List<Exp> remAssumeExpList) {
         List<Exp> seqAntecedents = new ArrayList<>(seq.getAntecedents());
         List<Exp> seqConsequents = new ArrayList<>(seq.getConcequents());
 
-        // If it is stipulate clause, keep it no matter what
+        // If it is stipulate statement, keep it no matter what
         if (myAssumeStmt.getIsStipulate()) {
             seqAntecedents.addAll(remAssumeExpList);
         }
@@ -164,18 +226,31 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                     // Get the set of symbols in the antecedent
                     Set<String> symbolsInSeq = new LinkedHashSet<>();
                     for (Exp antecedentExp : seqAntecedents) {
-                        symbolsInSeq.addAll(getSymbols(antecedentExp));
+                        // Use the symbol name extractor to retrieve
+                        // unique symbol names.
+                        UniqueSymbolNameExtractor symbolNameExtractor =
+                                new UniqueSymbolNameExtractor();
+                        TreeWalker.visit(symbolNameExtractor, antecedentExp);
+                        symbolsInSeq.addAll(symbolNameExtractor.getSymbols());
                     }
 
                     // Get the set of symbols in the consequent
                     for (Exp consequentExp : seqConsequents) {
-                        symbolsInSeq.addAll(getSymbols(consequentExp));
+                        // Use the symbol name extractor to retrieve
+                        // unique symbol names.
+                        UniqueSymbolNameExtractor symbolNameExtractor =
+                                new UniqueSymbolNameExtractor();
+                        TreeWalker.visit(symbolNameExtractor, consequentExp);
+                        symbolsInSeq.addAll(symbolNameExtractor.getSymbols());
                     }
 
                     // Add this as a new antecedent if there are common symbols
                     // in the assume expression and in the sequent. (Parsimonious step)
                     Set<String> intersection = new LinkedHashSet<>(symbolsInSeq);
-                    intersection.retainAll(getSymbols(assumeExp));
+                    UniqueSymbolNameExtractor symbolNameExtractor =
+                            new UniqueSymbolNameExtractor();
+                    TreeWalker.visit(symbolNameExtractor, assumeExp);
+                    intersection.retainAll(symbolNameExtractor.getSymbols());
 
                     // There are common symbols!
                     if (!intersection.isEmpty()) {
@@ -246,6 +321,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                     containsReplaceableExp(dotExpList
                             .get(dotExpList.size() - 1));
         }
+        // Case #3: VCVarExp
         else if (exp instanceof VCVarExp) {
             retVal = containsReplaceableExp(((VCVarExp) exp).getExp());
         }
@@ -254,192 +330,29 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>This method iterates through each of the assumed expressions.
-     * If the expression is a replaceable equals expression, it will substitute
-     * all instances of the expression in the rest of the assume expression
-     * list and in the confirm expression list.</p>
+     * <p>This method uses {@code sequent} to produce
+     * a list of reduced {@link Sequent Sequents}.</p>
      *
-     * <p>When it is not a replaceable expression, we apply a step to generate
-     * parsimonious VCs.</p>
+     * @param sequent Original {@link Sequent}.
+     * @param stepModel The model associated with this step.
      *
-     * @param assumeExpList The list of conjunct assume expressions.
-     *
-     * @return The new list of {@link Sequent Sequents}.
+     * @return A list of reduced {@link Sequent Sequents}.
      */
-    private List<Sequent> formParsimoniousVC(List<Exp> assumeExpList) {
-        List<Sequent> currentSequents = myCurrentAssertiveCodeBlock.getSequents();
-        List<Sequent> newSequents = new ArrayList<>();
+    private List<Sequent> reducedSequentForm(Sequent sequent, ST stepModel) {
+        // Apply the various sequent reduction rules.
+        SequentReduction reduction = new SequentReduction(sequent);
+        List<Sequent> resultSequents = reduction.applyReduction();
+        DirectedGraph<Sequent, DefaultEdge> reductionTree =
+                reduction.getReductionTree();
 
-        // Loop through each sequent and apply one of the assume steps
-        for (Sequent seq : currentSequents) {
-            newSequents.add(substitutionStep(seq, assumeExpList));
+        // Output the reduction tree as a dot file to the step model
+        // only if we did some kind of reduction.
+        if (!reductionTree.edgeSet().isEmpty()) {
+            ReductionTreeExporter treeExporter = new ReductionTreeDotExporter();
+            stepModel.add("reductionTrees", treeExporter.output(reductionTree));
         }
 
-        return newSequents;
-    }
-
-    /**
-     * <p>Gets all the unique symbols in an expression.</p>
-     *
-     * @param exp The searching {@link Exp}.
-     *
-     * @return The set of symbols.
-     */
-    private Set<String> getSymbols(Exp exp) {
-        // Return value
-        Set<String> symbolsSet = new HashSet<>();
-
-        // Not CharExp, DoubleExp, IntegerExp or StringExp
-        if (!(exp instanceof CharExp) && !(exp instanceof DoubleExp)
-                && !(exp instanceof IntegerExp) && !(exp instanceof StringExp)) {
-            // AlternativeExp
-            if (exp instanceof AlternativeExp) {
-                List<AltItemExp> alternativesList =
-                        ((AlternativeExp) exp).getAlternatives();
-
-                // Iterate through each of the alternatives
-                for (AltItemExp altExp : alternativesList) {
-                    Exp test = altExp.getTest();
-                    Exp assignment = altExp.getAssignment();
-
-                    // Don't loop if they are null
-                    if (test != null) {
-                        symbolsSet.addAll(getSymbols(altExp.getTest()));
-                    }
-
-                    if (assignment != null) {
-                        symbolsSet.addAll(getSymbols(altExp.getAssignment()));
-                    }
-                }
-            }
-            // DotExp
-            else if (exp instanceof DotExp) {
-                List<Exp> segExpList = ((DotExp) exp).getSegments();
-                StringBuffer currentStr = new StringBuffer();
-
-                // Iterate through each of the segment expressions
-                for (Exp e : segExpList) {
-                    // For each expression, obtain the set of symbols
-                    // and form a candidate expression.
-                    Set<String> retSet = getSymbols(e);
-                    for (String s : retSet) {
-                        if (currentStr.length() != 0) {
-                            currentStr.append(".");
-                        }
-                        currentStr.append(s);
-                    }
-                    symbolsSet.add(currentStr.toString());
-                }
-            }
-            // EqualsExp
-            else if (exp instanceof EqualsExp) {
-                symbolsSet.addAll(getSymbols(((EqualsExp) exp).getLeft()));
-                symbolsSet.addAll(getSymbols(((EqualsExp) exp).getRight()));
-            }
-            // FunctionExp
-            else if (exp instanceof FunctionExp) {
-                FunctionExp funcExp = (FunctionExp) exp;
-                symbolsSet.addAll(getSymbols(funcExp.getName()));
-
-                // Add the carat expression if it is not null
-                if (funcExp.getCaratExp() != null) {
-                    symbolsSet.addAll(getSymbols(funcExp.getCaratExp()));
-                }
-
-                // Add all the symbols in the argument list
-                List<Exp> funcArgExpList = funcExp.getArguments();
-                for (Exp e : funcArgExpList) {
-                    symbolsSet.addAll(getSymbols(e));
-                }
-            }
-            // If Exp
-            else if (exp instanceof IfExp) {
-                symbolsSet.addAll(getSymbols(((IfExp) exp).getTest()));
-                symbolsSet.addAll(getSymbols(((IfExp) exp).getThen()));
-                symbolsSet.addAll(getSymbols(((IfExp) exp).getElse()));
-            }
-            // InfixExp
-            else if (exp instanceof InfixExp) {
-                symbolsSet.addAll(getSymbols(((InfixExp) exp).getLeft()));
-                symbolsSet.addAll(getSymbols(((InfixExp) exp).getRight()));
-            }
-            // LambdaExp
-            else if (exp instanceof LambdaExp) {
-                LambdaExp lambdaExp = (LambdaExp) exp;
-
-                // Add all the parameter variables
-                List<MathVarDec> paramList = lambdaExp.getParameters();
-                for (MathVarDec v : paramList) {
-                    symbolsSet.add(v.getName().getName());
-                }
-
-                // Add all the symbols in the body
-                symbolsSet.addAll(getSymbols(lambdaExp.getBody()));
-            }
-            // OldExp
-            else if (exp instanceof OldExp) {
-                symbolsSet.add(exp.toString());
-            }
-            // OutfixExp
-            else if (exp instanceof OutfixExp) {
-                symbolsSet.addAll(getSymbols(((OutfixExp) exp).getArgument()));
-            }
-            // PrefixExp
-            else if (exp instanceof PrefixExp) {
-                symbolsSet.addAll(getSymbols(((PrefixExp) exp).getArgument()));
-            }
-            // SetExp
-            else if (exp instanceof SetExp) {
-                SetExp setExp = (SetExp) exp;
-
-                // Add all the parts that form the set expression
-                symbolsSet.add(setExp.getVar().getName().getName());
-                symbolsSet.addAll(getSymbols(setExp.getWhere()));
-                symbolsSet.addAll(getSymbols(setExp.getBody()));
-            }
-            // SetCollectionExp
-            else if (exp instanceof SetCollectionExp) {
-                SetCollectionExp setExp = (SetCollectionExp) exp;
-
-                // Add all the parts that form the set expression
-                for (MathExp e : setExp.getVars()) {
-                    symbolsSet.addAll(getSymbols(e));
-                }
-            }
-            // TupleExp
-            else if (exp instanceof TupleExp) {
-                TupleExp tupleExp = (TupleExp) exp;
-
-                // Add all the expressions in the fields
-                List<Exp> fieldList = tupleExp.getFields();
-                for (Exp e : fieldList) {
-                    symbolsSet.addAll(getSymbols(e));
-                }
-            }
-            // VarExp
-            else if (exp instanceof VarExp) {
-                VarExp varExp = (VarExp) exp;
-                StringBuffer varName = new StringBuffer();
-
-                // Add the name of the variable (including any qualifiers)
-                if (varExp.getQualifier() != null) {
-                    varName.append(varExp.getQualifier().getName());
-                    varName.append(".");
-                }
-                varName.append(varExp.getName());
-                symbolsSet.add(varName.toString());
-            }
-            // VCVarExp
-            else if (exp instanceof VCVarExp) {
-                symbolsSet.addAll(getSymbols(((VCVarExp) exp).getExp()));
-            }
-            // Not Handled!
-            else {
-                Utilities.expNotHandled(exp, exp.getLocation());
-            }
-        }
-
-        return symbolsSet;
+        return resultSequents;
     }
 
     /**
@@ -499,7 +412,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     /**
      * <p>This is a helper method that checks to see if the any of the assume expressions
      * can be substituted. If it can, it will generate a new sequent. If it cannot, the original
-     * sequent will be kept. Once this step is over, it will call the next assume application step
+     * sequent will be kept. Once this step is over, it will call {@link #applicationStep(Sequent, List)}
      * to generate the final {@link Sequent}.</p>
      *
      * @param seq The current {@link Sequent} we are processing.
@@ -616,8 +529,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             newConsequents = consequentsSubtituted;
         }
 
-        // Perform the assume application step and return the new sequent
-        return assumeApplicationStep(new Sequent(seq.getLocation(),
+        // Perform the application step and return the new sequent
+        return applicationStep(new Sequent(seq.getLocation(),
                 newAntecedents, newConsequents), remAssumeExpList);
     }
 }

@@ -20,8 +20,10 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -32,13 +34,12 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.Parameter
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
-import edu.clemson.cs.rsrg.vcgeneration.absyn.mathexpr.VCVarExp;
-import edu.clemson.cs.rsrg.vcgeneration.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -374,15 +375,22 @@ public class CallStmtRule extends AbstractProofRuleApplication
         // Store the location detail for the assume statement
         myLocationDetails.put(assumeStmt.getLocation(), "Ensures Clause of " + opDec.getName());
 
-        // Use the sequent substitution map to do replacements
-        List<Sequent> sequents = myCurrentAssertiveCodeBlock.getSequents();
-        List<Sequent> newSequent = new ArrayList<>(sequents.size());
-        for (Sequent s : sequents) {
-            newSequent.add(createReplacementSequent(s, substitutionsForSeq));
+        // Retrieve the list of VCs and use the sequent
+        // substitution map to do replacements.
+        List<VerificationCondition> vcs = myCurrentAssertiveCodeBlock.getVCs();
+        List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
+        for (VerificationCondition vc : vcs) {
+            List<Sequent> sequents = vc.getAssociatedSequents();
+            List<Sequent> newSequent = new ArrayList<>(sequents.size());
+            for (Sequent s : sequents) {
+                newSequent.add(createReplacementSequent(s, substitutionsForSeq));
+            }
+
+            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequent));
         }
 
-        // Store the new list of sequents
-        myCurrentAssertiveCodeBlock.setSequents(newSequent);
+        // Store the new list of vcs
+        myCurrentAssertiveCodeBlock.setVCs(newVCs);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");

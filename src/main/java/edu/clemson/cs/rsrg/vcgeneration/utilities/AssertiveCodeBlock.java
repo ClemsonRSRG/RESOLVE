@@ -19,7 +19,6 @@ import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
-import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -49,10 +48,10 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     private final ResolveConceptualElement myInstantiatingElement;
 
     /**
-     * <p>List of {@link Sequent Sequents} representing the VCs
-     * we are trying to prove.</p>
+     * <p>List of {@link VerificationCondition VCs} we are trying
+     * to prove.</p>
      */
-    private List<Sequent> mySequents;
+    private List<VerificationCondition> myVCs;
 
     /**
      * <p>List of {@link Statement Statements} that we
@@ -84,7 +83,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         myBlockName = name;
         myFreeVars = new LinkedList<>();
         myInstantiatingElement = instantiatingElement;
-        mySequents = new LinkedList<>();
+        myVCs = new LinkedList<>();
         myStatements = new LinkedList<>();
         myTypeGraph = g;
     }
@@ -140,9 +139,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
 
         // Free variables
         sb.append("Free Variables:\n");
-        Iterator<Exp> freeVarIt = myFreeVars.iterator();
-        while (freeVarIt.hasNext()) {
-            Exp current = freeVarIt.next();
+        for (Exp current : myFreeVars) {
             sb.append(current.asString(indentSize + innerIndentInc,
                     innerIndentInc));
             sb.append(" : ");
@@ -160,12 +157,16 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         }
         sb.append("\n");
 
-        // Sequents
-        sb.append("Sequents:\n");
-        for (Sequent sequent : mySequents) {
-            sb.append(sequent.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-            sb.append("\n");
+        // VCs
+        sb.append("VC(s):\n");
+        Iterator<VerificationCondition> conditionIterator = myVCs.iterator();
+        while (conditionIterator.hasNext()) {
+            VerificationCondition vc = conditionIterator.next();
+            sb.append(vc.asString(indentSize + innerIndentInc, innerIndentInc));
+
+            if (conditionIterator.hasNext()) {
+                sb.append("\n");
+            }
         }
 
         return sb.toString();
@@ -183,7 +184,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
                         myBlockName);
 
         Collections.copy(newBlock.myFreeVars, myFreeVars);
-        Collections.copy(newBlock.mySequents, mySequents);
+        Collections.copy(newBlock.myVCs, myVCs);
         Collections.copy(newBlock.myStatements, myStatements);
 
         return newBlock;
@@ -225,7 +226,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         return myBlockName.equals(block.myBlockName)
                 && myFreeVars.equals(block.myFreeVars)
                 && myInstantiatingElement.equals(block.myInstantiatingElement)
-                && mySequents.equals(block.mySequents)
+                && myVCs.equals(block.myVCs)
                 && myStatements.equals(block.myStatements)
                 && myTypeGraph.equals(block.myTypeGraph);
     }
@@ -251,13 +252,13 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method returns the list of sequents stored inside
+     * <p>This method returns the list of {@code VCs} stored inside
      * this assertive code block.</p>
      *
-     * @return A list of {@link Sequent Sequents}.
+     * @return A list of {@link VerificationCondition VCs}.
      */
-    public final List<Sequent> getSequents() {
-        return mySequents;
+    public final List<VerificationCondition> getVCs() {
+        return myVCs;
     }
 
     /**
@@ -279,7 +280,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         int result = myBlockName.hashCode();
         result = 31 * result + myFreeVars.hashCode();
         result = 31 * result + myInstantiatingElement.hashCode();
-        result = 31 * result + mySequents.hashCode();
+        result = 31 * result + myVCs.hashCode();
         result = 31 * result + myStatements.hashCode();
         result = 31 * result + myTypeGraph.hashCode();
 
@@ -308,14 +309,14 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method replaces the list of {@link Sequent Sequents}
-     * in this assertive code with {@code sequents}.</p>
+     * <p>This method replaces the list of {@link VerificationCondition VCs}
+     * in this assertive code with {@code vcs}.</p>
      *
-     * @param sequents A new list of {@link Sequent Sequents}
-     *                 for this assertive code block.
+     * @param vcs A new list of {@link VerificationCondition VCs}
+     *            for this assertive code block.
      */
-    public final void setSequents(List<Sequent> sequents) {
-        mySequents = sequents;
+    public final void setVCs(List<VerificationCondition> vcs) {
+        myVCs = vcs;
     }
 
     /**

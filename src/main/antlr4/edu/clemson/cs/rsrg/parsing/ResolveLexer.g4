@@ -689,7 +689,7 @@ CHARACTER_LITERAL
     ;
 
 STRING_LITERAL
-    :   '\"' StringCharacters? '\"'
+    :   '"' StringCharacters? '"'
     ;
 
 fragment

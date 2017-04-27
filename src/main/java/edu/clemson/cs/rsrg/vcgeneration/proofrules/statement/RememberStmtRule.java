@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -61,15 +62,22 @@ public class RememberStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Use the sequent substitution map to do replacements
-        List<Sequent> sequents = myCurrentAssertiveCodeBlock.getSequents();
-        List<Sequent> newSequent = new ArrayList<>(sequents.size());
-        for (Sequent s : sequents) {
-            newSequent.add(createReplacementSequent(s));
+        // Retrieve the list of VCs and use the sequent
+        // substitution map to do replacements.
+        List<VerificationCondition> vcs = myCurrentAssertiveCodeBlock.getVCs();
+        List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
+        for (VerificationCondition vc : vcs) {
+            List<Sequent> sequents = vc.getAssociatedSequents();
+            List<Sequent> newSequent = new ArrayList<>(sequents.size());
+            for (Sequent s : sequents) {
+                newSequent.add(createReplacementSequent(s));
+            }
+
+            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequent));
         }
 
-        // Store the new list of sequents
-        myCurrentAssertiveCodeBlock.setSequents(newSequent);
+        // Store the new list of vcs
+        myCurrentAssertiveCodeBlock.setVCs(newVCs);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");

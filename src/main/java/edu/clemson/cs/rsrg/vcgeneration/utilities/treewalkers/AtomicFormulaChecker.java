@@ -10,9 +10,8 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.treewalkers;
+package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
-import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
@@ -24,7 +23,7 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
  * This visitor logic is implemented as a {@link TreeWalkerVisitor}.</p>
  *
  * @author Yu-Shan Sun
- * @version 3.0
+ * @version 1.0
  */
 public class AtomicFormulaChecker extends TreeWalkerVisitor {
 
@@ -53,20 +52,6 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     // ===========================================================
     // Visitor Methods
     // ===========================================================
-
-    /**
-     * <p>Code that gets executed before visiting any {@link ResolveConceptualElement}.</p>
-     *
-     * @param e Any element that inherits from {@link ResolveConceptualElement}.
-     */
-    @Override
-    public final void preAny(ResolveConceptualElement e) {
-        if (!(e instanceof Exp)) {
-            throw new MiscErrorException("Found a "
-                    + e.getClass().getSimpleName() + " in a Sequent!",
-                    new RuntimeException());
-        }
-    }
 
     // -----------------------------------------------------------
     // Math Expression-Related
