@@ -707,6 +707,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                             statement.getLocation());
                 }
             }
+            else if (statement instanceof PresumeStmt) {
+                // Generate a new presume rule application.
+                ruleApplication =
+                        new PresumeStmtRule((PresumeStmt) statement,
+                                assertiveCodeBlock, mySTGroup, blockModel);
+            }
             else if (statement instanceof SwapStmt) {
                 // Generate a new swap rule application.
                 ruleApplication =
@@ -745,9 +751,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             else if (lastStatement instanceof IfStmt) {
                 applyIfStmtRule((IfStmt) statement);
-            }
-            else if (lastStatement instanceof PresumeStmt) {
-                applyPresumeStmtRule((PresumeStmt) statement);
             }
             else if (lastStatement instanceof WhileStmt) {
                 applyWhileStmtRule((WhileStmt) statement);
