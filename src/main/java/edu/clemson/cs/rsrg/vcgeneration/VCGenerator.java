@@ -58,10 +58,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.AssumeStmtRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.CallStmtRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.ConfirmStmtRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.RememberStmtRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
@@ -637,9 +634,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>Applies each of the proof rules. This <code>AssertiveCode</code> will be
-     * stored for later use and therefore should be considered immutable after
-     * a call to this method.</p>
+     * <p>Applies each of the statement proof rules. After this call, we are
+     * done processing {@code assertiveCodeBlock}.</p>
+     *
+     * @param assertiveCodeBlock An assertive block that we are trying apply
+     *                           the proof rules to the various
+     *                           {@link Statement Statements}.
      */
     private void applyStatementRules(AssertiveCodeBlock assertiveCodeBlock) {
         // Obtain the assertive code block model
@@ -653,7 +653,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Generate one of the statement proof rule applications
             ProofRuleApplication ruleApplication;
             if (statement instanceof AssumeStmt) {
-                // Apply the assume rule.
+                // Generate a new assume rule application.
                 ruleApplication =
                         new AssumeStmtRule((AssumeStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
@@ -677,13 +677,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                 List<ProgramExp> callArgs = functionExp.getArguments();
                 List<Exp> replaceArgs = modifyArgumentList(callArgs);
 
-                // Apply the call rule.
+                // Generate a new call rule application.
                 ruleApplication =
                         new CallStmtRule(callStmt, opEntry, replaceArgs,
                                 myCurrentModuleScope, assertiveCodeBlock, mySTGroup, blockModel);
             }
             else if (statement instanceof ConfirmStmt) {
-                // Apply the confirm rule.
+                // Generate a new confirm rule application.
                 ruleApplication =
                         new ConfirmStmtRule((ConfirmStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
@@ -697,7 +697,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
-                    // Apply the remember rule.
+                    // Generate a new remember rule application.
                     ruleApplication =
                             new RememberStmtRule(assertiveCodeBlock, mySTGroup, blockModel);
                 }
@@ -706,6 +706,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                             "[VCGenerator] Forget statements are not handled.",
                             statement.getLocation());
                 }
+            }
+            else if (statement instanceof SwapStmt) {
+                // Generate a new swap rule application.
+                ruleApplication =
+                        new SwapStmtRule((SwapStmt) statement, myCurrentModuleScope,
+                                assertiveCodeBlock, mySTGroup, blockModel);
             }
             else {
                 throw new SourceErrorException(
@@ -742,9 +748,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             else if (lastStatement instanceof PresumeStmt) {
                 applyPresumeStmtRule((PresumeStmt) statement);
-            }
-            else if (lastStatement instanceof SwapStmt) {
-                applySwapStmtRule((SwapStmt) statement);
             }
             else if (lastStatement instanceof WhileStmt) {
                 applyWhileStmtRule((WhileStmt) statement);

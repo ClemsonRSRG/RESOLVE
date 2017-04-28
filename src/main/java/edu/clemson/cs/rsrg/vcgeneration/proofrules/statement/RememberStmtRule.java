@@ -113,12 +113,12 @@ public class RememberStmtRule extends AbstractProofRuleApplication
         List<Exp> newAntecedents = new ArrayList<>();
         List<Exp> newConsequents = new ArrayList<>();
 
-        for (Exp antencedent : s.getAntecedents()) {
-            if (antencedent instanceof MathExp) {
-                newAntecedents.add(((MathExp) antencedent).remember());
+        for (Exp antecedent : s.getAntecedents()) {
+            if (antecedent instanceof MathExp) {
+                newAntecedents.add(((MathExp) antecedent).remember());
             }
             else {
-                Utilities.expNotHandled(antencedent, antencedent.getLocation());
+                Utilities.expNotHandled(antecedent, antecedent.getLocation());
             }
         }
 

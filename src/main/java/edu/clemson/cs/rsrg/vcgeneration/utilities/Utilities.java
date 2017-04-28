@@ -872,6 +872,36 @@ public class Utilities {
     }
 
     /**
+     * <p>Given a {@link ProgramVariableExp}, return the associated
+     * {@link PosSymbol} name.</p>
+     *
+     * @param exp A program variable expression.
+     *
+     * @return A {@link PosSymbol} name.
+     */
+    public static PosSymbol getVarName(ProgramVariableExp exp) {
+        // Return value
+        PosSymbol name = null;
+
+        // Program variable expression
+        if (exp instanceof ProgramVariableNameExp) {
+            name = ((ProgramVariableNameExp) exp).getName();
+        }
+        // Program dotted expression.
+        else if (exp instanceof ProgramVariableDotExp) {
+            List<ProgramVariableExp> segments =
+                    ((ProgramVariableDotExp) exp).getSegments();
+            name = getVarName(segments.get(segments.size() - 1));
+        }
+        // Can't handle any other kind of expressions
+        else {
+            expNotHandled(exp, exp.getLocation());
+        }
+
+        return name;
+    }
+
+    /**
      * <p>Given the name of an operation check to see if it is a
      * local operation</p>
      *
