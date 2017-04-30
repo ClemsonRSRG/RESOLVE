@@ -145,7 +145,7 @@ public class Populator extends TreeWalkerVisitor {
      *
      * <p>If you need to distinguish if you're in the middle of an
      * operation/{@link OperationProcedureDec} or a procedure, check
-     * myCorrespondingOperation.</p>
+     * {@code myCorrespondingOperation}.</p>
      */
     private List<ProgramParameterEntry> myCurrentParameters;
 
@@ -2692,6 +2692,13 @@ public class Populator extends TreeWalkerVisitor {
             OperationEntry op =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new OperationQuery(qualifier, name, argTypes));
+
+            // YS: Sanity check preserves/evaluates mode.
+            ValidFunctionCallChecker checker =
+                    new ValidFunctionCallChecker(exp, op, myCurrentParameters);
+            checker.areValidExpArgs();
+
+            // YS: Set the types only if it passes the sanity checker.
             exp.setProgramType(op.getReturnType());
             exp.setMathType(op.getReturnType().toMath());
 
