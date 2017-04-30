@@ -53,7 +53,7 @@ public class ValidOperationDeclChecker {
      *
      * <p>If you need to distinguish if you're in the middle of an
      * operation/{@link OperationProcedureDec} or a procedure, check
-     * myCorrespondingOperation.</p>
+     * {@code myCorrespondingOperation}.</p>
      */
     private final List<ProgramParameterEntry> myCurrentParameters;
 
@@ -70,7 +70,7 @@ public class ValidOperationDeclChecker {
      *
      * @param location Location that generated this checker.
      * @param operationEntry The associated operation entry.
-     * @param parameterEntries The current procedure's operation entry.
+     * @param parameterEntries The current list of parameter entries.
      */
     public ValidOperationDeclChecker(Location location,
             OperationEntry operationEntry,
