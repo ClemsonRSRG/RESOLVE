@@ -101,8 +101,9 @@ public class ValidFunctionCallChecker {
                     throw new SourceErrorException(
                             "An EVALUATES mode can only accept program"
                                     + " character/function/integer/string expressions.\n"
-                                    + "Found a program expression: " + argExp +
-                                    " with type: " + argExp.getProgramType(), myLocation);
+                                    + "Found a program expression: " + argExp
+                                    + " with type: " + argExp.getProgramType(),
+                            myLocation);
                 }
             }
         }

@@ -2698,6 +2698,7 @@ public class Populator extends TreeWalkerVisitor {
                     new ValidFunctionCallChecker(exp, op, myCurrentParameters);
             checker.areValidExpArgs();
 
+            // YS: Set the types only if it passes the sanity checker.
             exp.setProgramType(op.getReturnType());
             exp.setMathType(op.getReturnType().toMath());
 
