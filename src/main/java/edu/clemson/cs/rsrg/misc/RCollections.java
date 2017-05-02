@@ -32,7 +32,9 @@ public class RCollections {
      * <p>This method will return an <code>ArrayList</code> if given one, and
      * a <code>LinkedList</code> if given one, but otherwise the specific 
      * subclass of list returned is undefined.</p>
-     * 
+     *
+     * @param <T> Type of the original list.
+     * @param <R> Type for the return list.
      * @param original The original list.
      * @param mapping A mapping to be used to render the new list.
      * 

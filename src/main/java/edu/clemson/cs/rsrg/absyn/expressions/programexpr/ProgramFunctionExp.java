@@ -51,6 +51,7 @@ public class ProgramFunctionExp extends ProgramExp {
      * @param l A {@link Location} representation object.
      * @param qual A {@link PosSymbol} representing the expression's qualifier.
      * @param name A {@link PosSymbol} representing the expression's name.
+     * @param arguments List of arguments for this function call.
      */
     public ProgramFunctionExp(Location l, PosSymbol qual, PosSymbol name,
             List<ProgramExp> arguments) {

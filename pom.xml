@@ -8,23 +8,28 @@
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
-    <description>The RESOLVE compiler.</description>
+    <description>The RESOLVE Verifying Compiler.</description>
     <inceptionYear>2002</inceptionYear>
     <organization>
-        <name>Reusable Software Research Group</name>
-        <url>http://www.cs.clemson.edu/resolve/</url>
+        <name>RESOLVE Software Research Group (RSRG)</name>
+        <url>https://www.cs.clemson.edu/resolve/</url>
     </organization>
 
     <developers>
-
         <developer>
-            <name>Yu-Shan Sun</name>
-            <email>yushans@g.clemson.edu</email>
+            <name>Murali Sitaraman</name>
+            <email>murali@clemson.edu</email>
             <roles>
                 <role>Project lead - RESOLVE</role>
             </roles>
         </developer>
-
+        <developer>
+            <name>Yu-Shan Sun</name>
+            <email>yushans@g.clemson.edu</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
         <developer>
             <name>Dan Welch</name>
             <email>dtw.welch@gmail.com</email>
@@ -32,22 +37,20 @@
                 <role>Developer</role>
             </roles>
         </developer>
-
         <developer>
             <name>Blair Durkee</name>
-            <email>bdurkee@clemson.edu</email>
+            <email>bdurkee@g.clemson.edu</email>
             <roles>
                 <role>Developer</role>
             </roles>
         </developer>
-
         <developer>
             <name>Mike Kabanni</name>
+            <email>nkabban@g.clemson.edu</email>
             <roles>
                 <role>Developer</role>
             </roles>
         </developer>
-
     </developers>
 
     <licenses>
@@ -59,6 +62,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- License related information -->
         <license.url>src/resources/LICENSE-Header.txt</license.url>
     </properties>
@@ -77,14 +81,25 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.10</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
-            <artifactId>antlr4-maven-plugin</artifactId>
-            <version>4.6</version>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+            <version>4.0.8</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
@@ -97,30 +112,14 @@
             <version>1.0.1</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr-runtime</artifactId>
-            <version>3.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.clemson.cs.resolve</groupId>
-            <artifactId>git-plugin</artifactId>
-            <version>0.0.1-alpha3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>ST4</artifactId>
-            <version>4.0.8</version>
-        </dependency>
-        <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20140107</version>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
         </dependency>
     </dependencies>
 
@@ -165,7 +164,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.6</version>
+                <version>4.7</version>
                 <configuration>
                     <sourceDirectory>src/main/antlr4</sourceDirectory>
                 </configuration>
@@ -206,6 +205,7 @@
                         <exclude>*.yml</exclude>
                         <exclude>LICENSE.txt</exclude>
                         <exclude>bin/**</exclude>
+                        <exclude>docs/**</exclude>
                         <exclude>src/main/antlr3/**</exclude>
                         <exclude>src/main/antlr4/**</exclude>
                         <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
@@ -247,16 +247,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin to generate Javadoc.
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
-                <configuration>
-                    <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
-                    <sourcepath>${project.basedir}/src/main/java/edu/clemson/cs/rsrg</sourcepath>
-                </configuration>
-            </plugin> -->
             <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -301,5 +291,22 @@
             </testResource>
         </testResources>
     </build>
+
+    <reporting>
+        <plugins>
+            <!-- Plugin to generate Javadoc. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <configuration>
+                    <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
+                    <excludePackageNames>edu.clemson.cs.r2jt</excludePackageNames>
+                    <doctitle>API for ${project.name} ${project.version}</doctitle>
+                    <windowtitle>${project.name}</windowtitle>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>

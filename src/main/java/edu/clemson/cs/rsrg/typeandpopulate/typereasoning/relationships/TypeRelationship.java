@@ -124,7 +124,8 @@ public class TypeRelationship {
      *
      * @return The substituted expression that got the mathematical type to bind to.
      *
-     * @throws NoSolutionException
+     * @throws NoSolutionException No solution between what we are trying
+     * to find the valid type conditions to.
      */
     public final Exp getValidTypeConditionsTo(MTType value,
             Map<String, MTType> typeBindings) throws NoSolutionException {
@@ -196,7 +197,8 @@ public class TypeRelationship {
      *
      * @return The substituted expression that got the value bound to.
      *
-     * @throws NoSolutionException
+     * @throws NoSolutionException No solution between what we are trying
+     * to find the valid type conditions to.
      */
     public final Exp getValidTypeConditionsTo(Exp value,
             Map<String, MTType> typeBindings) throws NoSolutionException {

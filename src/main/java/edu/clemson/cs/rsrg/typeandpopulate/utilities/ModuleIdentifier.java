@@ -138,6 +138,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     /**
      * <p>Returns full qualified symbol in string format.</p>
      *
+     * @param symbol Symbol to be qualified.
+     *
      * @return Qualified symbol as a string.
      */
     public final String fullyQualifiedRepresentation(String symbol) {

@@ -29,7 +29,7 @@ import java.util.Set;
 
 /**
  * <p>An <code>InstantiatedScope</code> decorates an existing
- * {@link Scope} such that calls to {@link #addMatches(TableSearcher, List, Set, Map, FacilityEntry, SearchContext)},
+ * {@link Scope} such that calls to {@code addMatches},
  * the search method to which all others defer, are augmented with an additional
  * set of generic instantiations and an instantiating facility.</p>
  *

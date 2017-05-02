@@ -53,14 +53,13 @@ public class WalkerCodeGenerator {
     /**
      * <p>Generates a tree walker.</p>
      *
-     * <p>Two optional arguments in the array:
+     * <p>Two optional arguments in the array:</p>
      * <ul>
      * <li>The desired name of the walker (default: {@code TreeWalkerVisitor})</li>
      * <li>The desired name of the stack walker (default: {@code TreeWalkerStackVisitor})</li>
      * <li>The input package directory (default: {@code edu/clemson/cs/rsrg/absyn}</li>
      * <li>The output package directory (default: {@code edu/clemson/cs/rsrg/treewalk})</li>
      * </ul>
-     * </p>
      *
      * @param args Arguments required to perform the tree walker
      *             generation process.

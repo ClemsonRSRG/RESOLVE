@@ -68,7 +68,7 @@ import java.util.NoSuchElementException;
  *     equivalent</em> to itself.</li>
  * <li><code>t1</code> is a syntactic subtype of <code>t2</code> if
  *     <code>BigUnion{unique_var_name_1 : MType,
- *     ... unique_var_name_n : MType}{t1}</code> (for some <code>n > 0</code>,
+ *     ... unique_var_name_n : MType}{t1}</code> (for some {@code n > 0},
  *     where each <code>unique_var_name</code> does not appear in
  *     <code>t1</code>) is a syntactic subtype of <code>t2</code>.</li>
  * <li><pre>
@@ -93,14 +93,14 @@ import java.util.NoSuchElementException;
  * of the <code>r</code>s and some restriction (to syntactic subtypes) of the
  * <code>R</code>s not associated with <code>r</code>s in the valuation subset
  * such that <code>r_type_valued_expression</code> becomes alpha-equivalent to
- * </code>t_type_valued_expression</code>.
+ * <code>t_type_valued_expression</code>.
  * </li>
+ * </ul>
  *
- * <p><strong>TODO:</strong> Currently we do not deal correctly with types
+ * <p><strong>Note:</strong> Currently we do not deal correctly with types
  * where the same quantified variable appears multiple times in the template,
  * e.g., "<code>BigUnion{t : MType}{t union t}</code>".  This is coded
  * defensively and will throw a <code>RuntimeException</code> if it occurs.</p>
- * </ul>
  *
  * @version 2.0
  */

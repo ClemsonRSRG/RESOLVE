@@ -36,10 +36,13 @@ import java.util.*;
  * 		<li>Search any facilities declared in the local scope.</li>
  * 		<li>Search any imports in a depth-first manner, skipping any
  * 		    already-searched scopes.</li>
- * 		<ul>
- * 			<li>For each searched import, search any facilities declared
- * 			    inside.</li>
- * 		</ul>
+ * 		<li>
+ * 		    <ul>
+ * 			    <li>For each searched import, search any facilities declared
+ * 			        inside.</li>
+ * 		    </ul>
+ * 		</li>
+ *
  * </ol>
  *
  * <p>Instance of this class can be parameterized to search only direct imports

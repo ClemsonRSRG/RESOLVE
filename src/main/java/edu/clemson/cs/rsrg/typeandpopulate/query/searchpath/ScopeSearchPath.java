@@ -46,6 +46,7 @@ public interface ScopeSearchPath {
      * match is found and <code>searcher</code> expects no more than one match,
      * throws a {@link DuplicateSymbolException}.</p>
      *
+     * @param <E> A specific {@link SymbolTableEntry} we are searching for.
      * @param searcher A <code>TableSearcher</code> to apply to each scope along
      *                 the search path.
      * @param source The current scope from which the search was spawned.
