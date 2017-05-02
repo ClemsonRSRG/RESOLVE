@@ -363,11 +363,11 @@ public class MTFunction extends MTAbstract<MTFunction> {
      * top level parameters "filled in".</p>
      *
      * <p>So, for example, if this function type were
-     * <code>(T : MType, S : Str(R : MType), t : T) -> (T * S)</code> and you
+     * {@code (T : MType, S : Str(R : MType), t : T) -> (T * S)} and you
      * were to provide the parameters
-     * <code>(Z, {true, false, false}, false)</code>, this method would return
+     * {@code (Z, {true, false, false}, false)}, this method would return
      * the function type
-     * <code>(T : MType, S : Str(R : MType), t : Z) -> (Z * S)</code>. Note that
+     * {@code (T : MType, S : Str(R : MType), t : Z) -> (Z * S)}. Note that
      * the parameters in this example <em>do not</em> type against the given
      * function type, but that is irrelevant to this method.  The unbound
      * type variable <code>T</code> would be matched to <code>Z</code> and

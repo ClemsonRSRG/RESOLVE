@@ -195,6 +195,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      * expression.</p>
      *
      * @param var A variable expression to be checked.
+     *
+     * @return {@code true} if it contains this free var,
+     * {@code false} otherwise.
      */
     public final boolean containsFreeVar(Exp var) {
         boolean contains = false;
@@ -289,7 +292,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
 
     /**
      * <p>Checks if we have {@link Statement Statements} that we still
-     * need to apply proof rules to./p>
+     * need to apply proof rules to.</p>
      *
      * @return {@code true} if we have more {@link Statement Statements}
      * that needs to be processed, {@code false} otherwise.

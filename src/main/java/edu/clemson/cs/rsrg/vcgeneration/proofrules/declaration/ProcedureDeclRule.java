@@ -80,10 +80,11 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      * @param loc The location that generated this rule.
      * @param procVarDecs The {@link VarDec VarDecs} inside the
      *                    {@code procedure}.
-     * @param procStmts The {@link Statement Statements} inside the
-     *                  {@code procedure}.
      * @param procVarFinalItems The local variable declaration's
      *                          {@code finalization} specification items.
+     * @param procStmts The {@link Statement Statements} inside the
+     *                  {@code procedure}.
+     * @param procEnsuresExp The {@code procedure's} ensures expression.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param stGroup The string template group we will be using.

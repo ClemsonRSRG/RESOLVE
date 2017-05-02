@@ -186,7 +186,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates and saves the complete
      * module declaration.</p>
      *
@@ -204,7 +204,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
@@ -228,7 +228,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a {@code Precis}
      * module declaration.</p>
      *
@@ -250,7 +250,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated precis item.</p>
      *
      * @param ctx Precis item node in ANTLR4 AST.
@@ -266,7 +266,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
@@ -297,7 +297,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a {@code Facility}
      * module declaration.</p>
      *
@@ -366,7 +366,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated facility item.</p>
      *
      * @param ctx Facility item node in ANTLR4 AST.
@@ -382,7 +382,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a short facility
      * module declaration.</p>
      *
@@ -406,7 +406,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
@@ -430,7 +430,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a {@code Concept}
      * module declaration.</p>
      *
@@ -514,7 +514,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated concept item.</p>
      *
      * @param ctx Concept item node in ANTLR4 AST.
@@ -530,7 +530,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
@@ -562,7 +562,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a {@code Realization}
      * module declaration for an {@code Concept} module.</p>
      *
@@ -645,7 +645,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated realization item.</p>
      *
      * @param ctx Concept implementation item node in ANTLR4 AST.
@@ -661,7 +661,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
@@ -686,7 +686,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of an {@code Enhancement}
      * module declaration.</p>
      *
@@ -745,7 +745,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated enhancement item.</p>
      *
      * @param ctx Enhancement item node in ANTLR4 AST.
@@ -761,7 +761,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
@@ -790,7 +790,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a {@code Realization}
      * module declaration for an {@code Enhancement} module.</p>
      *
@@ -859,7 +859,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated realization item.</p>
      *
      * @param ctx Implementation item node in ANTLR4 AST.
@@ -875,7 +875,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
@@ -900,7 +900,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of an {@code Profile}
      * module declaration for an {@code Concept} module.</p>
      *
@@ -961,7 +961,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated item for concept
      * performance profiles.</p>
      *
@@ -979,7 +979,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if the {@link ResolveFile} name matches the
      * open and close names given in the file.</p>
      *
@@ -1004,7 +1004,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of an {@code Profile}
      * module declaration for an {@code Enhancement} module.</p>
      *
@@ -1069,7 +1069,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated item for enhancement
      * performance profiles.</p>
      *
@@ -1087,7 +1087,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation for an import
      * module name.</p>
      *
@@ -1107,7 +1107,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a module parameter declaration.</p>
      *
      * @param ctx Module parameter declaration node in ANTLR4 AST.
@@ -1138,7 +1138,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method creates a temporary list to store all the
      * temporary definition members</p>
      *
@@ -1152,7 +1152,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a definition parameter declaration.</p>
      *
      * @param ctx Definition parameter declaration node in ANTLR4 AST.
@@ -1171,7 +1171,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a concept type parameter declaration.</p>
      *
      * @param ctx Type parameter declaration node in ANTLR4 AST.
@@ -1183,7 +1183,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if this parameter declaration has a programming array type.
      * If yes, then this is an error, because there is no way the caller can pass
      * a variable of the same type to the calling statement.</p>
@@ -1203,7 +1203,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a constant parameter declaration
      * for each of the variables in the variable group.</p>
      *
@@ -1231,7 +1231,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates an operation parameter declaration.</p>
      *
      * @param ctx Operation parameter declaration node in ANTLR4 AST.
@@ -1244,7 +1244,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a realization parameter declaration.</p>
      *
      * @param ctx Concept implementation parameter declaration node in ANTLR4 AST.
@@ -1262,7 +1262,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if this parameter declaration has a programming array type.
      * If yes, then this is an error, because there is no way the caller can pass
      * a variable of the same type to the calling statement.</p>
@@ -1281,7 +1281,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the parameter declaration(s).</p>
      *
      * @param ctx Parameter declaration node in ANTLR4 AST.
@@ -1311,7 +1311,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new program named type.</p>
      *
      * @param ctx Program named type node in ANTLR4 AST.
@@ -1329,7 +1329,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new program record type.</p>
      *
      * @param ctx Program record type node in ANTLR4 AST.
@@ -1373,7 +1373,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a type model
      * declaration.</p>
      *
@@ -1436,7 +1436,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -1452,7 +1452,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a type realization
      * declaration.</p>
      *
@@ -1548,7 +1548,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -1564,7 +1564,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a facility type realization
      * declaration.</p>
      *
@@ -1659,7 +1659,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a type model
      * declaration for performance profiles..</p>
      *
@@ -1707,7 +1707,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a shared state
      * declaration.</p>
      *
@@ -1769,7 +1769,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -1784,7 +1784,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a shared state realization
      * declaration.</p>
      *
@@ -1869,7 +1869,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -1885,7 +1885,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a facility shared state realization
      * declaration.</p>
      *
@@ -1972,7 +1972,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new definition variable for a type model.</p>
      *
      * @param ctx Definition variable node in ANTLR4 AST.
@@ -1998,7 +1998,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a type model
      * initialization item.</p>
      *
@@ -2027,7 +2027,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a type model
      * finalization item.</p>
      *
@@ -2056,7 +2056,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -2072,7 +2072,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a type realization
      * initialization item.</p>
      *
@@ -2095,7 +2095,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -2111,7 +2111,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a type realization
      * finalization item.</p>
      *
@@ -2134,7 +2134,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -2150,7 +2150,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a facility type realization
      * initialization item.</p>
      *
@@ -2195,7 +2195,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -2211,7 +2211,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a facility type realization
      * finalization item.</p>
      *
@@ -2256,7 +2256,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a type model
      * initialization item for performance profiles.</p>
      *
@@ -2285,7 +2285,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a type model
      * finalization item for performance profiles.</p>
      *
@@ -2318,7 +2318,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -2333,7 +2333,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a procedure
      * declaration. Any syntactic sugar will be taken care of before we
      * are done processing this node.</p>
@@ -2381,7 +2381,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -2397,7 +2397,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a recursive procedure
      * declaration. Any syntactic sugar will be taken care of before we
      * are done processing this node.</p>
@@ -2448,7 +2448,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -2464,7 +2464,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for an operation procedure
      * declaration. Any syntactic sugar will be taken care of before we
      * are done processing this node.</p>
@@ -2499,7 +2499,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>We create a new object to store all the new array facilities
      * that can be created by the syntactic sugar conversions.</p>
      *
@@ -2515,7 +2515,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a recursive operation procedure
      * declaration. Any syntactic sugar will be taken care of before we
      * are done processing this node.</p>
@@ -2555,7 +2555,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for an operation
      * declaration.</p>
      *
@@ -2608,7 +2608,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for an operation
      * declaration for performance profiles.</p>
      *
@@ -2645,7 +2645,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a facility
      * declaration.</p>
      *
@@ -2709,7 +2709,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for a concept
      * enhancement declaration.</p>
      *
@@ -2735,7 +2735,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new representation for an
      * enhancement/enhancement realization pair declaration.</p>
      *
@@ -2786,7 +2786,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Since programming array expressions are simply syntactic sugar
      * that gets converted to call statements, they are not allowed to be
      * passed as module argument. This method stores a boolean that indicates
@@ -2801,7 +2801,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a module
      * argument.</p>
      *
@@ -2820,7 +2820,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores all math variable declarations.</p>
      *
      * @param ctx Math variable declaration groups node in ANTLR4 AST.
@@ -2838,7 +2838,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a math variable declaration.</p>
      *
      * @param ctx Math variable declaration node in ANTLR4 AST.
@@ -2852,7 +2852,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a programming variable declaration.</p>
      *
      * @param ctx Variable declaration node in ANTLR4 AST.
@@ -2896,7 +2896,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the statement representation
      * generated by its child rules.</p>
      *
@@ -2909,7 +2909,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a function assignment statement.</p>
      *
      * @param ctx Assign statement node in ANTLR4 AST.
@@ -2923,7 +2923,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a swap statement.</p>
      *
      * @param ctx Swap statement node in ANTLR4 AST.
@@ -2937,7 +2937,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a call statement.</p>
      *
      * @param ctx Call statement node in ANTLR4 AST.
@@ -2950,7 +2950,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a presume statement.</p>
      *
      * @param ctx Presume statement node in ANTLR4 AST.
@@ -2963,7 +2963,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a confirm statement with {@code false}
      * as its simplify flag.</p>
      *
@@ -2977,7 +2977,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates either a {@code Remember} or a {@code Forget}
      * statement.</p>
      *
@@ -3002,7 +3002,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates an if statement.</p>
      *
      * @param ctx If statement node in ANTLR4 AST.
@@ -3035,7 +3035,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a while statement.</p>
      *
      * @param ctx While statement node in ANTLR4 AST.
@@ -3086,7 +3086,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a math
      * type theorem declaration.</p>
      *
@@ -3116,7 +3116,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a representation of a math assertion
      * declaration.</p>
      *
@@ -3177,7 +3177,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a type definition declaration.</p>
      *
      * @param ctx Type definition declaration node in ANTLR4 AST.
@@ -3195,7 +3195,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method creates a temporary list to store all the
      * temporary definition members</p>
      *
@@ -3208,7 +3208,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a defines declaration.</p>
      *
      * @param ctx Defines declaration node in ANTLR4 AST.
@@ -3226,7 +3226,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method creates a temporary list to store all the
      * temporary definition members</p>
      *
@@ -3239,7 +3239,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the definition representation
      * generated by its child rules.</p>
      *
@@ -3253,7 +3253,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a categorical definition declaration.</p>
      *
      * @param ctx Categorical definition declaration node in ANTLR4 AST.
@@ -3276,7 +3276,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates an implicit definition declaration.</p>
      *
      * @param ctx Implicit definition declaration node in ANTLR4 AST.
@@ -3296,7 +3296,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates an inductive definition declaration.</p>
      *
      * @param ctx Inductive definition declaration node in ANTLR4 AST.
@@ -3317,7 +3317,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a standard definition declaration.</p>
      *
      * @param ctx Standard definition declaration node in ANTLR4 AST.
@@ -3347,7 +3347,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a temporary definition member object that stores
      * all the relevant information needed by the parent rule.</p>
      *
@@ -3373,7 +3373,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a temporary definition member object that stores
      * all the relevant information needed by the parent rule.</p>
      *
@@ -3392,7 +3392,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a temporary definition member object that stores
      * all the relevant information needed by the parent rule.</p>
      *
@@ -3438,7 +3438,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new affects clause.</p>
      *
      * @param ctx Affects clause node in ANTLR4 AST.
@@ -3457,7 +3457,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new requires clause.</p>
      *
      * @param ctx Requires clause node in ANTLR4 AST.
@@ -3470,7 +3470,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new ensures clause.</p>
      *
      * @param ctx Ensures clause node in ANTLR4 AST.
@@ -3483,7 +3483,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new ensures clause.</p>
      *
      * @param ctx Constraint clause node in ANTLR4 AST.
@@ -3496,7 +3496,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new maintaining clause.</p>
      *
      * @param ctx Maintaining clause node in ANTLR4 AST.
@@ -3509,7 +3509,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new decreasing clause.</p>
      *
      * @param ctx Decreasing clause node in ANTLR4 AST.
@@ -3529,7 +3529,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new correspondence clause.</p>
      *
      * @param ctx Correspondence clause node in ANTLR4 AST.
@@ -3543,7 +3543,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new convention clause.</p>
      *
      * @param ctx Convention clause node in ANTLR4 AST.
@@ -3556,7 +3556,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new duration clause.</p>
      *
      * @param ctx Duration clause node in ANTLR4 AST.
@@ -3576,7 +3576,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new manipulation displacement clause.</p>
      *
      * @param ctx Manipulation displacement clause node in ANTLR4 AST.
@@ -3601,7 +3601,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new arbitrary type with
      * the math type expression generated by its child rules.</p>
      *
@@ -3619,7 +3619,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math expression representation
      * generated by its child rules.</p>
      *
@@ -3632,7 +3632,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates an iterated math expression.</p>
      *
@@ -3670,7 +3670,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a quantified math expression.</p>
      *
@@ -3718,7 +3718,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math implies expression.</p>
      *
@@ -3755,7 +3755,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math infix expression
      * that contains all the logical expressions.</p>
@@ -3803,7 +3803,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules, generates a new math between expression
      * or generates a new math infix expression with the specified
@@ -3863,7 +3863,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math infix expression
      * with a range operator.</p>
@@ -3892,7 +3892,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math type assertion expression.</p>
      *
@@ -3920,7 +3920,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math function type expression.</p>
      *
@@ -3948,7 +3948,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math adding expression.</p>
      *
@@ -3984,7 +3984,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math multiplication expression.</p>
      *
@@ -4021,7 +4021,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math exponential expression.</p>
      *
@@ -4049,7 +4049,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expression representation
      * generated by its child rules or generates a new math prefix expression.</p>
      *
@@ -4080,7 +4080,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a math expression representation
      * generated by its child rules.</p>
      *
@@ -4093,7 +4093,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the mathematical alternative expression.</p>
      *
      * @param ctx Math alternative expression node in ANTLR4 AST.
@@ -4112,7 +4112,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the different alternatives for the
      * mathematical alternative expression.</p>
      *
@@ -4132,7 +4132,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math boolean literal.</p>
      *
      * @param ctx Math boolean literal node in ANTLR4 AST.
@@ -4146,7 +4146,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math integer literal.</p>
      *
      * @param ctx Math integer literal node in ANTLR4 AST.
@@ -4164,7 +4164,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math real literal.</p>
      *
      * @param ctx Math real literal node in ANTLR4 AST.
@@ -4177,7 +4177,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math character literal.</p>
      *
      * @param ctx Math character literal node in ANTLR4 AST.
@@ -4190,7 +4190,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math string literal.</p>
      *
      * @param ctx Math string literal node in ANTLR4 AST.
@@ -4203,7 +4203,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method either stores the math expressions representation
      * generated by its child rules or generates a new math dotted expression.</p>
      *
@@ -4235,7 +4235,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a math function expression or variable expression
      * representation generated by its child rules.</p>
      *
@@ -4248,7 +4248,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math old expression representation.</p>
      *
      * @param ctx Math old expression node in ANTLR4 AST.
@@ -4261,7 +4261,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math function expression representation.</p>
      *
      * @param ctx Math function expression node in ANTLR4 AST.
@@ -4293,7 +4293,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math variable expression
      * representation generated by its child rules.</p>
      *
@@ -4306,7 +4306,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math variable name expression
      * representation.</p>
      *
@@ -4325,7 +4325,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math operator name expression representation.</p>
      *
      * @param ctx Math operator name expression node in ANTLR4 AST.
@@ -4351,7 +4351,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math outfix expression
      * representation generated by its child rules.</p>
      *
@@ -4387,7 +4387,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math set builder expression
      * representation generated by its child rules.</p>
      *
@@ -4406,7 +4406,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math set collection expression
      * representation generated by its child rules.</p>
      *
@@ -4426,7 +4426,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math tuple expression representation
      * generated by its child rules.</p>
      *
@@ -4444,7 +4444,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math lambda expression representation
      * generated by its child rules.</p>
      *
@@ -4471,7 +4471,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math Cartesian product expression
      * representation generated by its child rules.</p>
      *
@@ -4497,7 +4497,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the nested math expression representation
      * generated by its child rules.</p>
      *
@@ -4510,7 +4510,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the math expression representing the where clause
      * generated by its child rules.</p>
      *
@@ -4527,7 +4527,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program application expression.
      * This is really a syntactic sugar for the different function
      * calls, so all we are returning are program function expressions.</p>
@@ -4597,7 +4597,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program exponent expressions representation
      * generated by its child rules.</p>
      *
@@ -4611,7 +4611,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program exponential expressions.
      * This is really a syntactic sugar for the different function
      * calls, so all we are returning are program function expressions.</p>
@@ -4641,7 +4641,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program unary expressions.
      * This is really a syntactic sugar for the different function
      * calls, so all we are returning are program function expressions.</p>
@@ -4670,7 +4670,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program primary expression representation
      * generated by its child rules.</p>
      *
@@ -4683,7 +4683,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program literal expression representation
      * generated by its child rules.</p>
      *
@@ -4696,7 +4696,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program function expression representation
      * generated by its child rules.</p>
      *
@@ -4709,7 +4709,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program variable expression representation
      * generated by its child rules.</p>
      *
@@ -4722,7 +4722,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program nested expression representation
      * generated by its child rules.</p>
      *
@@ -4735,7 +4735,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the program integer literal.</p>
      *
      * @param ctx Program integer literal node in ANTLR4 AST.
@@ -4749,7 +4749,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the program character literal.</p>
      *
      * @param ctx Program character literal node in ANTLR4 AST.
@@ -4763,7 +4763,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the program string literal.</p>
      *
      * @param ctx Program string literal node in ANTLR4 AST.
@@ -4778,7 +4778,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the program function expression representation.</p>
      *
      * @param ctx Program function expression node in ANTLR4 AST.
@@ -4803,7 +4803,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a program variable expression representation
      * generated by its child rules.</p>
      *
@@ -4816,7 +4816,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method generates a new program variable dotted
      * expression.</p>
      *
@@ -4836,7 +4836,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the generated temporary object to represent a program variable array expression
      * as the last element of this dotted expression. The rule that contains this expression should convert
      * it to the appropriate function call.</p>
@@ -4861,7 +4861,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>Checks to see if this expression is part of a module argument.
      * If yes, then this is an error, because we can't convert it to the
      * appropriate function call.</p>
@@ -4879,7 +4879,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores a temporary object to represent a program variable array expression.
      * The rule that contains this expression should convert it to the appropriate function
      * call.</p>
@@ -4895,7 +4895,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br>
      * <p>This method stores the program variable name expression representation.</p>
      *
      * @param ctx Program variable name expression node in ANTLR4 AST.

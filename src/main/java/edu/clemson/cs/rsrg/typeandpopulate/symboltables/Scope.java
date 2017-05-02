@@ -77,6 +77,7 @@ public interface Scope {
      * <p>Regardless of how this method terminates, any searched scopes will be
      * added to <code>searchedScopes</code>.</p>
      *
+     * @param <E> A specific {@link SymbolTableEntry} we are adding matches for.
      * @param searcher The searcher to be used to match symbol table entries.
      * @param matches A non-<code>null</code> accumulator of matches.
      * @param searchedScopes A set of already-searched scopes.
@@ -90,6 +91,7 @@ public interface Scope {
      *            scope.  If this parameter is <code>null</code> then
      *            <code>genericInstantiations.isEmpty() == true</code>, but the
      *            reverse is not necessarily the case.
+     * @param l A searching context.
      *
      * @return <code>true</code> if <code>matches</code> now represents a
      *         final list of search results; i.e., no further scopes
@@ -121,7 +123,9 @@ public interface Scope {
      * and returns a new list rather than requiring an accumulator and starts
      * with an empty set of searched scopes and instantiations.</p>
      *
+     * @param <E> A specific {@link SymbolTableEntry} we are finding matches for.
      * @param searcher The searcher to be used to match symbol table entries.
+     * @param l A searching context.
      *
      * @return A list of all symbols that match.
      */
@@ -133,6 +137,7 @@ public interface Scope {
      * as the source scope of the search, i.e. the scope that is the context
      * from which the search was triggered.</p>
      *
+     * @param <E> A specific {@link SymbolTableEntry} we are querying for matches.
      * @param query The query to use.
      *
      * @return A list of all symbols matching the given query.
@@ -149,6 +154,7 @@ public interface Scope {
      * {@link DuplicateSymbolException}, then this method will throw
      * a <code>DuplicateSymbolException</code>.</p>
      *
+     * @param <E> A specific {@link SymbolTableEntry} we are querying for matches.
      * @param query The query to use.
      *
      * @return The single symbol that is matched.

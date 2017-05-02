@@ -56,9 +56,11 @@ public interface ModuleScope extends Scope {
     ModuleIdentifier getModuleIdentifier();
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</code> the module who's scope
+     * <p>Returns <code>true</code> <strong>iff</strong> the module who's scope
      * is represented by this <code>ModuleScope</code> imports the given
      * module. Note that, by definition, all modules import themselves.</p>
+     *
+     * @param i A {@link ModuleIdentifier}.
      *
      * @return The boolean result.
      */

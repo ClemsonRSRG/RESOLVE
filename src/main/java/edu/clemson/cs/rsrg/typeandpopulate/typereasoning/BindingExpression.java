@@ -73,8 +73,8 @@ public class BindingExpression {
      *
      * @return A map containing all the expressions we bound.
      *
-     * @throws TypeMismatchException
-     * @throws BindingException
+     * @throws TypeMismatchException A type mismatch between what we are trying to bind.
+     * @throws BindingException Some error occurred during the binding process.
      */
     public Map<String, Exp> bindTo(Exp expr, Map<String, MTType> typeBindings)
             throws TypeMismatchException, BindingException {

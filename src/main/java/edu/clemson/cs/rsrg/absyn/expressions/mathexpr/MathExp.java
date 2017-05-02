@@ -63,6 +63,7 @@ public abstract class MathExp extends Exp {
      * <p>This static method makes sure that our types are set,
      * before attempting to form a conjunct.</p>
      *
+     * @param l A {@link Location} for the new conjuncted expression.
      * @param e1 The first {@link Exp} representation object.
      * @param e2 The second {@link Exp} representation object.
      *
@@ -107,6 +108,7 @@ public abstract class MathExp extends Exp {
      * <p>This static method makes sure that our types are set,
      * before attempting to form a disjunct.</p>
      *
+     * @param l A {@link Location} for the new disjuncted expression.
      * @param e1 The first {@link Exp} representation object.
      * @param e2 The second {@link Exp} representation object.
      *
@@ -151,6 +153,7 @@ public abstract class MathExp extends Exp {
      * <p>This static method makes sure that our types are set,
      * before attempting to form an implication.</p>
      *
+     * @param l A {@link Location} for the new implied expression.
      * @param e1 The first {@link Exp} representation object.
      * @param e2 The second {@link Exp} representation object.
      *
@@ -195,7 +198,7 @@ public abstract class MathExp extends Exp {
      * <p>This static method method creates a variable expression that
      * matches the boolean {@code false}.</p>
      *
-     * @param l A {@link Location} where the representation object is created from.
+     * @param l A {@link Location} for the new {@code false} expression.
      * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
      *
      * @return The {@link VarExp} representation object.
@@ -217,7 +220,7 @@ public abstract class MathExp extends Exp {
      * <p>This static method method creates a variable expression that
      * matches the boolean {@code true}.</p>
      *
-     * @param l A {@link Location} where the representation object is created from.
+     * @param l A {@link Location} for the new {@code true} expression.
      * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
      *
      * @return The {@link VarExp} representation object.
@@ -240,8 +243,10 @@ public abstract class MathExp extends Exp {
      * arbitrary {@link Exp} when checking to see if we are
      * simply the literal {@code true}.</p>
      *
-     * @return True if {@code exp}contains {@code true},
-     * false otherwise.
+     * @param exp An {@link Exp} to be evaluated.
+     *
+     * @return {@code true} if {@code exp} is the literal true expression,
+     * {@code false} otherwise.
      */
     public static boolean isLiteralTrue(Exp exp) {
         boolean retval = (exp instanceof VarExp);
@@ -258,8 +263,10 @@ public abstract class MathExp extends Exp {
      * arbitrary {@link Exp} when checking to see if we are
      * simply the literal {@code false}.</p>
      *
-     * @return True if {@code exp} contains {@code false},
-     * false otherwise.
+     * @param exp An {@link Exp} to be evaluated.
+     *
+     * @return {@code true} if {@code exp} is the literal false expression,
+     * {@code false} otherwise.
      */
     public static boolean isLiteralFalse(Exp exp) {
         boolean retval = (exp instanceof VarExp);

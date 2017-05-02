@@ -271,9 +271,9 @@ public class FlagDependencies {
     }
 
     /**
-     * <code>Creates an <em>implies</em> relationship between two flags.  If
+     * <p>Creates an <em>implies</em> relationship between two flags.  If
      * the user turns on the <code>ifOn</code> flag, the <code>impliesOn</code>
-     * flag will be automatically turned on too.</code>
+     * flag will be automatically turned on too.</p>
      *
      * @param ifOn      The flag that implies the other.
      * @param impliesOn The flag that should be turned on if <code>ifOn</code>

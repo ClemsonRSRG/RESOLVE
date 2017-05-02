@@ -167,12 +167,12 @@ public abstract class MTType {
 
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> <code>o</code> is an
-     * </code>MTType</code> that is <em>alpha equivalent</em> to this type.
+     * <code>MTType</code> that is <em>alpha equivalent</em> to this type.
      * I.e., it must be exactly the same with the sole exception that
      * quantified variables may have different names if they are otherwise
-     * identical.  So, BigUnion{t : MType}{t} <code>equals</code>
-     * BigUnion{r : MType}{r}.  However, BigUnion{t : MType}{t} <em>does
-     * not</em> <code>equals</code> BigUnion{r : Power(MType)}{r}.</p>
+     * identical.  So, <code>BigUnion{t : MType}{t}</code> <code>equals</code>
+     * <code>BigUnion{r : MType}{r}</code>.  However, <code>BigUnion{t : MType}{t}</code>
+     * <em>does not</em> <code>equals</code> <code>BigUnion{r : Power(MType)}{r}</code>.</p>
      *
      * @param o The object to compare with this <code>MTType</code>.
      *
@@ -348,6 +348,8 @@ public abstract class MTType {
     /**
      * <p>Indicates that this type is known to be a subtype of {@code o}.</p>
      *
+     * @param o An {@link MTType}.
+     *
      * @return {@code true} if it is a subtype, {@code false} otherwise.
      */
     public final boolean isSubtypeOf(MTType o) {
@@ -357,6 +359,8 @@ public abstract class MTType {
     /**
      * <p>Indicates that this type is known to be a syntactic
      * subtype of {@code o}.</p>
+     *
+     * @param o An {@link MTType}.
      *
      * @return {@code true} if it is a syntactic subtype,
      * {@code false} otherwise.

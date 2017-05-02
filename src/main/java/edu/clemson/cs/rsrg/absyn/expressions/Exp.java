@@ -148,7 +148,7 @@ public abstract class Exp extends ResolveConceptualElement {
 
     /**
      * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns {@code true} <strong>iff</code> this
+     * strict. This method returns {@code true} <strong>iff</strong> this
      * expression and the provided expression, {@code e}, are equivalent
      * with respect to structure and all function and variable names.</p>
      *

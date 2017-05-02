@@ -21,7 +21,8 @@ import java.util.Map;
 
 /**
  * <p>This is the class for all the mathematical set expression objects
- * of the kind {x : Z | x < y} that the compiler builds using the ANTLR4 AST nodes.</p>
+ * of the kind {@code {x : Z | x < y}} that the compiler builds using
+ * the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */

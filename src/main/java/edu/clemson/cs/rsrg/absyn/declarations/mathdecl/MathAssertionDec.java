@@ -223,6 +223,8 @@ public class MathAssertionDec extends Dec {
 
     /**
      * <p>Returns the assertion type for this math assertion declaration.</p>
+     *
+     * @return The {@link AssertionType} representation object.
      */
     public final AssertionType getAssertionType() {
         return myAssertionType;
@@ -231,6 +233,8 @@ public class MathAssertionDec extends Dec {
     /**
      * <p>Returns the specific subtype of the theorem represented by this
      * math assertion declaration.</p>
+     *
+     * @return The {@link TheoremSubtype} representation object.
      */
     public final TheoremSubtype getTheoremSubtype() {
         return myTheoremSubtype;

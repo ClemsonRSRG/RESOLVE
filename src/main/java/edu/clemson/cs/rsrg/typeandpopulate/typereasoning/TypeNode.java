@@ -90,7 +90,8 @@ public class TypeNode {
      *
      * @return An {@link Exp} establishing the relationship.
      *
-     * @throws TypeMismatchException
+     * @throws TypeMismatchException A type mismatch between what we are trying
+     * to find the valid type conditions to.
      */
     public final Exp getValidTypeConditionsTo(Exp value, MTType dst,
             Map<String, MTType> bindings) throws TypeMismatchException {
@@ -108,7 +109,8 @@ public class TypeNode {
      *
      * @return An {@link Exp} establishing the relationship.
      *
-     * @throws TypeMismatchException
+     * @throws TypeMismatchException A type mismatch between what we are trying
+     * to find the valid type conditions to.
      */
     public final Exp getValidTypeConditionsTo(MTType value, MTType dst,
             Map<String, MTType> bindings) throws TypeMismatchException {

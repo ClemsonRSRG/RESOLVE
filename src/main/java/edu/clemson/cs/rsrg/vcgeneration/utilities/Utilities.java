@@ -448,10 +448,12 @@ public class Utilities {
      *     appropriate substitutions made.</li>
      *     <li>The {@code operation}'s {@code requires} clause with the following
      *     change if it is an implementation for a {@code concept}'s operation:</li>
-     *     <ul>
-     *         <li>Substitute the parameter name with {@code Conc.<name>} if this
-     *         is the type we are implementing in a {@code concept realization}.</li>
-     *     </ul>
+     *     <li>
+     *         <ul>
+     *             <li>Substitute the parameter name with {@code Conc.<name>} if this
+     *             is the type we are implementing in a {@code concept realization}.</li>
+     *         </ul>
+     *     </li>
      *     <li>Any {@code which_entails} expressions that originated from any of the
      *     clauses above.</li>
      * </ul>
