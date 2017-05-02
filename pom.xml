@@ -8,23 +8,28 @@
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
-    <description>The RESOLVE compiler.</description>
+    <description>The RESOLVE Verifying Compiler.</description>
     <inceptionYear>2002</inceptionYear>
     <organization>
-        <name>Reusable Software Research Group</name>
-        <url>http://www.cs.clemson.edu/resolve/</url>
+        <name>RESOLVE Software Research Group (RSRG)</name>
+        <url>https://www.cs.clemson.edu/resolve/</url>
     </organization>
 
     <developers>
-
         <developer>
-            <name>Yu-Shan Sun</name>
-            <email>yushans@g.clemson.edu</email>
+            <name>Murali Sitaraman</name>
+            <email>murali@clemson.edu</email>
             <roles>
                 <role>Project lead - RESOLVE</role>
             </roles>
         </developer>
-
+        <developer>
+            <name>Yu-Shan Sun</name>
+            <email>yushans@g.clemson.edu</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
         <developer>
             <name>Dan Welch</name>
             <email>dtw.welch@gmail.com</email>
@@ -32,22 +37,20 @@
                 <role>Developer</role>
             </roles>
         </developer>
-
         <developer>
             <name>Blair Durkee</name>
-            <email>bdurkee@clemson.edu</email>
+            <email>bdurkee@g.clemson.edu</email>
             <roles>
                 <role>Developer</role>
             </roles>
         </developer>
-
         <developer>
             <name>Mike Kabanni</name>
+            <email>nkabban@g.clemson.edu</email>
             <roles>
                 <role>Developer</role>
             </roles>
         </developer>
-
     </developers>
 
     <licenses>
@@ -59,6 +62,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- License related information -->
         <license.url>src/resources/LICENSE-Header.txt</license.url>
     </properties>
