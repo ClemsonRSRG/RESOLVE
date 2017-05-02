@@ -205,6 +205,7 @@
                         <exclude>*.yml</exclude>
                         <exclude>LICENSE.txt</exclude>
                         <exclude>bin/**</exclude>
+                        <exclude>docs/**</exclude>
                         <exclude>src/main/antlr3/**</exclude>
                         <exclude>src/main/antlr4/**</exclude>
                         <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
@@ -246,16 +247,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin to generate Javadoc.
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
-                <configuration>
-                    <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
-                    <sourcepath>${project.basedir}/src/main/java/edu/clemson/cs/rsrg</sourcepath>
-                </configuration>
-            </plugin> -->
             <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -300,5 +291,22 @@
             </testResource>
         </testResources>
     </build>
+
+    <reporting>
+        <plugins>
+            <!-- Plugin to generate Javadoc. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <configuration>
+                    <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
+                    <excludePackageNames>edu.clemson.cs.r2jt</excludePackageNames>
+                    <doctitle>API for ${project.name} ${project.version}</doctitle>
+                    <windowtitle>${project.name}</windowtitle>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>

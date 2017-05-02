@@ -13,7 +13,6 @@
 package edu.clemson.cs.rsrg.absyn.expressions.programexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
@@ -26,8 +25,8 @@ import java.util.Map;
  * {@code Static_Array_Template}.</p>
  *
  * <p>When the {@link TreeBuildingListener} walks either to the exit function of
- * a {@link ResolveParser.ProgVarDotArrayExpContext} node or
- * a {@link ResolveParser.ProgVarArrayExpContext} node, we create an instance
+ * a {@code ResolveParser.ProgVarDotArrayExpContext} node or
+ * a {@code ResolveParser.ProgVarArrayExpContext} node, we create an instance
  * of this class to satisfy the requirements of building something of type
  * {@link ProgramExp}.</p>
  *

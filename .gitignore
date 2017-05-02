@@ -2,6 +2,7 @@
 # Compiled source #
 ###################
 
+docs/javadoc
 target/
 *.class
 *.tokens

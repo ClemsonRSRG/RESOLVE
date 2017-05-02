@@ -236,6 +236,9 @@ public class CompileEnvironment {
      * environment, has an associated file and a valid module dec.</p>
      *
      * @param id The ID for the {@link ResolveFile} we want to search for.
+     *
+     * @return {@code true} if we have compiled this {@link ModuleIdentifier},
+     * {@code false} otherwise.
      */
     public final boolean containsID(ModuleIdentifier id) {
         return myCompilingModules.containsKey(id);
@@ -245,15 +248,19 @@ public class CompileEnvironment {
      * <p>Returns the file associated with the specified id.</p>
      *
      * @param id The ID for the {@link ResolveFile} we want to search for.
+     *
+     * @return The {@link ResolveFile} associated with the {@code id}.
      */
     public final ResolveFile getFile(ModuleIdentifier id) {
         return myCompilingModules.get(id).getValue();
     }
 
     /**
-     * <pReturns the {@link ModuleDec} associated with the specified id.></p>
+     * <p>Returns the {@link ModuleDec} associated with the specified id.</p>
      *
      * @param id The ID for the {@link ResolveFile} we want to search for.
+     *
+     * @return The {@link ModuleDec} associated with the {@code id}.
      */
     public final ModuleDec getModuleAST(ModuleIdentifier id) {
         return myCompilingModules.get(id).getKey();

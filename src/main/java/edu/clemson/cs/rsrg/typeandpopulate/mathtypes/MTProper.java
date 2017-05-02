@@ -60,6 +60,8 @@ public class MTProper extends MTType {
      * contain other types.</p>
      *
      * @param g The current type graph.
+     * @param knownToContainOnlyMTypes A flag that indicates if this type
+     *                                 only contains {@code MTTypes}.
      */
     public MTProper(TypeGraph g, boolean knownToContainOnlyMTypes) {
         this(g, null, knownToContainOnlyMTypes, null);
@@ -81,6 +83,10 @@ public class MTProper extends MTType {
      * contain other types.</p>
      *
      * @param g The current type graph.
+     * @param type Type associated with this proper type.
+     * @param knownToContainOnlyMTypes A flag that indicates if this type
+     *                                 only contains {@code MTTypes}.
+     * @param name The name for this type.
      */
     public MTProper(TypeGraph g, MTType type, boolean knownToContainOnlyMTypes,
             String name) {

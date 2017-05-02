@@ -146,7 +146,8 @@ public class ArrayConversionUtilities {
      *
      * @return A {@link VarDec} object.
      *
-     * @exception MiscErrorException
+     * @exception MiscErrorException Some error occurred while trying to
+     * build temporary array name.
      */
     public static VarDec buildTempArrayNameVarDec(
             ProgramVariableExp arrayNameExp, Ty arrayContentType, int counter) {
@@ -191,7 +192,8 @@ public class ArrayConversionUtilities {
      *
      * @return The array index expression.
      *
-     * @exception MiscErrorException
+     * @exception MiscErrorException Some error occurred while trying to
+     * extract the index value.
      */
     public static ProgramExp getArrayIndexExp(ProgramExp exp) {
         ProgramExp arrayIndexExp;
@@ -231,7 +233,8 @@ public class ArrayConversionUtilities {
      *
      * @return The array name expression.
      *
-     * @exception MiscErrorException
+     * @exception MiscErrorException Some error occurred while trying to
+     * extract the name.
      */
     public static ProgramVariableExp getArrayNameExp(ProgramExp exp) {
         ProgramVariableExp arrayNameExp;

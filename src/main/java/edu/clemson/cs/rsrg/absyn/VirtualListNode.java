@@ -52,6 +52,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      * virtual list nodes for all the children objects inside the current
      * traversing object.</p>
      *
+     * @param l A {@link Location} representation object.
      * @param parent Parent element.
      * @param listName Name of the current element.
      * @param list List of children elements.

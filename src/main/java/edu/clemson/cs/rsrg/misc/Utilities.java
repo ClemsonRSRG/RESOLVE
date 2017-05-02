@@ -252,6 +252,8 @@ public class Utilities {
     /**
      * <p>Determines if the specified filename is a valid RESOLVE file type.</p>
      *
+     * @param filename Filename.
+     *
      * @return A RESOLVE extension type object if it is an extension we
      * recognize or null if it is not.
      */

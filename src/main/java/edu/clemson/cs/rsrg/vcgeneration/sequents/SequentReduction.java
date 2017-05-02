@@ -29,7 +29,6 @@ import org.jgrapht.graph.DefaultEdge;
  * <p>This class contains logic for reducing a {@link Sequent}.</p>
  *
  * @see <a href="https://en.wikipedia.org/wiki/Sequent_calculus">Sequent Calculus</a>
- * for the history and explanation of each of the reduction rules.
  *
  * @author Yu-Shan Sun
  * @version 1.0

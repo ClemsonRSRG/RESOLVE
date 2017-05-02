@@ -85,6 +85,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
      *                       contained in the definition to their bounding types. May be
      *                       <code>null</code>, which will be interpreted as the empty
      *                       map.
+     * @param genericsInDefiningContext A map from names of generic types to
+     *                                  their bounding types.
      * @param sourceModule The module where this entry was created from.
      */
     public MathSymbolEntry(TypeGraph g, String name, Quantification q, ResolveConceptualElement definingElement,
@@ -152,11 +154,13 @@ public class MathSymbolEntry extends SymbolTableEntry {
      * unacceptable for a call to this function.</p>
      *
      * @param arguments Arguments to the mathematical function.
+     * @param callingContext The current scope we are calling from.
+     * @param definitionSchematicTypes The schematic types from the definition.
      *
      * @return A {@link MathSymbolEntry} with the arguments deschematized
      * against the formal parameters.
      *
-     * @throws NoSolutionException
+     * @throws NoSolutionException We couldn't deschematize this function.
      */
     public final MathSymbolEntry deschematize(List<Exp> arguments, Scope callingContext,
             Map<String, MTType> definitionSchematicTypes) throws NoSolutionException {
@@ -295,7 +299,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
      *
      * @return The {@link MTType} type object.
      *
-     * @throws SymbolNotOfKindTypeException
+     * @throws SymbolNotOfKindTypeException We are trying to get a
+     * {@code null} type value.
      */
     public final MTType getTypeValue() throws SymbolNotOfKindTypeException {
         if (myTypeValue == null) {

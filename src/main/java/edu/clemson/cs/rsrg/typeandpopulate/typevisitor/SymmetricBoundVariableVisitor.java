@@ -144,6 +144,9 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
      *
      * @param t1 A math type.
      * @param t2 A math type.
+     *
+     * @return {@code true} if {@code t1} and {@code t2} bind,
+     * {@code false} otherwise.
      */
     protected boolean boundBeginMTBigUnion(MTBigUnion t1, MTBigUnion t2) {
         return true;
@@ -155,6 +158,9 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
      *
      * @param t1 A math type.
      * @param t2 A math type.
+     *
+     * @return {@code true} if {@code t1} and {@code t2} bind,
+     * {@code false} otherwise.
      */
     protected boolean boundEndMTBigUnion(MTBigUnion t1, MTBigUnion t2) {
         return true;
