@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.UnbufferedCharStream;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -67,7 +67,7 @@ public class SequentReductionTest {
         try {
             FAKE_LOCATION =
                     new Location(new ResolveFile("SequentReductionTest",
-                            ModuleType.THEORY, new ANTLRInputStream(
+                            ModuleType.THEORY, new UnbufferedCharStream(
                                     new StringReader("")),
                             new ArrayList<String>(), ""), 0, 0);
 

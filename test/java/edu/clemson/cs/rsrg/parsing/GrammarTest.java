@@ -13,13 +13,9 @@
 package edu.clemson.cs.rsrg.parsing;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ConsoleErrorListener;
-import org.antlr.v4.runtime.DiagnosticErrorListener;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -105,10 +101,10 @@ public class GrammarTest {
      * @return The number of syntax errors encountered.
      */
     private int getNumberOfSyntaxErrors(String filename) {
-        ANTLRInputStream input;
+        CharStream input;
         try {
             File file = new File(this.getClass().getResource(filename).toURI());
-            input = new ANTLRInputStream(new FileInputStream(file));
+            input = CharStreams.fromPath(file.toPath());
         }
         catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);

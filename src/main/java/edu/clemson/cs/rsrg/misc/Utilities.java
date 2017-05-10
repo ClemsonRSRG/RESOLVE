@@ -15,11 +15,11 @@ package edu.clemson.cs.rsrg.misc;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
@@ -139,8 +139,7 @@ public class Utilities {
         String name = Utilities.getFileName(file.getName(), moduleType);
         List<String> pkgList =
                 Utilities.getPackageList(file.getAbsolutePath(), workspacePath);
-        ANTLRInputStream inputStream =
-                new ANTLRInputStream(new FileInputStream(file));
+        CharStream inputStream = CharStreams.fromPath(file.toPath());
 
         return new ResolveFile(name, moduleType, inputStream, pkgList, file
                 .getAbsolutePath());
