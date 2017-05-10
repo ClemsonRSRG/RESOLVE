@@ -23,6 +23,10 @@ import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -191,10 +195,11 @@ public class FileOutputListener implements OutputListener {
      */
     private void writeToFile(String outputFileName, String outputString) {
         try {
+            Path outputFilePath = Paths.get(outputFileName);
+            Charset charset = Charset.forName("UTF-8");
+
             // Write the contents to file
-            Writer writer =
-                    new BufferedWriter(new FileWriter(new File(outputFileName),
-                            false));
+            Writer writer = Files.newBufferedWriter(outputFilePath, charset);
             writer.write(outputString);
             writer.close();
         }

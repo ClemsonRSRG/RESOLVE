@@ -17,6 +17,9 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
@@ -103,19 +106,21 @@ public class WalkerCodeGenerator {
                             + javaSrcDir + outputPackageDir + "/";
             targetDir = targetDir.replace(File.separator, "/");
 
+            // Path and Charset
+            Path walkerFilePath = Paths.get(targetDir, walkerName + ".java");
+            Path stackWalkerFilePath =
+                    Paths.get(targetDir, stackWalkerName + ".java");
+            Charset charset = Charset.forName("UTF-8");
+
             // Write the visitor contents to file
-            Writer writer =
-                    new BufferedWriter(new FileWriter(targetDir + walkerName
-                            + ".java", false));
+            Writer writer = Files.newBufferedWriter(walkerFilePath, charset);
             writer.write(visitor.render());
             writer.close();
 
             System.out.println("Successfully created: " + walkerName + ".java");
 
             // Write the stack visitor contents to file
-            writer =
-                    new BufferedWriter(new FileWriter(targetDir
-                            + stackWalkerName + ".java", false));
+            writer = Files.newBufferedWriter(stackWalkerFilePath, charset);
             writer.write(stackVisitor.render());
             writer.close();
 

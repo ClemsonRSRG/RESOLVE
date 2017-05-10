@@ -26,8 +26,14 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 /**
  * <p>This class stores all necessary objects and flags needed during
@@ -145,19 +151,15 @@ public class CompileEnvironment {
             Date date = new Date();
             SimpleDateFormat dateFormat =
                     new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
-            File infoFile =
-                    new File(myCompileDir, "Log-"
-                            + dateFormat.format(date) + ".log");
-            File errorFile =
-                    new File(myCompileDir, "Debug-Log-"
-                            + dateFormat.format(date) + ".log");
+            Path infoFilePath = Paths.get(myCompileDir.getAbsolutePath(),
+                    "Log-" + dateFormat.format(date) + ".log");
+            Path errorFilePath = Paths.get(myCompileDir.getAbsolutePath(),
+                    "Debug-Log-" + dateFormat.format(date) + ".log");
+            Charset charset = Charset.forName("UTF-8");
 
             statusHandler =
-                    new WriterStatusHandler(
-                            new BufferedWriter(new OutputStreamWriter(
-                                    new FileOutputStream(infoFile), "utf-8")),
-                            new BufferedWriter(new OutputStreamWriter(
-                                    new FileOutputStream(errorFile), "utf-8")));
+                    new WriterStatusHandler(Files.newBufferedWriter(infoFilePath, charset, CREATE, APPEND),
+                            Files.newBufferedWriter(errorFilePath, charset, CREATE, APPEND));
         }
         myStatusHandler = statusHandler;
 
