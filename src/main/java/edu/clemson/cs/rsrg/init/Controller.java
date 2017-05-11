@@ -260,13 +260,13 @@ class Controller {
      *
      * @return The inner representation for a module. See {@link ModuleDec}.
      *
-     * @throws MiscErrorException Some how we couldn't instantiate an {@link ANTLRInputStream}.
+     * @throws MiscErrorException Some how we couldn't instantiate an {@link CharStream}.
      * @throws SourceErrorException There are errors in the source file.
      */
     private ModuleDec createModuleAST(ResolveFile file) {
-        ANTLRInputStream input = file.getInputStream();
+        CharStream input = file.getInputStream();
         if (input == null) {
-            throw new MiscErrorException("ANTLRInputStream null",
+            throw new MiscErrorException("CharStream null",
                     new IllegalArgumentException());
         }
 
@@ -293,7 +293,7 @@ class Controller {
             rootModuleCtx = parser.module();
         }
         catch (Exception ex) {
-            tokens.reset();
+            tokens.seek(0);
             parser.reset();
             parser.getInterpreter().setPredictionMode(PredictionMode.LL);
             rootModuleCtx = parser.module();

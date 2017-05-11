@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.init.file;
 
 import java.util.List;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
 
 /**
  * <p>This class is the standard "file" format for the RESOLVE compiler.
@@ -35,7 +35,7 @@ public class ResolveFile {
     private final String myCreatedJarPath;
 
     /** <p>Input stream that will contain all the RESOLVE source code.</p> */
-    private final ANTLRInputStream myInputStream;
+    private final CharStream myInputStream;
 
     /** <p>File's name.</p> */
     private final String myModuleFileName;
@@ -61,8 +61,8 @@ public class ResolveFile {
      * @param packageList The package where this source file belong.
      * @param jarPath The path where we want the jar to be generated.
      */
-    public ResolveFile(String name, ModuleType moduleType,
-            ANTLRInputStream input, List<String> packageList, String jarPath) {
+    public ResolveFile(String name, ModuleType moduleType, CharStream input,
+            List<String> packageList, String jarPath) {
         myInputStream = input;
         myCreatedJarPath = jarPath;
         myModuleFileName = name;
@@ -117,7 +117,7 @@ public class ResolveFile {
      *
      * @return An input stream for ANTLR4.
      */
-    public final ANTLRInputStream getInputStream() {
+    public final CharStream getInputStream() {
         return myInputStream;
     }
 
