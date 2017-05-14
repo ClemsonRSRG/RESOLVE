@@ -365,6 +365,29 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Concept Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ConceptModuleDec}.</p>
+     *
+     * @param concept A concept module declaration.
+     */
+    @Override
+    public final void preConceptModuleDec(ConceptModuleDec concept) {
+        PosSymbol conceptName = concept.getName();
+
+        // Store the enhancement realization requires clause
+        storeRequiresClause(conceptName.getName(), concept.getRequires());
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputConceptHeader").add(
+                        "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
     // Enhancement Realization Module
     // -----------------------------------------------------------
 
