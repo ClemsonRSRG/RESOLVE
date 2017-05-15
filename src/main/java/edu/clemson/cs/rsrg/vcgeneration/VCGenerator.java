@@ -621,6 +621,39 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
     }
 
+    // -----------------------------------------------------------
+    // Other
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AssertionClause}.</p>
+     *
+     * @param clause An assertion clause declaration.
+     */
+    @Override
+    public final void postAssertionClause(AssertionClause clause) {
+        if (clause.getWhichEntailsExp() != null) {
+            // Create a new assertive code block
+            PosSymbol name =
+                    new PosSymbol(clause.getLocation(),
+                            "Which_Entails located at: " + clause.getLocation());
+            AssertiveCodeBlock block  =
+                    new AssertiveCodeBlock(myTypeGraph, clause, name);
+
+            // Create a new model for this assertive code block
+            ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+            blockModel.add("blockName", name);
+            ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+            stepModel.add("proofRuleName", "Which_Entails Declaration Rule")
+                    .add("currentStateOfBlock", block);
+            blockModel.add("vcGenSteps", stepModel.render());
+            myAssertiveCodeBlockModels.put(block, blockModel);
+
+            // Add this as a new incomplete assertive code block
+            myIncompleteAssertiveCodeBlocks.add(block);
+        }
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
