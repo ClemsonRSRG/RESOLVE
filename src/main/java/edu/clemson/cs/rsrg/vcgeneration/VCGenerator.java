@@ -636,9 +636,24 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Create a new assertive code block
             PosSymbol name =
                     new PosSymbol(clause.getLocation(),
-                            "Which_Entails located at: " + clause.getLocation());
-            AssertiveCodeBlock block  =
+                            "Which_Entails Expression Located at  "
+                                    + clause.getLocation());
+            AssertiveCodeBlock block =
                     new AssertiveCodeBlock(myTypeGraph, clause, name);
+
+            // Apply the rule
+            block.addStatement(new AssumeStmt(clause.getLocation().clone(),
+                    clause.getAssertionExp(), false));
+            block.addStatement(new ConfirmStmt(clause.getLocation().clone(),
+                    clause.getWhichEntailsExp(), false));
+
+            // Add the location detail if it doesn't exist
+            if (!myLocationDetails.containsKey(clause.getWhichEntailsExp()
+                    .getLocation())) {
+                myLocationDetails.put(
+                        clause.getWhichEntailsExp().getLocation(), name
+                                .getName());
+            }
 
             // Create a new model for this assertive code block
             ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
@@ -1093,10 +1108,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     .getLocation(), "Requires Clause of " + decName);
             if (requiresClause.getWhichEntailsExp() != null) {
                 myLocationDetails.put(requiresClause.getWhichEntailsExp()
-                        .getLocation(),
-                        "Which_Entails expression for clause located at "
-                                + requiresClause.getWhichEntailsExp()
-                                        .getLocation());
+                        .getLocation(), "Which_Entails Expression Located at "
+                        + requiresClause.getWhichEntailsExp().getLocation());
             }
         }
     }
