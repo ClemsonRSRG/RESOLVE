@@ -2,7 +2,7 @@
 # This script runs the formatter to make sure everything is properly formatted.
 
 # Run the format goal for the java-formatter plugin
-mvn clean java-formatter:format
+mvn java-formatter:format
 
 # Change the permission of this file back to 644
 chmod 644 bin/runFormatter
