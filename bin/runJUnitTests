@@ -1,5 +1,0 @@
-#! /bin/bash
-# This script runs the JUnit Tests
-
-# Run the test goal
-mvn clean test
