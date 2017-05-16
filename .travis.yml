@@ -21,13 +21,16 @@ jobs:
   include:
     - stage: check styles
       jdk: oraclejdk8
-      env:
-        - SCRIPT=runFormatter
-        - SCRIPT=runLicensePlugin
       before_script:
-        - chmod +x bin/$SCRIPT
+        - chmod +x bin/runFormatter
       script:
-        - bin/$SCRIPT
+        - bin/runFormatter
+    - stage: check styles
+      jdk: oraclejdk8
+      before_script:
+        - chmod +x bin/runLicensePlugin
+      script:
+        - bin/runLicensePlugin
     - stage: compiler tests
       before_script: chmod +x bin/runCompilerTests
       script: bin/runCompilerTests
