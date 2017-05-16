@@ -13,6 +13,9 @@ FILESTOANALYZE=($(cat bin/tests/filesToAnalyze.txt | tr "\n" " "))
 FILESTOBUILDJAR=($(cat bin/tests/filesToBuildJar.txt | tr "\n" " "))
 FILESTOPROVE=($(cat bin/tests/filesToProve.txt | tr "\n" " "))
 
+# Run the install goal (skipping unit tests and javadoc generations)
+mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
 # Clone the latest RESOLVE-Workspace from GitHub
 echo ""
 echo "---- RETRIEVING RESOLVE WORKSPACE ----"
