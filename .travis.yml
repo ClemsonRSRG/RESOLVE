@@ -17,16 +17,19 @@ jdk:
 # Travis CI website.
 jobs:
   include:
-    - stage: checkStyle
-      env: 
-        - SCRIPT=runFormatter
-        - SCRIPT=runLicensePlugin
+    - stage: checkStyles
       install: skip
       before_script:
-        - chmod +x bin/$SCRIPT
+        - chmod +x bin/runFormatter
       script:
-        - bin/$SCRIPT
-    - stage: test
+        - bin/runFormatter
+    - stage: checkStyles
+      install: skip
+      before_script:
+        - chmod +x bin/runLicensePlugin
+      script:
+        - bin/runLicensePlugin
+    - stage: compilerTests
       env:
         - SCRIPT=runJUnitTests
         - SCRIPT=runCompilerTests
