@@ -365,6 +365,29 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Concept Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ConceptModuleDec}.</p>
+     *
+     * @param concept A concept module declaration.
+     */
+    @Override
+    public final void preConceptModuleDec(ConceptModuleDec concept) {
+        PosSymbol conceptName = concept.getName();
+
+        // Store the enhancement realization requires clause
+        storeRequiresClause(conceptName.getName(), concept.getRequires());
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputConceptHeader").add(
+                        "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
     // Enhancement Realization Module
     // -----------------------------------------------------------
 
@@ -595,6 +618,54 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Shouldn't be possible but just in case it ever happens
             // by accident.
             Utilities.tyNotHandled(dec.getTy(), dec.getLocation());
+        }
+    }
+
+    // -----------------------------------------------------------
+    // Other
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AssertionClause}.</p>
+     *
+     * @param clause An assertion clause declaration.
+     */
+    @Override
+    public final void postAssertionClause(AssertionClause clause) {
+        if (clause.getWhichEntailsExp() != null) {
+            // Create a new assertive code block
+            PosSymbol name =
+                    new PosSymbol(clause.getLocation(),
+                            "Which_Entails Expression Located at  "
+                                    + clause.getLocation());
+            AssertiveCodeBlock block =
+                    new AssertiveCodeBlock(myTypeGraph, clause, name);
+
+            // Apply the rule
+            block.addStatement(new AssumeStmt(clause.getLocation().clone(),
+                    clause.getAssertionExp(), false));
+            block.addStatement(new ConfirmStmt(clause.getLocation().clone(),
+                    clause.getWhichEntailsExp(), false));
+
+            // Add the location detail if it doesn't exist
+            if (!myLocationDetails.containsKey(clause.getWhichEntailsExp()
+                    .getLocation())) {
+                myLocationDetails.put(
+                        clause.getWhichEntailsExp().getLocation(), name
+                                .getName());
+            }
+
+            // Create a new model for this assertive code block
+            ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+            blockModel.add("blockName", name);
+            ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+            stepModel.add("proofRuleName", "Which_Entails Declaration Rule")
+                    .add("currentStateOfBlock", block);
+            blockModel.add("vcGenSteps", stepModel.render());
+            myAssertiveCodeBlockModels.put(block, blockModel);
+
+            // Add this as a new incomplete assertive code block
+            myIncompleteAssertiveCodeBlocks.add(block);
         }
     }
 
@@ -1037,10 +1108,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     .getLocation(), "Requires Clause of " + decName);
             if (requiresClause.getWhichEntailsExp() != null) {
                 myLocationDetails.put(requiresClause.getWhichEntailsExp()
-                        .getLocation(),
-                        "Which_Entails expression for clause located at "
-                                + requiresClause.getWhichEntailsExp()
-                                        .getLocation());
+                        .getLocation(), "Which_Entails Expression Located at "
+                        + requiresClause.getWhichEntailsExp().getLocation());
             }
         }
     }
