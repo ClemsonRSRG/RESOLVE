@@ -11,10 +11,6 @@ branches:
 language: java
 jdk:
   - oraclejdk8
-  
-# Skipping the Installation Step and Run Unit Test
-install: skip
-script: mvn test
 
 # The following settings allow us to run concurrent tests using the scripts in the "bin" folder.
 # It also caches things related to Maven. If caching errors occur, please clear the cache on the
