@@ -39,8 +39,9 @@ jobs:
     - stage: compiler tests
       jdk: oraclejdk8
       install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-      env:
-        - SCRIPT=runAnalyzeTests
-        - SCRIPT=runProveTests
-      before_script: chmod +x bin/$SCRIPT
-      script: bin/$SCRIPT
+      script:
+        - chmod +x bin/runAnalyzeTests
+        - bin/runAnalyzeTests
+      script:
+        - chmod +x bin/runProveTests
+        - bin/runProveTests
