@@ -7,12 +7,15 @@ branches:
   only:
     - master
 
-# Compile and run the tests using JDK8
+# Use JDK8
 language: java
 jdk: oraclejdk8
   
-# Skipping the Installation Step
+# Skipping the Installation Step and Run Unit Tests
 install: true
+cache:
+  directories:
+    - $HOME/.m2
 
 # The following settings allow us to run concurrent tests using the scripts in the "bin" folder.
 # It also caches things related to Maven. If caching errors occur, please clear the cache on the
@@ -32,8 +35,10 @@ jobs:
       script:
         - bin/runLicensePlugin
     - stage: compiler tests
-      before_script: chmod +x bin/runCompilerTests
-      script: bin/runCompilerTests
-      cache:
-        directories:
-          - $HOME/.m2
+      jdk: oraclejdk8
+      install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+      env:
+        - SCRIPT=runAnalyzeTests
+        - SCRIPT=runProveTests
+      before_script: chmod +x bin/$SCRIPT
+      script: bin/$SCRIPT
