@@ -6,22 +6,17 @@ sudo: false
 branches:
   only:
     - master
-
-# Use JDK8
 language: java
-jdk: oraclejdk8
-  
-# Skipping the Installation Step and Run Unit Tests
+
+# Skipping the Installation Step
 install: true
-cache:
-  directories:
-    - $HOME/.m2
 
 # The following settings allow us to run concurrent tests using the scripts in the "bin" folder.
 # It also caches things related to Maven. If caching errors occur, please clear the cache on the
 # Travis CI website.
 jobs:
   include:
+    # This stage makes sure that our code styles are the same.
     - stage: check styles
       jdk: oraclejdk8
       before_script:
@@ -34,6 +29,13 @@ jobs:
         - chmod +x bin/runLicensePlugin
       script:
         - bin/runLicensePlugin
+    # This stage runs the JUnit tests.
+    - stage: test
+      jdk: oraclejdk8
+      script: mvn test -B
+      cache:
+        directories: $HOME/.m2
+    # This stage runs the RESOLVE compiler on files that we know to be working.
     - stage: compiler tests
       jdk: oraclejdk8
       install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
