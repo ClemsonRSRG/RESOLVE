@@ -431,6 +431,33 @@ public class Utilities {
     }
 
     /**
+     * <p>This method returns a newly created {@link VarExp}
+     * with {@code P_val} as the name and {@code N} as its math type.</p>
+     *
+     * @param loc New {@link VarExp VarExp's} {@link Location}.
+     * @param scope The module scope to start our search.
+     *
+     * @return {@code P_val} variable expression.
+     */
+    public static VarExp createPValExp(Location loc, ModuleScope scope) {
+        VarExp retExp = null;
+
+        // Locate "N" (Natural Number)
+        MathSymbolEntry mse = searchMathSymbol(loc, "N", scope);
+        try {
+            // Create a variable with the name P_val
+            retExp =
+                    createVarExp(loc.clone(), null, new PosSymbol(loc.clone(),
+                            "P_val"), mse.getTypeValue(), null);
+        }
+        catch (SymbolNotOfKindTypeException e) {
+            notAType(mse, loc);
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>This method uses all the {@code requires} and {@code constraint}
      * clauses from the various different sources (see below for complete list)
      * and builds the appropriate {@code assume} clause that goes at the
