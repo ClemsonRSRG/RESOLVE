@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
 import edu.clemson.cs.rsrg.absyn.statements.ChangeStmt;
@@ -93,9 +94,16 @@ public class WhileStmtRule extends AbstractProofRuleApplication
         // add it to the assertive code block.
         // TODO: Check to see what happens when the loop invariant contains a which_entails. - YS
         AssertionClause loopInvariantClause = whileLoopItem.getMaintainingClause();
-        myCurrentAssertiveCodeBlock.addStatement(
-                new ConfirmStmt(loopInvariantClause.getLocation().clone(),
-                        loopInvariantClause.getAssertionExp().clone(), false));
+        ConfirmStmt confirmStmt = new ConfirmStmt(loopInvariantClause.getLocation().clone(),
+                loopInvariantClause.getAssertionExp().clone(), false);
+        myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
+        myLocationDetails.put(confirmStmt.getLocation(), "Base Case of the Invariant of While Statement");
+
+        // NY YS
+        // TODO: Obtain the elapsed time duration of loop
+
+        // NY YS
+        // TODO: Confirm that elapsed time is 0.0
 
         // Create the change statement with the variables that are changing.
         List<ProgramVariableExp> changingVars = whileLoopItem.getChangingVars();
@@ -105,6 +113,11 @@ public class WhileStmtRule extends AbstractProofRuleApplication
         }
         myCurrentAssertiveCodeBlock.addStatement(
                 new ChangeStmt(whileLoopItem.getLocation().clone(), changingVarsAsMathExp));
+
+        // NQV for P_Val
+        AssertionClause decreasingClause = whileLoopItem.getDecreasingClause();
+        VCVarExp nqvPValExp = Utilities.createVCVarExp(myCurrentAssertiveCodeBlock,
+                Utilities.createPValExp(decreasingClause.getLocation().clone(), myCurrentModuleScope));
 
         // Create a statement assuming the invariant and the decreasing clause.
 
