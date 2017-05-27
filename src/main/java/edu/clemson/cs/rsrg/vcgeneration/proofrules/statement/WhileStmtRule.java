@@ -14,13 +14,17 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ChangeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.WhileStmt;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -53,6 +57,12 @@ public class WhileStmtRule extends AbstractProofRuleApplication
      */
     private final ModuleScope myCurrentModuleScope;
 
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
     /** <p>The {@link WhileStmt} we are applying the rule to.</p> */
     private final WhileStmt myWhileStmt;
 
@@ -67,15 +77,18 @@ public class WhileStmtRule extends AbstractProofRuleApplication
      * @param whileStmt The {@link WhileStmt} we are applying
      *                  the rule to.
      * @param moduleScope The current module scope we are visiting.
+     * @param g The current type graph.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public WhileStmtRule(WhileStmt whileStmt, ModuleScope moduleScope,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
+            TypeGraph g, AssertiveCodeBlock block, STGroup stGroup,
+            ST blockModel) {
         super(block, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
+        myTypeGraph = g;
         myWhileStmt = whileStmt;
     }
 
@@ -119,7 +132,15 @@ public class WhileStmtRule extends AbstractProofRuleApplication
         VCVarExp nqvPValExp = Utilities.createVCVarExp(myCurrentAssertiveCodeBlock,
                 Utilities.createPValExp(decreasingClause.getLocation().clone(), myCurrentModuleScope));
 
-        // Create a statement assuming the invariant and the decreasing clause.
+        // Create a statement assuming the invariant and NQV(RS, P_Val) = P_Exp
+        EqualsExp equalsPExp = new EqualsExp(decreasingClause.getLocation().clone(),
+                nqvPValExp.clone(), null, EqualsExp.Operator.EQUAL,
+                decreasingClause.getAssertionExp().clone());
+        equalsPExp.setMathType(myTypeGraph.BOOLEAN);
+        myCurrentAssertiveCodeBlock.addStatement(
+                new AssumeStmt(myWhileStmt.getLocation().clone(),
+                        InfixExp.formConjunct(myWhileStmt.getLocation().clone(),
+                                loopInvariantClause.getAssertionExp().clone(), equalsPExp), false));
 
         // Create the replacing If-Else statement.
 
