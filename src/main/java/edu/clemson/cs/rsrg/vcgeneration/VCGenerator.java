@@ -719,6 +719,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                         new SwapStmtRule((SwapStmt) statement, myCurrentModuleScope,
                                 assertiveCodeBlock, mySTGroup, blockModel);
             }
+            else if (statement instanceof WhileStmt) {
+                // Generate a new while rule application
+                ruleApplication =
+                        new WhileStmtRule((WhileStmt) statement, myCurrentModuleScope,
+                                myTypeGraph, assertiveCodeBlock, mySTGroup, blockModel);
+            }
             else {
                 throw new SourceErrorException(
                         "[VCGenerator] Statement type not handled: "
@@ -751,9 +757,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             else if (lastStatement instanceof IfStmt) {
                 applyIfStmtRule((IfStmt) statement);
-            }
-            else if (lastStatement instanceof WhileStmt) {
-                applyWhileStmtRule((WhileStmt) statement);
             }*/
         }
 
