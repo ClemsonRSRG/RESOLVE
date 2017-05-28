@@ -432,12 +432,12 @@ public class Utilities {
 
     /**
      * <p>This method returns a newly created {@link VarExp}
-     * with {@code P_val} as the name and {@code N} as its math type.</p>
+     * with {@code P_Val} as the name and {@code N} as its math type.</p>
      *
      * @param loc New {@link VarExp VarExp's} {@link Location}.
      * @param scope The module scope to start our search.
      *
-     * @return {@code P_val} variable expression.
+     * @return {@code P_Val} variable expression.
      */
     public static VarExp createPValExp(Location loc, ModuleScope scope) {
         VarExp retExp = null;
@@ -448,7 +448,7 @@ public class Utilities {
             // Create a variable with the name P_val
             retExp =
                     createVarExp(loc.clone(), null, new PosSymbol(loc.clone(),
-                            "P_val"), mse.getTypeValue(), null);
+                            "P_Val"), mse.getTypeValue(), null);
         }
         catch (SymbolNotOfKindTypeException e) {
             notAType(mse, loc);

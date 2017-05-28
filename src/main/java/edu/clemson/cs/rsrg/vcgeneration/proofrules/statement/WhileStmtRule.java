@@ -14,21 +14,19 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
-import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
-import edu.clemson.cs.rsrg.absyn.statements.ChangeStmt;
-import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
-import edu.clemson.cs.rsrg.absyn.statements.WhileStmt;
+import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
+import edu.clemson.cs.rsrg.absyn.statements.*;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VCConfirmStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -142,7 +140,51 @@ public class WhileStmtRule extends AbstractProofRuleApplication
                         InfixExp.formConjunct(myWhileStmt.getLocation().clone(),
                                 loopInvariantClause.getAssertionExp().clone(), equalsPExp), false));
 
+        // NY YS
+        // TODO: Also assume NQV(RP, Cum_Dur) = El_Dur_Exp
+
+        // YS: We deep copy the statements just in case we run into aliasing problems.
+        List<Statement> ifStmts = new ArrayList<>(myWhileStmt.getStatements().size() + 1);
+        for (Statement s : myWhileStmt.getStatements()) {
+            ifStmts.add(s.clone());
+        }
+
+        // Confirm the inductive case of invariant and P_Exp <= 1 + NQV(RS, P_Val) (termination)
+        IntegerExp oneExp = new IntegerExp(decreasingClause.getLocation().clone(), null, 1);
+        oneExp.setMathType(decreasingClause.getAssertionExp().getMathType());
+
+        InfixExp sumExp = new InfixExp(decreasingClause.getLocation().clone(), oneExp, null,
+                new PosSymbol(decreasingClause.getLocation().clone(), "+"), nqvPValExp.clone());
+        sumExp.setMathType(decreasingClause.getAssertionExp().getMathType());
+
+        InfixExp terminationExp = new InfixExp(decreasingClause.getLocation().clone(),
+                decreasingClause.getAssertionExp().clone(), null,
+                new PosSymbol(decreasingClause.getLocation().clone(), "<="), sumExp);
+        terminationExp.setMathType(myTypeGraph.BOOLEAN);
+        myLocationDetails.put(terminationExp.getLocation(), "Termination of While Statement");
+
+        Exp invariantAsExp = loopInvariantClause.getAssertionExp().clone();
+        myLocationDetails.put(invariantAsExp.getLocation(), "Inductive Case of Invariant of While Statement");
+
+        // YS: Simplify if we have "maintaining true"
+        ifStmts.add(new ConfirmStmt(loopInvariantClause.getLocation().clone(),
+                InfixExp.formConjunct(myWhileStmt.getLocation().clone(), invariantAsExp, terminationExp),
+                MathExp.isLiteralTrue(invariantAsExp)));
+
+        // If part should contain the original statements plus a ConfirmStmt that ensures
+        // the invariant and the decreasing clause holds.
+        IfConditionItem ifPart = new IfConditionItem(myWhileStmt.getLocation().clone(),
+                myWhileStmt.getTest(), ifStmts);
+
+        // Else part should only contain the original sequents in a special VCConfirmStmt
+        List<Statement> elsePart = new ArrayList<>(1);
+        elsePart.add(new VCConfirmStmt(myWhileStmt.getLocation().clone(),
+                myCurrentAssertiveCodeBlock.getVCs()));
+
         // Create the replacing If-Else statement.
+        myCurrentAssertiveCodeBlock.addStatement(
+                new IfStmt(myWhileStmt.getLocation().clone(), ifPart,
+                        new ArrayList<IfConditionItem>(), elsePart));
 
         // Store an empty list of vcs.
         myCurrentAssertiveCodeBlock.setVCs(new LinkedList<VerificationCondition>());
