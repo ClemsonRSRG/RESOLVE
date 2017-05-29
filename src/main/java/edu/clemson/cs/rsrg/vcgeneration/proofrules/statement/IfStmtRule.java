@@ -12,7 +12,9 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
-import edu.clemson.cs.r2jt.absyn.IfStmt;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
+import edu.clemson.cs.rsrg.absyn.statements.IfStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -67,7 +69,28 @@ public class IfStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
+        // Note: In the If-Else Rule, we will end up with a total of two assertive
+        // code blocks that are almost identical. The first block will be the current
+        // assertive block that we are currently processing and will contain the
+        // logic for the if portion of the statement. Regardless if there is an else
+        // portion or not, the other block will contain the else portion.
+        AssertiveCodeBlock negIfAssertiveCodeBlock =
+                myCurrentAssertiveCodeBlock.clone();
 
+        // TODO: Convert the if-condition into mathematical expressions.
+        // TODO: Use the nested function call walker to deal with nested function calls.
+        IfConditionItem ifConditionItem = myIfStmt.getIfClause();
+        ProgramExp ifCondition = ifConditionItem.getTest();
+
+        // If part of the rule
+
+        // Else part of the rule
+
+        // Add the different details to the various different output models
+        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+        stepModel.add("proofRuleName", getRuleDescription()).add(
+                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
     /**
