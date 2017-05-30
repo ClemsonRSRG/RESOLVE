@@ -36,7 +36,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
-import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
@@ -377,17 +376,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
 
         // Retrieve the list of VCs and use the sequent
         // substitution map to do replacements.
-        List<VerificationCondition> vcs = myCurrentAssertiveCodeBlock.getVCs();
-        List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
-        for (VerificationCondition vc : vcs) {
-            List<Sequent> sequents = vc.getAssociatedSequents();
-            List<Sequent> newSequent = new ArrayList<>(sequents.size());
-            for (Sequent s : sequents) {
-                newSequent.add(createReplacementSequent(s, substitutionsForSeq));
-            }
-
-            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequent));
-        }
+        List<VerificationCondition> newVCs =
+                createReplacementVCs(myCurrentAssertiveCodeBlock.getVCs(), substitutionsForSeq);
 
         // Store the new list of vcs
         myCurrentAssertiveCodeBlock.setVCs(newVCs);
@@ -413,30 +403,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
     // ===========================================================
     // Private Methods
     // ===========================================================
-
-    /**
-     * <p>An helper method that performs the substitution on all the
-     * {@link Exp} in the {@link Sequent}.</p>
-     *
-     * @param s The original {@link Sequent}.
-     * @param substitutions A map of substitutions.
-     *
-     * @return A modified {@link Sequent}.
-     */
-    private Sequent createReplacementSequent(Sequent s, Map<Exp, Exp> substitutions) {
-        List<Exp> newAntecedents = new ArrayList<>();
-        List<Exp> newConsequents = new ArrayList<>();
-
-        for (Exp antencedent : s.getAntecedents()) {
-            newAntecedents.add(antencedent.substitute(substitutions));
-        }
-
-        for (Exp consequent : s.getConcequents()) {
-            newConsequents.add(consequent.substitute(substitutions));
-        }
-
-        return new Sequent(s.getLocation(), newAntecedents, newConsequents);
-    }
 
     /**
      * <p>Replace the formal with the actual variables
