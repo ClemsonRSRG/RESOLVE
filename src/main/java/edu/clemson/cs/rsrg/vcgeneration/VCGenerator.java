@@ -682,6 +682,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                         new CallStmtRule(callStmt, opEntry, replaceArgs,
                                 myCurrentModuleScope, assertiveCodeBlock, mySTGroup, blockModel);
             }
+            else if (statement instanceof ChangeStmt) {
+                // Generate a new change rule application.
+                ruleApplication =
+                        new ChangeStmtRule((ChangeStmt) statement,
+                                assertiveCodeBlock, mySTGroup, blockModel);
+            }
             else if (statement instanceof ConfirmStmt) {
                 // Generate a new confirm rule application.
                 ruleApplication =
