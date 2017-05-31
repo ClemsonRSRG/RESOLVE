@@ -69,7 +69,7 @@ public class PresumeStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Add a new confirm statement followed by a stipulate assume statement
+        // Add a new confirm statement followed by an assume statement
         // generated the presume statement to to the assertive code block.
         // YS: We clone the location and expression to avoid aliasing.
         myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(myPresumeStmt
@@ -77,7 +77,7 @@ public class PresumeStmtRule extends AbstractProofRuleApplication
                 false));
         myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(myPresumeStmt
                 .getLocation().clone(), myPresumeStmt.getAssertion().clone(),
-                true));
+                false));
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
