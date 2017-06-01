@@ -62,6 +62,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VCConfirmStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -723,6 +724,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new swap rule application.
                 ruleApplication =
                         new SwapStmtRule((SwapStmt) statement, myCurrentModuleScope,
+                                assertiveCodeBlock, mySTGroup, blockModel);
+            }
+            else if (statement instanceof VCConfirmStmt) {
+                // Generate a new VCConfirm rule application.
+                ruleApplication =
+                        new VCConfirmStmtRule((VCConfirmStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
             }
             else if (statement instanceof WhileStmt) {
