@@ -1,3 +1,15 @@
+/*
+ * VCConfirmStmtRule.java
+ * ---------------------------------
+ * Copyright (c) 2017
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
@@ -17,7 +29,9 @@ import org.stringtemplate.v4.STGroup;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class VCConfirmStmtRule extends AbstractProofRuleApplication implements ProofRuleApplication {
+public class VCConfirmStmtRule extends AbstractProofRuleApplication
+        implements
+            ProofRuleApplication {
 
     // ===========================================================
     // Member Fields
@@ -41,7 +55,8 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication implements P
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public VCConfirmStmtRule(VCConfirmStmt vcConfirmStmt, AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
+    public VCConfirmStmtRule(VCConfirmStmt vcConfirmStmt,
+            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
         myVCConfirmStmt = vcConfirmStmt;
     }
@@ -60,7 +75,8 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication implements P
         // assertive code block. The while statement that generated the VCConfirmStmt
         // should have made sure of that. However, it doesn't hurt to combine them rather
         // than simply replacing it directly. - YS
-        List<VerificationCondition> newVCs = myCurrentAssertiveCodeBlock.getVCs();
+        List<VerificationCondition> newVCs =
+                myCurrentAssertiveCodeBlock.getVCs();
         newVCs.addAll(myVCConfirmStmt.getVCs());
 
         // Store the new list of vcs
