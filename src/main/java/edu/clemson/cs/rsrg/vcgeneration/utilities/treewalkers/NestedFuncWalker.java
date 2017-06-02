@@ -53,7 +53,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     public final void preProgramFunctionExp(ProgramFunctionExp exp) {}
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramFunctionExp}.</p>
+     * <p>Code that gets executed after visiting a {@link ProgramFunctionExp}.</p>
      *
      * @param exp A program function expression.
      */
