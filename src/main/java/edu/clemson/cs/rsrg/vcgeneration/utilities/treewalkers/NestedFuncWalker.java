@@ -13,8 +13,11 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>This class extracts ensures clauses (with the appropriate substitutions)
@@ -30,11 +33,19 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // Member Fields
     // ===========================================================
 
+    /**
+     * <p>A map that contains the modified ensures clause with the formal
+     * replaced with the actuals for each of the nested function calls.</p>
+     */
+    private final Map<ProgramFunctionExp, Exp> myEnsuresClauseMap;
+
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public NestedFuncWalker() {}
+    public NestedFuncWalker() {
+        myEnsuresClauseMap = new HashMap<>();
+    }
 
     // ===========================================================
     // Visitor Methods
