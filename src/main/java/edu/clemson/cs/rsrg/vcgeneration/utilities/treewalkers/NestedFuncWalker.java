@@ -13,10 +13,13 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -92,6 +95,25 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      * @return The complete requires clause.
      */
     public final AssertionClause getRequiresClause() {
+        return null;
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>Replace the formal with the actual variables
+     * inside the requires clause.</p>
+     *
+     * @param requires The requires clause.
+     * @param paramList The list of parameter variables.
+     * @param argList The list of arguments from the operation call.
+     *
+     * @return The requires clause in <code>Exp</code> form.
+     */
+    private Exp replaceFormalWithActualReq(Exp requires,
+            List<ParameterVarDec> paramList, List<ProgramExp> argList) {
         return null;
     }
 
