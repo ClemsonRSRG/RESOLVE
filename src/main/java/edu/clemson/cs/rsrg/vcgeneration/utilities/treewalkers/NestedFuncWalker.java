@@ -163,7 +163,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             }
 
             // VarExp form of the parameter variable
-            VarExp oldExp =
+            VarExp paramExpAsVarExp =
                     Utilities.createVarExp(varDec.getLocation(), null,
                             varDec.getName(), exp.getMathType(), exp.getMathTypeValue());
 
@@ -174,7 +174,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                             replExp.getMathType(), replExp.getMathTypeValue());
 
             // Add a substitution entry from formal parameter to temp
-            paramToTemp.put(oldExp, tempExp);
+            paramToTemp.put(paramExpAsVarExp, tempExp);
 
             // Add a substitution entry from temp to actual parameter
             tempToActual.put(tempExp, replExp);
