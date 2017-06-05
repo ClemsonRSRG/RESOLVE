@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
@@ -135,25 +136,48 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             ParameterVarDec varDec = paramList.get(i);
             Exp exp = argList.get(i);
 
-            // Convert the pExp into a something we can use
-            Exp repl = Utilities.convertExp(exp, myCurrentModuleScope);
+            // If we happen to have a nested function call as argument, then
+            // simply look inside our ensures clause map for the new modified
+            // ensures clause.
+            Exp replExp;
+            if (exp instanceof ProgramFunctionExp) {
+                // Check to see if we have an ensures clause
+                // for this nested call
+                if (myEnsuresClauseMap.containsKey(exp)) {
+                    // The replacement will be the inner operation's
+                    // ensures clause.
+                    replExp = myEnsuresClauseMap.get(exp);
+                }
+                else {
+                    // Something went wrong with the walking mechanism.
+                    // We should have seen this inner operation call before
+                    // processing the outer operation call.
+                    throw new MiscErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
+                            exp.toString() + " " + exp.getLocation(), new RuntimeException());
+                }
+            }
+            // All other types of expressions
+            else {
+                // Convert the exp into a something we can use
+                replExp = Utilities.convertExp(exp, myCurrentModuleScope);
+            }
 
             // VarExp form of the parameter variable
             VarExp oldExp =
                     Utilities.createVarExp(varDec.getLocation(), null,
                             varDec.getName(), exp.getMathType(), exp.getMathTypeValue());
 
-            // New VarExp
-            VarExp newExp =
+            // A temporary VarExp that avoids any formal with the same name as the actual.
+            VarExp tempExp =
                     Utilities.createVarExp(varDec.getLocation(), null,
                             new PosSymbol(varDec.getLocation(), "_" + varDec.getName().getName()),
-                            repl.getMathType(), repl.getMathTypeValue());
+                            replExp.getMathType(), replExp.getMathTypeValue());
 
             // Add a substitution entry from formal parameter to temp
-            paramToTemp.put(oldExp, newExp);
+            paramToTemp.put(oldExp, tempExp);
 
             // Add a substitution entry from temp to actual parameter
-            tempToActual.put(newExp, repl);
+            tempToActual.put(tempExp, replExp);
         }
 
         // Replace from formal to temp and then from temp to actual
