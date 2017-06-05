@@ -20,6 +20,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,12 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>The module scope for the file we are generating
+     * {@code VCs} for.</p>
+     */
+    private final ModuleScope myCurrentModuleScope;
+
+    /**
      * <p>A map that contains the modified ensures clause with the formal
      * replaced with the actuals for each of the nested function calls.</p>
      */
@@ -49,7 +56,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // Constructors
     // ===========================================================
 
-    public NestedFuncWalker() {
+    public NestedFuncWalker(ModuleScope moduleScope) {
+       myCurrentModuleScope = moduleScope;
         myEnsuresClauseMap = new HashMap<>();
     }
 
@@ -154,5 +162,4 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
         return requires;
     }
-
 }
