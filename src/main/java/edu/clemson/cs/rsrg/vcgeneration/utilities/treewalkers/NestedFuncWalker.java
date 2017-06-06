@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
@@ -21,9 +22,12 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -115,7 +119,29 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>Replace the formal with the actual variables
+     * <p>An helper method that returns {@link ProgramFunctionExp ProgramFunctionExp's}
+     * corresponding {@link OperationDec}.</p>
+     *
+     * @param functionExp A program function expression.
+     *
+     * @return The corresponding {@link OperationDec}.
+     */
+    private OperationDec getOperationDec(ProgramFunctionExp functionExp) {
+        // Obtain the corresponding OperationEntry and OperationDec
+        List<PTType> argTypes = new LinkedList<>();
+        for (ProgramExp arg : functionExp.getArguments()) {
+            argTypes.add(arg.getProgramType());
+        }
+        OperationEntry opEntry =
+                Utilities.searchOperation(functionExp.getLocation(),
+                        functionExp.getQualifier(), functionExp.getName(),
+                        argTypes, myCurrentModuleScope);
+
+        return (OperationDec) opEntry.getDefiningElement();
+    }
+
+    /**
+     * <p>An helper method that replaces the formal with the actual variables
      * inside the requires clause.</p>
      *
      * @param requires The requires clause.

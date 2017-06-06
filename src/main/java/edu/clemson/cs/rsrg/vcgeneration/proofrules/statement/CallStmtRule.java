@@ -439,7 +439,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>Replace the formal with the actual variables
+     * <p>An helper method that replaces the formal with the actual variables
      * inside the requires clause.</p>
      *
      * @param requires The requires clause.
