@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,8 +35,8 @@ import java.util.Map;
 
 /**
  * <p>This class extracts ensures clauses (with the appropriate substitutions)
- * from walking nested {@link ProgramFunctionExp}. This visitor logic is implemented
- * as a {@link TreeWalkerVisitor}.</p>
+ * from walking potentially nested {@link ProgramFunctionExp}. This visitor logic
+ * is implemented as a {@link TreeWalkerVisitor}.</p>
  *
  * @author Yu-Shan Sun
  * @version 2.0
@@ -64,14 +65,29 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      */
     private final List<Exp> myRequiresClauseList;
 
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public NestedFuncWalker(ModuleScope moduleScope) {
+    /**
+     * <p>This creates a {@link TreeWalkerVisitor} that visits
+     * and generates {@code requires} and {@code ensures} clauses
+     * for potentially nested function calls.</p>
+     *
+     * @param moduleScope The current module scope we are visiting.
+     * @param g The current type graph.
+     */
+    public NestedFuncWalker(ModuleScope moduleScope, TypeGraph g) {
         myCurrentModuleScope = moduleScope;
         myEnsuresClauseMap = new HashMap<>();
         myRequiresClauseList = new LinkedList<>();
+        myTypeGraph = g;
     }
 
     // ===========================================================
@@ -122,7 +138,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      * @return The complete requires clause as an {@link Exp}.
      */
     public final Exp getRequiresClause(Location loc) {
-        Exp allRequiresExp = VarExp.getTrueVarExp(loc.clone());
+        Exp allRequiresExp = VarExp.getTrueVarExp(loc.clone(), myTypeGraph);
         for (Exp exp : myRequiresClauseList) {
             // Don't need to do anything if the requires clause is simply true.
             if (!VarExp.isLiteralTrue(exp)) {
