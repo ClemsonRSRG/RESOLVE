@@ -28,10 +28,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>This class extracts ensures clauses (with the appropriate substitutions)
@@ -125,7 +122,24 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      * @return The complete ensures clause as an {@link Exp}.
      */
     public final Exp getEnsuresClause() {
-        return null;
+        Exp ensures;
+
+        // We can't have more than one thing left or have none at all in our map.
+        // This must mean either something didn't get replaced correctly or
+        // we forgot to add an ensures clause to the map.
+        if (myEnsuresClauseMap.size() > 1 || myEnsuresClauseMap.size() == 0) {
+            throw new MiscErrorException(
+                    "[VCGenerator] An error occurred while walking the tree! Our ensures clause map contains: "
+                            + myEnsuresClauseMap.toString(),
+                    new RuntimeException());
+        }
+        // Retrieve the ensures clause of the nested function call.
+        else {
+            Set<ProgramFunctionExp> opNameSet = myEnsuresClauseMap.keySet();
+            ensures = myEnsuresClauseMap.remove(opNameSet.iterator().next());
+        }
+
+        return ensures;
     }
 
     /**
