@@ -109,7 +109,19 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      * @param exp A program function expression.
      */
     @Override
-    public final void postProgramFunctionExp(ProgramFunctionExp exp) {}
+    public final void postProgramFunctionExp(ProgramFunctionExp exp) {
+        // Call a method to locate the operation declaration for this call
+        OperationDec operationDec = getOperationDec(exp);
+
+        // Replace formals in the original requires clause with the
+        // actuals from the function call.
+        Exp requiresExp =
+                replaceFormalWithActualReq(operationDec.getRequires()
+                        .getAssertionExp(), operationDec.getParameters(), exp
+                        .getArguments());
+
+        // TODO: Replace any facility declaration actuals in the requires clause.
+    }
 
     // ===========================================================
     // Public Methods
