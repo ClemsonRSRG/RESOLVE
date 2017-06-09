@@ -57,6 +57,12 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     private final Map<ProgramFunctionExp, Exp> myEnsuresClauseMap;
 
     /**
+     * <p>A map that stores all the details associated with
+     * a particular {@link Location}.</p>
+     */
+    private final Map<Location, String> myLocationDetails;
+
+    /**
      * <p>A list that contains the modified requires clauses with the formal
      * replaced with the actuals for each of the nested function calls.</p>
      */
@@ -84,6 +90,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         myCurrentModuleScope = moduleScope;
         myEnsuresClauseMap = new HashMap<>();
         myRequiresClauseList = new LinkedList<>();
+        myLocationDetails = new HashMap<>();
         myTypeGraph = g;
     }
 
@@ -110,6 +117,12 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      */
     @Override
     public final void postProgramFunctionExp(ProgramFunctionExp exp) {
+        // Create a string with the qualifier (if any) and the operation name
+        String fullOperationName = exp.getName().getName();
+        if (exp.getQualifier() != null) {
+            fullOperationName = exp.getQualifier() + "::" + fullOperationName;
+        }
+
         // Call a method to locate the operation declaration for this call
         OperationDec operationDec = getOperationDec(exp);
 
@@ -121,6 +134,13 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                         .getArguments());
 
         // TODO: Replace any facility declaration actuals in the requires clause.
+
+        // TODO: Append the name of the declaration that is making this function call.
+        String details = "";
+
+        // Store the location detail for the function call's requires clause
+        myLocationDetails.put(requiresExp.getLocation(), "Requires Clause of "
+                + fullOperationName + details);
     }
 
     // ===========================================================
