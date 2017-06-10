@@ -142,6 +142,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             // Store the location detail for the function call's requires clause
             myLocationDetails.put(requiresExp.getLocation(),
                     "Requires Clause of " + fullOperationName + details);
+
+            // Store the modified requires clause in our list
+            myRequiresClauseList.add(requiresExp);
         }
     }
 
