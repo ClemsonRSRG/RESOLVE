@@ -127,20 +127,22 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         OperationDec operationDec = getOperationDec(exp);
 
         // Replace formals in the original requires clause with the
-        // actuals from the function call.
-        Exp requiresExp =
-                replaceFormalWithActualReq(operationDec.getRequires()
-                        .getAssertionExp(), operationDec.getParameters(), exp
-                        .getArguments());
+        // actuals from the function call, if it is not simply "requires true"
+        if (!VarExp.isLiteralTrue(operationDec.getRequires().getAssertionExp())) {
+            Exp requiresExp =
+                    replaceFormalWithActualReq(operationDec.getRequires()
+                            .getAssertionExp(), operationDec.getParameters(),
+                            exp.getArguments());
 
-        // TODO: Replace any facility declaration actuals in the requires clause.
+            // TODO: Replace any facility declaration actuals in the requires clause.
 
-        // TODO: Append the name of the declaration that is making this function call.
-        String details = "";
+            // TODO: Append the name of the declaration that is making this function call.
+            String details = "";
 
-        // Store the location detail for the function call's requires clause
-        myLocationDetails.put(requiresExp.getLocation(), "Requires Clause of "
-                + fullOperationName + details);
+            // Store the location detail for the function call's requires clause
+            myLocationDetails.put(requiresExp.getLocation(),
+                    "Requires Clause of " + fullOperationName + details);
+        }
     }
 
     // ===========================================================
@@ -186,18 +188,15 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     public final Exp getRequiresClause(Location loc) {
         Exp allRequiresExp = VarExp.getTrueVarExp(loc.clone(), myTypeGraph);
         for (Exp exp : myRequiresClauseList) {
-            // Don't need to do anything if the requires clause is simply true.
-            if (!VarExp.isLiteralTrue(exp)) {
-                // Replace allRequiresExp if it is still "true"
-                if (VarExp.isLiteralTrue(allRequiresExp)) {
-                    allRequiresExp = exp.clone();
-                }
-                // Else form a conjunct.
-                else {
-                    allRequiresExp =
-                            InfixExp.formConjunct(loc.clone(), allRequiresExp,
-                                    exp.clone());
-                }
+            // Replace allRequiresExp if it is still "true"
+            if (VarExp.isLiteralTrue(allRequiresExp)) {
+                allRequiresExp = exp.clone();
+            }
+            // Else form a conjunct.
+            else {
+                allRequiresExp =
+                        InfixExp.formConjunct(loc.clone(), allRequiresExp, exp
+                                .clone());
             }
         }
 
