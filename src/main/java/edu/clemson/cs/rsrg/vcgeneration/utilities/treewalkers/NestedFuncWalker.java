@@ -180,6 +180,17 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This method returns a map containing details about
+     * a {@link Location} object that was generated while visiting
+     * function calls.</p>
+     *
+     * @return A map from {@link Location} to location detail strings.
+     */
+    public final Map<Location, String> getNewLocationString() {
+        return myLocationDetails;
+    }
+
+    /**
      * <p>This method returns the final modified requires clause
      * after all the necessary replacement/substitutions have been made.</p>
      *
