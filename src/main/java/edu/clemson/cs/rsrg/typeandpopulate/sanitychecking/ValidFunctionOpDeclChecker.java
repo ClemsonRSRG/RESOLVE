@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.typeandpopulate.sanitychecking;
 
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 
 /**
  * <p>This is a sanity checker for making sure the {@link OperationDec}
@@ -31,9 +32,6 @@ public class ValidFunctionOpDeclChecker {
     /** <p>The function operation declaration to be checked.</p> */
     private final OperationDec MyFunctionOperationDec;
 
-    /** <p>The location that generated this checker.</p> */
-    private final Location myLocation;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -42,17 +40,26 @@ public class ValidFunctionOpDeclChecker {
      * <p>Creates a sanity checker for checking the various different criteria
      * for being a valid function operation declaration.</p>
      *
-     * @param location Location that generated this checker.
      * @param functionOperation The associated function operation declaration.
      */
-    public ValidFunctionOpDeclChecker(Location location,
-            OperationDec functionOperation) {
-        myLocation = location;
+    public ValidFunctionOpDeclChecker(OperationDec functionOperation) {
         MyFunctionOperationDec = functionOperation;
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>Checks to see if the provided {@link OperationDec} is a
+     * valid function operation declaration. A valid function
+     * operation declaration must be of the form:
+     * {@code <FuncOpDeclName> = <Expression/Value>}</p>
+     *
+     * @throws SourceErrorException This is thrown if it is not a valid
+     * function operation declaration. The message will indicate why it is
+     * not valid.
+     */
+    public final void checkFunctionOpDecl() {}
 
 }

@@ -1292,6 +1292,13 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postOperationDec(OperationDec dec) {
+        // If this is a function operation declaration, then we need to make sure
+        // it is a valid declaration.
+        if (dec.getReturnTy() != null) {
+            ValidFunctionOpDeclChecker declChecker = new ValidFunctionOpDeclChecker(dec);
+            declChecker.checkFunctionOpDecl();
+        }
+
         // If this is not an OperationDec wrapped inside a FacilityOperationDec,
         // we need to end the current scope, add the operation declaration using
         // the inner most active scope and set the parameter list to null.
