@@ -103,14 +103,6 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramFunctionExp}.</p>
-     *
-     * @param exp A program function expression.
-     */
-    @Override
-    public final void preProgramFunctionExp(ProgramFunctionExp exp) {}
-
-    /**
      * <p>Code that gets executed after visiting a {@link ProgramFunctionExp}.</p>
      *
      * @param exp A program function expression.
@@ -126,9 +118,10 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         // Call a method to locate the operation declaration for this call
         OperationDec operationDec = getOperationDec(exp);
 
-        // Replace formals in the original requires clause with the
-        // actuals from the function call, if it is not simply "requires true"
+        // Only need to do something if it is not "requires true"
         if (!VarExp.isLiteralTrue(operationDec.getRequires().getAssertionExp())) {
+            // Replace formals in the original requires clause with the
+            // actuals from the function call.
             Exp requiresExp =
                     replaceFormalWithActualReq(operationDec.getRequires()
                             .getAssertionExp(), operationDec.getParameters(),
