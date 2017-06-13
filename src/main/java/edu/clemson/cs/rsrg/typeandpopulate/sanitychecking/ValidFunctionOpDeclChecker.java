@@ -13,6 +13,10 @@
 package edu.clemson.cs.rsrg.typeandpopulate.sanitychecking;
 
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 
@@ -30,7 +34,7 @@ public class ValidFunctionOpDeclChecker {
     // ===========================================================
 
     /** <p>The function operation declaration to be checked.</p> */
-    private final OperationDec MyFunctionOperationDec;
+    private final OperationDec myFunctionOperationDec;
 
     // ===========================================================
     // Constructors
@@ -43,7 +47,7 @@ public class ValidFunctionOpDeclChecker {
      * @param functionOperation The associated function operation declaration.
      */
     public ValidFunctionOpDeclChecker(OperationDec functionOperation) {
-        MyFunctionOperationDec = functionOperation;
+        myFunctionOperationDec = functionOperation;
     }
 
     // ===========================================================
@@ -53,13 +57,25 @@ public class ValidFunctionOpDeclChecker {
     /**
      * <p>Checks to see if the provided {@link OperationDec} is a
      * valid function operation declaration. A valid function
-     * operation declaration must be of the form:
-     * {@code <FuncOpDeclName> = <Expression/Value>}</p>
+     * operation declaration must have an {@code ensures} clause
+     * of the form: {@code <FuncOpDeclName> = <Expression/Value>}.</p>
      *
      * @throws SourceErrorException This is thrown if it is not a valid
      * function operation declaration. The message will indicate why it is
      * not valid.
      */
-    public final void checkFunctionOpDecl() {}
+    public final void checkFunctionOpDecl() {
+        Location funcOpLoc = myFunctionOperationDec.getLocation();
+        String funcOpName = myFunctionOperationDec.getName().getName();
+        Exp ensuresExp = myFunctionOperationDec.getEnsures().getAssertionExp();
+
+        // 1. Make sure we don't have "ensures true"
+        if (!VarExp.isLiteralTrue(ensuresExp)) {
+            
+        }
+        else {
+            throw new SourceErrorException("Function operation: " + funcOpName + " cannot have 'ensures true;' as its specification.", funcOpLoc);
+        }
+    }
 
 }
