@@ -71,10 +71,23 @@ public class ValidFunctionOpDeclChecker {
 
         // 1. Make sure we don't have "ensures true"
         if (!VarExp.isLiteralTrue(ensuresExp)) {
-            
+            // 2. Make sure it is an EqualsExp with the "=" operator
+            if (ensuresExp instanceof EqualsExp
+                    && ((EqualsExp) ensuresExp).getOperator().equals(
+                            Operator.EQUAL)) {
+
+            }
+            else {
+                throw new SourceErrorException("Function operation: "
+                        + funcOpName
+                        + " must have an ensures clause of the form: '"
+                        + funcOpName + " = <Expression/Value>'", funcOpLoc);
+            }
         }
         else {
-            throw new SourceErrorException("Function operation: " + funcOpName + " cannot have 'ensures true;' as its specification.", funcOpLoc);
+            throw new SourceErrorException("Function operation: " + funcOpName
+                    + " cannot have 'ensures true;' as its specification.",
+                    funcOpLoc);
         }
     }
 
