@@ -78,15 +78,25 @@ public class ValidFunctionOpDeclChecker {
                 EqualsExp ensuresExpAsEqualsExp = (EqualsExp) ensuresExp;
                 // 3. Make sure the function name is used in the ensures clause
                 if (ensuresExpAsEqualsExp.containsVar(funcOpName, false)) {
-
+                    // 4. Make sure that the function name is on the left side only.
+                    if (!ensuresExpAsEqualsExp.getLeft().containsVar(
+                            funcOpName, false)
+                            || ensuresExpAsEqualsExp.getRight().containsVar(
+                                    funcOpName, false)) {
+                        throw new SourceErrorException(
+                                "Function operation name: "
+                                        + funcOpName
+                                        + " can only appear on the left hand side of the ensures clause. "
+                                        + "The ensures clause must be of the form: '"
+                                        + funcOpName + " = <Expression/Value>'",
+                                funcOpLoc);
+                    }
                 }
                 else {
-                    throw new SourceErrorException(
-                            "Function operation name: "
-                                    + funcOpName
-                                    + " not found in the ensures clause. The ensures clause must be of the form: '"
-                                    + funcOpName + " = <Expression/Value>'",
-                            funcOpLoc);
+                    throw new SourceErrorException("Function operation name: "
+                            + funcOpName + " not found in the ensures clause. "
+                            + "The ensures clause must be of the form: '"
+                            + funcOpName + " = <Expression/Value>'", funcOpLoc);
                 }
             }
             else {
