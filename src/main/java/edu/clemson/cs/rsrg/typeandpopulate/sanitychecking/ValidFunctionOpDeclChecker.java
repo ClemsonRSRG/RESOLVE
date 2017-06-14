@@ -75,7 +75,19 @@ public class ValidFunctionOpDeclChecker {
             if (ensuresExp instanceof EqualsExp
                     && ((EqualsExp) ensuresExp).getOperator().equals(
                             Operator.EQUAL)) {
+                EqualsExp ensuresExpAsEqualsExp = (EqualsExp) ensuresExp;
+                // 3. Make sure the function name is used in the ensures clause
+                if (ensuresExpAsEqualsExp.containsVar(funcOpName, false)) {
 
+                }
+                else {
+                    throw new SourceErrorException(
+                            "Function operation name: "
+                                    + funcOpName
+                                    + " not found in the ensures clause. The ensures clause must be of the form: '"
+                                    + funcOpName + " = <Expression/Value>'",
+                            funcOpLoc);
+                }
             }
             else {
                 throw new SourceErrorException("Function operation: "
