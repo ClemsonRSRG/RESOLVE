@@ -139,6 +139,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
         }
+
+        // YS: The ensures clause was sanity checked already, so no need to do it here.
     }
 
     // ===========================================================

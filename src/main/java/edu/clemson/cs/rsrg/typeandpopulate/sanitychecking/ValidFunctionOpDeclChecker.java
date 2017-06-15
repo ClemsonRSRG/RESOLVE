@@ -78,14 +78,16 @@ public class ValidFunctionOpDeclChecker {
                 EqualsExp ensuresExpAsEqualsExp = (EqualsExp) ensuresExp;
                 // 3. Make sure the function name is used in the ensures clause
                 if (ensuresExpAsEqualsExp.containsVar(funcOpName, false)) {
+                    Exp leftExp = ensuresExpAsEqualsExp.getLeft();
+                    Exp rightExp = ensuresExpAsEqualsExp.getRight();
+
                     // 4. Make sure that the left hand side is a VarExp with the
                     //    function operation as the name.
-                    if (ensuresExpAsEqualsExp.getLeft() instanceof VarExp
-                            && ((VarExp) ensuresExpAsEqualsExp.getLeft())
-                                    .getName().getName().equals(funcOpName)) {
+                    if (leftExp instanceof VarExp
+                            && ((VarExp) leftExp).getName().getName().equals(
+                                    funcOpName)) {
                         // 5. Make sure that the function name isn't on the right hand side.
-                        if (ensuresExpAsEqualsExp.getRight().containsVar(
-                                funcOpName, false)) {
+                        if (rightExp.containsVar(funcOpName, false)) {
                             throw new SourceErrorException(
                                     "Function operation name: "
                                             + funcOpName
