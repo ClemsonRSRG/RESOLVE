@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -240,13 +241,32 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
     /**
      * <p>An helper method that replaces the formal with the actual variables
-     * inside the requires clause.</p>
+     * inside the {@code ensures} clause.</p>
      *
-     * @param requires The requires clause.
+     * @param ensures The {@code ensures} clause as an {@link Exp}.
+     * @param paramList The list of parameter variables.
+     * @param affectsVarList The list of global state variables affected by this operation.
+     * @param argList The list of arguments from the operation call.
+     *
+     * @return A potentially modified {@code ensures} clause
+     * represented using an {@link Exp}.
+     */
+    private Exp replaceFormalWithActualEns(Exp ensures,
+            List<ParameterVarDec> paramList, AffectsClause affectsVarList,
+            List<ProgramExp> argList) {
+        return null;
+    }
+
+    /**
+     * <p>An helper method that replaces the formal with the actual variables
+     * inside the {@code requires} clause.</p>
+     *
+     * @param requires The {@code requires} clause as an {@link Exp}.
      * @param paramList The list of parameter variables.
      * @param argList The list of arguments from the operation call.
      *
-     * @return The requires clause in <code>Exp</code> form.
+     * @return A potentially modified {@code requires} clause
+     * represented using an {@link Exp}.
      */
     private Exp replaceFormalWithActualReq(Exp requires,
             List<ParameterVarDec> paramList, List<ProgramExp> argList) {
