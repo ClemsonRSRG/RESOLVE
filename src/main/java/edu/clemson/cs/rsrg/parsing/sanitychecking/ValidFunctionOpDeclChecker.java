@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.typeandpopulate.sanitychecking;
+package edu.clemson.cs.rsrg.parsing.sanitychecking;
 
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -58,7 +58,8 @@ public class ValidFunctionOpDeclChecker {
      * <p>Checks to see if the provided {@link OperationDec} is a
      * valid function operation declaration. A valid function
      * operation declaration must have an {@code ensures} clause
-     * of the form: {@code <FuncOpDeclName> = <Expression/Value>}.</p>
+     * of the form: {@code <FuncOpDeclName> = <Expression/Value>}.
+     * It also shouldn't affect any global state variables.</p>
      *
      * @throws SourceErrorException This is thrown if it is not a valid
      * function operation declaration. The message will indicate why it is
@@ -69,24 +70,30 @@ public class ValidFunctionOpDeclChecker {
         String funcOpName = myFunctionOperationDec.getName().getName();
         Exp ensuresExp = myFunctionOperationDec.getEnsures().getAssertionExp();
 
-        // 1. Make sure we don't have "ensures true"
+        // 1. Check to see if it affects any global state variables
+        if (myFunctionOperationDec.getAffectedVars() != null) {
+            throw new SourceErrorException("Function operation: " + funcOpName
+                    + " cannot contain an affects clause.", funcOpLoc);
+        }
+
+        // 2. Make sure we don't have "ensures true"
         if (!VarExp.isLiteralTrue(ensuresExp)) {
-            // 2. Make sure it is an EqualsExp with the "=" operator
+            // 3. Make sure it is an EqualsExp with the "=" operator
             if (ensuresExp instanceof EqualsExp
                     && ((EqualsExp) ensuresExp).getOperator().equals(
                             Operator.EQUAL)) {
                 EqualsExp ensuresExpAsEqualsExp = (EqualsExp) ensuresExp;
-                // 3. Make sure the function name is used in the ensures clause
+                // 4. Make sure the function name is used in the ensures clause
                 if (ensuresExpAsEqualsExp.containsVar(funcOpName, false)) {
                     Exp leftExp = ensuresExpAsEqualsExp.getLeft();
                     Exp rightExp = ensuresExpAsEqualsExp.getRight();
 
-                    // 4. Make sure that the left hand side is a VarExp with the
+                    // 5. Make sure that the left hand side is a VarExp with the
                     //    function operation as the name.
                     if (leftExp instanceof VarExp
                             && ((VarExp) leftExp).getName().getName().equals(
                                     funcOpName)) {
-                        // 5. Make sure that the function name isn't on the right hand side.
+                        // 6. Make sure that the function name isn't on the right hand side.
                         if (rightExp.containsVar(funcOpName, false)) {
                             throw new SourceErrorException(
                                     "Function operation name: "

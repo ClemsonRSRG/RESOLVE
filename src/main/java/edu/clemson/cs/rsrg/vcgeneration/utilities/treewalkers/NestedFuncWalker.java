@@ -245,15 +245,13 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      *
      * @param ensures The {@code ensures} clause as an {@link Exp}.
      * @param paramList The list of parameter variables.
-     * @param affectsVarList The list of global state variables affected by this operation.
      * @param argList The list of arguments from the operation call.
      *
      * @return A potentially modified {@code ensures} clause
      * represented using an {@link Exp}.
      */
     private Exp replaceFormalWithActualEns(Exp ensures,
-            List<ParameterVarDec> paramList, AffectsClause affectsVarList,
-            List<ProgramExp> argList) {
+            List<ParameterVarDec> paramList, List<ProgramExp> argList) {
         return null;
     }
 
