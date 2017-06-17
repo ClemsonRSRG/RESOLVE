@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
@@ -287,6 +288,23 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                 // Convert the exp into a something we can use
                 replExp = Utilities.convertExp(exp, myCurrentModuleScope);
             }
+
+            // VarExp form of the parameter variable
+            VarExp paramExpAsVarExp =
+                    Utilities.createVarExp(varDec.getLocation(), null,
+                            varDec.getName(), exp.getMathType(), exp.getMathTypeValue());
+
+            // A temporary VarExp that avoids any formal with the same name as the actual.
+            VarExp tempExp =
+                    Utilities.createVarExp(varDec.getLocation(), null,
+                            new PosSymbol(varDec.getLocation(), "_" + varDec.getName().getName()),
+                            replExp.getMathType(), replExp.getMathTypeValue());
+
+            // Add a substitution entry from formal parameter to tempExp.
+            paramToTemp.put(paramExpAsVarExp, tempExp);
+
+            // Add a substitution entry from tempExp to actual parameter.
+            tempToActual.put(tempExp, replExp);
         }
 
         // Replace from formal to temp and then from temp to actual
@@ -358,10 +376,10 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                             new PosSymbol(varDec.getLocation(), "_" + varDec.getName().getName()),
                             replExp.getMathType(), replExp.getMathTypeValue());
 
-            // Add a substitution entry from formal parameter to temp
+            // Add a substitution entry from formal parameter to tempExp.
             paramToTemp.put(paramExpAsVarExp, tempExp);
 
-            // Add a substitution entry from temp to actual parameter
+            // Add a substitution entry from tempExp to actual parameter.
             tempToActual.put(tempExp, replExp);
         }
 
