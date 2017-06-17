@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
-import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -252,7 +251,49 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      */
     private Exp replaceFormalWithActualEns(Exp ensures,
             List<ParameterVarDec> paramList, List<ProgramExp> argList) {
-        return null;
+        // YS: We need two replacement maps in case we happen to have the
+        // same names in formal parameter arguments and in the argument list.
+        Map<Exp, Exp> paramToTemp = new HashMap<>();
+        Map<Exp, Exp> tempToActual = new HashMap<>();
+
+        // Replace postcondition variables in the ensures clause
+        for (int i = 0; i < argList.size(); i++) {
+            ParameterVarDec varDec = paramList.get(i);
+            Exp exp = argList.get(i);
+
+            // If we happen to have a nested function call as argument, then
+            // simply look inside our ensures clause map for the new modified
+            // ensures clause.
+            Exp replExp;
+            if (exp instanceof ProgramFunctionExp) {
+                // Check to see if we have an ensures clause
+                // for this nested call
+                if (myEnsuresClauseMap.containsKey(exp)) {
+                    // The replacement will be the inner operation's
+                    // ensures clause. We are done processing the
+                    // inner function call, so we can remove it from our map.
+                    replExp = myEnsuresClauseMap.remove(exp);
+                }
+                else {
+                    // Something went wrong with the walking mechanism.
+                    // We should have seen this inner operation call before
+                    // processing the outer operation call.
+                    throw new MiscErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
+                            exp.toString() + " " + exp.getLocation(), new RuntimeException());
+                }
+            }
+            // All other types of expressions
+            else {
+                // Convert the exp into a something we can use
+                replExp = Utilities.convertExp(exp, myCurrentModuleScope);
+            }
+        }
+
+        // Replace from formal to temp and then from temp to actual
+        ensures = ensures.substitute(paramToTemp);
+        ensures = ensures.substitute(tempToActual);
+
+        return ensures;
     }
 
     /**
@@ -280,14 +321,16 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
             // If we happen to have a nested function call as argument, then
             // simply look inside our ensures clause map for the new modified
-            // ensures clause.
+            // ensures clause for any replacements in the requires clause.
             Exp replExp;
             if (exp instanceof ProgramFunctionExp) {
                 // Check to see if we have an ensures clause
                 // for this nested call
                 if (myEnsuresClauseMap.containsKey(exp)) {
                     // The replacement will be the inner operation's
-                    // ensures clause.
+                    // ensures clause. Notice that we only do a "get"
+                    // and not a "remove". We still need this for when
+                    // we process the processing function call's ensures clause.
                     replExp = myEnsuresClauseMap.get(exp);
                 }
                 else {
