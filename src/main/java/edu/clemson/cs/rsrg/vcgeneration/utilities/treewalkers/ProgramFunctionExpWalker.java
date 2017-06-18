@@ -1,5 +1,5 @@
 /*
- * NestedFuncWalker.java
+ * ProgramFunctionExpWalker.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -16,7 +16,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
@@ -39,7 +38,7 @@ import java.util.*;
  * @author Yu-Shan Sun
  * @version 2.0
  */
-public class NestedFuncWalker extends TreeWalkerVisitor {
+public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
     // ===========================================================
     // Member Fields
@@ -87,7 +86,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
-    public NestedFuncWalker(ModuleScope moduleScope, TypeGraph g) {
+    public ProgramFunctionExpWalker(ModuleScope moduleScope, TypeGraph g) {
         myCurrentModuleScope = moduleScope;
         myEnsuresClauseMap = new HashMap<>();
         myRequiresClauseList = new LinkedList<>();
