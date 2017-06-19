@@ -13,12 +13,14 @@
 package edu.clemson.cs.rsrg.parsing.sanitychecking;
 
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 
 /**
  * <p>This is a sanity checker for making sure the {@link OperationDec}
@@ -76,24 +78,39 @@ public class ValidFunctionOpDeclChecker {
                     + " cannot contain an affects clause.", funcOpLoc);
         }
 
-        // 2. Make sure we don't have "ensures true"
+        // 2. Check to see if the parameter modes are either PRESERVES, RESTORES or EVALUATES
+        for (ParameterVarDec varDec : myFunctionOperationDec.getParameters()) {
+            ParameterMode varDecMode = varDec.getMode();
+            if (varDecMode.equals(ParameterMode.ALTERS)
+                    || varDecMode.equals(ParameterMode.CLEARS)
+                    || varDecMode.equals(ParameterMode.REPLACES)
+                    || varDecMode.equals(ParameterMode.UPDATES)) {
+                throw new SourceErrorException(
+                        "Function parameter: "
+                                + varDec.getName().getName()
+                                + ", must have either PRESERVES, RESTORES or EVALUATES mode.",
+                        varDec.getLocation());
+            }
+        }
+
+        // 3. Make sure we don't have "ensures true"
         if (!VarExp.isLiteralTrue(ensuresExp)) {
-            // 3. Make sure it is an EqualsExp with the "=" operator
+            // 4. Make sure it is an EqualsExp with the "=" operator
             if (ensuresExp instanceof EqualsExp
                     && ((EqualsExp) ensuresExp).getOperator().equals(
                             Operator.EQUAL)) {
                 EqualsExp ensuresExpAsEqualsExp = (EqualsExp) ensuresExp;
-                // 4. Make sure the function name is used in the ensures clause
+                // 5. Make sure the function name is used in the ensures clause
                 if (ensuresExpAsEqualsExp.containsVar(funcOpName, false)) {
                     Exp leftExp = ensuresExpAsEqualsExp.getLeft();
                     Exp rightExp = ensuresExpAsEqualsExp.getRight();
 
-                    // 5. Make sure that the left hand side is a VarExp with the
+                    // 6. Make sure that the left hand side is a VarExp with the
                     //    function operation as the name.
                     if (leftExp instanceof VarExp
                             && ((VarExp) leftExp).getName().getName().equals(
                                     funcOpName)) {
-                        // 6. Make sure that the function name isn't on the right hand side.
+                        // 7. Make sure that the function name isn't on the right hand side.
                         if (rightExp.containsVar(funcOpName, false)) {
                             throw new SourceErrorException(
                                     "Function operation name: "
