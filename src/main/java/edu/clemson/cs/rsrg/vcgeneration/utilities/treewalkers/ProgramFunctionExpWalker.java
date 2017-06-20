@@ -151,24 +151,28 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * <p>This method returns the final modified ensures clause
      * after all the necessary replacement/substitutions have been made.</p>
      *
+     * @param exp The outermost {@link ProgramFunctionExp} that we wish to
+     *            extract an {@code ensures} clause for.
+     *
      * @return The complete ensures clause as an {@link Exp}.
+     *
+     * @throws MiscErrorException This is thrown when we can't locate the
+     * ensures clause for {@code exp}.
      */
-    public final Exp getEnsuresClause() {
+    public final Exp getEnsuresClause(ProgramFunctionExp exp) {
         Exp ensures;
 
-        // We can't have more than one thing left or have none at all in our map.
-        // This must mean either something didn't get replaced correctly or
-        // we forgot to add an ensures clause to the map.
-        if (myEnsuresClauseMap.size() > 1 || myEnsuresClauseMap.size() == 0) {
+        // Attempt to locate the ensures clause for exp
+        if (myEnsuresClauseMap.containsKey(exp)) {
+            ensures = myEnsuresClauseMap.get(exp).clone();
+        }
+        else {
             throw new MiscErrorException(
-                    "[VCGenerator] An error occurred while walking the tree! Our ensures clause map contains: "
+                    "[VCGenerator] Cannot locate the ensures clause for: "
+                            + exp.toString()
+                            + ". Our ensures clause map contains: "
                             + myEnsuresClauseMap.toString(),
                     new RuntimeException());
-        }
-        // Retrieve the ensures clause of the nested function call.
-        else {
-            Set<ProgramFunctionExp> opNameSet = myEnsuresClauseMap.keySet();
-            ensures = myEnsuresClauseMap.remove(opNameSet.iterator().next());
         }
 
         return ensures;
