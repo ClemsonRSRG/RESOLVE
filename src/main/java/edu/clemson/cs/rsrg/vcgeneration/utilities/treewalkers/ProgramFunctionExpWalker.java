@@ -151,6 +151,10 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * <p>This method returns the final modified ensures clause
      * after all the necessary replacement/substitutions have been made.</p>
      *
+     * <p>Note that the return value is removed from the class and
+     * subsequent calls to this method with the same {@code exp}
+     * will result in an exception.</p>
+     *
      * @param exp The outermost {@link ProgramFunctionExp} that we wish to
      *            extract an {@code ensures} clause for.
      *
@@ -164,7 +168,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
         // Attempt to locate the ensures clause for exp
         if (myEnsuresClauseMap.containsKey(exp)) {
-            ensures = myEnsuresClauseMap.get(exp).clone();
+            ensures = myEnsuresClauseMap.remove(exp);
         }
         else {
             throw new MiscErrorException(
