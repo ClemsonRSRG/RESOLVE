@@ -68,6 +68,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      */
     private final List<Exp> myRequiresClauseList;
 
+    /** <p>A list that contains all the restores parameter ensures clauses</p> */
+    private final List<Exp> myRestoresParamEnsuresClauses;
+
     /**
      * <p>This is the math type graph that indicates relationship
      * between different math types.</p>
@@ -90,6 +93,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         myCurrentModuleScope = moduleScope;
         myEnsuresClauseMap = new HashMap<>();
         myRequiresClauseList = new LinkedList<>();
+        myRestoresParamEnsuresClauses = new LinkedList<>();
         myLocationDetails = new HashMap<>();
         myTypeGraph = g;
     }
@@ -218,6 +222,17 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         }
 
         return allRequiresExp;
+    }
+
+    /**
+     * <p>This method returns the list of @code restores} parameter's
+     * ensures clauses (if any).</p>
+     *
+     * @return {@code Ensures} clauses generated from {@code restores}
+     * parameters.
+     */
+    public final List<Exp> getRestoresParamEnsuresClauses() {
+        return myRestoresParamEnsuresClauses;
     }
 
     // ===========================================================
