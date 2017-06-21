@@ -15,7 +15,10 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
@@ -24,6 +27,7 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -145,6 +149,13 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         }
 
         // YS: The ensures clause was sanity checked already, so no need to do it here.
+        // Replace formals in the original ensures clause with the actuals
+        // from the function call.
+
+        // Add any ensures clauses for restores parameter to our restores parameter
+        // ensures clause list.
+        generateRestoresParamEnsuresClause(fullOperationName, operationDec
+                .getParameters(), exp.getArguments());
     }
 
     // ===========================================================
@@ -238,6 +249,45 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method that generates {@code ensures} clauses for any parameters
+     * with {@code restores} parameter mode.</p>
+     *
+     * @param opName Name of the operation we are calling.
+     * @param paramList The list of parameter variables.
+     * @param argList The list of arguments from the operation call.
+     */
+    private void generateRestoresParamEnsuresClause(String opName,
+            List<ParameterVarDec> paramList, List<ProgramExp> argList) {
+        for (int i = 0; i < argList.size(); i++) {
+            ParameterVarDec varDec = paramList.get(i);
+            Exp exp = argList.get(i);
+
+            // Only do this if it is a restores parameter mode
+            if (varDec.getMode().equals(ParameterMode.RESTORES)) {
+                // YS: Can safely cast this as VarExp because it is the only thing that
+                // we can pass to a restores parameter.
+                VarExp expAsVarExp =
+                        (VarExp) Utilities
+                                .convertExp(exp, myCurrentModuleScope);
+                OldExp oldExp =
+                        new OldExp(expAsVarExp.getLocation().clone(),
+                                expAsVarExp.clone());
+
+                // Generate the restores parameter ensures clause and
+                // store the new location detail.
+                EqualsExp equalsExp =
+                        new EqualsExp(expAsVarExp.getLocation().clone(),
+                                expAsVarExp, null, Operator.EQUAL, oldExp);
+                myLocationDetails.put(equalsExp.getLocation(),
+                        "Ensures Clause of " + opName + " (Condition from \""
+                                + ParameterMode.RESTORES.name()
+                                + "\" parameter mode)");
+                myRestoresParamEnsuresClauses.add(equalsExp);
+            }
+        }
+    }
 
     /**
      * <p>An helper method that returns {@link ProgramFunctionExp ProgramFunctionExp's}
