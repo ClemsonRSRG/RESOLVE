@@ -151,6 +151,22 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         // YS: The ensures clause was sanity checked already, so no need to do it here.
         // Replace formals in the original ensures clause with the actuals
         // from the function call.
+        Exp ensuresExp =
+                replaceFormalWithActualEns(operationDec.getEnsures()
+                        .getAssertionExp(), operationDec.getParameters(), exp
+                        .getArguments());
+
+        // TODO: Replace any facility declaration actuals in the ensures clause.
+
+        // TODO: Append the name of the declaration that is making this function call.
+        String details = "";
+
+        // Store the location detail for the function call's ensures clause
+        myLocationDetails.put(ensuresExp.getLocation(), "Ensures Clause of "
+                + fullOperationName + details);
+
+        // Store the modified ensures clause in our map
+        myEnsuresClauseMap.put(exp, ensuresExp);
 
         // Add any ensures clauses for restores parameter to our restores parameter
         // ensures clause list.
