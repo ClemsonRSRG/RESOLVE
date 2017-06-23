@@ -54,6 +54,15 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      */
     private final ModuleScope myCurrentModuleScope;
 
+    /** <p>The current procedure declaration we are processing.</p> */
+    private final OperationEntry myCurrentOperationEntry;
+
+    /**
+     * <p>If this is a {@code Recursive Procedure}, then this will contain
+     * the {@code decreasing} clause.</p>
+     */
+    private final Exp myDecreasingExp;
+
     /**
      * <p>A map that contains the modified ensures clause with the formal
      * replaced with the actuals for each of the nested function calls.</p>
@@ -90,11 +99,29 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * and generates {@code requires} and {@code ensures} clauses
      * for potentially nested function calls.</p>
      *
+     * <p>Note that this constructor is used by non-procedure declarations,
+     * where there isn't a current {@link OperationEntry} or a
+     * {@code decreasing} clause.</p>
+     *
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
     public ProgramFunctionExpWalker(ModuleScope moduleScope, TypeGraph g) {
+        this(null, null, moduleScope, g);
+    }
+
+    /**
+     * <p>This creates a {@link TreeWalkerVisitor} that visits
+     * and generates {@code requires} and {@code ensures} clauses
+     * for potentially nested function calls.</p>
+     *
+     * @param moduleScope The current module scope we are visiting.
+     * @param g The current type graph.
+     */
+    public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp, ModuleScope moduleScope, TypeGraph g) {
         myCurrentModuleScope = moduleScope;
+        myCurrentOperationEntry = entry;
+        myDecreasingExp = decreasingExp;
         myEnsuresClauseMap = new HashMap<>();
         myRequiresClauseList = new LinkedList<>();
         myRestoresParamEnsuresClauses = new LinkedList<>();
@@ -166,6 +193,8 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         // ensures clause list.
         generateRestoresParamEnsuresClause(fullOperationName, operationDec
                 .getParameters(), exp.getArguments());
+
+        // Check to see if this function is calling itself recursively
     }
 
     // ===========================================================
