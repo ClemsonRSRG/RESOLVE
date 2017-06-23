@@ -137,12 +137,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
             // TODO: Replace any facility declaration actuals in the requires clause.
 
-            // TODO: Append the name of the declaration that is making this function call.
-            String details = "";
-
             // Store the location detail for the function call's requires clause
             myLocationDetails.put(requiresExp.getLocation(),
-                    "Requires Clause of " + fullOperationName + details);
+                    "Requires Clause of " + fullOperationName);
 
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
@@ -158,12 +155,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
         // TODO: Replace any facility declaration actuals in the ensures clause.
 
-        // TODO: Append the name of the declaration that is making this function call.
-        String details = "";
-
         // Store the location detail for the function call's ensures clause
         myLocationDetails.put(ensuresExp.getLocation(), "Ensures Clause of "
-                + fullOperationName + details);
+                + fullOperationName);
 
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);
