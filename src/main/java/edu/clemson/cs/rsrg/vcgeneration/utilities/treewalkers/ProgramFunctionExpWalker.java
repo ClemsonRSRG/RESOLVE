@@ -25,6 +25,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -197,6 +198,15 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 .getParameters(), exp.getArguments());
 
         // Check to see if this function is calling itself recursively
+        if (myCurrentOperationEntry != null
+                && myCurrentOperationEntry.equals(operationEntry)) {
+            // Make sure we have a decreasing clause
+            if (myDecreasingExp == null) {
+                throw new MiscErrorException(
+                        "[VCGenerator] Cannot locate the decreasing clause for: "
+                                + exp.toString(), new RuntimeException());
+            }
+        }
     }
 
     // ===========================================================
