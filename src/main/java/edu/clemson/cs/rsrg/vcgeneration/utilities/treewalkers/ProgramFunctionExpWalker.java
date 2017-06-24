@@ -150,8 +150,10 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
             fullOperationName = exp.getQualifier() + "::" + fullOperationName;
         }
 
-        // Call a method to locate the operation declaration for this call
-        OperationDec operationDec = getOperationDec(exp);
+        // Call a method to locate the operation entry for this call
+        OperationEntry operationEntry = getOperationEntry(exp);
+        OperationDec operationDec =
+                (OperationDec) operationEntry.getDefiningElement();
 
         // Only need to do something if it is not "requires true"
         if (!VarExp.isLiteralTrue(operationDec.getRequires().getAssertionExp())) {
@@ -330,24 +332,21 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
     /**
      * <p>An helper method that returns {@link ProgramFunctionExp ProgramFunctionExp's}
-     * corresponding {@link OperationDec}.</p>
+     * corresponding {@link OperationEntry}.</p>
      *
      * @param functionExp A program function expression.
      *
-     * @return The corresponding {@link OperationDec}.
+     * @return The corresponding {@link OperationEntry}.
      */
-    private OperationDec getOperationDec(ProgramFunctionExp functionExp) {
-        // Obtain the corresponding OperationEntry and OperationDec
+    private OperationEntry getOperationEntry(ProgramFunctionExp functionExp) {
+        // Obtain the corresponding OperationEntry
         List<PTType> argTypes = new LinkedList<>();
         for (ProgramExp arg : functionExp.getArguments()) {
             argTypes.add(arg.getProgramType());
         }
-        OperationEntry opEntry =
-                Utilities.searchOperation(functionExp.getLocation(),
-                        functionExp.getQualifier(), functionExp.getName(),
-                        argTypes, myCurrentModuleScope);
 
-        return (OperationDec) opEntry.getDefiningElement();
+        return Utilities.searchOperation(functionExp.getLocation(), functionExp.getQualifier(),
+                functionExp.getName(), argTypes, myCurrentModuleScope);
     }
 
     /**
