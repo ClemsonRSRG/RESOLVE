@@ -22,10 +22,10 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
+import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -85,6 +85,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     /** <p>A list that contains all the restores parameter ensures clauses</p> */
     private final List<Exp> myRestoresParamEnsuresClauses;
 
+    /** <p>A list that contains any generated termination {@code Confirm} statements.</p> */
+    private final List<ConfirmStmt> myTerminationConfirmStmts;
+
     /**
      * <p>This is the math type graph that indicates relationship
      * between different math types.</p>
@@ -127,6 +130,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         myRequiresClauseList = new LinkedList<>();
         myRestoresParamEnsuresClauses = new LinkedList<>();
         myLocationDetails = new HashMap<>();
+        myTerminationConfirmStmts = new LinkedList<>();
         myTypeGraph = g;
     }
 
@@ -295,6 +299,18 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      */
     public final List<Exp> getRestoresParamEnsuresClauses() {
         return myRestoresParamEnsuresClauses;
+    }
+
+    /**
+     * <p>This method returns the list of termination
+     * {@code Confirm} clauses (if any).</p>
+     *
+     * @return {@code Confirm} clauses generated from
+     * recursive calls to our current {@code Procedure}
+     * declaration.
+     */
+    public final List<ConfirmStmt> getTerminationConfirmStmts() {
+        return myTerminationConfirmStmts;
     }
 
     // ===========================================================
