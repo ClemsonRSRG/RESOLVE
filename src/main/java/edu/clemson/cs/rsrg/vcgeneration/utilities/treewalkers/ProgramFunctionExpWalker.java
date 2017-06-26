@@ -24,8 +24,10 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -214,9 +216,10 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 .getParameters(), exp.getArguments());
 
         // Check to see if this function is calling itself recursively
+        // and generate the appropriate termination VC.
         if (myCurrentOperationEntry != null
                 && myCurrentOperationEntry.equals(operationEntry)) {
-
+            generateTerminationConfirmStmt(exp);
         }
     }
 
@@ -325,6 +328,34 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>This method returns a newly created {@link VarExp}
+     * with {@code P_Val} as the name and {@code N} as its math type.</p>
+     *
+     * @param loc New {@link VarExp VarExp's} {@link Location}.
+     * @param scope The module scope to start our search.
+     *
+     * @return {@code P_Val} variable expression.
+     */
+    private VarExp createPValExp(Location loc, ModuleScope scope) {
+        // TODO: Use the one defined in Utilities when we merge with the branch that has it.
+        VarExp retExp = null;
+
+        // Locate "N" (Natural Number)
+        MathSymbolEntry mse = Utilities.searchMathSymbol(loc, "N", scope);
+        try {
+            // Create a variable with the name P_val
+            retExp =
+                    Utilities.createVarExp(loc.clone(), null, new PosSymbol(loc
+                            .clone(), "P_Val"), mse.getTypeValue(), null);
+        }
+        catch (SymbolNotOfKindTypeException e) {
+            Utilities.notAType(mse, loc);
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>An helper method that generates {@code ensures} clauses for any parameters
      * with {@code restores} parameter mode.</p>
      *
@@ -378,8 +409,8 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         else {
             VCVarExp nqvPValExp =
                     Utilities.createVCVarExp(myCurrentAssertiveCodeBlock,
-                            Utilities.createPValExp(myDecreasingExp
-                                    .getLocation().clone(),
+                            createPValExp(
+                                    myDecreasingExp.getLocation().clone(),
                                     myCurrentModuleScope));
 
             // Generate the termination of recursive call: P_Exp <= 1 + NQV(RS, P_Val)
