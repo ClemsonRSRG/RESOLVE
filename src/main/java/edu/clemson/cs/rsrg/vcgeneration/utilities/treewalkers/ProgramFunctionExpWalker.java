@@ -15,11 +15,8 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
@@ -32,6 +29,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.Parameter
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.*;
 
@@ -48,6 +46,12 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>The current {@link AssertiveCodeBlock} we are using to
+     * generate {@code VCs}.</p>
+     */
+    private final AssertiveCodeBlock myCurrentAssertiveCodeBlock;
 
     /**
      * <p>The module scope for the file we are generating
@@ -103,15 +107,17 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * and generates {@code requires} and {@code ensures} clauses
      * for potentially nested function calls.</p>
      *
-     * <p>Note that this constructor is used by non-procedure declarations,
-     * where there isn't a current {@link OperationEntry} or a
-     * {@code decreasing} clause.</p>
+     * <p>Note that this constructor is used by non-recursive declarations,
+     * where there isn't a {@code decreasing} clause.</p>
      *
+     * @param block The assertive code block that the subclasses are
+     *              applying the rule to.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
-    public ProgramFunctionExpWalker(ModuleScope moduleScope, TypeGraph g) {
-        this(null, null, moduleScope, g);
+    public ProgramFunctionExpWalker(AssertiveCodeBlock block,
+            ModuleScope moduleScope, TypeGraph g) {
+        this(null, null, block, moduleScope, g);
     }
 
     /**
@@ -119,10 +125,16 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * and generates {@code requires} and {@code ensures} clauses
      * for potentially nested function calls.</p>
      *
+     * @param entry The current visiting {@code Procedure} declaration's
+     *              {@link OperationEntry}.
+     * @param decreasingExp The {@code decreasing} clause for the visiting
+     * @param block The assertive code block that the subclasses are
+     *              applying the rule to.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
-    public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp, ModuleScope moduleScope, TypeGraph g) {
+    public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp, AssertiveCodeBlock block, ModuleScope moduleScope, TypeGraph g) {
+        myCurrentAssertiveCodeBlock = block;
         myCurrentModuleScope = moduleScope;
         myCurrentOperationEntry = entry;
         myDecreasingExp = decreasingExp;
@@ -204,12 +216,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         // Check to see if this function is calling itself recursively
         if (myCurrentOperationEntry != null
                 && myCurrentOperationEntry.equals(operationEntry)) {
-            // Make sure we have a decreasing clause
-            if (myDecreasingExp == null) {
-                throw new MiscErrorException(
-                        "[VCGenerator] Cannot locate the decreasing clause for: "
-                                + exp.toString(), new RuntimeException());
-            }
+
         }
     }
 
@@ -353,6 +360,57 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                                 + "\" parameter mode)");
                 myRestoresParamEnsuresClauses.add(equalsExp);
             }
+        }
+    }
+
+    /**
+     * <p>An helper method that generates termination {@code Confirm} statements.</p>
+     *
+     * @param functionExp A program function expression.
+     */
+    private void generateTerminationConfirmStmt(ProgramFunctionExp functionExp) {
+        // Make sure we have a decreasing clause
+        if (myDecreasingExp == null) {
+            throw new MiscErrorException(
+                    "[VCGenerator] Cannot locate the decreasing clause for: "
+                            + functionExp.toString(), new RuntimeException());
+        }
+        else {
+            VCVarExp nqvPValExp =
+                    Utilities.createVCVarExp(myCurrentAssertiveCodeBlock,
+                            Utilities.createPValExp(myDecreasingExp
+                                    .getLocation().clone(),
+                                    myCurrentModuleScope));
+
+            // Generate the termination of recursive call: P_Exp <= 1 + NQV(RS, P_Val)
+            IntegerExp oneExp =
+                    new IntegerExp(myDecreasingExp.getLocation().clone(), null,
+                            1);
+            oneExp.setMathType(myDecreasingExp.getMathType());
+
+            InfixExp sumExp =
+                    new InfixExp(myDecreasingExp.getLocation().clone(), oneExp,
+                            null, new PosSymbol(myDecreasingExp.getLocation()
+                                    .clone(), "+"), nqvPValExp.clone());
+            sumExp.setMathType(myDecreasingExp.getMathType());
+
+            InfixExp terminationExp =
+                    new InfixExp(
+                            myDecreasingExp.getLocation().clone(),
+                            myDecreasingExp.clone(),
+                            null,
+                            new PosSymbol(
+                                    myDecreasingExp.getLocation().clone(), "<="),
+                            sumExp);
+            terminationExp.setMathType(myTypeGraph.BOOLEAN);
+
+            // Generate a new ConfirmStmt using terminationExp
+            ConfirmStmt confirmStmt =
+                    new ConfirmStmt(terminationExp.getLocation().clone(),
+                            terminationExp, false);
+            myLocationDetails.put(confirmStmt.getLocation(),
+                    "Termination of Recursive Call");
+            myTerminationConfirmStmts.add(confirmStmt);
         }
     }
 
