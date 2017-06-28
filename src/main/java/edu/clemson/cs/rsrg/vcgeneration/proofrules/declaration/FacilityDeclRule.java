@@ -37,6 +37,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     /** <p>The {@code facility} declaration we are applying the rule to.</p> */
     private final FacilityDec myFacilityDec;
 
+    /** <p>A flag that indicates if this is a local facility declaration or not.</p> */
+    private final boolean myIsLocalFacilityDec;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -47,15 +50,17 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      *
      * @param facilityDec The {@code facility} declaration we are applying the
      *                    rule to.
+     * @param isLocalFacDec A flag that indicates if this is a local {@link FacilityDec}.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public FacilityDeclRule(FacilityDec facilityDec, AssertiveCodeBlock block,
-            STGroup stGroup, ST blockModel) {
+    public FacilityDeclRule(FacilityDec facilityDec, boolean isLocalFacDec,
+            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
         myFacilityDec = facilityDec;
+        myIsLocalFacilityDec = isLocalFacDec;
     }
 
     // ===========================================================
@@ -67,11 +72,16 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Add the different details to the various different output models
-        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-        stepModel.add("proofRuleName", getRuleDescription()).add(
-                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
-        myBlockModel.add("vcGenSteps", stepModel.render());
+        // This class is used by any importing facility declarations as well as
+        // any local facility declarations. We really don't need to display
+        // anything to our models if it isn't local. - YS
+        if (myIsLocalFacilityDec) {
+            // Add the different details to the various different output models
+            ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+            stepModel.add("proofRuleName", getRuleDescription()).add(
+                    "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+            myBlockModel.add("vcGenSteps", stepModel.render());
+        }
     }
 
     /**
