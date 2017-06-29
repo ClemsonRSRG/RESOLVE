@@ -15,9 +15,6 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptModuleDec;
-import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
-import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
@@ -147,31 +144,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
         // Create a VarExp representing each of the module arguments
         for (ModuleParameterDec dec : formalParams) {
+            // Use the wrapped declaration name and type to create a VarExp.
             Dec wrappedDec = dec.getWrappedDec();
-
-            // TODO: Check what to do in the following situation - YS
-            // At this point, deal with concept type, constant and operation
-            // parameters. Figure out what to do when the user passes in a
-            // definition, performance operation or concept realization parameters.
-            VarExp decAsVarExp;
-            if (wrappedDec instanceof ConstantParamDec || wrappedDec instanceof ConceptTypeParamDec) {
-                decAsVarExp =
-                        Utilities.createVarExp(wrappedDec.getLocation(), null, wrappedDec.getName(),
-                                wrappedDec.getMathType(), null);
-            }
-            else if (wrappedDec instanceof OperationDec) {
-                OperationDec opDec = (OperationDec) wrappedDec;
-                decAsVarExp =
-                        Utilities.createVarExp(wrappedDec.getLocation(), null, opDec.getName(),
-                                dec.getMathType(), null);
-            }
-            else {
-                throw new MiscErrorException("[VCGenerator] Cannot handle the following argument: "
-                        + dec.toString(), new RuntimeException());
-            }
-
-            // Store the result
-            retExpList.add(decAsVarExp);
+            retExpList.add(Utilities.createVarExp(wrappedDec.getLocation(),
+                    null, wrappedDec.getName(), wrappedDec.getMathType(), null));
         }
 
         return retExpList;
