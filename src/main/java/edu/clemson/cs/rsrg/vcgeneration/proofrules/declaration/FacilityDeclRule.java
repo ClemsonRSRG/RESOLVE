@@ -12,8 +12,15 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -21,6 +28,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -118,4 +126,54 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         return "Facility Declaration Rule";
     }
 
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method that creates a list of {@link VarExp VarExps}
+     * representing each of the {@link ModuleParameterDec ModuleParameterDecs}.</p>
+     *
+     * @param formalParams List of module formal parameters.
+     *
+     * @return A list containing the {@link VarExp VarExps} representing
+     * each formal parameter.
+     *
+     * @throws MiscErrorException An error is thrown if we don't know how to handle
+     * a particular kind of {@link ModuleParameterDec}.
+     */
+    private List<VarExp> createModuleParamExpList(List<ModuleParameterDec> formalParams) {
+        List<VarExp> retExpList = new ArrayList<>(formalParams.size());
+
+        // Create a VarExp representing each of the module arguments
+        for (ModuleParameterDec dec : formalParams) {
+            Dec wrappedDec = dec.getWrappedDec();
+
+            // TODO: Check what to do in the following situation - YS
+            // At this point, deal with concept type, constant and operation
+            // parameters. Figure out what to do when the user passes in a
+            // definition, performance operation or concept realization parameters.
+            VarExp decAsVarExp;
+            if (wrappedDec instanceof ConstantParamDec || wrappedDec instanceof ConceptTypeParamDec) {
+                decAsVarExp =
+                        Utilities.createVarExp(wrappedDec.getLocation(), null, wrappedDec.getName(),
+                                wrappedDec.getMathType(), null);
+            }
+            else if (wrappedDec instanceof OperationDec) {
+                OperationDec opDec = (OperationDec) wrappedDec;
+                decAsVarExp =
+                        Utilities.createVarExp(wrappedDec.getLocation(), null, opDec.getName(),
+                                dec.getMathType(), null);
+            }
+            else {
+                throw new MiscErrorException("[VCGenerator] Cannot handle the following argument: "
+                        + dec.toString(), new RuntimeException());
+            }
+
+            // Store the result
+            retExpList.add(decAsVarExp);
+        }
+
+        return retExpList;
+    }
 }
