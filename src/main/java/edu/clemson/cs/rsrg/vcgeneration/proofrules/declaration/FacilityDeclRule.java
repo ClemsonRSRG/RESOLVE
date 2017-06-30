@@ -107,6 +107,16 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     (ConceptModuleDec) mySymbolTable.getModuleScope(
                             new ModuleIdentifier(myFacilityDec.getConceptName()
                                     .getName())).getDefiningElement();
+
+            // Convert the concept's module parameters and the instantiated
+            // concept's arguments into the appropriate mathematical expressions.
+            // Note that any nested function calls will be dealt with appropriately.
+            List<VarExp> conceptFormalParamList =
+                    createModuleParamExpList(facConceptDec.getParameterDecs());
+            List<Exp> conceptActualArgList =
+                    createModuleArgExpList(myFacilityDec.getConceptParams());
+
+            // Facility Declaration Rule (Concept Requires): CPC[ n ~> n_exp, R ~> IR ]
         }
         catch (NoSuchSymbolException e) {
             Utilities
