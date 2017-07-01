@@ -25,6 +25,7 @@ import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
@@ -64,6 +65,12 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     /** <p>The symbol table we are currently building.</p> */
     private final MathSymbolTableBuilder mySymbolTable;
 
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -90,6 +97,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         myFacilityDec = facilityDec;
         myIsLocalFacilityDec = isLocalFacDec;
         mySymbolTable = symbolTableBuilder;
+        myTypeGraph = symbolTableBuilder.getTypeGraph();
     }
 
     // ===========================================================
@@ -116,7 +124,17 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             List<Exp> conceptActualArgList =
                     createModuleArgExpList(myFacilityDec.getConceptParams());
 
-            // Facility Declaration Rule (Concept Requires): CPC[ n ~> n_exp, R ~> IR ]
+            // Step 1: Substitute concept realization's formal parameters with
+            //         actual instantiation arguments for the concept realization's
+            //         requires clause.
+            //         ( RPC[ rn~>rn_exp, RR~>IRR ] )
+            // Note: Only to this step if we don't have an external realization
+
+            // Step 2: Form a conjunct with the substituted concept realization clause
+            //         (if is not just "true") and the concept requires clause.
+            //         Substitute concept's formal parameter with actual instantiation
+            //         arguments for this new conjunct.
+            //         ( ( RPC[ rn~>rn_exp, RR~>IRR ] ∧ CPC )[ n~>n_exp, R~>IR ] )
         }
         catch (NoSuchSymbolException e) {
             Utilities
