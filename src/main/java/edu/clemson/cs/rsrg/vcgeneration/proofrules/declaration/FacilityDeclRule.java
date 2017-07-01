@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
@@ -115,6 +116,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     (ConceptModuleDec) mySymbolTable.getModuleScope(
                             new ModuleIdentifier(myFacilityDec.getConceptName()
                                     .getName())).getDefiningElement();
+
+            // Obtain the concept's requires clause
+            Exp conceptReq =
+                    facConceptDec.getRequires().getAssertionExp().clone();
 
             // Convert the concept's module parameters and the instantiated
             // concept's arguments into the appropriate mathematical expressions.
