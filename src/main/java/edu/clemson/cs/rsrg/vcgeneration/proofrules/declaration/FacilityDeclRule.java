@@ -134,6 +134,32 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             //         requires clause.
             //         ( RPC[ rn~>rn_exp, RR~>IRR ] )
             // Note: Only to this step if we don't have an external realization
+            Exp conceptRealizReq =
+                    VarExp.getTrueVarExp(myFacilityDec.getLocation(),
+                            myTypeGraph);
+            if (!myFacilityDec.getExternallyRealizedFlag()) {
+                // Obtain the concept realization module for the facility
+                ConceptRealizModuleDec facConceptRealizDec =
+                        (ConceptRealizModuleDec) mySymbolTable.getModuleScope(
+                                new ModuleIdentifier(myFacilityDec
+                                        .getConceptRealizName().getName()))
+                                .getDefiningElement();
+
+                // Obtain the concept's requires clause
+                conceptRealizReq =
+                        facConceptRealizDec.getRequires().getAssertionExp()
+                                .clone();
+
+                // Convert the concept realization's module parameters and the instantiated
+                // concept's arguments into the appropriate mathematical expressions.
+                // Note that any nested function calls will be dealt with appropriately.
+                List<VarExp> conceptRealizFormalParamList =
+                        createModuleParamExpList(facConceptRealizDec
+                                .getParameterDecs());
+                List<Exp> conceptRealizActualArgList =
+                        createModuleArgExpList(myFacilityDec
+                                .getConceptRealizParams());
+            }
 
             // Step 2: Form a conjunct with the substituted concept realization clause
             //         (if is not just "true") and the concept requires clause.
