@@ -22,6 +22,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -51,6 +52,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
+    // -----------------------------------------------------------
+    // General
+    // -----------------------------------------------------------
+
     /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
@@ -71,6 +76,28 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * between different math types.</p>
      */
     private final TypeGraph myTypeGraph;
+
+    // -----------------------------------------------------------
+    // Formal-to-Actual Replacement Maps
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This maps all {@code Concept} formal arguments to the instantiated
+     * actual arguments.</p>
+     */
+    private final Map<Exp, Exp> myConceptArgMap;
+
+    /**
+     * <p>This maps all {@code Concept Realization} formal arguments to the instantiated
+     * actual arguments.</p>
+     */
+    private final Map<Exp, Exp> myConceptRealizArgMap;
+
+    /**
+     * <p>This maps all {@code Enhancement} and {@code Enhancement Realization} formal arguments
+     * to the instantiated actual arguments.</p>
+     */
+    private final Map<PosSymbol, Map<Exp, Exp>> myEnhancementArgMaps;
 
     // ===========================================================
     // Constructors
@@ -99,6 +126,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         myIsLocalFacilityDec = isLocalFacDec;
         mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
+
+        // Replacement maps
+        myConceptArgMap = new LinkedHashMap<>();
+        myConceptRealizArgMap = new LinkedHashMap<>();
+        myEnhancementArgMaps = new LinkedHashMap<>();
     }
 
     // ===========================================================
@@ -199,6 +231,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     // Private Methods
     // ===========================================================
 
+    // -----------------------------------------------------------
+    // General
+    // -----------------------------------------------------------
+
     /**
      * <p>An helper method that creates a list of {@link Exp Exps}
      * representing each of the {@link ModuleArgumentItem ModuleArgumentItems}.
@@ -258,4 +294,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
         return retExpList;
     }
+    // -----------------------------------------------------------
+    // Proof Rule - Related
+    // -----------------------------------------------------------
+
 }
