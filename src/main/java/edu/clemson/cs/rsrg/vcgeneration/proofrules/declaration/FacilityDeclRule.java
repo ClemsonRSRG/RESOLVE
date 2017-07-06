@@ -320,6 +320,13 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             List<Exp> conceptActualArgList =
                     createModuleArgExpList(myFacilityDec.getConceptParams());
 
+            // Create a mapping from concept formal parameters
+            // to actual arguments for future use.
+            for (int i = 0; i < conceptFormalParamList.size(); i++) {
+                myConceptArgMap.put(conceptFormalParamList.get(i),
+                        conceptActualArgList.get(i));
+            }
+
             // Step 1: Substitute concept realization's formal parameters with
             //         actual instantiation arguments for the concept realization's
             //         requires clause.
@@ -350,6 +357,13 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 List<Exp> conceptRealizActualArgList =
                         createModuleArgExpList(myFacilityDec
                                 .getConceptRealizParams());
+
+                // Create a mapping from concept realization formal parameters
+                // to actual arguments for future use.
+                for (int i = 0; i < conceptRealizFormalParamList.size(); i++) {
+                    myConceptRealizArgMap.put(conceptRealizFormalParamList
+                            .get(i), conceptRealizActualArgList.get(i));
+                }
             }
 
             // Step 2: Form a conjunct with the substituted concept realization clause
