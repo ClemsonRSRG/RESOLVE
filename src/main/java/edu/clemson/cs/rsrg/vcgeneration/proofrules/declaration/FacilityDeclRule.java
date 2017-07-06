@@ -32,6 +32,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.FacilityDeclFormalToActuals;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -78,7 +79,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     private final TypeGraph myTypeGraph;
 
     // -----------------------------------------------------------
-    // Formal-to-Actual Replacement Maps
+    // FacilityDeclFormalToActuals - Related
     // -----------------------------------------------------------
 
     /**
@@ -156,6 +157,18 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     "currentStateOfBlock", myCurrentAssertiveCodeBlock);
             myBlockModel.add("vcGenSteps", stepModel.render());
         }
+    }
+
+    /**
+     * <p>This method returns an object that records all the transformations
+     * for each of the facility declaration specifications' and realizations'
+     * formal parameters to their actual arguments.</p>
+     *
+     * @return A {@link FacilityDeclFormalToActuals} containing all the information.
+     */
+    public final FacilityDeclFormalToActuals getFacilityDeclFormalToActuals() {
+        return new FacilityDeclFormalToActuals(myFacilityDec, myConceptArgMap,
+                myConceptRealizArgMap, myEnhancementArgMaps);
     }
 
     /**
