@@ -50,6 +50,16 @@ public class ConceptTypeExtractor extends TreeWalkerVisitor {
     // Visitor Methods
     // ===========================================================
 
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept}.
+     */
+    @Override
+    public final void postTypeFamilyDec(TypeFamilyDec dec) {
+        myTypeFamilyDecs.add(dec);
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
