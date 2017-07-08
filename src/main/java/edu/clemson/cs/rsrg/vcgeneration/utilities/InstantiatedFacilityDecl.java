@@ -108,6 +108,8 @@ public class InstantiatedFacilityDecl {
 
         if (!myConceptArgMap.equals(that.myConceptArgMap))
             return false;
+        if (!myConceptDeclaredTypes.equals(that.myConceptDeclaredTypes))
+            return false;
         if (!myConceptRealizArgMap.equals(that.myConceptRealizArgMap))
             return false;
         if (!myEnhancementArgMaps.equals(that.myEnhancementArgMaps))
@@ -131,7 +133,7 @@ public class InstantiatedFacilityDecl {
      *
      * @return A list of {@link TypeFamilyDec}.
      */
-    public List<TypeFamilyDec> getConceptDeclaredTypes() {
+    public final List<TypeFamilyDec> getConceptDeclaredTypes() {
         return myConceptDeclaredTypes;
     }
 
@@ -195,6 +197,7 @@ public class InstantiatedFacilityDecl {
     @Override
     public final int hashCode() {
         int result = myConceptArgMap.hashCode();
+        result = 31 * result + myConceptDeclaredTypes.hashCode();
         result = 31 * result + myConceptRealizArgMap.hashCode();
         result = 31 * result + myEnhancementArgMaps.hashCode();
         result = 31 * result + myInstantiatedFacilityDec.hashCode();
