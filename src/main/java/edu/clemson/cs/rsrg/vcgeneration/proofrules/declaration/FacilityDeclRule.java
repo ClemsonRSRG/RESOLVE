@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
@@ -32,7 +33,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.FacilityDeclFormalToActuals;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -79,7 +80,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     private final TypeGraph myTypeGraph;
 
     // -----------------------------------------------------------
-    // FacilityDeclFormalToActuals - Related
+    // InstantiatedFacilityDecl - Related
     // -----------------------------------------------------------
 
     /**
@@ -160,14 +161,14 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>This method returns an object that records all the transformations
-     * for each of the facility declaration specifications' and realizations'
-     * formal parameters to their actual arguments.</p>
+     * <p>This method returns an object that records all relevant information
+     * for the instantiated {@code Facility}.</p>
      *
-     * @return A {@link FacilityDeclFormalToActuals} containing all the information.
+     * @return A {@link InstantiatedFacilityDecl} containing all the information.
      */
-    public final FacilityDeclFormalToActuals getFacilityDeclFormalToActuals() {
-        return new FacilityDeclFormalToActuals(myFacilityDec, myConceptArgMap,
+    public final InstantiatedFacilityDecl getFacilityDeclFormalToActuals() {
+        return new InstantiatedFacilityDecl(myFacilityDec,
+                new LinkedList<TypeFamilyDec>(), myConceptArgMap,
                 myConceptRealizArgMap, myEnhancementArgMaps);
     }
 
