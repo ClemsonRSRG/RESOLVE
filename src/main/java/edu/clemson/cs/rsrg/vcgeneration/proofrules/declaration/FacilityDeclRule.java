@@ -91,6 +91,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     private final Map<Exp, Exp> myConceptArgMap;
 
+    /** <p>This contains all the types declared by the {@code Concept}.</p> */
+    private final List<TypeFamilyDec> myConceptDeclaredTypes;
+
     /**
      * <p>This maps all {@code Concept Realization} formal arguments to the instantiated
      * actual arguments.</p>
@@ -131,7 +134,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
 
-        // Replacement maps
+        // InstantiatedFacilityDecl - Related
+        myConceptDeclaredTypes = new LinkedList<>();
         myConceptArgMap = new LinkedHashMap<>();
         myConceptRealizArgMap = new LinkedHashMap<>();
         myEnhancementArgMaps = new LinkedHashMap<>();
@@ -168,10 +172,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      *
      * @return A {@link InstantiatedFacilityDecl} containing all the information.
      */
-    public final InstantiatedFacilityDecl getFacilityDeclFormalToActuals() {
+    public final InstantiatedFacilityDecl getInstantiatedFacilityDecl() {
         return new InstantiatedFacilityDecl(myFacilityDec,
-                new LinkedList<TypeFamilyDec>(), myConceptArgMap,
-                myConceptRealizArgMap, myEnhancementArgMaps);
+                myConceptDeclaredTypes, myConceptArgMap, myConceptRealizArgMap,
+                myEnhancementArgMaps);
     }
 
     /**
@@ -327,6 +331,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             // Extract the concept's type declarations
             ConceptTypeExtractor typeExtractor = new ConceptTypeExtractor();
             TreeWalker.visit(typeExtractor, facConceptDec);
+            myConceptDeclaredTypes.addAll(typeExtractor.getTypeFamilyDecs());
 
             // Obtain the concept's requires clause
             Exp conceptReq =

@@ -1,5 +1,5 @@
 /*
- * FacilityDeclFormalToActuals.java
+ * InstantiatedFacilityDecl.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
