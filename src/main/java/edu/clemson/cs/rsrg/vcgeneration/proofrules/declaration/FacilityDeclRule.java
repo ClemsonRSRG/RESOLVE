@@ -25,6 +25,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
@@ -35,6 +36,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptTypeExtractor;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -321,6 +323,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     (ConceptModuleDec) mySymbolTable.getModuleScope(
                             new ModuleIdentifier(myFacilityDec.getConceptName()
                                     .getName())).getDefiningElement();
+
+            // Extract the concept's type declarations
+            ConceptTypeExtractor typeExtractor = new ConceptTypeExtractor();
+            TreeWalker.visit(typeExtractor, facConceptDec);
 
             // Obtain the concept's requires clause
             Exp conceptReq =
