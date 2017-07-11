@@ -193,7 +193,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Facility Declaration Rule";
+        return "Facility Instantiation Rule";
     }
 
     // ===========================================================
@@ -365,41 +365,56 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             //         ( RPC[ rn~>rn_exp, RR~>IRR ] )
             // Note: Only to this step if we don't have an external realization
             if (!myFacilityDec.getExternallyRealizedFlag()) {
-                // Obtain the concept realization module for the facility
-                ConceptRealizModuleDec facConceptRealizDec =
-                        (ConceptRealizModuleDec) mySymbolTable.getModuleScope(
-                                new ModuleIdentifier(myFacilityDec
-                                        .getConceptRealizName().getName()))
-                                .getDefiningElement();
+                try {
+                    // Obtain the concept realization module for the facility
+                    ConceptRealizModuleDec facConceptRealizDec =
+                            (ConceptRealizModuleDec) mySymbolTable
+                                    .getModuleScope(
+                                            new ModuleIdentifier(myFacilityDec
+                                                    .getConceptRealizName()
+                                                    .getName()))
+                                    .getDefiningElement();
 
-                // Obtain the concept's requires clause
-                Exp conceptRealizReq =
-                        facConceptRealizDec.getRequires().getAssertionExp()
-                                .clone();
+                    // Obtain the concept's requires clause
+                    Exp conceptRealizReq =
+                            facConceptRealizDec.getRequires().getAssertionExp()
+                                    .clone();
 
-                // Convert the concept realization's module parameters and the instantiated
-                // concept's arguments into the appropriate mathematical expressions.
-                // Note that any nested function calls will be dealt with appropriately.
-                List<VarExp> conceptRealizFormalParamList =
-                        createModuleParamExpList(facConceptRealizDec
-                                .getParameterDecs());
-                List<Exp> conceptRealizActualArgList =
-                        createModuleArgExpList(myFacilityDec
-                                .getConceptRealizParams());
+                    // Convert the concept realization's module parameters and the instantiated
+                    // concept's arguments into the appropriate mathematical expressions.
+                    // Note that any nested function calls will be dealt with appropriately.
+                    List<VarExp> conceptRealizFormalParamList =
+                            createModuleParamExpList(facConceptRealizDec
+                                    .getParameterDecs());
+                    List<Exp> conceptRealizActualArgList =
+                            createModuleArgExpList(myFacilityDec
+                                    .getConceptRealizParams());
 
-                // Replace the formal with the actual (if conceptRealizReq /= true)
-                if (!MathExp.isLiteralTrue(conceptRealizReq)) {
-                    retExp =
-                            replaceFormalWithActual(conceptRealizReq,
-                                    conceptRealizFormalParamList,
-                                    conceptRealizActualArgList);
+                    // Replace the formal with the actual (if conceptRealizReq /= true)
+                    if (!MathExp.isLiteralTrue(conceptRealizReq)) {
+                        retExp =
+                                replaceFormalWithActual(conceptRealizReq,
+                                        conceptRealizFormalParamList,
+                                        conceptRealizActualArgList);
+
+                        // Store the location detail for this requires clause
+                        myLocationDetails.put(retExp.getLocation(),
+                                "Requires Clause for "
+                                        + facConceptRealizDec.getName()
+                                                .getName() + " in "
+                                        + getRuleDescription());
+                    }
+
+                    // Create a mapping from concept realization formal parameters
+                    // to actual arguments for future use.
+                    for (int i = 0; i < conceptRealizFormalParamList.size(); i++) {
+                        myConceptRealizArgMap.put(conceptRealizFormalParamList
+                                .get(i), conceptRealizActualArgList.get(i));
+                    }
                 }
-
-                // Create a mapping from concept realization formal parameters
-                // to actual arguments for future use.
-                for (int i = 0; i < conceptRealizFormalParamList.size(); i++) {
-                    myConceptRealizArgMap.put(conceptRealizFormalParamList
-                            .get(i), conceptRealizActualArgList.get(i));
+                catch (NoSuchSymbolException e) {
+                    Utilities.noSuchModule(myFacilityDec.getConceptRealizName()
+                            .getLocation());
                 }
             }
 
