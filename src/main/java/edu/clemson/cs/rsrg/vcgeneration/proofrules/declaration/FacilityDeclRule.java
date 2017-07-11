@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
@@ -363,9 +364,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             //         requires clause.
             //         ( RPC[ rn~>rn_exp, RR~>IRR ] )
             // Note: Only to this step if we don't have an external realization
-            Exp conceptRealizReq =
-                    VarExp.getTrueVarExp(myFacilityDec.getLocation(),
-                            myTypeGraph);
             if (!myFacilityDec.getExternallyRealizedFlag()) {
                 // Obtain the concept realization module for the facility
                 ConceptRealizModuleDec facConceptRealizDec =
@@ -375,7 +373,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                 .getDefiningElement();
 
                 // Obtain the concept's requires clause
-                conceptRealizReq =
+                Exp conceptRealizReq =
                         facConceptRealizDec.getRequires().getAssertionExp()
                                 .clone();
 
@@ -388,6 +386,14 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 List<Exp> conceptRealizActualArgList =
                         createModuleArgExpList(myFacilityDec
                                 .getConceptRealizParams());
+
+                // Replace the formal with the actual (if conceptRealizReq /= true)
+                if (!MathExp.isLiteralTrue(conceptRealizReq)) {
+                    retExp =
+                            replaceFormalWithActual(conceptRealizReq,
+                                    conceptRealizFormalParamList,
+                                    conceptRealizActualArgList);
+                }
 
                 // Create a mapping from concept realization formal parameters
                 // to actual arguments for future use.
