@@ -72,6 +72,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     /** <p>A flag that indicates if this is a local facility declaration or not.</p> */
     private final boolean myIsLocalFacilityDec;
 
+    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
+    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
+
     /** <p>The symbol table we are currently building.</p> */
     private final MathSymbolTableBuilder mySymbolTable;
 
@@ -117,6 +120,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * @param facilityDec The {@code facility} declaration we are applying the
      *                    rule to.
      * @param isLocalFacDec A flag that indicates if this is a local {@link FacilityDec}.
+     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
@@ -125,16 +129,18 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public FacilityDeclRule(FacilityDec facilityDec, boolean isLocalFacDec,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
         myFacilityDec = facilityDec;
         myIsLocalFacilityDec = isLocalFacDec;
+        myProcessedInstFacilityDecls = processedInstFacDecs;
         mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
 
-        // InstantiatedFacilityDecl - Related
+        // Objects needed to create a new InstantiatedFacilityDecl
         myConceptDeclaredTypes = new LinkedList<>();
         myConceptArgMap = new LinkedHashMap<>();
         myConceptRealizArgMap = new LinkedHashMap<>();
