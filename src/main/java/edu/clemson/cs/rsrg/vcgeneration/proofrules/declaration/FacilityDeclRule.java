@@ -364,6 +364,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             //         requires clause.
             //         ( RPC[ rn~>rn_exp, RR~>IRR ] )
             // Note: Only to this step if we don't have an external realization
+            Exp conceptRealizReq =
+                    VarExp.getTrueVarExp(myFacilityDec.getLocation().clone(),
+                            myTypeGraph);
             if (!myFacilityDec.getExternallyRealizedFlag()) {
                 try {
                     // Obtain the concept realization module for the facility
@@ -376,7 +379,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                     .getDefiningElement();
 
                     // Obtain the concept's requires clause
-                    Exp conceptRealizReq =
+                    conceptRealizReq =
                             facConceptRealizDec.getRequires().getAssertionExp()
                                     .clone();
 
@@ -392,13 +395,13 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
                     // Replace the formal with the actual (if conceptRealizReq /= true)
                     if (!MathExp.isLiteralTrue(conceptRealizReq)) {
-                        retExp =
+                        conceptRealizReq =
                                 replaceFormalWithActual(conceptRealizReq,
                                         conceptRealizFormalParamList,
                                         conceptRealizActualArgList);
 
                         // Store the location detail for this requires clause
-                        myLocationDetails.put(retExp.getLocation(),
+                        myLocationDetails.put(conceptRealizReq.getLocation(),
                                 "Requires Clause for "
                                         + facConceptRealizDec.getName()
                                                 .getName() + " in "
