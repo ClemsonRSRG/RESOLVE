@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
@@ -327,7 +328,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * passed-in operations requires clauses and ensures clause.
      */
     private Exp applyConceptRelatedPart() {
-        Exp retExp = null;
+        Exp retExp =
+                VarExp.getTrueVarExp(myFacilityDec.getLocation().clone(),
+                        myTypeGraph);
+        ;
         try {
             // Obtain the concept module for the facility
             ConceptModuleDec facConceptDec =
@@ -400,6 +404,20 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                         conceptRealizFormalParamList,
                                         conceptRealizActualArgList);
 
+                        // Step 2a: Substitute concept's formal parameters with actual
+                        //          instantiation arguments for the concept realization's
+                        //          requires clause.
+                        //          ( ( RPC[ rn~>rn_exp, RR~>IRR ] ∧ CPC )[ n~>n_exp, R~>IR ] )
+                        //
+                        // YS: This isn't exactly what the rule says, but it makes it easier
+                        //     to record the location details for displaying purposes. Doing
+                        //     the substitution first and then forming the conjunct is the same
+                        //     as forming the conjunct first and then doing the substitution.
+                        conceptRealizReq =
+                                replaceFormalWithActual(conceptRealizReq,
+                                        conceptFormalParamList,
+                                        conceptRealizActualArgList);
+
                         // Store the location detail for this requires clause
                         myLocationDetails.put(conceptRealizReq.getLocation(),
                                 "Requires Clause for "
@@ -407,6 +425,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                                 .getName() + " in "
                                         + getRuleDescription());
                     }
+
+                    // Step 3: Substitute any operations's requires and ensures clauses
+                    //         passed to the concept realization instantiation.
+                    //         ( preRP[ rn~>rn_exp, rx~>irx ] => preIRP ) ∧
+                    //         ( postIRP => postRP[ rn~>rn_exp, #rx~>#irx, rx~>irx ] )
 
                     // Create a mapping from concept realization formal parameters
                     // to actual arguments for future use.
@@ -421,11 +444,42 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 }
             }
 
-            // Step 2: Form a conjunct with the substituted concept realization clause
-            //         (if is not just "true") and the concept requires clause.
-            //         Substitute concept's formal parameter with actual instantiation
-            //         arguments for this new conjunct.
-            //         ( ( RPC[ rn~>rn_exp, RR~>IRR ] ∧ CPC )[ n~>n_exp, R~>IR ] )
+            // Step 2b: Substitute concept's formal parameters with actual
+            //          instantiation arguments for the concept's requires clause.
+            //          Form the appropriate step 1 expression!
+            //          ( ( RPC[ rn~>rn_exp, RR~>IRR ] ∧ CPC )[ n~>n_exp, R~>IR ] )
+            //
+            // YS: Replace the formal with the actual (if conceptReq /= true)
+            if (!MathExp.isLiteralTrue(conceptReq)) {
+                conceptReq =
+                        replaceFormalWithActual(conceptReq,
+                                conceptFormalParamList, conceptActualArgList);
+
+                // Store the location detail for this requires clause
+                myLocationDetails.put(conceptReq.getLocation(),
+                        "Requires Clause for "
+                                + facConceptDec.getName().getName() + " in "
+                                + getRuleDescription());
+            }
+
+            // Results from applying steps 1, 2a and 2b.
+            Exp conceptRequiresConjuct;
+            if (VarExp.isLiteralTrue(conceptRealizReq)) {
+                conceptRequiresConjuct = conceptReq;
+            }
+            else {
+                if (VarExp.isLiteralTrue(conceptReq)) {
+                    conceptRequiresConjuct = conceptRealizReq;
+                }
+                else {
+                    // YS: The rule does put the CPC in the second part of the conjunct,
+                    //     But I want the requires clause VC for concept to come before
+                    //     it's realizations.
+                    conceptRequiresConjuct =
+                            InfixExp.formConjunct(myFacilityDec.getLocation()
+                                    .clone(), conceptReq, conceptRealizReq);
+                }
+            }
         }
         catch (NoSuchSymbolException e) {
             Utilities
