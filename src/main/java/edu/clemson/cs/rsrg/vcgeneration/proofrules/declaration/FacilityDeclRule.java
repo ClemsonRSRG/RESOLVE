@@ -25,9 +25,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
@@ -487,6 +489,38 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         }
 
         return retExp;
+    }
+
+    /**
+     * <p>An helper method that applies the part of the rule that deals with
+     * passing {@code Operations} as parameters.</p>
+     *
+     * @param argLoc A {@link Location} object that indicates where the {@code Operation}
+     *               is being passed as argument.
+     * @param formalOpEntry The formal {@link OperationEntry} stored in our symbol table.
+     * @param actualOpEntry The actual {@link OperationEntry} stored in our symbol table.
+     * @param conceptFormalParamList The list of {@code Concept} formal parameters.
+     * @param conceptActualArgList The list of arguments instantiating the {@code Concept}.
+     * @param enhancementFormalParamList The list of {@code Enhancement} formal parameters.
+     *                                   If we are processing {@code Concept Realizations},
+     *                                   this list will be empty.
+     * @param enhancementActualArgList The list of arguments instantiating the {@code Enhancement}.
+     *                                 If we are processing {@code Concept Realizations},
+     *                                 this list will be empty.
+     * @param realizFormalParamList The list of {@code Realization} formal parameters.
+     * @param realizActualArgList The list of arguments instantiating the {@code Realization}.
+     *
+     * @return An {@link Exp} that contains the passed-in operations requires clauses
+     * and ensures clause that must be true to successfully pass the operation as parameter.
+     */
+    private Exp applyOperationRelatedPart(Location argLoc,
+            OperationEntry formalOpEntry, OperationEntry actualOpEntry,
+            List<VarExp> conceptFormalParamList,
+            List<Exp> conceptActualArgList,
+            List<VarExp> enhancementFormalParamList,
+            List<Exp> enhancementActualArgList,
+            List<VarExp> realizFormalParamList, List<Exp> realizActualArgList) {
+        return null;
     }
 
 }
