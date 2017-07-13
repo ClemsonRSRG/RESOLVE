@@ -65,6 +65,18 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     // -----------------------------------------------------------
 
     /**
+     * <p>A list that will be populated with the arguments used to
+     * instantiate the {@code Concept}.</p>
+     */
+    private final List<Exp> myConceptActualArgList;
+
+    /**
+     * <p>A list that will be populated with the instantiating
+     * {@code Concept}'s formal parameters.</p>
+     */
+    private final List<VarExp> myConceptFormalParamList;
+
+    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -137,6 +149,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
+        myConceptActualArgList = new ArrayList<>();
+        myConceptFormalParamList = new ArrayList<>();
         myCurrentModuleScope = moduleScope;
         myFacilityDec = facilityDec;
         myIsLocalFacilityDec = isLocalFacDec;
@@ -333,7 +347,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         Exp retExp =
                 VarExp.getTrueVarExp(myFacilityDec.getLocation().clone(),
                         myTypeGraph);
-        ;
         try {
             // Obtain the concept module for the facility
             ConceptModuleDec facConceptDec =
@@ -353,16 +366,17 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             // Convert the concept's module parameters and the instantiated
             // concept's arguments into the appropriate mathematical expressions.
             // Note that any nested function calls will be dealt with appropriately.
-            List<VarExp> conceptFormalParamList =
-                    createModuleParamExpList(facConceptDec.getParameterDecs());
-            List<Exp> conceptActualArgList =
-                    createModuleArgExpList(myFacilityDec.getConceptParams());
+            myConceptFormalParamList
+                    .addAll(createModuleParamExpList(facConceptDec
+                            .getParameterDecs()));
+            myConceptActualArgList.addAll(createModuleArgExpList(myFacilityDec
+                    .getConceptParams()));
 
             // Create a mapping from concept formal parameters
             // to actual arguments for future use.
-            for (int i = 0; i < conceptFormalParamList.size(); i++) {
-                myConceptArgMap.put(conceptFormalParamList.get(i),
-                        conceptActualArgList.get(i));
+            for (int i = 0; i < myConceptFormalParamList.size(); i++) {
+                myConceptArgMap.put(myConceptFormalParamList.get(i),
+                        myConceptActualArgList.get(i));
             }
 
             // Step 1: Substitute concept realization's formal parameters with
@@ -417,7 +431,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         //     as forming the conjunct first and then doing the substitution.
                         conceptRealizReq =
                                 replaceFormalWithActual(conceptRealizReq,
-                                        conceptFormalParamList,
+                                        myConceptFormalParamList,
                                         conceptRealizActualArgList);
 
                         // Store the location detail for this requires clause
@@ -455,7 +469,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             if (!MathExp.isLiteralTrue(conceptReq)) {
                 conceptReq =
                         replaceFormalWithActual(conceptReq,
-                                conceptFormalParamList, conceptActualArgList);
+                                myConceptFormalParamList,
+                                myConceptActualArgList);
 
                 // Store the location detail for this requires clause
                 myLocationDetails.put(conceptReq.getLocation(),
@@ -499,8 +514,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      *               is being passed as argument.
      * @param formalOpEntry The formal {@link OperationEntry} stored in our symbol table.
      * @param actualOpEntry The actual {@link OperationEntry} stored in our symbol table.
-     * @param conceptFormalParamList The list of {@code Concept} formal parameters.
-     * @param conceptActualArgList The list of arguments instantiating the {@code Concept}.
      * @param enhancementFormalParamList The list of {@code Enhancement} formal parameters.
      *                                   If we are processing {@code Concept Realizations},
      *                                   this list will be empty.
@@ -515,8 +528,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     private Exp applyOperationRelatedPart(Location argLoc,
             OperationEntry formalOpEntry, OperationEntry actualOpEntry,
-            List<VarExp> conceptFormalParamList,
-            List<Exp> conceptActualArgList,
             List<VarExp> enhancementFormalParamList,
             List<Exp> enhancementActualArgList,
             List<VarExp> realizFormalParamList, List<Exp> realizActualArgList) {
