@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -445,10 +446,25 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                         + getRuleDescription());
                     }
 
-                    // Step 3: Substitute any operations's requires and ensures clauses
-                    //         passed to the concept realization instantiation.
-                    //         ( preRP[ rn~>rn_exp, rx~>irx ] => preIRP ) ∧
-                    //         ( postIRP => postRP[ rn~>rn_exp, #rx~>#irx, rx~>irx ] )
+                    // Iterate through searching for any operations being passed as parameters.
+                    Iterator<ModuleParameterDec> realizFormalParams =
+                            facConceptRealizDec.getParameterDecs().iterator();
+                    Iterator<ModuleArgumentItem> realizActualArgs =
+                            myFacilityDec.getConceptRealizParams().iterator();
+                    while (realizFormalParams.hasNext()) {
+                        ModuleParameterDec moduleParameterDec =
+                                realizFormalParams.next();
+                        ModuleArgumentItem moduleArgumentItem =
+                                realizActualArgs.next();
+
+                        // Only care about OperationDecs
+                        if (moduleParameterDec.getWrappedDec() instanceof OperationDec) {
+                            // Step 3: Substitute any operations's requires and ensures clauses
+                            //         passed to the concept realization instantiation.
+                            //         ( preRP[ rn~>rn_exp, rx~>irx ] => preIRP ) ∧
+                            //         ( postIRP => postRP[ rn~>rn_exp, #rx~>#irx, rx~>irx ] )
+                        }
+                    }
 
                     // Create a mapping from concept realization formal parameters
                     // to actual arguments for future use.
