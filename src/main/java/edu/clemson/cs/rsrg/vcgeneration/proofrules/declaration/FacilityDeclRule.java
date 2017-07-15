@@ -31,7 +31,10 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -330,6 +333,43 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         }
 
         return retExp;
+    }
+
+    /**
+     * <p>An helper method that searches for an {@link OperationEntry} using
+     * the provided qualifier and name.</p>
+     *
+     * @param loc The location in the AST that we are currently visiting.
+     * @param qualifier The qualifier of the operation.
+     * @param name The name of the operation.
+     *
+     * @return An {@link OperationEntry} from the symbol table.
+     */
+    private OperationEntry searchOperation(Location loc, PosSymbol qualifier,
+            PosSymbol name) {
+        // Query for the corresponding operation
+        OperationEntry op = null;
+        try {
+            op =
+                    myCurrentModuleScope
+                            .queryForOne(
+                                    new NameQuery(
+                                            qualifier,
+                                            name,
+                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toOperationEntry(loc);
+        }
+        catch (NoSuchSymbolException nsse) {
+            Utilities.noSuchSymbol(qualifier, name.getName(), loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+
+        return op;
     }
 
     // -----------------------------------------------------------
