@@ -520,6 +520,32 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                             //         passed to the concept realization instantiation.
                             //         ( preRP[ rn~>rn_exp, rx~>irx ] => preIRP ) ∧
                             //         ( postIRP => postRP[ rn~>rn_exp, #rx~>#irx, rx~>irx ] )
+                            Exp processedOperationPart =
+                                    applyOperationRelatedPart(
+                                            moduleArgumentItem.getLocation()
+                                                    .clone(),
+                                            formalOperationDec,
+                                            actualOperationDec,
+                                            new ArrayList<VarExp>(),
+                                            new ArrayList<Exp>(),
+                                            conceptRealizFormalParamList,
+                                            conceptRealizActualArgList);
+                            if (VarExp
+                                    .isLiteralTrue(conceptRealizOperationPart)) {
+                                conceptRealizOperationPart =
+                                        processedOperationPart;
+                            }
+                            else {
+                                // YS - Don't need to form a conjunct if processed operation part is "true".
+                                if (!VarExp
+                                        .isLiteralTrue(processedOperationPart)) {
+                                    conceptRealizOperationPart =
+                                            InfixExp.formConjunct(myFacilityDec
+                                                    .getLocation().clone(),
+                                                    conceptRealizOperationPart,
+                                                    processedOperationPart);
+                                }
+                            }
                         }
                     }
 
@@ -604,8 +630,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      *
      * @param argLoc A {@link Location} object that indicates where the {@code Operation}
      *               is being passed as argument.
-     * @param formalOpEntry The formal {@link OperationEntry} stored in our symbol table.
-     * @param actualOpEntry The actual {@link OperationEntry} stored in our symbol table.
+     * @param formalOpDec The formal {@link OperationDec} specified in the formal parameters.
+     * @param actualOpDec The actual {@link OperationDec} being passed to the instantiation.
      * @param enhancementFormalParamList The list of {@code Enhancement} formal parameters.
      *                                   If we are processing {@code Concept Realizations},
      *                                   this list will be empty.
@@ -619,11 +645,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * and ensures clause that must be true to successfully pass the operation as parameter.
      */
     private Exp applyOperationRelatedPart(Location argLoc,
-            OperationEntry formalOpEntry, OperationEntry actualOpEntry,
+            OperationDec formalOpDec, OperationDec actualOpDec,
             List<VarExp> enhancementFormalParamList,
             List<Exp> enhancementActualArgList,
             List<VarExp> realizFormalParamList, List<Exp> realizActualArgList) {
-        return null;
+        return VarExp.getTrueVarExp(argLoc, myTypeGraph);
     }
 
 }
