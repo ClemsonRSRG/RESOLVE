@@ -23,8 +23,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -499,6 +498,24 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
                         // Only care about OperationDecs
                         if (moduleParameterDec.getWrappedDec() instanceof OperationDec) {
+                            // Formal operation defined in the specifications and
+                            // the operation being passed as argument
+                            OperationDec formalOperationDec =
+                                    (OperationDec) moduleParameterDec
+                                            .getWrappedDec();
+
+                            ProgramVariableNameExp operationNameExp =
+                                    (ProgramVariableNameExp) moduleArgumentItem
+                                            .getArgumentExp();
+                            OperationEntry actualOperationEntry =
+                                    searchOperation(moduleArgumentItem
+                                            .getLocation(), operationNameExp
+                                            .getQualifier(), operationNameExp
+                                            .getName());
+                            OperationDec actualOperationDec =
+                                    (OperationDec) actualOperationEntry
+                                            .getDefiningElement();
+
                             // Step 3: Substitute any operations's requires and ensures clauses
                             //         passed to the concept realization instantiation.
                             //         ( preRP[ rn~>rn_exp, rx~>irx ] => preIRP ) ∧
