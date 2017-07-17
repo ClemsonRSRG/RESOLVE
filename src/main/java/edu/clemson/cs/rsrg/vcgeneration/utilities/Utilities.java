@@ -954,7 +954,7 @@ public class Utilities {
         else {
             message =
                     "[VCGenerator] No such symbol in module: "
-                            + qualifier.getName() + "." + symbolName;
+                            + qualifier.getName() + "::" + symbolName;
         }
 
         throw new SourceErrorException(message, loc);
