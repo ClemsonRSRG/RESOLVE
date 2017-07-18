@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
@@ -279,6 +280,27 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             Dec wrappedDec = dec.getWrappedDec();
             retExpList.add(Utilities.createVarExp(wrappedDec.getLocation(),
                     null, wrappedDec.getName(), wrappedDec.getMathType(), null));
+        }
+
+        return retExpList;
+    }
+
+    /**
+     * <p>An helper method that creates a list of {@link VarExp VarExps}
+     * representing each of the {@code Operation's} {@link ParameterVarDec ParameterVarDecs}.</p>
+     *
+     * @param parameterVarDecs List of operation parameters.
+     *
+     * @return A list containing the {@link VarExp VarExps} representing
+     * each operation parameter.
+     */
+    private List<VarExp> createOperationParamExpList(List<ParameterVarDec> parameterVarDecs) {
+        List<VarExp> retExpList = new ArrayList<>(parameterVarDecs.size());
+
+        // Create a VarExp representing each of the operation parameters
+        for (ParameterVarDec dec : parameterVarDecs) {
+            retExpList.add(Utilities.createVarExp(dec.getLocation(),
+                    null, dec.getName(), dec.getMathType(), null));
         }
 
         return retExpList;
@@ -649,6 +671,15 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             List<VarExp> enhancementFormalParamList,
             List<Exp> enhancementActualArgList,
             List<VarExp> realizFormalParamList, List<Exp> realizActualArgList) {
+        // Things related to formalOpDec
+        boolean isFormalOpDecLocal =
+                Utilities.isLocationOperation(formalOpDec.getName().getName(),
+                        myCurrentModuleScope);
+        Exp formalOpRequires = formalOpDec.getRequires().getAssertionExp();
+        Exp formalOpEnsures = formalOpDec.getEnsures().getAssertionExp();
+        List<VarExp> formalOpParams =
+                createOperationParamExpList(formalOpDec.getParameters());
+
         return VarExp.getTrueVarExp(argLoc, myTypeGraph);
     }
 
