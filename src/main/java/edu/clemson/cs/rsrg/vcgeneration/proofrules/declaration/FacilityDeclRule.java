@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
@@ -280,6 +281,26 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             Dec wrappedDec = dec.getWrappedDec();
             retExpList.add(Utilities.createVarExp(wrappedDec.getLocation(),
                     null, wrappedDec.getName(), wrappedDec.getMathType(), null));
+        }
+
+        return retExpList;
+    }
+
+    /**
+     * <p>An helper method that creates a list of {@link OldExp OldExps}
+     * representing each of the possible incoming values of {@link VarExp VarExps}.</p>
+     *
+     * @param varExps List of variable expressions.
+     *
+     * @return A list containing the {@link OldExp OldExps} representing
+     * each {@link VarExp}'s incoming value.
+     */
+    private List<OldExp> createOldExpFromVarExpList(List<VarExp> varExps) {
+        List<OldExp> retExpList = new ArrayList<>(varExps.size());
+
+        // Create an OldExp representing the incoming value of each VarExp
+        for (VarExp exp : varExps) {
+            retExpList.add(new OldExp(exp.getLocation().clone(), exp.clone()));
         }
 
         return retExpList;
@@ -677,8 +698,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         myCurrentModuleScope);
         Exp formalOpRequires = formalOpDec.getRequires().getAssertionExp();
         Exp formalOpEnsures = formalOpDec.getEnsures().getAssertionExp();
-        List<VarExp> formalOpParams =
+        List<VarExp> formalOpParamsAsVarExp =
                 createOperationParamExpList(formalOpDec.getParameters());
+        List<OldExp> formalOpParamsAsOldExps =
+                createOldExpFromVarExpList(formalOpParamsAsVarExp);
 
         return VarExp.getTrueVarExp(argLoc, myTypeGraph);
     }
