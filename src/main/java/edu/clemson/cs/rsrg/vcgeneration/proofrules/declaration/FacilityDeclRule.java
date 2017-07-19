@@ -310,18 +310,20 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * <p>An helper method that creates a list of {@link VarExp VarExps}
      * representing each of the {@code Operation's} {@link ParameterVarDec ParameterVarDecs}.</p>
      *
+     * @param qualifier Any module qualifier that we need to add to the {@link VarExp VarExps}
+     *                  we are creating from the operation parameters.
      * @param parameterVarDecs List of operation parameters.
      *
      * @return A list containing the {@link VarExp VarExps} representing
      * each operation parameter.
      */
-    private List<VarExp> createOperationParamExpList(List<ParameterVarDec> parameterVarDecs) {
+    private List<VarExp> createOperationParamExpList(PosSymbol qualifier, List<ParameterVarDec> parameterVarDecs) {
         List<VarExp> retExpList = new ArrayList<>(parameterVarDecs.size());
 
         // Create a VarExp representing each of the operation parameters
         for (ParameterVarDec dec : parameterVarDecs) {
             retExpList.add(Utilities.createVarExp(dec.getLocation(),
-                    null, dec.getName(), dec.getMathType(), null));
+                    qualifier, dec.getName(), dec.getMathType(), null));
         }
 
         return retExpList;
@@ -568,6 +570,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                             moduleArgumentItem.getLocation()
                                                     .clone(),
                                             formalOperationDec,
+                                            operationNameExp.getQualifier(),
                                             actualOperationDec,
                                             new ArrayList<VarExp>(),
                                             new ArrayList<Exp>(),
@@ -674,6 +677,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * @param argLoc A {@link Location} object that indicates where the {@code Operation}
      *               is being passed as argument.
      * @param formalOpDec The formal {@link OperationDec} specified in the formal parameters.
+     * @param actualOpQualifier The module qualifier indicating where the {@code actualOpDec}
+     *                          originated from.
      * @param actualOpDec The actual {@link OperationDec} being passed to the instantiation.
      * @param enhancementFormalParamList The list of {@code Enhancement} formal parameters.
      *                                   If we are processing {@code Concept Realizations},
@@ -688,20 +693,43 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * and ensures clause that must be true to successfully pass the operation as parameter.
      */
     private Exp applyOperationRelatedPart(Location argLoc,
-            OperationDec formalOpDec, OperationDec actualOpDec,
-            List<VarExp> enhancementFormalParamList,
+            OperationDec formalOpDec, PosSymbol actualOpQualifier,
+            OperationDec actualOpDec, List<VarExp> enhancementFormalParamList,
             List<Exp> enhancementActualArgList,
             List<VarExp> realizFormalParamList, List<Exp> realizActualArgList) {
         // Things related to formalOpDec
-        boolean isFormalOpDecLocal =
-                Utilities.isLocationOperation(formalOpDec.getName().getName(),
-                        myCurrentModuleScope);
         Exp formalOpRequires = formalOpDec.getRequires().getAssertionExp();
         Exp formalOpEnsures = formalOpDec.getEnsures().getAssertionExp();
+
         List<VarExp> formalOpParamsAsVarExp =
-                createOperationParamExpList(formalOpDec.getParameters());
+                createOperationParamExpList(null, formalOpDec.getParameters());
+        if (formalOpDec.getReturnTy() != null) {
+            formalOpParamsAsVarExp.add(Utilities.createVarExp(formalOpDec
+                    .getReturnTy().getLocation(), null, formalOpDec.getName(),
+                    formalOpDec.getReturnTy().getMathType(), null));
+        }
+
         List<OldExp> formalOpParamsAsOldExps =
                 createOldExpFromVarExpList(formalOpParamsAsVarExp);
+
+        // Things related to actualOpDec
+        Exp actualOpRequires = actualOpDec.getRequires().getAssertionExp();
+        Exp actualOpEnsures = actualOpDec.getEnsures().getAssertionExp();
+
+        // YS - We need to replace the requires/ensures clauses to include any
+        // qualifiers to distinguish the operation from others with the same name.
+        List<VarExp> actualOpParamsAsVarExp =
+                createOperationParamExpList(actualOpQualifier, actualOpDec
+                        .getParameters());
+        if (actualOpDec.getReturnTy() != null) {
+            actualOpParamsAsVarExp.add(Utilities.createVarExp(actualOpDec
+                    .getReturnTy().getLocation(), actualOpQualifier,
+                    actualOpDec.getName(), actualOpDec.getReturnTy()
+                            .getMathType(), null));
+        }
+
+        List<OldExp> actualOpParamsAsOldExps =
+                createOldExpFromVarExpList(actualOpParamsAsVarExp);
 
         return VarExp.getTrueVarExp(argLoc, myTypeGraph);
     }
