@@ -310,20 +310,18 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * <p>An helper method that creates a list of {@link VarExp VarExps}
      * representing each of the {@code Operation's} {@link ParameterVarDec ParameterVarDecs}.</p>
      *
-     * @param qualifier Any module qualifier that we need to add to the {@link VarExp VarExps}
-     *                  we are creating from the operation parameters.
      * @param parameterVarDecs List of operation parameters.
      *
      * @return A list containing the {@link VarExp VarExps} representing
      * each operation parameter.
      */
-    private List<VarExp> createOperationParamExpList(PosSymbol qualifier, List<ParameterVarDec> parameterVarDecs) {
+    private List<VarExp> createOperationParamExpList(List<ParameterVarDec> parameterVarDecs) {
         List<VarExp> retExpList = new ArrayList<>(parameterVarDecs.size());
 
         // Create a VarExp representing each of the operation parameters
         for (ParameterVarDec dec : parameterVarDecs) {
             retExpList.add(Utilities.createVarExp(dec.getLocation(),
-                    qualifier, dec.getName(), dec.getMathType(), null));
+                    null, dec.getName(), dec.getMathType(), null));
         }
 
         return retExpList;
@@ -702,7 +700,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         Exp formalOpEnsures = formalOpDec.getEnsures().getAssertionExp();
 
         List<VarExp> formalOpParamsAsVarExp =
-                createOperationParamExpList(null, formalOpDec.getParameters());
+                createOperationParamExpList(formalOpDec.getParameters());
         if (formalOpDec.getReturnTy() != null) {
             formalOpParamsAsVarExp.add(Utilities.createVarExp(formalOpDec
                     .getReturnTy().getLocation(), null, formalOpDec.getName(),
@@ -716,14 +714,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         Exp actualOpRequires = actualOpDec.getRequires().getAssertionExp();
         Exp actualOpEnsures = actualOpDec.getEnsures().getAssertionExp();
 
-        // YS - We need to replace the requires/ensures clauses to include any
-        // qualifiers to distinguish the operation from others with the same name.
         List<VarExp> actualOpParamsAsVarExp =
-                createOperationParamExpList(actualOpQualifier, actualOpDec
-                        .getParameters());
+                createOperationParamExpList(actualOpDec.getParameters());
         if (actualOpDec.getReturnTy() != null) {
             actualOpParamsAsVarExp.add(Utilities.createVarExp(actualOpDec
-                    .getReturnTy().getLocation(), actualOpQualifier,
+                            .getReturnTy().getLocation(), actualOpQualifier,
                     actualOpDec.getName(), actualOpDec.getReturnTy()
                             .getMathType(), null));
         }
@@ -731,7 +726,42 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         List<OldExp> actualOpParamsAsOldExps =
                 createOldExpFromVarExpList(actualOpParamsAsVarExp);
 
+        // YS - We need to replace the requires/ensures clauses to include any
+        // qualifiers to distinguish the operation from others with the same name.
+        if (actualOpQualifier != null) {
+            Map<Exp, Exp> varExpReplacementMap = new HashMap<>(actualOpParamsAsVarExp.size());
+            List<VarExp> qualifiedVarExp = new ArrayList<>(actualOpParamsAsVarExp.size());
+            for (VarExp paramExp : actualOpParamsAsVarExp) {
+                VarExp qualifiedParamExp =
+                        Utilities.createVarExp(paramExp.getLocation(),
+                                actualOpQualifier.clone(), paramExp.getName().clone(),
+                                paramExp.getMathType(), paramExp.getMathTypeValue());
+
+                qualifiedVarExp.add((VarExp) qualifiedParamExp.clone());
+                varExpReplacementMap.put(paramExp, qualifiedParamExp);
+            }
+
+            // Apply the replacement for any outgoing variables
+            actualOpRequires = actualOpRequires.substitute(varExpReplacementMap);
+            actualOpEnsures = actualOpEnsures.substitute(varExpReplacementMap);
+
+            Map<Exp, Exp> oldExpReplacementMap = new HashMap<>(actualOpParamsAsOldExps.size());
+            List<OldExp> qualifiedOldExp = createOldExpFromVarExpList(qualifiedVarExp);
+            Iterator<OldExp> actualOpParamsAsOldExpsIt = actualOpParamsAsOldExps.iterator();
+            Iterator<OldExp> qualifiedOldExpIt = qualifiedOldExp.iterator();
+            while (actualOpParamsAsOldExpsIt.hasNext()) {
+                oldExpReplacementMap.put(actualOpParamsAsOldExpsIt.next(), qualifiedOldExpIt.next());
+            }
+
+            // Apply the replacement for any incoming variables
+            actualOpRequires = actualOpRequires.substitute(oldExpReplacementMap);
+            actualOpEnsures = actualOpEnsures.substitute(oldExpReplacementMap);
+
+            // Use these as our replacement lists
+            actualOpParamsAsVarExp = qualifiedVarExp;
+            actualOpParamsAsOldExps = qualifiedOldExp;
+        }
+
         return VarExp.getTrueVarExp(argLoc, myTypeGraph);
     }
-
 }
