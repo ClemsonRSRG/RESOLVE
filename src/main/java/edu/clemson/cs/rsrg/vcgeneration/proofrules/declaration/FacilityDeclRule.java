@@ -712,15 +712,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             }
 
             Map<Exp, Exp> varExpReplacementMap = new HashMap<>(actualOpParamsAsVarExp.size());
-            List<VarExp> qualifiedVarExp = new ArrayList<>(actualOpParamsAsVarExp.size());
             for (VarExp paramExp : actualOpParamsAsVarExp) {
-                VarExp qualifiedParamExp =
-                        Utilities.createVarExp(paramExp.getLocation(),
-                                actualOpQualifier.clone(), paramExp.getName().clone(),
-                                paramExp.getMathType(), paramExp.getMathTypeValue());
-
-                qualifiedVarExp.add((VarExp) qualifiedParamExp.clone());
-                varExpReplacementMap.put(paramExp, qualifiedParamExp);
+                varExpReplacementMap.put(paramExp, Utilities.createVarExp(paramExp.getLocation(),
+                        actualOpQualifier.clone(), paramExp.getName().clone(),
+                        paramExp.getMathType(), paramExp.getMathTypeValue()));
             }
 
             // Apply the replacement for any outgoing variables
@@ -732,14 +727,42 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP
         // YS - Only do this if preIRP isn't just true.
         if (!VarExp.isLiteralTrue(actualOpRequires)) {
+            retExp = InfixExp.formImplies(actualOpRequires.getLocation(),
+                    formalOpRequires, actualOpRequires);
 
+            // Store the location detail for this implication
+            String message = "Requires Clause of " +
+                    formalOpDec.getName().getName() + " implies the Requires Clause of ";
+            if (actualOpQualifier != null) {
+                message += (actualOpQualifier.getName() + "::");
+            }
+            myLocationDetails.put(retExp.getLocation(),
+                    message + actualOpDec.getName().getName() + " in " + getRuleDescription());
         }
 
         // Facility Decl Rule (Operations as Parameters Part 2):
         // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
         // YS - Only do this if postRP isn't just true.
         if (!VarExp.isLiteralTrue(formalOpEnsures)) {
+            Exp impliesExp = InfixExp.formImplies(actualOpEnsures.getLocation(),
+                    actualOpEnsures, formalOpEnsures);
 
+            // Store the location detail for this implication
+            String message = "Ensures Clause of ";
+            if (actualOpQualifier != null) {
+                message += (actualOpQualifier.getName() + "::");
+            }
+            myLocationDetails.put(retExp.getLocation(), message + actualOpDec.getName().getName() +
+                    " implies the Ensures Clause of " + formalOpDec.getName().getName() +
+                    " in " + getRuleDescription());
+
+            // Form a conjunct if needed
+            if (!VarExp.isLiteralTrue(retExp)) {
+                retExp = InfixExp.formConjunct(actualOpDec.getLocation(), retExp, impliesExp);
+            }
+            else {
+                retExp = impliesExp;
+            }
         }
 
         return retExp;
