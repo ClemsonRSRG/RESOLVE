@@ -287,26 +287,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>An helper method that creates a list of {@link OldExp OldExps}
-     * representing each of the possible incoming values of {@link VarExp VarExps}.</p>
-     *
-     * @param varExps List of variable expressions.
-     *
-     * @return A list containing the {@link OldExp OldExps} representing
-     * each {@link VarExp}'s incoming value.
-     */
-    private List<OldExp> createOldExpFromVarExpList(List<VarExp> varExps) {
-        List<OldExp> retExpList = new ArrayList<>(varExps.size());
-
-        // Create an OldExp representing the incoming value of each VarExp
-        for (VarExp exp : varExps) {
-            retExpList.add(new OldExp(exp.getLocation().clone(), exp.clone()));
-        }
-
-        return retExpList;
-    }
-
-    /**
      * <p>An helper method that creates a list of {@link VarExp VarExps}
      * representing each of the {@code Operation's} {@link ParameterVarDec ParameterVarDecs}.</p>
      *
@@ -695,40 +675,42 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             OperationDec actualOpDec, List<VarExp> enhancementFormalParamList,
             List<Exp> enhancementActualArgList,
             List<VarExp> realizFormalParamList, List<Exp> realizActualArgList) {
-        // Things related to formalOpDec
+        Exp retExp = VarExp.getTrueVarExp(argLoc, myTypeGraph);
+
+        // Replace concept/enhancement/realization formals with actual
+        // instantiations in the formalOpRequires/formalOpEnsures clauses
         Exp formalOpRequires = formalOpDec.getRequires().getAssertionExp();
         Exp formalOpEnsures = formalOpDec.getEnsures().getAssertionExp();
+        formalOpRequires =
+                replaceFormalWithActual(formalOpRequires, myConceptFormalParamList, myConceptActualArgList);
+        formalOpRequires =
+                replaceFormalWithActual(formalOpRequires, enhancementFormalParamList, enhancementActualArgList);
+        formalOpRequires =
+                replaceFormalWithActual(formalOpRequires, realizFormalParamList, realizActualArgList);
 
-        List<VarExp> formalOpParamsAsVarExp =
-                createOperationParamExpList(formalOpDec.getParameters());
-        if (formalOpDec.getReturnTy() != null) {
-            formalOpParamsAsVarExp.add(Utilities.createVarExp(formalOpDec
-                    .getReturnTy().getLocation(), null, formalOpDec.getName(),
-                    formalOpDec.getReturnTy().getMathType(), null));
-        }
-
-        List<OldExp> formalOpParamsAsOldExps =
-                createOldExpFromVarExpList(formalOpParamsAsVarExp);
+        formalOpEnsures =
+                replaceFormalWithActual(formalOpEnsures, myConceptFormalParamList, myConceptActualArgList);
+        formalOpEnsures =
+                replaceFormalWithActual(formalOpEnsures, enhancementFormalParamList, enhancementActualArgList);
+        formalOpEnsures =
+                replaceFormalWithActual(formalOpEnsures, realizFormalParamList, realizActualArgList);
 
         // Things related to actualOpDec
         Exp actualOpRequires = actualOpDec.getRequires().getAssertionExp();
         Exp actualOpEnsures = actualOpDec.getEnsures().getAssertionExp();
 
-        List<VarExp> actualOpParamsAsVarExp =
-                createOperationParamExpList(actualOpDec.getParameters());
-        if (actualOpDec.getReturnTy() != null) {
-            actualOpParamsAsVarExp.add(Utilities.createVarExp(actualOpDec
-                            .getReturnTy().getLocation(), actualOpQualifier,
-                    actualOpDec.getName(), actualOpDec.getReturnTy()
-                            .getMathType(), null));
-        }
-
-        List<OldExp> actualOpParamsAsOldExps =
-                createOldExpFromVarExpList(actualOpParamsAsVarExp);
-
         // YS - We need to replace the requires/ensures clauses to include any
         // qualifiers to distinguish the operation from others with the same name.
         if (actualOpQualifier != null) {
+            List<VarExp> actualOpParamsAsVarExp =
+                    createOperationParamExpList(actualOpDec.getParameters());
+            if (actualOpDec.getReturnTy() != null) {
+                actualOpParamsAsVarExp.add(Utilities.createVarExp(actualOpDec
+                                .getReturnTy().getLocation(), actualOpQualifier,
+                        actualOpDec.getName(), actualOpDec.getReturnTy()
+                                .getMathType(), null));
+            }
+
             Map<Exp, Exp> varExpReplacementMap = new HashMap<>(actualOpParamsAsVarExp.size());
             List<VarExp> qualifiedVarExp = new ArrayList<>(actualOpParamsAsVarExp.size());
             for (VarExp paramExp : actualOpParamsAsVarExp) {
@@ -744,24 +726,22 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             // Apply the replacement for any outgoing variables
             actualOpRequires = actualOpRequires.substitute(varExpReplacementMap);
             actualOpEnsures = actualOpEnsures.substitute(varExpReplacementMap);
-
-            Map<Exp, Exp> oldExpReplacementMap = new HashMap<>(actualOpParamsAsOldExps.size());
-            List<OldExp> qualifiedOldExp = createOldExpFromVarExpList(qualifiedVarExp);
-            Iterator<OldExp> actualOpParamsAsOldExpsIt = actualOpParamsAsOldExps.iterator();
-            Iterator<OldExp> qualifiedOldExpIt = qualifiedOldExp.iterator();
-            while (actualOpParamsAsOldExpsIt.hasNext()) {
-                oldExpReplacementMap.put(actualOpParamsAsOldExpsIt.next(), qualifiedOldExpIt.next());
-            }
-
-            // Apply the replacement for any incoming variables
-            actualOpRequires = actualOpRequires.substitute(oldExpReplacementMap);
-            actualOpEnsures = actualOpEnsures.substitute(oldExpReplacementMap);
-
-            // Use these as our replacement lists
-            actualOpParamsAsVarExp = qualifiedVarExp;
-            actualOpParamsAsOldExps = qualifiedOldExp;
         }
 
-        return VarExp.getTrueVarExp(argLoc, myTypeGraph);
+        // Facility Decl Rule (Operations as Parameters Part 1):
+        // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP
+        // YS - Only do this if preIRP isn't just true.
+        if (!VarExp.isLiteralTrue(actualOpRequires)) {
+
+        }
+
+        // Facility Decl Rule (Operations as Parameters Part 2):
+        // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
+        // YS - Only do this if postRP isn't just true.
+        if (!VarExp.isLiteralTrue(formalOpEnsures)) {
+
+        }
+
+        return retExp;
     }
 }
