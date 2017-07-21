@@ -23,9 +23,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
+import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -182,6 +182,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         // Apply the part of the rule that deals with the facility
         // concept and its associated realization.
         Exp retExpPart1 = applyConceptRelatedPart();
+
+        // Apply the part of the rule that deals with the facility
+        // enhancements and its associated realizations.
+        Exp retExpPart2 = applyEnhacementRelatedPart();
 
         // This class is used by any importing facility declarations as well as
         // any local facility declarations. We really don't need to display
@@ -643,6 +647,27 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         catch (NoSuchSymbolException e) {
             Utilities
                     .noSuchModule(myFacilityDec.getConceptName().getLocation());
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>An helper method that applies the part of the rule that deals with
+     * {@code Enhancement} and {@code Enhancement Realizations}.</p>
+     *
+     * @return An {@link Exp} that contains the {@code Enhancement}'s and
+     * {@code Enhancement Realization}'s modified requires clauses and any
+     * passed-in operations requires clauses and ensures clause.
+     */
+    private Exp applyEnhacementRelatedPart() {
+        Exp retExp =
+                VarExp.getTrueVarExp(myFacilityDec.getLocation().clone(),
+                        myTypeGraph);
+
+        for (EnhancementSpecRealizItem specRealizItem : myFacilityDec
+                .getEnhancementRealizPairs()) {
+
         }
 
         return retExp;
