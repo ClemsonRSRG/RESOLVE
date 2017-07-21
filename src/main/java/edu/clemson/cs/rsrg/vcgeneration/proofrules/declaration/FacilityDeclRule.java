@@ -14,8 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptModuleDec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
@@ -667,7 +666,35 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
         for (EnhancementSpecRealizItem specRealizItem : myFacilityDec
                 .getEnhancementRealizPairs()) {
+            // Enhancement part of the rule
+            try {
+                // Obtain the enhancement module for the facility
+                EnhancementModuleDec enhancementModuleDec =
+                        (EnhancementModuleDec) mySymbolTable.getModuleScope(
+                                new ModuleIdentifier(specRealizItem
+                                        .getEnhancementName().getName()))
+                                .getDefiningElement();
+            }
+            catch (NoSuchSymbolException e) {
+                Utilities.noSuchModule(specRealizItem.getEnhancementName()
+                        .getLocation());
+            }
 
+            // Enhancement realization part of the rule
+            try {
+                // Obtain the enhancement module for the facility
+                EnhancementRealizModuleDec enhancementRealizModuleDec =
+                        (EnhancementRealizModuleDec) mySymbolTable
+                                .getModuleScope(
+                                        new ModuleIdentifier(specRealizItem
+                                                .getEnhancementRealizName()
+                                                .getName()))
+                                .getDefiningElement();
+            }
+            catch (NoSuchSymbolException e) {
+                Utilities.noSuchModule(specRealizItem
+                        .getEnhancementRealizName().getLocation());
+            }
         }
 
         return retExp;
