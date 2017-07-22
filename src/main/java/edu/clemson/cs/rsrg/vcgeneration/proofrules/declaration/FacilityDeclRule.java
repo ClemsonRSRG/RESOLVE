@@ -679,7 +679,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                 .getDefiningElement();
 
                 // Obtain the enhancement's requires clause
-                Exp enhancementReq = enhancementModuleDec.getRequires().getAssertionExp().clone();
+                Exp enhancementReq =
+                        enhancementModuleDec.getRequires().getAssertionExp().clone();
 
                 // Convert the enhancement's module parameters and the instantiated
                 // concept's arguments into the appropriate mathematical expressions.
@@ -692,7 +693,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 // Create a mapping from concept formal parameters
                 // to actual arguments for future use.
                 for (int i = 0; i < enhancementFormalParamList.size(); i++) {
-                    enhancementArgMap.put(enhancementFormalParamList.get(i), enhancementActualArgList.get(i));
+                    enhancementArgMap.put(enhancementFormalParamList.get(i),
+                            enhancementActualArgList.get(i));
                 }
             }
             catch (NoSuchSymbolException e) {
@@ -710,6 +712,26 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                                 .getEnhancementRealizName()
                                                 .getName()))
                                 .getDefiningElement();
+
+                // Obtain the enhancement realization's requires clause
+                Exp realizationReq =
+                        enhancementRealizModuleDec.getRequires().getAssertionExp().clone();
+
+                // Convert the enhancement's module parameters and the instantiated
+                // concept's arguments into the appropriate mathematical expressions.
+                // Note that any nested function calls will be dealt with appropriately.
+                List<VarExp> enhancementRealizFormalParamList =
+                        createModuleParamExpList(enhancementRealizModuleDec.getParameterDecs());
+                List<Exp> enhancementRealizActualArgList =
+                        createModuleArgExpList(specRealizItem.getEnhancementRealizParams());
+
+                // Create a mapping from concept formal parameters
+                // to actual arguments for future use.
+                Map<Exp, Exp> enhancementRealizArgMap = new LinkedHashMap<>();
+                for (int i = 0; i < enhancementRealizFormalParamList.size(); i++) {
+                    enhancementArgMap.put(enhancementRealizFormalParamList.get(i),
+                            enhancementRealizActualArgList.get(i));
+                }
             }
             catch (NoSuchSymbolException e) {
                 Utilities.noSuchModule(specRealizItem
