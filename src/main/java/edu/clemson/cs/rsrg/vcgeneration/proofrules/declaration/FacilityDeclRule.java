@@ -667,6 +667,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         for (EnhancementSpecRealizItem specRealizItem : myFacilityDec
                 .getEnhancementRealizPairs()) {
             // Enhancement part of the rule
+            List<VarExp> enhancementFormalParamList;
+            List<Exp> enhancementActualArgList;
+            Map<Exp, Exp> enhancementArgMap = new LinkedHashMap<>();
             try {
                 // Obtain the enhancement module for the facility
                 EnhancementModuleDec enhancementModuleDec =
@@ -674,6 +677,23 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                 new ModuleIdentifier(specRealizItem
                                         .getEnhancementName().getName()))
                                 .getDefiningElement();
+
+                // Obtain the enhancement's requires clause
+                Exp enhancementReq = enhancementModuleDec.getRequires().getAssertionExp().clone();
+
+                // Convert the enhancement's module parameters and the instantiated
+                // concept's arguments into the appropriate mathematical expressions.
+                // Note that any nested function calls will be dealt with appropriately.
+                enhancementFormalParamList =
+                        createModuleParamExpList(enhancementModuleDec.getParameterDecs());
+                enhancementActualArgList =
+                        createModuleArgExpList(specRealizItem.getEnhancementParams());
+
+                // Create a mapping from concept formal parameters
+                // to actual arguments for future use.
+                for (int i = 0; i < enhancementFormalParamList.size(); i++) {
+                    enhancementArgMap.put(enhancementFormalParamList.get(i), enhancementActualArgList.get(i));
+                }
             }
             catch (NoSuchSymbolException e) {
                 Utilities.noSuchModule(specRealizItem.getEnhancementName()
