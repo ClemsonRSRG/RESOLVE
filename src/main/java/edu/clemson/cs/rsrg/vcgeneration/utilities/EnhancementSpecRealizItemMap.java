@@ -76,6 +76,30 @@ public class EnhancementSpecRealizItemMap {
     // ===========================================================
 
     /**
+     * <p>This method overrides the default {@code equals} method implementation.</p>
+     *
+     * @param o Object to be compared.
+     *
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     */
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        EnhancementSpecRealizItemMap that = (EnhancementSpecRealizItemMap) o;
+
+        if (!myEnhancementSpecRealizItem
+                .equals(that.myEnhancementSpecRealizItem))
+            return false;
+        if (!myEnhancementArgMap.equals(that.myEnhancementArgMap))
+            return false;
+        return myEnhancementRealizArgMap.equals(that.myEnhancementRealizArgMap);
+    }
+
+    /**
      * <p>This method returns a map containing the {@code Enhancement's}
      * formal to actual arguments for the instantiated {@code Facility}.</p>
      *
@@ -103,6 +127,19 @@ public class EnhancementSpecRealizItemMap {
      */
     public final EnhancementSpecRealizItem getEnhancementSpecRealizItem() {
         return myEnhancementSpecRealizItem;
+    }
+
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public final int hashCode() {
+        int result = myEnhancementSpecRealizItem.hashCode();
+        result = 31 * result + myEnhancementArgMap.hashCode();
+        result = 31 * result + myEnhancementRealizArgMap.hashCode();
+        return result;
     }
 
 }
