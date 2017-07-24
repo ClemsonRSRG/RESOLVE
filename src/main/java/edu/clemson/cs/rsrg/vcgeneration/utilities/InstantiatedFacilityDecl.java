@@ -18,7 +18,6 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * <p>This class stores all information pertinent to an {@link FacilityDec}
@@ -53,10 +52,11 @@ public class InstantiatedFacilityDecl {
     private final Map<Exp, Exp> myConceptRealizArgMap;
 
     /**
-     * <p>This maps all {@code Enhancement} and {@code Enhancement Realization} formal arguments
-     * to the instantiated actual arguments.</p>
+     * <p>A list that contains maps to all {@code Enhancement} and
+     * {@code Enhancement Realization} formal arguments to the instantiated
+     * actual arguments.</p>
      */
-    private final Map<PosSymbol, Map<Exp, Exp>> myEnhancementArgMaps;
+    private final List<EnhancementSpecRealizItemMap> myEnhancementSpecRealizItemMaps;
 
     /** <p>The instantiated {@code Facility}.</p> */
     private final FacilityDec myInstantiatedFacilityDec;
@@ -78,12 +78,12 @@ public class InstantiatedFacilityDecl {
      */
     public InstantiatedFacilityDecl(FacilityDec dec,
             List<TypeFamilyDec> conceptDeclaredTypes, Map<Exp, Exp> cArgMap,
-            Map<Exp, Exp> crArgMap, Map<PosSymbol, Map<Exp, Exp>> eArgMaps) {
+            Map<Exp, Exp> crArgMap, List<EnhancementSpecRealizItemMap> eArgMaps) {
         myInstantiatedFacilityDec = dec;
         myConceptDeclaredTypes = conceptDeclaredTypes;
         myConceptArgMap = cArgMap;
         myConceptRealizArgMap = crArgMap;
-        myEnhancementArgMaps = eArgMaps;
+        myEnhancementSpecRealizItemMaps = eArgMaps;
     }
 
     // ===========================================================
@@ -112,7 +112,8 @@ public class InstantiatedFacilityDecl {
             return false;
         if (!myConceptRealizArgMap.equals(that.myConceptRealizArgMap))
             return false;
-        if (!myEnhancementArgMaps.equals(that.myEnhancementArgMaps))
+        if (!myEnhancementSpecRealizItemMaps
+                .equals(that.myEnhancementSpecRealizItemMaps))
             return false;
         return myInstantiatedFacilityDec.equals(that.myInstantiatedFacilityDec);
     }
@@ -148,27 +149,14 @@ public class InstantiatedFacilityDecl {
     }
 
     /**
-     * <p>This method returns the names of {@code Enhancement} and
-     * {@code Enhancement Realization} for the instantiated {@code Facility}.</p>
-     *
-     * @return A {@link Set} containing {@link PosSymbol} representation
-     * of {@code Enhancement} and {@code Enhancement Realization} names.
-     */
-    public final Set<PosSymbol> getEnhancementKeys() {
-        return myEnhancementArgMaps.keySet();
-    }
-
-    /**
-     * <p>This method returns a map containing the {@code Enhancement's} or
+     * <p>This method returns a list containing maps of the {@code Enhancement's} and
      * {@code Enhancement Realization's} formal to actual arguments for
      * the instantiated {@code Facility}.</p>
      *
-     * @param name Name of the enhancement or enhancement realization
-     *
-     * @return A {@link Map} containing the formal to actual mapping.
+     * @return A {@link List} containing {@link EnhancementSpecRealizItemMap}.
      */
-    public final Map<Exp, Exp> getEnhancementArgMap(PosSymbol name) {
-        return myEnhancementArgMaps.get(name);
+    public final List<EnhancementSpecRealizItemMap> getEnhancementArgMaps() {
+        return myEnhancementSpecRealizItemMaps;
     }
 
     /**
@@ -199,9 +187,8 @@ public class InstantiatedFacilityDecl {
         int result = myConceptArgMap.hashCode();
         result = 31 * result + myConceptDeclaredTypes.hashCode();
         result = 31 * result + myConceptRealizArgMap.hashCode();
-        result = 31 * result + myEnhancementArgMaps.hashCode();
+        result = 31 * result + myEnhancementSpecRealizItemMaps.hashCode();
         result = 31 * result + myInstantiatedFacilityDec.hashCode();
         return result;
     }
-
 }
