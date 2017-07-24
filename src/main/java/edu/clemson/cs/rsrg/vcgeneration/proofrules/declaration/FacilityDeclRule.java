@@ -447,10 +447,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         myConceptActualArgList.get(i));
             }
 
-            // Step 1: Substitute concept realization's formal parameters with
-            //         actual instantiation arguments for the concept realization's
-            //         requires clause.
-            //         ( RPC[ rn~>rn_exp, RR~>IRR ] )
             // Note: Only to this step if we don't have an external realization
             Exp conceptRealizReq =
                     VarExp.getTrueVarExp(myFacilityDec.getLocation().clone(),
@@ -486,6 +482,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
                     // Replace the formal with the actual (if conceptRealizReq /= true)
                     if (!MathExp.isLiteralTrue(conceptRealizReq)) {
+                        // Step 1: Substitute concept realization's formal parameters with
+                        //         actual instantiation arguments for the concept realization's
+                        //         requires clause.
+                        //         ( RPC[ rn~>rn_exp, RR~>IRR ] )
                         conceptRealizReq =
                                 replaceFormalWithActual(conceptRealizReq,
                                         conceptRealizFormalParamList,
@@ -503,7 +503,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         conceptRealizReq =
                                 replaceFormalWithActual(conceptRealizReq,
                                         myConceptFormalParamList,
-                                        conceptRealizActualArgList);
+                                        myConceptActualArgList);
 
                         // Store the location detail for this requires clause
                         myLocationDetails.put(conceptRealizReq.getLocation(),
@@ -698,52 +698,165 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     enhancementArgMap.put(enhancementFormalParamList.get(i),
                             enhancementActualArgList.get(i));
                 }
+
+                // Enhancement realization part of the rule
+                try {
+                    // Obtain the enhancement module for the facility
+                    EnhancementRealizModuleDec enhancementRealizModuleDec =
+                            (EnhancementRealizModuleDec) mySymbolTable
+                                    .getModuleScope(
+                                            new ModuleIdentifier(specRealizItem
+                                                    .getEnhancementRealizName()
+                                                    .getName()))
+                                    .getDefiningElement();
+
+                    // Obtain the enhancement realization's requires clause
+                    Exp realizationReq =
+                            enhancementRealizModuleDec.getRequires().getAssertionExp().clone();
+
+                    // Convert the enhancement's module parameters and the instantiated
+                    // concept's arguments into the appropriate mathematical expressions.
+                    // Note that any nested function calls will be dealt with appropriately.
+                    List<VarExp> enhancementRealizFormalParamList =
+                            createModuleParamExpList(enhancementRealizModuleDec.getParameterDecs());
+                    List<Exp> enhancementRealizActualArgList =
+                            createModuleArgExpList(specRealizItem.getEnhancementRealizParams());
+
+                    // Create a mapping from concept formal parameters
+                    // to actual arguments for future use.
+                    Map<Exp, Exp> enhancementRealizArgMap = new LinkedHashMap<>();
+                    for (int i = 0; i < enhancementRealizFormalParamList.size(); i++) {
+                        enhancementArgMap.put(enhancementRealizFormalParamList.get(i),
+                                enhancementRealizActualArgList.get(i));
+                    }
+
+                    // Replace the formal with the actual (if realizationReq /= true)
+                    if (!MathExp.isLiteralTrue(realizationReq)) {
+                        // Step 1: Substitute enhancement realization's formal parameters with
+                        //         actual instantiation arguments for the enhancement realization's
+                        //         requires clause.
+                        //         ( ERPC[ ern~>ern_exp ] )
+                        realizationReq =
+                                replaceFormalWithActual(realizationReq,
+                                        enhancementRealizFormalParamList,
+                                        enhancementRealizActualArgList);
+
+                        // Step 2a: Substitute enhancement's formal parameters with actual
+                        //          instantiation arguments for the enhancement realization's
+                        //          requires clause.
+                        //          ( ERPC[ ern~>ern_exp ] ∧ EPC )
+                        //
+                        // YS: This isn't exactly what the rule says, but it makes it easier
+                        //     to record the location details for displaying purposes. Doing
+                        //     the substitution first and then forming the conjunct is the same
+                        //     as forming the conjunct first and then doing the substitution.
+                        realizationReq =
+                                replaceFormalWithActual(realizationReq,
+                                        enhancementFormalParamList,
+                                        enhancementActualArgList);
+
+                        // Step 2b: Substitute concept's formal parameters with actual
+                        //          instantiation arguments for the enhancement realization's
+                        //          requires clause.
+                        //          ( ( ERPC[ ern~>ern_exp ] ∧ EPC )[ n~>n_exp, R~>IR ] )
+                        //
+                        // YS: This isn't exactly what the rule says, but it makes it easier
+                        //     to record the location details for displaying purposes. Doing
+                        //     the substitution first and then forming the conjunct is the same
+                        //     as forming the conjunct first and then doing the substitution.
+                        realizationReq =
+                                replaceFormalWithActual(realizationReq,
+                                        myConceptFormalParamList,
+                                        myConceptActualArgList);
+
+                        // Store the location detail for this requires clause
+                        myLocationDetails.put(realizationReq.getLocation(),
+                                "Requires Clause for "
+                                        + enhancementRealizModuleDec.getName()
+                                        .getName() + " in "
+                                        + getRuleDescription());
+                    }
+
+                    // Iterate through searching for any operations being passed as parameters.
+                    Exp realizOperationPart =
+                            VarExp.getTrueVarExp(myFacilityDec.getLocation().clone(),
+                                    myTypeGraph);
+                    Iterator<ModuleParameterDec> realizFormalParams =
+                            enhancementRealizModuleDec.getParameterDecs().iterator();
+                    Iterator<ModuleArgumentItem> realizActualArgs =
+                            specRealizItem.getEnhancementRealizParams().iterator();
+                    while (realizFormalParams.hasNext()) {
+                        ModuleParameterDec moduleParameterDec =
+                                realizFormalParams.next();
+                        ModuleArgumentItem moduleArgumentItem =
+                                realizActualArgs.next();
+
+                        // Only care about OperationDecs
+                        if (moduleParameterDec.getWrappedDec() instanceof OperationDec) {
+                            // Formal operation defined in the specifications and
+                            // the operation being passed as argument
+                            OperationDec formalOperationDec =
+                                    (OperationDec) moduleParameterDec
+                                            .getWrappedDec();
+
+                            ProgramVariableNameExp operationNameExp =
+                                    (ProgramVariableNameExp) moduleArgumentItem
+                                            .getArgumentExp();
+                            OperationEntry actualOperationEntry =
+                                    searchOperation(moduleArgumentItem
+                                            .getLocation(), operationNameExp
+                                            .getQualifier(), operationNameExp
+                                            .getName());
+                            OperationDec actualOperationDec =
+                                    (OperationDec) actualOperationEntry
+                                            .getDefiningElement();
+
+                            // Step 3: Substitute any operations's requires and ensures clauses
+                            //         passed to the enhancement realization instantiation.
+                            //         ( preERP[ ern~>ern_exp, erx~>ierx ] => preIERP ) ∧
+                            //         ( postIERP => postERP[ ern~>ern_exp, #erx~>#ierx, erx~>ierx ] )
+                            Exp processedOperationPart =
+                                    applyOperationRelatedPart(
+                                            moduleArgumentItem.getLocation()
+                                                    .clone(),
+                                            formalOperationDec,
+                                            operationNameExp.getQualifier(),
+                                            actualOperationDec,
+                                            enhancementFormalParamList,
+                                            enhancementActualArgList,
+                                            enhancementRealizFormalParamList,
+                                            enhancementRealizActualArgList);
+                            if (VarExp
+                                    .isLiteralTrue(realizOperationPart)) {
+                                realizOperationPart = processedOperationPart;
+                            } else {
+                                // YS - Don't need to form a conjunct if processed operation part is "true".
+                                if (!VarExp
+                                        .isLiteralTrue(processedOperationPart)) {
+                                    realizOperationPart =
+                                            InfixExp.formConjunct(myFacilityDec
+                                                            .getLocation().clone(),
+                                                    realizOperationPart,
+                                                    processedOperationPart);
+                                }
+                            }
+                        }
+                    }
+
+                    // Store these inside a new EnhancementSpecRealizItemMap and
+                    // add it to our list.
+                    myEnhancementSpecRealizItemMaps.add(
+                            new EnhancementSpecRealizItemMap(specRealizItem,
+                                    enhancementArgMap, enhancementRealizArgMap));
+                }
+                catch (NoSuchSymbolException e) {
+                    Utilities.noSuchModule(specRealizItem
+                            .getEnhancementRealizName().getLocation());
+                }
             }
             catch (NoSuchSymbolException e) {
                 Utilities.noSuchModule(specRealizItem.getEnhancementName()
                         .getLocation());
-            }
-
-            // Enhancement realization part of the rule
-            try {
-                // Obtain the enhancement module for the facility
-                EnhancementRealizModuleDec enhancementRealizModuleDec =
-                        (EnhancementRealizModuleDec) mySymbolTable
-                                .getModuleScope(
-                                        new ModuleIdentifier(specRealizItem
-                                                .getEnhancementRealizName()
-                                                .getName()))
-                                .getDefiningElement();
-
-                // Obtain the enhancement realization's requires clause
-                Exp realizationReq =
-                        enhancementRealizModuleDec.getRequires().getAssertionExp().clone();
-
-                // Convert the enhancement's module parameters and the instantiated
-                // concept's arguments into the appropriate mathematical expressions.
-                // Note that any nested function calls will be dealt with appropriately.
-                List<VarExp> enhancementRealizFormalParamList =
-                        createModuleParamExpList(enhancementRealizModuleDec.getParameterDecs());
-                List<Exp> enhancementRealizActualArgList =
-                        createModuleArgExpList(specRealizItem.getEnhancementRealizParams());
-
-                // Create a mapping from concept formal parameters
-                // to actual arguments for future use.
-                Map<Exp, Exp> enhancementRealizArgMap = new LinkedHashMap<>();
-                for (int i = 0; i < enhancementRealizFormalParamList.size(); i++) {
-                    enhancementArgMap.put(enhancementRealizFormalParamList.get(i),
-                            enhancementRealizActualArgList.get(i));
-                }
-
-                // Store these inside a new EnhancementSpecRealizItemMap and
-                // add it to our list.
-                myEnhancementSpecRealizItemMaps.add(
-                        new EnhancementSpecRealizItemMap(specRealizItem,
-                                enhancementArgMap, enhancementRealizArgMap));
-            }
-            catch (NoSuchSymbolException e) {
-                Utilities.noSuchModule(specRealizItem
-                        .getEnhancementRealizName().getLocation());
             }
         }
 
