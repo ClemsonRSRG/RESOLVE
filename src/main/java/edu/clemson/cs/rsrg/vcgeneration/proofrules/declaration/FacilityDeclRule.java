@@ -42,6 +42,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.EnhancementSpecRealizItemMap;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptTypeExtractor;
@@ -124,10 +125,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     private final Map<Exp, Exp> myConceptRealizArgMap;
 
     /**
-     * <p>This maps all {@code Enhancement} and {@code Enhancement Realization} formal arguments
-     * to the instantiated actual arguments.</p>
+     * <p>A list that contains maps to all {@code Enhancement} and
+     * {@code Enhancement Realization} formal arguments to the instantiated
+     * actual arguments.</p>
      */
-    private final Map<PosSymbol, Map<Exp, Exp>> myEnhancementArgMaps;
+    private final List<EnhancementSpecRealizItemMap> myEnhancementSpecRealizItemMaps;
 
     // ===========================================================
     // Constructors
@@ -166,7 +168,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         myConceptDeclaredTypes = new LinkedList<>();
         myConceptArgMap = new LinkedHashMap<>();
         myConceptRealizArgMap = new LinkedHashMap<>();
-        myEnhancementArgMaps = new LinkedHashMap<>();
+        myEnhancementSpecRealizItemMaps = new LinkedList<>();
     }
 
     // ===========================================================
@@ -207,7 +209,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     public final InstantiatedFacilityDecl getInstantiatedFacilityDecl() {
         return new InstantiatedFacilityDecl(myFacilityDec,
                 myConceptDeclaredTypes, myConceptArgMap, myConceptRealizArgMap,
-                myEnhancementArgMaps);
+                myEnhancementSpecRealizItemMaps);
     }
 
     /**
@@ -732,6 +734,12 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     enhancementArgMap.put(enhancementRealizFormalParamList.get(i),
                             enhancementRealizActualArgList.get(i));
                 }
+
+                // Store these inside a new EnhancementSpecRealizItemMap and
+                // add it to our list.
+                myEnhancementSpecRealizItemMaps.add(
+                        new EnhancementSpecRealizItemMap(specRealizItem,
+                                enhancementArgMap, enhancementRealizArgMap));
             }
             catch (NoSuchSymbolException e) {
                 Utilities.noSuchModule(specRealizItem
