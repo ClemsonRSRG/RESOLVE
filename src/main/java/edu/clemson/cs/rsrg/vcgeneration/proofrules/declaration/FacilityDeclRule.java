@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
+import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
@@ -205,9 +206,12 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         }
 
         // This class is used by any importing facility declarations as well as
-        // any local facility declarations. We really don't need to display
-        // anything to our models if it isn't local. - YS
+        // any local facility declarations. We really don't need to generate VCs
+        // or display anything to our models if it isn't local. - YS
         if (myIsLocalFacilityDec) {
+            myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(confirmExp
+                    .getLocation(), confirmExp, false));
+
             // Add the different details to the various different output models
             ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
             stepModel.add("proofRuleName", getRuleDescription()).add(
