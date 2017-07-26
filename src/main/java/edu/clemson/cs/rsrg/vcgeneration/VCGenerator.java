@@ -445,6 +445,41 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Facility-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link FacilityDec}.</p>
+     *
+     * @param dec A facility declaration.
+     */
+    @Override
+    public final void postFacilityDec(FacilityDec dec) {
+        // Create a new assertive code block
+        myCurrentAssertiveCodeBlock =
+                new AssertiveCodeBlock(myTypeGraph, dec, dec.getName());
+
+        // Apply facility declaration rule
+        FacilityDeclRule declRule =
+                new FacilityDeclRule(dec, true, myProcessedInstFacilityDecls,
+                        myBuilder, myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                        mySTGroup, myVCGenDetailsModel);
+        declRule.applyRule();
+
+        // Store this facility's InstantiatedFacilityDecl for future use
+        myProcessedInstFacilityDecls.add(declRule.getInstantiatedFacilityDecl());
+
+        // Update the current assertive code block and its associated block model.
+        myCurrentAssertiveCodeBlock =
+                declRule.getAssertiveCodeBlocks().getFirst();
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, declRule
+                .getBlockModel());
+
+        // Add this as a new incomplete assertive code block
+        myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
+    }
+
+    // -----------------------------------------------------------
     // Operation-Related
     // -----------------------------------------------------------
 
