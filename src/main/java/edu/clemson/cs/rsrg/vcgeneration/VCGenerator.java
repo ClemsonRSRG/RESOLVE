@@ -55,6 +55,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
@@ -64,6 +65,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.ConfirmStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.RememberStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
@@ -110,6 +112,13 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     /** <p>The mathematical type Z.</p> */
     private MTType Z;
+
+    // -----------------------------------------------------------
+    // Facility Declaration-Related
+    // -----------------------------------------------------------
+
+    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
+    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     // -----------------------------------------------------------
     // Operation Declaration-Related
@@ -233,6 +242,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myGlobalRequires = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
         myLocationDetails = new LinkedHashMap<>();
+        myProcessedInstFacilityDecls = new LinkedList<>();
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
         myVariableSpecFinalItems = new LinkedHashMap<>();
@@ -279,6 +289,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                     FacilityDec facDec =
                             (FacilityDec) s.toFacilityEntry(dec.getLocation())
                                     .getDefiningElement();
+                    FacilityDeclRule ruleApplication =
+                            new FacilityDeclRule(facDec, false, myProcessedInstFacilityDecls,
+                                    myBuilder, myCurrentModuleScope,
+                                    new AssertiveCodeBlock(myTypeGraph, facDec, facDec.getName()),
+                                    mySTGroup, myVCGenDetailsModel);
+                    ruleApplication.applyRule();
+
+                    // Store this facility's InstantiatedFacilityDecl for future use
+                    myProcessedInstFacilityDecls.add(ruleApplication.getInstantiatedFacilityDecl());
 
                     // Store all requires/constraint from the imported concept
                     PosSymbol conceptName = facDec.getConceptName();
