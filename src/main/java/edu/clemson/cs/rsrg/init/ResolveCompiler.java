@@ -329,7 +329,7 @@ public class ResolveCompiler {
             // 1) Find the file using any specified workspace directory.
             // 2) Find the file in the current directory.
             File file;
-            if (compileEnvironment.getWorkspaceDir() != null) {
+            if (compileEnvironment.flags.isFlagSet(FLAG_WORKSPACE_DIR)) {
                 file =
                         Utilities.getAbsoluteFile(compileEnvironment
                                 .getWorkspaceDir(), fileString);
