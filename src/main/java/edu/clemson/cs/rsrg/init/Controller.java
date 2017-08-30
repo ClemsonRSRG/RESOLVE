@@ -271,8 +271,13 @@ class Controller {
         }
 
         // Create a RESOLVE language lexer
+        // YS: We are not too concerned with lexer error messages.
+        //     If we ever needed, then we will need to figure out
+        //     how to incorporate the user specified status handler
+        //     to the error listener.
         ResolveLexer lexer = new ResolveLexer(input);
         ResolveTokenFactory factory = new ResolveTokenFactory(file);
+        lexer.removeErrorListeners();
         lexer.setTokenFactory(factory);
 
         // Create a RESOLVE language parser
