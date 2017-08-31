@@ -23,8 +23,9 @@ import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
-import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.statushandling.AntlrLexerErrorListener;
 import edu.clemson.cs.rsrg.statushandling.AntlrParserErrorListener;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -58,6 +59,16 @@ class Controller {
     // ===========================================================
 
     /**
+     * <p>This is the lexer error listener for all ANTLR4 related objects.</p>
+     */
+    private final AntlrLexerErrorListener myAntlrLexerErrorListener;
+
+    /**
+     * <p>This is the parser error listener for all ANTLR4 related objects.</p>
+     */
+    private final AntlrParserErrorListener myAntlrParserErrorListener;
+
+    /**
      * <p>The current job's compilation environment
      * that stores all necessary objects and flags.</p>
      */
@@ -67,11 +78,6 @@ class Controller {
      * <p>This is the status handler for the RESOLVE compiler.</p>
      */
     private final StatusHandler myStatusHandler;
-
-    /**
-     * <p>This is the parser error listener for all ANTLR4 related objects.</p>
-     */
-    private final AntlrParserErrorListener myAntlrParserErrorListener;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -104,7 +110,10 @@ class Controller {
     Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
         myStatusHandler = compileEnvironment.getStatusHandler();
-        myAntlrParserErrorListener = new AntlrParserErrorListener(myStatusHandler);
+        myAntlrLexerErrorListener =
+                new AntlrLexerErrorListener(myStatusHandler);
+        myAntlrParserErrorListener =
+                new AntlrParserErrorListener(myStatusHandler);
         mySymbolTable =
                 (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
@@ -271,13 +280,10 @@ class Controller {
         }
 
         // Create a RESOLVE language lexer
-        // YS: We are not too concerned with lexer error messages.
-        //     If we ever needed, then we will need to figure out
-        //     how to incorporate the user specified status handler
-        //     to the error listener.
         ResolveLexer lexer = new ResolveLexer(input);
         ResolveTokenFactory factory = new ResolveTokenFactory(file);
         lexer.removeErrorListeners();
+        lexer.addErrorListener(myAntlrLexerErrorListener);
         lexer.setTokenFactory(factory);
 
         // Create a RESOLVE language parser
