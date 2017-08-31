@@ -24,7 +24,7 @@ import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
-import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
+import edu.clemson.cs.rsrg.statushandling.AntlrParserErrorListener;
 import edu.clemson.cs.rsrg.statushandling.exception.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -69,9 +69,9 @@ class Controller {
     private final StatusHandler myStatusHandler;
 
     /**
-     * <p>This is the error listener for all ANTLR4 related objects.</p>
+     * <p>This is the parser error listener for all ANTLR4 related objects.</p>
      */
-    private final AntlrErrorListener myAntlrErrorListener;
+    private final AntlrParserErrorListener myAntlrParserErrorListener;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -104,7 +104,7 @@ class Controller {
     Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
         myStatusHandler = compileEnvironment.getStatusHandler();
-        myAntlrErrorListener = new AntlrErrorListener(myStatusHandler);
+        myAntlrParserErrorListener = new AntlrParserErrorListener(myStatusHandler);
         mySymbolTable =
                 (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
@@ -284,7 +284,7 @@ class Controller {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokens);
         parser.removeErrorListeners();
-        parser.addErrorListener(myAntlrErrorListener);
+        parser.addErrorListener(myAntlrParserErrorListener);
         parser.setTokenFactory(factory);
 
         // Two-Stage Parsing

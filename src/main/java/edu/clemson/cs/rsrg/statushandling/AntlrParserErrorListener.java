@@ -24,7 +24,7 @@ import org.antlr.v4.runtime.*;
  * @author Daniel Welch
  * @version 1.0
  */
-public class AntlrErrorListener extends BaseErrorListener {
+public class AntlrParserErrorListener extends BaseErrorListener {
 
     // ==========================================================
     // Member Fields
@@ -45,7 +45,7 @@ public class AntlrErrorListener extends BaseErrorListener {
      *
      * @param statusHandler An status handler to display debug or error messages.
      */
-    public AntlrErrorListener(StatusHandler statusHandler) {
+    public AntlrParserErrorListener(StatusHandler statusHandler) {
         myStatusHandler = statusHandler;
     }
 
