@@ -12,6 +12,8 @@
  */
 package edu.clemson.cs.rsrg.statushandling;
 
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -66,8 +68,20 @@ public class AntlrLexerErrorListener extends BaseErrorListener {
     public final void syntaxError(Recognizer<?, ?> recognizer,
             Object offendingSymbol, int line, int charPositionInLine,
             String msg, RecognitionException e) {
-        myStatusHandler.error(null, "line " + line + ":" + charPositionInLine
-                + " " + msg);
+        // Only do this if we have a ResolveTokenFactory
+        if (recognizer.getTokenFactory() != null
+                && recognizer.getTokenFactory() instanceof ResolveTokenFactory) {
+            // Build a location
+            ResolveTokenFactory tokenFactory =
+                    (ResolveTokenFactory) recognizer.getTokenFactory();
+            myStatusHandler.error(new Location(tokenFactory.getFile(), line,
+                    charPositionInLine), msg);
+        }
+        // Otherwise simply return the raw string.
+        else {
+            myStatusHandler.error(null, "Line " + line + ":"
+                    + charPositionInLine + " " + msg);
+        }
     }
 
 }
