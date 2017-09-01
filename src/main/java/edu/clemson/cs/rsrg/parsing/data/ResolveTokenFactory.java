@@ -93,4 +93,13 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
         return t;
     }
 
+    /**
+     * <p>This returns the {@code file} we are associated with.</p>
+     *
+     * @return A {@link ResolveFile}.
+     */
+    public final ResolveFile getFile() {
+        return myFile;
+    }
+
 }
