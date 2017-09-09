@@ -15,8 +15,8 @@ package edu.clemson.cs.rsrg.translation;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 
 /**
- * <p>This class generates verification conditions (VCs) using the provided
- * RESOLVE abstract syntax tree. This visitor logic is implemented as
+ * <p>This is the abstract base class for all target language translators
+ * using the RESOLVE abstract syntax tree. This visitor logic is implemented as
  * a {@link TreeWalkerStackVisitor}.</p>
  *
  * @author Daniel Welch
