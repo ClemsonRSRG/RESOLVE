@@ -12,6 +12,8 @@
  */
 package edu.clemson.cs.rsrg.translation;
 
+import edu.clemson.cs.rsrg.init.flag.Flag;
+import edu.clemson.cs.rsrg.init.flag.Flag.Type;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 
 /**
@@ -43,6 +45,17 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // ===========================================================
     // Flags
     // ===========================================================
+
+    /**
+     * <p>An auxiliary flag that indicates we are translating to
+     * a target file.</p>
+     */
+    public static final Flag FLAG_TRANSLATE =
+            new Flag(
+                    FLAG_SECTION_NAME,
+                    "translate",
+                    "An auxiliary flag that indicates we are translating a source file",
+                    Type.AUXILIARY);
 
     // ===========================================================
     // Constructors

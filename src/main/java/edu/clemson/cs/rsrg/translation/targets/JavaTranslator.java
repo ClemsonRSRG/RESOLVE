@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.rsrg.init.flag.Flag;
+import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 
 /**
@@ -59,6 +60,14 @@ public class JavaTranslator extends AbstractTranslator {
     public static final Flag JAVA_FLAG_TRANSLATE_CLEAN =
             new Flag(FLAG_SECTION_NAME, "javaTranslateClean",
                     FLAG_DESC_TRANSLATE_CLEAN);
+
+    /**
+     * <p>Add all the required and implied flags for the {@code JavaTranslator}.</p>
+     */
+    public static void setUpFlags() {
+        FlagDependencies.addImplies(JAVA_FLAG_TRANSLATE, FLAG_TRANSLATE);
+        FlagDependencies.addImplies(JAVA_FLAG_TRANSLATE_CLEAN, FLAG_TRANSLATE);
+    }
 
     // ===========================================================
     // Constructors
