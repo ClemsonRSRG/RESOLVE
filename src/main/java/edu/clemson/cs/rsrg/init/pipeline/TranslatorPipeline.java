@@ -14,7 +14,11 @@ package edu.clemson.cs.rsrg.init.pipeline;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
+import edu.clemson.cs.rsrg.translation.AbstractTranslator;
+import edu.clemson.cs.rsrg.translation.targets.CTranslator;
+import edu.clemson.cs.rsrg.translation.targets.JavaTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
@@ -54,7 +58,46 @@ public class TranslatorPipeline extends AbstractPipeline {
     public final void process(ModuleIdentifier currentTarget) {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
         StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
+
+        // Check to see if we are translating to Java
+        boolean isJavaTranslateFlagOn =
+                myCompileEnvironment.flags
+                        .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)
+                        || myCompileEnvironment.flags
+                                .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE_CLEAN);
+        if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n---------------Begin Translation---------------\n\n");
+            sb.append("Translating: ");
+            sb.append(moduleDec.getName());
+            sb.append(" to ");
+            if (isJavaTranslateFlagOn) {
+                sb.append("Java");
+            }
+            else {
+                sb.append("C");
+            }
+
+            statusHandler.info(null, sb.toString());
+        }
+
+        // Create the appropriate translator
+        AbstractTranslator translator;
+        if (isJavaTranslateFlagOn) {
+            translator = new JavaTranslator();
+        }
+        else {
+            translator = new CTranslator();
+        }
+
         // TODO: Add logic here!
+
+        if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n---------------End Translation---------------\n");
+
+            statusHandler.info(null, sb.toString());
+        }
     }
 
 }
