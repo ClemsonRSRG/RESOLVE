@@ -34,6 +34,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // Flag Strings
     // ===========================================================
 
+    /**
+     * <p>This indicates that this section translates {@code RESOLVE}
+     * source files to other target languages.</p>
+     */
+    protected static final String FLAG_SECTION_NAME = "Translation";
+
     // ===========================================================
     // Flags
     // ===========================================================
