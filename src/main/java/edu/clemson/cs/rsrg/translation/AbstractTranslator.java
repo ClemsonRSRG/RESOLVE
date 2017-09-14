@@ -12,9 +12,11 @@
  */
 package edu.clemson.cs.rsrg.translation;
 
+import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.Flag.Type;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 
 /**
  * <p>This is the abstract base class for all target language translators
@@ -31,6 +33,15 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /** <p>The symbol table we are currently building.</p> */
+    private final MathSymbolTableBuilder myBuilder;
+
+    /**
+     * <p>The current job's compilation environment
+     * that stores all necessary objects and flags.</p>
+     */
+    private final CompileEnvironment myCompileEnvironment;
 
     // ===========================================================
     // Flag Strings
@@ -60,6 +71,20 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // ===========================================================
     // Constructors
     // ===========================================================
+
+    /**
+     * <p>An helper constructor that creates and stores all the common
+     * objects used by classes that inherit from this class.</p>
+     *
+     * @param builder A scope builder for a symbol table.
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
+     */
+    protected AbstractTranslator(MathSymbolTableBuilder builder,
+            CompileEnvironment compileEnvironment) {
+        myBuilder = builder;
+        myCompileEnvironment = compileEnvironment;
+    }
 
     // ===========================================================
     // Visitor Methods

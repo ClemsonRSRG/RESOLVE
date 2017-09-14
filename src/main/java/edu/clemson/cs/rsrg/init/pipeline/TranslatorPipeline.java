@@ -84,10 +84,11 @@ public class TranslatorPipeline extends AbstractPipeline {
         // Create the appropriate translator
         AbstractTranslator translator;
         if (isJavaTranslateFlagOn) {
-            translator = new JavaTranslator();
+            translator =
+                    new JavaTranslator(mySymbolTable, myCompileEnvironment);
         }
         else {
-            translator = new CTranslator();
+            translator = new CTranslator(mySymbolTable, myCompileEnvironment);
         }
 
         // TODO: Add logic here!

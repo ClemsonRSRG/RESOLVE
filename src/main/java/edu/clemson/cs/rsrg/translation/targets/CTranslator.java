@@ -12,9 +12,12 @@
  */
 package edu.clemson.cs.rsrg.translation.targets;
 
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 
 /**
  * <p>This class translates a {@code RESOLVE} source file
@@ -73,6 +76,18 @@ public class CTranslator extends AbstractTranslator {
     // ===========================================================
     // Constructors
     // ===========================================================
+
+    /**
+     * <p>This creates an object that overrides methods to translate
+     * a {@link ModuleDec} into a {@code C} source file.</p>
+     *
+     * @param builder            A scope builder for a symbol table.
+     * @param compileEnvironment The current job's compilation environment
+     */
+    public CTranslator(MathSymbolTableBuilder builder,
+            CompileEnvironment compileEnvironment) {
+        super(builder, compileEnvironment);
+    }
 
     // ===========================================================
     // Visitor Methods
