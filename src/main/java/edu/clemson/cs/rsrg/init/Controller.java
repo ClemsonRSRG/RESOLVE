@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.statushandling.exception.*;
+import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
@@ -161,6 +162,14 @@ class Controller {
                 AnalysisPipeline analysisPipe =
                         new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
                 analysisPipe.process(m);
+
+                // Translate source file to target file
+                if (myCompileEnvironment.flags.isFlagSet(AbstractTranslator.FLAG_TRANSLATE) &&
+                        m.equals(new ModuleIdentifier(targetModule))) {
+                    TranslatorPipeline translatorPipeline =
+                            new TranslatorPipeline(myCompileEnvironment, mySymbolTable);
+                    translatorPipeline.process(m);
+                }
 
                 // Generate VCs
                 if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_VERIFY_VC) &&
