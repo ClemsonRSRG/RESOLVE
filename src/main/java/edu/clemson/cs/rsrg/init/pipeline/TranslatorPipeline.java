@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.translation.targets.CTranslator;
 import edu.clemson.cs.rsrg.translation.targets.JavaTranslator;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
@@ -91,7 +92,8 @@ public class TranslatorPipeline extends AbstractPipeline {
             translator = new CTranslator(mySymbolTable, myCompileEnvironment);
         }
 
-        // TODO: Add logic here!
+        // Walk the AST and translate into the appropriate target source file
+        TreeWalker.visit(translator, moduleDec);
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             StringBuffer sb = new StringBuffer();
