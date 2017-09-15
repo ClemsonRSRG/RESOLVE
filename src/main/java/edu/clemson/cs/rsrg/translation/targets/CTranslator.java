@@ -69,8 +69,12 @@ public class CTranslator extends AbstractTranslator {
      * <p>Add all the required and implied flags for the {@code CTranslator}.</p>
      */
     public static void setUpFlags() {
+        // Always need to set the auxiliary flag
         FlagDependencies.addImplies(C_FLAG_TRANSLATE, FLAG_TRANSLATE);
         FlagDependencies.addImplies(C_FLAG_TRANSLATE_CLEAN, FLAG_TRANSLATE);
+
+        // Translate clean requires the regular translate flag
+        FlagDependencies.addRequires(C_FLAG_TRANSLATE_CLEAN, C_FLAG_TRANSLATE);
     }
 
     // ===========================================================

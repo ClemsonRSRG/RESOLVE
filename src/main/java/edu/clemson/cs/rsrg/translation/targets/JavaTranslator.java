@@ -68,8 +68,12 @@ public class JavaTranslator extends AbstractTranslator {
      * <p>Add all the required and implied flags for the {@code JavaTranslator}.</p>
      */
     public static void setUpFlags() {
+        // Always need to set the auxiliary flag
         FlagDependencies.addImplies(JAVA_FLAG_TRANSLATE, FLAG_TRANSLATE);
         FlagDependencies.addImplies(JAVA_FLAG_TRANSLATE_CLEAN, FLAG_TRANSLATE);
+
+        // Translate clean requires the regular translate flag
+        FlagDependencies.addRequires(JAVA_FLAG_TRANSLATE_CLEAN, JAVA_FLAG_TRANSLATE);
     }
 
     // ===========================================================
