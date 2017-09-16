@@ -73,7 +73,8 @@ public class JavaTranslator extends AbstractTranslator {
         FlagDependencies.addImplies(JAVA_FLAG_TRANSLATE_CLEAN, FLAG_TRANSLATE);
 
         // Translate clean requires the regular translate flag
-        FlagDependencies.addRequires(JAVA_FLAG_TRANSLATE_CLEAN, JAVA_FLAG_TRANSLATE);
+        FlagDependencies.addRequires(JAVA_FLAG_TRANSLATE_CLEAN,
+                JAVA_FLAG_TRANSLATE);
     }
 
     // ===========================================================
