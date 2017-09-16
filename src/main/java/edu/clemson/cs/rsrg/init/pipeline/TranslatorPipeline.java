@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.init.pipeline;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
+import edu.clemson.cs.rsrg.init.output.OutputListener;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.translation.targets.CTranslator;
@@ -67,19 +68,12 @@ public class TranslatorPipeline extends AbstractPipeline {
                         || myCompileEnvironment.flags
                                 .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE_CLEAN);
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            StringBuffer sb = new StringBuffer();
-            sb.append("\n---------------Begin Translation---------------\n\n");
-            sb.append("Translating: ");
-            sb.append(moduleDec.getName());
-            sb.append(" to ");
-            if (isJavaTranslateFlagOn) {
-                sb.append("Java");
-            }
-            else {
-                sb.append("C");
-            }
+            String messageString =
+                    "\n---------------Begin Translation---------------\n\n"
+                            + targetLanguageMessage(moduleDec.getName()
+                                    .getName(), isJavaTranslateFlagOn);
 
-            statusHandler.info(null, sb.toString());
+            statusHandler.info(null, messageString);
         }
 
         // Create the appropriate translator
@@ -95,12 +89,58 @@ public class TranslatorPipeline extends AbstractPipeline {
         // Walk the AST and translate into the appropriate target source file
         TreeWalker.visit(translator, moduleDec);
 
-        if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            StringBuffer sb = new StringBuffer();
-            sb.append("\n---------------End Translation---------------\n");
-
-            statusHandler.info(null, sb.toString());
+        // Output the contents to listener objects
+        for (OutputListener listener : myCompileEnvironment
+                .getOutputListeners()) {
+            if (isJavaTranslateFlagOn) {
+                listener.javaTranslationResult("", "", "");
+            }
+            else {
+                listener.cTranslationResult("", "", "");
+            }
         }
+
+        if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            String messageString =
+                    "Done "
+                            + targetLanguageMessage(moduleDec.getName()
+                                    .getName(), isJavaTranslateFlagOn)
+                            + "\n---------------End Translation---------------\n";
+
+            statusHandler.info(null, messageString);
+        }
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method that outputs the appropriate string message
+     * that indicates the source module name and the target language
+     * we are translating to.</p>
+     *
+     * @param moduleName Name of the module we are translating.
+     * @param isJavaTranslateFlagOn A flag that indicates whether or not
+     *                              we are translating to {@code Java}.
+     *
+     * @return A message string.
+     */
+    private String targetLanguageMessage(String moduleName,
+            boolean isJavaTranslateFlagOn) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Translating: ");
+        sb.append(moduleName);
+        sb.append(" to ");
+        if (isJavaTranslateFlagOn) {
+            sb.append("Java");
+        }
+        else {
+            sb.append("C");
+        }
+
+        return sb.toString();
     }
 
 }
