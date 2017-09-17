@@ -94,6 +94,17 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // Public Methods
     // ===========================================================
 
+    /**
+     * <p>This method returns the translated source file
+     * as a string.</p>
+     *
+     * @return A file content string.
+     */
+    public final String getOutputCode() {
+        // TODO: Implement this!
+        return "";
+    }
+
     // ===========================================================
     // Protected Methods
     // ===========================================================

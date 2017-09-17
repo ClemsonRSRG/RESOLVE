@@ -93,10 +93,14 @@ public class TranslatorPipeline extends AbstractPipeline {
         for (OutputListener listener : myCompileEnvironment
                 .getOutputListeners()) {
             if (isJavaTranslateFlagOn) {
-                listener.javaTranslationResult("", "", "");
+                listener.javaTranslationResult(myCompileEnvironment.getFile(
+                        currentTarget).toString(), moduleDec.getName()
+                        .getName(), translator.getOutputCode());
             }
             else {
-                listener.cTranslationResult("", "", "");
+                listener.cTranslationResult(myCompileEnvironment.getFile(
+                        currentTarget).toString(), moduleDec.getName()
+                        .getName(), translator.getOutputCode());
             }
         }
 
