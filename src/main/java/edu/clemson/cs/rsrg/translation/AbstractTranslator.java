@@ -59,6 +59,18 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      */
     private ModuleScope myCurrentModuleScope;
 
+    /**
+     * <p>These are special files that should already exist in
+     * the current workspace and shouldn't be overwritten.</p>
+     */
+    protected final String[] noTranslate =
+            { "Std_Boolean_Fac.fa", "Std_Char_Str_Fac.fa",
+                    "Std_Character_Fac.fa", "Std_Integer_Fac.fa",
+                    "Std_Boolean_Realiz", "Integer_Template.co",
+                    "Character_Template.co", "Char_Str_Template.co",
+                    "Seq_Input_Template.co", "Seq_Output_Template.co",
+                    "Print.co", "Std_Location_Linking_Realiz.rb" };
+
     // -----------------------------------------------------------
     // Output-Related
     // -----------------------------------------------------------
