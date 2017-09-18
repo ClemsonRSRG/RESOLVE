@@ -18,6 +18,7 @@ import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import org.stringtemplate.v4.STGroupFile;
 
 /**
  * <p>This class translates a {@code RESOLVE} source file
@@ -90,7 +91,7 @@ public class CTranslator extends AbstractTranslator {
      */
     public CTranslator(MathSymbolTableBuilder builder,
             CompileEnvironment compileEnvironment) {
-        super(builder, compileEnvironment);
+        super(builder, compileEnvironment, new STGroupFile("templates/C.stg"));
     }
 
     // ===========================================================
