@@ -24,6 +24,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Stack;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -63,13 +65,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>These are special files that should already exist in
      * the current workspace and shouldn't be overwritten.</p>
      */
-    protected final String[] noTranslate =
-            { "Std_Boolean_Fac.fa", "Std_Char_Str_Fac.fa",
+    private static final List<String> noTranslate =
+            Arrays.asList("Std_Boolean_Fac.fa", "Std_Char_Str_Fac.fa",
                     "Std_Character_Fac.fa", "Std_Integer_Fac.fa",
                     "Std_Boolean_Realiz", "Integer_Template.co",
                     "Character_Template.co", "Char_Str_Template.co",
                     "Seq_Input_Template.co", "Seq_Output_Template.co",
-                    "Print.co", "Std_Location_Linking_Realiz.rb" };
+                    "Print.co", "Std_Location_Linking_Realiz.rb");
 
     // -----------------------------------------------------------
     // Output-Related
@@ -186,6 +188,19 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public final String getOutputCode() {
         // TODO: Implement this!
         return "";
+    }
+
+    /**
+     * <p>This method checks to see if we should translate
+     * a file.</p>
+     *
+     * @param identifier A module identifier.
+     *
+     * @return {@code true} if it is a special file
+     * that we shouldn't translate, {@code false} otherwise.
+     */
+    public static boolean onNoTranslateList(ModuleIdentifier identifier) {
+        return noTranslate.contains(identifier.toString());
     }
 
     // ===========================================================

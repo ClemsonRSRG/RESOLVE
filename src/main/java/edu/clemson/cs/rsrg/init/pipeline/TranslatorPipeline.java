@@ -61,57 +61,74 @@ public class TranslatorPipeline extends AbstractPipeline {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
         StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
 
-        // Check to see if we are translating to Java
-        boolean isJavaTranslateFlagOn =
-                myCompileEnvironment.flags
-                        .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)
-                        || myCompileEnvironment.flags
-                                .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE_CLEAN);
-        if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            String messageString =
-                    "\n---------------Begin Translation---------------\n\n"
-                            + targetLanguageMessage(moduleDec.getName()
-                                    .getName(), isJavaTranslateFlagOn);
+        // Check to see if the file is on the no translate list
+        if (!AbstractTranslator.onNoTranslateList(currentTarget)) {
+            // Check to see if we are translating to Java
+            boolean isJavaTranslateFlagOn =
+                    myCompileEnvironment.flags
+                            .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)
+                            || myCompileEnvironment.flags
+                                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE_CLEAN);
+            if (myCompileEnvironment.flags
+                    .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                String messageString =
+                        "\n---------------Begin Translation---------------\n\n"
+                                + targetLanguageMessage(moduleDec.getName()
+                                        .getName(), isJavaTranslateFlagOn);
 
-            statusHandler.info(null, messageString);
-        }
+                statusHandler.info(null, messageString);
+            }
 
-        // Create the appropriate translator
-        AbstractTranslator translator;
-        if (isJavaTranslateFlagOn) {
-            translator =
-                    new JavaTranslator(mySymbolTable, myCompileEnvironment);
-        }
-        else {
-            translator = new CTranslator(mySymbolTable, myCompileEnvironment);
-        }
-
-        // Walk the AST and translate into the appropriate target source file
-        TreeWalker.visit(translator, moduleDec);
-
-        // Output the contents to listener objects
-        for (OutputListener listener : myCompileEnvironment
-                .getOutputListeners()) {
+            // Create the appropriate translator
+            AbstractTranslator translator;
             if (isJavaTranslateFlagOn) {
-                listener.javaTranslationResult(myCompileEnvironment.getFile(
-                        currentTarget).toString(), moduleDec.getName()
-                        .getName(), translator.getOutputCode());
+                translator =
+                        new JavaTranslator(mySymbolTable, myCompileEnvironment);
             }
             else {
-                listener.cTranslationResult(myCompileEnvironment.getFile(
-                        currentTarget).toString(), moduleDec.getName()
-                        .getName(), translator.getOutputCode());
+                translator =
+                        new CTranslator(mySymbolTable, myCompileEnvironment);
+            }
+
+            // Walk the AST and translate into the appropriate target source file
+            TreeWalker.visit(translator, moduleDec);
+
+            // Output the contents to listener objects
+            for (OutputListener listener : myCompileEnvironment
+                    .getOutputListeners()) {
+                if (isJavaTranslateFlagOn) {
+                    listener.javaTranslationResult(myCompileEnvironment
+                            .getFile(currentTarget).toString(), moduleDec
+                            .getName().getName(), translator.getOutputCode());
+                }
+                else {
+                    listener.cTranslationResult(myCompileEnvironment.getFile(
+                            currentTarget).toString(), moduleDec.getName()
+                            .getName(), translator.getOutputCode());
+                }
+            }
+
+            if (myCompileEnvironment.flags
+                    .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                String messageString =
+                        "Done "
+                                + targetLanguageMessage(moduleDec.getName()
+                                        .getName(), isJavaTranslateFlagOn)
+                                + "\n---------------End Translation---------------\n";
+
+                statusHandler.info(null, messageString);
             }
         }
+        else {
+            // Skip translating this module.
+            if (myCompileEnvironment.flags
+                    .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                String messageString =
+                        "Skipping Translating Module: "
+                                + moduleDec.getName().getName() + "\n";
 
-        if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            String messageString =
-                    "Done "
-                            + targetLanguageMessage(moduleDec.getName()
-                                    .getName(), isJavaTranslateFlagOn)
-                            + "\n---------------End Translation---------------\n";
-
-            statusHandler.info(null, messageString);
+                statusHandler.info(null, messageString);
+            }
         }
     }
 
