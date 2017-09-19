@@ -24,9 +24,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -60,6 +58,14 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * {@code VCs} for.</p>
      */
     private ModuleScope myCurrentModuleScope;
+
+    /**
+     * <p>This set keeps track of any additional <code>includes</code> or
+     * <code>imports</code> needed to run the translated file. We call
+     * it <em>dynamic</em> since only certain nodes trigger additions to this
+     * set (i.e. <code>FacilityDec</code>s).</p>
+     */
+    protected final Set<String> myDynamicImports;
 
     /**
      * <p>These are special files that should already exist in
@@ -140,6 +146,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myActiveTemplates = new Stack<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
+        myDynamicImports = new LinkedHashSet<>();
         mySTGroup = group;
     }
 
@@ -172,6 +179,18 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         }
         catch (NoSuchSymbolException nsse) {
             noSuchModule(dec.getLocation());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
+     *
+     * @param dec A module declaration.
+     */
+    @Override
+    public final void postModuleDec(ModuleDec dec) {
+        if (!myDynamicImports.isEmpty()) {
+            myActiveTemplates.firstElement().add("includes", myDynamicImports);
         }
     }
 
