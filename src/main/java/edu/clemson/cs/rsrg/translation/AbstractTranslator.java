@@ -186,8 +186,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * @return A file content string.
      */
     public final String getOutputCode() {
-        // TODO: Implement this!
-        return "";
+        return myActiveTemplates.peek().render();
     }
 
     /**
