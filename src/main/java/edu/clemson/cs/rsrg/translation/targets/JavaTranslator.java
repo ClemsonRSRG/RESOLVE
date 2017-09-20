@@ -12,12 +12,13 @@
  */
 package edu.clemson.cs.rsrg.translation.targets;
 
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -123,6 +124,27 @@ public class JavaTranslator extends AbstractTranslator {
         myActiveTemplates.peek().add("structures", completed);
     }
 
+    // -----------------------------------------------------------
+    // Concept Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ConceptModuleDec}.</p>
+     *
+     * @param dec A concept module declaration.
+     */
+    @Override
+    public final void preConceptModuleDec(ConceptModuleDec dec) {
+        addPackageTemplate(dec);
+
+        ST concept =
+                mySTGroup.getInstanceOf("interface_class").add("name",
+                        dec.getName().getName()).add("extend",
+                        "RESOLVE_INTERFACE");
+
+        myActiveTemplates.push(concept);
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
@@ -134,5 +156,21 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>Creates and adds a formed java package template to the
+     * {@code directives} attribute of the outermost {@code module}
+     * template defined in <tt>Base.stg</tt>.</p>
+     *
+     * @param dec The {@link ModuleDec} currently being translated.
+     */
+    private void addPackageTemplate(ModuleDec dec) {
+        List<String> pkgDirectories =
+                getFile(dec.getName().getName()).getPkgList();
+        ST pkg =
+                mySTGroup.getInstanceOf("package").add("directories",
+                        pkgDirectories);
+        myActiveTemplates.peek().add("directives", pkg);
+    }
 
 }

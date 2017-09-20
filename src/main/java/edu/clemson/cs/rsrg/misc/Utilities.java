@@ -185,7 +185,7 @@ public class Utilities {
         String relativePath = filePath.substring(workspacePath.length() + 1);
 
         // Add all package names using the Java Collections
-        List<String> pkgList = new LinkedList<String>();
+        List<String> pkgList = new LinkedList<>();
         Collections.addAll(pkgList, relativePath.split(Pattern
                 .quote(File.separator)));
 

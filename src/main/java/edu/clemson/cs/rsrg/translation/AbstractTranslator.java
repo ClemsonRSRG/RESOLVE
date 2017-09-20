@@ -12,12 +12,15 @@
  */
 package edu.clemson.cs.rsrg.translation;
 
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.Flag.Type;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
@@ -224,6 +227,25 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // ===========================================================
     // Protected Methods
     // ===========================================================
+
+    // -----------------------------------------------------------
+    // Utility methods
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This method returns a {@link ResolveFile} given a string containing the name.</p>
+     *
+     * @param name A module's name.
+     *
+     * @return A {@link ResolveFile}.
+     */
+    protected final ResolveFile getFile(String name) {
+        return myCompileEnvironment.getFile(new ModuleIdentifier(name));
+    }
+
+    // -----------------------------------------------------------
+    // Error handling methods
+    // -----------------------------------------------------------
 
     /**
      * <p>An helper method that throws the appropriate no module found
