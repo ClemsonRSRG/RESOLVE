@@ -188,7 +188,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * @param dec A module declaration.
      */
     @Override
-    public final void postModuleDec(ModuleDec dec) {
+    public void postModuleDec(ModuleDec dec) {
         if (!myDynamicImports.isEmpty()) {
             myActiveTemplates.firstElement().add("includes", myDynamicImports);
         }

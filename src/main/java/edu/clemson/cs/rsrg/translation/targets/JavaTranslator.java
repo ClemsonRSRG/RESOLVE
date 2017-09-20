@@ -18,6 +18,7 @@ import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 /**
@@ -98,6 +99,29 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
     // Visitor Methods
     // ===========================================================
+
+    // -----------------------------------------------------------
+    // Module Declarations
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
+     *
+     * @param dec A module declaration.
+     */
+    @Override
+    public final void postModuleDec(ModuleDec dec) {
+        super.postModuleDec(dec);
+
+        ST completed = myActiveTemplates.pop();
+
+        if (myActiveTemplates.size() != 1) {
+            throw new IllegalStateException("Translation template stack "
+                    + "corrupted. Check your 'post' methods.");
+        }
+
+        myActiveTemplates.peek().add("structures", completed);
+    }
 
     // ===========================================================
     // Public Methods
