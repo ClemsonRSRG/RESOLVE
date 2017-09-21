@@ -189,6 +189,9 @@ public class Utilities {
         Collections.addAll(pkgList, relativePath.split(Pattern
                 .quote(File.separator)));
 
+        // Remove filename from our package structure.
+        pkgList.remove(pkgList.size() - 1);
+
         return pkgList;
     }
 
