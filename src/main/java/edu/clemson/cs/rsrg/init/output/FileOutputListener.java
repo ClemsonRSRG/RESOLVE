@@ -109,7 +109,7 @@ public class FileOutputListener implements OutputListener {
     @Override
     public final void javaTranslationResult(String inputFileName,
             String outputFileName, String javaTranslation) {
-        throw new UnsupportedOperationException("Needs to be implemented!");
+        writeToFile(outputFileName + ".java", javaTranslation);
     }
 
     /**
