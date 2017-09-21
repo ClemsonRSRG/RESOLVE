@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.translation;
 
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
@@ -20,7 +19,6 @@ import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.Flag.Type;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
@@ -77,10 +75,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     private static final List<String> noTranslate =
             Arrays.asList("Std_Boolean_Fac.fa", "Std_Char_Str_Fac.fa",
                     "Std_Character_Fac.fa", "Std_Integer_Fac.fa",
-                    "Std_Boolean_Realiz", "Integer_Template.co",
-                    "Character_Template.co", "Char_Str_Template.co",
-                    "Seq_Input_Template.co", "Seq_Output_Template.co",
-                    "Print.co", "Std_Location_Linking_Realiz.rb");
+                    "Std_Boolean_Realiz", "Boolean_Template.co",
+                    "Integer_Template.co", "Character_Template.co",
+                    "Char_Str_Template.co", "Seq_Input_Template.co",
+                    "Seq_Output_Template.co", "Print.co");
 
     // -----------------------------------------------------------
     // Output-Related
