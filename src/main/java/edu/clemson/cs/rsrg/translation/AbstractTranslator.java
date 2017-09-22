@@ -12,8 +12,12 @@
  */
 package edu.clemson.cs.rsrg.translation;
 
+import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
+import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.Flag.Type;
@@ -192,6 +196,56 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void postModuleDec(ModuleDec dec) {
         if (!myDynamicImports.isEmpty()) {
             myActiveTemplates.firstElement().add("includes", myDynamicImports);
+        }
+    }
+
+    // -----------------------------------------------------------
+    // Uses Items (Imports)
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link UsesItem}.</p>
+     *
+     * @param uses An uses item declaration.
+     */
+    @Override
+    public final void preUsesItem(UsesItem uses) {
+        ResolveFile file =
+                myCompileEnvironment.getFile(new ModuleIdentifier(uses));
+
+        // YS: When translating, we don't really need theory files.
+        if (!file.getModuleType().equals(ModuleType.THEORY)) {
+            // Deal with concept imports
+            List<String> pkgDirectories;
+            if (file.getModuleType().equals(ModuleType.CONCEPT)) {
+                pkgDirectories = getFile(file.getName()).getPkgList();
+            }
+            // Deal with both kinds of facility imports
+            else {
+                ModuleDec dec =
+                        myCompileEnvironment.getModuleAST(new ModuleIdentifier(
+                                uses));
+
+                // Short facility imports
+                if (dec instanceof ShortFacilityModuleDec) {
+                    FacilityDec facilityDec =
+                            ((ShortFacilityModuleDec) dec).getDec();
+                    pkgDirectories =
+                            getFile(facilityDec.getConceptName().getName())
+                                    .getPkgList();
+                }
+                // Facility imports
+                else {
+                    pkgDirectories =
+                            getFile(dec.getName().getName()).getPkgList();
+                }
+            }
+
+            // Create an import string for this uses item.
+            myActiveTemplates.firstElement().add(
+                    "includes",
+                    mySTGroup.getInstanceOf("include").add("directories",
+                            pkgDirectories));
         }
     }
 
