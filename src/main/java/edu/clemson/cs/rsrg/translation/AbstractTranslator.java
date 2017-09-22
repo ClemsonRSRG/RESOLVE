@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.translation;
 
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.FacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
@@ -235,9 +236,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                                     .getPkgList();
                 }
                 // Facility imports
-                else {
+                else if (dec instanceof FacilityModuleDec) {
                     pkgDirectories =
                             getFile(dec.getName().getName()).getPkgList();
+                }
+                else {
+                    pkgDirectories = new ArrayList<>();
+                    unsupportedImport(uses.getName());
                 }
             }
 
@@ -348,6 +353,24 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         }
 
         throw new SourceErrorException(sb.toString(), loc);
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method that throws the appropriate unsupported
+     * import message.</p>
+     *
+     * @param name Name of the file that isn't an import file
+     *             that is supported by the translator.
+     */
+    private void unsupportedImport(PosSymbol name) {
+        throw new SourceErrorException("[" + getClass().getCanonicalName()
+                + "] " + "Module: " + name
+                + " can't be translated into the appropriate import string.",
+                name.getLocation());
     }
 
 }
