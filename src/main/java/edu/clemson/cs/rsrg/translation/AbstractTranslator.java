@@ -27,6 +27,7 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -299,6 +300,47 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected final ResolveFile getFile(String name) {
         return myCompileEnvironment.getFile(new ModuleIdentifier(name));
     }
+
+    /**
+     * <p>This method returns the default function modifier specified
+     * by the target language.</p>
+     *
+     * @return Function modifier as a string.
+     */
+    protected abstract String getFunctionModifier();
+
+    /**
+     * <p>This method returns the operation type template for
+     * the target language.</p>
+     *
+     * @param type A {@link PTType}.
+     *
+     * @return A {@link ST} associated with the given
+     * program type.
+     */
+    protected abstract ST getOperationTypeTemplate(PTType type);
+
+    /**
+     * <p>This method returns the program parameter type template for
+     * the target language.</p>
+     *
+     * @param type A {@link PTType}.
+     *
+     * @return A {@link ST} associated with the given
+     * program parameter type.
+     */
+    protected abstract ST getParameterTypeTemplate(PTType type);
+
+    /**
+     * <p>This method returns the program variable type template for
+     * the target language.</p>
+     *
+     * @param type A {@link PTType}.
+     *
+     * @return A {@link ST} associated with the given
+     * program variable type.
+     */
+    protected abstract ST getVariableTypeTemplate(PTType type);
 
     // -----------------------------------------------------------
     // Error handling methods
