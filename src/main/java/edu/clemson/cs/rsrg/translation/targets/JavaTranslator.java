@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
@@ -143,6 +144,44 @@ public class JavaTranslator extends AbstractTranslator {
                         "RESOLVE_INTERFACE");
 
         myActiveTemplates.push(concept);
+    }
+
+    // -----------------------------------------------------------
+    // Type Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link TypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept}.
+     */
+    @Override
+    public final void preTypeFamilyDec(TypeFamilyDec dec) {
+        ST typeDec =
+                mySTGroup.getInstanceOf("interface_class").add("name",
+                        dec.getName().getName()).add("extend", "RType").add(
+                        "public", false);
+
+        myActiveTemplates.peek().add("classes", typeDec);
+
+        /*try {
+            ProgramTypeDefinitionEntry ptde =
+                    myScope.queryForOne(
+                            new UnqualifiedNameQuery(dec.getName().getName()))
+                            .toProgramTypeDefinitionEntry(dec.getLocation());
+
+            ST typeDefinition =
+                    getOperationLikeTemplate(ptde.getProgramType(), "create"
+                            + dec.getName().getName(), false);
+
+            myActiveTemplates.peek().add("functions", typeDefinition);
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException(nsse);
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }*/
     }
 
     // ===========================================================
