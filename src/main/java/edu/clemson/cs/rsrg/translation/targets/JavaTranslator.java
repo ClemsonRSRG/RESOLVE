@@ -201,7 +201,7 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     protected final String getFunctionModifier() {
-        return null;
+        return "public";
     }
 
     /**
