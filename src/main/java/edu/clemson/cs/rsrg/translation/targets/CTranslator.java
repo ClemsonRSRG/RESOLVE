@@ -17,7 +17,9 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 /**
@@ -105,6 +107,58 @@ public class CTranslator extends AbstractTranslator {
     // ===========================================================
     // Protected Methods
     // ===========================================================
+
+    /**
+     * <p>This method returns the default function modifier specified
+     * by the target language.</p>
+     *
+     * @return Function modifier as a string.
+     */
+    @Override
+    protected final String getFunctionModifier() {
+        return null;
+    }
+
+    /**
+     * <p>This method returns the operation type template for
+     * the target language.</p>
+     *
+     * @param type A {@link PTType}.
+     *
+     * @return A {@link ST} associated with the given
+     * program type.
+     */
+    @Override
+    protected final ST getOperationTypeTemplate(PTType type) {
+        return null;
+    }
+
+    /**
+     * <p>This method returns the program parameter type template for
+     * the target language.</p>
+     *
+     * @param type A {@link PTType}.
+     *
+     * @return A {@link ST} associated with the given
+     * program parameter type.
+     */
+    @Override
+    protected final ST getParameterTypeTemplate(PTType type) {
+        return null;
+    }
+
+    /**
+     * <p>This method returns the program variable type template for
+     * the target language.</p>
+     *
+     * @param type A {@link PTType}.
+     *
+     * @return A {@link ST} associated with the given
+     * program variable type.
+     */
+    protected final ST getVariableTypeTemplate(PTType type) {
+        return null;
+    }
 
     // ===========================================================
     // Private Methods
