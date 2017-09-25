@@ -27,7 +27,7 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
-import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -64,7 +64,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
-    private ModuleScope myCurrentModuleScope;
+    protected ModuleScope myCurrentModuleScope;
 
     /**
      * <p>This set keeps track of any additional <code>includes</code> or
@@ -153,6 +153,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myActiveTemplates = new Stack<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
+        myCurrentModuleScope = null;
         myDynamicImports = new LinkedHashSet<>();
         mySTGroup = group;
     }
@@ -330,6 +331,46 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * program parameter type.
      */
     protected abstract ST getParameterTypeTemplate(PTType type);
+
+    /**
+     * <p>This method returns the 'name' component of a {@link PTType}.
+     *
+     * @param type A {@link PTType}.
+     *
+     * @return {@code type}'s actual name rather than the more easily
+     * accessible {@code toString()} representation.
+     */
+    protected final String getTypeName(PTType type) {
+        String result;
+
+        if (type == null) {
+            return null;
+        }
+
+        if (type instanceof PTElement) {
+            // Not sure under what conditions this would appear in output.
+            result = "PTELEMENT";
+        }
+        else if (type instanceof PTGeneric) {
+            result = ((PTGeneric) type).getName();
+        }
+        else if (type instanceof PTRepresentation) {
+            result = ((PTRepresentation) type).getFamily().getName();
+        }
+        else if (type instanceof PTFacilityRepresentation) {
+            result = ((PTFacilityRepresentation) type).getName();
+        }
+        else if (type instanceof PTFamily) {
+            result = ((PTFamily) type).getName();
+        }
+        else {
+            throw new UnsupportedOperationException("Translation has "
+                    + "encountered an unrecognized PTType: " + type.toString()
+                    + ". Backing out.");
+        }
+
+        return result;
+    }
 
     /**
      * <p>This method returns the program variable type template for
