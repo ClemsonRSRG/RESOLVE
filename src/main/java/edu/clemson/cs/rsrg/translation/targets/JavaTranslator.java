@@ -215,7 +215,7 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     protected final ST getOperationTypeTemplate(PTType type) {
-        return null;
+        return getVariableTypeTemplate(type);
     }
 
     /**
@@ -229,7 +229,7 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     protected final ST getParameterTypeTemplate(PTType type) {
-        return null;
+        return getVariableTypeTemplate(type);
     }
 
     /**
