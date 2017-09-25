@@ -26,8 +26,15 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
+import edu.clemson.cs.rsrg.typeandpopulate.query.EntryTypeQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.query.UnqualifiedNameQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -290,6 +297,48 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
     // Utility methods
     // -----------------------------------------------------------
+
+    /**
+     * <p>This method searches for the {@link FacilityEntry} responsible for
+     * bringing the {@link SymbolTableEntry} referenced by {@code type} into the
+     * <code>ModuleScope</code> being translated.</p>
+     *
+     * @param type The {@link PTType} we want symbol table info for.
+     *
+     * @return The {@link FacilityEntry} that defines {@code type}.
+     */
+    protected final FacilityEntry getDefiningFacilityEntry(PTType type) {
+        FacilityEntry result = null;
+
+        try {
+            ProgramTypeEntry te =
+                    myCurrentModuleScope.queryForOne(
+                            new UnqualifiedNameQuery(type.toString()))
+                            .toProgramTypeEntry(null);
+
+            List<FacilityEntry> facilities =
+                    myCurrentModuleScope.query(new EntryTypeQuery<>(FacilityEntry.class,
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+
+            for (FacilityEntry facility : facilities) {
+                if (te.getSourceModuleIdentifier().equals(
+                        facility.getFacility().getSpecification()
+                                .getModuleIdentifier())) {
+
+                    result = facility;
+                }
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, type.toString(), null);
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse); // shouldn't fire.
+        }
+
+        return result;
+    }
 
     /**
      * <p>This method returns a {@link ResolveFile} given a string containing the name.</p>
