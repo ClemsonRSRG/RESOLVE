@@ -18,7 +18,11 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.TypeFamilyEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
+import edu.clemson.cs.rsrg.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -165,24 +169,24 @@ public class JavaTranslator extends AbstractTranslator {
 
         myActiveTemplates.peek().add("classes", typeDec);
 
-        /*try {
-            ProgramTypeDefinitionEntry ptde =
-                    myScope.queryForOne(
+        try {
+            TypeFamilyEntry typeFamilyEntry =
+                    myCurrentModuleScope.queryForOne(
                             new UnqualifiedNameQuery(dec.getName().getName()))
-                            .toProgramTypeDefinitionEntry(dec.getLocation());
+                            .toTypeFamilyEntry(dec.getLocation());
 
             ST typeDefinition =
-                    getOperationLikeTemplate(ptde.getProgramType(), "create"
-                            + dec.getName().getName(), false);
+                    getOperationLikeTemplate(typeFamilyEntry.getProgramType(),
+                            "create" + dec.getName().getName(), false);
 
             myActiveTemplates.peek().add("functions", typeDefinition);
         }
         catch (NoSuchSymbolException nsse) {
-            throw new RuntimeException(nsse);
+            noSuchSymbol(null, dec.getName());
         }
         catch (DuplicateSymbolException dse) {
-            throw new RuntimeException(dse);
-        }*/
+            throw new RuntimeException(dse); // shouldn't fire.
+        }
     }
 
     // ===========================================================
