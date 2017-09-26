@@ -360,6 +360,34 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected abstract String getFunctionModifier();
 
     /**
+     * <p>This method returns a {@code function} template 'filled in' with the
+     * attributes provided.</p>
+     *
+     * @param returnType A {@link PTType} representative of the
+     *                   function's return {@code type} attribute.
+     * @param name The name attribute.
+     * @param hasBody A boolean indicating whether or not the function being
+     *                created should have a body or not.
+     *
+     * @return A {@code function} template with the {@code type}
+     * and {@code name} attributes formed and filled in.
+     */
+    protected final ST getOperationLikeTemplate(PTType returnType, String name,
+            boolean hasBody) {
+        String attributeName = (hasBody) ? "function_def" : "function_decl";
+
+        ST operationLikeThingy =
+                mySTGroup.getInstanceOf(attributeName).add("name", name).add(
+                        "modifier", getFunctionModifier());
+
+        operationLikeThingy.add("type",
+                (returnType != null) ? getOperationTypeTemplate(returnType)
+                        : "void");
+
+        return operationLikeThingy;
+    }
+
+    /**
      * <p>This method returns the operation type template for
      * the target language.</p>
      *
