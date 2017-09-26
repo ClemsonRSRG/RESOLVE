@@ -18,7 +18,7 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
-import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -242,7 +242,65 @@ public class JavaTranslator extends AbstractTranslator {
      * program variable type.
      */
     protected final ST getVariableTypeTemplate(PTType type) {
-        return null;
+        ST result;
+        ModuleDec currentModule = myCurrentModuleScope.getDefiningElement();
+
+        // Case 1: Generic types ("Entry", "Info", etc.)
+        if (type instanceof PTGeneric || type instanceof PTElement) {
+            result =
+                    mySTGroup.getInstanceOf("unqualified_type").add("name",
+                            "RType");
+        }
+        // Case 2: Program types implemented by a concept realization.
+        else if (type instanceof PTRepresentation) {
+            result =
+                    mySTGroup.getInstanceOf("qualified_type").add("name",
+                            getTypeName(type));
+
+            result.add("concept", ((ConceptRealizModuleDec) currentModule)
+                    .getConceptName().getName());
+        }
+        // Case 3: Program types declared and implemented in a facility module.
+        else if (type instanceof PTFacilityRepresentation) {
+            result =
+                    mySTGroup.getInstanceOf("unqualified_type").add("name",
+                            getTypeName(type));
+        }
+        // Case 4: Program types declared by the concept.
+        else {
+            String moduleName = currentModule.getName().getName();
+            result =
+                    mySTGroup.getInstanceOf("qualified_type").add("name",
+                            getTypeName(type));
+
+            // Case 4.1: This is an instantiated version of a concept type.
+            if (getDefiningFacilityEntry(type) != null) {
+                moduleName =
+                        getDefiningFacilityEntry(type).getFacility()
+                                .getSpecification().getModuleIdentifier()
+                                .toString();
+            }
+            // Case 4.2: We are in an enhancement and we are using a type
+            //           declared by the concept.
+            else if (myCurrentModuleScope.getDefiningElement() instanceof EnhancementModuleDec) {
+                moduleName =
+                        ((EnhancementModuleDec) myCurrentModuleScope
+                                .getDefiningElement()).getConceptName()
+                                .getName();
+            }
+            // Case 4.3: We are in an enhancement realization and we are using a type
+            //           declared by the concept.
+            else if (myCurrentModuleScope.getDefiningElement() instanceof EnhancementRealizModuleDec) {
+                moduleName =
+                        ((EnhancementRealizModuleDec) myCurrentModuleScope
+                                .getDefiningElement()).getConceptName()
+                                .getName();
+            }
+
+            result.add("concept", moduleName);
+        }
+
+        return result;
     }
 
     // ===========================================================
