@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.FacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
@@ -80,6 +81,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * set (i.e. <code>FacilityDec</code>s).</p>
      */
     protected final Set<String> myDynamicImports;
+
+    /**
+     * <p>This list keeps track of the any {@link OperationDec OperationDec's}
+     * parameters.</p>
+     */
+    protected final List<String> myOperationParameterNames;
 
     /**
      * <p>These are special files that should already exist in
@@ -162,6 +169,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myCompileEnvironment = compileEnvironment;
         myCurrentModuleScope = null;
         myDynamicImports = new LinkedHashSet<>();
+        myOperationParameterNames = new ArrayList<>();
         mySTGroup = group;
     }
 

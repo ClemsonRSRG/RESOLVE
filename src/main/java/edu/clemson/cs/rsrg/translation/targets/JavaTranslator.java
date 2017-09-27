@@ -13,6 +13,8 @@
 package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -42,6 +44,12 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>This set keeps track of the names of any {@link OperationDec OperationDec(s)}
+     * that parameterized the current module.</p>
+     */
+    private final Set<String> myParameterOperationNames;
 
     // ===========================================================
     // Flag Strings
@@ -102,6 +110,7 @@ public class JavaTranslator extends AbstractTranslator {
             CompileEnvironment compileEnvironment) {
         super(builder, compileEnvironment,
                 new STGroupFile("templates/Java.stg"));
+        myParameterOperationNames = new HashSet<>();
     }
 
     // ===========================================================
@@ -153,6 +162,50 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     // -----------------------------------------------------------
+    // Module parameter declarations
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ModuleParameterDec}.</p>
+     *
+     * @param dec A module parameter declaration.
+     */
+    @Override
+    public final void preModuleParameterDec(ModuleParameterDec dec) {
+        if (dec.getWrappedDec() instanceof OperationDec) {
+            myParameterOperationNames.add(dec.getName().getName());
+
+            ST parameter =
+                    mySTGroup.getInstanceOf("parameter").add("type",
+                            dec.getName().getName()).add("name",
+                            dec.getName().getName() + "Param");
+
+            ST operationInterface =
+                    mySTGroup.getInstanceOf("interface_class").add("name",
+                            dec.getName().getName());
+
+            myActiveTemplates.peek().add("parameters", parameter);
+            myActiveTemplates.push(operationInterface);
+
+            // Return value is the same name as the operation.
+            myOperationParameterNames.add(dec.getName().getName());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ModuleParameterDec}.</p>
+     *
+     * @param dec A module parameter declaration.
+     */
+    @Override
+    public final void postModuleParameterDec(ModuleParameterDec dec) {
+        if (dec.getWrappedDec() instanceof OperationDec) {
+            ST operationInterface = myActiveTemplates.pop();
+            myActiveTemplates.peek().add("classes", operationInterface);
+        }
+    }
+
+    // -----------------------------------------------------------
     // Variable Declaration-Related
     // -----------------------------------------------------------
 
@@ -163,14 +216,14 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     public final void preParameterVarDec(ParameterVarDec dec) {
-        PTType type = dec.getTy().getProgramType();
+        /*PTType type = dec.getTy().getProgramType();
 
         ST parameter =
                 mySTGroup.getInstanceOf("parameter").add("type",
                         getParameterTypeTemplate(type)).add("name",
                         dec.getName().getName());
 
-        myActiveTemplates.peek().add("parameters", parameter);
+        myActiveTemplates.peek().add("parameters", parameter);*/
     }
 
     // -----------------------------------------------------------
