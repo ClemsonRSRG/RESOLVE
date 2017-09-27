@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
@@ -149,6 +150,27 @@ public class JavaTranslator extends AbstractTranslator {
                         "RESOLVE_INTERFACE");
 
         myActiveTemplates.push(concept);
+    }
+
+    // -----------------------------------------------------------
+    // Variable Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ParameterVarDec}.</p>
+     *
+     * @param dec A parameter declaration.
+     */
+    @Override
+    public final void preParameterVarDec(ParameterVarDec dec) {
+        PTType type = dec.getTy().getProgramType();
+
+        ST parameter =
+                mySTGroup.getInstanceOf("parameter").add("type",
+                        getParameterTypeTemplate(type)).add("name",
+                        dec.getName().getName());
+
+        myActiveTemplates.peek().add("parameters", parameter);
     }
 
     // -----------------------------------------------------------
