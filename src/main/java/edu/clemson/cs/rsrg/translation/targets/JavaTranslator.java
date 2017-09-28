@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -21,11 +22,12 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.TypeFamilyEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
-import edu.clemson.cs.rsrg.typeandpopulate.query.UnqualifiedNameQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.query.*;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -205,6 +207,36 @@ public class JavaTranslator extends AbstractTranslator {
         }
     }
 
+    /**
+     * <p>Code that gets executed after visiting a {@link ConceptTypeParamDec}.</p>
+     *
+     * @param param A concept type parameter declaration.
+     */
+    @Override
+    public final void postConceptTypeParamDec(ConceptTypeParamDec param) {
+        try {
+            ProgramParameterEntry ppe =
+                    myCurrentModuleScope.queryForOne(
+                            new NameAndEntryTypeQuery<>(null, param.getName(),
+                                    ProgramParameterEntry.class,
+                                    MathSymbolTable.ImportStrategy.IMPORT_NONE,
+                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true))
+                            .toProgramParameterEntry(param.getLocation());
+
+            ST getter =
+                    getOperationLikeTemplate(ppe.getDeclaredType(), "getType"
+                            + param.getName().getName(), false);
+
+            myActiveTemplates.peek().add("functions", getter);
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, param.getName());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse); // shouldn't fire.
+        }
+    }
+
     // -----------------------------------------------------------
     // Variable Declaration-Related
     // -----------------------------------------------------------
@@ -216,14 +248,14 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     public final void preParameterVarDec(ParameterVarDec dec) {
-        /*PTType type = dec.getTy().getProgramType();
+    /*PTType type = dec.getTy().getProgramType();
 
-        ST parameter =
-                mySTGroup.getInstanceOf("parameter").add("type",
-                        getParameterTypeTemplate(type)).add("name",
-                        dec.getName().getName());
+    ST parameter =
+            mySTGroup.getInstanceOf("parameter").add("type",
+                    getParameterTypeTemplate(type)).add("name",
+                    dec.getName().getName());
 
-        myActiveTemplates.peek().add("parameters", parameter);*/
+    myActiveTemplates.peek().add("parameters", parameter);*/
     }
 
     // -----------------------------------------------------------
