@@ -307,6 +307,22 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
+     * <p>This method constructs and adds a {@code parameter} to the currently active
+     * template.</p>
+     *
+     * @param type A {@link PTType} representing the 'declared type' of
+     *             the parameter.
+     * @param name The name of the parameter.
+     */
+    protected final void addParameterTemplate(PTType type, String name) {
+        ST parameter =
+                mySTGroup.getInstanceOf("parameter").add("type",
+                        getVariableTypeTemplate(type)).add("name", name);
+
+        myActiveTemplates.peek().add("parameters", parameter);
+    }
+
+    /**
      * <p>This method searches for the {@link FacilityEntry} responsible for
      * bringing the {@link SymbolTableEntry} referenced by {@code type} into the
      * <code>ModuleScope</code> being translated.</p>

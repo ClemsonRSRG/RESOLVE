@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.translation.targets;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -235,6 +236,32 @@ public class JavaTranslator extends AbstractTranslator {
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse); // shouldn't fire.
         }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ConstantParamDec}.</p>
+     *
+     * @param param A constant parameter declaration.
+     */
+    @Override
+    public final void postConstantParamDec(ConstantParamDec param) {
+        String name = param.getName().getName();
+        PTType type = param.getVarDec().getTy().getProgramType();
+
+        boolean translatingBody =
+                (myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec)
+                        || (myCurrentModuleScope.getDefiningElement() instanceof EnhancementRealizModuleDec);
+
+        if (translatingBody) {
+            addParameterTemplate(type, name);
+        }
+
+        ST getter =
+                getOperationLikeTemplate(type, "get" + name, translatingBody);
+        getter.add("stmts", mySTGroup.getInstanceOf("return_stmt").add("name",
+                name));
+
+        myActiveTemplates.peek().add("functions", getter);
     }
 
     // -----------------------------------------------------------
