@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.FacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
@@ -100,6 +101,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     "Char_Str_Template.co", "Seq_Input_Template.co",
                     "Seq_Output_Template.co", "Print.co");
 
+    /**
+     * <p>While we walk the children of a {@link OperationProcedureDec}, this will be set
+     * to the {@link OperationProcedureDec}. Otherwise it will be {@code null}.</p>
+     */
+    private OperationProcedureDec myCurrentPrivateProcedure;
+
     // -----------------------------------------------------------
     // Output-Related
     // -----------------------------------------------------------
@@ -168,6 +175,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
         myCurrentModuleScope = null;
+        myCurrentPrivateProcedure = null;
         myDynamicImports = new LinkedHashSet<>();
         myOperationParameterNames = new ArrayList<>();
         mySTGroup = group;
@@ -269,6 +277,50 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     mySTGroup.getInstanceOf("include").add("directories",
                             pkgDirectories));
         }
+    }
+
+    // -----------------------------------------------------------
+    // Operation Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link OperationDec}.</p>
+     *
+     * @param dec An operation declaration.
+     */
+    @Override
+    public final void preOperationDec(OperationDec dec) {
+
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link OperationDec}.</p>
+     *
+     * @param dec An operation declaration.
+     */
+    @Override
+    public final void postOperationDec(OperationDec dec) {
+
+    }
+
+    /**
+     * <p>Code that gets executed before visiting an {@link OperationProcedureDec}.</p>
+     *
+     * @param dec A local operation with procedure declaration.
+     */
+    @Override
+    public final void preOperationProcedureDec(OperationProcedureDec dec) {
+        myCurrentPrivateProcedure = dec;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link OperationProcedureDec}.</p>
+     *
+     * @param dec A local operation with procedure declaration.
+     */
+    @Override
+    public final void postOperationProcedureDec(OperationProcedureDec dec) {
+
     }
 
     // ===========================================================
