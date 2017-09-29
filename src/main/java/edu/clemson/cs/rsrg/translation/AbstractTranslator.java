@@ -290,7 +290,20 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      */
     @Override
     public final void preOperationDec(OperationDec dec) {
+        // Check to see if we are an OperationDec
+        // inside a OperationProcedureDec. If we are,
+        // then we have a body.
+        boolean hasBody = false;
+        if (myCurrentPrivateProcedure != null) {
+            hasBody = true;
+        }
 
+        ST operation =
+                getOperationLikeTemplate((dec.getReturnTy() != null) ? dec
+                        .getReturnTy().getProgramType() : null, dec.getName()
+                        .getName(), hasBody);
+
+        myActiveTemplates.push(operation);
     }
 
     /**
@@ -300,7 +313,19 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      */
     @Override
     public final void postOperationDec(OperationDec dec) {
-
+        // Perform different actions depending if we are
+        // a standalone OperationDec or if we are an
+        // OperationDec inside a FacilityOperationDec
+        if (myCurrentPrivateProcedure == null) {
+            ST operation = myActiveTemplates.pop();
+            myActiveTemplates.peek().add("functions", operation);
+        }
+        else {
+            if (dec.getReturnTy() != null) {
+                addVariableTemplate(dec.getReturnTy().getProgramType(), dec
+                        .getName().getName());
+            }
+        }
     }
 
     /**
