@@ -20,6 +20,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
@@ -96,6 +97,10 @@ public class JavaTranslator extends AbstractTranslator {
         // Translate clean requires the regular translate flag
         FlagDependencies.addRequires(JAVA_FLAG_TRANSLATE_CLEAN,
                 JAVA_FLAG_TRANSLATE);
+
+        // Setup debugging for java translator
+        FlagDependencies.addImplies(FLAG_TRANSLATE_DEBUG,
+                ResolveCompiler.FLAG_DEBUG);
     }
 
     // ===========================================================

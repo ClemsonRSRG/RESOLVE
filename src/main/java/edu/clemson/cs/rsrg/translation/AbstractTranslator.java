@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.Flag.Type;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
@@ -107,6 +108,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      */
     private OperationProcedureDec myCurrentPrivateProcedure;
 
+    /** <p>This is the status handler for the RESOLVE compiler.</p> */
+    private final StatusHandler myStatusHandler;
+
     // -----------------------------------------------------------
     // Output-Related
     // -----------------------------------------------------------
@@ -140,6 +144,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      */
     protected static final String FLAG_SECTION_NAME = "Translation";
 
+    /**
+     * <p>This indicates that the {@code Translator} is going to print debugging
+     * information wherever possible.</p>
+     */
+    private static final String FLAG_TRANSLATE_DEBUG_INFO =
+            "Translation Debug Flag";
+
     // ===========================================================
     // Flags
     // ===========================================================
@@ -154,6 +165,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     "translate",
                     "An auxiliary flag that indicates we are translating a source file",
                     Type.AUXILIARY);
+
+    /**
+     * <p>Tells the compiler to print out {@code Translator} information messages.</p>
+     */
+    protected static final Flag FLAG_TRANSLATE_DEBUG =
+            new Flag(FLAG_SECTION_NAME, "translateDebug",
+                    FLAG_TRANSLATE_DEBUG_INFO);
 
     // ===========================================================
     // Constructors
@@ -179,6 +197,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myDynamicImports = new LinkedHashSet<>();
         myOperationParameterNames = new ArrayList<>();
         mySTGroup = group;
+        myStatusHandler = myCompileEnvironment.getStatusHandler();
     }
 
     // ===========================================================
@@ -322,8 +341,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         }
         else {
             if (dec.getReturnTy() != null) {
-                addVariableTemplate(dec.getReturnTy().getProgramType(), dec
-                        .getName().getName());
+                addVariableTemplate(dec.getLocation(), dec.getReturnTy()
+                        .getProgramType(), dec.getName().getName());
             }
         }
     }
@@ -378,6 +397,19 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // ===========================================================
     // Protected Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method to print debugging messages if the debug
+     * flag is on.</p>
+     *
+     * @param l Location that generated the message.
+     * @param message The message to be outputted.
+     */
+    protected final void emitDebug(Location l, String message) {
+        if (myCompileEnvironment.flags.isFlagSet(FLAG_TRANSLATE_DEBUG)) {
+            myStatusHandler.info(l, message);
+        }
+    }
 
     // -----------------------------------------------------------
     // Utility methods
@@ -624,11 +656,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>This method constructs and adds a {@code variable} template to the currently
      * active template.</p>
      *
+     * @param loc The {@link Location} where we are trying to add the variable.
      * @param type A {@link PTType} representing the type of the
      *             variable.
      * @param name The name of the variable.
      */
-    private void addVariableTemplate(PTType type, String name) {
+    private void addVariableTemplate(Location loc, PTType type, String name) {
         ST init, variable;
 
         // Case 1: Generic types ("Entry", "Info", etc.)
@@ -662,8 +695,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                         "type", getVariableTypeTemplate(type))
                         .add("init", init);
 
-        /*AbstractTranslator.emitDebug(("Adding variable: " + name
-                + " with type: " + getTypeName(type)));*/
+        emitDebug(loc, "Adding variable: " + name + " with type: "
+                + getTypeName(type));
 
         myActiveTemplates.peek().add("variables", variable);
     }

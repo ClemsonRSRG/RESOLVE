@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
@@ -78,6 +79,10 @@ public class CTranslator extends AbstractTranslator {
 
         // Translate clean requires the regular translate flag
         FlagDependencies.addRequires(C_FLAG_TRANSLATE_CLEAN, C_FLAG_TRANSLATE);
+
+        // Setup debugging for java translator
+        FlagDependencies.addImplies(FLAG_TRANSLATE_DEBUG,
+                ResolveCompiler.FLAG_DEBUG);
     }
 
     // ===========================================================
