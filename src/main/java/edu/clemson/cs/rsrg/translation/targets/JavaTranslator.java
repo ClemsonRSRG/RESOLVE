@@ -258,7 +258,7 @@ public class JavaTranslator extends AbstractTranslator {
                         || (myCurrentModuleScope.getDefiningElement() instanceof EnhancementRealizModuleDec);
 
         if (translatingBody) {
-            addParameterTemplate(type, name);
+            addParameterTemplate(param.getLocation(), type, name);
         }
 
         ST getter =
@@ -464,6 +464,9 @@ public class JavaTranslator extends AbstractTranslator {
                 mySTGroup.getInstanceOf("package").add("directories",
                         pkgDirectories);
         myActiveTemplates.peek().add("directives", pkg);
+
+        emitDebug(dec.getLocation(), "Adding package template for module: "
+                + dec.getName());
     }
 
 }

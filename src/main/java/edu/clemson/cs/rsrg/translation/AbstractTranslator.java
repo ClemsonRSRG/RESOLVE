@@ -419,16 +419,21 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>This method constructs and adds a {@code parameter} to the currently active
      * template.</p>
      *
+     * @param loc The {@link Location} where we are trying to add the variable.
      * @param type A {@link PTType} representing the 'declared type' of
      *             the parameter.
      * @param name The name of the parameter.
      */
-    protected final void addParameterTemplate(PTType type, String name) {
+    protected final void addParameterTemplate(Location loc, PTType type,
+            String name) {
         ST parameter =
                 mySTGroup.getInstanceOf("parameter").add("type",
                         getVariableTypeTemplate(type)).add("name", name);
 
         myActiveTemplates.peek().add("parameters", parameter);
+
+        emitDebug(loc, "Adding parameter variable: " + name + " with type: "
+                + getTypeName(type));
     }
 
     /**
