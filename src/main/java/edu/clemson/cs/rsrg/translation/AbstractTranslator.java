@@ -621,6 +621,54 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
+     * <p>This method constructs and adds a {@code variable} template to the currently
+     * active template.</p>
+     *
+     * @param type A {@link PTType} representing the type of the
+     *             variable.
+     * @param name The name of the variable.
+     */
+    private void addVariableTemplate(PTType type, String name) {
+        ST init, variable;
+
+        // Case 1: Generic types ("Entry", "Info", etc.)
+        if (type instanceof PTGeneric) {
+            init =
+                    mySTGroup.getInstanceOf("rtype_init").add("typeName",
+                            getTypeName(type));
+        }
+        // Case 2: Program types declared and implemented in a facility module.
+        else if (type instanceof PTFacilityRepresentation) {
+            init =
+                    mySTGroup.getInstanceOf("facility_type_var_init").add(
+                            "name", getTypeName(type));
+        }
+        // Case 3: This is an instantiated version of a concept type.
+        else if (getDefiningFacilityEntry(type) != null) {
+            init =
+                    mySTGroup.getInstanceOf("var_init").add("type",
+                            getVariableTypeTemplate(type)).add("facility",
+                            getDefiningFacilityEntry(type).getName());
+        }
+        // Case 4: Program types declared by the concept.
+        else {
+            init =
+                    mySTGroup.getInstanceOf("enhancement_var_init").add("type",
+                            getVariableTypeTemplate(type));
+        }
+
+        variable =
+                mySTGroup.getInstanceOf("var_decl").add("name", name).add(
+                        "type", getVariableTypeTemplate(type))
+                        .add("init", init);
+
+        /*AbstractTranslator.emitDebug(("Adding variable: " + name
+                + " with type: " + getTypeName(type)));*/
+
+        myActiveTemplates.peek().add("variables", variable);
+    }
+
+    /**
      * <p>An helper method that throws the appropriate unsupported
      * import message.</p>
      *
