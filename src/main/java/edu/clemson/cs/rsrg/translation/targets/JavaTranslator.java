@@ -280,14 +280,14 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     public final void preParameterVarDec(ParameterVarDec dec) {
-    /*PTType type = dec.getTy().getProgramType();
+        PTType type = dec.getTy().getProgramType();
 
-    ST parameter =
-            mySTGroup.getInstanceOf("parameter").add("type",
-                    getParameterTypeTemplate(type)).add("name",
-                    dec.getName().getName());
+        ST parameter =
+                mySTGroup.getInstanceOf("parameter").add("type",
+                        getParameterTypeTemplate(type)).add("name",
+                        dec.getName().getName());
 
-    myActiveTemplates.peek().add("parameters", parameter);*/
+        myActiveTemplates.peek().add("parameters", parameter);
     }
 
     // -----------------------------------------------------------
