@@ -244,21 +244,28 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ConstantParamDec}.</p>
+     * <p>This method redefines how a {@link ConstantParamDec} should be walked.</p>
      *
-     * @param param A constant parameter declaration.
+     * @param dec A constant parameter declaration.
+     *
+     * @return {@code true}
      */
     @Override
-    public final void postConstantParamDec(ConstantParamDec param) {
-        String name = param.getName().getName();
-        PTType type = param.getVarDec().getTy().getProgramType();
+    public final boolean walkConstantParamDec(ConstantParamDec dec) {
+        preAny(dec);
+        preDec(dec);
+
+        // YS: We don't want to walker the inner ParameterVarDec,
+        //     so we are redefining the walk and adding the logic here.
+        String name = dec.getName().getName();
+        PTType type = dec.getVarDec().getTy().getProgramType();
 
         boolean translatingBody =
                 (myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec)
                         || (myCurrentModuleScope.getDefiningElement() instanceof EnhancementRealizModuleDec);
 
         if (translatingBody) {
-            addParameterTemplate(param.getLocation(), type, name);
+            addParameterTemplate(dec.getLocation(), type, name);
         }
 
         ST getter =
@@ -267,6 +274,11 @@ public class JavaTranslator extends AbstractTranslator {
                 name));
 
         myActiveTemplates.peek().add("functions", getter);
+
+        postDec(dec);
+        postAny(dec);
+
+        return true;
     }
 
     // -----------------------------------------------------------
