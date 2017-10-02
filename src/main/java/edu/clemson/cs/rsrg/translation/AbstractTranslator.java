@@ -364,7 +364,18 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      */
     @Override
     public final void postOperationProcedureDec(OperationProcedureDec dec) {
+        if (dec.getWrappedOpDec().getReturnTy() != null) {
+            ST returnStmt =
+                    mySTGroup.getInstanceOf("return_stmt").add("name",
+                            dec.getName().getName());
 
+            myActiveTemplates.peek().add("stmts", returnStmt);
+        }
+
+        ST operation = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("functions", operation);
+
+        myCurrentPrivateProcedure = null;
     }
 
     // ===========================================================
