@@ -210,6 +210,9 @@ public class JavaTranslator extends AbstractTranslator {
         if (dec.getWrappedDec() instanceof OperationDec) {
             ST operationInterface = myActiveTemplates.pop();
             myActiveTemplates.peek().add("classes", operationInterface);
+
+            emitDebug(dec.getLocation(), "Adding operation parameter: "
+                    + dec.getName());
         }
     }
 
@@ -234,6 +237,8 @@ public class JavaTranslator extends AbstractTranslator {
                             + param.getName().getName(), false);
 
             myActiveTemplates.peek().add("functions", getter);
+
+            emitDebug(param.getLocation(), "Adding concept type parameter: " + param.getName());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, param.getName());
@@ -275,6 +280,9 @@ public class JavaTranslator extends AbstractTranslator {
 
         myActiveTemplates.peek().add("functions", getter);
 
+        emitDebug(dec.getLocation(), "Adding constant parameter: "
+                + dec.getName());
+
         postDec(dec);
         postAny(dec);
 
@@ -300,6 +308,9 @@ public class JavaTranslator extends AbstractTranslator {
                         dec.getName().getName());
 
         myActiveTemplates.peek().add("parameters", parameter);
+
+        emitDebug(dec.getLocation(), "Adding parameter variable: "
+                + dec.getName());
     }
 
     // -----------------------------------------------------------
@@ -331,6 +342,9 @@ public class JavaTranslator extends AbstractTranslator {
                             "create" + dec.getName().getName(), false);
 
             myActiveTemplates.peek().add("functions", typeDefinition);
+
+            emitDebug(dec.getLocation(), "Adding type family declaration: "
+                    + dec.getName());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, dec.getName());

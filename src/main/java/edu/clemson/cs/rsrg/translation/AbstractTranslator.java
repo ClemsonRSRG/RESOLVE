@@ -226,6 +226,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
             // Store this as our current outermost template
             myActiveTemplates.push(outermostEnclosingTemplate);
+
+            emitDebug(dec.getLocation(), "Beginning translating: "
+                    + dec.getName());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchModule(dec.getLocation());
@@ -242,6 +245,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         if (!myDynamicImports.isEmpty()) {
             myActiveTemplates.firstElement().add("includes", myDynamicImports);
         }
+
+        emitDebug(dec.getLocation(), "Done translating: " + dec.getName()
+                + "\n");
     }
 
     // -----------------------------------------------------------
@@ -295,6 +301,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     "includes",
                     mySTGroup.getInstanceOf("include").add("directories",
                             pkgDirectories));
+
+            emitDebug(uses.getLocation(), "Adding import: " + uses.getName());
         }
     }
 
@@ -338,6 +346,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         if (myCurrentPrivateProcedure == null) {
             ST operation = myActiveTemplates.pop();
             myActiveTemplates.peek().add("functions", operation);
+
+            emitDebug(dec.getLocation(), "Adding operation: " + dec.getName());
         }
         else {
             if (dec.getReturnTy() != null) {
@@ -374,6 +384,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         ST operation = myActiveTemplates.pop();
         myActiveTemplates.peek().add("functions", operation);
+
+        emitDebug(dec.getLocation(), "Adding local operation: " + dec.getName());
 
         myCurrentPrivateProcedure = null;
     }
