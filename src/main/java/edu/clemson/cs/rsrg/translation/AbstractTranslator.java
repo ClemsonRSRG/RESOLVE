@@ -18,6 +18,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
@@ -388,6 +389,47 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         emitDebug(dec.getLocation(), "Adding local operation: " + dec.getName());
 
         myCurrentPrivateProcedure = null;
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProcedureDec}.</p>
+     *
+     * @param dec A procedure declaration.
+     */
+    @Override
+    public final void preProcedureDec(ProcedureDec dec) {
+        ST operation =
+                getOperationLikeTemplate((dec.getReturnTy() != null) ? dec
+                        .getReturnTy().getProgramType() : null, dec.getName()
+                        .getName(), true);
+
+        myActiveTemplates.push(operation);
+
+        if (dec.getReturnTy() != null) {
+            addVariableTemplate(dec.getLocation(), dec.getReturnTy()
+                    .getProgramType(), dec.getName().getName());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProcedureDec}.</p>
+     *
+     * @param dec A procedure declaration.
+     */
+    @Override
+    public final void postProcedureDec(ProcedureDec dec) {
+        if (dec.getReturnTy() != null) {
+            ST returnStmt =
+                    mySTGroup.getInstanceOf("return_stmt").add("name",
+                            dec.getName().getName());
+
+            myActiveTemplates.peek().add("stmts", returnStmt);
+        }
+
+        ST operation = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("functions", operation);
+
+        emitDebug(dec.getLocation(), "Adding procedure: " + dec.getName());
     }
 
     // ===========================================================
