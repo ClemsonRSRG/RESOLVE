@@ -170,6 +170,35 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     // -----------------------------------------------------------
+    // Concept Realization Module
+    // -----------------------------------------------------------
+
+    // -----------------------------------------------------------
+    // Enhancement Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link EnhancementModuleDec}.</p>
+     *
+     * @param dec An enhancement module declaration.
+     */
+    @Override
+    public final void preEnhancementModuleDec(EnhancementModuleDec dec) {
+        addPackageTemplate(dec);
+
+        ST enhancement =
+                mySTGroup.getInstanceOf("interface_class").add("name",
+                        dec.getName().getName()).add("extend",
+                        dec.getConceptName().getName());
+
+        myActiveTemplates.push(enhancement);
+    }
+
+    // -----------------------------------------------------------
+    // Enhancement Realization Module
+    // -----------------------------------------------------------
+
+    // -----------------------------------------------------------
     // Module parameter declarations
     // -----------------------------------------------------------
 
