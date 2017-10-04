@@ -198,6 +198,37 @@ public class JavaTranslator extends AbstractTranslator {
     // Enhancement Realization Module
     // -----------------------------------------------------------
 
+    /**
+     * <p>Code that gets executed before visiting an {@link EnhancementRealizModuleDec}.</p>
+     *
+     * @param dec An enhancement realization module declaration.
+     */
+    @Override
+    public final void preEnhancementRealizModuleDec(
+            EnhancementRealizModuleDec dec) {
+        addPackageTemplate(dec);
+        addReflectionImportTemplates();
+
+        List<ProgramParameterEntry> formals =
+                getModuleFormalParameters(dec.getConceptName());
+
+        ST enhancementBody =
+                mySTGroup.getInstanceOf("enhancement_body_class").add("name",
+                        dec.getName().getName()).add("conceptname",
+                        dec.getConceptName().getName());
+
+        enhancementBody.add("implement", dec.getEnhancementName().getName());
+        enhancementBody.add("implement", dec.getConceptName().getName());
+        enhancementBody.add("implement", "InvocationHandler");
+
+        myActiveTemplates.push(enhancementBody);
+
+        for (ProgramParameterEntry p : formals) {
+            addParameterTemplate(dec.getLocation(), p.getDeclaredType(), p
+                    .getName());
+        }
+    }
+
     // -----------------------------------------------------------
     // Module parameter declarations
     // -----------------------------------------------------------
