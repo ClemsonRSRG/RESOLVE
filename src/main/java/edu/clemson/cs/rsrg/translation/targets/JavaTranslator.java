@@ -207,7 +207,7 @@ public class JavaTranslator extends AbstractTranslator {
     public final void preEnhancementRealizModuleDec(
             EnhancementRealizModuleDec dec) {
         addPackageTemplate(dec);
-        addReflectionImportTemplates();
+        addReflectionImportTemplates(dec);
 
         List<ProgramParameterEntry> formals =
                 getModuleFormalParameters(dec.getConceptName());
@@ -552,6 +552,24 @@ public class JavaTranslator extends AbstractTranslator {
         myActiveTemplates.peek().add("directives", pkg);
 
         emitDebug(dec.getLocation(), "Adding package template for module: "
+                + dec.getName());
+    }
+
+    /**
+     * <p>Creates and adds a formed java reflection package template to the
+     * {@code includes} attribute of the outermost {@code module}
+     * template defined in <tt>Base.stg</tt>.</p>
+     *
+     * @param dec The {@link EnhancementRealizModuleDec} currently being translated.
+     */
+    private void addReflectionImportTemplates(EnhancementRealizModuleDec dec) {
+        ST imp =
+                mySTGroup.getInstanceOf("include").add("directories",
+                        "java.lang.reflect");
+
+        myActiveTemplates.firstElement().add("includes", imp);
+
+        emitDebug(dec.getLocation(), "Adding reflection imports for module: "
                 + dec.getName());
     }
 
