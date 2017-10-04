@@ -30,9 +30,7 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerStackVisitor;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
@@ -561,6 +559,34 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * @return Function modifier as a string.
      */
     protected abstract String getFunctionModifier();
+
+    /**
+     * <p>This method returns a list of {@link ProgramParameterEntry ProgramParameterEntries}
+     * representing the formal parameters of module {@code moduleName}.</p>
+     *
+     * @param moduleName A {@link PosSymbol} containing the name of the
+     *                   module whose parameters we are trying to extract.
+     *
+     * @return A (possibly empty) list of formal parameters.
+     */
+    protected final List<ProgramParameterEntry> getModuleFormalParameters(
+            PosSymbol moduleName) {
+        List<ProgramParameterEntry> parameterEntries = null;
+        try {
+            ModuleDec spec =
+                    myBuilder.getModuleScope(
+                            new ModuleIdentifier(moduleName.getName()))
+                            .getDefiningElement();
+
+            parameterEntries =
+                    myBuilder.getScope(spec).getFormalParameterEntries();
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchModule(moduleName.getLocation());
+        }
+
+        return parameterEntries;
+    }
 
     /**
      * <p>This method returns a {@code function} template 'filled in' with the
