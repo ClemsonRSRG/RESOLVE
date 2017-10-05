@@ -61,7 +61,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /** <p>The symbol table we are currently building.</p> */
-    private final MathSymbolTableBuilder myBuilder;
+    protected final MathSymbolTableBuilder myBuilder;
 
     /**
      * <p>The current job's compilation environment

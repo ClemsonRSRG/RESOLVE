@@ -31,7 +31,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.query.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import java.util.*;
+
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -226,6 +229,64 @@ public class JavaTranslator extends AbstractTranslator {
         for (ProgramParameterEntry p : formals) {
             addParameterTemplate(dec.getLocation(), p.getDeclaredType(), p
                     .getName());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link EnhancementRealizModuleDec}.</p>
+     *
+     * @param dec An enhancement realization module declaration.
+     */
+    @Override
+    public final void postEnhancementRealizModuleDec(
+            EnhancementRealizModuleDec dec) {
+        /* This is where we give the enhancement body all the functionality
+         * defined in the base concept. This is done via a set of functions
+         * that share the signatures of the functions defined in the base
+         * concept, but whose bodies merely call the <em>real</em> method.
+         */
+        try {
+            ModuleScope conceptScope =
+                    myBuilder.getModuleScope(new ModuleIdentifier(dec
+                            .getConceptName().getName()));
+
+            List<OperationEntry> conceptOperations =
+                    conceptScope.query(new EntryTypeQuery<>(
+                            OperationEntry.class,
+                            MathSymbolTable.ImportStrategy.IMPORT_NONE,
+                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+
+            List<TypeFamilyEntry> conceptTypes =
+                    conceptScope
+                            .query(new EntryTypeQuery<>(
+                                    TypeFamilyEntry.class,
+                                    MathSymbolTable.ImportStrategy.IMPORT_NONE,
+                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+
+            for (OperationEntry o : conceptOperations) {
+                PTType returnType =
+                        (o.getReturnType() instanceof PTVoid) ? null : o
+                                .getReturnType();
+
+                addEnhancementConceptualFunction(returnType, o.getName(), o
+                        .getParameters());
+            }
+
+            for (ProgramParameterEntry p : getModuleFormalParameters(dec
+                    .getConceptName())) {
+
+                addEnhancementConceptualFunction(p.getDeclaredType(), (p
+                        .getDeclaredType() instanceof PTElement) ? "getType"
+                        + p.getName() : "get" + p.getName(), null);
+            }
+
+            for (TypeFamilyEntry e : conceptTypes) {
+                addEnhancementConceptualFunction(e.getProgramType(), "create"
+                        + e.getName(), null);
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchModule(dec.getConceptName());
         }
     }
 
