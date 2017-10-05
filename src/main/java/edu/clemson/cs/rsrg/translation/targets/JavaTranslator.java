@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.translation.targets;
 
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
@@ -23,6 +24,7 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
@@ -32,9 +34,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.query.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
-import java.util.*;
-
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -268,21 +269,21 @@ public class JavaTranslator extends AbstractTranslator {
                         (o.getReturnType() instanceof PTVoid) ? null : o
                                 .getReturnType();
 
-                addEnhancementConceptualFunction(returnType, o.getName(), o
-                        .getParameters());
+                addEnhancementConceptualFunction(o.getDefiningElement().getLocation(),
+                        returnType, o.getName(), o.getParameters());
             }
 
             for (ProgramParameterEntry p : getModuleFormalParameters(dec
                     .getConceptName())) {
 
-                addEnhancementConceptualFunction(p.getDeclaredType(), (p
-                        .getDeclaredType() instanceof PTElement) ? "getType"
+                addEnhancementConceptualFunction(p.getDefiningElement().getLocation(),
+                        p.getDeclaredType(), (p.getDeclaredType() instanceof PTElement) ? "getType"
                         + p.getName() : "get" + p.getName(), null);
             }
 
             for (TypeFamilyEntry e : conceptTypes) {
-                addEnhancementConceptualFunction(e.getProgramType(), "create"
-                        + e.getName(), null);
+                addEnhancementConceptualFunction(e.getDefiningElement().getLocation(),
+                        e.getProgramType(), "create" + e.getName(), null);
             }
         }
         catch (NoSuchSymbolException nsse) {
@@ -596,6 +597,48 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>This method is only intended to be called when translating
+     * {@link EnhancementRealizModuleDec EnhancementRealizModuleDecs}.
+     * It is used to construct and add a 'dummy method' that simply uses
+     * 'con' to call the actual method.</p>
+     *
+     * <p>For example, given {@code type} = null,
+     * {@code name} = 'Pop', and {@code parameters} = [R, S]; is method returns :
+     * <pre>
+     *     public void Pop(RType R, Stack_Template.Stack S) {
+     *         con.Pop(R, S);
+     *     }
+     * </pre>
+     * </p>
+     *
+     * @param type A {@link PTType} for the function's return type.
+     * @param name The name.
+     * @param parameters A list of {@link ProgramParameterEntry}
+     *                   representing the function's formal parameters.
+     */
+    private void addEnhancementConceptualFunction(Location loc, PTType type,
+            String name, ImmutableList<ProgramParameterEntry> parameters) {
+        ST singleLine =
+                mySTGroup.getInstanceOf("enhanced_stmt").add("returns", type)
+                        .add("name", name);
+
+        ST operation = getOperationLikeTemplate(type, name, true);
+        myActiveTemplates.push(operation);
+
+        if (parameters != null) {
+            for (ProgramParameterEntry p : parameters) {
+                addParameterTemplate(loc, p.getDeclaredType(), p.getName());
+                singleLine.add("arguments", p.getName());
+            }
+        }
+
+        ST result = myActiveTemplates.pop().add("stmts", singleLine);
+        myActiveTemplates.peek().add("conceptfunctions", result);
+
+        emitDebug(loc, "Adding enhancement conceptual function for: " + name);
+    }
 
     /**
      * <p>Creates and adds a formed java package template to the
