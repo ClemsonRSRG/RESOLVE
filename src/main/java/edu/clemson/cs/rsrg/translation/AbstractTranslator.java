@@ -582,7 +582,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     myBuilder.getScope(spec).getFormalParameterEntries();
         }
         catch (NoSuchSymbolException nsse) {
-            noSuchModule(moduleName.getLocation());
+            noSuchModule(moduleName);
         }
 
         return parameterEntries;
@@ -702,6 +702,17 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected final void noSuchModule(Location loc) {
         throw new SourceErrorException("[" + getClass().getCanonicalName()
                 + "] " + "Module does not exist or is not in scope.", loc);
+    }
+
+    /**
+     * <p>An helper method that indicates that a module with the specified name
+     * cannot be found.</p>
+     *
+     * @param name The name of a module.
+     */
+    protected final void noSuchModule(PosSymbol name) {
+        throw new SourceErrorException("[" + getClass().getCanonicalName()
+                + "] " + "Module does not exist or is not in scope.", name);
     }
 
     /**
