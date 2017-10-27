@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
+import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
@@ -29,12 +30,15 @@ import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.exception.NoneProvidedException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.query.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleParameterization;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
@@ -58,6 +62,12 @@ public class JavaTranslator extends AbstractTranslator {
      * that parameterized the current module.</p>
      */
     private final Set<String> myParameterOperationNames;
+
+    /**
+     * <p>These are string templates used to generate code for {@link FacilityDec FacilitiDec(s)}
+     * and its associated enhancements.</p>
+     */
+    private ST myBaseInstantiation, myBaseEnhancement;
 
     // ===========================================================
     // Flag Strings
@@ -122,6 +132,8 @@ public class JavaTranslator extends AbstractTranslator {
             CompileEnvironment compileEnvironment) {
         super(builder, compileEnvironment,
                 new STGroupFile("templates/Java.stg"));
+        myBaseEnhancement = null;
+        myBaseInstantiation = null;
         myParameterOperationNames = new HashSet<>();
     }
 
@@ -409,6 +421,62 @@ public class JavaTranslator extends AbstractTranslator {
         postAny(dec);
 
         return true;
+    }
+
+    // -----------------------------------------------------------
+    // Facility Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link FacilityDec}.</p>
+     *
+     * @param dec A facility declaration.
+     */
+    @Override
+    public final void preFacilityDec(FacilityDec dec) {
+        myBaseInstantiation = mySTGroup.getInstanceOf("facility_init");
+        myBaseInstantiation.add("realization", dec.getConceptRealizName().getName());
+
+        myActiveTemplates.push(myBaseInstantiation);
+        Scope scopeToSearch = myCurrentModuleScope;
+
+        // If we're within a function, get the appropriate scope so we
+        // can find the SymbolTableEntry representing this FacilityDec.
+        // Note : I don't really like this. I'd rather use the depth of the
+        // stack I think...
+        // YS: Might not need the following if.
+        if (!myCurrentModuleScope.equals(myBuilder.getScope(this.getAncestor(2)))) {
+            scopeToSearch = myBuilder.getScope(this.getAncestor(2));
+        }
+
+        try {
+            myCurrentFacilityEntry =
+                    scopeToSearch.queryForOne(
+                            new NameAndEntryTypeQuery<>(null, dec.getName(),
+                                    FacilityEntry.class,
+                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, false))
+                            .toFacilityEntry(dec.getLocation());
+
+            ModuleParameterization spec =
+                    myCurrentFacilityEntry.getFacility().getSpecification();
+
+            ModuleParameterization realiz =
+                    myCurrentFacilityEntry.getFacility().getRealization();
+
+            if (!dec.getExternallyRealizedFlag()) {
+                constructFacilityArgBindings(spec, realiz);
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, dec.getName());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
+        catch (NoneProvidedException npe) {
+            noSuchModule(dec.getConceptRealizName());
+        }
     }
 
     // -----------------------------------------------------------

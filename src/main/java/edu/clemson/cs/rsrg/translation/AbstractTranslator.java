@@ -70,6 +70,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     private final CompileEnvironment myCompileEnvironment;
 
     /**
+     * <p>A pointer to a {@link SymbolTableEntry} that corresponds to
+     * the {@link FacilityDec} currently being walked. If one isn't
+     * being walked, this should be {@code null}.</p>
+     */
+    protected FacilityEntry myCurrentFacilityEntry;
+
+    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -191,6 +198,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myActiveTemplates = new Stack<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
+        myCurrentFacilityEntry = null;
         myCurrentModuleScope = null;
         myCurrentPrivateProcedure = null;
         myDynamicImports = new LinkedHashSet<>();
