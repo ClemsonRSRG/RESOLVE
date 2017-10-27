@@ -21,11 +21,13 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
@@ -58,16 +60,23 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>This set keeps track of the names of any {@link OperationDec OperationDec(s)}
-     * that parameterized the current module.</p>
-     */
-    private final Set<String> myParameterOperationNames;
-
-    /**
      * <p>These are string templates used to generate code for {@link FacilityDec FacilitiDec(s)}
      * and its associated enhancements.</p>
      */
     private ST myBaseInstantiation, myBaseEnhancement;
+
+    /**
+     * <p>A mapping between the {@link ModuleArgumentItem ModuleArgumentItems}
+     * representing the actual arguments of a {@link FacilityDec} and
+     * their formal {@link ModuleParameterDec} bound counterparts.</p>
+     */
+    private final Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings;
+
+    /**
+     * <p>This set keeps track of the names of any {@link OperationDec OperationDec(s)}
+     * that parameterized the current module.</p>
+     */
+    private final Set<String> myParameterOperationNames;
 
     // ===========================================================
     // Flag Strings
@@ -134,6 +143,7 @@ public class JavaTranslator extends AbstractTranslator {
                 new STGroupFile("templates/Java.stg"));
         myBaseEnhancement = null;
         myBaseInstantiation = null;
+        myFacilityBindings = new LinkedHashMap<>();
         myParameterOperationNames = new HashSet<>();
     }
 
@@ -465,7 +475,7 @@ public class JavaTranslator extends AbstractTranslator {
                     myCurrentFacilityEntry.getFacility().getRealization();
 
             if (!dec.getExternallyRealizedFlag()) {
-                constructFacilityArgBindings(spec, realiz);
+                constructFacilityArgBindings(dec.getLocation(), spec, realiz);
             }
         }
         catch (NoSuchSymbolException nsse) {
@@ -745,4 +755,37 @@ public class JavaTranslator extends AbstractTranslator {
                 + dec.getName());
     }
 
+    /**
+     * <p>Binds <em>every</em> actual parameter of a {@link FacilityDec}
+     * to its formal counterpart, as defined in a {@code concept}, {@code enhancement},
+     * or {@code realization}.</p>
+     *
+     * @param loc The {@link Location} where we are trying to bind the facility arguments.
+     * @param spec A {@link ModuleParameterization} referencing a
+     *             {@code concept} or {@code enhancement}.
+     * @param realiz A {@link ModuleParameterization} referencing a
+     *               realization ({@code concept realization} or {@code enhancement realization}).
+     */
+    private void constructFacilityArgBindings(Location loc, ModuleParameterization spec, ModuleParameterization realiz) {
+        myFacilityBindings.clear();
+
+        try {
+            List<ModuleArgumentItem> joinedActuals = new LinkedList<>(spec.getParameters());
+
+            ModuleDec specModule = myBuilder.getModuleScope(spec.getModuleIdentifier()).getDefiningElement();
+            ModuleDec realizModule = myBuilder.getModuleScope(realiz.getModuleIdentifier()).getDefiningElement();
+
+            List<ModuleParameterDec> joinedFormals = new LinkedList<>(specModule.getParameterDecs());
+            joinedActuals.addAll(realiz.getParameters());
+            joinedFormals.addAll(realizModule.getParameterDecs());
+
+            for (int i = 0; i < joinedActuals.size(); i++) {
+                myFacilityBindings.put(joinedActuals.get(i), joinedFormals.get(i));
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SourceErrorException("[" + getClass().getCanonicalName()
+                    + "] " + "Error while trying to bind facility arguments.", loc);
+        }
+    }
 }
