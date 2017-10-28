@@ -67,6 +67,12 @@ public class JavaTranslator extends AbstractTranslator {
     private ST myBaseInstantiation, myBaseEnhancement;
 
     /**
+     * <p>A {@link ModuleParameterization} corresponding to the
+     * {@link EnhancementSpecRealizItem} being walked.</p>
+     */
+    private ModuleParameterization myCurrentEnhancement = null;
+
+    /**
      * <p>A mapping between the {@link ModuleArgumentItem ModuleArgumentItems}
      * representing the actual arguments of a {@link FacilityDec} and
      * their formal {@link ModuleParameterDec} bound counterparts.</p>
@@ -497,7 +503,42 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     public final void preEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
-        // TODO: Add logic
+        ST singleArg = null;
+        List<Object> args = new LinkedList<>();
+
+        List<ModuleParameterization> enhancements =
+                myCurrentFacilityEntry.getEnhancements();
+
+        boolean proxied = myCurrentFacilityEntry.getEnhancements().size() > 1;
+
+        if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
+            singleArg = ((ST) myBaseInstantiation.getAttribute("arguments"));
+        }
+        else if (myBaseInstantiation.getAttribute("arguments") != null) {
+            args =
+                    new LinkedList<Object>((List) myBaseInstantiation
+                            .getAttribute("arguments"));
+        }
+
+        for (ModuleParameterization m : enhancements) {
+            if (m.getModuleIdentifier().toString().equals(
+                    item.getEnhancementName().getName())) {
+                constructFacilityArgBindings(item.getLocation(),
+                        m, myCurrentFacilityEntry.getEnhancementRealization(m));
+                myCurrentEnhancement = m;
+            }
+        }
+
+        myActiveTemplates.push(mySTGroup.getInstanceOf("facility_init"));
+        myActiveTemplates.peek().add("isProxied", proxied).add("realization",
+                item.getEnhancementRealizName().getName());
+
+        if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
+            myActiveTemplates.peek().add("arguments", singleArg);
+        }
+        else {
+            myActiveTemplates.peek().add("arguments", args);
+        }
     }
 
     /**
@@ -506,8 +547,9 @@ public class JavaTranslator extends AbstractTranslator {
      * @param item An {@code enhancement} and {@code realization} item pair.
      */
     @Override
-    public final void postEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
-        // TODO: Add logic
+    public final void postEnhancementSpecRealizItem(
+            EnhancementSpecRealizItem item) {
+    // TODO: Add logic
     }
 
     // -----------------------------------------------------------
