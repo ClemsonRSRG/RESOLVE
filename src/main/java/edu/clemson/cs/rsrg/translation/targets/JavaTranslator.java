@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
@@ -487,6 +488,26 @@ public class JavaTranslator extends AbstractTranslator {
         catch (NoneProvidedException npe) {
             noSuchModule(dec.getConceptRealizName());
         }
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link EnhancementSpecRealizItem}.</p>
+     *
+     * @param item An {@code enhancement} and {@code realization} item pair.
+     */
+    @Override
+    public final void preEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
+        // TODO: Add logic
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link EnhancementSpecRealizItem}.</p>
+     *
+     * @param item An {@code enhancement} and {@code realization} item pair.
+     */
+    @Override
+    public final void postEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
+        // TODO: Add logic
     }
 
     // -----------------------------------------------------------
