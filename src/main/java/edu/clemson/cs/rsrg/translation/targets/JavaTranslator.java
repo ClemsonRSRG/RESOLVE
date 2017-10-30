@@ -13,7 +13,6 @@
 package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
-import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
@@ -22,7 +21,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableNameExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -72,7 +70,7 @@ public class JavaTranslator extends AbstractTranslator {
      * <p>A {@link ModuleParameterization} corresponding to the
      * {@link EnhancementSpecRealizItem} being walked.</p>
      */
-    private ModuleParameterization myCurrentEnhancement = null;
+    private ModuleParameterization myCurrentEnhancement;
 
     /**
      * <p>A mapping between the {@link ModuleArgumentItem ModuleArgumentItems}
@@ -152,6 +150,7 @@ public class JavaTranslator extends AbstractTranslator {
                 new STGroupFile("templates/Java.stg"));
         myBaseEnhancement = null;
         myBaseInstantiation = null;
+        myCurrentEnhancement = null;
         myFacilityBindings = new LinkedHashMap<>();
         myParameterOperationNames = new HashSet<>();
     }
@@ -551,7 +550,33 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public final void postEnhancementSpecRealizItem(
             EnhancementSpecRealizItem item) {
-    // TODO: Add logic
+        String curName = item.getEnhancementRealizName().getName();
+
+        List<ModuleParameterization> enhancements =
+                myCurrentFacilityEntry.getEnhancements();
+
+        ModuleParameterization first = enhancements.get(0);
+        ModuleParameterization last = enhancements.get(enhancements.size() - 1);
+
+        String firstBodyName =
+                myCurrentFacilityEntry.getEnhancementRealization(first)
+                        .getModuleIdentifier().toString();
+
+        String lastBodyName =
+                myCurrentFacilityEntry.getEnhancementRealization(last)
+                        .getModuleIdentifier().toString();
+
+        if (curName.equals(lastBodyName)) {
+            myActiveTemplates.peek().add("arguments",
+                    myBaseInstantiation.render());
+        }
+
+        if (curName.equals(firstBodyName)) {
+            myBaseEnhancement = myActiveTemplates.peek();
+        }
+        else {
+            myBaseEnhancement.add("arguments", myActiveTemplates.peek());
+        }
     }
 
     /**
@@ -561,49 +586,49 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     public final void preModuleArgumentItem(ModuleArgumentItem item) {
-        /* TODO: Figure out how to refactor this.
-        PTType type = item.getProgramTypeValue();
+    /* TODO: Figure out how to refactor this.
+    PTType type = item.getProgramTypeValue();
 
-        if (type instanceof PTVoid) {
-            Dec wrappedDec = myFacilityBindings.get(item).getWrappedDec();
-            // Case 1: This is an operation name as argument.
-            if (wrappedDec instanceof OperationDec) {
-                ProgramVariableNameExp operationName =
-                        (ProgramVariableNameExp) item.getArgumentExp();
-                ST argItem =
-                        getOperationArgItemTemplate(
-                                (OperationDec) myFacilityBindings.get(item)
-                                        .getWrappedDec(), operationName
-                                        .getQualifier(), operationName
-                                        .getName());
-
-                myActiveTemplates.peek().add("arguments", argItem);
-            }
-            // Case 2: This is some constant value.
-            else if (wrappedDec instanceof ConstantParamDec) {
-                myActiveTemplates.peek().add("arguments", wrappedDec.getName());
-            }
-        }
-        // Case 3: This is a generic type.
-        else if (type instanceof PTGeneric) {
-            ProgramVariableNameExp typeName =
+    if (type instanceof PTVoid) {
+        Dec wrappedDec = myFacilityBindings.get(item).getWrappedDec();
+        // Case 1: This is an operation name as argument.
+        if (wrappedDec instanceof OperationDec) {
+            ProgramVariableNameExp operationName =
                     (ProgramVariableNameExp) item.getArgumentExp();
-            myActiveTemplates.peek().add("arguments", typeName.getName());
-        }
-        // Case 4: This is an instantiated type.
-        else if (type instanceof PTFacilityRepresentation) {
-            myActiveTemplates.peek().add("arguments",
-                    "new " + getTypeName(type) + "()");
-        }
-        else if (node.getEvalExp() == null) {
-
             ST argItem =
-                    myGroup.getInstanceOf("var_init").add("facility",
-                            getDefiningFacilityEntry(type).getName()).add(
-                            "type", getVariableTypeTemplate(type));
+                    getOperationArgItemTemplate(
+                            (OperationDec) myFacilityBindings.get(item)
+                                    .getWrappedDec(), operationName
+                                    .getQualifier(), operationName
+                                    .getName());
 
             myActiveTemplates.peek().add("arguments", argItem);
-        }*/
+        }
+        // Case 2: This is some constant value.
+        else if (wrappedDec instanceof ConstantParamDec) {
+            myActiveTemplates.peek().add("arguments", wrappedDec.getName());
+        }
+    }
+    // Case 3: This is a generic type.
+    else if (type instanceof PTGeneric) {
+        ProgramVariableNameExp typeName =
+                (ProgramVariableNameExp) item.getArgumentExp();
+        myActiveTemplates.peek().add("arguments", typeName.getName());
+    }
+    // Case 4: This is an instantiated type.
+    else if (type instanceof PTFacilityRepresentation) {
+        myActiveTemplates.peek().add("arguments",
+                "new " + getTypeName(type) + "()");
+    }
+    else if (node.getEvalExp() == null) {
+
+        ST argItem =
+                myGroup.getInstanceOf("var_init").add("facility",
+                        getDefiningFacilityEntry(type).getName()).add(
+                        "type", getVariableTypeTemplate(type));
+
+        myActiveTemplates.peek().add("arguments", argItem);
+    }*/
     }
 
     // -----------------------------------------------------------
