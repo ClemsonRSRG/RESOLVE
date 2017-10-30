@@ -28,6 +28,7 @@ import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
@@ -972,5 +973,81 @@ public class JavaTranslator extends AbstractTranslator {
             throw new SourceErrorException("[" + getClass().getCanonicalName()
                     + "] " + "Error while trying to bind facility arguments.", loc);
         }
+    }
+
+    // TODO: Add javadoc.
+    private ST getOperationArgItemTemplate(OperationDec operation, PosSymbol qualifier, PosSymbol name) {
+        /* TODO : Try to refactor/rethink this method + op_arg_template. Too ugly.
+        int parameterNum = 0;
+        ST result =
+                myGroup.getInstanceOf("operation_argument_item").add(
+                        "actualName", name.getName());
+
+        if (qualifier != null) {
+            result.add("actualQualifier", qualifier.getName());
+        }
+
+        try {
+            OperationEntry o =
+                    myScope.queryForOne(
+                            new NameQuery(qualifier, name,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false))
+                            .toOperationEntry(name.getLocation());
+
+            for (ProgramParameterEntry p : o.getParameters()) {
+                ST castedType = getVariableTypeTemplate(p.getDeclaredType());
+                ST castedArg =
+                        myGroup.getInstanceOf("parameter").add("type",
+                                castedType).add("name", "p" + parameterNum);
+                result.add("castedArguments", castedArg);
+                parameterNum++;
+            }
+            parameterNum = 0;
+
+            String realization;
+            if (myCurrentEnhancement != null) {
+                realization =
+                        myCurrentFacilityEntry.getEnhancementRealization(
+                                myCurrentEnhancement).getModuleIdentifier()
+                                .toString();
+            }
+            else {
+                realization =
+                        myCurrentFacilityEntry.getFacility().getRealization()
+                                .getModuleIdentifier().toString();
+            }
+
+            PTType returnType =
+                    (operation.getReturnTy() != null) ? operation.getReturnTy()
+                            .getProgramTypeValue() : null;
+
+            ST interior =
+                    getOperationLikeTemplate(returnType, operation.getName()
+                            .getName(), true);
+
+            myActiveTemplates.push(interior);
+
+            for (ParameterVarDec p : operation.getParameters()) {
+                addParameterTemplate(p.getTy().getProgramTypeValue(), "p"
+                        + parameterNum);
+                parameterNum++;
+            }
+
+            result.add("function", myActiveTemplates.pop()).add("realization",
+                    realization).add("hasReturn", returnType != null);
+        }
+        catch (NoneProvidedException npe) {
+
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException(nsse);
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
+        return result;*/
+        return null; // TODO: Remove once we finish refactoring.
     }
 }
