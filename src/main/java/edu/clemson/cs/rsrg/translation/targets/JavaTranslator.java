@@ -498,6 +498,49 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
+     * <p>Code that gets executed after visiting a {@link FacilityDec}.</p>
+     *
+     * @param dec A facility declaration.
+     */
+    @Override
+    public final void postFacilityDec(FacilityDec dec) {
+        /* TODO: Might have to refactor module argument items first before dealing with this.
+        String facilityType = node.getConceptName().getName();
+        List<String> pathPieces =
+                getPathList(getFile(null, node.getConceptName().getName()));
+
+        // Basically: If we are an enhanced facility, clear the stack of only
+        // the templates pushed for each EnhancementBodyItem plus the base
+        // instantiation.. THEN push on the formed (enhanced) rhs.
+        if (myActiveTemplates.peek() != myBaseInstantiation) {
+
+            for (ModuleParameterization p : myCurrentFacilityEntry
+                    .getEnhancements()) {
+                myActiveTemplates.pop();
+            }
+            myActiveTemplates.pop();
+            myActiveTemplates.push(myBaseEnhancement);
+        }
+
+        // TODO : Figure out why the hell node.getEnhancements().size() is 0
+        //        in BPStack.fa where there is clearly one enhancement!
+        if (node.getEnhancementBodies().size() == 1) {
+            facilityType =
+                    node.getEnhancementBodies().get(0).getName().getName();
+        }
+
+        ST facilityVariable =
+                myGroup.getInstanceOf("var_decl").add("type", facilityType)
+                        .add("name", node.getName().getName()).add("init",
+                                myActiveTemplates.pop());
+
+        myActiveTemplates.peek().add("variables", facilityVariable);
+
+        myDynamicImports.add(myGroup.getInstanceOf("include").add(
+                "directories", pathPieces).render()); */
+    }
+
+    /**
      * <p>Code that gets executed before visiting a {@link EnhancementSpecRealizItem}.</p>
      *
      * @param item An {@code enhancement} and {@code realization} item pair.
