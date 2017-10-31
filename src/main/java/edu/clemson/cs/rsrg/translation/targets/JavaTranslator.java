@@ -976,7 +976,8 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     // TODO: Add javadoc.
-    private ST getOperationArgItemTemplate(OperationDec operation, PosSymbol qualifier, PosSymbol name) {
+    private ST getOperationArgItemTemplate(OperationDec operation,
+            PosSymbol qualifier, PosSymbol name) {
         /* TODO : Try to refactor/rethink this method + op_arg_template. Too ugly.
         int parameterNum = 0;
         ST result =
