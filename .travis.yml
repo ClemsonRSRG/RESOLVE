@@ -11,6 +11,12 @@ language: java
 # Skipping the Installation Step
 install: true
 
+# Build Stages Order
+stages:
+  - check styles
+  - junit tests
+  - compiler tests
+
 # The following settings allow us to run concurrent tests using the scripts in the "bin" folder.
 # It also caches things related to Maven. If caching errors occur, please clear the cache on the
 # Travis CI website.
@@ -30,12 +36,10 @@ jobs:
       script:
         - bin/runLicensePlugin
     # This stage runs the JUnit tests.
-    - stage: test
+    - stage: junit tests
       jdk: oraclejdk8
       script: 
         - mvn test -B
-      cache:
-        directories: $HOME/.m2
     # This stage runs the RESOLVE compiler on files that we know to be working.
     - stage: compiler tests
       jdk: oraclejdk8
