@@ -462,12 +462,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply facility declaration rule
         FacilityDeclRule declRule =
                 new FacilityDeclRule(dec, true, myProcessedInstFacilityDecls,
-                        myBuilder, myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        mySTGroup, myVCGenDetailsModel);
+                        myBuilder, myCurrentModuleScope,
+                        myCurrentAssertiveCodeBlock, mySTGroup,
+                        myVCGenDetailsModel);
         declRule.applyRule();
 
         // Store this facility's InstantiatedFacilityDecl for future use
-        myProcessedInstFacilityDecls.add(declRule.getInstantiatedFacilityDecl());
+        myProcessedInstFacilityDecls
+                .add(declRule.getInstantiatedFacilityDecl());
 
         // Update the current assertive code block and its associated block model.
         myCurrentAssertiveCodeBlock =

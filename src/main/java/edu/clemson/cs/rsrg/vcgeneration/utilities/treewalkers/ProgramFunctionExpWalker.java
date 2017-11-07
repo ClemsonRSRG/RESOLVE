@@ -32,6 +32,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.*;
 
@@ -82,6 +83,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      */
     private final Map<Location, String> myLocationDetails;
 
+    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
+    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
+
     /**
      * <p>A list that contains the modified requires clauses with the formal
      * replaced with the actuals for each of the nested function calls.</p>
@@ -114,12 +118,14 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      *
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
     public ProgramFunctionExpWalker(AssertiveCodeBlock block,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
             ModuleScope moduleScope, TypeGraph g) {
-        this(null, null, block, moduleScope, g);
+        this(null, null, block, processedInstFacDecs, moduleScope, g);
     }
 
     /**
@@ -132,15 +138,19 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * @param decreasingExp The {@code decreasing} clause for the visiting
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
-    public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp, AssertiveCodeBlock block, ModuleScope moduleScope, TypeGraph g) {
+    public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp,
+            AssertiveCodeBlock block, List<InstantiatedFacilityDecl> processedInstFacDecs,
+            ModuleScope moduleScope, TypeGraph g) {
         myCurrentAssertiveCodeBlock = block;
         myCurrentModuleScope = moduleScope;
         myCurrentOperationEntry = entry;
         myDecreasingExp = decreasingExp;
         myEnsuresClauseMap = new HashMap<>();
+        myProcessedInstFacilityDecls = processedInstFacDecs;
         myRequiresClauseList = new LinkedList<>();
         myRestoresParamEnsuresClauses = new LinkedList<>();
         myLocationDetails = new HashMap<>();
