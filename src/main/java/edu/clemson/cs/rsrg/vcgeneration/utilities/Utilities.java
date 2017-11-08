@@ -16,6 +16,7 @@ import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -1034,6 +1035,71 @@ public class Utilities {
         }
 
         return retVal;
+    }
+
+    public static Exp replaceFacilityFormalWithActual(Location loc,
+            Exp clauseExp, List<ParameterVarDec> paramList,
+            PosSymbol currentModuleName, List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs) {
+        // Make a copy of the clauseExp for modification
+        Exp modifiedClauseExp = clauseExp.clone();
+
+        // YS: Check each operation parameter's raw type. If it matches
+        // one that originated from an instantiated facility type,
+        // then replace any formal parameters with its corresponding
+        // instantiation argument.
+        for (ParameterVarDec dec : paramList) {
+            // YS: For it to be a instantiated type by a facility,
+            // it must be a NameTy. It can't be a RecordTy or ArbitraryTy.
+            // We also ignore any generic types.
+            if ((dec.getTy() instanceof NameTy)
+                    && !(dec.getTy().getProgramType() instanceof PTGeneric)) {
+                NameTy decTyAsNameTy = (NameTy) dec.getTy();
+
+                // Make sure it is an instantiated facility type.
+                // YS: The way we check this is by process of elimination.
+                // It can't be a type we are implementing (concept realizations)
+                // or a extending some functionality (enhancements).
+                boolean isInstantiatedType = true;
+                if (decTyAsNameTy.getQualifier() == null) {
+                    // Check all concept types
+                    Iterator<TypeFamilyDec> it = typeFamilyDecs.iterator();
+                    while (it.hasNext() && isInstantiatedType) {
+                        // If the name matches, then it must be a concept abstract type
+                        if (decTyAsNameTy.getName().getName().equals(
+                                it.next().getName().getName())) {
+                            isInstantiatedType = false;
+                        }
+                    }
+
+                    // Check all representation types.
+                    Iterator<AbstractTypeRepresentationDec> it2 =
+                            localRepresentationTypeDecs.iterator();
+                    while (it2.hasNext() && isInstantiatedType) {
+                        // If the name matches, then it must be the representation type
+                        if (decTyAsNameTy.getName().getName().equals(
+                                it2.next().getName().getName())) {
+                            isInstantiatedType = false;
+                        }
+                    }
+                }
+                else {
+                    // This is a no brainer. If the qualifier matches the current
+                    // module name, then it isn't a instantiated type.
+                    if (decTyAsNameTy.getQualifier().getName().equals(
+                            currentModuleName.getName())) {
+                        isInstantiatedType = false;
+                    }
+                }
+
+                // YS: Only proceed if it is a instantiated type.
+                // Loop through each instantiated facility declaration
+                // and obtain the facility that instantiated this type.
+            }
+        }
+
+        return modifiedClauseExp;
     }
 
     /**
