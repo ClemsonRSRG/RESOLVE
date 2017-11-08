@@ -1096,6 +1096,47 @@ public class Utilities {
                 // YS: Only proceed if it is a instantiated type.
                 // Loop through each instantiated facility declaration
                 // and obtain the facility that instantiated this type.
+                if (isInstantiatedType) {
+                    InstantiatedFacilityDecl instantiatedFacilityDecl = null;
+                    Iterator<InstantiatedFacilityDecl> it =
+                            processedInstFacDecs.iterator();
+                    if (decTyAsNameTy.getQualifier() == null) {
+                        while (it.hasNext() && instantiatedFacilityDecl == null) {
+                            InstantiatedFacilityDecl nextDec = it.next();
+
+                            // Search the types that the instantiated facility declaration
+                            // implements. If it one of them matches, then it must be the type
+                            // we are looking for. There can't be another type with the same name,
+                            // because the Populator would have complained about it being ambiguous.
+                            Iterator<TypeFamilyDec> it2 =
+                                    nextDec.getConceptDeclaredTypes()
+                                            .iterator();
+                            while (it2.hasNext()
+                                    && instantiatedFacilityDecl == null) {
+                                if (decTyAsNameTy.getName().getName().equals(
+                                        it2.next().getName().getName())) {
+                                    instantiatedFacilityDecl = nextDec;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        while (it.hasNext() && instantiatedFacilityDecl == null) {
+                            // Match the facility declaration name with the parameter type qualifier.
+                            InstantiatedFacilityDecl nextDec = it.next();
+                            if (decTyAsNameTy.getQualifier().getName().equals(
+                                    nextDec.getInstantiatedFacilityName()
+                                            .getName())) {
+                                instantiatedFacilityDecl = nextDec;
+                            }
+                        }
+                    }
+
+                    // TODO: Throw an error if we reached this point and didn't find
+                    // the instantiating facility declaration.
+
+                    // TODO: Perform all the necessary replacements.
+                }
             }
         }
 
