@@ -1037,9 +1037,25 @@ public class Utilities {
         return retVal;
     }
 
-    public static Exp replaceFacilityFormalWithActual(Location loc,
-            Exp clauseExp, List<ParameterVarDec> paramList,
-            PosSymbol currentModuleName, List<TypeFamilyDec> typeFamilyDecs,
+    /**
+     * <p>This method is used to replace any parameter declarations whose program types
+     * come from instantiated facility declarations. This will replace any the instantiated
+     * type's formal with its actual instantiation expression in {@code clauseExp}.</p>
+     *
+     * @param clauseExp Some clause expression we are trying to replace.
+     * @param paramList List of parameter declarations from the operation we are
+     *                  trying to call.
+     * @param currentModuleName Name of the current module.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
+     *                             so far.
+     *
+     * @return The modified {@link Exp}.
+     */
+    public static Exp replaceFacilityFormalWithActual(Exp clauseExp,
+            List<ParameterVarDec> paramList, PosSymbol currentModuleName,
+            List<TypeFamilyDec> typeFamilyDecs,
             List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs) {
         // Make a copy of the clauseExp for modification
