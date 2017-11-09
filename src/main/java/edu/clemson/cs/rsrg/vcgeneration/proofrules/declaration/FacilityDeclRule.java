@@ -332,56 +332,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>An helper method that replaces the module parameters with the
-     * actual instantiated arguments. Note that both of these have been
-     * converted to mathematical expressions.</p>
-     *
-     * @param exp The expression to be replaced.
-     * @param formalParams List of module formal parameters.
-     * @param actualArgs List of module instantiated arguments.
-     *
-     * @return The modified expression.
-     */
-    private Exp replaceFormalWithActual(Exp exp, List<VarExp> formalParams, List<Exp> actualArgs) {
-        // YS: We need two replacement maps in case we happen to have the
-        // same names in formal parameters expressions and in the argument list.
-        Map<Exp, Exp> paramToTemp = new HashMap<>();
-        Map<Exp, Exp> tempToActual = new HashMap<>();
-
-        Exp retExp = exp.clone();
-        if (formalParams.size() == actualArgs.size()) {
-            // Loop through both lists
-            for (int i = 0; i < formalParams.size(); i++) {
-                VarExp formalParam = formalParams.get(i);
-                Exp actualArg = actualArgs.get(i);
-
-                // A temporary VarExp that avoids any formal with the same name as the actual.
-                VarExp tempExp = Utilities.createVarExp(formalParam.getLocation(), null,
-                        new PosSymbol(formalParam.getLocation(), "_" + formalParam.getName().getName()),
-                        actualArg.getMathType(), actualArg.getMathTypeValue());
-
-                // Add a substitution entry from formal parameter to tempExp.
-                paramToTemp.put(formalParam, tempExp);
-
-                // Add a substitution entry from tempExp to actual parameter.
-                tempToActual.put(tempExp, actualArg);
-            }
-
-            // Replace from formal to temp and then from temp to actual
-            retExp = retExp.substitute(paramToTemp);
-            retExp = retExp.substitute(tempToActual);
-        }
-        else {
-            // Something went wrong while obtaining the parameter and argument lists.
-            throw new MiscErrorException(
-                    "[VCGenerator] Formal parameter size is different than actual argument size.",
-                    new RuntimeException());
-        }
-
-        return retExp;
-    }
-
-    /**
      * <p>An helper method that searches for an {@link OperationEntry} using
      * the provided qualifier and name.</p>
      *
@@ -506,7 +456,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         //         requires clause.
                         //         ( RPC[ rn~>rn_exp, RR~>IRR ] )
                         conceptRealizReq =
-                                replaceFormalWithActual(conceptRealizReq,
+                                Utilities.replaceFormalWithActual(
+                                        conceptRealizReq,
                                         conceptRealizFormalParamList,
                                         conceptRealizActualArgList);
 
@@ -520,7 +471,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         //     the substitution first and then forming the conjunct is the same
                         //     as forming the conjunct first and then doing the substitution.
                         conceptRealizReq =
-                                replaceFormalWithActual(conceptRealizReq,
+                                Utilities.replaceFormalWithActual(
+                                        conceptRealizReq,
                                         myConceptFormalParamList,
                                         myConceptActualArgList);
 
@@ -617,7 +569,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             // YS: Replace the formal with the actual (if conceptReq /= true)
             if (!MathExp.isLiteralTrue(conceptReq)) {
                 conceptReq =
-                        replaceFormalWithActual(conceptReq,
+                        Utilities.replaceFormalWithActual(conceptReq,
                                 myConceptFormalParamList,
                                 myConceptActualArgList);
 
@@ -762,7 +714,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     //         requires clause.
                     //         ( ERPC[ ern~>ern_exp ] )
                     realizationReq =
-                            replaceFormalWithActual(realizationReq,
+                            Utilities.replaceFormalWithActual(
+                                    realizationReq,
                                     enhancementRealizFormalParamList,
                                     enhancementRealizActualArgList);
 
@@ -776,7 +729,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     //     the substitution first and then forming the conjunct is the same
                     //     as forming the conjunct first and then doing the substitution.
                     realizationReq =
-                            replaceFormalWithActual(realizationReq,
+                            Utilities.replaceFormalWithActual(
+                                    realizationReq,
                                     enhancementFormalParamList,
                                     enhancementActualArgList);
 
@@ -790,7 +744,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     //     the substitution first and then forming the conjunct is the same
                     //     as forming the conjunct first and then doing the substitution.
                     realizationReq =
-                            replaceFormalWithActual(realizationReq,
+                            Utilities.replaceFormalWithActual(
+                                    realizationReq,
                                     myConceptFormalParamList,
                                     myConceptActualArgList);
 
@@ -888,7 +843,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 //     the substitution first and then forming the conjunct is the same
                 //     as forming the conjunct first and then doing the substitution.
                 enhancementReq =
-                        replaceFormalWithActual(enhancementReq,
+                        Utilities.replaceFormalWithActual(
+                                enhancementReq,
                                 enhancementFormalParamList,
                                 enhancementActualArgList);
 
@@ -902,7 +858,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 //     the substitution first and then forming the conjunct is the same
                 //     as forming the conjunct first and then doing the substitution.
                 enhancementReq =
-                        replaceFormalWithActual(enhancementReq,
+                        Utilities.replaceFormalWithActual(
+                                enhancementReq,
                                 myConceptFormalParamList,
                                 myConceptActualArgList);
 
@@ -989,18 +946,24 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         Exp formalOpRequires = formalOpDec.getRequires().getAssertionExp();
         Exp formalOpEnsures = formalOpDec.getEnsures().getAssertionExp();
         formalOpRequires =
-                replaceFormalWithActual(formalOpRequires, myConceptFormalParamList, myConceptActualArgList);
+                Utilities.replaceFormalWithActual(formalOpRequires,
+                        myConceptFormalParamList, myConceptActualArgList);
         formalOpRequires =
-                replaceFormalWithActual(formalOpRequires, enhancementFormalParamList, enhancementActualArgList);
+                Utilities.replaceFormalWithActual(formalOpRequires,
+                        enhancementFormalParamList, enhancementActualArgList);
         formalOpRequires =
-                replaceFormalWithActual(formalOpRequires, realizFormalParamList, realizActualArgList);
+                Utilities.replaceFormalWithActual(formalOpRequires,
+                        realizFormalParamList, realizActualArgList);
 
         formalOpEnsures =
-                replaceFormalWithActual(formalOpEnsures, myConceptFormalParamList, myConceptActualArgList);
+                Utilities.replaceFormalWithActual(formalOpEnsures,
+                        myConceptFormalParamList, myConceptActualArgList);
         formalOpEnsures =
-                replaceFormalWithActual(formalOpEnsures, enhancementFormalParamList, enhancementActualArgList);
+                Utilities.replaceFormalWithActual(formalOpEnsures,
+                        enhancementFormalParamList, enhancementActualArgList);
         formalOpEnsures =
-                replaceFormalWithActual(formalOpEnsures, realizFormalParamList, realizActualArgList);
+                Utilities.replaceFormalWithActual(formalOpEnsures,
+                        realizFormalParamList, realizActualArgList);
 
         // Things related to actualOpDec
         Exp actualOpRequires = actualOpDec.getRequires().getAssertionExp();

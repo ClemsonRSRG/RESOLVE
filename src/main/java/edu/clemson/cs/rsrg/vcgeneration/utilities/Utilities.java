@@ -1168,6 +1168,58 @@ public class Utilities {
     }
 
     /**
+     * <p>This method is used to replace the module parameters with the actual instantiated arguments.
+     * Note that both of these have been converted to mathematical expressions.</p>
+     *
+     * @param exp The expression to be replaced.
+     * @param formalParams List of module formal parameters.
+     * @param actualArgs List of module instantiated arguments.
+     *
+     * @return The modified expression.
+     *
+     * @throws MiscErrorException This exception is thrown when we pass two lists that aren't equal
+     * in size.
+     */
+    public static Exp replaceFormalWithActual(Exp exp, List<VarExp> formalParams, List<Exp> actualArgs) {
+        // YS: We need two replacement maps in case we happen to have the
+        // same names in formal parameters expressions and in the argument list.
+        Map<Exp, Exp> paramToTemp = new HashMap<>();
+        Map<Exp, Exp> tempToActual = new HashMap<>();
+
+        Exp retExp = exp.clone();
+        if (formalParams.size() == actualArgs.size()) {
+            // Loop through both lists
+            for (int i = 0; i < formalParams.size(); i++) {
+                VarExp formalParam = formalParams.get(i);
+                Exp actualArg = actualArgs.get(i);
+
+                // A temporary VarExp that avoids any formal with the same name as the actual.
+                VarExp tempExp = Utilities.createVarExp(formalParam.getLocation(), null,
+                        new PosSymbol(formalParam.getLocation(), "_" + formalParam.getName().getName()),
+                        actualArg.getMathType(), actualArg.getMathTypeValue());
+
+                // Add a substitution entry from formal parameter to tempExp.
+                paramToTemp.put(formalParam, tempExp);
+
+                // Add a substitution entry from tempExp to actual parameter.
+                tempToActual.put(tempExp, actualArg);
+            }
+
+            // Replace from formal to temp and then from temp to actual
+            retExp = retExp.substitute(paramToTemp);
+            retExp = retExp.substitute(tempToActual);
+        }
+        else {
+            // Something went wrong while obtaining the parameter and argument lists.
+            throw new MiscErrorException(
+                    "[VCGenerator] Formal parameter size is different than actual argument size.",
+                    new RuntimeException());
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>Given a math symbol name, locate and return
      * the {@link MathSymbolEntry} stored in the
      * symbol table.</p>
