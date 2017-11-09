@@ -28,6 +28,7 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -1148,8 +1149,14 @@ public class Utilities {
                         }
                     }
 
-                    // TODO: Throw an error if we reached this point and didn't find
+                    // Throw an error if we reached this point and didn't find
                     // the instantiating facility declaration.
+                    if (instantiatedFacilityDecl == null) {
+                        throw new MiscErrorException(
+                                "[VCGenerator] Couldn't replace formal parameters with the instantiated arguments in "
+                                        + clauseExp.toString(),
+                                new RuntimeException());
+                    }
 
                     // TODO: Perform all the necessary replacements.
                 }
