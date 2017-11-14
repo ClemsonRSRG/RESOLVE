@@ -52,10 +52,10 @@ public class FormalActualLists {
      * <p>This creates an object that stores the formal parameters from a module
      * and the processed instantiating arguments from a {@link FacilityDec}.</p>
      *
-     * @param actualArgList The processed arguments used to instantiate a module.
      * @param formalParamList The formal parameters from a module.
+     * @param actualArgList The processed arguments used to instantiate a module.
      */
-    public FormalActualLists(List<Exp> actualArgList, List<VarExp> formalParamList) {
+    public FormalActualLists(List<VarExp> formalParamList, List<Exp> actualArgList) {
         myActualArgList = new ArrayList<>(actualArgList);
         myFormalParamList = new ArrayList<>(formalParamList);
     }

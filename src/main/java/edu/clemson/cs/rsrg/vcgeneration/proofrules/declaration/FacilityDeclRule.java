@@ -125,11 +125,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     private final Map<Exp, Exp> myConceptRealizArgMap;
 
     /**
-     * <p>A list that contains maps to all {@code Enhancement} and
-     * {@code Enhancement Realization} formal arguments to the instantiated
-     * actual arguments.</p>
+     * <p>A list that contains the {@code Enhancement} and {@code Enhancement Realization}'s
+     * formal arguments to the instantiated actual arguments.</p>
      */
-    private final List<EnhancementSpecRealizItemMap> myEnhancementSpecRealizItemMaps;
+    private final List<InstantiatedEnhSpecRealizItem> myInstantiatedEnhSpecRealizItems;
 
     // ===========================================================
     // Constructors
@@ -168,7 +167,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         myConceptDeclaredTypes = new LinkedList<>();
         myConceptArgMap = new LinkedHashMap<>();
         myConceptRealizArgMap = new LinkedHashMap<>();
-        myEnhancementSpecRealizItemMaps = new LinkedList<>();
+        myInstantiatedEnhSpecRealizItems = new LinkedList<>();
     }
 
     // ===========================================================
@@ -228,7 +227,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     public final InstantiatedFacilityDecl getInstantiatedFacilityDecl() {
         return new InstantiatedFacilityDecl(myFacilityDec,
                 myConceptDeclaredTypes, myConceptArgMap, myConceptRealizArgMap,
-                myEnhancementSpecRealizItemMaps);
+                myInstantiatedEnhSpecRealizItems);
     }
 
     /**
@@ -634,7 +633,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * {@code Enhancement Realization}'s modified requires clauses and any
      * passed-in operations requires clauses and ensures clause.
      */
-    private Exp applyEnhancementRelatedPart(EnhancementSpecRealizItem specRealizItem) {
+    private Exp applyEnhancementRelatedPart(
+            EnhancementSpecRealizItem specRealizItem) {
         Exp retExp =
                 VarExp.getTrueVarExp(myFacilityDec.getLocation().clone(),
                         myTypeGraph);
@@ -642,7 +642,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         // Enhancement part of the rule
         List<VarExp> enhancementFormalParamList;
         List<Exp> enhancementActualArgList;
-        Map<Exp, Exp> enhancementArgMap = new LinkedHashMap<>();
         try {
             // Obtain the enhancement module for the facility
             EnhancementModuleDec enhancementModuleDec =
@@ -653,22 +652,18 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
             // Obtain the enhancement's requires clause
             Exp enhancementReq =
-                    enhancementModuleDec.getRequires().getAssertionExp().clone();
+                    enhancementModuleDec.getRequires().getAssertionExp()
+                            .clone();
 
             // Convert the enhancement's module parameters and the instantiated
             // enhancement's arguments into the appropriate mathematical expressions.
             // Note that any nested function calls will be dealt with appropriately.
             enhancementFormalParamList =
-                    createModuleParamExpList(enhancementModuleDec.getParameterDecs());
+                    createModuleParamExpList(enhancementModuleDec
+                            .getParameterDecs());
             enhancementActualArgList =
-                    createModuleArgExpList(specRealizItem.getEnhancementParams());
-
-            // Create a mapping from concept formal parameters
-            // to actual arguments for future use.
-            for (int i = 0; i < enhancementFormalParamList.size(); i++) {
-                enhancementArgMap.put(enhancementFormalParamList.get(i),
-                        enhancementActualArgList.get(i));
-            }
+                    createModuleArgExpList(specRealizItem
+                            .getEnhancementParams());
 
             // Enhancement realization part of the rule
             Exp realizationReq =
@@ -689,23 +684,18 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
                 // Obtain the enhancement realization's requires clause
                 realizationReq =
-                        enhancementRealizModuleDec.getRequires().getAssertionExp().clone();
+                        enhancementRealizModuleDec.getRequires()
+                                .getAssertionExp().clone();
 
                 // Convert the enhancement realization's module parameters and the instantiated
                 // realization's arguments into the appropriate mathematical expressions.
                 // Note that any nested function calls will be dealt with appropriately.
                 List<VarExp> enhancementRealizFormalParamList =
-                        createModuleParamExpList(enhancementRealizModuleDec.getParameterDecs());
+                        createModuleParamExpList(enhancementRealizModuleDec
+                                .getParameterDecs());
                 List<Exp> enhancementRealizActualArgList =
-                        createModuleArgExpList(specRealizItem.getEnhancementRealizParams());
-
-                // Create a mapping from concept formal parameters
-                // to actual arguments for future use.
-                Map<Exp, Exp> enhancementRealizArgMap = new LinkedHashMap<>();
-                for (int i = 0; i < enhancementRealizFormalParamList.size(); i++) {
-                    enhancementArgMap.put(enhancementRealizFormalParamList.get(i),
-                            enhancementRealizActualArgList.get(i));
-                }
+                        createModuleArgExpList(specRealizItem
+                                .getEnhancementRealizParams());
 
                 // Replace the formal with the actual (if realizationReq /= true)
                 if (!MathExp.isLiteralTrue(realizationReq)) {
@@ -714,8 +704,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     //         requires clause.
                     //         ( ERPC[ ern~>ern_exp ] )
                     realizationReq =
-                            Utilities.replaceFormalWithActual(
-                                    realizationReq,
+                            Utilities.replaceFormalWithActual(realizationReq,
                                     enhancementRealizFormalParamList,
                                     enhancementRealizActualArgList);
 
@@ -729,8 +718,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     //     the substitution first and then forming the conjunct is the same
                     //     as forming the conjunct first and then doing the substitution.
                     realizationReq =
-                            Utilities.replaceFormalWithActual(
-                                    realizationReq,
+                            Utilities.replaceFormalWithActual(realizationReq,
                                     enhancementFormalParamList,
                                     enhancementActualArgList);
 
@@ -744,8 +732,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     //     the substitution first and then forming the conjunct is the same
                     //     as forming the conjunct first and then doing the substitution.
                     realizationReq =
-                            Utilities.replaceFormalWithActual(
-                                    realizationReq,
+                            Utilities.replaceFormalWithActual(realizationReq,
                                     myConceptFormalParamList,
                                     myConceptActualArgList);
 
@@ -753,13 +740,14 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     myLocationDetails.put(realizationReq.getLocation(),
                             "Requires Clause for "
                                     + enhancementRealizModuleDec.getName()
-                                    .getName() + " in "
+                                            .getName() + " in "
                                     + getRuleDescription());
                 }
 
                 // Iterate through searching for any operations being passed as parameters.
                 Iterator<ModuleParameterDec> realizFormalParams =
-                        enhancementRealizModuleDec.getParameterDecs().iterator();
+                        enhancementRealizModuleDec.getParameterDecs()
+                                .iterator();
                 Iterator<ModuleArgumentItem> realizActualArgs =
                         specRealizItem.getEnhancementRealizParams().iterator();
                 while (realizFormalParams.hasNext()) {
@@ -793,26 +781,24 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         //         ( preERP[ ern~>ern_exp, erx~>ierx ] => preIERP ) ∧
                         //         ( postIERP => postERP[ ern~>ern_exp, #erx~>#ierx, erx~>ierx ] )
                         Exp processedOperationPart =
-                                applyOperationRelatedPart(
-                                        moduleArgumentItem.getLocation()
-                                                .clone(),
-                                        formalOperationDec,
-                                        operationNameExp.getQualifier(),
+                                applyOperationRelatedPart(moduleArgumentItem
+                                        .getLocation().clone(),
+                                        formalOperationDec, operationNameExp
+                                                .getQualifier(),
                                         actualOperationDec,
                                         enhancementFormalParamList,
                                         enhancementActualArgList,
                                         enhancementRealizFormalParamList,
                                         enhancementRealizActualArgList);
-                        if (VarExp
-                                .isLiteralTrue(realizOperationPart)) {
+                        if (VarExp.isLiteralTrue(realizOperationPart)) {
                             realizOperationPart = processedOperationPart;
-                        } else {
+                        }
+                        else {
                             // YS - Don't need to form a conjunct if processed operation part is "true".
-                            if (!VarExp
-                                    .isLiteralTrue(processedOperationPart)) {
+                            if (!VarExp.isLiteralTrue(processedOperationPart)) {
                                 realizOperationPart =
                                         InfixExp.formConjunct(myFacilityDec
-                                                        .getLocation().clone(),
+                                                .getLocation().clone(),
                                                 realizOperationPart,
                                                 processedOperationPart);
                             }
@@ -820,11 +806,14 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     }
                 }
 
-                // Store these inside a new EnhancementSpecRealizItemMap and
+                // Store these inside a new InstantiatedEnhSpecRealizItem and
                 // add it to our list.
-                myEnhancementSpecRealizItemMaps.add(
-                        new EnhancementSpecRealizItemMap(specRealizItem,
-                                enhancementArgMap, enhancementRealizArgMap));
+                myInstantiatedEnhSpecRealizItems
+                        .add(new InstantiatedEnhSpecRealizItem(specRealizItem,
+                                enhancementFormalParamList,
+                                enhancementActualArgList,
+                                enhancementRealizFormalParamList,
+                                enhancementRealizActualArgList));
             }
             catch (NoSuchSymbolException e) {
                 Utilities.noSuchModule(specRealizItem
@@ -843,8 +832,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 //     the substitution first and then forming the conjunct is the same
                 //     as forming the conjunct first and then doing the substitution.
                 enhancementReq =
-                        Utilities.replaceFormalWithActual(
-                                enhancementReq,
+                        Utilities.replaceFormalWithActual(enhancementReq,
                                 enhancementFormalParamList,
                                 enhancementActualArgList);
 
@@ -858,16 +846,15 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 //     the substitution first and then forming the conjunct is the same
                 //     as forming the conjunct first and then doing the substitution.
                 enhancementReq =
-                        Utilities.replaceFormalWithActual(
-                                enhancementReq,
+                        Utilities.replaceFormalWithActual(enhancementReq,
                                 myConceptFormalParamList,
                                 myConceptActualArgList);
 
                 // Store the location detail for this requires clause
                 myLocationDetails.put(enhancementReq.getLocation(),
                         "Requires Clause for "
-                                + enhancementModuleDec.getName().getName() + " in "
-                                + getRuleDescription());
+                                + enhancementModuleDec.getName().getName()
+                                + " in " + getRuleDescription());
             }
 
             // Results from applying steps 1a to 1e.
@@ -899,8 +886,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 }
                 else {
                     retExp =
-                            InfixExp.formConjunct(myFacilityDec.getLocation().clone(),
-                                    enhancementRequiresConjuct, realizOperationPart);
+                            InfixExp.formConjunct(myFacilityDec.getLocation()
+                                    .clone(), enhancementRequiresConjuct,
+                                    realizOperationPart);
                 }
             }
         }

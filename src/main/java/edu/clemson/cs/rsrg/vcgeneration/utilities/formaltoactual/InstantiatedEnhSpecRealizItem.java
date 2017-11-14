@@ -1,5 +1,5 @@
 /*
- * EnhancementSpecRealizItemMap.java
+ * InstantiatedEnhSpecRealizItem.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -14,18 +14,19 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual;
 
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
-import java.util.Map;
+import java.util.List;
 
 /**
- * <p>This class stores mapping for an {@link EnhancementSpecRealizItem EnhancementSpecRealizItem's}
- * formal parameters in the specifications/implementations to their actual arguments in the
+ * <p>This class stores an {@link EnhancementSpecRealizItem EnhancementSpecRealizItem's}
+ * formal parameters in the specifications/implementations and their actual arguments in the
  * {@code Facility} instantiation.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class EnhancementSpecRealizItemMap {
+public class InstantiatedEnhSpecRealizItem {
 
     // ===========================================================
     // Member Fields
@@ -38,16 +39,16 @@ public class EnhancementSpecRealizItemMap {
     private final EnhancementSpecRealizItem myEnhancementSpecRealizItem;
 
     /**
-     * <p>This maps all {@code Enhancement} formal arguments to the instantiated
-     * actual arguments.</p>
+     * <p>This contains all the {@code Enhancement} formal arguments
+     * and its instantiated actual arguments.</p>
      */
-    private final Map<Exp, Exp> myEnhancementArgMap;
+    private final FormalActualLists myEnhancementParamArgs;
 
     /**
-     * <p>This maps all {@code Enhancement Realization} formal arguments to the instantiated
-     * actual arguments.</p>
+     * <p>This contains all the {@code Enhancement Realization} formal arguments
+     * and its instantiated actual arguments.</p>
      */
-    private final Map<Exp, Exp> myEnhancementRealizArgMap;
+    private final FormalActualLists myEnhancementRealizParamArgs;
 
     // ===========================================================
     // Constructors
@@ -60,15 +61,20 @@ public class EnhancementSpecRealizItemMap {
      *
      * @param enhancementSpecRealizItem The {@link EnhancementSpecRealizItem} from
      *                                  the instantiated {@code Facility}.
-     * @param eArgMap Argument mapping for the instantiating {@code Enhancement}.
-     * @param erArgMap Argument mapping for the instantiating {@code Enhancement Realization}.
+     * @param eFormalParamList The formal parameters from the {@code Enhancement}.
+     * @param eActualArgList The processed arguments used to instantiate the {@code Enhancement}.
+     * @param erFormalParamList The formal parameters from the {@code Enhancement Realization}.
+     * @param erActualArgList The processed arguments used to instantiate the {@code Enhancement Realization}.
      */
-    public EnhancementSpecRealizItemMap(
+    public InstantiatedEnhSpecRealizItem(
             EnhancementSpecRealizItem enhancementSpecRealizItem,
-            Map<Exp, Exp> eArgMap, Map<Exp, Exp> erArgMap) {
+            List<VarExp> eFormalParamList, List<Exp> eActualArgList,
+            List<VarExp> erFormalParamList, List<Exp> erActualArgList) {
         myEnhancementSpecRealizItem = enhancementSpecRealizItem;
-        myEnhancementArgMap = eArgMap;
-        myEnhancementRealizArgMap = erArgMap;
+        myEnhancementParamArgs =
+                new FormalActualLists(eFormalParamList, eActualArgList);
+        myEnhancementRealizParamArgs =
+                new FormalActualLists(erFormalParamList, erActualArgList);
     }
 
     // ===========================================================
@@ -89,34 +95,39 @@ public class EnhancementSpecRealizItemMap {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        EnhancementSpecRealizItemMap that = (EnhancementSpecRealizItemMap) o;
+        InstantiatedEnhSpecRealizItem that = (InstantiatedEnhSpecRealizItem) o;
 
         if (!myEnhancementSpecRealizItem
                 .equals(that.myEnhancementSpecRealizItem))
             return false;
-        if (!myEnhancementArgMap.equals(that.myEnhancementArgMap))
+        if (!myEnhancementParamArgs.equals(that.myEnhancementParamArgs))
             return false;
-        return myEnhancementRealizArgMap.equals(that.myEnhancementRealizArgMap);
+        return myEnhancementRealizParamArgs
+                .equals(that.myEnhancementRealizParamArgs);
     }
 
     /**
-     * <p>This method returns a map containing the {@code Enhancement's}
-     * formal to actual arguments for the instantiated {@code Facility}.</p>
+     * <p>This method returns a {@link FormalActualLists} containing the
+     * {@code Enhancement's} formal and actual arguments for the instantiated
+     * {@code Facility}.</p>
      *
-     * @return A {@link Map} containing the formal to actual mapping.
+     * @return A {@link FormalActualLists} containing the formal parameters and
+     * the instantiation arguments.
      */
-    public final Map<Exp, Exp> getEnhacementArgMap() {
-        return myEnhancementArgMap;
+    public final FormalActualLists getEnhancementParamArgLists() {
+        return myEnhancementParamArgs;
     }
 
     /**
-     * <p>This method returns a map containing the {@code Enhancement Realization's}
-     * formal to actual arguments for the instantiated {@code Facility}.</p>
+     * <p>This method returns a {@link FormalActualLists} containing the
+     * {@code Enhancement Realization's} formal and actual arguments for the
+     * instantiated {@code Facility}.</p>
      *
-     * @return A {@link Map} containing the formal to actual mapping.
+     * @return A {@link FormalActualLists} containing the formal parameters and
+     * the instantiation arguments.
      */
-    public final Map<Exp, Exp> getEnhancementRealizArgMap() {
-        return myEnhancementRealizArgMap;
+    public final FormalActualLists getEnhancementRealizParamArgLists() {
+        return myEnhancementRealizParamArgs;
     }
 
     /**
@@ -137,8 +148,8 @@ public class EnhancementSpecRealizItemMap {
     @Override
     public final int hashCode() {
         int result = myEnhancementSpecRealizItem.hashCode();
-        result = 31 * result + myEnhancementArgMap.hashCode();
-        result = 31 * result + myEnhancementRealizArgMap.hashCode();
+        result = 31 * result + myEnhancementParamArgs.hashCode();
+        result = 31 * result + myEnhancementRealizParamArgs.hashCode();
         return result;
     }
 

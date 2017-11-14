@@ -52,11 +52,10 @@ public class InstantiatedFacilityDecl {
     private final Map<Exp, Exp> myConceptRealizArgMap;
 
     /**
-     * <p>A list that contains maps to all {@code Enhancement} and
-     * {@code Enhancement Realization} formal arguments to the instantiated
-     * actual arguments.</p>
+     * <p>A list that contains the {@code Enhancement} and {@code Enhancement Realization}'s
+     * formal arguments to the instantiated actual arguments.</p>
      */
-    private final List<EnhancementSpecRealizItemMap> myEnhancementSpecRealizItemMaps;
+    private final List<InstantiatedEnhSpecRealizItem> myEnhancementSpecRealizItemMaps;
 
     /** <p>The instantiated {@code Facility}.</p> */
     private final FacilityDec myInstantiatedFacilityDec;
@@ -78,7 +77,7 @@ public class InstantiatedFacilityDecl {
      */
     public InstantiatedFacilityDecl(FacilityDec dec,
             List<TypeFamilyDec> conceptDeclaredTypes, Map<Exp, Exp> cArgMap,
-            Map<Exp, Exp> crArgMap, List<EnhancementSpecRealizItemMap> eArgMaps) {
+            Map<Exp, Exp> crArgMap, List<InstantiatedEnhSpecRealizItem> eArgMaps) {
         myInstantiatedFacilityDec = dec;
         myConceptDeclaredTypes = conceptDeclaredTypes;
         myConceptArgMap = cArgMap;
@@ -153,9 +152,9 @@ public class InstantiatedFacilityDecl {
      * {@code Enhancement Realization's} formal to actual arguments for
      * the instantiated {@code Facility}.</p>
      *
-     * @return A {@link List} containing {@link EnhancementSpecRealizItemMap}.
+     * @return A {@link List} containing {@link InstantiatedEnhSpecRealizItem}.
      */
-    public final List<EnhancementSpecRealizItemMap> getEnhancementArgMaps() {
+    public final List<InstantiatedEnhSpecRealizItem> getEnhancementArgMaps() {
         return myEnhancementSpecRealizItemMaps;
     }
 
