@@ -15,15 +15,15 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>This class stores all information pertinent to an {@link FacilityDec}
  * that will be useful for the various different {@code Proof Rules}. This
- * includes mappings of {@link FacilityDec FacilityDec's} formal parameters
- * in the specifications/implementations to their actual arguments in the
+ * includes {@link FacilityDec FacilityDec's} formal parameters
+ * in the specifications/implementations and their actual arguments in the
  * instantiation. It also includes the types declarations that will be
  * instantiated.</p>
  *
@@ -36,26 +36,26 @@ public class InstantiatedFacilityDecl {
     // Member Fields
     // ===========================================================
 
-    /**
-     * <p>This maps all {@code Concept} formal arguments to the instantiated
-     * actual arguments.</p>
-     */
-    private final Map<Exp, Exp> myConceptArgMap;
-
     /** <p>This contains all the types declared by the {@code Concept}.</p> */
     private final List<TypeFamilyDec> myConceptDeclaredTypes;
 
     /**
-     * <p>This maps all {@code Concept Realization} formal arguments to the instantiated
-     * actual arguments.</p>
+     * <p>This contains all the {@code Concept}'s formal arguments
+     * and its instantiated actual arguments.</p>
      */
-    private final Map<Exp, Exp> myConceptRealizArgMap;
+    private final FormalActualLists myConceptParamArgs;
+
+    /**
+     * <p>This contains all the {@code Concept Realization}'s formal arguments
+     * and its instantiated actual arguments.</p>
+     */
+    private final FormalActualLists myConceptRealizParamArgs;
 
     /**
      * <p>A list that contains the {@code Enhancement} and {@code Enhancement Realization}'s
      * formal arguments to the instantiated actual arguments.</p>
      */
-    private final List<InstantiatedEnhSpecRealizItem> myEnhancementSpecRealizItemMaps;
+    private final List<InstantiatedEnhSpecRealizItem> myInstantiatedEnhSpecRealizItems;
 
     /** <p>The instantiated {@code Facility}.</p> */
     private final FacilityDec myInstantiatedFacilityDec;
@@ -70,19 +70,24 @@ public class InstantiatedFacilityDecl {
      *
      * @param dec The instantiated {@code Facility} declaration.
      * @param conceptDeclaredTypes The types in the instantiating {@code Concept}.
-     * @param cArgMap Argument mapping for the instantiating {@code Concept}.
-     * @param crArgMap Argument mapping for the instantiating {@code Concept Realization}.
-     * @param eArgMaps Argument mapping for the instantiating {@code Enhancement} and
-     *                 {@code Enhancement Realization}.
+     * @param cFormalParamList The formal parameters from the {@code Concept}.
+     * @param cActualArgList The processed arguments used to instantiate the {@code Concept}.
+     * @param crFormalParamList The formal parameters from the {@code Concept Realization}.
+     * @param crActualArgList The processed arguments used to instantiate the {@code Concept Realization}.
+     * @param enhSpecRealizItems A list of {@link InstantiatedEnhSpecRealizItem InstantiatedEnhSpecRealizItems}.
      */
     public InstantiatedFacilityDecl(FacilityDec dec,
-            List<TypeFamilyDec> conceptDeclaredTypes, Map<Exp, Exp> cArgMap,
-            Map<Exp, Exp> crArgMap, List<InstantiatedEnhSpecRealizItem> eArgMaps) {
+            List<TypeFamilyDec> conceptDeclaredTypes,
+            List<VarExp> cFormalParamList, List<Exp> cActualArgList,
+            List<VarExp> crFormalParamList, List<Exp> crActualArgList,
+            List<InstantiatedEnhSpecRealizItem> enhSpecRealizItems) {
         myInstantiatedFacilityDec = dec;
         myConceptDeclaredTypes = conceptDeclaredTypes;
-        myConceptArgMap = cArgMap;
-        myConceptRealizArgMap = crArgMap;
-        myEnhancementSpecRealizItemMaps = eArgMaps;
+        myConceptParamArgs =
+                new FormalActualLists(cFormalParamList, cActualArgList);
+        myConceptRealizParamArgs =
+                new FormalActualLists(crFormalParamList, crActualArgList);
+        myInstantiatedEnhSpecRealizItems = enhSpecRealizItems;
     }
 
     // ===========================================================
@@ -105,26 +110,16 @@ public class InstantiatedFacilityDecl {
 
         InstantiatedFacilityDecl that = (InstantiatedFacilityDecl) o;
 
-        if (!myConceptArgMap.equals(that.myConceptArgMap))
-            return false;
         if (!myConceptDeclaredTypes.equals(that.myConceptDeclaredTypes))
             return false;
-        if (!myConceptRealizArgMap.equals(that.myConceptRealizArgMap))
+        if (!myConceptParamArgs.equals(that.myConceptParamArgs))
             return false;
-        if (!myEnhancementSpecRealizItemMaps
-                .equals(that.myEnhancementSpecRealizItemMaps))
+        if (!myConceptRealizParamArgs.equals(that.myConceptRealizParamArgs))
+            return false;
+        if (!myInstantiatedEnhSpecRealizItems
+                .equals(that.myInstantiatedEnhSpecRealizItems))
             return false;
         return myInstantiatedFacilityDec.equals(that.myInstantiatedFacilityDec);
-    }
-
-    /**
-     * <p>This method returns a map containing the {@code Concept's}
-     * formal to actual arguments for the instantiated {@code Facility}.</p>
-     *
-     * @return A {@link Map} containing the formal to actual mapping.
-     */
-    public final Map<Exp, Exp> getConceptArgMap() {
-        return myConceptArgMap;
     }
 
     /**
@@ -138,24 +133,38 @@ public class InstantiatedFacilityDecl {
     }
 
     /**
-     * <p>This method returns a map containing the {@code Concept Realization's}
-     * formal to actual arguments for the instantiated {@code Facility}.</p>
+     * <p>This method returns a {@link FormalActualLists} containing the
+     * {@code Concept}'s formal and actual arguments for the instantiated
+     * {@code Facility}.</p>
      *
-     * @return A {@link Map} containing the formal to actual mapping.
+     * @return A {@link FormalActualLists} containing the formal parameters and
+     * the instantiation arguments.
      */
-    public final Map<Exp, Exp> getConceptRealizArgMap() {
-        return myConceptRealizArgMap;
+    public final FormalActualLists getConceptParamArgLists() {
+        return myConceptParamArgs;
     }
 
     /**
-     * <p>This method returns a list containing maps of the {@code Enhancement's} and
-     * {@code Enhancement Realization's} formal to actual arguments for
-     * the instantiated {@code Facility}.</p>
+     * <p>This method returns a {@link FormalActualLists} containing the
+     * {@code Concept Realization}'s formal and actual arguments for the
+     * instantiated {@code Facility}.</p>
+     *
+     * @return A {@link FormalActualLists} containing the formal parameters and
+     * the instantiation arguments.
+     */
+    public final FormalActualLists getConceptRealizParamArgLists() {
+        return myConceptRealizParamArgs;
+    }
+
+    /**
+     * <p>This method returns a list of {@link InstantiatedEnhSpecRealizItem} containing
+     * the {@code Enhancement's} and {@code Enhancement Realization's} formal and actual arguments
+     * for the instantiated {@code Facility}.</p>
      *
      * @return A {@link List} containing {@link InstantiatedEnhSpecRealizItem}.
      */
     public final List<InstantiatedEnhSpecRealizItem> getEnhancementArgMaps() {
-        return myEnhancementSpecRealizItemMaps;
+        return myInstantiatedEnhSpecRealizItems;
     }
 
     /**
@@ -183,11 +192,12 @@ public class InstantiatedFacilityDecl {
      */
     @Override
     public final int hashCode() {
-        int result = myConceptArgMap.hashCode();
-        result = 31 * result + myConceptDeclaredTypes.hashCode();
-        result = 31 * result + myConceptRealizArgMap.hashCode();
-        result = 31 * result + myEnhancementSpecRealizItemMaps.hashCode();
+        int result = myConceptDeclaredTypes.hashCode();
+        result = 31 * result + myConceptParamArgs.hashCode();
+        result = 31 * result + myConceptRealizParamArgs.hashCode();
+        result = 31 * result + myInstantiatedEnhSpecRealizItems.hashCode();
         result = 31 * result + myInstantiatedFacilityDec.hashCode();
         return result;
     }
+
 }

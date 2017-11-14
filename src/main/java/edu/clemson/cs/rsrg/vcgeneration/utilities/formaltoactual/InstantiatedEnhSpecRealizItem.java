@@ -39,13 +39,13 @@ public class InstantiatedEnhSpecRealizItem {
     private final EnhancementSpecRealizItem myEnhancementSpecRealizItem;
 
     /**
-     * <p>This contains all the {@code Enhancement} formal arguments
+     * <p>This contains all the {@code Enhancement}'s formal arguments
      * and its instantiated actual arguments.</p>
      */
     private final FormalActualLists myEnhancementParamArgs;
 
     /**
-     * <p>This contains all the {@code Enhancement Realization} formal arguments
+     * <p>This contains all the {@code Enhancement Realization}'s formal arguments
      * and its instantiated actual arguments.</p>
      */
     private final FormalActualLists myEnhancementRealizParamArgs;
@@ -108,7 +108,7 @@ public class InstantiatedEnhSpecRealizItem {
 
     /**
      * <p>This method returns a {@link FormalActualLists} containing the
-     * {@code Enhancement's} formal and actual arguments for the instantiated
+     * {@code Enhancement}'s formal and actual arguments for the instantiated
      * {@code Facility}.</p>
      *
      * @return A {@link FormalActualLists} containing the formal parameters and
@@ -120,7 +120,7 @@ public class InstantiatedEnhSpecRealizItem {
 
     /**
      * <p>This method returns a {@link FormalActualLists} containing the
-     * {@code Enhancement Realization's} formal and actual arguments for the
+     * {@code Enhancement Realization}'s formal and actual arguments for the
      * instantiated {@code Facility}.</p>
      *
      * @return A {@link FormalActualLists} containing the formal parameters and

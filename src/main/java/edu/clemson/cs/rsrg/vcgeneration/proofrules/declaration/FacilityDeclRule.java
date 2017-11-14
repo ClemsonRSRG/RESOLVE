@@ -70,18 +70,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     // -----------------------------------------------------------
 
     /**
-     * <p>A list that will be populated with the arguments used to
-     * instantiate the {@code Concept}.</p>
-     */
-    private final List<Exp> myConceptActualArgList;
-
-    /**
-     * <p>A list that will be populated with the instantiating
-     * {@code Concept}'s formal parameters.</p>
-     */
-    private final List<VarExp> myConceptFormalParamList;
-
-    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -110,19 +98,31 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     // -----------------------------------------------------------
 
     /**
-     * <p>This maps all {@code Concept} formal arguments to the instantiated
-     * actual arguments.</p>
+     * <p>A list that will be populated with the arguments used to
+     * instantiate the {@code Concept}.</p>
      */
-    private final Map<Exp, Exp> myConceptArgMap;
+    private final List<Exp> myConceptActualArgList;
 
     /** <p>This contains all the types declared by the {@code Concept}.</p> */
     private final List<TypeFamilyDec> myConceptDeclaredTypes;
 
     /**
-     * <p>This maps all {@code Concept Realization} formal arguments to the instantiated
-     * actual arguments.</p>
+     * <p>A list that will be populated with the instantiating
+     * {@code Concept}'s formal parameters.</p>
      */
-    private final Map<Exp, Exp> myConceptRealizArgMap;
+    private final List<VarExp> myConceptFormalParamList;
+
+    /**
+     * <p>A list that will be populated with the arguments used to
+     * instantiate the {@code Concept Realization}.</p>
+     */
+    private final List<Exp> myConceptRealizActualArgList;
+
+    /**
+     * <p>A list that will be populated with the instantiating
+     * {@code Concept Realization}'s formal parameters.</p>
+     */
+    private final List<VarExp> myConceptRealizFormalParamList;
 
     /**
      * <p>A list that contains the {@code Enhancement} and {@code Enhancement Realization}'s
@@ -154,8 +154,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
-        myConceptActualArgList = new ArrayList<>();
-        myConceptFormalParamList = new ArrayList<>();
         myCurrentModuleScope = moduleScope;
         myFacilityDec = facilityDec;
         myIsLocalFacilityDec = isLocalFacDec;
@@ -164,9 +162,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         myTypeGraph = symbolTableBuilder.getTypeGraph();
 
         // Objects needed to create a new InstantiatedFacilityDecl
+        myConceptActualArgList = new ArrayList<>();
         myConceptDeclaredTypes = new LinkedList<>();
-        myConceptArgMap = new LinkedHashMap<>();
-        myConceptRealizArgMap = new LinkedHashMap<>();
+        myConceptFormalParamList = new ArrayList<>();
+        myConceptRealizActualArgList = new ArrayList<>();
+        myConceptRealizFormalParamList = new ArrayList<>();
         myInstantiatedEnhSpecRealizItems = new LinkedList<>();
     }
 
@@ -226,8 +226,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     public final InstantiatedFacilityDecl getInstantiatedFacilityDecl() {
         return new InstantiatedFacilityDecl(myFacilityDec,
-                myConceptDeclaredTypes, myConceptArgMap, myConceptRealizArgMap,
-                myInstantiatedEnhSpecRealizItems);
+                myConceptDeclaredTypes, myConceptFormalParamList,
+                myConceptActualArgList, myConceptRealizFormalParamList,
+                myConceptRealizActualArgList, myInstantiatedEnhSpecRealizItems);
     }
 
     /**
@@ -408,13 +409,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             myConceptActualArgList.addAll(createModuleArgExpList(myFacilityDec
                     .getConceptParams()));
 
-            // Create a mapping from concept formal parameters
-            // to actual arguments for future use.
-            for (int i = 0; i < myConceptFormalParamList.size(); i++) {
-                myConceptArgMap.put(myConceptFormalParamList.get(i),
-                        myConceptActualArgList.get(i));
-            }
-
             // Note: Only to this step if we don't have an external realization
             Exp conceptRealizReq =
                     VarExp.getTrueVarExp(myFacilityDec.getLocation().clone(),
@@ -441,12 +435,12 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     // Convert the concept realization's module parameters and the instantiated
                     // realization's arguments into the appropriate mathematical expressions.
                     // Note that any nested function calls will be dealt with appropriately.
-                    List<VarExp> conceptRealizFormalParamList =
-                            createModuleParamExpList(facConceptRealizDec
-                                    .getParameterDecs());
-                    List<Exp> conceptRealizActualArgList =
-                            createModuleArgExpList(myFacilityDec
-                                    .getConceptRealizParams());
+                    myConceptRealizFormalParamList
+                            .addAll(createModuleParamExpList(facConceptRealizDec
+                                    .getParameterDecs()));
+                    myConceptRealizActualArgList
+                            .addAll(createModuleArgExpList(myFacilityDec
+                                    .getConceptRealizParams()));
 
                     // Replace the formal with the actual (if conceptRealizReq /= true)
                     if (!MathExp.isLiteralTrue(conceptRealizReq)) {
@@ -457,8 +451,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         conceptRealizReq =
                                 Utilities.replaceFormalWithActual(
                                         conceptRealizReq,
-                                        conceptRealizFormalParamList,
-                                        conceptRealizActualArgList);
+                                        myConceptRealizFormalParamList,
+                                        myConceptRealizActualArgList);
 
                         // Step 1b: Substitute concept's formal parameters with actual
                         //          instantiation arguments for the concept realization's
@@ -527,8 +521,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                             actualOperationDec,
                                             new ArrayList<VarExp>(),
                                             new ArrayList<Exp>(),
-                                            conceptRealizFormalParamList,
-                                            conceptRealizActualArgList);
+                                            myConceptRealizFormalParamList,
+                                            myConceptRealizActualArgList);
                             if (VarExp
                                     .isLiteralTrue(conceptRealizOperationPart)) {
                                 conceptRealizOperationPart =
@@ -546,13 +540,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                 }
                             }
                         }
-                    }
-
-                    // Create a mapping from concept realization formal parameters
-                    // to actual arguments for future use.
-                    for (int i = 0; i < conceptRealizFormalParamList.size(); i++) {
-                        myConceptRealizArgMap.put(conceptRealizFormalParamList
-                                .get(i), conceptRealizActualArgList.get(i));
                     }
                 }
                 catch (NoSuchSymbolException e) {
