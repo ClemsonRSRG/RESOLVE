@@ -163,7 +163,7 @@ public class InstantiatedFacilityDecl {
      *
      * @return A {@link List} containing {@link InstantiatedEnhSpecRealizItem}.
      */
-    public final List<InstantiatedEnhSpecRealizItem> getEnhancementArgMaps() {
+    public final List<InstantiatedEnhSpecRealizItem> getInstantiatedEnhSpecRealizItems() {
         return myInstantiatedEnhSpecRealizItems;
     }
 

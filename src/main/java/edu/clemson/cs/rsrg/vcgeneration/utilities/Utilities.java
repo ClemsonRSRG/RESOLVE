@@ -49,6 +49,8 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.FormalActualLists;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedEnhSpecRealizItem;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
 import org.jgrapht.DirectedGraph;
@@ -1158,8 +1160,57 @@ public class Utilities {
                                         + clauseExp.toString(),
                                 new RuntimeException());
                     }
+                    else {
+                        // Replace concept's formal parameters with actual
+                        // instantiation arguments
+                        FormalActualLists conceptFormalActuals =
+                                instantiatedFacilityDecl
+                                        .getConceptParamArgLists();
+                        modifiedClauseExp =
+                                replaceFormalWithActual(modifiedClauseExp,
+                                        conceptFormalActuals
+                                                .getFormalParamList(),
+                                        conceptFormalActuals.getActualArgList());
 
-                    // TODO: Perform all the necessary replacements.
+                        // Replace concept realization formal parameters
+                        // with actual instantiation arguments
+                        FormalActualLists conceptRealizFormalActuals =
+                                instantiatedFacilityDecl
+                                        .getConceptRealizParamArgLists();
+                        modifiedClauseExp =
+                                replaceFormalWithActual(modifiedClauseExp,
+                                        conceptRealizFormalActuals
+                                                .getFormalParamList(),
+                                        conceptRealizFormalActuals
+                                                .getActualArgList());
+
+                        // Replace enhancement/enhancement realization's
+                        // formal parameters with actual instantiation arguments.
+                        List<InstantiatedEnhSpecRealizItem> items =
+                                instantiatedFacilityDecl
+                                        .getInstantiatedEnhSpecRealizItems();
+                        for (InstantiatedEnhSpecRealizItem item : items) {
+                            // Enhancement
+                            FormalActualLists enhancementFormalActuals =
+                                    item.getEnhancementParamArgLists();
+                            modifiedClauseExp =
+                                    replaceFormalWithActual(modifiedClauseExp,
+                                            enhancementFormalActuals
+                                                    .getFormalParamList(),
+                                            enhancementFormalActuals
+                                                    .getActualArgList());
+
+                            // Enhancement Realization
+                            FormalActualLists enhancementRealizFormalActuals =
+                                    item.getEnhancementRealizParamArgLists();
+                            modifiedClauseExp =
+                                    replaceFormalWithActual(modifiedClauseExp,
+                                            enhancementRealizFormalActuals
+                                                    .getFormalParamList(),
+                                            enhancementRealizFormalActuals
+                                                    .getActualArgList());
+                        }
+                    }
                 }
             }
         }
