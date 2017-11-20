@@ -13,6 +13,8 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
@@ -51,6 +53,13 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>This contains all the types declared by the {@code Concept}
+     * associated with the current module. Note that if we are in a
+     * {@code Facility}, this list will be empty.</p>
+     */
+    private final List<TypeFamilyDec> myConceptDeclaredTypes;
+
+    /**
      * <p>The current {@link AssertiveCodeBlock} we are using to
      * generate {@code VCs}.</p>
      */
@@ -76,6 +85,13 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * replaced with the actuals for each of the nested function calls.</p>
      */
     private final Map<ProgramFunctionExp, Exp> myEnsuresClauseMap;
+
+    /**
+     * <p>If our current module scope allows us to introduce new type implementations,
+     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
 
     /**
      * <p>A map that stores all the details associated with
@@ -118,14 +134,19 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      *
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
     public ProgramFunctionExpWalker(AssertiveCodeBlock block,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
             ModuleScope moduleScope, TypeGraph g) {
-        this(null, null, block, processedInstFacDecs, moduleScope, g);
+        this(null, null, block, typeFamilyDecs, localRepresentationTypeDecs,
+                processedInstFacDecs, moduleScope, g);
     }
 
     /**
@@ -138,22 +159,28 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * @param decreasingExp The {@code decreasing} clause for the visiting
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
     public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp,
-            AssertiveCodeBlock block, List<InstantiatedFacilityDecl> processedInstFacDecs,
+            AssertiveCodeBlock block, List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
             ModuleScope moduleScope, TypeGraph g) {
+        myConceptDeclaredTypes = typeFamilyDecs;
         myCurrentAssertiveCodeBlock = block;
         myCurrentModuleScope = moduleScope;
         myCurrentOperationEntry = entry;
         myDecreasingExp = decreasingExp;
         myEnsuresClauseMap = new HashMap<>();
+        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
+        myLocationDetails = new HashMap<>();
         myProcessedInstFacilityDecls = processedInstFacDecs;
         myRequiresClauseList = new LinkedList<>();
         myRestoresParamEnsuresClauses = new LinkedList<>();
-        myLocationDetails = new HashMap<>();
         myTerminationConfirmStmts = new LinkedList<>();
         myTypeGraph = g;
     }
@@ -193,7 +220,15 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             .getAssertionExp(), operationDec.getParameters(),
                             exp.getArguments());
 
-            // TODO: Replace any facility declaration actuals in the requires clause.
+            // Replace any facility declaration instantiation arguments
+            // in the requires clause.
+            requiresExp =
+                    Utilities.replaceFacilityFormalWithActual(requiresExp,
+                            operationDec.getParameters(), myCurrentModuleScope
+                                    .getDefiningElement().getName(),
+                            myConceptDeclaredTypes,
+                            myLocalRepresentationTypeDecs,
+                            myProcessedInstFacilityDecls);
 
             // Store the location detail for the function call's requires clause
             myLocationDetails.put(requiresExp.getLocation(),
@@ -211,7 +246,14 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                         .getAssertionExp(), operationDec.getParameters(), exp
                         .getArguments());
 
-        // TODO: Replace any facility declaration actuals in the ensures clause.
+        // Replace any facility declaration instantiation arguments
+        // in the ensures clause.
+        ensuresExp =
+                Utilities.replaceFacilityFormalWithActual(ensuresExp,
+                        operationDec.getParameters(), myCurrentModuleScope
+                                .getDefiningElement().getName(),
+                        myConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls);
 
         // Store the location detail for the function call's ensures clause
         myLocationDetails.put(ensuresExp.getLocation(), "Ensures Clause of "
