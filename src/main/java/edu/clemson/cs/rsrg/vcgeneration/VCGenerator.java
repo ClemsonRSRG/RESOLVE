@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDe
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -116,6 +117,20 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Facility Declaration-Related
     // -----------------------------------------------------------
+
+    /**
+     * <p>This contains all the types declared by the {@code Concept}
+     * associated with the current module. Note that if we are in a
+     * {@code Facility}, this list will be empty.</p>
+     */
+    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
+
+    /**
+     * <p>If our current module scope allows us to introduce new type implementations,
+     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
 
     /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
     private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
@@ -237,9 +252,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertiveCodeBlockModels = new LinkedHashMap<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
+        myCurrentConceptDeclaredTypes = new LinkedList<>();
         myFinalAssertiveCodeBlocks = new LinkedList<>();
         myGlobalConstraints = new LinkedHashMap<>();
         myGlobalRequires = new LinkedList<>();
+        myLocalRepresentationTypeDecs = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
         myLocationDetails = new LinkedHashMap<>();
         myProcessedInstFacilityDecls = new LinkedList<>();
@@ -290,7 +307,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                             (FacilityDec) s.toFacilityEntry(dec.getLocation())
                                     .getDefiningElement();
                     FacilityDeclRule ruleApplication =
-                            new FacilityDeclRule(facDec, false, myProcessedInstFacilityDecls,
+                            new FacilityDeclRule(facDec, false,
+                                    myCurrentConceptDeclaredTypes,
+                                    myLocalRepresentationTypeDecs,
+                                    myProcessedInstFacilityDecls,
                                     myBuilder, myCurrentModuleScope,
                                     new AssertiveCodeBlock(myTypeGraph, facDec, facDec.getName()),
                                     mySTGroup, myVCGenDetailsModel);
@@ -461,10 +481,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Apply facility declaration rule
         FacilityDeclRule declRule =
-                new FacilityDeclRule(dec, true, myProcessedInstFacilityDecls,
-                        myBuilder, myCurrentModuleScope,
-                        myCurrentAssertiveCodeBlock, mySTGroup,
-                        myVCGenDetailsModel);
+                new FacilityDeclRule(dec, true, myCurrentConceptDeclaredTypes,
+                        myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls, myBuilder,
+                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                        mySTGroup, myVCGenDetailsModel);
         declRule.applyRule();
 
         // Store this facility's InstantiatedFacilityDecl for future use
