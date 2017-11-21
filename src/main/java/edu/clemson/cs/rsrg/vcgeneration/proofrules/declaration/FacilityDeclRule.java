@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -29,7 +30,6 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
@@ -46,6 +46,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.*;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptTypeExtractor;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -70,6 +71,13 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     // -----------------------------------------------------------
 
     /**
+     * <p>This contains all the types declared by the {@code Concept}
+     * associated with the current module. Note that if we are in a
+     * {@code Facility}, this list will be empty.</p>
+     */
+    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
+
+    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -80,6 +88,13 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
     /** <p>A flag that indicates if this is a local facility declaration or not.</p> */
     private final boolean myIsLocalFacilityDec;
+
+    /**
+     * <p>If our current module scope allows us to introduce new type implementations,
+     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
 
     /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
     private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
@@ -103,7 +118,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     private final List<Exp> myConceptActualArgList;
 
-    /** <p>This contains all the types declared by the {@code Concept}.</p> */
+    /**
+     * <p>This contains all the types declared by the
+     * instantiated {@code Concept}.</p>
+     */
     private final List<TypeFamilyDec> myConceptDeclaredTypes;
 
     /**
@@ -141,6 +159,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * @param facilityDec The {@code facility} declaration we are applying the
      *                    rule to.
      * @param isLocalFacDec A flag that indicates if this is a local {@link FacilityDec}.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
@@ -150,13 +170,17 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public FacilityDeclRule(FacilityDec facilityDec, boolean isLocalFacDec,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
+        myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
         myFacilityDec = facilityDec;
         myIsLocalFacilityDec = isLocalFacDec;
+        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myProcessedInstFacilityDecls = processedInstFacDecs;
         mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
@@ -271,9 +295,18 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             ProgramExp moduleArgumentExp = item.getArgumentExp();
             Exp moduleArgumentAsExp;
             if (moduleArgumentExp instanceof ProgramFunctionExp) {
-                // TODO: Use the program function expression walker to generate moduleArgumentAsExp.
-                throw new MiscErrorException("[VCGenerator] Insert program function expression walker here!",
-                        new RuntimeException());
+                // Use the walker to retrieve the ensures clause.
+                ProgramFunctionExpWalker walker =
+                        new ProgramFunctionExpWalker(myCurrentAssertiveCodeBlock,
+                                myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                                myProcessedInstFacilityDecls, myCurrentModuleScope, myTypeGraph);
+                TreeWalker.visit(walker, moduleArgumentExp);
+
+                // Retrieve the various pieces of information from the walker
+                moduleArgumentAsExp = walker.getEnsuresClause((ProgramFunctionExp) moduleArgumentExp);
+                if (myIsLocalFacilityDec) {
+                    myLocationDetails.putAll(walker.getNewLocationString());
+                }
             }
             else {
                 // Simply convert to the math equivalent expression
