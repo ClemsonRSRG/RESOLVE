@@ -604,6 +604,32 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Type Realization-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AbstractTypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declaration.
+     */
+    @Override
+    public final void postAbstractTypeRepresentationDec(
+            AbstractTypeRepresentationDec dec) {
+        myLocalRepresentationTypeDecs.add((AbstractTypeRepresentationDec) dec
+                .clone());
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept}.
+     */
+    @Override
+    public final void postTypeFamilyDec(TypeFamilyDec dec) {
+        myCurrentConceptDeclaredTypes.add((TypeFamilyDec) dec.clone());
+    }
+
+    // -----------------------------------------------------------
     // Variable Declaration-Related
     // -----------------------------------------------------------
 
