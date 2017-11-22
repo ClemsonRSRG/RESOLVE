@@ -449,6 +449,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
         storeConceptAssertionClauses(conceptName.getLocation(), coId, false);
 
+        // Store all the type families declared in the concept
+        storeConceptTypeFamilyDecs(conceptName.getLocation(), coId);
+
         // Store all requires/constraint from the imported enhancement
         PosSymbol enhancementName = enhancementRealization.getEnhancementName();
         ModuleIdentifier enId = new ModuleIdentifier(enhancementName.getName());
@@ -1010,6 +1013,33 @@ public class VCGenerator extends TreeWalkerVisitor {
                         .getConstraints());
                 myLocationDetails.put(conceptModuleDec.getLocation(),
                         "Constraint Clause for " + conceptModuleDec.getName());
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(loc);
+        }
+    }
+
+    /**
+     * <p>An helper method for storing the imported {@code concept's}
+     * {@code Type Family} declarations for future use.</p>
+     *
+     * @param loc The location of the imported {@code module}.
+     * @param id A {@link ModuleIdentifier} referring to an
+     *           importing {@code concept}.
+     */
+    private void storeConceptTypeFamilyDecs(Location loc, ModuleIdentifier id) {
+        try {
+            ConceptModuleDec conceptModuleDec =
+                    (ConceptModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+            List<Dec> decs = conceptModuleDec.getDecList();
+
+            for (Dec dec : decs) {
+                if (dec instanceof TypeFamilyDec) {
+                    myCurrentConceptDeclaredTypes.add((TypeFamilyDec) dec
+                            .clone());
+                }
             }
         }
         catch (NoSuchSymbolException e) {
