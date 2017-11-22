@@ -240,11 +240,6 @@ public class ValidFacilityDeclChecker {
                     foundDifferentTypes = true;
                 }
             }
-            else {
-                if (!(wrappedDec instanceof ConceptTypeParamDec)) {
-                    foundDifferentTypes = true;
-                }
-            }
         }
 
         return foundDifferentTypes;
