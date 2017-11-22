@@ -141,8 +141,8 @@ public class Utilities {
                 Utilities.getPackageList(file.getAbsolutePath(), workspacePath);
         CharStream inputStream = CharStreams.fromPath(file.toPath());
 
-        return new ResolveFile(name, moduleType, inputStream, pkgList, file
-                .getAbsolutePath());
+        return new ResolveFile(name, moduleType, inputStream, file
+                .getParentFile().toPath(), pkgList, file.getAbsolutePath());
     }
 
     /**

@@ -67,7 +67,7 @@ public class HardCoded {
             Location classTheoryLoc =
                     new Location(new ResolveFile("Cls_Theory",
                             ModuleType.THEORY, new UnbufferedCharStream(
-                            new StringReader("")),
+                            new StringReader("")), null,
                             new ArrayList<String>(), ""),
                             0, 0);
             ModuleDec module =
@@ -209,7 +209,7 @@ public class HardCoded {
             Location globalSpaceLoc =
                     new Location(new ResolveFile("Global", ModuleType.THEORY,
                             new UnbufferedCharStream(new StringReader("")),
-                            new ArrayList<String>(), ""), 0, 0);
+                            null, new ArrayList<String>(), ""), 0, 0);
             VarExp v =
                     new VarExp(globalSpaceLoc, null, new PosSymbol(
                             globalSpaceLoc, "Global"));
