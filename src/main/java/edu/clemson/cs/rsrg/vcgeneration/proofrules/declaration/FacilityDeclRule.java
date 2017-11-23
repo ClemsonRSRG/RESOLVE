@@ -227,9 +227,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             }
         }
 
-        // This class is used by any importing facility declarations as well as
+        // YS - This class is used by any importing facility declarations as well as
         // any local facility declarations. We really don't need to generate VCs
-        // or display anything to our models if it isn't local. - YS
+        // or display anything to our models if it isn't local.
         if (myIsLocalFacilityDec) {
             myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(confirmExp
                     .getLocation(), confirmExp, false));

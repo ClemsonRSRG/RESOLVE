@@ -306,6 +306,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                     FacilityDec facDec =
                             (FacilityDec) s.toFacilityEntry(dec.getLocation())
                                     .getDefiningElement();
+
+                    // Create a new model for this assertive code block
+                    ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+                    blockModel.add("blockName", dec.getName());
+
                     FacilityDeclRule ruleApplication =
                             new FacilityDeclRule(facDec, false,
                                     myCurrentConceptDeclaredTypes,
@@ -313,7 +318,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     myProcessedInstFacilityDecls,
                                     myBuilder, myCurrentModuleScope,
                                     new AssertiveCodeBlock(myTypeGraph, facDec, facDec.getName()),
-                                    mySTGroup, myVCGenDetailsModel);
+                                    mySTGroup, blockModel);
                     ruleApplication.applyRule();
 
                     // Store this facility's InstantiatedFacilityDecl for future use
@@ -482,13 +487,27 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCodeBlock =
                 new AssertiveCodeBlock(myTypeGraph, dec, dec.getName());
 
+        // Create the top most level assume statement and
+        // add it to the assertive code block as the first statement
+        // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
+        /*AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation().clone(),
+                Utilities.createTopLevelAssumeExps(dec.getLocation(), myCurrentModuleScope,
+                        myCurrentAssertiveCodeBlock, myLocationDetails, myGlobalRequires, myGlobalConstraints,
+                        myCorrespondingOperation, false),
+                false);
+        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);*/
+
+        // Create a new model for this assertive code block
+        ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        blockModel.add("blockName", dec.getName());
+
         // Apply facility declaration rule
         FacilityDeclRule declRule =
                 new FacilityDeclRule(dec, true, myCurrentConceptDeclaredTypes,
                         myLocalRepresentationTypeDecs,
                         myProcessedInstFacilityDecls, myBuilder,
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        mySTGroup, myVCGenDetailsModel);
+                        mySTGroup, blockModel);
         declRule.applyRule();
 
         // Store this facility's InstantiatedFacilityDecl for future use
