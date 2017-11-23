@@ -522,6 +522,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
+
+        // Add any new location details
+        myLocationDetails.putAll(declRule.getNewLocationString());
     }
 
     // -----------------------------------------------------------
