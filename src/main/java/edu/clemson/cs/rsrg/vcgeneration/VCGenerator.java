@@ -489,13 +489,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
-        // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
-        /*AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation().clone(),
-                Utilities.createTopLevelAssumeExps(dec.getLocation(), myCurrentModuleScope,
-                        myCurrentAssertiveCodeBlock, myLocationDetails, myGlobalRequires, myGlobalConstraints,
-                        myCorrespondingOperation, false),
-                false);
-        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);*/
+        AssumeStmt topLevelAssumeStmt =
+                new AssumeStmt(dec.getLocation().clone(), Utilities
+                        .createTopLevelAssumeExpFromContext(dec.getLocation(),
+                                myGlobalRequires, myGlobalConstraints), false);
+        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create a new model for this assertive code block
         ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
@@ -568,7 +566,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // add it to the assertive code block as the first statement
         // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
         AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation().clone(),
-                Utilities.createTopLevelAssumeExps(dec.getLocation(), myCurrentModuleScope,
+                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(), myCurrentModuleScope,
                         myCurrentAssertiveCodeBlock, myLocationDetails, myGlobalRequires, myGlobalConstraints,
                         myCorrespondingOperation, isLocal),
                 false);

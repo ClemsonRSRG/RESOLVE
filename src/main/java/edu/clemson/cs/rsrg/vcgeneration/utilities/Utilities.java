@@ -451,6 +451,59 @@ public class Utilities {
      *     <li>{@code Shared Variables}' {@code correspondence} clause.</li>
      *     <li>{@code constraint} clauses for all the parameters with the
      *     appropriate substitutions made.</li>
+     *     <li>Any {@code which_entails} expressions that originated from any of the
+     *     clauses above.</li>
+     * </ul>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param moduleLevelRequiresClauses A list containing all the module level {@code requires} clauses.
+     * @param moduleLevelConstraintClauses A map containing all the module level {@code constraint} clauses.
+     *
+     * @return The top-level assumed expression.
+     */
+    public static Exp createTopLevelAssumeExpFromContext(Location loc,
+            List<AssertionClause> moduleLevelRequiresClauses,
+            Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses) {
+        Exp retExp = null;
+
+        // Add the module level requires clause. Note that we don't
+        // need to add their location details to the map because
+        // it is there already.
+        for (AssertionClause clause : moduleLevelRequiresClauses) {
+            retExp = Utilities.formConjunct(loc, retExp, clause);
+        }
+
+        // Add the module level constraint clauses.
+        // Note that we don't need to add their location details to the map
+        // because it is there already.
+        for (Dec dec : moduleLevelConstraintClauses.keySet()) {
+            for (AssertionClause clause : moduleLevelConstraintClauses.get(dec)) {
+                retExp = Utilities.formConjunct(loc, retExp, clause);
+            }
+        }
+
+        // TODO: Add any shared variable's constraint, convention, correspondence here.
+
+        return retExp;
+    }
+
+    /**
+     * <p>This method uses all the {@code requires} and {@code constraint}
+     * clauses from the various different sources (see below for complete list)
+     * and builds the appropriate {@code assume} clause that goes at the
+     * beginning an {@link AssertiveCodeBlock}.</p>
+     *
+     * <p>List of different places where clauses can originate from:</p>
+     * <ul>
+     *     <li>{@code Concept}'s {@code requires} clause.</li>
+     *     <li>{@code Concept}'s module {@code constraint} clause.</li>
+     *     <li>{@code Shared Variables}' {@code constraint} clause.</li>
+     *     <li>{@code Concept Realization}'s {@code requires} clause.</li>
+     *     <li>{@code Shared Variables}' {@code convention} clause.</li>
+     *     <li>{@code Shared Variables}' {@code correspondence} clause.</li>
+     *     <li>{@code constraint} clauses for all the parameters with the
+     *     appropriate substitutions made.</li>
      *     <li>The {@code operation}'s {@code requires} clause with the following
      *     change if it is an implementation for a {@code concept}'s operation:</li>
      *     <li>
@@ -477,31 +530,17 @@ public class Utilities {
      *
      * @return The top-level assumed expression.
      */
-    public static Exp createTopLevelAssumeExps(Location loc, ModuleScope scope,
-            AssertiveCodeBlock currentBlock,
+    public static Exp createTopLevelAssumeExpForProcedureDec(Location loc,
+            ModuleScope scope, AssertiveCodeBlock currentBlock,
             Map<Location, String> locationStringsMap,
             List<AssertionClause> moduleLevelRequiresClauses,
             Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses,
             OperationEntry correspondingOperationEntry, boolean isLocalOperation) {
-        Exp retExp = null;
-
-        // Add the module level requires clause. Note that we don't
-        // need to add their location details to the map because
-        // it is there already.
-        for (AssertionClause clause : moduleLevelRequiresClauses) {
-            retExp = Utilities.formConjunct(loc, retExp, clause);
-        }
-
-        // Add the module level constraint clauses.
-        // Note that we don't need to add their location details to the map
-        // because it is there already.
-        for (Dec dec : moduleLevelConstraintClauses.keySet()) {
-            for (AssertionClause clause : moduleLevelConstraintClauses.get(dec)) {
-                retExp = Utilities.formConjunct(loc, retExp, clause);
-            }
-        }
-
-        // TODO: Add any shared variable's constraint, convention, correspondence here.
+        // Add all the expressions we can assume from the current context
+        Exp retExp =
+                createTopLevelAssumeExpFromContext(loc,
+                        moduleLevelRequiresClauses,
+                        moduleLevelConstraintClauses);
 
         // Add the operation's requires clause (and any which_entails clause)
         AssertionClause requiresClause =
