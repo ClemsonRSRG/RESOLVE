@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.io.*;
 import java.nio.charset.Charset;
@@ -121,7 +122,8 @@ public class FileOutputListener implements OutputListener {
     @Override
     public final void vcGeneratorResult(String inputFileName,
             String outputFileName, List<AssertiveCodeBlock> blocks,
-            Map<Location, String> locationDetails, String verboseOutput) {
+            Map<Location, LocationDetailModel> locationDetails,
+            String verboseOutput) {
         StringBuffer sb = new StringBuffer();
 
         // String template to hold the VC generation details
@@ -137,11 +139,12 @@ public class FileOutputListener implements OutputListener {
             for (VerificationCondition vc : vcs) {
                 // Create a model for adding all the details
                 // associated with this VC.
-                Location loc = vc.getLocation();
+                LocationDetailModel detailModel =
+                        locationDetails.get(vc.getLocation());
                 ST vcModel = group.getInstanceOf("outputVC");
                 vcModel.add("vcNum", vc.getName());
-                vcModel.add("location", loc);
-                vcModel.add("locationDetail", locationDetails.get(loc));
+                vcModel.add("location", detailModel.getDestinationLoc());
+                vcModel.add("locationDetail", detailModel.getDetailMessage());
 
                 // Output each of the associated sequents
                 List<Sequent> sequents = vc.getAssociatedSequents();

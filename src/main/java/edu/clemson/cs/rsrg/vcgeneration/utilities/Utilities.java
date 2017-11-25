@@ -16,6 +16,7 @@ import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -27,6 +28,7 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -47,6 +49,9 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.FormalActualLists;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedEnhSpecRealizItem;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
@@ -184,7 +189,7 @@ public class Utilities {
      * @return The final confirm expression.
      */
     public static Exp createFinalConfirmExp(Location loc, ModuleScope scope,
-            TypeGraph g, Map<Location, String> locationStringsMap,
+            TypeGraph g, Map<Location, LocationDetailModel> locationStringsMap,
             OperationEntry correspondingOperationEntry) {
         Exp retExp = null;
 
@@ -196,13 +201,15 @@ public class Utilities {
             retExp = Utilities.formConjunct(loc, retExp, ensuresClause);
 
             // At the same time add the location details for these expressions.
-            locationStringsMap.put(ensuresExp.getLocation(), "Ensures Clause of "
-                    + correspondingOperationEntry.getName());
+            Location ensuresLoc = ensuresExp.getLocation();
+            locationStringsMap.put(ensuresLoc, new LocationDetailModel(
+                    ensuresLoc, loc,
+                    "Ensures Clause of " + correspondingOperationEntry.getName()));
             if (ensuresClause.getWhichEntailsExp() != null) {
-                locationStringsMap.put(ensuresClause.getWhichEntailsExp()
-                                .getLocation(),
-                        "Which_Entails expression for clause located at "
-                                + ensuresClause.getWhichEntailsExp().getLocation());
+                Location entailsLoc = ensuresClause.getWhichEntailsExp().getLocation();
+                locationStringsMap.put(entailsLoc, new LocationDetailModel(
+                        entailsLoc, loc,
+                        "Which_Entails expression for clause located at " + entailsLoc));
             }
         }
 
@@ -301,9 +308,12 @@ public class Utilities {
                 retExp = Utilities.formConjunct(restoresLoc.clone(), retExp, restoresEnsuresClause);
 
                 // Add the location details for this expression.
-                locationStringsMap.put(restoresEnsuresClause.getLocation(), "Ensures Clause of "
-                        + correspondingOperationEntry.getName()
-                        + " (Condition from \"" + parameterMode + "\" parameter mode)");
+                Location restoresEnsuresLoc = restoresEnsuresClause.getLocation();
+                locationStringsMap.put(restoresEnsuresLoc, new LocationDetailModel(
+                        restoresEnsuresLoc, loc,
+                        "Ensures Clause of "
+                                + correspondingOperationEntry.getName()
+                                + " (Condition from \"" + parameterMode + "\" parameter mode)"));
             }
             // The clears mode adds an additional ensures
             // that the outgoing value is the initial value.
@@ -334,9 +344,12 @@ public class Utilities {
                 retExp = Utilities.formConjunct(loc.clone(), retExp, modifiedInitEnsures);
 
                 // Add the location details for this expression.
-                locationStringsMap.put(modifiedInitEnsures.getLocation(), "Ensures Clause of "
-                        + correspondingOperationEntry.getName()
-                        + " (Condition from \"" + parameterMode + "\" parameter mode)");
+                Location modifiedInitEnsuresLoc = modifiedInitEnsures.getLocation();
+                locationStringsMap.put(modifiedInitEnsuresLoc, new LocationDetailModel(
+                        modifiedInitEnsuresLoc, loc,
+                        "Ensures Clause of "
+                                + correspondingOperationEntry.getName()
+                                + " (Condition from \"" + parameterMode + "\" parameter mode)"));
             }
 
             // TODO: See below!
@@ -350,8 +363,11 @@ public class Utilities {
             retExp = VarExp.getTrueVarExp(loc.clone(), g);
 
             // Add the location details for this expression.
-            locationStringsMap.put(retExp.getLocation(),
-                    "Ensures Clause of " + correspondingOperationEntry.getName());
+            Location retExpLoc = retExp.getLocation();
+            locationStringsMap.put(retExpLoc, new LocationDetailModel(
+                    retExpLoc, loc,
+                    "Ensures Clause of "
+                            + correspondingOperationEntry.getName()));
         }
 
         return retExp;
@@ -446,6 +462,59 @@ public class Utilities {
      *     <li>{@code Shared Variables}' {@code correspondence} clause.</li>
      *     <li>{@code constraint} clauses for all the parameters with the
      *     appropriate substitutions made.</li>
+     *     <li>Any {@code which_entails} expressions that originated from any of the
+     *     clauses above.</li>
+     * </ul>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param moduleLevelRequiresClauses A list containing all the module level {@code requires} clauses.
+     * @param moduleLevelConstraintClauses A map containing all the module level {@code constraint} clauses.
+     *
+     * @return The top-level assumed expression.
+     */
+    public static Exp createTopLevelAssumeExpFromContext(Location loc,
+            List<AssertionClause> moduleLevelRequiresClauses,
+            Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses) {
+        Exp retExp = null;
+
+        // Add the module level requires clause. Note that we don't
+        // need to add their location details to the map because
+        // it is there already.
+        for (AssertionClause clause : moduleLevelRequiresClauses) {
+            retExp = Utilities.formConjunct(loc, retExp, clause);
+        }
+
+        // Add the module level constraint clauses.
+        // Note that we don't need to add their location details to the map
+        // because it is there already.
+        for (Dec dec : moduleLevelConstraintClauses.keySet()) {
+            for (AssertionClause clause : moduleLevelConstraintClauses.get(dec)) {
+                retExp = Utilities.formConjunct(loc, retExp, clause);
+            }
+        }
+
+        // TODO: Add any shared variable's constraint, convention, correspondence here.
+
+        return retExp;
+    }
+
+    /**
+     * <p>This method uses all the {@code requires} and {@code constraint}
+     * clauses from the various different sources (see below for complete list)
+     * and builds the appropriate {@code assume} clause that goes at the
+     * beginning an {@link AssertiveCodeBlock}.</p>
+     *
+     * <p>List of different places where clauses can originate from:</p>
+     * <ul>
+     *     <li>{@code Concept}'s {@code requires} clause.</li>
+     *     <li>{@code Concept}'s module {@code constraint} clause.</li>
+     *     <li>{@code Shared Variables}' {@code constraint} clause.</li>
+     *     <li>{@code Concept Realization}'s {@code requires} clause.</li>
+     *     <li>{@code Shared Variables}' {@code convention} clause.</li>
+     *     <li>{@code Shared Variables}' {@code correspondence} clause.</li>
+     *     <li>{@code constraint} clauses for all the parameters with the
+     *     appropriate substitutions made.</li>
      *     <li>The {@code operation}'s {@code requires} clause with the following
      *     change if it is an implementation for a {@code concept}'s operation:</li>
      *     <li>
@@ -472,31 +541,17 @@ public class Utilities {
      *
      * @return The top-level assumed expression.
      */
-    public static Exp createTopLevelAssumeExps(Location loc, ModuleScope scope,
-            AssertiveCodeBlock currentBlock,
-            Map<Location, String> locationStringsMap,
+    public static Exp createTopLevelAssumeExpForProcedureDec(Location loc,
+            ModuleScope scope, AssertiveCodeBlock currentBlock,
+            Map<Location, LocationDetailModel> locationStringsMap,
             List<AssertionClause> moduleLevelRequiresClauses,
             Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses,
             OperationEntry correspondingOperationEntry, boolean isLocalOperation) {
-        Exp retExp = null;
-
-        // Add the module level requires clause. Note that we don't
-        // need to add their location details to the map because
-        // it is there already.
-        for (AssertionClause clause : moduleLevelRequiresClauses) {
-            retExp = Utilities.formConjunct(loc, retExp, clause);
-        }
-
-        // Add the module level constraint clauses.
-        // Note that we don't need to add their location details to the map
-        // because it is there already.
-        for (Dec dec : moduleLevelConstraintClauses.keySet()) {
-            for (AssertionClause clause : moduleLevelConstraintClauses.get(dec)) {
-                retExp = Utilities.formConjunct(loc, retExp, clause);
-            }
-        }
-
-        // TODO: Add any shared variable's constraint, convention, correspondence here.
+        // Add all the expressions we can assume from the current context
+        Exp retExp =
+                createTopLevelAssumeExpFromContext(loc,
+                        moduleLevelRequiresClauses,
+                        moduleLevelConstraintClauses);
 
         // Add the operation's requires clause (and any which_entails clause)
         AssertionClause requiresClause =
@@ -506,15 +561,18 @@ public class Utilities {
             retExp = Utilities.formConjunct(loc, retExp, requiresClause);
 
             // At the same time add the location details for these expressions.
-            locationStringsMap.put(requiresExp.getLocation(),
-                    "Requires Clause of "
-                            + correspondingOperationEntry.getName());
+            Location requiresLoc = requiresExp.getLocation();
+            locationStringsMap.put(requiresLoc, new LocationDetailModel(
+                    requiresLoc, requiresLoc, "Requires Clause of "
+                            + correspondingOperationEntry.getName()));
             if (requiresClause.getWhichEntailsExp() != null) {
-                locationStringsMap.put(requiresClause.getWhichEntailsExp()
-                        .getLocation(),
+                Location entailsLoc =
+                        requiresClause.getWhichEntailsExp().getLocation();
+                locationStringsMap.put(entailsLoc, new LocationDetailModel(
+                        entailsLoc, entailsLoc,
                         "Which_Entails expression for clause located at "
                                 + requiresClause.getWhichEntailsExp()
-                                        .getLocation());
+                                        .getLocation()));
             }
         }
 
@@ -568,17 +626,22 @@ public class Utilities {
                                         modifiedConstraintClause);
 
                         // At the same time add the location details for these expressions.
-                        locationStringsMap.put(modifiedConstraintClause
-                                .getAssertionExp().getLocation(),
-                                "Constraint Clause of "
-                                        + parameterVarDec.getName());
+                        Location constraintLoc =
+                                modifiedConstraintClause.getAssertionExp()
+                                        .getLocation();
+                        locationStringsMap.put(constraintLoc,
+                                new LocationDetailModel(constraintLoc,
+                                        constraintLoc, "Constraint Clause of "
+                                                + parameterVarDec.getName()));
                         if (constraintClause.getWhichEntailsExp() != null) {
-                            locationStringsMap.put(modifiedConstraintClause
-                                    .getWhichEntailsExp().getLocation(),
-                                    "Which_Entails expression for clause located at "
-                                            + modifiedConstraintClause
-                                                    .getWhichEntailsExp()
-                                                    .getLocation());
+                            Location entailsLoc =
+                                    modifiedConstraintClause
+                                            .getWhichEntailsExp().getLocation();
+                            locationStringsMap.put(entailsLoc,
+                                    new LocationDetailModel(entailsLoc,
+                                            entailsLoc,
+                                            "Which_Entails expression for clause located at "
+                                                    + entailsLoc));
                         }
                     }
                 }
@@ -954,7 +1017,7 @@ public class Utilities {
         else {
             message =
                     "[VCGenerator] No such symbol in module: "
-                            + qualifier.getName() + "." + symbolName;
+                            + qualifier.getName() + "::" + symbolName;
         }
 
         throw new SourceErrorException(message, loc);
@@ -1034,6 +1097,235 @@ public class Utilities {
         }
 
         return retVal;
+    }
+
+    /**
+     * <p>This method is used to replace any parameter declarations whose program types
+     * come from instantiated facility declarations. This will replace any the instantiated
+     * type's formal with its actual instantiation expression in {@code clauseExp}.</p>
+     *
+     * @param clauseExp Some clause expression we are trying to replace.
+     * @param paramList List of parameter declarations from the operation we are
+     *                  trying to call.
+     * @param currentModuleName Name of the current module.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
+     *                             so far.
+     *
+     * @return The modified {@link Exp}.
+     */
+    public static Exp replaceFacilityFormalWithActual(Exp clauseExp,
+            List<ParameterVarDec> paramList, PosSymbol currentModuleName,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs) {
+        // Make a copy of the clauseExp for modification
+        Exp modifiedClauseExp = clauseExp.clone();
+
+        // YS: Check each operation parameter's raw type. If it matches
+        // one that originated from an instantiated facility type,
+        // then replace any formal parameters with its corresponding
+        // instantiation argument.
+        for (ParameterVarDec dec : paramList) {
+            // YS: For it to be a instantiated type by a facility,
+            // it must be a NameTy. It can't be a RecordTy or ArbitraryTy.
+            // We also ignore any generic types.
+            if ((dec.getTy() instanceof NameTy)
+                    && !(dec.getTy().getProgramType() instanceof PTGeneric)) {
+                NameTy decTyAsNameTy = (NameTy) dec.getTy();
+
+                // Make sure it is an instantiated facility type.
+                // YS: The way we check this is by process of elimination.
+                // It can't be a type we are implementing (concept realizations)
+                // or a extending some functionality (enhancements).
+                boolean isInstantiatedType = true;
+                if (decTyAsNameTy.getQualifier() == null) {
+                    // Check all concept types
+                    Iterator<TypeFamilyDec> it = typeFamilyDecs.iterator();
+                    while (it.hasNext() && isInstantiatedType) {
+                        // If the name matches, then it must be a concept abstract type
+                        if (decTyAsNameTy.getName().getName().equals(
+                                it.next().getName().getName())) {
+                            isInstantiatedType = false;
+                        }
+                    }
+
+                    // Check all representation types.
+                    Iterator<AbstractTypeRepresentationDec> it2 =
+                            localRepresentationTypeDecs.iterator();
+                    while (it2.hasNext() && isInstantiatedType) {
+                        // If the name matches, then it must be the representation type
+                        if (decTyAsNameTy.getName().getName().equals(
+                                it2.next().getName().getName())) {
+                            isInstantiatedType = false;
+                        }
+                    }
+                }
+                else {
+                    // This is a no brainer. If the qualifier matches the current
+                    // module name, then it isn't a instantiated type.
+                    if (decTyAsNameTy.getQualifier().getName().equals(
+                            currentModuleName.getName())) {
+                        isInstantiatedType = false;
+                    }
+                }
+
+                // YS: Only proceed if it is a instantiated type.
+                // Loop through each instantiated facility declaration
+                // and obtain the facility that instantiated this type.
+                if (isInstantiatedType) {
+                    InstantiatedFacilityDecl instantiatedFacilityDecl = null;
+                    Iterator<InstantiatedFacilityDecl> it =
+                            processedInstFacDecs.iterator();
+                    if (decTyAsNameTy.getQualifier() == null) {
+                        while (it.hasNext() && instantiatedFacilityDecl == null) {
+                            InstantiatedFacilityDecl nextDec = it.next();
+
+                            // Search the types that the instantiated facility declaration
+                            // implements. If it one of them matches, then it must be the type
+                            // we are looking for. There can't be another type with the same name,
+                            // because the Populator would have complained about it being ambiguous.
+                            Iterator<TypeFamilyDec> it2 =
+                                    nextDec.getConceptDeclaredTypes()
+                                            .iterator();
+                            while (it2.hasNext()
+                                    && instantiatedFacilityDecl == null) {
+                                if (decTyAsNameTy.getName().getName().equals(
+                                        it2.next().getName().getName())) {
+                                    instantiatedFacilityDecl = nextDec;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        while (it.hasNext() && instantiatedFacilityDecl == null) {
+                            // Match the facility declaration name with the parameter type qualifier.
+                            InstantiatedFacilityDecl nextDec = it.next();
+                            if (decTyAsNameTy.getQualifier().getName().equals(
+                                    nextDec.getInstantiatedFacilityName()
+                                            .getName())) {
+                                instantiatedFacilityDecl = nextDec;
+                            }
+                        }
+                    }
+
+                    // Throw an error if we reached this point and didn't find
+                    // the instantiating facility declaration.
+                    if (instantiatedFacilityDecl == null) {
+                        throw new MiscErrorException(
+                                "[VCGenerator] Couldn't replace formal parameters with the instantiated arguments in "
+                                        + clauseExp.toString(),
+                                new RuntimeException());
+                    }
+                    else {
+                        // Replace concept's formal parameters with actual
+                        // instantiation arguments
+                        FormalActualLists conceptFormalActuals =
+                                instantiatedFacilityDecl
+                                        .getConceptParamArgLists();
+                        modifiedClauseExp =
+                                replaceFormalWithActual(modifiedClauseExp,
+                                        conceptFormalActuals
+                                                .getFormalParamList(),
+                                        conceptFormalActuals.getActualArgList());
+
+                        // Replace concept realization formal parameters
+                        // with actual instantiation arguments
+                        FormalActualLists conceptRealizFormalActuals =
+                                instantiatedFacilityDecl
+                                        .getConceptRealizParamArgLists();
+                        modifiedClauseExp =
+                                replaceFormalWithActual(modifiedClauseExp,
+                                        conceptRealizFormalActuals
+                                                .getFormalParamList(),
+                                        conceptRealizFormalActuals
+                                                .getActualArgList());
+
+                        // Replace enhancement/enhancement realization's
+                        // formal parameters with actual instantiation arguments.
+                        List<InstantiatedEnhSpecRealizItem> items =
+                                instantiatedFacilityDecl
+                                        .getInstantiatedEnhSpecRealizItems();
+                        for (InstantiatedEnhSpecRealizItem item : items) {
+                            // Enhancement
+                            FormalActualLists enhancementFormalActuals =
+                                    item.getEnhancementParamArgLists();
+                            modifiedClauseExp =
+                                    replaceFormalWithActual(modifiedClauseExp,
+                                            enhancementFormalActuals
+                                                    .getFormalParamList(),
+                                            enhancementFormalActuals
+                                                    .getActualArgList());
+
+                            // Enhancement Realization
+                            FormalActualLists enhancementRealizFormalActuals =
+                                    item.getEnhancementRealizParamArgLists();
+                            modifiedClauseExp =
+                                    replaceFormalWithActual(modifiedClauseExp,
+                                            enhancementRealizFormalActuals
+                                                    .getFormalParamList(),
+                                            enhancementRealizFormalActuals
+                                                    .getActualArgList());
+                        }
+                    }
+                }
+            }
+        }
+
+        return modifiedClauseExp;
+    }
+
+    /**
+     * <p>This method is used to replace the module parameters with the actual instantiated arguments.
+     * Note that both of these have been converted to mathematical expressions.</p>
+     *
+     * @param exp The expression to be replaced.
+     * @param formalParams List of module formal parameters.
+     * @param actualArgs List of module instantiated arguments.
+     *
+     * @return The modified expression.
+     *
+     * @throws MiscErrorException This exception is thrown when we pass two lists that aren't equal
+     * in size.
+     */
+    public static Exp replaceFormalWithActual(Exp exp, List<VarExp> formalParams, List<Exp> actualArgs) {
+        // YS: We need two replacement maps in case we happen to have the
+        // same names in formal parameters expressions and in the argument list.
+        Map<Exp, Exp> paramToTemp = new HashMap<>();
+        Map<Exp, Exp> tempToActual = new HashMap<>();
+
+        Exp retExp = exp.clone();
+        if (formalParams.size() == actualArgs.size()) {
+            // Loop through both lists
+            for (int i = 0; i < formalParams.size(); i++) {
+                VarExp formalParam = formalParams.get(i);
+                Exp actualArg = actualArgs.get(i);
+
+                // A temporary VarExp that avoids any formal with the same name as the actual.
+                VarExp tempExp = Utilities.createVarExp(formalParam.getLocation(), null,
+                        new PosSymbol(formalParam.getLocation(), "_" + formalParam.getName().getName()),
+                        actualArg.getMathType(), actualArg.getMathTypeValue());
+
+                // Add a substitution entry from formal parameter to tempExp.
+                paramToTemp.put(formalParam, tempExp);
+
+                // Add a substitution entry from tempExp to actual parameter.
+                tempToActual.put(tempExp, actualArg);
+            }
+
+            // Replace from formal to temp and then from temp to actual
+            retExp = retExp.substitute(paramToTemp);
+            retExp = retExp.substitute(tempToActual);
+        }
+        else {
+            // Something went wrong while obtaining the parameter and argument lists.
+            throw new MiscErrorException(
+                    "[VCGenerator] Formal parameter size is different than actual argument size.",
+                    new RuntimeException());
+        }
+
+        return retExp;
     }
 
     /**

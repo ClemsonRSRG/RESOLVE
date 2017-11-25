@@ -32,6 +32,7 @@ import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
@@ -137,7 +138,7 @@ class Controller {
                     new DefaultDirectedGraph<>(
                             DefaultEdge.class);
             g.addVertex(new ModuleIdentifier(targetModule));
-            findDependencies(g, targetModule);
+            findDependencies(g, targetModule, file.getParentPath());
 
             // Perform different compilation tasks to each file
             for (ModuleIdentifier m : getCompileOrder(g)) {
@@ -322,6 +323,8 @@ class Controller {
      *
      * @param g The compilation's file dependency graph.
      * @param root Current compiling module.
+     * @param parentPath The parent path if it is known. Otherwise,
+     *                   this can be {@code null}.
      *
      * @throws CircularDependencyException Some of the source files form a
      * circular dependency.
@@ -330,7 +333,7 @@ class Controller {
      */
     private void findDependencies(
             DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
-            ModuleDec root) {
+            ModuleDec root, Path parentPath) {
         Map<PosSymbol, Boolean> allImports = root.getModuleDependencies();
         for (PosSymbol importRequest : allImports.keySet()) {
             // Don't try to import the built-in Cls_Theory
@@ -339,7 +342,8 @@ class Controller {
                 // or not. If yes, we add it as an external import and move on.
                 // If no, we add it as a new dependency that must be imported.
                 if (!allImports.get(importRequest)) {
-                    ResolveFile file = findResolveFile(importRequest.getName());
+                    ResolveFile file =
+                            findResolveFile(importRequest.getName(), parentPath);
                     ModuleIdentifier id =
                             new ModuleIdentifier(importRequest.getName());
                     ModuleIdentifier rootId = new ModuleIdentifier(root);
@@ -358,7 +362,7 @@ class Controller {
                         myCompileEnvironment.constructRecord(file, module);
 
                         // Now check this new module for dependencies
-                        findDependencies(g, module);
+                        findDependencies(g, module, file.getParentPath());
                     }
                     else {
                         module = myCompileEnvironment.getModuleAST(id);
@@ -393,13 +397,15 @@ class Controller {
      * <p>This method attempts to locate a file with the
      * specified name.</p>
      *
-     * @param baseName The name of the file including the extension
+     * @param baseName The name of the file including the extension.
+     * @param parentPath The parent path if it is known. Otherwise,
+     *                   this can be {@code null}.
      *
-     * @return A <code>ResolveFile</code> object that is used by the compiler.
+     * @return A {@link ResolveFile} object that is used by the compiler.
      *
      * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
-    private ResolveFile findResolveFile(String baseName) {
+    private ResolveFile findResolveFile(String baseName, Path parentPath) {
         // First check to see if this is a user created
         // file from the WebIDE/WebAPI.
         ResolveFile file;
@@ -409,14 +415,37 @@ class Controller {
         // If not, use the file locator to locate our file
         else {
             try {
-                FileLocator l =
-                        new FileLocator(baseName, ModuleType.getAllExtensions());
+                // There might be files with the same name all throughout the workspace,
+                // so ideally we want to start from the innermost path possible.
+                File actualFile = null;
+                if (parentPath != null) {
+                    try {
+                        FileLocator l =
+                                new FileLocator(baseName, ModuleType
+                                        .getAllExtensions());
+                        Files.walkFileTree(parentPath, l);
+                        actualFile = l.getFile();
+                    }
+                    catch (IOException ioe2) {
+                        // Don't do anything. We simply didn't find it using the parent path.
+                    }
+                }
+
+                // If we couldn't find it, try searching the entire workspace.
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
-                Files.walkFileTree(workspaceDir.toPath(), l);
+                if (actualFile == null) {
+                    FileLocator l =
+                            new FileLocator(baseName, ModuleType
+                                    .getAllExtensions());
+                    Files.walkFileTree(workspaceDir.toPath(), l);
+                    actualFile = l.getFile();
+                }
+
+                // Convert to ResolveFile
                 ModuleType extType =
-                        Utilities.getModuleType(l.getFile().getName());
+                        Utilities.getModuleType(actualFile.getName());
                 file =
-                        Utilities.convertToResolveFile(l.getFile(), extType,
+                        Utilities.convertToResolveFile(actualFile, extType,
                                 workspaceDir.getAbsolutePath());
             }
             catch (IOException ioe) {

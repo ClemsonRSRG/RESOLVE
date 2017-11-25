@@ -13,6 +13,8 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
@@ -32,7 +34,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
 
 /**
@@ -48,6 +52,13 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>This contains all the types declared by the {@code Concept}
+     * associated with the current module. Note that if we are in a
+     * {@code Facility}, this list will be empty.</p>
+     */
+    private final List<TypeFamilyDec> myConceptDeclaredTypes;
 
     /**
      * <p>The current {@link AssertiveCodeBlock} we are using to
@@ -77,10 +88,20 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     private final Map<ProgramFunctionExp, Exp> myEnsuresClauseMap;
 
     /**
+     * <p>If our current module scope allows us to introduce new type implementations,
+     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
+
+    /**
      * <p>A map that stores all the details associated with
      * a particular {@link Location}.</p>
      */
-    private final Map<Location, String> myLocationDetails;
+    private final Map<Location, LocationDetailModel> myLocationDetails;
+
+    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
+    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     /**
      * <p>A list that contains the modified requires clauses with the formal
@@ -114,12 +135,19 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      *
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
     public ProgramFunctionExpWalker(AssertiveCodeBlock block,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
             ModuleScope moduleScope, TypeGraph g) {
-        this(null, null, block, moduleScope, g);
+        this(null, null, block, typeFamilyDecs, localRepresentationTypeDecs,
+                processedInstFacDecs, moduleScope, g);
     }
 
     /**
@@ -132,18 +160,28 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * @param decreasingExp The {@code decreasing} clause for the visiting
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
-    public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp, AssertiveCodeBlock block, ModuleScope moduleScope, TypeGraph g) {
+    public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp,
+            AssertiveCodeBlock block, List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
+            ModuleScope moduleScope, TypeGraph g) {
+        myConceptDeclaredTypes = typeFamilyDecs;
         myCurrentAssertiveCodeBlock = block;
         myCurrentModuleScope = moduleScope;
         myCurrentOperationEntry = entry;
         myDecreasingExp = decreasingExp;
         myEnsuresClauseMap = new HashMap<>();
+        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
+        myLocationDetails = new HashMap<>();
+        myProcessedInstFacilityDecls = processedInstFacDecs;
         myRequiresClauseList = new LinkedList<>();
         myRestoresParamEnsuresClauses = new LinkedList<>();
-        myLocationDetails = new HashMap<>();
         myTerminationConfirmStmts = new LinkedList<>();
         myTypeGraph = g;
     }
@@ -183,11 +221,21 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             .getAssertionExp(), operationDec.getParameters(),
                             exp.getArguments());
 
-            // TODO: Replace any facility declaration actuals in the requires clause.
+            // Replace any facility declaration instantiation arguments
+            // in the requires clause.
+            requiresExp =
+                    Utilities.replaceFacilityFormalWithActual(requiresExp,
+                            operationDec.getParameters(), myCurrentModuleScope
+                                    .getDefiningElement().getName(),
+                            myConceptDeclaredTypes,
+                            myLocalRepresentationTypeDecs,
+                            myProcessedInstFacilityDecls);
 
             // Store the location detail for the function call's requires clause
-            myLocationDetails.put(requiresExp.getLocation(),
-                    "Requires Clause of " + fullOperationName);
+            Location requiresLoc = requiresExp.getLocation();
+            myLocationDetails.put(requiresLoc, new LocationDetailModel(
+                    requiresLoc, requiresLoc, "Requires Clause of "
+                            + fullOperationName));
 
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
@@ -201,11 +249,19 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                         .getAssertionExp(), operationDec.getParameters(), exp
                         .getArguments());
 
-        // TODO: Replace any facility declaration actuals in the ensures clause.
+        // Replace any facility declaration instantiation arguments
+        // in the ensures clause.
+        ensuresExp =
+                Utilities.replaceFacilityFormalWithActual(ensuresExp,
+                        operationDec.getParameters(), myCurrentModuleScope
+                                .getDefiningElement().getName(),
+                        myConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls);
 
         // Store the location detail for the function call's ensures clause
-        myLocationDetails.put(ensuresExp.getLocation(), "Ensures Clause of "
-                + fullOperationName);
+        Location ensuresLoc = ensuresExp.getLocation();
+        myLocationDetails.put(ensuresLoc, new LocationDetailModel(ensuresLoc,
+                ensuresLoc, "Ensures Clause of " + fullOperationName));
 
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);
@@ -269,7 +325,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      *
      * @return A map from {@link Location} to location detail strings.
      */
-    public final Map<Location, String> getNewLocationString() {
+    public final Map<Location, LocationDetailModel> getNewLocationString() {
         return myLocationDetails;
     }
 
@@ -385,10 +441,12 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 EqualsExp equalsExp =
                         new EqualsExp(expAsVarExp.getLocation().clone(),
                                 expAsVarExp, null, Operator.EQUAL, oldExp);
-                myLocationDetails.put(equalsExp.getLocation(),
-                        "Ensures Clause of " + opName + " (Condition from \""
+                Location equalsLoc = equalsExp.getLocation();
+                myLocationDetails.put(equalsLoc, new LocationDetailModel(
+                        equalsLoc, equalsLoc, "Ensures Clause of " + opName
+                                + " (Condition from \""
                                 + ParameterMode.RESTORES.name()
-                                + "\" parameter mode)");
+                                + "\" parameter mode)"));
                 myRestoresParamEnsuresClauses.add(equalsExp);
             }
         }
@@ -439,8 +497,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
             ConfirmStmt confirmStmt =
                     new ConfirmStmt(terminationExp.getLocation().clone(),
                             terminationExp, false);
-            myLocationDetails.put(confirmStmt.getLocation(),
-                    "Termination of Recursive Call");
+            Location confirmLoc = confirmStmt.getLocation();
+            myLocationDetails.put(confirmLoc, new LocationDetailModel(
+                    confirmLoc, confirmLoc, "Termination of Recursive Call"));
             myTerminationConfirmStmts.add(confirmStmt);
         }
     }
