@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import java.util.Deque;
 import java.util.Map;
 import org.stringtemplate.v4.ST;
@@ -55,7 +56,7 @@ public interface ProofRuleApplication {
      *
      * @return A map from {@link Location} to location detail strings.
      */
-    Map<Location, String> getNewLocationString();
+    Map<Location, LocationDetailModel> getNewLocationString();
 
     /**
      * <p>This method returns a description associated with

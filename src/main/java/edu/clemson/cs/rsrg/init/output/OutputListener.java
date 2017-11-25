@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +74,8 @@ public interface OutputListener {
      */
     void vcGeneratorResult(String inputFileName, String outputFileName,
             List<AssertiveCodeBlock> blocks,
-            Map<Location, String> locationDetails, String verboseOutput);
+            Map<Location, LocationDetailModel> locationDetails,
+            String verboseOutput);
 
     /**
      * <p>This method outputs the prover results for a given {@code VC}.</p>

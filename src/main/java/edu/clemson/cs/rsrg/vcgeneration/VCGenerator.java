@@ -66,6 +66,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.ConfirmStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.RememberStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
@@ -197,7 +198,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>A map that stores all the details associated with
      * a particular {@link Location}.</p>
      */
-    private final Map<Location, String> myLocationDetails;
+    private final Map<Location, LocationDetailModel> myLocationDetails;
 
     /** <p>String template groups for storing all the VC generation details.</p> */
     private final STGroup mySTGroup;
@@ -621,6 +622,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
 
+        // Add any new location details
+        myLocationDetails.putAll(declRule.getNewLocationString());
+
         myVariableSpecFinalItems.clear();
         myCurrentAssertiveCodeBlock = null;
         myCorrespondingOperation = null;
@@ -774,11 +778,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                     clause.getWhichEntailsExp(), false));
 
             // Add the location detail if it doesn't exist
-            if (!myLocationDetails.containsKey(clause.getWhichEntailsExp()
-                    .getLocation())) {
-                myLocationDetails.put(
-                        clause.getWhichEntailsExp().getLocation(), name
-                                .getName());
+            Location entailsLoc = clause.getWhichEntailsExp().getLocation();
+            if (!myLocationDetails.containsKey(entailsLoc)) {
+                myLocationDetails.put(entailsLoc, new LocationDetailModel(
+                        entailsLoc, entailsLoc, name.getName()));
             }
 
             // Create a new model for this assertive code block
@@ -815,7 +818,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @return A map containing location details.
      */
-    public final Map<Location, String> getLocationDetails() {
+    public final Map<Location, LocationDetailModel> getLocationDetails() {
         return myLocationDetails;
     }
 
@@ -1029,10 +1032,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Store the concept's module constraints
             if (!conceptModuleDec.getConstraints().isEmpty()) {
+                Location conceptLoc = conceptModuleDec.getLocation();
                 myGlobalConstraints.put(conceptModuleDec, conceptModuleDec
                         .getConstraints());
-                myLocationDetails.put(conceptModuleDec.getLocation(),
-                        "Constraint Clause for " + conceptModuleDec.getName());
+                myLocationDetails.put(conceptLoc, new LocationDetailModel(
+                        conceptLoc, conceptLoc, "Constraint Clause for "
+                                + conceptModuleDec.getName()));
             }
         }
         catch (NoSuchSymbolException e) {
@@ -1227,11 +1232,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                     .getModelType(), null);
 
                             // Store the constraint and its associated location detail for future use
+                            Location constraintLoc =
+                                    modifiedConstraint.getLocation();
                             myGlobalConstraints.put(dec, Collections
                                     .singletonList(modifiedConstraint));
-                            myLocationDetails.put(modifiedConstraint
-                                    .getLocation(), "Constraint Clause of "
-                                    + dec.getName());
+                            myLocationDetails.put(constraintLoc,
+                                    new LocationDetailModel(constraintLoc,
+                                            constraintLoc,
+                                            "Constraint Clause of "
+                                                    + dec.getName()));
                         }
                     }
                 }
@@ -1257,12 +1266,17 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Add the location details for both the requires and
             // which_entails expressions (if any).
-            myLocationDetails.put(requiresClause.getAssertionExp()
-                    .getLocation(), "Requires Clause of " + decName);
+            Location assertionLoc =
+                    requiresClause.getAssertionExp().getLocation();
+            myLocationDetails.put(assertionLoc,
+                    new LocationDetailModel(assertionLoc, assertionLoc,
+                            "Requires Clause of " + decName));
             if (requiresClause.getWhichEntailsExp() != null) {
-                myLocationDetails.put(requiresClause.getWhichEntailsExp()
-                        .getLocation(), "Which_Entails Expression Located at "
-                        + requiresClause.getWhichEntailsExp().getLocation());
+                Location entailsLoc =
+                        requiresClause.getAssertionExp().getLocation();
+                myLocationDetails.put(entailsLoc, new LocationDetailModel(
+                        entailsLoc, entailsLoc,
+                        "Which_Entails Expression Located at " + entailsLoc));
             }
         }
     }

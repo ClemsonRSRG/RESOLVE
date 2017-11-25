@@ -38,6 +38,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
@@ -353,7 +354,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
         myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
 
         // Store the location detail for the confirm statement
-        myLocationDetails.put(confirmStmt.getLocation(), "Requires Clause of " + opDec.getName());
+        Location confirmLoc = confirmStmt.getLocation();
+        myLocationDetails.put(confirmLoc, new LocationDetailModel(
+                confirmLoc, confirmLoc, "Requires Clause of " + opDec.getName()));
 
         if (parameterEnsures != null) {
             if (VarExp.isLiteralTrue(ensuresExp)) {
@@ -373,7 +376,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
         myCurrentAssertiveCodeBlock.addStatement(assumeStmt);
 
         // Store the location detail for the assume statement
-        myLocationDetails.put(assumeStmt.getLocation(), "Ensures Clause of " + opDec.getName());
+        Location assumeLoc = assumeStmt.getLocation();
+        myLocationDetails.put(assumeLoc, new LocationDetailModel(
+                assumeLoc, assumeLoc, "Ensures Clause of " + opDec.getName()));
 
         // Retrieve the list of VCs and use the sequent
         // substitution map to do replacements.

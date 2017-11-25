@@ -43,6 +43,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.*;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptTypeExtractor;
@@ -503,11 +504,16 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                         myConceptActualArgList);
 
                         // Store the location detail for this requires clause
-                        myLocationDetails.put(conceptRealizReq.getLocation(),
-                                "Requires Clause for "
-                                        + facConceptRealizDec.getName()
-                                                .getName() + " in "
-                                        + getRuleDescription());
+                        Location conceptRealizReqLoc =
+                                conceptRealizReq.getLocation();
+                        myLocationDetails.put(conceptRealizReqLoc,
+                                new LocationDetailModel(conceptRealizReqLoc,
+                                        myFacilityDec.getConceptRealizName()
+                                                .getLocation(),
+                                        "Requires Clause for "
+                                                + facConceptRealizDec.getName()
+                                                        .getName() + " in "
+                                                + getRuleDescription()));
                     }
 
                     // Iterate through searching for any operations being passed as parameters.
@@ -593,10 +599,12 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                 myConceptActualArgList);
 
                 // Store the location detail for this requires clause
-                myLocationDetails.put(conceptReq.getLocation(),
-                        "Requires Clause for "
+                Location conceptReqLoc = conceptReq.getLocation();
+                myLocationDetails.put(conceptReqLoc, new LocationDetailModel(
+                        conceptReqLoc, myFacilityDec.getConceptName()
+                                .getLocation(), "Requires Clause for "
                                 + facConceptDec.getName().getName() + " in "
-                                + getRuleDescription());
+                                + getRuleDescription()));
             }
 
             // Results from applying steps 1a to 1c.
@@ -757,11 +765,15 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                     myConceptActualArgList);
 
                     // Store the location detail for this requires clause
-                    myLocationDetails.put(realizationReq.getLocation(),
-                            "Requires Clause for "
-                                    + enhancementRealizModuleDec.getName()
-                                            .getName() + " in "
-                                    + getRuleDescription());
+                    Location realizationLoc = realizationReq.getLocation();
+                    myLocationDetails.put(realizationLoc,
+                            new LocationDetailModel(realizationLoc,
+                                    specRealizItem.getEnhancementRealizName()
+                                            .getLocation(),
+                                    "Requires Clause for "
+                                            + enhancementRealizModuleDec
+                                                    .getName().getName()
+                                            + " in " + getRuleDescription()));
                 }
 
                 // Iterate through searching for any operations being passed as parameters.
@@ -871,10 +883,14 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                 myConceptActualArgList);
 
                 // Store the location detail for this requires clause
-                myLocationDetails.put(enhancementReq.getLocation(),
-                        "Requires Clause for "
-                                + enhancementModuleDec.getName().getName()
-                                + " in " + getRuleDescription());
+                Location enhancementReqLoc = enhancementReq.getLocation();
+                myLocationDetails.put(enhancementReqLoc,
+                        new LocationDetailModel(enhancementReqLoc,
+                                specRealizItem.getEnhancementName()
+                                        .getLocation(), "Requires Clause for "
+                                        + enhancementModuleDec.getName()
+                                                .getName() + " in "
+                                        + getRuleDescription()));
             }
 
             // Results from applying steps 1a to 1e.
@@ -1014,8 +1030,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             if (actualOpQualifier != null) {
                 message += (actualOpQualifier.getName() + "::");
             }
-            myLocationDetails.put(retExp.getLocation(),
-                    message + actualOpDec.getName().getName() + " in " + getRuleDescription());
+            Location retExpLoc = retExp.getLocation();
+            myLocationDetails.put(retExpLoc, new LocationDetailModel(retExpLoc, argLoc,
+                    message + actualOpDec.getName().getName() + " in " + getRuleDescription()));
         }
 
         // Facility Decl Rule (Operations as Parameters Part 2):
@@ -1030,9 +1047,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             if (actualOpQualifier != null) {
                 message += (actualOpQualifier.getName() + "::");
             }
-            myLocationDetails.put(retExp.getLocation(), message + actualOpDec.getName().getName() +
+            Location impliesLoc = impliesExp.getLocation();
+            myLocationDetails.put(impliesLoc, new LocationDetailModel(impliesLoc, argLoc,
+                    message + actualOpDec.getName().getName() +
                     " implies the Ensures Clause of " + formalOpDec.getName().getName() +
-                    " in " + getRuleDescription());
+                    " in " + getRuleDescription()));
 
             // Form a conjunct if needed
             if (!VarExp.isLiteralTrue(retExp)) {

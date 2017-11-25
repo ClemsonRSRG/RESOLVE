@@ -189,7 +189,7 @@ public class Utilities {
      * @return The final confirm expression.
      */
     public static Exp createFinalConfirmExp(Location loc, ModuleScope scope,
-            TypeGraph g, Map<Location, String> locationStringsMap,
+            TypeGraph g, Map<Location, LocationDetailModel> locationStringsMap,
             OperationEntry correspondingOperationEntry) {
         Exp retExp = null;
 
@@ -201,13 +201,15 @@ public class Utilities {
             retExp = Utilities.formConjunct(loc, retExp, ensuresClause);
 
             // At the same time add the location details for these expressions.
-            locationStringsMap.put(ensuresExp.getLocation(), "Ensures Clause of "
-                    + correspondingOperationEntry.getName());
+            Location ensuresLoc = ensuresExp.getLocation();
+            locationStringsMap.put(ensuresLoc, new LocationDetailModel(
+                    ensuresLoc, loc,
+                    "Ensures Clause of " + correspondingOperationEntry.getName()));
             if (ensuresClause.getWhichEntailsExp() != null) {
-                locationStringsMap.put(ensuresClause.getWhichEntailsExp()
-                                .getLocation(),
-                        "Which_Entails expression for clause located at "
-                                + ensuresClause.getWhichEntailsExp().getLocation());
+                Location entailsLoc = ensuresClause.getWhichEntailsExp().getLocation();
+                locationStringsMap.put(entailsLoc, new LocationDetailModel(
+                        entailsLoc, loc,
+                        "Which_Entails expression for clause located at " + entailsLoc));
             }
         }
 
@@ -306,9 +308,12 @@ public class Utilities {
                 retExp = Utilities.formConjunct(restoresLoc.clone(), retExp, restoresEnsuresClause);
 
                 // Add the location details for this expression.
-                locationStringsMap.put(restoresEnsuresClause.getLocation(), "Ensures Clause of "
-                        + correspondingOperationEntry.getName()
-                        + " (Condition from \"" + parameterMode + "\" parameter mode)");
+                Location restoresEnsuresLoc = restoresEnsuresClause.getLocation();
+                locationStringsMap.put(restoresEnsuresLoc, new LocationDetailModel(
+                        restoresEnsuresLoc, loc,
+                        "Ensures Clause of "
+                                + correspondingOperationEntry.getName()
+                                + " (Condition from \"" + parameterMode + "\" parameter mode)"));
             }
             // The clears mode adds an additional ensures
             // that the outgoing value is the initial value.
@@ -339,9 +344,12 @@ public class Utilities {
                 retExp = Utilities.formConjunct(loc.clone(), retExp, modifiedInitEnsures);
 
                 // Add the location details for this expression.
-                locationStringsMap.put(modifiedInitEnsures.getLocation(), "Ensures Clause of "
-                        + correspondingOperationEntry.getName()
-                        + " (Condition from \"" + parameterMode + "\" parameter mode)");
+                Location modifiedInitEnsuresLoc = modifiedInitEnsures.getLocation();
+                locationStringsMap.put(modifiedInitEnsuresLoc, new LocationDetailModel(
+                        modifiedInitEnsuresLoc, loc,
+                        "Ensures Clause of "
+                                + correspondingOperationEntry.getName()
+                                + " (Condition from \"" + parameterMode + "\" parameter mode)"));
             }
 
             // TODO: See below!
@@ -355,8 +363,11 @@ public class Utilities {
             retExp = VarExp.getTrueVarExp(loc.clone(), g);
 
             // Add the location details for this expression.
-            locationStringsMap.put(retExp.getLocation(),
-                    "Ensures Clause of " + correspondingOperationEntry.getName());
+            Location retExpLoc = retExp.getLocation();
+            locationStringsMap.put(retExpLoc, new LocationDetailModel(
+                    retExpLoc, loc,
+                    "Ensures Clause of "
+                            + correspondingOperationEntry.getName()));
         }
 
         return retExp;
@@ -532,7 +543,7 @@ public class Utilities {
      */
     public static Exp createTopLevelAssumeExpForProcedureDec(Location loc,
             ModuleScope scope, AssertiveCodeBlock currentBlock,
-            Map<Location, String> locationStringsMap,
+            Map<Location, LocationDetailModel> locationStringsMap,
             List<AssertionClause> moduleLevelRequiresClauses,
             Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses,
             OperationEntry correspondingOperationEntry, boolean isLocalOperation) {
@@ -550,15 +561,18 @@ public class Utilities {
             retExp = Utilities.formConjunct(loc, retExp, requiresClause);
 
             // At the same time add the location details for these expressions.
-            locationStringsMap.put(requiresExp.getLocation(),
-                    "Requires Clause of "
-                            + correspondingOperationEntry.getName());
+            Location requiresLoc = requiresExp.getLocation();
+            locationStringsMap.put(requiresLoc, new LocationDetailModel(
+                    requiresLoc, requiresLoc, "Requires Clause of "
+                            + correspondingOperationEntry.getName()));
             if (requiresClause.getWhichEntailsExp() != null) {
-                locationStringsMap.put(requiresClause.getWhichEntailsExp()
-                        .getLocation(),
+                Location entailsLoc =
+                        requiresClause.getWhichEntailsExp().getLocation();
+                locationStringsMap.put(entailsLoc, new LocationDetailModel(
+                        entailsLoc, entailsLoc,
                         "Which_Entails expression for clause located at "
                                 + requiresClause.getWhichEntailsExp()
-                                        .getLocation());
+                                        .getLocation()));
             }
         }
 
@@ -612,17 +626,22 @@ public class Utilities {
                                         modifiedConstraintClause);
 
                         // At the same time add the location details for these expressions.
-                        locationStringsMap.put(modifiedConstraintClause
-                                .getAssertionExp().getLocation(),
-                                "Constraint Clause of "
-                                        + parameterVarDec.getName());
+                        Location constraintLoc =
+                                modifiedConstraintClause.getAssertionExp()
+                                        .getLocation();
+                        locationStringsMap.put(constraintLoc,
+                                new LocationDetailModel(constraintLoc,
+                                        constraintLoc, "Constraint Clause of "
+                                                + parameterVarDec.getName()));
                         if (constraintClause.getWhichEntailsExp() != null) {
-                            locationStringsMap.put(modifiedConstraintClause
-                                    .getWhichEntailsExp().getLocation(),
-                                    "Which_Entails expression for clause located at "
-                                            + modifiedConstraintClause
-                                                    .getWhichEntailsExp()
-                                                    .getLocation());
+                            Location entailsLoc =
+                                    modifiedConstraintClause
+                                            .getWhichEntailsExp().getLocation();
+                            locationStringsMap.put(entailsLoc,
+                                    new LocationDetailModel(entailsLoc,
+                                            entailsLoc,
+                                            "Which_Entails expression for clause located at "
+                                                    + entailsLoc));
                         }
                     }
                 }

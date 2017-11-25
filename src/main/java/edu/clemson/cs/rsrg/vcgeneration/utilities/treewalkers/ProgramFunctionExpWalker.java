@@ -34,6 +34,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
@@ -97,7 +98,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * <p>A map that stores all the details associated with
      * a particular {@link Location}.</p>
      */
-    private final Map<Location, String> myLocationDetails;
+    private final Map<Location, LocationDetailModel> myLocationDetails;
 
     /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
     private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
@@ -231,8 +232,10 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             myProcessedInstFacilityDecls);
 
             // Store the location detail for the function call's requires clause
-            myLocationDetails.put(requiresExp.getLocation(),
-                    "Requires Clause of " + fullOperationName);
+            Location requiresLoc = requiresExp.getLocation();
+            myLocationDetails.put(requiresLoc, new LocationDetailModel(
+                    requiresLoc, requiresLoc, "Requires Clause of "
+                            + fullOperationName));
 
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
@@ -256,8 +259,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                         myProcessedInstFacilityDecls);
 
         // Store the location detail for the function call's ensures clause
-        myLocationDetails.put(ensuresExp.getLocation(), "Ensures Clause of "
-                + fullOperationName);
+        Location ensuresLoc = ensuresExp.getLocation();
+        myLocationDetails.put(ensuresLoc, new LocationDetailModel(ensuresLoc,
+                ensuresLoc, "Ensures Clause of " + fullOperationName));
 
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);
@@ -321,7 +325,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      *
      * @return A map from {@link Location} to location detail strings.
      */
-    public final Map<Location, String> getNewLocationString() {
+    public final Map<Location, LocationDetailModel> getNewLocationString() {
         return myLocationDetails;
     }
 
@@ -437,10 +441,12 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 EqualsExp equalsExp =
                         new EqualsExp(expAsVarExp.getLocation().clone(),
                                 expAsVarExp, null, Operator.EQUAL, oldExp);
-                myLocationDetails.put(equalsExp.getLocation(),
-                        "Ensures Clause of " + opName + " (Condition from \""
+                Location equalsLoc = equalsExp.getLocation();
+                myLocationDetails.put(equalsLoc, new LocationDetailModel(
+                        equalsLoc, equalsLoc, "Ensures Clause of " + opName
+                                + " (Condition from \""
                                 + ParameterMode.RESTORES.name()
-                                + "\" parameter mode)");
+                                + "\" parameter mode)"));
                 myRestoresParamEnsuresClauses.add(equalsExp);
             }
         }
@@ -491,8 +497,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
             ConfirmStmt confirmStmt =
                     new ConfirmStmt(terminationExp.getLocation().clone(),
                             terminationExp, false);
-            myLocationDetails.put(confirmStmt.getLocation(),
-                    "Termination of Recursive Call");
+            Location confirmLoc = confirmStmt.getLocation();
+            myLocationDetails.put(confirmLoc, new LocationDetailModel(
+                    confirmLoc, confirmLoc, "Termination of Recursive Call"));
             myTerminationConfirmStmts.add(confirmStmt);
         }
     }
