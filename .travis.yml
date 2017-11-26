@@ -6,27 +6,52 @@ sudo: false
 branches:
   only:
     - master
-
-# Compile and run the tests using JDK8
 language: java
-jdk:
-  - oraclejdk8
 
-# Don't run the initial maven install
+# Skipping the Installation Step
 install: true
+
+# Build Stages Order
+stages:
+  - check styles
+  - junit tests
+  - compiler tests
 
 # The following settings allow us to run concurrent tests using the scripts in the "bin" folder.
 # It also caches things related to Maven. If caching errors occur, please clear the cache on the
 # Travis CI website.
-env:
-  - SCRIPT=runFormatter
-  - SCRIPT=runLicensePlugin
-  - SCRIPT=runJUnitTests
-  - SCRIPT=runCompilerTests
-before_script:
-  - chmod +x bin/$SCRIPT
-script:
-  - bin/$SCRIPT
-cache:
-  directories:
-      - $HOME/.m2
+jobs:
+  include:
+    # This stage makes sure that our code styles are the same.
+    - stage: check styles
+      jdk: oraclejdk8
+      before_script:
+        - chmod +x bin/runFormatter
+      script:
+        - bin/runFormatter
+    - stage: check styles
+      jdk: oraclejdk8
+      before_script:
+        - chmod +x bin/runLicensePlugin
+      script:
+        - bin/runLicensePlugin
+    # This stage runs the JUnit tests.
+    - stage: junit tests
+      jdk: oraclejdk8
+      script: 
+        - mvn test -B
+    # This stage runs the RESOLVE compiler on files that we know to be working.
+    - stage: compiler tests
+      jdk: oraclejdk8
+      install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+      before_script: 
+        - chmod +x bin/runAnalyzeTests
+      script:
+        - bin/runAnalyzeTests
+    - stage: compiler tests
+      jdk: oraclejdk8
+      install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+      before_script: 
+        - chmod +x bin/runProveTests
+      script:
+        - bin/runProveTests

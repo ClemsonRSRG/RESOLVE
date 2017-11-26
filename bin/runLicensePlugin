@@ -2,7 +2,7 @@
 # This script runs the license plugin to make sure all source files have the appropriate license header.
 
 # Run the check goal for the license plugin
-mvn clean license:check
+mvn license:check
 
 # Change the permission of this file back to 644
 chmod 644 bin/runLicensePlugin

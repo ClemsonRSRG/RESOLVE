@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -45,7 +46,7 @@ public abstract class AbstractProofRuleApplication
      * <p>A map that stores all the details associated with
      * a particular {@link Location}.</p>
      */
-    protected final Map<Location, String> myLocationDetails;
+    protected final Map<Location, LocationDetailModel> myLocationDetails;
 
     /**
      * <p>A double ended queue that contains all the assertive code blocks
@@ -119,7 +120,7 @@ public abstract class AbstractProofRuleApplication
      * @return A map from {@link Location} to location detail strings.
      */
     @Override
-    public final Map<Location, String> getNewLocationString() {
+    public final Map<Location, LocationDetailModel> getNewLocationString() {
         return myLocationDetails;
     }
 

@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDe
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -55,15 +56,18 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VCConfirmStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -108,6 +112,27 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     /** <p>The mathematical type Z.</p> */
     private MTType Z;
+
+    // -----------------------------------------------------------
+    // Facility Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This contains all the types declared by the {@code Concept}
+     * associated with the current module. Note that if we are in a
+     * {@code Facility}, this list will be empty.</p>
+     */
+    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
+
+    /**
+     * <p>If our current module scope allows us to introduce new type implementations,
+     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
+
+    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
+    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     // -----------------------------------------------------------
     // Operation Declaration-Related
@@ -171,7 +196,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>A map that stores all the details associated with
      * a particular {@link Location}.</p>
      */
-    private final Map<Location, String> myLocationDetails;
+    private final Map<Location, LocationDetailModel> myLocationDetails;
 
     /** <p>String template groups for storing all the VC generation details.</p> */
     private final STGroup mySTGroup;
@@ -226,11 +251,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertiveCodeBlockModels = new LinkedHashMap<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
+        myCurrentConceptDeclaredTypes = new LinkedList<>();
         myFinalAssertiveCodeBlocks = new LinkedList<>();
         myGlobalConstraints = new LinkedHashMap<>();
         myGlobalRequires = new LinkedList<>();
+        myLocalRepresentationTypeDecs = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
         myLocationDetails = new LinkedHashMap<>();
+        myProcessedInstFacilityDecls = new LinkedList<>();
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
         myVariableSpecFinalItems = new LinkedHashMap<>();
@@ -277,6 +305,23 @@ public class VCGenerator extends TreeWalkerVisitor {
                     FacilityDec facDec =
                             (FacilityDec) s.toFacilityEntry(dec.getLocation())
                                     .getDefiningElement();
+
+                    // Create a new model for this assertive code block
+                    ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+                    blockModel.add("blockName", dec.getName());
+
+                    FacilityDeclRule ruleApplication =
+                            new FacilityDeclRule(facDec, false,
+                                    myCurrentConceptDeclaredTypes,
+                                    myLocalRepresentationTypeDecs,
+                                    myProcessedInstFacilityDecls,
+                                    myBuilder, myCurrentModuleScope,
+                                    new AssertiveCodeBlock(myTypeGraph, facDec, facDec.getName()),
+                                    mySTGroup, blockModel);
+                    ruleApplication.applyRule();
+
+                    // Store this facility's InstantiatedFacilityDecl for future use
+                    myProcessedInstFacilityDecls.add(ruleApplication.getInstantiatedFacilityDecl());
 
                     // Store all requires/constraint from the imported concept
                     PosSymbol conceptName = facDec.getConceptName();
@@ -363,6 +408,29 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Concept Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ConceptModuleDec}.</p>
+     *
+     * @param concept A concept module declaration.
+     */
+    @Override
+    public final void preConceptModuleDec(ConceptModuleDec concept) {
+        PosSymbol conceptName = concept.getName();
+
+        // Store the enhancement realization requires clause
+        storeRequiresClause(conceptName.getName(), concept.getRequires());
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputConceptHeader").add(
+                        "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
     // Enhancement Realization Module
     // -----------------------------------------------------------
 
@@ -385,6 +453,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
         storeConceptAssertionClauses(conceptName.getLocation(), coId, false);
 
+        // Store all the type families declared in the concept
+        storeConceptTypeFamilyDecs(conceptName.getLocation(), coId);
+
         // Store all requires/constraint from the imported enhancement
         PosSymbol enhancementName = enhancementRealization.getEnhancementName();
         ModuleIdentifier enId = new ModuleIdentifier(enhancementName.getName());
@@ -398,6 +469,59 @@ public class VCGenerator extends TreeWalkerVisitor {
                         "enhancementName", enhancementName.getName()).add(
                         "conceptName", conceptName.getName());
         myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
+    // Facility-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link FacilityDec}.</p>
+     *
+     * @param dec A facility declaration.
+     */
+    @Override
+    public final void postFacilityDec(FacilityDec dec) {
+        // Create a new assertive code block
+        myCurrentAssertiveCodeBlock =
+                new AssertiveCodeBlock(myTypeGraph, dec, dec.getName());
+
+        // Create the top most level assume statement and
+        // add it to the assertive code block as the first statement
+        AssumeStmt topLevelAssumeStmt =
+                new AssumeStmt(dec.getLocation().clone(), Utilities
+                        .createTopLevelAssumeExpFromContext(dec.getLocation(),
+                                myGlobalRequires, myGlobalConstraints), false);
+        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+        // Create a new model for this assertive code block
+        ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        blockModel.add("blockName", dec.getName());
+
+        // Apply facility declaration rule
+        FacilityDeclRule declRule =
+                new FacilityDeclRule(dec, true, myCurrentConceptDeclaredTypes,
+                        myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls, myBuilder,
+                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                        mySTGroup, blockModel);
+        declRule.applyRule();
+
+        // Store this facility's InstantiatedFacilityDecl for future use
+        myProcessedInstFacilityDecls
+                .add(declRule.getInstantiatedFacilityDecl());
+
+        // Update the current assertive code block and its associated block model.
+        myCurrentAssertiveCodeBlock =
+                declRule.getAssertiveCodeBlocks().getFirst();
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, declRule
+                .getBlockModel());
+
+        // Add this as a new incomplete assertive code block
+        myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
+
+        // Add any new location details
+        myLocationDetails.putAll(declRule.getNewLocationString());
     }
 
     // -----------------------------------------------------------
@@ -441,7 +565,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // add it to the assertive code block as the first statement
         // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
         AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation().clone(),
-                Utilities.createTopLevelAssumeExps(dec.getLocation(), myCurrentModuleScope,
+                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(), myCurrentModuleScope,
                         myCurrentAssertiveCodeBlock, myLocationDetails, myGlobalRequires, myGlobalConstraints,
                         myCorrespondingOperation, isLocal),
                 false);
@@ -496,9 +620,38 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
 
+        // Add any new location details
+        myLocationDetails.putAll(declRule.getNewLocationString());
+
         myVariableSpecFinalItems.clear();
         myCurrentAssertiveCodeBlock = null;
         myCorrespondingOperation = null;
+    }
+
+    // -----------------------------------------------------------
+    // Type Realization-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AbstractTypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declaration.
+     */
+    @Override
+    public final void postAbstractTypeRepresentationDec(
+            AbstractTypeRepresentationDec dec) {
+        myLocalRepresentationTypeDecs.add((AbstractTypeRepresentationDec) dec
+                .clone());
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeFamilyDec}.</p>
+     *
+     * @param dec A type family declared in a {@code Concept}.
+     */
+    @Override
+    public final void postTypeFamilyDec(TypeFamilyDec dec) {
+        myCurrentConceptDeclaredTypes.add((TypeFamilyDec) dec.clone());
     }
 
     // -----------------------------------------------------------
@@ -596,6 +749,53 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
     }
 
+    // -----------------------------------------------------------
+    // Other
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AssertionClause}.</p>
+     *
+     * @param clause An assertion clause declaration.
+     */
+    @Override
+    public final void postAssertionClause(AssertionClause clause) {
+        if (clause.getWhichEntailsExp() != null) {
+            // Create a new assertive code block
+            PosSymbol name =
+                    new PosSymbol(clause.getLocation(),
+                            "Which_Entails Expression Located at  "
+                                    + clause.getLocation());
+            AssertiveCodeBlock block =
+                    new AssertiveCodeBlock(myTypeGraph, clause, name);
+
+            // Apply the rule
+            block.addStatement(new AssumeStmt(clause.getLocation().clone(),
+                    clause.getAssertionExp(), false));
+            block.addStatement(new ConfirmStmt(clause.getLocation().clone(),
+                    clause.getWhichEntailsExp(), false));
+
+            // Add the location detail if it doesn't exist
+            Location entailsLoc = clause.getWhichEntailsExp().getLocation();
+            if (!myLocationDetails.containsKey(entailsLoc)) {
+                myLocationDetails.put(entailsLoc, new LocationDetailModel(
+                        entailsLoc, entailsLoc, name.getName()));
+            }
+
+            // Create a new model for this assertive code block
+            ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+            blockModel.add("blockName", name);
+            ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+            stepModel.add("proofRuleName", "Which_Entails Declaration Rule")
+                    .add("currentStateOfBlock", block);
+            blockModel.add("vcGenSteps", stepModel.render());
+            myAssertiveCodeBlockModels.put(block, blockModel);
+
+            // Add this as a new incomplete assertive code block
+            myIncompleteAssertiveCodeBlocks.add(block);
+        }
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
@@ -616,7 +816,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @return A map containing location details.
      */
-    public final Map<Location, String> getLocationDetails() {
+    public final Map<Location, LocationDetailModel> getLocationDetails() {
         return myLocationDetails;
     }
 
@@ -854,10 +1054,39 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Store the concept's module constraints
             if (!conceptModuleDec.getConstraints().isEmpty()) {
+                Location conceptLoc = conceptModuleDec.getLocation();
                 myGlobalConstraints.put(conceptModuleDec, conceptModuleDec
                         .getConstraints());
-                myLocationDetails.put(conceptModuleDec.getLocation(),
-                        "Constraint Clause for " + conceptModuleDec.getName());
+                myLocationDetails.put(conceptLoc, new LocationDetailModel(
+                        conceptLoc, conceptLoc, "Constraint Clause for "
+                                + conceptModuleDec.getName()));
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(loc);
+        }
+    }
+
+    /**
+     * <p>An helper method for storing the imported {@code concept's}
+     * {@code Type Family} declarations for future use.</p>
+     *
+     * @param loc The location of the imported {@code module}.
+     * @param id A {@link ModuleIdentifier} referring to an
+     *           importing {@code concept}.
+     */
+    private void storeConceptTypeFamilyDecs(Location loc, ModuleIdentifier id) {
+        try {
+            ConceptModuleDec conceptModuleDec =
+                    (ConceptModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+            List<Dec> decs = conceptModuleDec.getDecList();
+
+            for (Dec dec : decs) {
+                if (dec instanceof TypeFamilyDec) {
+                    myCurrentConceptDeclaredTypes.add((TypeFamilyDec) dec
+                            .clone());
+                }
             }
         }
         catch (NoSuchSymbolException e) {
@@ -1025,11 +1254,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                     .getModelType(), null);
 
                             // Store the constraint and its associated location detail for future use
+                            Location constraintLoc =
+                                    modifiedConstraint.getLocation();
                             myGlobalConstraints.put(dec, Collections
                                     .singletonList(modifiedConstraint));
-                            myLocationDetails.put(modifiedConstraint
-                                    .getLocation(), "Constraint Clause of "
-                                    + dec.getName());
+                            myLocationDetails.put(constraintLoc,
+                                    new LocationDetailModel(constraintLoc,
+                                            constraintLoc,
+                                            "Constraint Clause of "
+                                                    + dec.getName()));
                         }
                     }
                 }
@@ -1055,14 +1288,17 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Add the location details for both the requires and
             // which_entails expressions (if any).
-            myLocationDetails.put(requiresClause.getAssertionExp()
-                    .getLocation(), "Requires Clause of " + decName);
+            Location assertionLoc =
+                    requiresClause.getAssertionExp().getLocation();
+            myLocationDetails.put(assertionLoc,
+                    new LocationDetailModel(assertionLoc, assertionLoc,
+                            "Requires Clause of " + decName));
             if (requiresClause.getWhichEntailsExp() != null) {
-                myLocationDetails.put(requiresClause.getWhichEntailsExp()
-                        .getLocation(),
-                        "Which_Entails expression for clause located at "
-                                + requiresClause.getWhichEntailsExp()
-                                        .getLocation());
+                Location entailsLoc =
+                        requiresClause.getAssertionExp().getLocation();
+                myLocationDetails.put(entailsLoc, new LocationDetailModel(
+                        entailsLoc, entailsLoc,
+                        "Which_Entails Expression Located at " + entailsLoc));
             }
         }
     }

@@ -37,6 +37,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
@@ -352,7 +353,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
         myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
 
         // Store the location detail for the confirm statement
-        myLocationDetails.put(confirmStmt.getLocation(), "Requires Clause of " + opDec.getName());
+        Location confirmLoc = confirmStmt.getLocation();
+        myLocationDetails.put(confirmLoc, new LocationDetailModel(
+                confirmLoc, confirmLoc, "Requires Clause of " + opDec.getName()));
 
         if (parameterEnsures != null) {
             if (VarExp.isLiteralTrue(ensuresExp)) {
@@ -372,7 +375,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
         myCurrentAssertiveCodeBlock.addStatement(assumeStmt);
 
         // Store the location detail for the assume statement
-        myLocationDetails.put(assumeStmt.getLocation(), "Ensures Clause of " + opDec.getName());
+        Location assumeLoc = assumeStmt.getLocation();
+        myLocationDetails.put(assumeLoc, new LocationDetailModel(
+                assumeLoc, assumeLoc, "Ensures Clause of " + opDec.getName()));
 
         // Retrieve the list of VCs and use the sequent
         // substitution map to do replacements.
@@ -405,7 +410,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>Replace the formal with the actual variables
+     * <p>An helper method that replaces the formal with the actual variables
      * inside the requires clause.</p>
      *
      * @param requires The requires clause.
@@ -426,24 +431,24 @@ public class CallStmtRule extends AbstractProofRuleApplication
             Exp exp = argList.get(i);
 
             // Convert the pExp into a something we can use
-            Exp repl = Utilities.convertExp(exp, myCurrentModuleScope);
+            Exp replExp = Utilities.convertExp(exp, myCurrentModuleScope);
 
             // VarExp form of the parameter variable
-            VarExp oldExp =
+            VarExp paramExpAsVarExp =
                     Utilities.createVarExp(varDec.getLocation(), null,
                             varDec.getName(), exp.getMathType(), exp.getMathTypeValue());
 
-            // New VarExp
-            VarExp newExp =
+            // A temporary VarExp that avoids any formal with the same name as the actual.
+            VarExp tempExp =
                     Utilities.createVarExp(varDec.getLocation(), null,
                             new PosSymbol(varDec.getLocation(), "_" + varDec.getName().getName()),
-                            repl.getMathType(), repl.getMathTypeValue());
+                            replExp.getMathType(), replExp.getMathTypeValue());
 
             // Add a substitution entry from formal parameter to temp
-            paramToTemp.put(oldExp, newExp);
+            paramToTemp.put(paramExpAsVarExp, tempExp);
 
             // Add a substitution entry from temp to actual parameter
-            tempToActual.put(newExp, repl);
+            tempToActual.put(tempExp, replExp);
         }
 
         // Replace from formal to temp and then from temp to actual

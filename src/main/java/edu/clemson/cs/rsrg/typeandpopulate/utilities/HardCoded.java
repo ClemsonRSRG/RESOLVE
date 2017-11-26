@@ -25,20 +25,18 @@ import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry.Quantification;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.UnbufferedCharStream;
 
 /**
  * <p>The <code>HardCoded</code> class defines all mathematical symbols
@@ -68,8 +66,8 @@ public class HardCoded {
             // this and see if it can be moved to a physical file.
             Location classTheoryLoc =
                     new Location(new ResolveFile("Cls_Theory",
-                            ModuleType.THEORY, new ANTLRInputStream(
-                            new StringReader("")),
+                            ModuleType.THEORY, new UnbufferedCharStream(
+                            new StringReader("")), null,
                             new ArrayList<String>(), ""),
                             0, 0);
             ModuleDec module =
@@ -194,10 +192,6 @@ public class HardCoded {
             //Not possible--we're the first ones to add anything
             throw new RuntimeException(dse);
         }
-        catch (IOException e) {
-            throw new MiscErrorException(
-                    "Error instantiating built-in relationships", e);
-        }
     }
 
     /**
@@ -214,8 +208,8 @@ public class HardCoded {
             // we associate everything with a VarExp.
             Location globalSpaceLoc =
                     new Location(new ResolveFile("Global", ModuleType.THEORY,
-                            new ANTLRInputStream(new StringReader("")),
-                            new ArrayList<String>(), ""), 0, 0);
+                            new UnbufferedCharStream(new StringReader("")),
+                            null, new ArrayList<String>(), ""), 0, 0);
             VarExp v =
                     new VarExp(globalSpaceLoc, null, new PosSymbol(
                             globalSpaceLoc, "Global"));
@@ -249,10 +243,6 @@ public class HardCoded {
         catch (DuplicateSymbolException dse) {
             //Not possible--we're the first ones to add anything
             throw new RuntimeException(dse);
-        }
-        catch (IOException e) {
-            throw new MiscErrorException(
-                    "Error instantiating symbols in the global space", e);
         }
     }
 
