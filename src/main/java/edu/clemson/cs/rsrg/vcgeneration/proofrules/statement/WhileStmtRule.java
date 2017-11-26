@@ -24,10 +24,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.VCConfirmStmt;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.*;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,7 +106,9 @@ public class WhileStmtRule extends AbstractProofRuleApplication
         ConfirmStmt confirmStmt = new ConfirmStmt(loopInvariantClause.getLocation().clone(),
                 loopInvariantClause.getAssertionExp().clone(), false);
         myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
-        myLocationDetails.put(confirmStmt.getLocation(), "Base Case of the Invariant of While Statement");
+        myLocationDetails.put(confirmStmt.getLocation(),
+                new LocationDetailModel(confirmStmt.getLocation(), confirmStmt.getLocation(),
+                        "Base Case of the Invariant of While Statement"));
 
         // NY YS
         // TODO: Obtain the elapsed time duration of loop
@@ -161,10 +161,14 @@ public class WhileStmtRule extends AbstractProofRuleApplication
                 decreasingClause.getAssertionExp().clone(), null,
                 new PosSymbol(decreasingClause.getLocation().clone(), "<="), sumExp);
         terminationExp.setMathType(myTypeGraph.BOOLEAN);
-        myLocationDetails.put(terminationExp.getLocation(), "Termination of While Statement");
+        myLocationDetails.put(terminationExp.getLocation(),
+                new LocationDetailModel(terminationExp.getLocation(), terminationExp.getLocation(),
+                        "Termination of While Statement"));
 
         Exp invariantAsExp = loopInvariantClause.getAssertionExp().clone();
-        myLocationDetails.put(invariantAsExp.getLocation(), "Inductive Case of Invariant of While Statement");
+        myLocationDetails.put(invariantAsExp.getLocation(),
+                new LocationDetailModel(invariantAsExp.getLocation(), invariantAsExp.getLocation(),
+                        "Inductive Case of Invariant of While Statement"));
 
         // YS: Simplify if we have "maintaining true"
         ifStmts.add(new ConfirmStmt(loopInvariantClause.getLocation().clone(),
