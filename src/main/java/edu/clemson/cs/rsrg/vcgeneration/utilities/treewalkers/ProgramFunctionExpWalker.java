@@ -384,34 +384,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns a newly created {@link VarExp}
-     * with {@code P_Val} as the name and {@code N} as its math type.</p>
-     *
-     * @param loc New {@link VarExp VarExp's} {@link Location}.
-     * @param scope The module scope to start our search.
-     *
-     * @return {@code P_Val} variable expression.
-     */
-    private VarExp createPValExp(Location loc, ModuleScope scope) {
-        // TODO: Use the one defined in Utilities when we merge with the branch that has it.
-        VarExp retExp = null;
-
-        // Locate "N" (Natural Number)
-        MathSymbolEntry mse = Utilities.searchMathSymbol(loc, "N", scope);
-        try {
-            // Create a variable with the name P_val
-            retExp =
-                    Utilities.createVarExp(loc.clone(), null, new PosSymbol(loc
-                            .clone(), "P_Val"), mse.getTypeValue(), null);
-        }
-        catch (SymbolNotOfKindTypeException e) {
-            Utilities.notAType(mse, loc);
-        }
-
-        return retExp;
-    }
-
-    /**
      * <p>An helper method that generates {@code ensures} clauses for any parameters
      * with {@code restores} parameter mode.</p>
      *
@@ -467,8 +439,8 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         else {
             VCVarExp nqvPValExp =
                     Utilities.createVCVarExp(myCurrentAssertiveCodeBlock,
-                            createPValExp(
-                                    myDecreasingExp.getLocation().clone(),
+                            Utilities.createPValExp(myDecreasingExp
+                                    .getLocation().clone(),
                                     myCurrentModuleScope));
 
             // Generate the termination of recursive call: P_Exp <= 1 + NQV(RS, P_Val)
