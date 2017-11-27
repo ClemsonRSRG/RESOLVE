@@ -1032,6 +1032,79 @@ public class Utilities {
     }
 
     /**
+     * <p>An helper method that negates the incoming expression.</p>
+     *
+     * @param exp The expression to be negated.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return A modified {@link Exp}.
+     */
+    public static Exp negateExp(Exp exp, MTType booleanType) {
+        Exp retExp;
+
+        // Case 1: Some kind of equality expression
+        if (exp instanceof EqualsExp) {
+            EqualsExp expAsEqualsExp = (EqualsExp) exp;
+
+            // Obtain the new operator
+            Operator newOperator;
+            if (expAsEqualsExp.getOperator() == Operator.EQUAL) {
+                newOperator = Operator.NOT_EQUAL;
+            }
+            else {
+                newOperator = Operator.EQUAL;
+            }
+
+            // Copy the qualifier if any
+            PosSymbol newQualifier = null;
+            if (expAsEqualsExp.getQualifier() != null) {
+                newQualifier = expAsEqualsExp.getQualifier().clone();
+            }
+
+            // Create the negation of the equality expression.
+            retExp =
+                    new EqualsExp(expAsEqualsExp.getLocation().clone(),
+                            expAsEqualsExp.getLeft().clone(), newQualifier,
+                            newOperator, expAsEqualsExp.getRight().clone());
+        }
+        // Case 2: Some kind of prefix expression
+        else if (exp instanceof PrefixExp) {
+            PrefixExp expAsPrefixExp = (PrefixExp) exp;
+
+            // We can only deal with not expressions.
+            // Any other kind of expression, we simply negate it!
+            if (expAsPrefixExp.getOperatorAsString().equals("not")) {
+                retExp = expAsPrefixExp.getArgument().clone();
+            }
+            else {
+                // Copy the qualifier if any
+                PosSymbol newQualifier = null;
+                if (expAsPrefixExp.getQualifier() != null) {
+                    newQualifier = expAsPrefixExp.getQualifier().clone();
+                }
+
+                retExp =
+                        new PrefixExp(expAsPrefixExp.getLocation().clone(),
+                                newQualifier, new PosSymbol(expAsPrefixExp
+                                        .getLocation().clone(), "not"),
+                                expAsPrefixExp.clone());
+            }
+        }
+        // Case 3: All other kinds of expressions.
+        else {
+            retExp =
+                    new PrefixExp(exp.getLocation().clone(), null,
+                            new PosSymbol(exp.getLocation().clone(), "not"),
+                            exp.clone());
+        }
+
+        // Set the type of this new expression to be boolean
+        retExp.setMathType(booleanType);
+
+        return retExp;
+    }
+
+    /**
      * <p>An helper method that throws the appropriate message that
      * the symbol table entry that we found isn't a type.</p>
      *
