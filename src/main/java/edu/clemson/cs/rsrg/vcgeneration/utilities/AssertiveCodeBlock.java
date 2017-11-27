@@ -19,7 +19,6 @@ import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -183,9 +182,19 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
                 new AssertiveCodeBlock(myTypeGraph, myInstantiatingElement,
                         myBlockName);
 
-        Collections.copy(newBlock.myFreeVars, myFreeVars);
-        Collections.copy(newBlock.myVCs, myVCs);
-        Collections.copy(newBlock.myStatements, myStatements);
+        // YS: Collections.copy complains about source does not fit in dest,
+        // it probably doesn't know it is a LinkedList, so we manually copy everything.
+        for (Exp current : myFreeVars) {
+            newBlock.myFreeVars.add(current.clone());
+        }
+
+        for (Statement statement : myStatements) {
+            newBlock.myStatements.add(statement.clone());
+        }
+
+        for (VerificationCondition vc : myVCs) {
+            newBlock.myVCs.add(vc.clone());
+        }
 
         return newBlock;
     }

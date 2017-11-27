@@ -16,7 +16,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -93,7 +92,9 @@ public class FormalActualLists {
      */
     public final List<Exp> getActualArgList() {
         List<Exp> retList = new ArrayList<>(myActualArgList.size());
-        Collections.copy(retList, myActualArgList);
+        for (Exp exp : myActualArgList) {
+            retList.add(exp.clone());
+        }
 
         return retList;
     }
@@ -106,7 +107,9 @@ public class FormalActualLists {
      */
     public final List<VarExp> getFormalParamList() {
         List<VarExp> retList = new ArrayList<>(myFormalParamList.size());
-        Collections.copy(retList, myFormalParamList);
+        for (VarExp varExp : myFormalParamList) {
+            retList.add((VarExp) varExp.clone());
+        }
 
         return retList;
     }
