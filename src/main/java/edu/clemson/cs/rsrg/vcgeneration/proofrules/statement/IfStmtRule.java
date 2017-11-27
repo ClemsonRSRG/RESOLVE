@@ -24,6 +24,7 @@ import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.IfStmt;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -66,6 +67,19 @@ public class IfStmtRule extends AbstractProofRuleApplication
      */
     private final ModuleScope myCurrentModuleScope;
 
+    /**
+     * <p>If we are in a {@code Procedure} and it is an recursive
+     * operation implementation, then this stores the decreasing clause
+     * expression.</p>
+     */
+    private final Exp myCurrentProcedureDecreasingExp;
+
+    /**
+     * <p>The {@link OperationEntry} associated with this {@code If}
+     * statement if we are inside a {@code ProcedureDec}.</p>
+     */
+    private final OperationEntry myCurrentProcedureOperationEntry;
+
     /** <p>The {@link IfStmt} we are applying the rule to.</p> */
     private final IfStmt myIfStmt;
 
@@ -78,9 +92,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
 
     /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
     private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
-
-    /** <p>The symbol table we are currently building.</p> */
-    private final MathSymbolTableBuilder mySymbolTable;
 
     /**
      * <p>This is the math type graph that indicates relationship
@@ -98,6 +109,12 @@ public class IfStmtRule extends AbstractProofRuleApplication
      *
      * @param ifStmt The {@link IfStmt} we are applying
      *               the rule to.
+     * @param currentProcedureOpEntry An {@link OperationEntry} with a {@code Procedure},
+     *                                if {@code ifStmt} is inside one. Otherwise it should
+     *                                be left as {@code null}.
+     * @param currentProcedureDecreasingExp If we are in a {@code Procedure} and it is recursive,
+     *                                      this is its {@code decreasing} clause expression.
+     *                                      Otherwise it should be left as {@code null}.
      * @param typeFamilyDecs List of abstract types we are implementing or extending.
      * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
@@ -108,7 +125,9 @@ public class IfStmtRule extends AbstractProofRuleApplication
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public IfStmtRule(IfStmt ifStmt, List<TypeFamilyDec> typeFamilyDecs,
+    public IfStmtRule(IfStmt ifStmt, OperationEntry currentProcedureOpEntry,
+            Exp currentProcedureDecreasingExp,
+            List<TypeFamilyDec> typeFamilyDecs,
             List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
@@ -116,10 +135,11 @@ public class IfStmtRule extends AbstractProofRuleApplication
         super(block, stGroup, blockModel);
         myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
+        myCurrentProcedureDecreasingExp = currentProcedureDecreasingExp;
+        myCurrentProcedureOperationEntry = currentProcedureOpEntry;
         myIfStmt = ifStmt;
         myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myProcessedInstFacilityDecls = processedInstFacDecs;
-        mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
     }
 
@@ -145,15 +165,29 @@ public class IfStmtRule extends AbstractProofRuleApplication
                     myCurrentAssertiveCodeBlock.clone();
 
             // Use the walker to convert to mathematical expression
-            // TODO: Use the other constructor!
             ProgramFunctionExp ifConditionAsProgramFunctionExp =
                     (ProgramFunctionExp) ifCondition;
-            ProgramFunctionExpWalker walker =
-                    new ProgramFunctionExpWalker(myCurrentAssertiveCodeBlock,
-                            myCurrentConceptDeclaredTypes,
-                            myLocalRepresentationTypeDecs,
-                            myProcessedInstFacilityDecls, myCurrentModuleScope,
-                            myTypeGraph);
+            ProgramFunctionExpWalker walker;
+            if (myCurrentProcedureOperationEntry == null) {
+                walker =
+                        new ProgramFunctionExpWalker(
+                                myCurrentAssertiveCodeBlock,
+                                myCurrentConceptDeclaredTypes,
+                                myLocalRepresentationTypeDecs,
+                                myProcessedInstFacilityDecls,
+                                myCurrentModuleScope, myTypeGraph);
+            }
+            else {
+                walker =
+                        new ProgramFunctionExpWalker(
+                                myCurrentProcedureOperationEntry,
+                                myCurrentProcedureDecreasingExp,
+                                myCurrentAssertiveCodeBlock,
+                                myCurrentConceptDeclaredTypes,
+                                myLocalRepresentationTypeDecs,
+                                myProcessedInstFacilityDecls,
+                                myCurrentModuleScope, myTypeGraph);
+            }
             TreeWalker.visit(walker, ifConditionAsProgramFunctionExp);
 
             // Retrieve the various pieces of information from the walker
@@ -259,23 +293,38 @@ public class IfStmtRule extends AbstractProofRuleApplication
             // 1) Add the testing condition as a new stipulate assume statement.
             //    ( Stipulate not(Math(BE)) )
             Exp elseConditionBEExp = generatedEnsures.clone();
-            elseConditionBEExp = Utilities.negateExp(elseConditionBEExp, myTypeGraph.BOOLEAN);
+            elseConditionBEExp =
+                    Utilities
+                            .negateExp(elseConditionBEExp, myTypeGraph.BOOLEAN);
             myLocationDetails.put(elseConditionBEExp.getLocation(),
                     new LocationDetailModel(generatedEnsures.getLocation(),
                             elseConditionBEExp.getLocation(),
                             "Negation of If Statement Condition"));
-            negIfAssertiveCodeBlock.addStatement(new AssumeStmt(
-                    ifConditionItem.getTest().getLocation().clone(),
-                    elseConditionBEExp, true));
+            negIfAssertiveCodeBlock
+                    .addStatement(new AssumeStmt(ifConditionItem.getTest()
+                            .getLocation().clone(), elseConditionBEExp, true));
 
             // 2) Add all the statements inside the else-part to the
             //    else-assertive code block.
             negIfAssertiveCodeBlock.addStatements(myIfStmt.getElseclause());
 
+            // TODO: 3) Update the location detail for the VCs
+
             // NY YS
             // TODO: Duration for Else Part
 
+            // Store the new block and add a new block model that goes with it.
             myResultingAssertiveCodeBlocks.add(negIfAssertiveCodeBlock);
+
+            ST negIfBlockModel =
+                    mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+            negIfBlockModel.add("blockName", negIfAssertiveCodeBlock.getName());
+            ST negIfStepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+            negIfStepModel.add("proofRuleName", "Else-Part Rule").add(
+                    "currentStateOfBlock", negIfBlockModel);
+            negIfBlockModel.add("vcGenSteps", negIfStepModel.render());
+            myNewAssertiveCodeBlockModels.put(negIfAssertiveCodeBlock,
+                    negIfBlockModel);
         }
         else {
             Utilities.expNotHandled(ifCondition, myIfStmt.getLocation());

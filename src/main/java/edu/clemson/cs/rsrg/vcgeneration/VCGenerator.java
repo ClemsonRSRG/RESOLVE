@@ -145,6 +145,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     private OperationEntry myCorrespondingOperation;
 
     /**
+     * <p>While walking a procedure, if it is an recursive operation implementation,
+     * then this stores the decreasing clause expression.</p>
+     */
+    private Exp myOperationDecreasingExp;
+
+    /**
      * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
      * {@code finalization} specification item if we were able to generate one.</p>
      */
@@ -544,6 +550,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Utilities.searchOperation(dec.getLocation(), null, dec
                         .getName(), argTypes, myCurrentModuleScope);
 
+        // Store any decreasing clauses for future use
+        if (dec.getRecursive()) {
+            myOperationDecreasingExp = dec.getDecreasing().getAssertionExp();
+        }
+
         // TODO: Add the performance logic
         // Obtain the performance duration clause
         /*if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
@@ -902,6 +913,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                 myLocationDetails.put(statement.getLocation(),
                         myLocationDetails.get(((ConfirmStmt) statement).getAssertion().getLocation()));
             }
+            else if (statement instanceof IfStmt) {
+                // Generate a new if-else rule application.
+                ruleApplication =
+                        new IfStmtRule((IfStmt) statement,
+                                myCorrespondingOperation, myOperationDecreasingExp,
+                                myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                                myProcessedInstFacilityDecls, myBuilder, myCurrentModuleScope,
+                                myCurrentAssertiveCodeBlock, mySTGroup, blockModel);
+            }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
                     // Generate a new remember rule application.
@@ -958,6 +978,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 myIncompleteAssertiveCodeBlocks.addFirst(resultingBlocks.removeLast());
             }
 
+            // Store any new block models
+            myAssertiveCodeBlockModels.putAll(ruleApplication.getNewAssertiveCodeBlockModels());
+
             // Add any new location details
             myLocationDetails.putAll(ruleApplication.getNewLocationString());
 
@@ -967,9 +990,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Apply each statement rule here.
             /*else if (lastStatement instanceof FuncAssignStmt) {
                 applyFuncAssignStmtRule((FuncAssignStmt) statement);
-            }
-            else if (lastStatement instanceof IfStmt) {
-                applyIfStmtRule((IfStmt) statement);
             }*/
         }
 

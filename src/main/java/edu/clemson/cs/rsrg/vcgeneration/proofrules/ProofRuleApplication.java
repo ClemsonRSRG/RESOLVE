@@ -50,6 +50,16 @@ public interface ProofRuleApplication {
     ST getBlockModel();
 
     /**
+     * <p>This method returns the a map containing the new string template
+     * block models associated with any {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
+     * that resulted from applying the {@code Proof Rule}.</p>
+     *
+     * @return A map from {@link AssertiveCodeBlock AssertiveCodeBlock(s)} to
+     * {@link ST} block models.
+     */
+    Map<AssertiveCodeBlock, ST> getNewAssertiveCodeBlockModels();
+
+    /**
      * <p>This method returns a map containing details about
      * a {@link Location} object that was generated during the proof
      * application process.</p>
