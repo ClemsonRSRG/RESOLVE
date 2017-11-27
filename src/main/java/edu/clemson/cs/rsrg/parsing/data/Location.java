@@ -216,17 +216,15 @@ public class Location implements Cloneable {
          */
         @Override
         public final boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
+            // Check to see if it is null or if the classes are different
+            if (o == null || getClass() != o.getClass()) {
                 return false;
-
-            Pos pos = (Pos) o;
-
-            if (myCurrline != pos.myCurrline)
-                return false;
-            return myCurrColumn == pos.myCurrColumn;
-
+            }
+            else {
+                // Simply check if the references are the same.
+                // Checking integers won't do the trick!
+                return this == o;
+            }
         }
 
         /**
