@@ -605,19 +605,15 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postProcedureDec(ProcedureDec dec) {
-        // Create the final confirm expression
-        // TODO: Replace facility actuals variables in the ensures clause
-        Exp finalConfirmExp =
-                Utilities.createFinalConfirmExp(dec.getLocation(),
-                        myCurrentModuleScope, myTypeGraph, myLocationDetails,
-                        myCorrespondingOperation);
-
         // Apply procedure declaration rule
         // TODO: Recheck logic to make sure everything still works!
         ProofRuleApplication declRule =
-                new ProcedureDeclRule(dec.getLocation(), dec.getVariables(),
-                        myVariableSpecFinalItems, dec.getStatements(),
-                        finalConfirmExp, myCurrentAssertiveCodeBlock,
+                new ProcedureDeclRule(dec, myCorrespondingOperation,
+                        myOperationDecreasingExp, myVariableSpecFinalItems,
+                        myCurrentConceptDeclaredTypes,
+                        myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls, myBuilder,
+                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
                         mySTGroup, myAssertiveCodeBlockModels
                                 .remove(myCurrentAssertiveCodeBlock));
         declRule.applyRule();
