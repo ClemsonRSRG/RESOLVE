@@ -916,7 +916,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 myCorrespondingOperation, myOperationDecreasingExp,
                                 myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
                                 myProcessedInstFacilityDecls, myBuilder, myCurrentModuleScope,
-                                myCurrentAssertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock, mySTGroup, blockModel);
             }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
