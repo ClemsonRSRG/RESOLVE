@@ -893,32 +893,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             else if (statement instanceof ConfirmStmt) {
                 // Generate a new confirm rule application.
-                ConfirmStmt confirmStmt = (ConfirmStmt) statement;
                 ruleApplication =
-                        new ConfirmStmtRule(confirmStmt,
+                        new ConfirmStmtRule((ConfirmStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
-
-                if (!confirmStmt.getSimplify()) {
-                    /*if (myLocationDetails.containsKey(confirmStmt.getAssertion().getLocation())) {
-                        System.out.println(myLocationDetails.containsKey(confirmStmt.getAssertion().getLocation())
-                                + " " + myLocationDetails.get(confirmStmt.getAssertion().getLocation()).getDetailMessage()
-                                + " " + confirmStmt.getAssertion().toString()
-                                + " " + confirmStmt.getAssertion().getLocation().toString());
-                    }
-                    else {
-                        System.out.println(myLocationDetails.containsKey(confirmStmt.getAssertion().getLocation())
-                                + " " + confirmStmt.getAssertion().toString()
-                                + " " + confirmStmt.getAssertion().getLocation().toString());
-                        myLocationDetails.put(confirmStmt.getAssertion().getLocation(), new LocationDetailModel(confirmStmt.getAssertion().getLocation(), confirmStmt.getAssertion().getLocation(), "BLANK!"));
-                    }*/
-                }
-
-                // Since the ConfirmStmt's location might be different than
-                // it's assertion's location. We need to copy over the details
-                // for the inner assertion and set it as the detail for the
-                // ConfirmStmt's location.
-                /*myLocationDetails.put(statement.getLocation(),
-                        myLocationDetails.get(((ConfirmStmt) statement).getAssertion().getLocation()));*/
             }
             else if (statement instanceof IfStmt) {
                 // Generate a new if-else rule application.

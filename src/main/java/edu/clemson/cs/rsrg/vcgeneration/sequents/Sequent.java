@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.sequents;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.AtomicFormulaChecker;
@@ -84,7 +85,7 @@ public class Sequent implements BasicCapabilities, Cloneable {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < indentSize; ++i) {
             sb.append(" ");
         }
@@ -183,6 +184,28 @@ public class Sequent implements BasicCapabilities, Cloneable {
      */
     public final Location getLocation() {
         return myLocation;
+    }
+
+    /**
+     * <p>This method gets the location details associated
+     * with this sequent.</p>
+     *
+     * @return A {@link LocationDetailModel}.
+     */
+    public final LocationDetailModel getLocationDetailModel() {
+        // YS: All the expressions inside the consequent should have the same
+        //     LocationDetailModel. We simply return the first one we
+        //     find.
+        LocationDetailModel model = null;
+        Iterator<Exp> consequentExpIt = myConcequents.iterator();
+        while (consequentExpIt.hasNext() && model == null) {
+            Exp exp = consequentExpIt.next();
+            if (exp.getLocationDetailModel() != null) {
+                model = exp.getLocationDetailModel();
+            }
+        }
+
+        return model;
     }
 
     /**

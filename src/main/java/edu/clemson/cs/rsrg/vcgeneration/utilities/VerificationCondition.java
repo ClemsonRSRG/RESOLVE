@@ -14,9 +14,11 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities;
 
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -98,7 +100,7 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (Sequent sequent : myAssociatedSequents) {
             sb.append(sequent.asString(indentSize, innerIndentInc));
@@ -165,6 +167,27 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      */
     public final Location getLocation() {
         return myLocation;
+    }
+
+    /**
+     * <p>This method gets the location details associated
+     * with this {@code VC}.</p>
+     *
+     * @return A {@link LocationDetailModel}.
+     */
+    public final LocationDetailModel getLocationDetailModel() {
+        // YS: We simply return the first one we find from one
+        //     of the associated sequents.
+        LocationDetailModel model = null;
+        Iterator<Sequent> sequentIt = myAssociatedSequents.iterator();
+        while (sequentIt.hasNext() && model == null) {
+            Sequent sequent = sequentIt.next();
+            if (sequent.getLocationDetailModel() != null) {
+                model = sequent.getLocationDetailModel();
+            }
+        }
+
+        return model;
     }
 
     /**

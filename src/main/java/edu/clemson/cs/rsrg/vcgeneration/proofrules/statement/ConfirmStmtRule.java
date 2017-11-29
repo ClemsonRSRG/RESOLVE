@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
@@ -80,7 +81,7 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
 
         // Check to see if this confirm can be simplified or not.
-        if (myConfirmStmt.getSimplify()) {
+        if (myConfirmStmt.getSimplify() && VarExp.isLiteralTrue(myConfirmStmt.getAssertion())) {
             // Add the different details to the various different output models
             stepModel.add("proofRuleName", getRuleDescription() + " and Simplified")
                     .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
