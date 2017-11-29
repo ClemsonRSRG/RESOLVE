@@ -38,6 +38,7 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
@@ -63,7 +64,6 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VCConfirmStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
@@ -179,6 +179,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     private final Map<Dec, List<AssertionClause>> myGlobalConstraints;
 
     /**
+     * <p>A map that stores all the details associated with
+     * a particular {@link AssertionClause}.</p>
+     */
+    private final Map<AssertionClause, LocationDetailModel> myGlobalLocationDetails;
+
+    /**
      * <p>A list that stores all the module level {@code requires}
      * clauses.</p>
      */
@@ -197,12 +203,6 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     /** <p>String template for the each of the assertive code blocks.</p> */
     private final Map<AssertiveCodeBlock, ST> myAssertiveCodeBlockModels;
-
-    /**
-     * <p>A map that stores all the details associated with
-     * a particular {@link Location}.</p>
-     */
-    private final Map<Location, LocationDetailModel> myLocationDetails;
 
     /** <p>String template groups for storing all the VC generation details.</p> */
     private final STGroup mySTGroup;
@@ -260,10 +260,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentConceptDeclaredTypes = new LinkedList<>();
         myFinalAssertiveCodeBlocks = new LinkedList<>();
         myGlobalConstraints = new LinkedHashMap<>();
+        myGlobalLocationDetails = new LinkedHashMap<>();
         myGlobalRequires = new LinkedList<>();
         myLocalRepresentationTypeDecs = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
-        myLocationDetails = new LinkedHashMap<>();
         myProcessedInstFacilityDecls = new LinkedList<>();
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
@@ -497,7 +497,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), Utilities
                         .createTopLevelAssumeExpFromContext(dec.getLocation(),
-                                myGlobalRequires, myGlobalConstraints), false);
+                                myGlobalRequires, myGlobalConstraints,
+                                myGlobalLocationDetails), false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create a new model for this assertive code block
@@ -525,9 +526,6 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
-
-        // Add any new location details
-        myLocationDetails.putAll(declRule.getNewLocationString());
     }
 
     // -----------------------------------------------------------
@@ -575,11 +573,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
         // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
-        AssumeStmt topLevelAssumeStmt = new AssumeStmt(dec.getLocation().clone(),
-                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(), myCurrentModuleScope,
-                        myCurrentAssertiveCodeBlock, myLocationDetails, myGlobalRequires, myGlobalConstraints,
-                        myCorrespondingOperation, isLocal),
-                false);
+        AssumeStmt topLevelAssumeStmt =
+                new AssumeStmt(dec.getLocation().clone(),
+                        Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
+                                myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                                myGlobalRequires, myGlobalConstraints,
+                                myGlobalLocationDetails, myCorrespondingOperation,
+                                isLocal), false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create Remember statement
@@ -626,9 +626,6 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
-
-        // Add any new location details
-        myLocationDetails.putAll(declRule.getNewLocationString());
 
         myVariableSpecFinalItems.clear();
         myCurrentAssertiveCodeBlock = null;
@@ -776,18 +773,26 @@ public class VCGenerator extends TreeWalkerVisitor {
             AssertiveCodeBlock block =
                     new AssertiveCodeBlock(myTypeGraph, clause, name);
 
+            // Make a copy of the clause expression and add
+            // the location detail associated with it.
+            Exp clauseExp = clause.getAssertionExp().clone();
+            Location clauseLoc = clause.getWhichEntailsExp().getLocation();
+            clauseExp.setLocationDetailModel(new LocationDetailModel(clauseLoc
+                    .clone(), clauseLoc.clone(), clause.getClauseType().name()
+                    + " Clause Located at " + clauseLoc.clone()));
+
+            // Make a copy of the which_entails clause and add
+            // the location detail associated with it.
+            Exp whichEntailsExp = clause.getWhichEntailsExp().clone();
+            Location entailsLoc = clause.getWhichEntailsExp().getLocation();
+            whichEntailsExp.setLocationDetailModel(new LocationDetailModel(
+                    entailsLoc.clone(), entailsLoc.clone(), name.getName()));
+
             // Apply the rule
             block.addStatement(new AssumeStmt(clause.getLocation().clone(),
-                    clause.getAssertionExp(), false));
+                    clauseExp, false));
             block.addStatement(new ConfirmStmt(clause.getLocation().clone(),
-                    clause.getWhichEntailsExp(), false));
-
-            // Add the location detail if it doesn't exist
-            Location entailsLoc = clause.getWhichEntailsExp().getLocation();
-            if (!myLocationDetails.containsKey(entailsLoc)) {
-                myLocationDetails.put(entailsLoc, new LocationDetailModel(
-                        entailsLoc, entailsLoc, name.getName()));
-            }
+                    whichEntailsExp, false));
 
             // Create a new model for this assertive code block
             ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
@@ -815,16 +820,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     public final List<AssertiveCodeBlock> getFinalAssertiveCodeBlocks() {
         return myFinalAssertiveCodeBlocks;
-    }
-
-    /**
-     * <p>This method returns a map containing all the details associated with a
-     * {@link Location} that we have encountered during the generation process.</p>
-     *
-     * @return A map containing location details.
-     */
-    public final Map<Location, LocationDetailModel> getLocationDetails() {
-        return myLocationDetails;
     }
 
     /**
@@ -898,16 +893,32 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             else if (statement instanceof ConfirmStmt) {
                 // Generate a new confirm rule application.
+                ConfirmStmt confirmStmt = (ConfirmStmt) statement;
                 ruleApplication =
-                        new ConfirmStmtRule((ConfirmStmt) statement,
+                        new ConfirmStmtRule(confirmStmt,
                                 assertiveCodeBlock, mySTGroup, blockModel);
+
+                if (!confirmStmt.getSimplify()) {
+                    /*if (myLocationDetails.containsKey(confirmStmt.getAssertion().getLocation())) {
+                        System.out.println(myLocationDetails.containsKey(confirmStmt.getAssertion().getLocation())
+                                + " " + myLocationDetails.get(confirmStmt.getAssertion().getLocation()).getDetailMessage()
+                                + " " + confirmStmt.getAssertion().toString()
+                                + " " + confirmStmt.getAssertion().getLocation().toString());
+                    }
+                    else {
+                        System.out.println(myLocationDetails.containsKey(confirmStmt.getAssertion().getLocation())
+                                + " " + confirmStmt.getAssertion().toString()
+                                + " " + confirmStmt.getAssertion().getLocation().toString());
+                        myLocationDetails.put(confirmStmt.getAssertion().getLocation(), new LocationDetailModel(confirmStmt.getAssertion().getLocation(), confirmStmt.getAssertion().getLocation(), "BLANK!"));
+                    }*/
+                }
 
                 // Since the ConfirmStmt's location might be different than
                 // it's assertion's location. We need to copy over the details
                 // for the inner assertion and set it as the detail for the
                 // ConfirmStmt's location.
-                myLocationDetails.put(statement.getLocation(),
-                        myLocationDetails.get(((ConfirmStmt) statement).getAssertion().getLocation()));
+                /*myLocationDetails.put(statement.getLocation(),
+                        myLocationDetails.get(((ConfirmStmt) statement).getAssertion().getLocation()));*/
             }
             else if (statement instanceof IfStmt) {
                 // Generate a new if-else rule application.
@@ -976,9 +987,6 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Store any new block models
             myAssertiveCodeBlockModels.putAll(ruleApplication.getNewAssertiveCodeBlockModels());
-
-            // Add any new location details
-            myLocationDetails.putAll(ruleApplication.getNewLocationString());
 
             // Update our block model
             blockModel = ruleApplication.getBlockModel();
@@ -1068,14 +1076,22 @@ public class VCGenerator extends TreeWalkerVisitor {
                         .getLocation(), conceptModuleDec.getParameterDecs());
             }
 
-            // Store the concept's module constraints
+            // Store the concept's module constraints and
+            // its associated location detail for future use.
             if (!conceptModuleDec.getConstraints().isEmpty()) {
-                Location conceptLoc = conceptModuleDec.getLocation();
                 myGlobalConstraints.put(conceptModuleDec, conceptModuleDec
                         .getConstraints());
-                myLocationDetails.put(conceptLoc, new LocationDetailModel(
-                        conceptLoc, conceptLoc, "Constraint Clause for "
-                                + conceptModuleDec.getName()));
+
+                for (AssertionClause constraint : conceptModuleDec
+                        .getConstraints()) {
+                    Location constraintLoc =
+                            constraint.getAssertionExp().getLocation();
+                    myGlobalLocationDetails.put(constraint,
+                            new LocationDetailModel(constraintLoc.clone(),
+                                    constraintLoc.clone(),
+                                    "Constraint Clause of "
+                                            + conceptModuleDec.getName()));
+                }
             }
         }
         catch (NoSuchSymbolException e) {
@@ -1272,13 +1288,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                             // Store the constraint and its associated location detail for future use
                             Location constraintLoc =
                                     modifiedConstraint.getLocation();
-                            myGlobalConstraints.put(dec, Collections
-                                    .singletonList(modifiedConstraint));
-                            myLocationDetails.put(constraintLoc,
+                            myGlobalLocationDetails.put(modifiedConstraint,
                                     new LocationDetailModel(constraintLoc,
                                             constraintLoc,
                                             "Constraint Clause of "
                                                     + dec.getName()));
+                            myGlobalConstraints.put(dec, Collections
+                                    .singletonList(modifiedConstraint));
                         }
                     }
                 }
@@ -1302,20 +1318,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (!VarExp.isLiteralTrue(requiresClause.getAssertionExp())) {
             myGlobalRequires.add(requiresClause);
 
-            // Add the location details for both the requires and
-            // which_entails expressions (if any).
+            // Add the location details for the requires clause
             Location assertionLoc =
                     requiresClause.getAssertionExp().getLocation();
-            myLocationDetails.put(assertionLoc,
-                    new LocationDetailModel(assertionLoc, assertionLoc,
-                            "Requires Clause of " + decName));
-            if (requiresClause.getWhichEntailsExp() != null) {
-                Location entailsLoc =
-                        requiresClause.getAssertionExp().getLocation();
-                myLocationDetails.put(entailsLoc, new LocationDetailModel(
-                        entailsLoc, entailsLoc,
-                        "Which_Entails Expression Located at " + entailsLoc));
-            }
+            myGlobalLocationDetails.put(requiresClause,
+                    new LocationDetailModel(assertionLoc.clone(), assertionLoc
+                            .clone(), "Requires Clause of " + decName));
         }
     }
 

@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
@@ -236,9 +237,8 @@ public class Utilities {
         List<Exp> segments = new ArrayList<>();
         segments.add(typeNameExp);
         segments.add(isInitialExp);
-        DotExp exp = new DotExp(varDec.getLocation(), segments);
 
-        return exp;
+        return new DotExp(varDec.getLocation(), segments);
     }
 
     /**
@@ -292,19 +292,24 @@ public class Utilities {
      *            currently visiting.
      * @param moduleLevelRequiresClauses A list containing all the module level {@code requires} clauses.
      * @param moduleLevelConstraintClauses A map containing all the module level {@code constraint} clauses.
+     * @param moduleLevelLocationDetails A map containing {@link LocationDetailModel} for
+     *                                   the module level clauses.
      *
      * @return The top-level assumed expression.
      */
     public static Exp createTopLevelAssumeExpFromContext(Location loc,
             List<AssertionClause> moduleLevelRequiresClauses,
-            Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses) {
+            Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses,
+            Map<AssertionClause, LocationDetailModel> moduleLevelLocationDetails) {
         Exp retExp = null;
 
         // Add the module level requires clause. Note that we don't
         // need to add their location details to the map because
         // it is there already.
         for (AssertionClause clause : moduleLevelRequiresClauses) {
-            retExp = Utilities.formConjunct(loc, retExp, clause);
+            retExp =
+                    formConjunct(loc, retExp, clause,
+                            moduleLevelLocationDetails.get(clause));
         }
 
         // Add the module level constraint clauses.
@@ -312,7 +317,9 @@ public class Utilities {
         // because it is there already.
         for (Dec dec : moduleLevelConstraintClauses.keySet()) {
             for (AssertionClause clause : moduleLevelConstraintClauses.get(dec)) {
-                retExp = Utilities.formConjunct(loc, retExp, clause);
+                retExp =
+                        formConjunct(loc, retExp, clause,
+                                moduleLevelLocationDetails.get(clause));
             }
         }
 
@@ -355,47 +362,45 @@ public class Utilities {
      *            currently visiting.
      * @param scope The module scope to start our search.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
-     * @param locationStringsMap A map containing all the {@link Location} details.
      * @param moduleLevelRequiresClauses A list containing all the module level {@code requires} clauses.
      * @param moduleLevelConstraintClauses A map containing all the module level {@code constraint} clauses.
+     * @param moduleLevelLocationDetails A map containing {@link LocationDetailModel} for
+     *                                   the module level clauses.
      * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
      * @param isLocalOperation {@code true} if it is a local operation, {@code false} otherwise.
      *
      * @return The top-level assumed expression.
      */
-    public static Exp createTopLevelAssumeExpForProcedureDec(Location loc,
-            ModuleScope scope, AssertiveCodeBlock currentBlock,
-            Map<Location, LocationDetailModel> locationStringsMap,
+    public static Exp createTopLevelAssumeExpForProcedureDec(
+            Location loc,
+            ModuleScope scope,
+            AssertiveCodeBlock currentBlock,
             List<AssertionClause> moduleLevelRequiresClauses,
             Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses,
+            Map<AssertionClause, LocationDetailModel> moduleLevelLocationDetails,
             OperationEntry correspondingOperationEntry, boolean isLocalOperation) {
         // Add all the expressions we can assume from the current context
         Exp retExp =
                 createTopLevelAssumeExpFromContext(loc,
                         moduleLevelRequiresClauses,
-                        moduleLevelConstraintClauses);
+                        moduleLevelConstraintClauses,
+                        moduleLevelLocationDetails);
 
         // Add the operation's requires clause (and any which_entails clause)
         AssertionClause requiresClause =
                 correspondingOperationEntry.getRequiresClause();
         Exp requiresExp = requiresClause.getAssertionExp().clone();
         if (!VarExp.isLiteralTrue(requiresExp)) {
-            retExp = Utilities.formConjunct(loc, retExp, requiresClause);
-
-            // At the same time add the location details for these expressions.
-            Location requiresLoc = requiresExp.getLocation();
-            locationStringsMap.put(requiresLoc, new LocationDetailModel(
-                    requiresLoc, requiresLoc, "Requires Clause of "
-                            + correspondingOperationEntry.getName()));
-            if (requiresClause.getWhichEntailsExp() != null) {
-                Location entailsLoc =
-                        requiresClause.getWhichEntailsExp().getLocation();
-                locationStringsMap.put(entailsLoc, new LocationDetailModel(
-                        entailsLoc, entailsLoc,
-                        "Which_Entails expression for clause located at "
-                                + requiresClause.getWhichEntailsExp()
-                                        .getLocation()));
-            }
+            // Form a conjunct with the requires clause and add
+            // the location detail associated with it.
+            retExp =
+                    formConjunct(loc, retExp, requiresClause,
+                            new LocationDetailModel(requiresClause
+                                    .getLocation().clone(), requiresClause
+                                    .getLocation().clone(),
+                                    "Requires Clause of "
+                                            + correspondingOperationEntry
+                                                    .getName()));
         }
 
         // Loop through each of the parameters in the operation entry.
@@ -443,28 +448,21 @@ public class Utilities {
                                         null, parameterVarDec.getName(),
                                         typeFamilyDec.getExemplar(), typeEntry
                                                 .getModelType(), null);
-                        retExp =
-                                Utilities.formConjunct(loc, retExp,
-                                        modifiedConstraintClause);
 
-                        // At the same time add the location details for these expressions.
+                        // Form a conjunct with the modified constraint clause and add
+                        // the location detail associated with it.
                         Location constraintLoc =
                                 modifiedConstraintClause.getAssertionExp()
                                         .getLocation();
-                        locationStringsMap.put(constraintLoc,
-                                new LocationDetailModel(constraintLoc,
-                                        constraintLoc, "Constraint Clause of "
-                                                + parameterVarDec.getName()));
-                        if (constraintClause.getWhichEntailsExp() != null) {
-                            Location entailsLoc =
-                                    modifiedConstraintClause
-                                            .getWhichEntailsExp().getLocation();
-                            locationStringsMap.put(entailsLoc,
-                                    new LocationDetailModel(entailsLoc,
-                                            entailsLoc,
-                                            "Which_Entails expression for clause located at "
-                                                    + entailsLoc));
-                        }
+                        retExp =
+                                formConjunct(loc, retExp,
+                                        modifiedConstraintClause,
+                                        new LocationDetailModel(constraintLoc
+                                                .clone(),
+                                                constraintLoc.clone(),
+                                                "Constraint Clause of "
+                                                        + parameterVarDec
+                                                                .getName()));
                     }
                 }
 
@@ -582,7 +580,7 @@ public class Utilities {
      * @return A formatted string.
      */
     public static String expListAsString(List<Exp> exps) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         Iterator<Exp> expIterator = exps.iterator();
         while (expIterator.hasNext()) {
@@ -620,14 +618,18 @@ public class Utilities {
      *            currently visiting.
      * @param exp The original expression.
      * @param clause An {@link AssertionClause}.
+     * @param clauseDetailModel The {@link LocationDetailModel} associated
+     *                          with {@code clause}.
      *
      * @return A new {@link Exp}.
      */
-    public static Exp formConjunct(Location loc, Exp exp, AssertionClause clause) {
+    public static Exp formConjunct(Location loc, Exp exp,
+            AssertionClause clause, LocationDetailModel clauseDetailModel) {
         Exp retExp;
 
         // Add the assertion expression
         Exp assertionExp = clause.getAssertionExp().clone();
+        assertionExp.setLocationDetailModel(clauseDetailModel);
         if (exp == null) {
             retExp = assertionExp;
         }
@@ -637,9 +639,13 @@ public class Utilities {
 
         // Add any which_entails
         if (clause.getWhichEntailsExp() != null) {
-            retExp =
-                    InfixExp.formConjunct(loc, retExp, clause
-                            .getWhichEntailsExp());
+            Exp whichEntailsExp = clause.getWhichEntailsExp().clone();
+            Location entailsLoc = clause.getWhichEntailsExp().getLocation();
+            whichEntailsExp.setLocationDetailModel(new LocationDetailModel(
+                    entailsLoc.clone(), entailsLoc.clone(),
+                    "Which_Entails Expression Located at "
+                            + clause.getLocation()));
+            retExp = InfixExp.formConjunct(loc, retExp, whichEntailsExp);
         }
 
         return retExp;

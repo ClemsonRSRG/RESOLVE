@@ -19,13 +19,13 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.statements.*;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.*;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,16 +99,17 @@ public class WhileStmtRule extends AbstractProofRuleApplication
     public final void applyRule() {
         LoopVerificationItem whileLoopItem = myWhileStmt.getLoopVerificationBlock();
 
-        // Create a statement confirming the loop invariant and
+        // Create a statement confirming the loop invariant (base case) and
         // add it to the assertive code block.
-        // TODO: Check to see what happens when the loop invariant contains a which_entails. - YS
         AssertionClause loopInvariantClause = whileLoopItem.getMaintainingClause();
+        Exp baseCaseLoopInvariant = loopInvariantClause.getAssertionExp().clone();
+        baseCaseLoopInvariant.setLocationDetailModel(new LocationDetailModel(
+                loopInvariantClause.getLocation().clone(), baseCaseLoopInvariant.getLocation().clone(),
+                "Base Case of the Invariant of While Statement"));
+
         ConfirmStmt confirmStmt = new ConfirmStmt(loopInvariantClause.getLocation().clone(),
                 loopInvariantClause.getAssertionExp().clone(), false);
         myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
-        myLocationDetails.put(confirmStmt.getLocation(),
-                new LocationDetailModel(confirmStmt.getLocation(), confirmStmt.getLocation(),
-                        "Base Case of the Invariant of While Statement"));
 
         // NY YS
         // TODO: Obtain the elapsed time duration of loop
@@ -161,19 +162,19 @@ public class WhileStmtRule extends AbstractProofRuleApplication
                 decreasingClause.getAssertionExp().clone(), null,
                 new PosSymbol(decreasingClause.getLocation().clone(), "<="), sumExp);
         terminationExp.setMathType(myTypeGraph.BOOLEAN);
-        myLocationDetails.put(terminationExp.getLocation(),
-                new LocationDetailModel(terminationExp.getLocation(), terminationExp.getLocation(),
-                        "Termination of While Statement"));
+        terminationExp.setLocationDetailModel(new LocationDetailModel(
+                terminationExp.getLocation().clone(), terminationExp.getLocation().clone(),
+                "Termination of While Statement"));
 
-        Exp invariantAsExp = loopInvariantClause.getAssertionExp().clone();
-        myLocationDetails.put(invariantAsExp.getLocation(),
-                new LocationDetailModel(invariantAsExp.getLocation(), invariantAsExp.getLocation(),
-                        "Inductive Case of Invariant of While Statement"));
+        Exp inductiveLoopInvariant = loopInvariantClause.getAssertionExp().clone();
+        inductiveLoopInvariant.setLocationDetailModel(new LocationDetailModel(
+                loopInvariantClause.getLocation().clone(), inductiveLoopInvariant.getLocation().clone(),
+                "Inductive Case of Invariant of While Statement"));
 
-        // YS: Simplify if we have "maintaining true"
         ifStmts.add(new ConfirmStmt(loopInvariantClause.getLocation().clone(),
-                InfixExp.formConjunct(myWhileStmt.getLocation().clone(), invariantAsExp, terminationExp),
-                MathExp.isLiteralTrue(invariantAsExp)));
+                InfixExp.formConjunct(myWhileStmt.getLocation().clone(),
+                        inductiveLoopInvariant, terminationExp),
+                false));
 
         // If part should contain the original statements plus a ConfirmStmt that ensures
         // the invariant and the decreasing clause holds.

@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -38,7 +39,6 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.KnownTypeVariableFinalizationRule;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
@@ -252,55 +252,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>An helper method that helps create an conjunct expression and adds the associated
-     * {@link LocationDetailModel} to our map.</p>
-     *
-     * <p>Note that {@code exp1} may be {@code null}. In that case, we simply create a
-     * {@link LocationDetailModel} for {@code exp2} and return {@code exp2}.</p>
-     *
-     * @param srcLoc The {@link Location} where {@code exp2} was found.
-     *               Used as the source location for the detail model.
-     * @param conjunctLoc The {@link Location} to be used when forming a
-     *                    conjunct expression.
-     * @param exp1 The expression to appear on the left hand side of
-     *             a conjunct expression. This may be {@code null}.
-     * @param exp2 The expression to appear on the right hand side of
-     *             a conjunct expression. This must be non-{@code null}
-     *             and ideally not the {@code true} expression.
-     * @param message The message associated with {@code exp2}.
-     *
-     * @return An {@link Exp}.
-     */
-    private Exp createConjunctExp(Location srcLoc, Location conjunctLoc,
-            Exp exp1, Exp exp2, String message) {
-        Exp retExp;
-
-        if (exp1 == null) {
-            retExp = exp2;
-
-            // Add the location details for this expression.
-            myLocationDetails.put(exp2.getLocation(), new LocationDetailModel(
-                    srcLoc.clone(), exp2.getLocation(), message));
-        }
-        else {
-            // Form a conjunct with our return expression
-            InfixExp conjunctExp =
-                    (InfixExp) MathExp.formConjunct(conjunctLoc.clone(), exp1,
-                            exp2);
-
-            // Add the location details for this expression.
-            Location rightLoc = conjunctExp.getRight().getLocation();
-            myLocationDetails.put(rightLoc, new LocationDetailModel(srcLoc
-                    .clone(), rightLoc, message));
-
-            // Store this as our return expression.
-            retExp = conjunctExp;
-        }
-
-        return retExp;
-    }
-
-    /**
      * <p>An helper method that uses the {@code ensures} clause from the operation entry
      * and adds in additional {@code ensures} clauses for different parameter modes
      * and builds the appropriate {@code ensures} clause that will be an
@@ -309,21 +260,17 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      * @return The final confirm expression.
      */
     private Exp createFinalConfirmExp() {
-        Exp retExp = null;
+        Exp retExp;
         Location procedureLoc = myProcedureDec.getLocation();
 
-        // Add the operation's ensures clause (and any which_entails clause)
+        // Add the operation's ensures clause
         AssertionClause ensuresClause =
                 myCurrentProcedureOperationEntry.getEnsuresClause();
         Exp ensuresExp = ensuresClause.getAssertionExp().clone();
-        if (!VarExp.isLiteralTrue(ensuresExp)) {
-            // Make a copy of our ensures clause and add the
-            // associated location detail.
-            retExp = ensuresClause.getAssertionExp().clone();
-            myLocationDetails.put(retExp.getLocation(), new LocationDetailModel(
-                    ensuresExp.getLocation().clone(), retExp.getLocation(),
-                    "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()));
-        }
+        ensuresExp.setLocationDetailModel(new LocationDetailModel(
+                ensuresExp.getLocation().clone(), procedureLoc.clone(),
+                "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()));
+        retExp = ensuresExp;
 
         // Loop through each of the parameters in the operation entry.
         Iterator<ProgramParameterEntry> specParamVarDecIt = myCurrentProcedureOperationEntry.getParameters().iterator();
@@ -421,12 +368,15 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                     restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
                 }
 
-                // YS: This is complicated because locations change when we form a conjunct,
-                //     but we really want the location details to match up.
-                String message = "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
-                        + " (Condition from \"" + parameterMode + "\" parameter mode)";
-                retExp = createConjunctExp(parameterVarDec.getLocation(), procedureLoc,
-                        retExp, restoresConditionExp, message);
+                // Generate the restores parameter ensures clause and
+                // store the new location detail.
+                if (restoresConditionExp != null) {
+                    restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
+                            parameterVarDec.getLocation().clone(), realizParamVarDec.getLocation().clone(),
+                            "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
+                                    + " (Condition from \"" + parameterMode + "\" parameter mode)"));
+                    retExp = InfixExp.formConjunct(retExp.getLocation(), retExp, restoresConditionExp);
+                }
             }
             // The clears mode adds an additional ensures
             // that the outgoing value is the initial value.
@@ -454,30 +404,20 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                                     Utilities.createInitExp(parameterAsVarDec, myTypeGraph.BOOLEAN));
                 }
 
-                // YS: This is complicated because locations change when we form a conjunct,
-                //     but we really want the location details to match up.
-                String message = "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
-                        + " (Condition from \"" + parameterMode + "\" parameter mode)";
-                retExp = createConjunctExp(parameterVarDec.getLocation(), procedureLoc,
-                        retExp, modifiedInitEnsures.getAssertionExp(), message);
+                // Generate the clears parameter ensures clause and
+                // store the new location detail.
+                Exp clearsConditionExp = modifiedInitEnsures.getAssertionExp().clone();
+                clearsConditionExp.setLocationDetailModel(new LocationDetailModel(
+                        parameterVarDec.getLocation().clone(), realizParamVarDec.getLocation().clone(),
+                        "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
+                                + " (Condition from \"" + parameterMode + "\" parameter mode)"));
+                retExp = InfixExp.formConjunct(retExp.getLocation(), retExp, clearsConditionExp);
             }
 
             // TODO: See below!
             // If the type is a type representation, then our requires clause
             // should really say something about the conceptual type and not
             // the variable
-        }
-
-        // Check to see if it is null. If that is the case, then we simply return "true"
-        if (retExp == null) {
-            retExp = VarExp.getTrueVarExp(procedureLoc.clone(), myTypeGraph);
-
-            // Add the location details for this expression.
-            Location retExpLoc = retExp.getLocation();
-            myLocationDetails.put(retExpLoc, new LocationDetailModel(
-                    procedureLoc.clone(), retExpLoc,
-                    "Ensures Clause of "
-                            + myCurrentProcedureOperationEntry.getName()));
         }
 
         return retExp;

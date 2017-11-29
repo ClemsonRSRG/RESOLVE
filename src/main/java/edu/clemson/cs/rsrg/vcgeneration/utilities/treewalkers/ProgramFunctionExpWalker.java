@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
@@ -32,7 +33,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
@@ -91,12 +91,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * this list will be empty.</p>
      */
     private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
-    /**
-     * <p>A map that stores all the details associated with
-     * a particular {@link Location}.</p>
-     */
-    private final Map<Location, LocationDetailModel> myLocationDetails;
 
     /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
     private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
@@ -176,7 +170,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         myDecreasingExp = decreasingExp;
         myEnsuresClauseMap = new HashMap<>();
         myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
-        myLocationDetails = new HashMap<>();
         myProcessedInstFacilityDecls = processedInstFacDecs;
         myRequiresClauseList = new LinkedList<>();
         myRestoresParamEnsuresClauses = new LinkedList<>();
@@ -219,6 +212,12 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             .getAssertionExp(), operationDec.getParameters(),
                             exp.getArguments());
 
+            // Store the location detail for the function call's requires clause
+            requiresExp.setLocationDetailModel(new LocationDetailModel(
+                    operationDec.getRequires().getLocation().clone(), exp
+                            .getLocation().clone(), "Requires Clause of "
+                            + fullOperationName));
+
             // Replace any facility declaration instantiation arguments
             // in the requires clause.
             requiresExp =
@@ -228,12 +227,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             myConceptDeclaredTypes,
                             myLocalRepresentationTypeDecs,
                             myProcessedInstFacilityDecls);
-
-            // Store the location detail for the function call's requires clause
-            Location requiresLoc = requiresExp.getLocation();
-            myLocationDetails.put(requiresLoc, new LocationDetailModel(
-                    requiresLoc, requiresLoc, "Requires Clause of "
-                            + fullOperationName));
 
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
@@ -247,6 +240,11 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                         .getAssertionExp(), operationDec.getParameters(), exp
                         .getArguments());
 
+        // Store the location detail for the function call's ensures clause
+        ensuresExp.setLocationDetailModel(new LocationDetailModel(operationDec
+                .getEnsures().getLocation().clone(), exp.getLocation().clone(),
+                "Ensures Clause of " + fullOperationName));
+
         // Replace any facility declaration instantiation arguments
         // in the ensures clause.
         ensuresExp =
@@ -255,11 +253,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                                 .getDefiningElement().getName(),
                         myConceptDeclaredTypes, myLocalRepresentationTypeDecs,
                         myProcessedInstFacilityDecls);
-
-        // Store the location detail for the function call's ensures clause
-        Location ensuresLoc = ensuresExp.getLocation();
-        myLocationDetails.put(ensuresLoc, new LocationDetailModel(ensuresLoc,
-                ensuresLoc, "Ensures Clause of " + fullOperationName));
 
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);
@@ -314,17 +307,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         }
 
         return ensures;
-    }
-
-    /**
-     * <p>This method returns a map containing details about
-     * a {@link Location} object that was generated while visiting
-     * function calls.</p>
-     *
-     * @return A map from {@link Location} to location detail strings.
-     */
-    public final Map<Location, LocationDetailModel> getNewLocationString() {
-        return myLocationDetails;
     }
 
     /**
@@ -411,10 +393,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 EqualsExp equalsExp =
                         new EqualsExp(expAsVarExp.getLocation().clone(),
                                 expAsVarExp, null, Operator.EQUAL, oldExp);
-                Location equalsLoc = equalsExp.getLocation();
-                myLocationDetails.put(equalsLoc, new LocationDetailModel(
-                        equalsLoc, equalsLoc, "Ensures Clause of " + opName
-                                + " (Condition from \""
+                equalsExp.setLocationDetailModel(new LocationDetailModel(varDec
+                        .getLocation().clone(), exp.getLocation().clone(),
+                        "Ensures Clause of " + opName + " (Condition from \""
                                 + ParameterMode.RESTORES.name()
                                 + "\" parameter mode)"));
                 myRestoresParamEnsuresClauses.add(equalsExp);
@@ -463,13 +444,17 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             sumExp);
             terminationExp.setMathType(myTypeGraph.BOOLEAN);
 
+            // Store the location detail for the recursive function call's
+            // termination expression.
+            terminationExp.setLocationDetailModel(new LocationDetailModel(
+                    myDecreasingExp.getLocation().clone(), functionExp
+                            .getLocation().clone(),
+                    "Termination of Recursive Call"));
+
             // Generate a new ConfirmStmt using terminationExp
             ConfirmStmt confirmStmt =
                     new ConfirmStmt(terminationExp.getLocation().clone(),
                             terminationExp, false);
-            Location confirmLoc = confirmStmt.getLocation();
-            myLocationDetails.put(confirmLoc, new LocationDetailModel(
-                    confirmLoc, confirmLoc, "Termination of Recursive Call"));
             myTerminationConfirmStmts.add(confirmStmt);
         }
     }

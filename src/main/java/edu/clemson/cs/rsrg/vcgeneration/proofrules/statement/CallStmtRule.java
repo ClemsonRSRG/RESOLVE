@@ -27,6 +27,7 @@ import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
@@ -37,7 +38,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
@@ -119,10 +119,13 @@ public class CallStmtRule extends AbstractProofRuleApplication
     public final void applyRule() {
         OperationDec opDec = (OperationDec) myAssociatedOperationEntry.getDefiningElement();
 
-        // Get the ensures clause for this operation
+        // Get the ensures clause for this operation and
+        // store it's associated location detail.
         AssertionClause ensuresClause = myAssociatedOperationEntry.getEnsuresClause();
-        Exp ensuresExp =
-                Utilities.formConjunct(ensuresClause.getLocation(), null, ensuresClause);
+        Exp ensuresExp = Utilities.formConjunct(ensuresClause.getLocation(),
+                null, ensuresClause, new LocationDetailModel(
+                        ensuresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
+                        "Ensures Clause of " + opDec.getName()));
 
         /* TODO: Recursive call
         // Check for recursive call of itself
@@ -168,10 +171,16 @@ public class CallStmtRule extends AbstractProofRuleApplication
         }
         */
 
-        // Get the requires clause for this operation
+        // Get the requires assertion for this operation and
+        // store it's associated location detail.
+        // YS: We don't need confirm it's which_entails clause,
+        //     that has been taken care of already. Maybe add it as
+        //     as something we can assume?
         AssertionClause requiresClause = myAssociatedOperationEntry.getRequiresClause();
-        Exp requiresExp =
-                Utilities.formConjunct(requiresClause.getLocation(), null, requiresClause);
+        Exp requiresExp = requiresClause.getAssertionExp().clone();
+        requiresExp.setLocationDetailModel(new LocationDetailModel(
+                requiresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
+                "Requires Clause of " + opDec.getName()));
         boolean simplify = VarExp.isLiteralTrue(requiresExp);
 
         // Replace PreCondition variables in the requires clause
@@ -248,9 +257,15 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 }
 
                 if (!VarExp.isLiteralTrue(modifiedConstraint.getAssertionExp())) {
-                    parameterEnsures =
-                            Utilities.formConjunct(myCallStmt.getLocation(),
-                                    parameterEnsures, modifiedConstraint);
+                    // Form a conjunct with the modified constraint clause and add
+                    // the location detail associated with it.
+                    Location constraintLoc =
+                            modifiedConstraint.getAssertionExp()
+                                    .getLocation();
+                    parameterEnsures = Utilities.formConjunct(myCallStmt.getLocation(),
+                            parameterEnsures, modifiedConstraint, new LocationDetailModel(
+                                    constraintLoc.clone(), constraintLoc.clone(),
+                                    "Constraint Clause of " + parameterVarDec.getName()));
                 }
             }
         }
@@ -352,11 +367,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 new ConfirmStmt(myCallStmt.getLocation().clone(), requiresExp, simplify);
         myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
 
-        // Store the location detail for the confirm statement
-        Location confirmLoc = confirmStmt.getLocation();
-        myLocationDetails.put(confirmLoc, new LocationDetailModel(
-                confirmLoc, confirmLoc, "Requires Clause of " + opDec.getName()));
-
+        // Form a conjunct with the ensures clause.
         if (parameterEnsures != null) {
             if (VarExp.isLiteralTrue(ensuresExp)) {
                 ensuresExp = parameterEnsures;
@@ -373,11 +384,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
         AssumeStmt assumeStmt =
                 new AssumeStmt(myCallStmt.getLocation().clone(), ensuresExp, false);
         myCurrentAssertiveCodeBlock.addStatement(assumeStmt);
-
-        // Store the location detail for the assume statement
-        Location assumeLoc = assumeStmt.getLocation();
-        myLocationDetails.put(assumeLoc, new LocationDetailModel(
-                assumeLoc, assumeLoc, "Ensures Clause of " + opDec.getName()));
 
         // Retrieve the list of VCs and use the sequent
         // substitution map to do replacements.

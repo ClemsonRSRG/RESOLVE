@@ -16,6 +16,8 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -79,10 +81,16 @@ public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Create an assume statement with the initialization ensures clause.
+        // Create an assume statement with the initialization ensures clause and add
+        // the location detail associated with it.
+        Location initEnsuresLoc =
+                myInitEnsuresClause.getAssertionExp().getLocation();
         Exp assumeExp =
-                Utilities.formConjunct(myInitEnsuresClause.getLocation(), null,
-                        myInitEnsuresClause);
+                Utilities.formConjunct(initEnsuresLoc, null,
+                        myInitEnsuresClause, new LocationDetailModel(
+                                initEnsuresLoc.clone(), initEnsuresLoc.clone(),
+                                "Initialization Ensures Clause of "
+                                        + myVarDec.getName()));
         AssumeStmt initAssumeStmt =
                 new AssumeStmt(myInitEnsuresClause.getLocation(), assumeExp,
                         false);

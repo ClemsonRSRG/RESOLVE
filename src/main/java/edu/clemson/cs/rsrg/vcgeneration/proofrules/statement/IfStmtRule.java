@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.IfStmt;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -31,7 +32,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
@@ -200,7 +200,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
                     walker.getRestoresParamEnsuresClauses();
             List<ConfirmStmt> terminationConfirms =
                     walker.getTerminationConfirmStmts();
-            myLocationDetails.putAll(walker.getNewLocationString());
 
             // Form a conjunct using the restoresParamExps
             // YS: We also make a copy of this for the else part,
@@ -215,12 +214,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
                 // Make a copy of the expression for the else part
                 // and add the new location detail.
                 Exp expCopy = exp.clone();
-                LocationDetailModel detailModel =
-                        myLocationDetails.get(exp.getLocation());
-                myLocationDetails
-                        .put(expCopy.getLocation(), new LocationDetailModel(
-                                detailModel.getSourceLoc(), exp.getLocation(),
-                                detailModel.getDetailMessage()));
 
                 if (VarExp.isLiteralTrue(restoresParamEnsuresIfPart)) {
                     restoresParamEnsuresIfPart = exp;
@@ -249,17 +242,18 @@ public class IfStmtRule extends AbstractProofRuleApplication
             // 2) If the testing condition has any requires clauses,
             //    we need to add it as a new confirm statement.
             //    ( Confirm Invk_Cond(BE) )
-            myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(
-                    ifConditionItem.getTest().getLocation().clone(),
-                    generatedRequires, false));
+            if (!VarExp.isLiteralTrue(generatedRequires)) {
+                myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(
+                        ifConditionItem.getTest().getLocation().clone(),
+                        generatedRequires, false));
+            }
 
             // 3) Add the testing condition as a new stipulate assume statement.
             //    ( Stipulate Math(BE) )
             Exp ifConditionBEExp = generatedEnsures.clone();
-            myLocationDetails.put(ifConditionBEExp.getLocation(),
-                    new LocationDetailModel(generatedEnsures.getLocation(),
-                            ifConditionBEExp.getLocation(),
-                            "If Statement Condition"));
+            ifConditionBEExp.setLocationDetailModel(new LocationDetailModel(
+                    generatedEnsures.getLocation(), ifConditionBEExp
+                            .getLocation(), "If Statement Condition"));
             myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(
                     ifConditionItem.getTest().getLocation().clone(),
                     ifConditionBEExp, true));
@@ -296,10 +290,10 @@ public class IfStmtRule extends AbstractProofRuleApplication
             elseConditionBEExp =
                     Utilities
                             .negateExp(elseConditionBEExp, myTypeGraph.BOOLEAN);
-            myLocationDetails.put(elseConditionBEExp.getLocation(),
-                    new LocationDetailModel(generatedEnsures.getLocation(),
-                            elseConditionBEExp.getLocation(),
-                            "Negation of If Statement Condition"));
+            elseConditionBEExp.setLocationDetailModel(new LocationDetailModel(
+                    generatedEnsures.getLocation(), elseConditionBEExp
+                            .getLocation(),
+                    "Negation of If Statement Condition"));
             negIfAssertiveCodeBlock
                     .addStatement(new AssumeStmt(ifConditionItem.getTest()
                             .getLocation().clone(), elseConditionBEExp, true));

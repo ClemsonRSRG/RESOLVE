@@ -13,11 +13,9 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -41,12 +39,6 @@ public abstract class AbstractProofRuleApplication
      * will operate on.</p>
      */
     protected final AssertiveCodeBlock myCurrentAssertiveCodeBlock;
-
-    /**
-     * <p>A map that stores all the details associated with
-     * a particular {@link Location}.</p>
-     */
-    protected final Map<Location, LocationDetailModel> myLocationDetails;
 
     /**
      * <p>A map that stores string template models for generated
@@ -84,7 +76,6 @@ public abstract class AbstractProofRuleApplication
     protected AbstractProofRuleApplication(AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         myResultingAssertiveCodeBlocks = new LinkedList<>();
         myCurrentAssertiveCodeBlock = block;
-        myLocationDetails = new HashMap<>();
         myNewAssertiveCodeBlockModels = new HashMap<>();
         mySTGroup = stGroup;
         myBlockModel = blockModel;
@@ -130,18 +121,6 @@ public abstract class AbstractProofRuleApplication
     @Override
     public final Map<AssertiveCodeBlock, ST> getNewAssertiveCodeBlockModels() {
         return myNewAssertiveCodeBlockModels;
-    }
-
-    /**
-     * <p>This method returns a map containing details about
-     * a {@link Location} object that was generated during the proof
-     * application process.</p>
-     *
-     * @return A map from {@link Location} to location detail strings.
-     */
-    @Override
-    public final Map<Location, LocationDetailModel> getNewLocationString() {
-        return myLocationDetails;
     }
 
     // ===========================================================
