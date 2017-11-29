@@ -375,6 +375,13 @@ public abstract class Exp extends ResolveConceptualElement {
                 retval = substituteChildren(substitutions);
                 retval.setMathType(myMathType);
                 retval.setMathTypeValue(myMathTypeValue);
+
+                // Copy the location detail model if it is not null
+                if (myLocationDetailModel != null) {
+                    retval
+                            .setLocationDetailModel(myLocationDetailModel
+                                    .clone());
+                }
             }
         }
         else {
