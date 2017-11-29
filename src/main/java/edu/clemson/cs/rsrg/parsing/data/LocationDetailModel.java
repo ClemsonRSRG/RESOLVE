@@ -63,8 +63,7 @@ public class LocationDetailModel implements Cloneable {
      */
     @Override
     public final LocationDetailModel clone() {
-        return new LocationDetailModel(mySrcLoc.clone(), myDestLoc.clone(),
-                myDetailMessage);
+        return new LocationDetailModel(mySrcLoc, myDestLoc, myDetailMessage);
     }
 
     /**
