@@ -19,7 +19,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.GenerateRememberExp;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.GenerateRememberRuleSubstitutionMap;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -102,7 +102,7 @@ public class RememberStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>An helper method that uses the {@link GenerateRememberExp}
+     * <p>An helper method that uses the {@link GenerateRememberRuleSubstitutionMap}
      * walker to generate {@link Exp Exps} that result from applying
      * the {@code Remember} rule for each of the {@link Exp} in
      * the {@link Sequent}.</p>
@@ -118,17 +118,19 @@ public class RememberStmtRule extends AbstractProofRuleApplication
         for (Exp antecedent : s.getAntecedents()) {
             // Use the helper walker to generate the "remember"
             // expression for the antecedent.
-            GenerateRememberExp generateRememberExp = new GenerateRememberExp(antecedent);
-            TreeWalker.visit(generateRememberExp, antecedent);
-            newAntecedents.add(generateRememberExp.getResultingExp());
+            GenerateRememberRuleSubstitutionMap expMapGenerator =
+                    new GenerateRememberRuleSubstitutionMap(antecedent);
+            TreeWalker.visit(expMapGenerator, antecedent);
+            newAntecedents.add(antecedent.substitute(expMapGenerator.getSubstitutionMap()));
         }
 
         for (Exp consequent : s.getConcequents()) {
             // Use the helper walker to generate the "remember"
             // expression for the consequent.
-            GenerateRememberExp generateRememberExp = new GenerateRememberExp(consequent);
-            TreeWalker.visit(generateRememberExp, consequent);
-            newConsequents.add(generateRememberExp.getResultingExp());
+            GenerateRememberRuleSubstitutionMap expMapGenerator =
+                    new GenerateRememberRuleSubstitutionMap(consequent);
+            TreeWalker.visit(expMapGenerator, consequent);
+            newConsequents.add(consequent.substitute(expMapGenerator.getSubstitutionMap()));
         }
 
         return new Sequent(s.getLocation(), newAntecedents, newConsequents);
