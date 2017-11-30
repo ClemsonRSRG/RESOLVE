@@ -198,23 +198,6 @@ public class SetCollectionExp extends MathExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link SetCollectionExp} from applying the remember rule.
-     */
-    @Override
-    public final SetCollectionExp remember() {
-        Set<MathExp> newVarExps = new HashSet<>();
-        for (MathExp m : myMembers) {
-            newVarExps.add((MathExp) m.remember());
-        }
-
-        return new SetCollectionExp(cloneLocation(), newVarExps);
-    }
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.

@@ -12,14 +12,12 @@
  */
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
-import java.util.*;
 
 /**
  * <p>This is the abstract base class for all the mathematical expression objects
@@ -277,16 +275,6 @@ public abstract class MathExp extends Exp {
 
         return retval;
     }
-
-    /**
-     * <p>This method must be implemented by the inherited mathematical
-     * expression classes to apply VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link Exp} from applying the remember rule.
-     */
-    public abstract Exp remember();
 
     /**
      * <p>This method must be implemented by the inherited mathematical

@@ -17,7 +17,6 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
-import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -285,49 +284,6 @@ public class FunctionExp extends AbstractFunctionExp {
                                 .hashCode() : 0);
         result = 31 * result + myArguments.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link FunctionExp} from applying the remember rule.
-     */
-    @Override
-    public final FunctionExp remember() {
-        // TODO: May have to change the type of myFuncNameExp to allow non-variable names.
-        VarExp newNameExp;
-        if (myFuncNameExp instanceof VarExp){
-            newNameExp = myFuncNameExp.remember();
-        }
-        else {
-            throw new MiscErrorException("We encountered an expression of the type " +
-                    myFuncNameExp.getClass().getName(),
-                    new InvalidClassException(""));
-        }
-
-        Exp newCaratExp = null;
-        if (myFuncNameCaratExp != null) {
-            newCaratExp = myFuncNameCaratExp.clone();
-        }
-
-        List<Exp> newArgs = new ArrayList<>();
-        for (Exp e : myArguments) {
-            Exp copyExp;
-            if (e instanceof MathExp){
-                copyExp = ((MathExp) e).remember();
-            }
-            else {
-                throw new MiscErrorException("We encountered an expression of the type " +
-                        e.getClass().getName(),
-                        new InvalidClassException(""));
-            }
-
-            newArgs.add(copyExp);
-        }
-
-        return new FunctionExp(cloneLocation(), newNameExp, newCaratExp, newArgs);
     }
 
     /**

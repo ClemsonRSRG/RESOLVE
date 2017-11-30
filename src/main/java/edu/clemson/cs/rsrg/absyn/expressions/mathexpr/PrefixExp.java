@@ -181,26 +181,6 @@ public class PrefixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link PrefixExp} from applying the remember rule.
-     */
-    @Override
-    public final Exp remember() {
-        Exp newArgument = ((MathExp) myArgument).remember();
-
-        PosSymbol qualifier = null;
-        if (myQualifier != null) {
-            qualifier = myQualifier.clone();
-        }
-
-        return new PrefixExp(cloneLocation(), qualifier, myOperationName
-                .clone(), newArgument);
-    }
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.

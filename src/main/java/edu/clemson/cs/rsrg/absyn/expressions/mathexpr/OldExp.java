@@ -169,18 +169,6 @@ public class OldExp extends MathExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link Exp} from applying the remember rule.
-     */
-    @Override
-    public final Exp remember() {
-        return myOrigExp.clone();
-    }
-
-    /**
      * <p>This method sets the mathematical type associated
      * with this object.</p>
      *

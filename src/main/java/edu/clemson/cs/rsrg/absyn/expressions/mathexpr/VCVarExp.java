@@ -165,18 +165,6 @@ public class VCVarExp extends MathExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link VCVarExp} from applying the remember rule.
-     */
-    @Override
-    public final VCVarExp remember() {
-        return (VCVarExp) this.clone();
-    }
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.

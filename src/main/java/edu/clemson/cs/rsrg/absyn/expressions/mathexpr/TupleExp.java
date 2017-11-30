@@ -274,33 +274,6 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link TupleExp} from applying the remember rule.
-     */
-    @Override
-    public final TupleExp remember() {
-        List<Exp> newFieldExps = new ArrayList<>();
-        for (Exp e : myFields) {
-            Exp copyExp;
-            if (e instanceof MathExp){
-                copyExp = ((MathExp) e).remember();
-            }
-            else {
-                throw new MiscErrorException("We encountered an expression of the type " +
-                        e.getClass().getName(),
-                        new InvalidClassException(""));
-            }
-
-            newFieldExps.add(copyExp);
-        }
-
-        return new TupleExp(cloneLocation(), newFieldExps);
-    }
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.
