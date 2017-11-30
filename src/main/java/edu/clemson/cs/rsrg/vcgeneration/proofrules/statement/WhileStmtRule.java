@@ -107,8 +107,8 @@ public class WhileStmtRule extends AbstractProofRuleApplication
                 loopInvariantClause.getLocation().clone(), baseCaseLoopInvariant.getLocation().clone(),
                 "Base Case of the Invariant of While Statement"));
 
-        ConfirmStmt confirmStmt = new ConfirmStmt(loopInvariantClause.getLocation().clone(),
-                loopInvariantClause.getAssertionExp().clone(), false);
+        ConfirmStmt confirmStmt = new ConfirmStmt(baseCaseLoopInvariant.getLocation().clone(),
+                baseCaseLoopInvariant, false);
         myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
 
         // NY YS
@@ -136,10 +136,19 @@ public class WhileStmtRule extends AbstractProofRuleApplication
                 nqvPValExp.clone(), null, EqualsExp.Operator.EQUAL,
                 decreasingClause.getAssertionExp().clone());
         equalsPExp.setMathType(myTypeGraph.BOOLEAN);
+        equalsPExp.setLocationDetailModel(new LocationDetailModel(
+                decreasingClause.getLocation().clone(),  decreasingClause.getLocation().clone(),
+                "Decreasing Expression of While Statement"));
+
+        Exp assumeLoopInvariant = loopInvariantClause.getAssertionExp().clone();
+        assumeLoopInvariant.setLocationDetailModel(new LocationDetailModel(
+                loopInvariantClause.getLocation().clone(), assumeLoopInvariant.getLocation().clone(),
+                "Invariant of While Statement"));
+
         myCurrentAssertiveCodeBlock.addStatement(
                 new AssumeStmt(myWhileStmt.getLocation().clone(),
                         InfixExp.formConjunct(myWhileStmt.getLocation().clone(),
-                                loopInvariantClause.getAssertionExp().clone(), equalsPExp), false));
+                                assumeLoopInvariant, equalsPExp), false));
 
         // NY YS
         // TODO: Also assume NQV(RP, Cum_Dur) = El_Dur_Exp

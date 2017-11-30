@@ -70,17 +70,17 @@ public class VCConfirmStmt extends Statement {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("VC_Confirm ");
+        sb.append("VC_Confirm\n");
         Iterator<VerificationCondition> conditionIterator = myVCs.iterator();
         while (conditionIterator.hasNext()) {
             VerificationCondition vc = conditionIterator.next();
-            sb.append(vc.asString(0, innerIndentInc));
+            int tabSize = indentSize + innerIndentInc;
+            sb.append(vc.asString(tabSize, innerIndentInc));
 
             if (conditionIterator.hasNext()) {
-                sb.append(", ");
+                sb.append("\n");
             }
         }
-        sb.append(";");
 
         return sb.toString();
     }
