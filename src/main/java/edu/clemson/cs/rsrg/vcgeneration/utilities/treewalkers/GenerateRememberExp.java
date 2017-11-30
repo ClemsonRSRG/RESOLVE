@@ -80,7 +80,7 @@ public class GenerateRememberExp extends TreeWalkerVisitor {
     public final void postExp(Exp exp) {
         // YS: If there isn't a specific walk method that generated
         //     a modified Exp, simply make a copy.
-        if (myGeneratedExpMap.containsKey(exp)) {
+        if (!myGeneratedExpMap.containsKey(exp)) {
             myGeneratedExpMap.put(exp, exp.clone());
         }
     }

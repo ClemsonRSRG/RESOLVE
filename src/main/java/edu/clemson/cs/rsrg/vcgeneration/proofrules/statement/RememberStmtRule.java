@@ -128,7 +128,7 @@ public class RememberStmtRule extends AbstractProofRuleApplication
             // expression for the consequent.
             GenerateRememberExp generateRememberExp = new GenerateRememberExp(consequent);
             TreeWalker.visit(generateRememberExp, consequent);
-            newAntecedents.add(generateRememberExp.getResultingExp());
+            newConsequents.add(generateRememberExp.getResultingExp());
         }
 
         return new Sequent(s.getLocation(), newAntecedents, newConsequents);
