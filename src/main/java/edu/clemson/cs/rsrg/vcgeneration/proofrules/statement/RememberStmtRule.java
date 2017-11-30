@@ -13,13 +13,13 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.GenerateRememberExp;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -102,8 +102,10 @@ public class RememberStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>An helper method that calls the {@link MathExp#remember()} on
-     * each of the {@link Exp Exps} in the {@link Sequent}.</p>
+     * <p>An helper method that uses the {@link GenerateRememberExp}
+     * walker to generate {@link Exp Exps} that result from applying
+     * the {@code Remember} rule for each of the {@link Exp} in
+     * the {@link Sequent}.</p>
      *
      * @param s The original {@link Sequent}.
      *
@@ -114,21 +116,19 @@ public class RememberStmtRule extends AbstractProofRuleApplication
         List<Exp> newConsequents = new ArrayList<>();
 
         for (Exp antecedent : s.getAntecedents()) {
-            if (antecedent instanceof MathExp) {
-                newAntecedents.add(((MathExp) antecedent).remember());
-            }
-            else {
-                Utilities.expNotHandled(antecedent, antecedent.getLocation());
-            }
+            // Use the helper walker to generate the "remember"
+            // expression for the antecedent.
+            GenerateRememberExp generateRememberExp = new GenerateRememberExp(antecedent);
+            TreeWalker.visit(generateRememberExp, antecedent);
+            newAntecedents.add(generateRememberExp.getResultingExp());
         }
 
         for (Exp consequent : s.getConcequents()) {
-            if (consequent instanceof MathExp) {
-                newConsequents.add(((MathExp) consequent).remember());
-            }
-            else {
-                Utilities.expNotHandled(consequent, consequent.getLocation());
-            }
+            // Use the helper walker to generate the "remember"
+            // expression for the consequent.
+            GenerateRememberExp generateRememberExp = new GenerateRememberExp(consequent);
+            TreeWalker.visit(generateRememberExp, consequent);
+            newAntecedents.add(generateRememberExp.getResultingExp());
         }
 
         return new Sequent(s.getLocation(), newAntecedents, newConsequents);
