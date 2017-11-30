@@ -15,9 +15,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -191,17 +188,6 @@ public class EqualsExp extends InfixExp {
         }
 
         return (MathExp) simplified;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final List<InfixExp> split(MathExp assumpts, boolean single) {
-        List<InfixExp> lst = new ArrayList<>();
-        lst.add(this);
-
-        return lst;
     }
 
     // ===========================================================

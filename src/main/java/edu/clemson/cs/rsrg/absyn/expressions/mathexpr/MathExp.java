@@ -298,22 +298,6 @@ public abstract class MathExp extends Exp {
      */
     public abstract Exp simplify();
 
-    /**
-     * <p>This method is used to convert a {@link Exp} into the prover's
-     * version of {@link PExp}. By default, this method throws an exception
-     * unless the concrete subclass overrides this method.</p>
-     *
-     * @param assumpts The assumption expressions for this expression.
-     * @param single Boolean flag to indicate whether or not this is a
-     *               standalone expression.
-     *
-     * @return A list of {link Exp} objects.
-     */
-    public List<InfixExp> split(MathExp assumpts, boolean single) {
-        throw new UnsupportedOperationException("Split for classes of type "
-                + this.getClass() + " is not currently supported.");
-    }
-
     // ===========================================================
     // Private Methods
     // ===========================================================
