@@ -323,7 +323,7 @@ public class IfStmtRule extends AbstractProofRuleApplication
             negIfBlockModel.add("blockName", negIfAssertiveCodeBlock.getName());
             ST negIfStepModel = mySTGroup.getInstanceOf("outputVCGenStep");
             negIfStepModel.add("proofRuleName", "Else-Part Rule").add(
-                    "currentStateOfBlock", negIfBlockModel);
+                    "currentStateOfBlock", negIfAssertiveCodeBlock);
             negIfBlockModel.add("vcGenSteps", negIfStepModel.render());
             myNewAssertiveCodeBlockModels.put(negIfAssertiveCodeBlock,
                     negIfBlockModel);
