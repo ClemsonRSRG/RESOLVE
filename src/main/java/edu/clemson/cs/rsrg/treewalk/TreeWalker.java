@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.treewalk;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.VirtualListNode;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
