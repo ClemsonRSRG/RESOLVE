@@ -95,7 +95,7 @@ public class VCVarExp extends MathExp {
     public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
         if (myOrigExp != null) {
-            if (IsOldExp) {
+            if (!IsOldExp) {
                 found = myOrigExp.containsVar(varName, false);
             }
         }

@@ -159,17 +159,18 @@ public class WhileStmtRule extends AbstractProofRuleApplication
             ifStmts.add(s.clone());
         }
 
-        // Confirm the inductive case of invariant and P_Exp <= 1 + NQV(RS, P_Val) (termination)
+        // Confirm the inductive case of invariant and 1 + P_Exp <= NQV(RS, P_Val) (termination)
         IntegerExp oneExp = new IntegerExp(decreasingClause.getLocation().clone(), null, 1);
         oneExp.setMathType(decreasingClause.getAssertionExp().getMathType());
 
         InfixExp sumExp = new InfixExp(decreasingClause.getLocation().clone(), oneExp, null,
-                new PosSymbol(decreasingClause.getLocation().clone(), "+"), nqvPValExp.clone());
+                new PosSymbol(decreasingClause.getLocation().clone(), "+"),
+                decreasingClause.getAssertionExp().clone());
         sumExp.setMathType(decreasingClause.getAssertionExp().getMathType());
 
         InfixExp terminationExp = new InfixExp(decreasingClause.getLocation().clone(),
-                decreasingClause.getAssertionExp().clone(), null,
-                new PosSymbol(decreasingClause.getLocation().clone(), "<="), sumExp);
+                sumExp, null, new PosSymbol(decreasingClause.getLocation().clone(), "<="),
+                nqvPValExp.clone());
         terminationExp.setMathType(myTypeGraph.BOOLEAN);
         terminationExp.setLocationDetailModel(new LocationDetailModel(
                 terminationExp.getLocation().clone(), terminationExp.getLocation().clone(),
