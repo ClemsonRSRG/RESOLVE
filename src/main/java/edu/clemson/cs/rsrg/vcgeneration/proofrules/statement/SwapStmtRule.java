@@ -148,9 +148,9 @@ public class SwapStmtRule extends AbstractProofRuleApplication
         // want to replace everything from the left expression
         // to the right expression and subsequently replace all
         // of them back to left expression.
-        Map<Exp, Exp> subtitutionMap1 = new HashMap<>();
-        Map<Exp, Exp> subtitutionMap2 = new HashMap<>();
-        Map<Exp, Exp> subtitutionMap3 = new HashMap<>();
+        Map<Exp, Exp> substitutionMap1 = new HashMap<>();
+        Map<Exp, Exp> substitutionMap2 = new HashMap<>();
+        Map<Exp, Exp> substitutionMap3 = new HashMap<>();
 
         // Convert these to their MathExp counterparts
         ProgramVariableExp stmtLeft = mySwapStmt.getLeft();
@@ -167,24 +167,24 @@ public class SwapStmtRule extends AbstractProofRuleApplication
         // Map 1: expLeft ~> tmp
         // Map 2: expRight ~> expLeft
         // Map 3: tmp ~> expRight
-        subtitutionMap1.put(expLeft, tmp);
-        subtitutionMap2.put(expRight, expLeft);
-        subtitutionMap3.put(tmp, expRight);
+        substitutionMap1.put(expLeft, tmp);
+        substitutionMap2.put(expRight, expLeft);
+        substitutionMap3.put(tmp, expRight);
 
         // Replace in antecedents.
         for (Exp antecedent : s.getAntecedents()) {
-            Exp newAntencedent = antecedent.substitute(subtitutionMap1);
-            newAntencedent = newAntencedent.substitute(subtitutionMap2);
-            newAntencedent = newAntencedent.substitute(subtitutionMap3);
+            Exp newAntencedent = antecedent.substitute(substitutionMap1);
+            newAntencedent = newAntencedent.substitute(substitutionMap2);
+            newAntencedent = newAntencedent.substitute(substitutionMap3);
 
             newAntecedents.add(newAntencedent);
         }
 
         // Replace in consequents.
         for (Exp consequent : s.getConcequents()) {
-            Exp newConsequent = consequent.substitute(subtitutionMap1);
-            newConsequent = newConsequent.substitute(subtitutionMap2);
-            newConsequent = newConsequent.substitute(subtitutionMap3);
+            Exp newConsequent = consequent.substitute(substitutionMap1);
+            newConsequent = newConsequent.substitute(substitutionMap2);
+            newConsequent = newConsequent.substitute(substitutionMap3);
 
             newConsequents.add(newConsequent);
         }

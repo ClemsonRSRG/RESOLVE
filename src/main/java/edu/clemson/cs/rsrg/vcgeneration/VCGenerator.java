@@ -897,6 +897,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                         new ConfirmStmtRule((ConfirmStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
             }
+            else if (statement instanceof FuncAssignStmt) {
+                // Generate a new function assignment rule application.
+                ruleApplication =
+                        new FuncAssignStmtRule((FuncAssignStmt) statement,
+                                myCorrespondingOperation, myOperationDecreasingExp,
+                                myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                                myProcessedInstFacilityDecls, myBuilder, myCurrentModuleScope,
+                                assertiveCodeBlock, mySTGroup, blockModel);
+            }
             else if (statement instanceof IfStmt) {
                 // Generate a new if-else rule application.
                 ruleApplication =
@@ -967,11 +976,6 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Update our block model
             blockModel = ruleApplication.getBlockModel();
-
-            // Apply each statement rule here.
-            /*else if (lastStatement instanceof FuncAssignStmt) {
-                applyFuncAssignStmtRule((FuncAssignStmt) statement);
-            }*/
         }
 
         // If this block contains any branching conditions, add it
