@@ -57,13 +57,30 @@ outputFacilityHeader(facilityName) ::= <<
 >>
 
 /*
- * Template for displaying the name of a assertive code block and each of
- * its transformation through proof rule applications.
+ * Template for displaying the name of a assertive code block,
+ * any branching conditions and each of its transformations
+ * through proof rule applications.
  */
-outputAssertiveCodeBlock(blockName, vcGenSteps) ::= <<
+outputAssertiveCodeBlock(blockName, branchingConditions, vcGenSteps) ::= <<
 ========================= <blockName> =========================
 
+<if(branchingConditions)>
+<branchingConditions>
+<endif>
 <vcGenSteps; separator = "\n">
+>>
+
+/*
+ * Template for displaying the various different branching conditions that
+ * generated this assertive code block.
+ */
+outputBranchingConditions(conditions) ::= <<
+---------------------
+Branching Conditions
+---------------------
+<conditions : {condition | <i>. <condition>}; separator = "\n">
+---------------------
+
 >>
 
 /*

@@ -16,9 +16,11 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +41,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
 
     /** <p>Name of the {@link ResolveConceptualElement} that created this object.</p> */
     private final PosSymbol myBlockName;
+
+    /** <p>Deque of branching condition(s) that generated this assertive code block.</p> */
+    private final Deque<String> myBranchingConditions;
 
     /** <p>List of free variables.</p> */
     private final List<Exp> myFreeVars;
@@ -80,6 +85,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      */
     public AssertiveCodeBlock(TypeGraph g, ResolveConceptualElement instantiatingElement, PosSymbol name) {
         myBlockName = name;
+        myBranchingConditions = new LinkedList<>();
         myFreeVars = new LinkedList<>();
         myInstantiatingElement = instantiatingElement;
         myVCs = new LinkedList<>();
@@ -90,6 +96,21 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>Adds a new branching condition detail for this assertive code block.</p>
+     *
+     * @param branchingLoc A {@link Location} that indicates where the
+     *                     branching occurred.
+     * @param branchingExpAsString The branching condition converted to a
+     *                             mathematical {@link Exp}.
+     * @param evalResult The results of the evaluation.
+     */
+    public final void addBranchingCondition(Location branchingLoc,
+            String branchingExpAsString, boolean evalResult) {
+        myBranchingConditions.push("Expression at " + branchingLoc + " is "
+                + evalResult + ". [Exp: " + branchingExpAsString + "]");
+    }
 
     /**
      * <p>Add the {@link Exp} containing the name of the free variable
@@ -182,6 +203,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
                 new AssertiveCodeBlock(myTypeGraph, myInstantiatingElement,
                         myBlockName);
 
+        // Copy over any branching conditions
+        newBlock.myBranchingConditions.addAll(myBranchingConditions);
+
         // YS: Collections.copy complains about source does not fit in dest,
         // it probably doesn't know it is a LinkedList, so we manually copy everything.
         for (Exp current : myFreeVars) {
@@ -236,6 +260,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         AssertiveCodeBlock block = (AssertiveCodeBlock) o;
 
         return myBlockName.equals(block.myBlockName)
+                && myBranchingConditions.equals(block.myBranchingConditions)
                 && myFreeVars.equals(block.myFreeVars)
                 && myInstantiatingElement.equals(block.myInstantiatingElement)
                 && myVCs.equals(block.myVCs)
@@ -251,6 +276,16 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      */
     public final ResolveConceptualElement getInstantiatingElement() {
         return myInstantiatingElement;
+    }
+
+    /**
+     * <p>This method returns a collection of branching conditions
+     * that generated this assertive code block.</p>
+     *
+     * @return A {@link Deque} containing details on each condition.
+     */
+    public final Deque<String> getBranchingConditions() {
+        return myBranchingConditions;
     }
 
     /**
@@ -290,6 +325,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     @Override
     public final int hashCode() {
         int result = myBlockName.hashCode();
+        result = 31 * result + myBranchingConditions.hashCode();
         result = 31 * result + myFreeVars.hashCode();
         result = 31 * result + myInstantiatingElement.hashCode();
         result = 31 * result + myVCs.hashCode();

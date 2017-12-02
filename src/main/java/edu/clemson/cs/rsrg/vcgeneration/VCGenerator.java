@@ -974,6 +974,15 @@ public class VCGenerator extends TreeWalkerVisitor {
             }*/
         }
 
+        // If this block contains any branching conditions, add it
+        // to our block model.
+        Deque<String> branchingConditions = assertiveCodeBlock.getBranchingConditions();
+        if (!branchingConditions.isEmpty()) {
+            ST branchingModel = mySTGroup.getInstanceOf("outputBranchingConditions");
+            ST test = branchingModel.add("conditions", branchingConditions);
+            blockModel.add("branchingConditions", test.render());
+        }
+
         myAssertiveCodeBlockModels.put(assertiveCodeBlock, blockModel);
     }
 

@@ -262,9 +262,8 @@ public class IfStmtRule extends AbstractProofRuleApplication
             ifConditionBEExp.setLocationDetailModel(new LocationDetailModel(
                     generatedEnsures.getLocation(), ifConditionBEExp
                             .getLocation(), "If Statement Condition"));
-            myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(
-                    ifConditionItem.getTest().getLocation().clone(),
-                    ifConditionBEExp, true));
+            myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(ifCondition
+                    .getLocation().clone(), ifConditionBEExp, true));
 
             // 4) If the ProgramFunctionExp walker generated any restores
             //    parameter ensures clauses, we need to add it as a new
@@ -283,7 +282,9 @@ public class IfStmtRule extends AbstractProofRuleApplication
             // NY YS
             // TODO: Duration for If Part
 
-            // TODO: 6) Update the location detail for the VCs
+            // 6) Add a branching condition for this block
+            myCurrentAssertiveCodeBlock.addBranchingCondition(ifCondition
+                    .getLocation().clone(), ifConditionBEExp.toString(), true);
 
             // 7) Add the different details to the various different output models
             ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
@@ -302,20 +303,22 @@ public class IfStmtRule extends AbstractProofRuleApplication
                     generatedEnsures.getLocation(), elseConditionBEExp
                             .getLocation(),
                     "Negation of If Statement Condition"));
-            negIfAssertiveCodeBlock
-                    .addStatement(new AssumeStmt(ifConditionItem.getTest()
-                            .getLocation().clone(), elseConditionBEExp, true));
+            negIfAssertiveCodeBlock.addStatement(new AssumeStmt(ifCondition
+                    .getLocation().clone(), elseConditionBEExp, true));
 
             // 2) Add all the statements inside the else-part to the
             //    else-assertive code block.
             negIfAssertiveCodeBlock.addStatements(myIfStmt.getElseclause());
 
-            // TODO: 3) Update the location detail for the VCs
-
             // NY YS
             // TODO: Duration for Else Part
 
-            // Store the new block and add a new block model that goes with it.
+            // 3) Add a branching condition for this block
+            negIfAssertiveCodeBlock.addBranchingCondition(ifCondition
+                    .getLocation().clone(), elseConditionBEExp.toString(),
+                    false);
+
+            // 4) Store the new block and add a new block model that goes with it.
             myResultingAssertiveCodeBlocks.add(negIfAssertiveCodeBlock);
 
             ST negIfBlockModel =
