@@ -453,9 +453,9 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 boolean isLeftReplaceable = containsReplaceableExp(equalsExp.getLeft());
                 boolean isRightReplaceable = containsReplaceableExp(equalsExp.getRight());
 
-                // Check to see if we have P_val or Cum_Dur
+                // Check to see if we have P_Val or Cum_Dur
                 // TODO: Make sure this still works!
-                if (equalsExp.getLeft().containsVar("P_val", false) ||
+                if (equalsExp.getLeft().containsVar("P_Val", false) ||
                         equalsExp.getLeft().containsVar("Cum_Dur", false)) {
                     hasVerificationVar = true;
                 }
