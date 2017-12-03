@@ -500,25 +500,28 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 assumeExpCopyList.set(k, newAssumeExp);
             }
 
-            // Check to see if this is a stipulate assume clause
-            // If yes, we keep a copy of the current
-            // assume expression.
-            if (myAssumeStmt.getIsStipulate()) {
-                remAssumeExpList.add(currentAssumeExp.clone());
-            }
-
             List<Exp> antencedentsSubtituted = substituteExps(newAntecedents, substitutions);
             List<Exp> consequentsSubtituted = substituteExps(newConsequents, substitutions);
 
-            // No substitutions
-            if (antencedentsSubtituted.equals(newAntecedents) &&
-                    consequentsSubtituted.equals(newConsequents)) {
-                // Check to see if this a verification
-                // variable. If yes, we don't keep this assume.
-                // Otherwise, we need to store this for the
-                // step that generates the parsimonious vcs.
-                if (!hasVerificationVar) {
-                    remAssumeExpList.add(currentAssumeExp.clone());
+            // Check to see if this is a stipulate assume clause
+            // If yes, then we will have to add it for further processing
+            // regardless if we did a substitution or not.
+            if (myAssumeStmt.getIsStipulate()) {
+                remAssumeExpList.add(currentAssumeExp.clone());
+            }
+            else {
+                // Check to see if there is no change to the new antecedents
+                // and consequents. If not, then we might to keep this assumed
+                // expression for further processing.
+                if (antencedentsSubtituted.equals(newAntecedents) &&
+                        consequentsSubtituted.equals(newConsequents)) {
+                    // Check to see if this a verification
+                    // variable. If yes, we don't keep this assume.
+                    // Otherwise, we need to store this for the
+                    // step that generates the parsimonious vcs.
+                    if (!hasVerificationVar) {
+                        remAssumeExpList.add(currentAssumeExp.clone());
+                    }
                 }
             }
 
