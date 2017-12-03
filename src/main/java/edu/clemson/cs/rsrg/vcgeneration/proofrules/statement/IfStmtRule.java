@@ -15,7 +15,6 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
@@ -25,7 +24,6 @@ import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.IfStmt;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -203,12 +201,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
             List<ConfirmStmt> terminationConfirms =
                     walker.getTerminationConfirmStmts();
 
-            // The generated ensures clause must be an EqualsExp with
-            // the results from the program function call to the right of
-            // the equals. (Note: the left hand side should be the name
-            // of the operation).
-            generatedEnsures = formConditionExp(generatedEnsures);
-
             // Form a conjunct using the restoresParamExps
             // YS: We also make a copy of this for the else part,
             //     while storing the associated location details.
@@ -345,56 +337,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
     @Override
     public final String getRuleDescription() {
         return "If-Else Rule";
-    }
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
-
-    /**
-     * <p>An helper method for sanity checking the generated expression from
-     * the {@link ProgramFunctionExpWalker}.</p>
-     *
-     * @param generatedExp The generated {@code ensures} clause
-     *                     expression.
-     *
-     * @return The appropriate mathematical form of
-     * the condition {@link Exp}.
-     */
-    private Exp formConditionExp(Exp generatedExp) {
-        Exp retExp;
-
-        // Make sure we have an EqualsExp, else it is an error.
-        if (generatedExp instanceof EqualsExp) {
-            // Has to be a VarExp on the left hand side (containing the name
-            // of the function operation)
-            EqualsExp generatedExpAsEqualsexp = (EqualsExp) generatedExp;
-            if (generatedExpAsEqualsexp.getLeft() instanceof VarExp) {
-                retExp = generatedExpAsEqualsexp.getRight().clone();
-            }
-            else {
-                // Something went wrong with the program function walker.
-                // We should have generated an equals expression containing the
-                // results of the program function call.
-                throw new MiscErrorException(
-                        "[VCGenerator] Condition expression: "
-                                + generatedExp.toString()
-                                + " is not of the form: <OperationName> = <expression> "
-                                + generatedExp.getLocation(),
-                        new RuntimeException());
-            }
-        }
-        else {
-            // Something went wrong with the program function walker.
-            // We should have generated an equals expression containing the
-            // results of the program function call.
-            throw new MiscErrorException("[VCGenerator] Condition expression: "
-                    + generatedExp.toString()
-                    + " is not an equivalence expression "
-                    + generatedExp.getLocation(), new RuntimeException());
-        }
-
-        return retExp;
     }
 
 }

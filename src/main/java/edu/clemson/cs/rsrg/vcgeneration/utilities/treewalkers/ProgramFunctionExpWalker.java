@@ -295,7 +295,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
         // Attempt to locate the ensures clause for exp
         if (myEnsuresClauseMap.containsKey(exp)) {
-            ensures = myEnsuresClauseMap.remove(exp);
+            ensures = formConditionExp(myEnsuresClauseMap.remove(exp));
         }
         else {
             throw new MiscErrorException(
@@ -362,6 +362,52 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method for sanity checking the generated expression from
+     * the {@link ProgramFunctionExpWalker}.</p>
+     *
+     * @param generatedExp The generated {@code ensures} clause
+     *                     expression.
+     *
+     * @return The appropriate mathematical form of
+     * the condition {@link Exp}.
+     */
+    private Exp formConditionExp(Exp generatedExp) {
+        Exp retExp;
+
+        // Make sure we have an EqualsExp, else it is an error.
+        if (generatedExp instanceof EqualsExp) {
+            // Has to be a VarExp on the left hand side (containing the name
+            // of the function operation)
+            EqualsExp generatedExpAsEqualsexp = (EqualsExp) generatedExp;
+            if (generatedExpAsEqualsexp.getLeft() instanceof VarExp) {
+                retExp = generatedExpAsEqualsexp.getRight().clone();
+            }
+            else {
+                // Something went wrong with the program function walker.
+                // We should have generated an equals expression containing the
+                // results of the program function call.
+                throw new MiscErrorException(
+                        "[VCGenerator] Condition expression: "
+                                + generatedExp.toString()
+                                + " is not of the form: <OperationName> = <expression> "
+                                + generatedExp.getLocation(),
+                        new RuntimeException());
+            }
+        }
+        else {
+            // Something went wrong with the program function walker.
+            // We should have generated an equals expression containing the
+            // results of the program function call.
+            throw new MiscErrorException("[VCGenerator] Condition expression: "
+                    + generatedExp.toString()
+                    + " is not an equivalence expression "
+                    + generatedExp.getLocation(), new RuntimeException());
+        }
+
+        return retExp;
+    }
 
     /**
      * <p>An helper method that generates {@code ensures} clauses for any parameters
@@ -512,7 +558,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                     // The replacement will be the inner operation's
                     // ensures clause. We are done processing the
                     // inner function call, so we can remove it from our map.
-                    replExp = myEnsuresClauseMap.remove(exp);
+                    replExp = formConditionExp(myEnsuresClauseMap.remove(exp));
                 }
                 else {
                     // Something went wrong with the walking mechanism.
