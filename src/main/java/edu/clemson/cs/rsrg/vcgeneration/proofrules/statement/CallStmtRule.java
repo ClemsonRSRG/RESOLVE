@@ -28,7 +28,6 @@ import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -119,6 +118,11 @@ public class CallStmtRule extends AbstractProofRuleApplication
     public final void applyRule() {
         OperationDec opDec = (OperationDec) myAssociatedOperationEntry.getDefiningElement();
 
+        // Convert the formal operation parameters in VarExps for
+        // substitution purposes.
+        List<VarExp> operationParamAsVarExps =
+                Utilities.createOperationParamExpList(opDec.getParameters());
+
         // Get the ensures clause for this operation and
         // store it's associated location detail.
         AssertionClause ensuresClause = myAssociatedOperationEntry.getEnsuresClause();
@@ -184,8 +188,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
         boolean simplify = VarExp.isLiteralTrue(requiresExp);
 
         // Replace PreCondition variables in the requires clause
-        requiresExp =
-                replaceFormalWithActualReq(requiresExp, opDec.getParameters(), myModifiedArguments);
+        requiresExp = Utilities.replaceFormalWithActual(requiresExp,
+                operationParamAsVarExps, myModifiedArguments);
 
         /* TODO:
         // Replace facility actuals variables in the requires clause
@@ -411,56 +415,4 @@ public class CallStmtRule extends AbstractProofRuleApplication
         return "Call Rule";
     }
 
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
-
-    /**
-     * <p>An helper method that replaces the formal with the actual variables
-     * inside the requires clause.</p>
-     *
-     * @param requires The requires clause.
-     * @param paramList The list of parameter variables.
-     * @param argList The list of arguments from the operation call.
-     *
-     * @return The requires clause in <code>Exp</code> form.
-     */
-    private Exp replaceFormalWithActualReq(Exp requires, List<ParameterVarDec> paramList, List<Exp> argList) {
-        // YS: We need two replacement maps in case we happen to have the
-        // same names in formal parameter arguments and in the argument list.
-        Map<Exp, Exp> paramToTemp = new HashMap<>();
-        Map<Exp, Exp> tempToActual = new HashMap<>();
-
-        // Replace precondition variables in the requires clause
-        for (int i = 0; i < argList.size(); i++) {
-            ParameterVarDec varDec = paramList.get(i);
-            Exp exp = argList.get(i);
-
-            // Convert the pExp into a something we can use
-            Exp replExp = Utilities.convertExp(exp, myCurrentModuleScope);
-
-            // VarExp form of the parameter variable
-            VarExp paramExpAsVarExp =
-                    Utilities.createVarExp(varDec.getLocation(), null,
-                            varDec.getName(), exp.getMathType(), exp.getMathTypeValue());
-
-            // A temporary VarExp that avoids any formal with the same name as the actual.
-            VarExp tempExp =
-                    Utilities.createVarExp(varDec.getLocation(), null,
-                            new PosSymbol(varDec.getLocation(), "_" + varDec.getName().getName()),
-                            replExp.getMathType(), replExp.getMathTypeValue());
-
-            // Add a substitution entry from formal parameter to temp
-            paramToTemp.put(paramExpAsVarExp, tempExp);
-
-            // Add a substitution entry from temp to actual parameter
-            tempToActual.put(tempExp, replExp);
-        }
-
-        // Replace from formal to temp and then from temp to actual
-        requires = requires.substitute(paramToTemp);
-        requires = requires.substitute(tempToActual);
-
-        return requires;
-    }
 }

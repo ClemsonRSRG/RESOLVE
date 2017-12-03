@@ -242,6 +242,27 @@ public class Utilities {
     }
 
     /**
+     * <p>This method creates a list of {@link VarExp VarExps}
+     * representing each of the {@code Operation's} {@link ParameterVarDec ParameterVarDecs}.</p>
+     *
+     * @param parameterVarDecs List of operation parameters.
+     *
+     * @return A list containing the {@link VarExp VarExps} representing
+     * each operation parameter.
+     */
+    public static List<VarExp> createOperationParamExpList(List<ParameterVarDec> parameterVarDecs) {
+        List<VarExp> retExpList = new ArrayList<>(parameterVarDecs.size());
+
+        // Create a VarExp representing each of the operation parameters
+        for (ParameterVarDec dec : parameterVarDecs) {
+            retExpList.add(Utilities.createVarExp(dec.getLocation(),
+                    null, dec.getName(), dec.getMathType(), null));
+        }
+
+        return retExpList;
+    }
+
+    /**
      * <p>This method returns a newly created {@link VarExp}
      * with {@code P_Val} as the name and {@code N} as its math type.</p>
      *

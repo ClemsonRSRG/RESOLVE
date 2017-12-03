@@ -19,7 +19,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
@@ -330,33 +329,12 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     private List<VarExp> createModuleParamExpList(List<ModuleParameterDec> formalParams) {
         List<VarExp> retExpList = new ArrayList<>(formalParams.size());
 
-        // Create a VarExp representing each of the module arguments
+        // Create a VarExp representing each of the module parameters
         for (ModuleParameterDec dec : formalParams) {
             // Use the wrapped declaration name and type to create a VarExp.
             Dec wrappedDec = dec.getWrappedDec();
             retExpList.add(Utilities.createVarExp(wrappedDec.getLocation(),
                     null, wrappedDec.getName(), wrappedDec.getMathType(), null));
-        }
-
-        return retExpList;
-    }
-
-    /**
-     * <p>An helper method that creates a list of {@link VarExp VarExps}
-     * representing each of the {@code Operation's} {@link ParameterVarDec ParameterVarDecs}.</p>
-     *
-     * @param parameterVarDecs List of operation parameters.
-     *
-     * @return A list containing the {@link VarExp VarExps} representing
-     * each operation parameter.
-     */
-    private List<VarExp> createOperationParamExpList(List<ParameterVarDec> parameterVarDecs) {
-        List<VarExp> retExpList = new ArrayList<>(parameterVarDecs.size());
-
-        // Create a VarExp representing each of the operation parameters
-        for (ParameterVarDec dec : parameterVarDecs) {
-            retExpList.add(Utilities.createVarExp(dec.getLocation(),
-                    null, dec.getName(), dec.getMathType(), null));
         }
 
         return retExpList;
@@ -995,7 +973,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         // qualifiers to distinguish the operation from others with the same name.
         if (actualOpQualifier != null) {
             List<VarExp> actualOpParamsAsVarExp =
-                    createOperationParamExpList(actualOpDec.getParameters());
+                    Utilities.createOperationParamExpList(actualOpDec.getParameters());
             if (actualOpDec.getReturnTy() != null) {
                 actualOpParamsAsVarExp.add(Utilities.createVarExp(actualOpDec
                                 .getReturnTy().getLocation(), actualOpQualifier,
