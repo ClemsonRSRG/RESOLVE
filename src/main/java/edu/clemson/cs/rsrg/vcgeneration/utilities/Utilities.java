@@ -673,12 +673,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Returns the math type for "Z".</p>
+     * <p>An helper method that returns the math type for "Z".</p>
      *
      * @param loc The location in the AST that we are
      *            currently visiting.
      * @param scope The module scope to start our search.
-     *
      *
      * @return The <code>MTType</code> for "Z".
      */
@@ -694,6 +693,26 @@ public class Utilities {
         }
 
         return Z;
+    }
+
+    /**
+     * <p>An helper method that returns {@link ProgramFunctionExp ProgramFunctionExp's}
+     * corresponding {@link OperationEntry}.</p>
+     *
+     * @param functionExp A program function expression.
+     * @param scope The module scope to start our search.
+     *
+     * @return The corresponding {@link OperationEntry}.
+     */
+    public static OperationEntry getOperationEntry(ProgramFunctionExp functionExp, ModuleScope scope) {
+        // Obtain the corresponding program types from the arguments
+        List<PTType> argTypes = new LinkedList<>();
+        for (ProgramExp arg : functionExp.getArguments()) {
+            argTypes.add(arg.getProgramType());
+        }
+
+        return Utilities.searchOperation(functionExp.getLocation(),
+                functionExp.getQualifier(), functionExp.getName(), argTypes, scope);
     }
 
     /**

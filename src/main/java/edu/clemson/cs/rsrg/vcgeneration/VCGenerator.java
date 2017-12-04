@@ -27,8 +27,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -862,28 +860,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 assertiveCodeBlock, mySTGroup, blockModel);
             }
             else if (statement instanceof CallStmt) {
-                CallStmt callStmt = (CallStmt) statement;
-                ProgramFunctionExp functionExp = callStmt.getFunctionExp();
-
-                // Call a method to locate the operation dec for this call
-                List<PTType> argTypes = new LinkedList<>();
-                for (ProgramExp arg : functionExp.getArguments()) {
-                    argTypes.add(arg.getProgramType());
-                }
-                OperationEntry opEntry =
-                        Utilities.searchOperation(callStmt.getLocation(),
-                                functionExp.getQualifier(), functionExp.getName(),
-                                argTypes, myCurrentModuleScope);
-
-                // Find all the replacements that needs to happen to the requires
-                // and ensures clauses
-                List<ProgramExp> callArgs = functionExp.getArguments();
-                List<Exp> replaceArgs = modifyArgumentList(callArgs);
-
                 // Generate a new call rule application.
                 ruleApplication =
-                        new CallStmtRule(callStmt, opEntry, replaceArgs,
-                                myCurrentModuleScope, assertiveCodeBlock, mySTGroup, blockModel);
+                        new CallStmtRule((CallStmt) statement,
+                                myCorrespondingOperation,
+                                myOperationDecreasingExp,
+                                myCurrentConceptDeclaredTypes,
+                                myLocalRepresentationTypeDecs,
+                                myProcessedInstFacilityDecls, myBuilder,
+                                myCurrentModuleScope, assertiveCodeBlock,
+                                mySTGroup, blockModel);
             }
             else if (statement instanceof ChangeStmt) {
                 // Generate a new change rule application.
@@ -901,25 +887,32 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new function assignment rule application.
                 ruleApplication =
                         new FuncAssignStmtRule((FuncAssignStmt) statement,
-                                myCorrespondingOperation, myOperationDecreasingExp,
-                                myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myBuilder, myCurrentModuleScope,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                myCorrespondingOperation,
+                                myOperationDecreasingExp,
+                                myCurrentConceptDeclaredTypes,
+                                myLocalRepresentationTypeDecs,
+                                myProcessedInstFacilityDecls, myBuilder,
+                                myCurrentModuleScope, assertiveCodeBlock,
+                                mySTGroup, blockModel);
             }
             else if (statement instanceof IfStmt) {
                 // Generate a new if-else rule application.
                 ruleApplication =
                         new IfStmtRule((IfStmt) statement,
-                                myCorrespondingOperation, myOperationDecreasingExp,
-                                myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myBuilder, myCurrentModuleScope,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                myCorrespondingOperation,
+                                myOperationDecreasingExp,
+                                myCurrentConceptDeclaredTypes,
+                                myLocalRepresentationTypeDecs,
+                                myProcessedInstFacilityDecls, myBuilder,
+                                myCurrentModuleScope, assertiveCodeBlock,
+                                mySTGroup, blockModel);
             }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
                     // Generate a new remember rule application.
                     ruleApplication =
-                            new RememberStmtRule(assertiveCodeBlock, mySTGroup, blockModel);
+                            new RememberStmtRule(assertiveCodeBlock, mySTGroup,
+                                    blockModel);
                 }
                 else {
                     throw new SourceErrorException(
@@ -936,8 +929,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             else if (statement instanceof SwapStmt) {
                 // Generate a new swap rule application.
                 ruleApplication =
-                        new SwapStmtRule((SwapStmt) statement, myCurrentModuleScope,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                        new SwapStmtRule((SwapStmt) statement,
+                                myCurrentModuleScope, assertiveCodeBlock,
+                                mySTGroup, blockModel);
             }
             else if (statement instanceof VCConfirmStmt) {
                 // Generate a new VCConfirm rule application.
@@ -948,8 +942,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             else if (statement instanceof WhileStmt) {
                 // Generate a new while rule application
                 ruleApplication =
-                        new WhileStmtRule((WhileStmt) statement, myCurrentModuleScope,
-                                myTypeGraph, assertiveCodeBlock, mySTGroup, blockModel);
+                        new WhileStmtRule((WhileStmt) statement,
+                                myCurrentModuleScope, myTypeGraph,
+                                assertiveCodeBlock, mySTGroup, blockModel);
             }
             else {
                 throw new SourceErrorException(
@@ -965,14 +960,17 @@ public class VCGenerator extends TreeWalkerVisitor {
             // than one assertive code block. The first one is always
             // the one we passed in to the rule. We add the rest to the
             // front of the incomplete stack.
-            Deque<AssertiveCodeBlock> resultingBlocks = ruleApplication.getAssertiveCodeBlocks();
+            Deque<AssertiveCodeBlock> resultingBlocks =
+                    ruleApplication.getAssertiveCodeBlocks();
             assertiveCodeBlock = resultingBlocks.removeFirst();
             while (!resultingBlocks.isEmpty()) {
-                myIncompleteAssertiveCodeBlocks.addFirst(resultingBlocks.removeLast());
+                myIncompleteAssertiveCodeBlocks.addFirst(resultingBlocks
+                        .removeLast());
             }
 
             // Store any new block models
-            myAssertiveCodeBlockModels.putAll(ruleApplication.getNewAssertiveCodeBlockModels());
+            myAssertiveCodeBlockModels.putAll(ruleApplication
+                    .getNewAssertiveCodeBlockModels());
 
             // Update our block model
             blockModel = ruleApplication.getBlockModel();
@@ -980,60 +978,16 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // If this block contains any branching conditions, add it
         // to our block model.
-        Deque<String> branchingConditions = assertiveCodeBlock.getBranchingConditions();
+        Deque<String> branchingConditions =
+                assertiveCodeBlock.getBranchingConditions();
         if (!branchingConditions.isEmpty()) {
-            ST branchingModel = mySTGroup.getInstanceOf("outputBranchingConditions");
+            ST branchingModel =
+                    mySTGroup.getInstanceOf("outputBranchingConditions");
             ST test = branchingModel.add("conditions", branchingConditions);
             blockModel.add("branchingConditions", test.render());
         }
 
         myAssertiveCodeBlockModels.put(assertiveCodeBlock, blockModel);
-    }
-
-    /**
-     * <p>Modify the argument expression list if we have a
-     * nested function call.</p>
-     *
-     * @param callArgs The original list of arguments.
-     *
-     * @return The modified list of arguments.
-     */
-    private List<Exp> modifyArgumentList(List<ProgramExp> callArgs) {
-        // Find all the replacements that needs to happen to the requires
-        // and ensures clauses
-        List<Exp> replaceArgs = new ArrayList<>();
-        for (ProgramExp p : callArgs) {
-            /* TODO: Add the logic for nested function calls
-            // Check for nested function calls in ProgramDotExp
-            // and ProgramParamExp.
-            if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
-                NestedFuncWalker nfw =
-                        new NestedFuncWalker(myCurrentOperationEntry,
-                                myOperationDecreasingExp, mySymbolTable,
-                                myCurrentModuleScope, myCurrentAssertiveCode,
-                                myInstantiatedFacilityArgMap);
-                TreeWalker tw = new TreeWalker(nfw);
-                tw.visit(p);
-
-                // Add the requires clause as something we need to confirm
-                Exp pRequires = nfw.getRequiresClause();
-                if (!pRequires.isLiteralTrue()) {
-                    myCurrentAssertiveCode.addConfirm(pRequires.getLocation(),
-                            pRequires, false);
-                }
-
-                // Add the modified ensures clause as the new expression we want
-                // to replace in the CallStmt's ensures clause.
-                replaceArgs.add(nfw.getEnsuresClause());
-            }
-            // For all other types of arguments, simply add it to the list to be replaced
-            else {
-                replaceArgs.add(p);
-            }*/
-            replaceArgs.add(p);
-        }
-
-        return replaceArgs;
     }
 
     /**

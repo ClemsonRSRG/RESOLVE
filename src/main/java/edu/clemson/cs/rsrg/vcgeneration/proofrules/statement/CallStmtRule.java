@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -22,6 +23,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
@@ -33,12 +36,15 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -58,11 +64,15 @@ public class CallStmtRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@link OperationEntry} this call statement is trying to call.</p> */
-    private final OperationEntry myAssociatedOperationEntry;
-
     /** <p>The {@link CallStmt} we are applying the rule to.</p> */
     private final CallStmt myCallStmt;
+
+    /**
+     * <p>This contains all the types declared by the {@code Concept}
+     * associated with the current module. Note that if we are in a
+     * {@code Facility}, this list will be empty.</p>
+     */
+    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
 
     /**
      * <p>The module scope for the file we are generating
@@ -71,11 +81,33 @@ public class CallStmtRule extends AbstractProofRuleApplication
     private final ModuleScope myCurrentModuleScope;
 
     /**
-     * <p>Since we could have nested function calls, this list contains
-     * the new set of arguments with all those nested function calls
-     * replaced with what they generate.</p>
+     * <p>If we are in a {@code Procedure} and it is an recursive
+     * operation implementation, then this stores the decreasing clause
+     * expression.</p>
      */
-    private final List<Exp> myModifiedArguments;
+    private final Exp myCurrentProcedureDecreasingExp;
+
+    /**
+     * <p>The {@link OperationEntry} associated with this {@code If}
+     * statement if we are inside a {@code ProcedureDec}.</p>
+     */
+    private final OperationEntry myCurrentProcedureOperationEntry;
+
+    /**
+     * <p>If our current module scope allows us to introduce new type implementations,
+     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
+
+    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
+    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
+
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
 
     // ===========================================================
     // Constructors
@@ -87,24 +119,39 @@ public class CallStmtRule extends AbstractProofRuleApplication
      *
      * @param callStmt The {@link CallStmt} we are applying
      *                 the rule to.
-     * @param associatedOpEntry The associated {@link OperationEntry}
-     *                          that the {@code callStmt} is calling.
-     * @param modifiedArguments The modified arguments that with all the nested
-     *                          function calls taken care of.
+     * param currentProcedureOpEntry An {@link OperationEntry} with a {@code Procedure},
+     *                                if {@code ifStmt} is inside one. Otherwise it should
+     *                                be left as {@code null}.
+     * @param currentProcedureDecreasingExp If we are in a {@code Procedure} and it is recursive,
+     *                                      this is its {@code decreasing} clause expression.
+     *                                      Otherwise it should be left as {@code null}.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
+     * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public CallStmtRule(CallStmt callStmt, OperationEntry associatedOpEntry,
-            List<Exp> modifiedArguments, ModuleScope moduleScope,
+    public CallStmtRule(CallStmt callStmt,
+            OperationEntry currentProcedureOpEntry,
+            Exp currentProcedureDecreasingExp,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
+            MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
-        myAssociatedOperationEntry = associatedOpEntry;
         myCallStmt = callStmt;
+        myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
-        myModifiedArguments = modifiedArguments;
+        myCurrentProcedureDecreasingExp = currentProcedureDecreasingExp;
+        myCurrentProcedureOperationEntry = currentProcedureOpEntry;
+        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
+        myProcessedInstFacilityDecls = processedInstFacDecs;
+        myTypeGraph = symbolTableBuilder.getTypeGraph();
     }
 
     // ===========================================================
@@ -116,20 +163,31 @@ public class CallStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        OperationDec opDec = (OperationDec) myAssociatedOperationEntry.getDefiningElement();
+        ProgramFunctionExp functionExp = myCallStmt.getFunctionExp();
+
+        // Call a method to locate the operation entry for this call
+        OperationEntry operationEntry =
+                Utilities.getOperationEntry(functionExp, myCurrentModuleScope);
+        OperationDec operationDec =
+                (OperationDec) operationEntry.getDefiningElement();
+
+        // Find all the replacements that needs to happen to the requires
+        // and ensures clauses
+        List<ProgramExp> callArgs = functionExp.getArguments();
+        List<Exp> modifiedArguments = modifyArgumentList(callArgs);
 
         // Convert the formal operation parameters in VarExps for
         // substitution purposes.
         List<VarExp> operationParamAsVarExps =
-                Utilities.createOperationParamExpList(opDec.getParameters());
+                Utilities.createOperationParamExpList(operationDec.getParameters());
 
         // Get the ensures clause for this operation and
         // store it's associated location detail.
-        AssertionClause ensuresClause = myAssociatedOperationEntry.getEnsuresClause();
+        AssertionClause ensuresClause = operationEntry.getEnsuresClause();
         Exp ensuresExp = Utilities.formConjunct(ensuresClause.getLocation(),
                 null, ensuresClause, new LocationDetailModel(
                         ensuresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
-                        "Ensures Clause of " + opDec.getName()));
+                        "Ensures Clause of " + operationDec.getName()));
 
         /* TODO: Recursive call
         // Check for recursive call of itself
@@ -180,16 +238,16 @@ public class CallStmtRule extends AbstractProofRuleApplication
         // YS: We don't need confirm it's which_entails clause,
         //     that has been taken care of already. Maybe add it as
         //     as something we can assume?
-        AssertionClause requiresClause = myAssociatedOperationEntry.getRequiresClause();
+        AssertionClause requiresClause = operationEntry.getRequiresClause();
         Exp requiresExp = requiresClause.getAssertionExp().clone();
         requiresExp.setLocationDetailModel(new LocationDetailModel(
                 requiresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
-                "Requires Clause of " + opDec.getName()));
+                "Requires Clause of " + operationDec.getName()));
         boolean simplify = VarExp.isLiteralTrue(requiresExp);
 
         // Replace PreCondition variables in the requires clause
         requiresExp = Utilities.replaceFormalWithActual(requiresExp,
-                operationParamAsVarExps, myModifiedArguments);
+                operationParamAsVarExps, modifiedArguments);
 
         /* TODO:
         // Replace facility actuals variables in the requires clause
@@ -202,9 +260,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
         Map<Exp, Exp> substitutionsForSeq = new HashMap<>();
         Map<Exp, Exp> substitutions = new HashMap<>();
         Exp parameterEnsures = null;
-        Iterator<Exp> it = myModifiedArguments.iterator();
-        ImmutableList<ProgramParameterEntry> entries =
-                myAssociatedOperationEntry.getParameters();
+        Iterator<Exp> it = modifiedArguments.iterator();
+        ImmutableList<ProgramParameterEntry> entries = operationEntry.getParameters();
         for (ProgramParameterEntry entry : entries) {
             ParameterVarDec parameterVarDec =
                     (ParameterVarDec) entry.getDefiningElement();
@@ -415,4 +472,53 @@ public class CallStmtRule extends AbstractProofRuleApplication
         return "Call Rule";
     }
 
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>Modify the argument expression list if we have a
+     * nested function call.</p>
+     *
+     * @param callArgs The original list of arguments.
+     *
+     * @return The modified list of arguments.
+     */
+    private List<Exp> modifyArgumentList(List<ProgramExp> callArgs) {
+        // Find all the replacements that needs to happen to the requires
+        // and ensures clauses
+        List<Exp> replaceArgs = new ArrayList<>();
+        for (ProgramExp p : callArgs) {
+            /* TODO: Add the logic for nested function calls
+            // Check for nested function calls in ProgramDotExp
+            // and ProgramParamExp.
+            if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
+                NestedFuncWalker nfw =
+                        new NestedFuncWalker(myCurrentOperationEntry,
+                                myOperationDecreasingExp, mySymbolTable,
+                                myCurrentModuleScope, myCurrentAssertiveCode,
+                                myInstantiatedFacilityArgMap);
+                TreeWalker tw = new TreeWalker(nfw);
+                tw.visit(p);
+
+                // Add the requires clause as something we need to confirm
+                Exp pRequires = nfw.getRequiresClause();
+                if (!pRequires.isLiteralTrue()) {
+                    myCurrentAssertiveCode.addConfirm(pRequires.getLocation(),
+                            pRequires, false);
+                }
+
+                // Add the modified ensures clause as the new expression we want
+                // to replace in the CallStmt's ensures clause.
+                replaceArgs.add(nfw.getEnsuresClause());
+            }
+            // For all other types of arguments, simply add it to the list to be replaced
+            else {
+                replaceArgs.add(p);
+            }*/
+            replaceArgs.add(p);
+        }
+
+        return replaceArgs;
+    }
 }

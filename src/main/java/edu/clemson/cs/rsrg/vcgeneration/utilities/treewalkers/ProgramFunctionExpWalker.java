@@ -29,7 +29,6 @@ import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
-import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -199,7 +198,8 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         }
 
         // Call a method to locate the operation entry for this call
-        OperationEntry operationEntry = getOperationEntry(exp);
+        OperationEntry operationEntry =
+                Utilities.getOperationEntry(exp, myCurrentModuleScope);
         OperationDec operationDec =
                 (OperationDec) operationEntry.getDefiningElement();
 
@@ -503,25 +503,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             terminationExp, false);
             myTerminationConfirmStmts.add(confirmStmt);
         }
-    }
-
-    /**
-     * <p>An helper method that returns {@link ProgramFunctionExp ProgramFunctionExp's}
-     * corresponding {@link OperationEntry}.</p>
-     *
-     * @param functionExp A program function expression.
-     *
-     * @return The corresponding {@link OperationEntry}.
-     */
-    private OperationEntry getOperationEntry(ProgramFunctionExp functionExp) {
-        // Obtain the corresponding OperationEntry
-        List<PTType> argTypes = new LinkedList<>();
-        for (ProgramExp arg : functionExp.getArguments()) {
-            argTypes.add(arg.getProgramType());
-        }
-
-        return Utilities.searchOperation(functionExp.getLocation(), functionExp.getQualifier(),
-                functionExp.getName(), argTypes, myCurrentModuleScope);
     }
 
     /**
