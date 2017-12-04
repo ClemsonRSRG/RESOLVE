@@ -468,7 +468,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                                     .getLocation().clone(),
                                     myCurrentModuleScope));
 
-            // Generate the termination of recursive call: P_Exp <= 1 + NQV(RS, P_Val)
+            // Generate the termination of recursive call: 1 + P_Exp <= NQV(RS, P_Val)
             IntegerExp oneExp =
                     new IntegerExp(myDecreasingExp.getLocation().clone(), null,
                             1);
@@ -477,17 +477,13 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
             InfixExp sumExp =
                     new InfixExp(myDecreasingExp.getLocation().clone(), oneExp,
                             null, new PosSymbol(myDecreasingExp.getLocation()
-                                    .clone(), "+"), nqvPValExp.clone());
+                                    .clone(), "+"), myDecreasingExp.clone());
             sumExp.setMathType(myDecreasingExp.getMathType());
 
             InfixExp terminationExp =
-                    new InfixExp(
-                            myDecreasingExp.getLocation().clone(),
-                            myDecreasingExp.clone(),
-                            null,
-                            new PosSymbol(
-                                    myDecreasingExp.getLocation().clone(), "<="),
-                            sumExp);
+                    new InfixExp(myDecreasingExp.getLocation().clone(), sumExp,
+                            null, new PosSymbol(myDecreasingExp.getLocation()
+                                    .clone(), "<="), nqvPValExp.clone());
             terminationExp.setMathType(myTypeGraph.BOOLEAN);
 
             // Store the location detail for the recursive function call's

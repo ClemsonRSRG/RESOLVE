@@ -28,6 +28,7 @@ import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
@@ -206,49 +207,12 @@ public class CallStmtRule extends AbstractProofRuleApplication
                         ensuresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
                         "Ensures Clause of " + operationDec.getName()));
 
-        /* TODO: Recursive call
         // Check for recursive call of itself
-        if (myCurrentOperationEntry != null
-                && myOperationDecreasingExp != null
-                && myCurrentOperationEntry.getName().equals(opEntry.getName())
-                && myCurrentOperationEntry.getReturnType().equals(
-                opEntry.getReturnType())
-                && myCurrentOperationEntry.getSourceModuleIdentifier().equals(
-                opEntry.getSourceModuleIdentifier())) {
-            // Create a new confirm statement using P_val and the decreasing clause
-            VarExp pVal =
-                    Utilities.createPValExp(myOperationDecreasingExp
-                            .getLocation(), myCurrentModuleScope);
-
-            // Create a new infix expression
-            IntegerExp oneExp = new IntegerExp();
-            oneExp.setValue(1);
-            oneExp.setMathType(myOperationDecreasingExp.getMathType());
-            InfixExp leftExp =
-                    new InfixExp(stmt.getLocation(), oneExp, Utilities
-                            .createPosSymbol("+"), Exp
-                            .copy(myOperationDecreasingExp));
-            leftExp.setMathType(myOperationDecreasingExp.getMathType());
-            InfixExp exp =
-                    Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
-                            pVal, BOOLEAN);
-
-            // Create the new confirm statement
-            Location loc;
-            if (myOperationDecreasingExp.getLocation() != null) {
-                loc = (Location) myOperationDecreasingExp.getLocation().clone();
-            }
-            else {
-                loc = (Location) stmt.getLocation().clone();
-            }
-            loc.setDetails("Show Termination of Recursive Call");
-            Utilities.setLocation(exp, loc);
-            ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
-
-            // Add it to our list of assertions
-            myCurrentAssertiveCode.addCode(conf);
+        Exp terminationExp = VarExp.getTrueVarExp(functionExp.getLocation(), myTypeGraph);
+        if (myCurrentProcedureOperationEntry.equals(operationEntry)
+                && myCurrentProcedureDecreasingExp != null) {
+            terminationExp = createTerminationReqExp();
         }
-        */
 
         // Get the requires assertion for this operation and
         // store it's associated location detail.
@@ -494,8 +458,51 @@ public class CallStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>Modify the argument expression list if we have a
-     * nested function call.</p>
+     * <p>An helper method for generating a termination clause if our current
+     * {@link CallStmt} is a recursive call to our current recursive {@code procedure}.</p>
+     *
+     * @return An {@link Exp} that contains the termination clause.
+     */
+    private Exp createTerminationReqExp() {
+        // Create a new NQV(RS, P_Val)
+        VCVarExp nqvPValExp =
+                Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, Utilities
+                        .createPValExp(myCurrentProcedureDecreasingExp
+                                .getLocation().clone(), myCurrentModuleScope));
+
+        // Generate the termination of recursive call: 1 + P_Exp <= NQV(RS, P_Val)
+        IntegerExp oneExp =
+                new IntegerExp(myCurrentProcedureDecreasingExp.getLocation()
+                        .clone(), null, 1);
+        oneExp.setMathType(myCurrentProcedureDecreasingExp.getMathType());
+
+        InfixExp sumExp =
+                new InfixExp(myCurrentProcedureDecreasingExp.getLocation()
+                        .clone(), oneExp, null, new PosSymbol(
+                        myCurrentProcedureDecreasingExp.getLocation().clone(),
+                        "+"), myCurrentProcedureDecreasingExp.clone());
+        sumExp.setMathType(myCurrentProcedureDecreasingExp.getMathType());
+
+        InfixExp terminationExp =
+                new InfixExp(myCurrentProcedureDecreasingExp.getLocation()
+                        .clone(), sumExp, null, new PosSymbol(
+                        myCurrentProcedureDecreasingExp.getLocation().clone(),
+                        "<="), nqvPValExp.clone());
+        terminationExp.setMathType(myTypeGraph.BOOLEAN);
+
+        // Store the location detail for the recursive function call's
+        // termination expression.
+        terminationExp.setLocationDetailModel(new LocationDetailModel(
+                myCurrentProcedureDecreasingExp.getLocation().clone(),
+                myCallStmt.getFunctionExp().getLocation().clone(),
+                "Termination of Recursive Call"));
+
+        return terminationExp;
+    }
+
+    /**
+     * <p>An helper method for modifying the argument expression list
+     * if we have a nested function call.</p>
      *
      * @param callArgs The original list of arguments.
      *
