@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
-import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
@@ -22,19 +21,14 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
-import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
-import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -360,11 +354,113 @@ public class CallStmtRule extends AbstractProofRuleApplication
                         ensuresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
                         "Ensures Clause of " + operationDec.getName()));
 
-        // Loop through each of the parameters in the operation entry.
+        // Substitution maps
+        // 1) substitutions: Contains all the replacements for the ensures clause.
+        // 2) substitutionsForSeq: Contains all the replacements for the VC's sequents.
         Map<Exp, Exp> substitutionsForSeq = new HashMap<>();
         Map<Exp, Exp> substitutions = new HashMap<>();
+
+        // Loop through each of the operation parameters.
         Exp parameterEnsures = null;
-        Iterator<Exp> it = modifiedArguments.iterator();
+        List<ParameterVarDec> paramList = operationDec.getParameters();
+        for (int i = 0; i < paramList.size(); i++) {
+            ParameterVarDec varDec = paramList.get(i);
+            Exp exp = modifiedArguments.get(i);
+
+            // Parameter variable and incoming parameter variable
+            VarExp parameterExp = Utilities.createVarExp(varDec.getLocation().clone(), null,
+                    varDec.getName().clone(), varDec.getTy().getMathTypeValue(), null);
+            OldExp oldParameterExp = new OldExp(varDec.getLocation().clone(), parameterExp.clone());
+            oldParameterExp.setMathType(varDec.getTy().getMathTypeValue());
+
+            // 1) ALTERS Mode
+            Exp varDecEnsures = null;
+            if (varDec.getMode().equals(ParameterMode.ALTERS)) {
+
+            }
+            // 2) CLEARS Mode
+            else if (varDec.getMode().equals(ParameterMode.CLEARS)) {
+
+            }
+            // 3) REPLACES Mode
+            else if (varDec.getMode().equals(ParameterMode.REPLACES)) {
+                // NQV(parameterExp)
+                VCVarExp nqvParameterExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, parameterExp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvParameterExp);
+
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> NQV(parameterExp)
+                substitutions.put(parameterExp, nqvParameterExp);
+
+                // Substitutions for sequents in VCs
+                // 1) parameterExp ~> NQV(parameterExp)
+                substitutionsForSeq.put(parameterExp.clone(), nqvParameterExp.clone());
+            }
+            // 4) RESTORES Mode
+            else if (varDec.getMode().equals(ParameterMode.RESTORES)) {
+                // #Math(exp)
+                OldExp oldExp = new OldExp(exp.getLocation().clone(), exp.clone());
+                oldExp.setMathType(exp.getMathType());
+
+                // Generate the restores parameter ensures clause and
+                // store the new location detail.
+                // - parameterExp = #Math(exp)
+                varDecEnsures =
+                        new EqualsExp(varDec.getLocation().clone(),
+                                parameterExp.clone(), null, EqualsExp.Operator.EQUAL, oldExp);
+                varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
+                        .getLocation().clone(), exp.getLocation().clone(),
+                        "Ensures Clause of " + operationDec.getName() + " (Condition from \""
+                                + ParameterMode.RESTORES.name()
+                                + "\" parameter mode)"));
+
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> Math(exp)
+                substitutions.put(parameterExp, exp);
+
+                // Substitutions for sequents in VCs
+                // 1) parameterExp ~> Math(exp)
+                substitutionsForSeq.put(parameterExp.clone(), exp.clone());
+            }
+            // 5) UPDATES Mode
+            else if (varDec.getMode().equals(ParameterMode.UPDATES)) {
+                // NQV(parameterExp)
+                VCVarExp nqvParameterExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, parameterExp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvParameterExp);
+
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> NQV(parameterExp)
+                // 2) oldParameterExp ~> Math(exp)
+                substitutions.put(parameterExp, nqvParameterExp);
+                substitutions.put(oldParameterExp, exp);
+
+                // Substitutions for sequents in VCs
+                // 1) parameterExp ~> NQV(parameterExp)
+                substitutionsForSeq.put(parameterExp.clone(), nqvParameterExp.clone());
+            }
+            // 6) PRESERVES and EVALUATES Mode
+            else {
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> Math(exp)
+                substitutions.put(parameterExp, exp);
+            }
+
+            // Combine with other parameter ensures
+            if (varDecEnsures != null && VarExp.isLiteralTrue(varDecEnsures)) {
+                if (parameterEnsures == null) {
+                    parameterEnsures = varDecEnsures;
+                }
+                else {
+                    parameterEnsures =
+                            MathExp.formConjunct(myCallStmt.getLocation().clone(),
+                                    parameterEnsures, varDecEnsures);
+                }
+            }
+        }
+
+        /*Iterator<Exp> it = modifiedArguments.iterator();
         ImmutableList<ProgramParameterEntry> entries = operationEntry.getParameters();
         for (ProgramParameterEntry entry : entries) {
             ParameterVarDec parameterVarDec =
@@ -433,7 +529,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                                     "Constraint Clause of " + parameterVarDec.getName()));
                 }
             }
-        }
+        }*/
 
         // Apply any replacements if it isn't just "ensures true;"
         if (!VarExp.isLiteralTrue(ensuresExp)) {
