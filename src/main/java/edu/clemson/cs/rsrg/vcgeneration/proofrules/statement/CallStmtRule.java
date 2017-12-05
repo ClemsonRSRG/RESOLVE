@@ -17,10 +17,12 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
+import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
@@ -29,6 +31,8 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -357,14 +361,15 @@ public class CallStmtRule extends AbstractProofRuleApplication
         // Substitution maps
         // 1) substitutions: Contains all the replacements for the ensures clause.
         // 2) substitutionsForSeq: Contains all the replacements for the VC's sequents.
-        Map<Exp, Exp> substitutionsForSeq = new HashMap<>();
-        Map<Exp, Exp> substitutions = new HashMap<>();
+        Map<Exp, Exp> substitutionsForSeq = new LinkedHashMap<>();
+        Map<Exp, Exp> substitutions = new LinkedHashMap<>();
 
         // Loop through each of the operation parameters.
         Exp parameterEnsures = null;
         List<ParameterVarDec> paramList = operationDec.getParameters();
         for (int i = 0; i < paramList.size(); i++) {
             ParameterVarDec varDec = paramList.get(i);
+            NameTy nameTy = (NameTy) varDec.getTy();
             Exp exp = modifiedArguments.get(i);
 
             // Parameter variable and incoming parameter variable
@@ -373,29 +378,134 @@ public class CallStmtRule extends AbstractProofRuleApplication
             OldExp oldParameterExp = new OldExp(varDec.getLocation().clone(), parameterExp.clone());
             oldParameterExp.setMathType(varDec.getTy().getMathTypeValue());
 
+            // Query for the type entry in the symbol table
+            SymbolTableEntry ste =
+                    Utilities.searchProgramType(nameTy.getLocation(), nameTy
+                                    .getQualifier(), nameTy.getName(),
+                            myCurrentModuleScope);
+            ProgramTypeEntry typeEntry;
+            if (ste instanceof ProgramTypeEntry) {
+                typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
+            }
+            else {
+                typeEntry =
+                        ste.toTypeRepresentationEntry(nameTy.getLocation())
+                                .getDefiningTypeEntry();
+            }
+
             // 1) ALTERS Mode
             Exp varDecEnsures = null;
             if (varDec.getMode().equals(ParameterMode.ALTERS)) {
+                // NQV(exp)
+                VCVarExp nqvExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
 
-            }
-            // 2) CLEARS Mode
-            else if (varDec.getMode().equals(ParameterMode.CLEARS)) {
+                // Generate a constraint ensures clause if the type is not generic.
+                if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+                    TypeFamilyDec type =
+                            (TypeFamilyDec) typeEntry.getDefiningElement();
 
-            }
-            // 3) REPLACES Mode
-            else if (varDec.getMode().equals(ParameterMode.REPLACES)) {
-                // NQV(parameterExp)
-                VCVarExp nqvParameterExp =
-                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, parameterExp);
-                myCurrentAssertiveCodeBlock.addFreeVar(nqvParameterExp);
+                    if (!VarExp.isLiteralTrue(type.getConstraint()
+                            .getAssertionExp())) {
+                        AssertionClause constraintClause =
+                                type.getConstraint();
+                        AssertionClause modifiedConstraint =
+                                Utilities.getTypeConstraintClause(constraintClause,
+                                        exp.getLocation().clone(), null, varDec.getName(),
+                                        type.getExemplar(), typeEntry.getModelType(), null);
+                        varDecEnsures = modifiedConstraint.getAssertionExp().clone();
+
+                        // Local substitution
+                        Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
+                        ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
+                        varDecEnsures.substitute(ensuresSubMap);
+
+                        // Store the new location detail.
+                        varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
+                                .getLocation().clone(), exp.getLocation().clone(),
+                                "Ensures Clause of " + operationDec.getName() + " (Condition from \""
+                                        + ParameterMode.ALTERS.name()
+                                        + "\" parameter mode)"));
+                    }
+                }
 
                 // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> NQV(parameterExp)
-                substitutions.put(parameterExp, nqvParameterExp);
+                // 1) oldParameterExp ~> Math(exp)
+                substitutions.put(oldParameterExp, exp);
 
                 // Substitutions for sequents in VCs
                 // 1) parameterExp ~> NQV(parameterExp)
-                substitutionsForSeq.put(parameterExp.clone(), nqvParameterExp.clone());
+                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
+            }
+            // 2) CLEARS Mode
+            else if (varDec.getMode().equals(ParameterMode.CLEARS)) {
+                // NQV(exp)
+                VCVarExp nqvExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
+
+                // For all type family types, we need to generate the appropriate EqualsExp
+                // that says the expression contains the initial value
+                // - h = <init_value>
+                if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+                    TypeFamilyDec type =
+                            (TypeFamilyDec) typeEntry.getDefiningElement();
+                    AssertionClause initEnsures =
+                            type.getInitialization().getEnsures();
+                    AssertionClause modifiedInitEnsures =
+                            Utilities.getTypeEnsuresClause(initEnsures, exp
+                                    .getLocation(), null, varDec.getName(), type
+                                    .getExemplar(), typeEntry.getModelType(), null);
+
+                    // TODO: Logic for types in concept realizations
+
+                    varDecEnsures =
+                            new EqualsExp(varDec.getLocation().clone(),
+                                    parameterExp.clone(), null, EqualsExp.Operator.EQUAL,
+                                    modifiedInitEnsures.getAssertionExp().clone());
+                }
+                // For all generic types, all we can do is generate:
+                // an "Is_Initial" function.
+                // - T7.Is_Initial( NQV(RS, h) )
+                else {
+                    varDecEnsures = Utilities.createInitExp(new VarDec(varDec.getName(), nameTy), myTypeGraph.BOOLEAN);
+                }
+
+                // Local substitution
+                Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
+                ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
+                varDecEnsures.substitute(ensuresSubMap);
+
+                // Store the new location detail.
+                varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
+                        .getLocation().clone(), exp.getLocation().clone(),
+                        "Ensures Clause of " + operationDec.getName() + " (Condition from \""
+                                + ParameterMode.CLEARS.name()
+                                + "\" parameter mode)"));
+
+                // Substitutions for Ensures Clause:
+                // 1) oldParameterExp ~> Math(exp)
+                substitutions.put(oldParameterExp, exp);
+
+                // Substitutions for sequents in VCs
+                // 1) parameterExp ~> NQV(parameterExp)
+                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
+            }
+            // 3) REPLACES Mode
+            else if (varDec.getMode().equals(ParameterMode.REPLACES)) {
+                // NQV(exp)
+                VCVarExp nqvExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
+
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> NQV(exp)
+                substitutions.put(parameterExp, nqvExp);
+
+                // Substitutions for sequents in VCs
+                // 1) parameterExp ~> NQV(exp)
+                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
             }
             // 4) RESTORES Mode
             else if (varDec.getMode().equals(ParameterMode.RESTORES)) {
@@ -405,19 +515,15 @@ public class CallStmtRule extends AbstractProofRuleApplication
 
                 // Generate the restores parameter ensures clause and
                 // store the new location detail.
-                // - parameterExp = #Math(exp)
+                // - Math(exp) = #Math(exp)
                 varDecEnsures =
                         new EqualsExp(varDec.getLocation().clone(),
-                                parameterExp.clone(), null, EqualsExp.Operator.EQUAL, oldExp);
+                                exp.clone(), null, EqualsExp.Operator.EQUAL, oldExp);
                 varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
                         .getLocation().clone(), exp.getLocation().clone(),
                         "Ensures Clause of " + operationDec.getName() + " (Condition from \""
                                 + ParameterMode.RESTORES.name()
                                 + "\" parameter mode)"));
-
-                // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> Math(exp)
-                substitutions.put(parameterExp, exp);
 
                 // Substitutions for sequents in VCs
                 // 1) parameterExp ~> Math(exp)
@@ -425,20 +531,20 @@ public class CallStmtRule extends AbstractProofRuleApplication
             }
             // 5) UPDATES Mode
             else if (varDec.getMode().equals(ParameterMode.UPDATES)) {
-                // NQV(parameterExp)
-                VCVarExp nqvParameterExp =
-                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, parameterExp);
-                myCurrentAssertiveCodeBlock.addFreeVar(nqvParameterExp);
+                // NQV(exp)
+                VCVarExp nqvExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
 
                 // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> NQV(parameterExp)
+                // 1) parameterExp ~> NQV(exp)
                 // 2) oldParameterExp ~> Math(exp)
-                substitutions.put(parameterExp, nqvParameterExp);
+                substitutions.put(parameterExp, nqvExp);
                 substitutions.put(oldParameterExp, exp);
 
                 // Substitutions for sequents in VCs
-                // 1) parameterExp ~> NQV(parameterExp)
-                substitutionsForSeq.put(parameterExp.clone(), nqvParameterExp.clone());
+                // 1) parameterExp ~> NQV(exp)
+                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
             }
             // 6) PRESERVES and EVALUATES Mode
             else {
@@ -460,89 +566,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
             }
         }
 
-        /*Iterator<Exp> it = modifiedArguments.iterator();
-        ImmutableList<ProgramParameterEntry> entries = operationEntry.getParameters();
-        for (ProgramParameterEntry entry : entries) {
-            ParameterVarDec parameterVarDec =
-                    (ParameterVarDec) entry.getDefiningElement();
-            ParameterMode parameterMode = entry.getParameterMode();
-            NameTy nameTy = (NameTy) parameterVarDec.getTy();
-            Location loc = parameterVarDec.getLocation();
-            Exp argument = it.next();
-
-            // TODO: Add the other parameter mode logic
-            if (parameterMode == ParameterMode.UPDATES) {
-                // Parameter variable and incoming parameter variable and NQV(parameterExp)
-                VarExp parameterExp = Utilities.createVarExp(loc.clone(), null,
-                        parameterVarDec.getName().clone(), nameTy.getMathTypeValue(), null);
-                OldExp oldParameterExp = new OldExp(loc.clone(), parameterExp.clone());
-                oldParameterExp.setMathType(nameTy.getMathTypeValue());
-                VCVarExp nqvParameterExp = Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, parameterExp);
-                myCurrentAssertiveCodeBlock.addFreeVar(nqvParameterExp);
-
-                // Add these to our substitutions map
-                substitutions.put(parameterExp, nqvParameterExp);
-                substitutions.put(oldParameterExp, Utilities.convertExp(argument, myCurrentModuleScope));
-
-                // Add this as something to substitute in our sequents
-                substitutionsForSeq.put(parameterExp.clone(), nqvParameterExp.clone());
-
-                // Query for the type entry in the symbol table
-                SymbolTableEntry ste =
-                        Utilities.searchProgramType(parameterVarDec.getLocation(), nameTy.getQualifier(),
-                                nameTy.getName(), myCurrentModuleScope);
-
-                ProgramTypeEntry typeEntry;
-                if (ste instanceof ProgramTypeEntry) {
-                    typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
-                } else {
-                    typeEntry =
-                            ste.toTypeRepresentationEntry(nameTy.getLocation())
-                                    .getDefiningTypeEntry();
-                }
-
-                AssertionClause modifiedConstraint = null;
-                if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
-                    // Parameter variable with known program type
-                    TypeFamilyDec type =
-                            (TypeFamilyDec) typeEntry.getDefiningElement();
-                    AssertionClause constraint = type.getConstraint();
-                    modifiedConstraint =
-                            Utilities.getTypeConstraintClause(constraint,
-                                    loc.clone(), null,
-                                    parameterVarDec.getName(), type.getExemplar(),
-                                    typeEntry.getModelType(), null);
-                }
-                else {
-                    Utilities.notAType(typeEntry, parameterVarDec.getLocation());
-                }
-
-                if (!VarExp.isLiteralTrue(modifiedConstraint.getAssertionExp())) {
-                    // Form a conjunct with the modified constraint clause and add
-                    // the location detail associated with it.
-                    Location constraintLoc =
-                            modifiedConstraint.getAssertionExp()
-                                    .getLocation();
-                    parameterEnsures = Utilities.formConjunct(myCallStmt.getLocation(),
-                            parameterEnsures, modifiedConstraint, new LocationDetailModel(
-                                    constraintLoc.clone(), constraintLoc.clone(),
-                                    "Constraint Clause of " + parameterVarDec.getName()));
-                }
-            }
-        }*/
-
-        // Apply any replacements if it isn't just "ensures true;"
-        if (!VarExp.isLiteralTrue(ensuresExp)) {
-            // Replace any facility declaration instantiation arguments
-            // in the ensures clause.
-            ensuresExp =
-                    Utilities.replaceFacilityFormalWithActual(ensuresExp,
-                            operationDec.getParameters(), myCurrentModuleScope
-                                    .getDefiningElement().getName(),
-                            myCurrentConceptDeclaredTypes,
-                            myLocalRepresentationTypeDecs,
-                            myProcessedInstFacilityDecls);
-        }
+        // TODO: Add global state variable logic here!
 
         // Form the final conjunct ensures clause expression
         if (parameterEnsures != null) {
@@ -558,6 +582,19 @@ public class CallStmtRule extends AbstractProofRuleApplication
 
         // Apply substitutions
         ensuresExp = ensuresExp.substitute(substitutions);
+
+        // Apply any replacements if it isn't just "ensures true;"
+        if (!VarExp.isLiteralTrue(ensuresExp)) {
+            // Replace any facility declaration instantiation arguments
+            // in the ensures clause.
+            ensuresExp =
+                    Utilities.replaceFacilityFormalWithActual(ensuresExp,
+                            operationDec.getParameters(), myCurrentModuleScope
+                                    .getDefiningElement().getName(),
+                            myCurrentConceptDeclaredTypes,
+                            myLocalRepresentationTypeDecs,
+                            myProcessedInstFacilityDecls);
+        }
 
         // Retrieve the list of VCs and use the sequent
         // substitution map to do replacements.
@@ -710,79 +747,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 "Termination of Recursive Call"));
 
         return terminationExp;
-    }
-
-    /**
-     * <p>An helper method that helps locate any {@link InstantiatedFacilityDecl} that
-     * matches the name we passed in.</p>
-     *
-     * @param facilityName Name of the {@code facility} we are searching for.
-     *
-     * @return An {@link InstantiatedFacilityDecl} if we found one,
-     * {@code null} otherwise.
-     */
-    private InstantiatedFacilityDecl findInstantiatedFacilityDecl(
-            PosSymbol facilityName) {
-        InstantiatedFacilityDecl instantiatedFacilityDecl = null;
-        Iterator<InstantiatedFacilityDecl> declIterator =
-                myProcessedInstFacilityDecls.iterator();
-        while (declIterator.hasNext() && instantiatedFacilityDecl == null) {
-            InstantiatedFacilityDecl dec = declIterator.next();
-            if (dec.getInstantiatedFacilityDec().getName().getName().equals(
-                    facilityName.getName())) {
-                instantiatedFacilityDecl = dec;
-            }
-        }
-
-        return instantiatedFacilityDecl;
-    }
-
-    /**
-     * <p>An helper method that helps locate any {@link TypeFamilyDec} that
-     * matches the name we passed in.</p>
-     *
-     * @param typeName Name of the type we are searching for.
-     * @param typeFamilyDecs A list of {@link TypeFamilyDec TypeFamilyDecs}.
-     *
-     * @return A {@link TypeFamilyDec} if we found one,
-     * {@code null} otherwise.
-     */
-    private TypeFamilyDec findTypeFamilyDec(PosSymbol typeName,
-            List<TypeFamilyDec> typeFamilyDecs) {
-        TypeFamilyDec typeFamilyDec = null;
-        Iterator<TypeFamilyDec> decIterator = typeFamilyDecs.iterator();
-        while (decIterator.hasNext() && typeFamilyDec == null) {
-            TypeFamilyDec dec = decIterator.next();
-            if (dec.getName().getName().equals(typeName.getName())) {
-                typeFamilyDec = dec;
-            }
-        }
-
-        return typeFamilyDec;
-    }
-
-    /**
-     * <p>An helper method that helps locate any {@link AbstractTypeRepresentationDec} that
-     * matches the name we passed in.</p>
-     *
-     * @param typeName Name of the type we are searching for.
-     *
-     * @return An {@link AbstractTypeRepresentationDec} if we found one,
-     * {@code null} otherwise.
-     */
-    private AbstractTypeRepresentationDec findTypeRepresentationDec(
-            PosSymbol typeName) {
-        AbstractTypeRepresentationDec representationDec = null;
-        Iterator<AbstractTypeRepresentationDec> decIterator =
-                myLocalRepresentationTypeDecs.iterator();
-        while (decIterator.hasNext() && representationDec == null) {
-            AbstractTypeRepresentationDec dec = decIterator.next();
-            if (dec.getName().getName().equals(typeName.getName())) {
-                representationDec = dec;
-            }
-        }
-
-        return representationDec;
     }
 
     /**
