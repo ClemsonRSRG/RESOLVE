@@ -207,36 +207,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
                         ensuresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
                         "Ensures Clause of " + operationDec.getName()));
 
-        // Check for recursive call of itself
-        Exp terminationExp = VarExp.getTrueVarExp(functionExp.getLocation(), myTypeGraph);
-        if (myCurrentProcedureOperationEntry.equals(operationEntry)
-                && myCurrentProcedureDecreasingExp != null) {
-            terminationExp = createTerminationReqExp();
-        }
-
-        // Get the requires assertion for this operation and
-        // store it's associated location detail.
-        // YS: We don't need confirm it's which_entails clause,
-        //     that has been taken care of already. Maybe add it as
-        //     as something we can assume?
-        AssertionClause requiresClause = operationEntry.getRequiresClause();
-        Exp requiresExp = requiresClause.getAssertionExp().clone();
-        requiresExp.setLocationDetailModel(new LocationDetailModel(
-                requiresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
-                "Requires Clause of " + operationDec.getName()));
-        boolean simplify = VarExp.isLiteralTrue(requiresExp);
-
-        // Replace PreCondition variables in the requires clause
-        requiresExp = Utilities.replaceFormalWithActual(requiresExp,
-                operationParamAsVarExps, modifiedArguments);
-
-        /* TODO:
-        // Replace facility actuals variables in the requires clause
-        requires =
-                Utilities.replaceFacilityFormalWithActual(stmt.getLocation(),
-                        requires, opDec.getParameters(),
-                        myInstantiatedFacilityArgMap, myCurrentModuleScope); */
-
         // Loop through each of the parameters in the operation entry.
         Map<Exp, Exp> substitutionsForSeq = new HashMap<>();
         Map<Exp, Exp> substitutions = new HashMap<>();
@@ -404,9 +374,15 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     finalConfirm.getSimplify());
         } */
 
-        // We will need to confirm the requires clause
+        // 1) Confirm any nested function's invoking condition, recursive termination clauses
+        //    and the modified requires clause of this calling statement.
+        //    ( Confirm Invk_Cond(exp) and Pre[ Pre_Subs ] )
+        Exp requiresExp =
+                createModifiedReqExp(operationEntry, operationParamAsVarExps,
+                        modifiedArguments);
         ConfirmStmt confirmStmt =
-                new ConfirmStmt(myCallStmt.getLocation().clone(), requiresExp, simplify);
+                new ConfirmStmt(myCallStmt.getLocation().clone(), requiresExp,
+                        VarExp.isLiteralTrue(requiresExp));
         myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
 
         // Form a conjunct with the ensures clause.
@@ -456,6 +432,105 @@ public class CallStmtRule extends AbstractProofRuleApplication
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method for creating the modified {@code requires} clause
+     * that contains all invoking conditions for nested function calls as well as
+     * the modified requires clause from the call statement.</p>
+     *
+     * <p>Note that if any of the function or regular calls happen to be recursive,
+     * then this will also generate the appropriate termination clauses and add it
+     * to our current {@link AssertiveCodeBlock}.</p>
+     *
+     * @param operationEntry Calling statement's {@link OperationEntry}.
+     * @param operationParamAsVarExps List of operation parameters as {@link VarExp VarExps}.
+     * @param modifiedArguments List of modified calling arguments.
+     *
+     * @return The modified {@code requires} clause expression.
+     */
+    private Exp createModifiedReqExp(OperationEntry operationEntry,
+            List<VarExp> operationParamAsVarExps, List<Exp> modifiedArguments) {
+        OperationDec operationDec =
+                (OperationDec) operationEntry.getDefiningElement();
+
+        // Get the requires assertion for this operation and
+        // store it's associated location detail.
+        // YS: We don't need confirm it's which_entails clause,
+        //     that has been taken care of already. Maybe add it as
+        //     as something we can assume?
+        AssertionClause requiresClause = operationDec.getRequires();
+        Exp requiresExp = requiresClause.getAssertionExp().clone();
+        requiresExp.setLocationDetailModel(new LocationDetailModel(
+                requiresClause.getLocation().clone(), myCallStmt.getLocation()
+                        .clone(), "Requires Clause of "
+                        + operationDec.getName()));
+
+        // Apply any replacements if it isn't just "requires true;"
+        if (!VarExp.isLiteralTrue(requiresExp)) {
+            // Replace formals in the original requires clause with the
+            // actuals from the call statement.
+            requiresExp =
+                    Utilities.replaceFormalWithActual(requiresExp,
+                            operationParamAsVarExps, modifiedArguments);
+
+            // Replace any facility declaration instantiation arguments
+            // in the requires clause.
+            requiresExp =
+                    Utilities.replaceFacilityFormalWithActual(requiresExp,
+                            operationDec.getParameters(), myCurrentModuleScope
+                                    .getDefiningElement().getName(),
+                            myCurrentConceptDeclaredTypes,
+                            myLocalRepresentationTypeDecs,
+                            myProcessedInstFacilityDecls);
+        }
+
+        // Add any nested termination clauses to our current assertive code block.
+        for (ConfirmStmt confirmStmt : myNestedTerminationConfirmStmts) {
+            myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
+        }
+
+        // Check to see if we are recursively calling ourselves. If yes,
+        // generate a termination confirm clause and add it to our current
+        // assertive code block.
+        Exp terminationExp =
+                VarExp.getTrueVarExp(myCallStmt.getLocation(), myTypeGraph);
+        if (myCurrentProcedureOperationEntry.equals(operationEntry)
+                && myCurrentProcedureDecreasingExp != null) {
+            terminationExp = createTerminationReqExp();
+        }
+
+        if (!VarExp.isLiteralTrue(terminationExp)) {
+            myCurrentAssertiveCodeBlock
+                    .addStatement(new ConfirmStmt(terminationExp.getLocation()
+                            .clone(), terminationExp, false));
+        }
+
+        // Form the final conjuncted requires clause expression
+        Exp conjunctRequiresExp =
+                VarExp.getTrueVarExp(myCallStmt.getLocation().clone(),
+                        myTypeGraph);
+        for (Exp innerRequiresExp : myNestedRequiresClauses) {
+            if (VarExp.isLiteralTrue(conjunctRequiresExp)) {
+                conjunctRequiresExp = innerRequiresExp.clone();
+            }
+            else {
+                conjunctRequiresExp =
+                        MathExp.formConjunct(myCallStmt.getLocation().clone(),
+                                conjunctRequiresExp, innerRequiresExp.clone());
+            }
+        }
+
+        if (VarExp.isLiteralTrue(conjunctRequiresExp)) {
+            conjunctRequiresExp = requiresExp;
+        }
+        else {
+            conjunctRequiresExp =
+                    MathExp.formConjunct(myCallStmt.getLocation().clone(),
+                            conjunctRequiresExp, requiresExp);
+        }
+
+        return conjunctRequiresExp;
+    }
 
     /**
      * <p>An helper method for generating a termination clause if our current
