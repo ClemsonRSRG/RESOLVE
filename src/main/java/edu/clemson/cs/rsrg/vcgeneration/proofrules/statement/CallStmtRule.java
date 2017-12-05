@@ -713,6 +713,79 @@ public class CallStmtRule extends AbstractProofRuleApplication
     }
 
     /**
+     * <p>An helper method that helps locate any {@link InstantiatedFacilityDecl} that
+     * matches the name we passed in.</p>
+     *
+     * @param facilityName Name of the {@code facility} we are searching for.
+     *
+     * @return An {@link InstantiatedFacilityDecl} if we found one,
+     * {@code null} otherwise.
+     */
+    private InstantiatedFacilityDecl findInstantiatedFacilityDecl(
+            PosSymbol facilityName) {
+        InstantiatedFacilityDecl instantiatedFacilityDecl = null;
+        Iterator<InstantiatedFacilityDecl> declIterator =
+                myProcessedInstFacilityDecls.iterator();
+        while (declIterator.hasNext() && instantiatedFacilityDecl == null) {
+            InstantiatedFacilityDecl dec = declIterator.next();
+            if (dec.getInstantiatedFacilityDec().getName().getName().equals(
+                    facilityName.getName())) {
+                instantiatedFacilityDecl = dec;
+            }
+        }
+
+        return instantiatedFacilityDecl;
+    }
+
+    /**
+     * <p>An helper method that helps locate any {@link TypeFamilyDec} that
+     * matches the name we passed in.</p>
+     *
+     * @param typeName Name of the type we are searching for.
+     * @param typeFamilyDecs A list of {@link TypeFamilyDec TypeFamilyDecs}.
+     *
+     * @return A {@link TypeFamilyDec} if we found one,
+     * {@code null} otherwise.
+     */
+    private TypeFamilyDec findTypeFamilyDec(PosSymbol typeName,
+            List<TypeFamilyDec> typeFamilyDecs) {
+        TypeFamilyDec typeFamilyDec = null;
+        Iterator<TypeFamilyDec> decIterator = typeFamilyDecs.iterator();
+        while (decIterator.hasNext() && typeFamilyDec == null) {
+            TypeFamilyDec dec = decIterator.next();
+            if (dec.getName().getName().equals(typeName.getName())) {
+                typeFamilyDec = dec;
+            }
+        }
+
+        return typeFamilyDec;
+    }
+
+    /**
+     * <p>An helper method that helps locate any {@link AbstractTypeRepresentationDec} that
+     * matches the name we passed in.</p>
+     *
+     * @param typeName Name of the type we are searching for.
+     *
+     * @return An {@link AbstractTypeRepresentationDec} if we found one,
+     * {@code null} otherwise.
+     */
+    private AbstractTypeRepresentationDec findTypeRepresentationDec(
+            PosSymbol typeName) {
+        AbstractTypeRepresentationDec representationDec = null;
+        Iterator<AbstractTypeRepresentationDec> decIterator =
+                myLocalRepresentationTypeDecs.iterator();
+        while (decIterator.hasNext() && representationDec == null) {
+            AbstractTypeRepresentationDec dec = decIterator.next();
+            if (dec.getName().getName().equals(typeName.getName())) {
+                representationDec = dec;
+            }
+        }
+
+        return representationDec;
+    }
+
+    /**
      * <p>An helper method for modifying the argument expression list
      * if we have a nested function call.</p>
      *
