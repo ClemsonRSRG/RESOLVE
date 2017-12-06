@@ -17,7 +17,6 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
-import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
@@ -135,18 +134,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Operation Declaration-Related
     // -----------------------------------------------------------
-
-    /**
-     * <p>While walking a procedure, this is set to the entry for the operation
-     * or {@link OperationProcedureDec} that the procedure is attempting to implement.</p>
-     */
-    private OperationEntry myCorrespondingOperation;
-
-    /**
-     * <p>While walking a procedure, if it is an recursive operation implementation,
-     * then this stores the decreasing clause expression.</p>
-     */
-    private Exp myOperationDecreasingExp;
 
     /**
      * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
@@ -320,7 +307,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     myLocalRepresentationTypeDecs,
                                     myProcessedInstFacilityDecls,
                                     myBuilder, myCurrentModuleScope,
-                                    new AssertiveCodeBlock(myTypeGraph, facDec, facDec.getName()),
+                                    new AssertiveCodeBlock(facDec.getName(), facDec, myTypeGraph),
                                     mySTGroup, blockModel);
                     ruleApplication.applyRule();
 
@@ -488,7 +475,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     public final void postFacilityDec(FacilityDec dec) {
         // Create a new assertive code block
         myCurrentAssertiveCodeBlock =
-                new AssertiveCodeBlock(myTypeGraph, dec, dec.getName());
+                new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
 
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
@@ -542,14 +529,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         for (ParameterVarDec p : dec.getParameters()) {
             argTypes.add(p.getTy().getProgramType());
         }
-        myCorrespondingOperation =
+        OperationEntry correspondingOperation =
                 Utilities.searchOperation(dec.getLocation(), null, dec
                         .getName(), argTypes, myCurrentModuleScope);
-
-        // Store any decreasing clauses for future use
-        if (dec.getRecursive()) {
-            myOperationDecreasingExp = dec.getDecreasing().getAssertionExp();
-        }
 
         // TODO: Add the performance logic
         // Obtain the performance duration clause
@@ -565,8 +547,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                         myCurrentModuleScope);
 
         // Create a new assertive code block
-        myCurrentAssertiveCodeBlock =
-                new AssertiveCodeBlock(myTypeGraph, dec, dec.getName());
+        if (dec.getRecursive()) {
+            // Store any decreasing clauses for future use
+            myCurrentAssertiveCodeBlock =
+                    new AssertiveCodeBlock(dec.getName(), dec, correspondingOperation,
+                            dec.getDecreasing().getAssertionExp(), myTypeGraph);
+        }
+        else {
+            myCurrentAssertiveCodeBlock =
+                    new AssertiveCodeBlock(dec.getName(), dec, correspondingOperation,
+                            myTypeGraph);
+        }
 
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
@@ -576,7 +567,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                         Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
                                 myCurrentModuleScope, myCurrentAssertiveCodeBlock,
                                 myGlobalRequires, myGlobalConstraints,
-                                myGlobalLocationDetails, myCorrespondingOperation,
+                                myGlobalLocationDetails, correspondingOperation,
                                 isLocal), false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
@@ -606,8 +597,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply procedure declaration rule
         // TODO: Recheck logic to make sure everything still works!
         ProofRuleApplication declRule =
-                new ProcedureDeclRule(dec, myCorrespondingOperation,
-                        myOperationDecreasingExp, myVariableSpecFinalItems,
+                new ProcedureDeclRule(dec, myVariableSpecFinalItems,
                         myCurrentConceptDeclaredTypes,
                         myLocalRepresentationTypeDecs,
                         myProcessedInstFacilityDecls, myBuilder,
@@ -627,7 +617,6 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myVariableSpecFinalItems.clear();
         myCurrentAssertiveCodeBlock = null;
-        myCorrespondingOperation = null;
     }
 
     // -----------------------------------------------------------
@@ -769,7 +758,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             "Which_Entails Expression Located at  "
                                     + clause.getLocation());
             AssertiveCodeBlock block =
-                    new AssertiveCodeBlock(myTypeGraph, clause, name);
+                    new AssertiveCodeBlock(name, clause, myTypeGraph);
 
             // Make a copy of the clause expression and add
             // the location detail associated with it.
@@ -863,8 +852,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new call rule application.
                 ruleApplication =
                         new CallStmtRule((CallStmt) statement,
-                                myCorrespondingOperation,
-                                myOperationDecreasingExp,
                                 myCurrentConceptDeclaredTypes,
                                 myLocalRepresentationTypeDecs,
                                 myProcessedInstFacilityDecls, myBuilder,
@@ -887,8 +874,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new function assignment rule application.
                 ruleApplication =
                         new FuncAssignStmtRule((FuncAssignStmt) statement,
-                                myCorrespondingOperation,
-                                myOperationDecreasingExp,
                                 myCurrentConceptDeclaredTypes,
                                 myLocalRepresentationTypeDecs,
                                 myProcessedInstFacilityDecls, myBuilder,
@@ -899,8 +884,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new if-else rule application.
                 ruleApplication =
                         new IfStmtRule((IfStmt) statement,
-                                myCorrespondingOperation,
-                                myOperationDecreasingExp,
                                 myCurrentConceptDeclaredTypes,
                                 myLocalRepresentationTypeDecs,
                                 myProcessedInstFacilityDecls, myBuilder,

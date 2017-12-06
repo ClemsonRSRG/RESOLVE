@@ -124,12 +124,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      *
      * @param procedureDec The {@link ProcedureDec} we are applying
      *                     the rule to.
-     * @param currentProcedureOpEntry An {@link OperationEntry} with a {@code Procedure},
-     *                                if {@code ifStmt} is inside one. Otherwise it should
-     *                                be left as {@code null}.
-     * @param currentProcedureDecreasingExp If we are in a {@code Procedure} and it is recursive,
-     *                                      this is its {@code decreasing} clause expression.
-     *                                      Otherwise it should be left as {@code null}.
      * @param procVarFinalItems The local variable declaration's
      *                          {@code finalization} specification items.
      * @param typeFamilyDecs List of abstract types we are implementing or extending.
@@ -143,8 +137,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public ProcedureDeclRule(ProcedureDec procedureDec,
-            OperationEntry currentProcedureOpEntry,
-            Exp currentProcedureDecreasingExp,
             Map<VarDec, SpecInitFinalItem> procVarFinalItems,
             List<TypeFamilyDec> typeFamilyDecs,
             List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
@@ -154,8 +146,11 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         super(block, stGroup, blockModel);
         myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
-        myCurrentProcedureDecreasingExp = currentProcedureDecreasingExp;
-        myCurrentProcedureOperationEntry = currentProcedureOpEntry;
+        myCurrentProcedureDecreasingExp =
+                myCurrentAssertiveCodeBlock
+                        .getCorrespondingOperationDecreasingExp();
+        myCurrentProcedureOperationEntry =
+                myCurrentAssertiveCodeBlock.getCorrespondingOperation();
         myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myProcessedInstFacilityDecls = processedInstFacDecs;
         mySymbolTable = symbolTableBuilder;

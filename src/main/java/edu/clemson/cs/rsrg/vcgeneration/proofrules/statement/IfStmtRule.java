@@ -109,12 +109,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
      *
      * @param ifStmt The {@link IfStmt} we are applying
      *               the rule to.
-     * @param currentProcedureOpEntry An {@link OperationEntry} with a {@code Procedure},
-     *                                if {@code ifStmt} is inside one. Otherwise it should
-     *                                be left as {@code null}.
-     * @param currentProcedureDecreasingExp If we are in a {@code Procedure} and it is recursive,
-     *                                      this is its {@code decreasing} clause expression.
-     *                                      Otherwise it should be left as {@code null}.
      * @param typeFamilyDecs List of abstract types we are implementing or extending.
      * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
@@ -125,9 +119,7 @@ public class IfStmtRule extends AbstractProofRuleApplication
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public IfStmtRule(IfStmt ifStmt, OperationEntry currentProcedureOpEntry,
-            Exp currentProcedureDecreasingExp,
-            List<TypeFamilyDec> typeFamilyDecs,
+    public IfStmtRule(IfStmt ifStmt, List<TypeFamilyDec> typeFamilyDecs,
             List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
@@ -135,8 +127,11 @@ public class IfStmtRule extends AbstractProofRuleApplication
         super(block, stGroup, blockModel);
         myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
-        myCurrentProcedureDecreasingExp = currentProcedureDecreasingExp;
-        myCurrentProcedureOperationEntry = currentProcedureOpEntry;
+        myCurrentProcedureDecreasingExp =
+                myCurrentAssertiveCodeBlock
+                        .getCorrespondingOperationDecreasingExp();
+        myCurrentProcedureOperationEntry =
+                myCurrentAssertiveCodeBlock.getCorrespondingOperation();
         myIfStmt = ifStmt;
         myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myProcessedInstFacilityDecls = processedInstFacDecs;

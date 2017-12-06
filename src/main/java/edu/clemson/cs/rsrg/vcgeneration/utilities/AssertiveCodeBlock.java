@@ -13,11 +13,13 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import java.util.Deque;
@@ -44,6 +46,18 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
 
     /** <p>Deque of branching condition(s) that generated this assertive code block.</p> */
     private final Deque<String> myBranchingConditions;
+
+    /**
+     * <p>While walking a procedure, this is set to the entry for the operation
+     * or {@link OperationProcedureDec} that the procedure is attempting to implement.</p>
+     */
+    private final OperationEntry myCorrespondingOperation;
+
+    /**
+     * <p>While walking a procedure, if it is an recursive operation implementation,
+     * then this stores the decreasing clause expression.</p>
+     */
+    private final Exp myCorrespondingOperationDecreasingExp;
 
     /** <p>List of free variables.</p> */
     private final List<Exp> myFreeVars;
@@ -77,15 +91,56 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      * <p>This creates a new assertive code block for the
      * {@link VCGenerator}.</p>
      *
-     * @param g The current type graph.
-     * @param instantiatingElement The element that created this
-     *                             assertive code block.
      * @param name Name of the element that created this assertive
      *             code block.
+     * @param instantiatingElement The element that created this
+     *                             assertive code block.
+     * @param g The current type graph.
      */
-    public AssertiveCodeBlock(TypeGraph g, ResolveConceptualElement instantiatingElement, PosSymbol name) {
+    public AssertiveCodeBlock(PosSymbol name,
+            ResolveConceptualElement instantiatingElement, TypeGraph g) {
+        this(name, instantiatingElement, null, null, g);
+    }
+
+    /**
+     * <p>This creates a new assertive code block from a
+     * {@code procedure} declaration for the {@link VCGenerator}.</p>
+     *
+     * @param name Name of the element that created this assertive
+     *             code block.
+     * @param instantiatingElement The element that created this
+     *                             assertive code block.
+     * @param correspondingOperation The {@link OperationEntry} corresponding to
+     *                               the {@code procedure}.
+     * @param g The current type graph.
+     */
+    public AssertiveCodeBlock(PosSymbol name,
+            ResolveConceptualElement instantiatingElement,
+            OperationEntry correspondingOperation, TypeGraph g) {
+        this(name, instantiatingElement, correspondingOperation, null, g);
+    }
+
+    /**
+     * <p>This creates a new assertive code block from a
+     * {@code recursive procedure} declaration for the {@link VCGenerator}.</p>
+     *
+     * @param name Name of the element that created this assertive
+     *             code block.
+     * @param instantiatingElement The element that created this
+     *                             assertive code block.
+     * @param correspondingOperation The {@link OperationEntry} corresponding to
+     *                               the {@code procedure}.
+     * @param correspondingOperationDecreasingExp The {@code procedure}'s decreasing clause.
+     * @param g The current type graph.
+     */
+    public AssertiveCodeBlock(PosSymbol name,
+            ResolveConceptualElement instantiatingElement,
+            OperationEntry correspondingOperation,
+            Exp correspondingOperationDecreasingExp, TypeGraph g) {
         myBlockName = name;
         myBranchingConditions = new LinkedList<>();
+        myCorrespondingOperation = correspondingOperation;
+        myCorrespondingOperationDecreasingExp = correspondingOperationDecreasingExp;
         myFreeVars = new LinkedList<>();
         myInstantiatingElement = instantiatingElement;
         myVCs = new LinkedList<>();
@@ -155,7 +210,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         // Free variables
         sb.append("Free Variables:\n");
@@ -199,9 +254,17 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      */
     @Override
     public final AssertiveCodeBlock clone() {
+        // Copy any decreasing clause
+        Exp newDecreasingExp = null;
+        if (myCorrespondingOperationDecreasingExp != null) {
+            newDecreasingExp = myCorrespondingOperationDecreasingExp.clone();
+        }
+
+        // Copy a new assertive code block using the stored information
         AssertiveCodeBlock newBlock =
-                new AssertiveCodeBlock(myTypeGraph, myInstantiatingElement,
-                        myBlockName);
+                new AssertiveCodeBlock(myBlockName.clone(),
+                        myInstantiatingElement, myCorrespondingOperation,
+                        newDecreasingExp, myTypeGraph);
 
         // Copy over any branching conditions
         newBlock.myBranchingConditions.addAll(myBranchingConditions);
@@ -257,25 +320,21 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        AssertiveCodeBlock block = (AssertiveCodeBlock) o;
+        AssertiveCodeBlock that = (AssertiveCodeBlock) o;
 
-        return myBlockName.equals(block.myBlockName)
-                && myBranchingConditions.equals(block.myBranchingConditions)
-                && myFreeVars.equals(block.myFreeVars)
-                && myInstantiatingElement.equals(block.myInstantiatingElement)
-                && myVCs.equals(block.myVCs)
-                && myStatements.equals(block.myStatements)
-                && myTypeGraph.equals(block.myTypeGraph);
-    }
-
-    /**
-     * <p>This method returns the instantiating element that created
-     * this assertive code block.</p>
-     *
-     * @return A {@link ResolveConceptualElement}.
-     */
-    public final ResolveConceptualElement getInstantiatingElement() {
-        return myInstantiatingElement;
+        return myBlockName.equals(that.myBlockName)
+                && myBranchingConditions.equals(that.myBranchingConditions)
+                && (myCorrespondingOperation != null ? myCorrespondingOperation
+                        .equals(that.myCorrespondingOperation)
+                        : that.myCorrespondingOperation == null)
+                && (myCorrespondingOperationDecreasingExp != null ? myCorrespondingOperationDecreasingExp
+                        .equals(that.myCorrespondingOperationDecreasingExp)
+                        : that.myCorrespondingOperationDecreasingExp == null)
+                && myFreeVars.equals(that.myFreeVars)
+                && myInstantiatingElement.equals(that.myInstantiatingElement)
+                && myVCs.equals(that.myVCs)
+                && myStatements.equals(that.myStatements)
+                && myTypeGraph.equals(that.myTypeGraph);
     }
 
     /**
@@ -286,6 +345,37 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      */
     public final Deque<String> getBranchingConditions() {
         return myBranchingConditions;
+    }
+
+    /**
+     * <p>This method returns an {@link OperationEntry} that is associated with
+     * this assertive code block.</p>
+     *
+     * @return An {@link OperationEntry} if it originated from some kind of
+     * {@code procedure} declaration, {@code null} otherwise.
+     */
+    public final OperationEntry getCorrespondingOperation() {
+        return myCorrespondingOperation;
+    }
+
+    /**
+     * <p>This method returns a {@code decreasing} clause that is associated with
+     * the {@code recursive procedure} that created this assertive code block.</p>
+     *
+     * @return An {@link Exp} containing the decreasing clause, {@code null} otherwise.
+     */
+    public final Exp getCorrespondingOperationDecreasingExp() {
+        return myCorrespondingOperationDecreasingExp;
+    }
+
+    /**
+     * <p>This method returns the instantiating element that created
+     * this assertive code block.</p>
+     *
+     * @return A {@link ResolveConceptualElement}.
+     */
+    public final ResolveConceptualElement getInstantiatingElement() {
+        return myInstantiatingElement;
     }
 
     /**
@@ -326,6 +416,17 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     public final int hashCode() {
         int result = myBlockName.hashCode();
         result = 31 * result + myBranchingConditions.hashCode();
+
+        if (myCorrespondingOperation != null) {
+            result = 31 * result + myCorrespondingOperation.hashCode();
+        }
+
+        if (myCorrespondingOperationDecreasingExp != null) {
+            result =
+                    31 * result
+                            + myCorrespondingOperationDecreasingExp.hashCode();
+        }
+
         result = 31 * result + myFreeVars.hashCode();
         result = 31 * result + myInstantiatingElement.hashCode();
         result = 31 * result + myVCs.hashCode();

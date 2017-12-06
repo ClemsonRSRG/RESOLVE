@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.HashMap;
@@ -157,10 +157,9 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
     public final void preProgramExp(ProgramExp exp) {
         // This is an error! We should have converted all ProgramExp
         // to their math counterparts.
-        throw new MiscErrorException("[VCGenerator] Encountered ProgramExp: "
+        throw new SourceErrorException("[VCGenerator] Encountered ProgramExp: "
                 + exp + " in " + myOriginalExp
-                + " while applying the Remember Rule.",
-                new UnsupportedOperationException());
+                + " while applying the Remember Rule.", exp.getLocation());
     }
 
     // ===========================================================

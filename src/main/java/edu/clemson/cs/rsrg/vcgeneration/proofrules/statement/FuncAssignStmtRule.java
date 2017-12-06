@@ -110,12 +110,6 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
      *
      * @param funcAssignStmt The {@link FuncAssignStmt} we are applying
      *                       the rule to.
-     * @param currentProcedureOpEntry An {@link OperationEntry} with a {@code Procedure},
-     *                                if {@code ifStmt} is inside one. Otherwise it should
-     *                                be left as {@code null}.
-     * @param currentProcedureDecreasingExp If we are in a {@code Procedure} and it is recursive,
-     *                                      this is its {@code decreasing} clause expression.
-     *                                      Otherwise it should be left as {@code null}.
      * @param typeFamilyDecs List of abstract types we are implementing or extending.
      * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
@@ -127,8 +121,6 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public FuncAssignStmtRule(FuncAssignStmt funcAssignStmt,
-            OperationEntry currentProcedureOpEntry,
-            Exp currentProcedureDecreasingExp,
             List<TypeFamilyDec> typeFamilyDecs,
             List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
@@ -137,8 +129,11 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
         super(block, stGroup, blockModel);
         myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
-        myCurrentProcedureDecreasingExp = currentProcedureDecreasingExp;
-        myCurrentProcedureOperationEntry = currentProcedureOpEntry;
+        myCurrentProcedureDecreasingExp =
+                myCurrentAssertiveCodeBlock
+                        .getCorrespondingOperationDecreasingExp();
+        myCurrentProcedureOperationEntry =
+                myCurrentAssertiveCodeBlock.getCorrespondingOperation();
         myFuncAssignStmt = funcAssignStmt;
         myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myProcessedInstFacilityDecls = processedInstFacDecs;

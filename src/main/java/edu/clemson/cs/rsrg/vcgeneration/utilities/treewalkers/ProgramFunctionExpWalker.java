@@ -25,7 +25,7 @@ import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -287,7 +287,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      *
      * @return The complete ensures clause as an {@link Exp}.
      *
-     * @throws MiscErrorException This is thrown when we can't locate the
+     * @throws SourceErrorException This is thrown when we can't locate the
      * ensures clause for {@code exp}.
      */
     public final Exp getEnsuresClause(ProgramFunctionExp exp) {
@@ -298,12 +298,11 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
             ensures = formConditionExp(myEnsuresClauseMap.remove(exp));
         }
         else {
-            throw new MiscErrorException(
+            throw new SourceErrorException(
                     "[VCGenerator] Cannot locate the ensures clause for: "
                             + exp.toString()
                             + ". Our ensures clause map contains: "
-                            + myEnsuresClauseMap.toString(),
-                    new RuntimeException());
+                            + myEnsuresClauseMap.toString(), exp.getLocation());
         }
 
         return ensures;
@@ -388,22 +387,24 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 // Something went wrong with the program function walker.
                 // We should have generated an equals expression containing the
                 // results of the program function call.
-                throw new MiscErrorException(
+                throw new SourceErrorException(
                         "[VCGenerator] Condition expression: "
                                 + generatedExp.toString()
                                 + " is not of the form: <OperationName> = <expression> "
-                                + generatedExp.getLocation(),
-                        new RuntimeException());
+                                + generatedExp.getLocation(), generatedExp
+                                .getLocation());
             }
         }
         else {
             // Something went wrong with the program function walker.
             // We should have generated an equals expression containing the
             // results of the program function call.
-            throw new MiscErrorException("[VCGenerator] Condition expression: "
-                    + generatedExp.toString()
-                    + " is not an equivalence expression "
-                    + generatedExp.getLocation(), new RuntimeException());
+            throw new SourceErrorException(
+                    "[VCGenerator] Condition expression: "
+                            + generatedExp.toString()
+                            + " is not an equivalence expression "
+                            + generatedExp.getLocation(), generatedExp
+                            .getLocation());
         }
 
         return retExp;
@@ -457,9 +458,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     private void generateTerminationConfirmStmt(ProgramFunctionExp functionExp) {
         // Make sure we have a decreasing clause
         if (myDecreasingExp == null) {
-            throw new MiscErrorException(
+            throw new SourceErrorException(
                     "[VCGenerator] Cannot locate the decreasing clause for: "
-                            + functionExp.toString(), new RuntimeException());
+                            + functionExp.toString(), functionExp.getLocation());
         }
         else {
             VCVarExp nqvPValExp =
@@ -541,8 +542,8 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                     // Something went wrong with the walking mechanism.
                     // We should have seen this inner operation call before
                     // processing the outer operation call.
-                    throw new MiscErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
-                            exp.toString() + " " + exp.getLocation(), new RuntimeException());
+                    throw new SourceErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
+                            exp.toString(), exp.getLocation());
                 }
             }
             // All other types of expressions
@@ -617,8 +618,8 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                     // Something went wrong with the walking mechanism.
                     // We should have seen this inner operation call before
                     // processing the outer operation call.
-                    throw new MiscErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
-                            exp.toString() + " " + exp.getLocation(), new RuntimeException());
+                    throw new SourceErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
+                            exp.toString(), exp.getLocation());
                 }
             }
             // All other types of expressions

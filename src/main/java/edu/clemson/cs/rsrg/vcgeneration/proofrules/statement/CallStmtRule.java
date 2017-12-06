@@ -133,12 +133,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
      *
      * @param callStmt The {@link CallStmt} we are applying
      *                 the rule to.
-     * param currentProcedureOpEntry An {@link OperationEntry} with a {@code Procedure},
-     *                                if {@code ifStmt} is inside one. Otherwise it should
-     *                                be left as {@code null}.
-     * @param currentProcedureDecreasingExp If we are in a {@code Procedure} and it is recursive,
-     *                                      this is its {@code decreasing} clause expression.
-     *                                      Otherwise it should be left as {@code null}.
      * @param typeFamilyDecs List of abstract types we are implementing or extending.
      * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
@@ -150,8 +144,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public CallStmtRule(CallStmt callStmt,
-            OperationEntry currentProcedureOpEntry,
-            Exp currentProcedureDecreasingExp,
             List<TypeFamilyDec> typeFamilyDecs,
             List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
@@ -161,8 +153,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
         myCallStmt = callStmt;
         myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
-        myCurrentProcedureDecreasingExp = currentProcedureDecreasingExp;
-        myCurrentProcedureOperationEntry = currentProcedureOpEntry;
+        myCurrentProcedureDecreasingExp = myCurrentAssertiveCodeBlock.getCorrespondingOperationDecreasingExp();
+        myCurrentProcedureOperationEntry = myCurrentAssertiveCodeBlock.getCorrespondingOperation();
         myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myNestedRequiresClauses = new LinkedList<>();
         myNestedTerminationConfirmStmts = new LinkedList<>();
@@ -668,7 +660,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
         // assertive code block.
         Exp terminationExp =
                 VarExp.getTrueVarExp(myCallStmt.getLocation(), myTypeGraph);
-        if (myCurrentProcedureOperationEntry.equals(operationEntry)
+        if (myCurrentProcedureOperationEntry != null
+                && myCurrentProcedureOperationEntry.equals(operationEntry)
                 && myCurrentProcedureDecreasingExp != null) {
             terminationExp = createTerminationReqExp();
         }

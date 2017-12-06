@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 
 /**
@@ -161,8 +161,8 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     public final void preProgramExp(ProgramExp exp) {
         // This is an error! We should have converted all ProgramExp to their
         // MathExp counterparts.
-        throw new MiscErrorException("Found: " + exp + " in a Sequent!",
-                new RuntimeException());
+        throw new SourceErrorException("[VCGenerator] Found: " + exp
+                + " in a Sequent!", exp.getLocation());
     }
 
     // ===========================================================
