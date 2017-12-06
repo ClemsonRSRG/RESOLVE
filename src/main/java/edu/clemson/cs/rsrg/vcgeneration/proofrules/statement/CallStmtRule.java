@@ -461,7 +461,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 // an "Is_Initial" function.
                 // - T7.Is_Initial( NQV(RS, h) )
                 else {
-                    varDecEnsures = Utilities.createInitExp(new VarDec(varDec.getName(), nameTy), myTypeGraph.BOOLEAN);
+                    varDecEnsures = Utilities.createInitExp(
+                            new VarDec(varDec.getName(), nameTy), myTypeGraph.BOOLEAN);
                 }
 
                 // Local substitution
@@ -516,6 +517,10 @@ public class CallStmtRule extends AbstractProofRuleApplication
                         "Ensures Clause of " + operationDec.getName() + " (Condition from \""
                                 + ParameterMode.RESTORES.name()
                                 + "\" parameter mode)"));
+
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> Math(exp)
+                substitutions.put(parameterExp, exp);
 
                 // Substitutions for sequents in VCs
                 // 1) parameterExp ~> Math(exp)
