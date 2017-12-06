@@ -424,12 +424,12 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 }
 
                 // Substitutions for Ensures Clause:
-                // 1) oldParameterExp ~> Math(exp)
+                // 1) oldParameterExp ~> exp
                 substitutions.put(oldParameterExp, exp);
 
                 // Substitutions for sequents in VCs
-                // 1) parameterExp ~> NQV(parameterExp)
-                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
+                // 1) exp ~> NQV(exp)
+                substitutionsForSeq.put(exp.clone(), nqvExp.clone());
             }
             // 2) CLEARS Mode
             else if (varDec.getMode().equals(ParameterMode.CLEARS)) {
@@ -479,12 +479,12 @@ public class CallStmtRule extends AbstractProofRuleApplication
                                 + "\" parameter mode)"));
 
                 // Substitutions for Ensures Clause:
-                // 1) oldParameterExp ~> Math(exp)
+                // 1) oldParameterExp ~> exp
                 substitutions.put(oldParameterExp, exp);
 
                 // Substitutions for sequents in VCs
-                // 1) parameterExp ~> NQV(parameterExp)
-                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
+                // 1) exp ~> NQV(exp)
+                substitutionsForSeq.put(exp.clone(), nqvExp.clone());
             }
             // 3) REPLACES Mode
             else if (varDec.getMode().equals(ParameterMode.REPLACES)) {
@@ -498,34 +498,14 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 substitutions.put(parameterExp, nqvExp);
 
                 // Substitutions for sequents in VCs
-                // 1) parameterExp ~> NQV(exp)
-                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
+                // 1) exp ~> NQV(exp)
+                substitutionsForSeq.put(exp.clone(), nqvExp.clone());
             }
             // 4) RESTORES Mode
             else if (varDec.getMode().equals(ParameterMode.RESTORES)) {
-                // #Math(exp)
-                OldExp oldExp = new OldExp(exp.getLocation().clone(), exp.clone());
-                oldExp.setMathType(exp.getMathType());
-
-                // Generate the restores parameter ensures clause and
-                // store the new location detail.
-                // - Math(exp) = #Math(exp)
-                varDecEnsures =
-                        new EqualsExp(varDec.getLocation().clone(),
-                                exp.clone(), null, EqualsExp.Operator.EQUAL, oldExp);
-                varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
-                        .getLocation().clone(), exp.getLocation().clone(),
-                        "Ensures Clause of " + operationDec.getName() + " (Condition from \""
-                                + ParameterMode.RESTORES.name()
-                                + "\" parameter mode)"));
-
                 // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> Math(exp)
+                // 1) parameterExp ~> exp
                 substitutions.put(parameterExp, exp);
-
-                // Substitutions for sequents in VCs
-                // 1) parameterExp ~> Math(exp)
-                substitutionsForSeq.put(parameterExp.clone(), exp.clone());
             }
             // 5) UPDATES Mode
             else if (varDec.getMode().equals(ParameterMode.UPDATES)) {
@@ -536,7 +516,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
 
                 // Substitutions for Ensures Clause:
                 // 1) parameterExp ~> NQV(exp)
-                // 2) oldParameterExp ~> Math(exp)
+                // 2) oldParameterExp ~> exp
                 substitutions.put(parameterExp, nqvExp);
                 substitutions.put(oldParameterExp, exp);
 
@@ -547,7 +527,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
             // 6) PRESERVES and EVALUATES Mode
             else {
                 // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> Math(exp)
+                // 1) parameterExp ~> exp
                 substitutions.put(parameterExp, exp);
             }
 
