@@ -221,7 +221,8 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
 
         // Use the ensures clause to create a final confirm statement
         ConfirmStmt finalConfirmStmt =
-                new ConfirmStmt(myProcedureDec.getLocation().clone(), finalConfirmExp, false);
+                new ConfirmStmt(myProcedureDec.getLocation().clone(), finalConfirmExp,
+                        VarExp.isLiteralTrue(finalConfirmExp));
         myCurrentAssertiveCodeBlock.addStatement(finalConfirmStmt);
 
         // Add the different details to the various different output models
@@ -258,18 +259,13 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         Exp retExp;
         Location procedureLoc = myProcedureDec.getLocation();
 
-        // Add the operation's ensures clause
-        AssertionClause ensuresClause =
-                myCurrentProcedureOperationEntry.getEnsuresClause();
-        Exp ensuresExp = ensuresClause.getAssertionExp().clone();
-        ensuresExp.setLocationDetailModel(new LocationDetailModel(
-                ensuresExp.getLocation().clone(), procedureLoc.clone(),
-                "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()));
-        retExp = ensuresExp;
-
         // Loop through each of the parameters in the operation entry.
-        Iterator<ProgramParameterEntry> specParamVarDecIt = myCurrentProcedureOperationEntry.getParameters().iterator();
-        Iterator<ParameterVarDec> realizParamVarDecIt = myProcedureDec.getParameters().iterator();
+        Iterator<ProgramParameterEntry> specParamVarDecIt =
+                myCurrentProcedureOperationEntry.getParameters().iterator();
+        Iterator<ParameterVarDec> realizParamVarDecIt =
+                myProcedureDec.getParameters().iterator();
+        Exp paramEnsuresExp =
+                VarExp.getTrueVarExp(procedureLoc.clone(), myTypeGraph);
         while (specParamVarDecIt.hasNext())  {
             // Information from the operation specification
             ProgramParameterEntry entry = specParamVarDecIt.next();
@@ -283,9 +279,12 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             ParameterVarDec realizParamVarDec = realizParamVarDecIt.next();
 
             // Parameter variable and incoming parameter variable
-            VarExp parameterExp = Utilities.createVarExp(parameterVarDec.getLocation().clone(), null,
-                    parameterVarDec.getName().clone(), nameTy.getMathTypeValue(), null);
-            OldExp oldParameterExp = new OldExp(parameterVarDec.getLocation().clone(), parameterExp.clone());
+            VarExp parameterExp =
+                    Utilities.createVarExp(parameterVarDec.getLocation().clone(),
+                            null, parameterVarDec.getName().clone(),
+                            nameTy.getMathTypeValue(), null);
+            OldExp oldParameterExp =
+                    new OldExp(parameterVarDec.getLocation().clone(), parameterExp.clone());
             oldParameterExp.setMathType(nameTy.getMathTypeValue());
 
             // Query for the type entry in the symbol table
@@ -370,7 +369,16 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                             parameterVarDec.getLocation().clone(), realizParamVarDec.getLocation().clone(),
                             "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
                                     + " (Condition from \"" + parameterMode + "\" parameter mode)"));
-                    retExp = InfixExp.formConjunct(retExp.getLocation(), retExp, restoresConditionExp);
+
+                    // Form a conjunct if needed.
+                    if (VarExp.isLiteralTrue(paramEnsuresExp)) {
+                        paramEnsuresExp = restoresConditionExp;
+                    }
+                    else {
+                        paramEnsuresExp =
+                                InfixExp.formConjunct(paramEnsuresExp.getLocation(),
+                                        paramEnsuresExp, restoresConditionExp);
+                    }
                 }
             }
             // The clears mode adds an additional ensures
@@ -406,13 +414,44 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                         parameterVarDec.getLocation().clone(), realizParamVarDec.getLocation().clone(),
                         "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
                                 + " (Condition from \"" + parameterMode + "\" parameter mode)"));
-                retExp = InfixExp.formConjunct(retExp.getLocation(), retExp, clearsConditionExp);
+
+                // Form a conjunct if needed.
+                if (VarExp.isLiteralTrue(paramEnsuresExp)) {
+                    paramEnsuresExp = clearsConditionExp;
+                }
+                else {
+                    paramEnsuresExp =
+                            InfixExp.formConjunct(paramEnsuresExp.getLocation(),
+                                    paramEnsuresExp, clearsConditionExp);
+                }
             }
 
             // TODO: See below!
             // If the type is a type representation, then our requires clause
             // should really say something about the conceptual type and not
             // the variable
+        }
+
+        // Add the operation's ensures clause
+        AssertionClause ensuresClause =
+                myCurrentProcedureOperationEntry.getEnsuresClause();
+        Exp ensuresExp = ensuresClause.getAssertionExp().clone();
+        ensuresExp.setLocationDetailModel(new LocationDetailModel(
+                ensuresExp.getLocation().clone(), procedureLoc.clone(),
+                "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()));
+
+        // Form a conjunct if needed.
+        if (VarExp.isLiteralTrue(ensuresExp)) {
+            retExp = paramEnsuresExp;
+        }
+        else {
+            if (VarExp.isLiteralTrue(paramEnsuresExp)) {
+                retExp = ensuresExp;
+            } else {
+                retExp =
+                        InfixExp.formConjunct(ensuresExp.getLocation(),
+                                ensuresExp, paramEnsuresExp);
+            }
         }
 
         return retExp;
