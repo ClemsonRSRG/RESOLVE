@@ -205,7 +205,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
         //    YS: The rule does say separate the explicit and implicit post-conditions and deal
         //    with them separately, but rather than invoking some kind of split function, we simply
         //    defer everything to the assume rule!
-        //    ( Assume Implicit_Post[ Post_Subs ] and T6.Constraint(g) and T7.Is_Initial( NQV(RS, h) ) )
+        //    ( Assume Implicit_Post[ Post_Subs ] and ( w = #w )[ w⇝e, #w⇝#e ] and
+        //      T6.Constraint(g) and T7.Is_Initial( NQV(RS, h) ) )
         Exp ensuresExp =
                 createModifiedEnsExp(operationEntry, modifiedArguments);
         AssumeStmt assumeStmt =
@@ -829,9 +830,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 // to replace in the CallStmt's ensures clause.
                 replaceArgs.add(generatedEnsures.clone());
             }
-            // For all other types of arguments, simply add it to the list to be replaced
+            // For all other types of arguments, simply convert and add it to the list to be replaced
             else {
-                replaceArgs.add(exp);
+                replaceArgs.add(Utilities.convertExp(exp, myCurrentModuleScope));
             }
         }
 
