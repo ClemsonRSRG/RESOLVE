@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,9 +69,10 @@ public abstract class AbstractReductionRuleApplication
      * error message.</p>
      */
     protected final void unexpectedExp() {
-        throw new MiscErrorException("Found: " + myOriginalExp + " of type: "
-                + myOriginalExp.getClass().getSimpleName() + " while applying "
-                + getRuleDescription(), new IllegalStateException());
+        throw new SourceErrorException("[VCGenerator] Found: " + myOriginalExp
+                + " of type: " + myOriginalExp.getClass().getSimpleName()
+                + " while applying " + getRuleDescription(), myOriginalExp
+                .getLocation());
     }
 
 }

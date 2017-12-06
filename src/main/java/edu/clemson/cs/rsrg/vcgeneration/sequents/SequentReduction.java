@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.BetweenExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.PrefixExp;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.ReductionRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.leftrules.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.rightrules.*;
@@ -100,10 +100,10 @@ public class SequentReduction {
 
                 // It is an error if we don't get any sequents back.
                 if (leftReductionSeqs.isEmpty()) {
-                    throw new MiscErrorException("Error encountered during reduction. Sequent: "
+                    throw new SourceErrorException("[VCGenerator] Error encountered during reduction. Sequent: "
                             + seq
                             + " either contains atomic formulas or one of the reduction rules is wrong!",
-                            new IllegalStateException());
+                            seq.getLocation());
                 }
                 else if (leftReductionSeqs.size() == 1) {
                     Sequent resultSequent = leftReductionSeqs.getFirst();
@@ -124,10 +124,10 @@ public class SequentReduction {
 
                         // It is an error if we don't get any sequents back.
                         if (rightReductionSeqs.isEmpty()) {
-                            throw new MiscErrorException("Error encountered during reduction. Sequent: "
+                            throw new SourceErrorException("[VCGenerator] Error encountered during reduction. Sequent: "
                                     + resultSequent
                                     + " either contains atomic formulas or one of the reduction rules is wrong!",
-                                    new IllegalStateException());
+                                    resultSequent.getLocation());
                         }
                         else if (rightReductionSeqs.size() == 1) {
                             resultSequent = rightReductionSeqs.getFirst();
@@ -141,10 +141,10 @@ public class SequentReduction {
                             // identified this as a sequent that didn't contain atomic formulas
                             // or one of the reduction rules is wrong.
                             else {
-                                throw new MiscErrorException("Error encountered during reduction. Sequent: "
+                                throw new SourceErrorException("[VCGenerator] Error encountered during reduction. Sequent: "
                                         + resultSequent
                                         + " either contains atomic formulas or one of the reduction rules is wrong!",
-                                        new IllegalStateException());
+                                        resultSequent.getLocation());
                             }
                         }
                         // We definitely did some reduction because it generated more sequents,
