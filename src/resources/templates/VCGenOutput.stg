@@ -29,7 +29,7 @@ outputSequent(consequents, antecedents) ::= <<
 
 Goal(s):
 
-<consequents>
+<consequents : {consequent | <consequent>}; separator = " or ">
 
 Given(s):
 
