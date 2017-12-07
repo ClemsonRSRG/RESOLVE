@@ -138,8 +138,21 @@ public class FileOutputListener implements OutputListener {
                 LocationDetailModel detailModel = vc.getLocationDetailModel();
                 ST vcModel = group.getInstanceOf("outputVC");
                 vcModel.add("vcNum", vc.getName());
-                vcModel.add("location", detailModel.getDestinationLoc());
-                vcModel.add("locationDetail", detailModel.getDetailMessage());
+
+                // Warn the user if are missing the LocationDetailModel
+                if (detailModel != null) {
+                    vcModel.add("location", detailModel.getDestinationLoc());
+                    vcModel.add("locationDetail", detailModel
+                            .getDetailMessage());
+                }
+                else {
+                    myStatusHandler
+                            .warning(
+                                    vc.getLocation(),
+                                    "[FileOutputListener] VC "
+                                            + vc.getName()
+                                            + " is missing information about how this VC got generated.");
+                }
 
                 // Output each of the associated sequents
                 List<Sequent> sequents = vc.getAssociatedSequents();
@@ -202,8 +215,9 @@ public class FileOutputListener implements OutputListener {
             writer.close();
         }
         catch (IOException ioe) {
-            myStatusHandler.error(null, "Error while writing to file: "
-                    + outputFileName);
+            myStatusHandler.error(null,
+                    "[FileOutputListener] Error while writing to file: "
+                            + outputFileName);
         }
     }
 }
