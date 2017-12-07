@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
@@ -152,7 +153,8 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
             associatedSequents.addAll(sequentListMap.get(s));
 
             // Create a new VC
-            vcs.add(new VerificationCondition(myConfirmStmt.getLocation(), associatedSequents));
+            vcs.add(new VerificationCondition(myConfirmStmt.getLocation(),
+                    associatedSequents, findLocationDetailModel(associatedSequents)));
         }
 
         // Output the reduction tree as a dot file to the step model
@@ -206,5 +208,48 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
         }
 
         return sequentListMap;
+    }
+
+    /**
+     * <p>This method finds the location details that will be associated
+     * with a {@code VC}.</p>
+     *
+     * @param associatedSequents A list of associated {@link Sequent Sequents}.
+     *
+     * @return A {@link LocationDetailModel}.
+     */
+    private LocationDetailModel findLocationDetailModel(
+            List<Sequent> associatedSequents) {
+        // YS: All the expressions inside the consequent should have a
+        //     LocationDetailModel. We simply return the first one we
+        //     find.
+        LocationDetailModel model = null;
+        Iterator<Sequent> sequentIt = associatedSequents.iterator();
+        while (sequentIt.hasNext() && model == null) {
+            Sequent sequent = sequentIt.next();
+
+            // First check to see if we have any consequent. If yes, we simply
+            // return the first one we find.
+            Iterator<Exp> consequentExpIt = sequent.getConcequents().iterator();
+            while (consequentExpIt.hasNext() && model == null) {
+                Exp exp = consequentExpIt.next();
+                if (exp.getLocationDetailModel() != null) {
+                    model = exp.getLocationDetailModel();
+                }
+            }
+
+            // Second if we still didn't find it, we must have done some kind of
+            // sequent reduction and ended up putting the consequent in the antecedent
+            // as a negation. We simply return the first one we find.
+            Iterator<Exp> antecedentIt = sequent.getAntecedents().iterator();
+            while (antecedentIt.hasNext() && model == null) {
+                Exp exp = antecedentIt.next();
+                if (exp.getLocationDetailModel() != null) {
+                    model = exp.getLocationDetailModel();
+                }
+            }
+        }
+
+        return model;
     }
 }

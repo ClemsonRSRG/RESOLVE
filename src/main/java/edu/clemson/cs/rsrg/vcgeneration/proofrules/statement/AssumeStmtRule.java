@@ -148,7 +148,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                     newSequents.addAll(reducedSequentForm(resultSequent, stepModel));
                 }
 
-                newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequents));
+                newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
+                        newSequents, vc.getLocationDetailModel()));
             }
 
             // Set this as our new list of vcs

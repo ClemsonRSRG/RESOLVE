@@ -15,7 +15,6 @@ package edu.clemson.cs.rsrg.vcgeneration.sequents;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.AtomicFormulaChecker;
@@ -24,13 +23,13 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This class stores antecedent and consequent expressions for a given
+ * <p>This class stores {@code antecedent} and {@code consequent} expressions for a given
  * conditional assertion.</p>
  *
- * <p>All antecedents are joined by the {@code and} operator and the consequents
+ * <p>All {@code antecedents} are joined by the {@code and} operator and the {@code consequents}
  * are joined by the {@code or} operator. This means that if all the conditions
- * in the antecedent are true, then one of the conditions in the consequent
- * must be true.</p>
+ * in the {@code antecedent} are {@code true}, then one of the conditions in the {@code consequent}
+ * must be {@code true}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -41,13 +40,13 @@ public class Sequent implements BasicCapabilities, Cloneable {
     // Member Fields
     // ===========================================================
 
-    /** <p>The location for this {@code Sequent}.</p> */
-    private Location myLocation;
+    /** <p>The location for this {@code sequent}.</p> */
+    private final Location myLocation;
 
-    /** <p>List of all antecedent conditions</p> */
+    /** <p>List of all {@code antecedent} conditions</p> */
     private final List<Exp> myAntecedents;
 
-    /** <p>List of all consequent conditions</p> */
+    /** <p>List of all {@code consequent} conditions</p> */
     private final List<Exp> myConcequents;
 
     // ===========================================================
@@ -58,9 +57,9 @@ public class Sequent implements BasicCapabilities, Cloneable {
      * <p>This creates an object that represents each of verification
      * conditions that must be verified.</p>
      *
-     * @param loc The location that created this sequent.
-     * @param antecedents The antecedents for this sequent.
-     * @param consequents The consequents for this sequent.
+     * @param loc The location that created this {@code sequent}.
+     * @param antecedents The {@code antecedents} for this {@code sequent}.
+     * @param consequents The {@code consequents} for this {@code sequent}.
      */
     public Sequent(Location loc, List<Exp> antecedents, List<Exp> consequents) {
         myLocation = loc;
@@ -109,7 +108,7 @@ public class Sequent implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method checks to see if this is a {@code Sequent} that
+     * <p>This method checks to see if this is a {@code sequent} that
      * only contains atomic formulas.</p>
      *
      * @return {@code true} if it is, {@code false} otherwise.
@@ -152,25 +151,24 @@ public class Sequent implements BasicCapabilities, Cloneable {
 
         Sequent sequent = (Sequent) o;
 
-        return (myLocation != null ? myLocation.equals(sequent.myLocation)
-                : sequent.myLocation == null)
+        return myLocation.equals(sequent.myLocation)
                 && myAntecedents.equals(sequent.myAntecedents)
                 && myConcequents.equals(sequent.myConcequents);
     }
 
     /**
-     * <p>This method returns the antecedent in this sequent.</p>
+     * <p>This method returns the {@code antecedent} in this {@code sequent}.</p>
      *
-     * @return A list of {@link Exp} representing the antecedent.
+     * @return A list of {@link Exp} representing the {@code antecedent}.
      */
     public final List<Exp> getAntecedents() {
         return myAntecedents;
     }
 
     /**
-     * <p>This method returns the consequents in this sequent.</p>
+     * <p>This method returns the {@code consequents} in this {@code sequent}.</p>
      *
-     * @return A list of {@link Exp} representing the consequent.
+     * @return A list of {@link Exp} representing the {@code consequent}.
      */
     public final List<Exp> getConcequents() {
         return myConcequents;
@@ -178,34 +176,12 @@ public class Sequent implements BasicCapabilities, Cloneable {
 
     /**
      * <p>This method returns the location that created this
-     * sequent.</p>
+     * {@code sequent}.</p>
      *
      * @return A {@link Location}.
      */
     public final Location getLocation() {
         return myLocation;
-    }
-
-    /**
-     * <p>This method gets the location details associated
-     * with this sequent.</p>
-     *
-     * @return A {@link LocationDetailModel}.
-     */
-    public final LocationDetailModel getLocationDetailModel() {
-        // YS: All the expressions inside the consequent should have the same
-        //     LocationDetailModel. We simply return the first one we
-        //     find.
-        LocationDetailModel model = null;
-        Iterator<Exp> consequentExpIt = myConcequents.iterator();
-        while (consequentExpIt.hasNext() && model == null) {
-            Exp exp = consequentExpIt.next();
-            if (exp.getLocationDetailModel() != null) {
-                model = exp.getLocationDetailModel();
-            }
-        }
-
-        return model;
     }
 
     /**
@@ -215,19 +191,10 @@ public class Sequent implements BasicCapabilities, Cloneable {
      */
     @Override
     public final int hashCode() {
-        int result = myLocation != null ? myLocation.hashCode() : 0;
+        int result = myLocation.hashCode();
         result = 31 * result + myAntecedents.hashCode();
         result = 31 * result + myConcequents.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method stores a new location for this sequent.</p>
-     *
-     * @param loc A {@link Location}.
-     */
-    public final void setLocation(Location loc) {
-        myLocation = loc;
     }
 
     /**

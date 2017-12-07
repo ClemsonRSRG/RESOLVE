@@ -146,7 +146,8 @@ public abstract class AbstractProofRuleApplication
                 newSequent.add(createReplacementSequent(s, substitutions));
             }
 
-            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequent));
+            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
+                    newSequent, vc.getLocationDetailModel()));
         }
 
         return newVCs;

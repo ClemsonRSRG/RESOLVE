@@ -98,7 +98,8 @@ public class SwapStmtRule extends AbstractProofRuleApplication
                 newSequent.add(performSwap(s));
             }
 
-            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequent));
+            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
+                    newSequent, vc.getLocationDetailModel()));
         }
 
         // NY YS
