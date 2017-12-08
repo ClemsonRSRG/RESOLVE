@@ -41,13 +41,45 @@ public class LocationDetailModel implements Cloneable {
     /** <p>The source {@link Location} from an {@link Exp}.</p> */
     private final Location mySrcLoc;
 
+    /**
+     * <p>A flag that indicates if this is pointing at something
+     * that has been {@code sequent reduced}.</p>
+     */
+    private final boolean mySequentReducedFlag;
+
     // ===========================================================
     // Constructors
     // ===========================================================
 
+    /**
+     * <p>This creates an object that stores the source and destination
+     * locations that generated the associated {@link Exp}. The message is
+     * used by the {@link VCGenerator} for displaying purposes.</p>
+     *
+     * @param srcLoc A source {@link Location}.
+     * @param destLoc A destination {@link Location}.
+     * @param message The mssage associated with the {@link Exp}.
+     */
     public LocationDetailModel(Location srcLoc, Location destLoc, String message) {
+        this(srcLoc, destLoc, message, false);
+    }
+
+    /**
+     * <p>This creates an object that stores the source and destination
+     * locations that generated the associated {@link Exp}. The message is
+     * used by the {@link VCGenerator} for displaying purposes.</p>
+     *
+     * @param srcLoc A source {@link Location}.
+     * @param destLoc A destination {@link Location}.
+     * @param message The mssage associated with the {@link Exp}.
+     * @param sequentReducedFlag This indicates whether or not the associated
+     *                           {@link Exp} has been {@code sequent reduced}.
+     */
+    public LocationDetailModel(Location srcLoc, Location destLoc,
+            String message, boolean sequentReducedFlag) {
         myDestLoc = destLoc;
         myDetailMessage = message;
+        mySequentReducedFlag = sequentReducedFlag;
         mySrcLoc = srcLoc;
     }
 
@@ -82,11 +114,10 @@ public class LocationDetailModel implements Cloneable {
 
         LocationDetailModel that = (LocationDetailModel) o;
 
-        if (!myDestLoc.equals(that.myDestLoc))
-            return false;
-        if (!myDetailMessage.equals(that.myDetailMessage))
-            return false;
-        return mySrcLoc.equals(that.mySrcLoc);
+        return mySequentReducedFlag == that.mySequentReducedFlag
+                && myDestLoc.equals(that.myDestLoc)
+                && myDetailMessage.equals(that.myDetailMessage)
+                && mySrcLoc.equals(that.mySrcLoc);
     }
 
     /**
@@ -110,6 +141,17 @@ public class LocationDetailModel implements Cloneable {
     }
 
     /**
+     * <p>This method indicates if the associated {@link Exp} has been
+     * {@code sequent reduced} or not.</p>
+     *
+     * @return {@code true} if we have applied some kind of logical
+     * reduction to the {@link Exp}, {@code false} otherwise.
+     */
+    public final boolean isSequentReduced() {
+        return mySequentReducedFlag;
+    }
+
+    /**
      * <p>This method returns the source location where an {@link Exp}
      * originated from.</p>
      *
@@ -129,6 +171,7 @@ public class LocationDetailModel implements Cloneable {
         int result = myDestLoc.hashCode();
         result = 31 * result + myDetailMessage.hashCode();
         result = 31 * result + mySrcLoc.hashCode();
+        result = 31 * result + (mySequentReducedFlag ? 1 : 0);
         return result;
     }
 
