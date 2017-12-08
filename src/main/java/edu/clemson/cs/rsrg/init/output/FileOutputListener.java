@@ -138,7 +138,11 @@ public class FileOutputListener implements OutputListener {
                 LocationDetailModel detailModel = vc.getLocationDetailModel();
                 ST vcModel = group.getInstanceOf("outputVC");
                 vcModel.add("vcNum", vc.getName());
-                vcModel.add("hasImpactingReduction", true);
+
+                // Add additional detail if this VC has impacting reduction
+                if (vc.getHasImpactingReductionFlag()) {
+                    vcModel.add("hasImpactingReduction", true);
+                }
 
                 // Warn the user if are missing the LocationDetailModel
                 if (detailModel != null) {
