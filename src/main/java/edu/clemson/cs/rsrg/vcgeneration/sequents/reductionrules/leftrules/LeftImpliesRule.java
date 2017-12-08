@@ -70,8 +70,8 @@ public class LeftImpliesRule extends AbstractReductionRuleApplication
                     // Place the left expression as a new consequent in the second sequent
                     // and place the right expression as a new antecedent in the first sequent.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("implies")) {
-                        newAntecedents1.add(originalExpAsInfixExp.getRight());
-                        newConsequents2.add(originalExpAsInfixExp.getLeft());
+                        newAntecedents1.add(originalExpAsInfixExp.getRight().clone());
+                        newConsequents2.add(originalExpAsInfixExp.getLeft().clone());
                     }
                     // This must be an error!
                     else {
@@ -80,8 +80,8 @@ public class LeftImpliesRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newAntecedents1.add(exp);
-                    newAntecedents2.add(exp);
+                    newAntecedents1.add(exp.clone());
+                    newAntecedents2.add(exp.clone());
                 }
             }
 

@@ -67,8 +67,8 @@ public class RightAndRule extends AbstractReductionRuleApplication
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Add the left and right into the different antecedent lists
                     if (originalExpAsInfixExp.getOperatorAsString().equals("and")) {
-                        newConsequents1.add(originalExpAsInfixExp.getLeft());
-                        newConsequents2.add(originalExpAsInfixExp.getRight());
+                        newConsequents1.add(originalExpAsInfixExp.getLeft().clone());
+                        newConsequents2.add(originalExpAsInfixExp.getRight().clone());
                     }
                     // This must be an error!
                     else {
@@ -77,8 +77,8 @@ public class RightAndRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newConsequents1.add(exp);
-                    newConsequents2.add(exp);
+                    newConsequents1.add(exp.clone());
+                    newConsequents2.add(exp.clone());
                 }
             }
 

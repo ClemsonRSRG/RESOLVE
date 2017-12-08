@@ -67,7 +67,10 @@ public class RightNotRule extends AbstractReductionRuleApplication
                 if (exp.equals(originalExpAsPrefixExp)) {
                     // Add the expression inside the "not" to the consequent.
                     if (originalExpAsPrefixExp.getOperatorAsString().equals("not")) {
-                        newAntecedents.add(originalExpAsPrefixExp.getArgument());
+                        Exp argumentExp = originalExpAsPrefixExp.getArgument().clone();
+                        argumentExp.setLocationDetailModel(originalExpAsPrefixExp.getLocationDetailModel());
+
+                        newAntecedents.add(argumentExp);
                     }
                     // This must be an error!
                     else {

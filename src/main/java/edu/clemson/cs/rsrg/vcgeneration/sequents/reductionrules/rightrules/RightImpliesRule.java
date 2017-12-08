@@ -68,8 +68,8 @@ public class RightImpliesRule extends AbstractReductionRuleApplication
                     // Replace the original "and" expression with its associated
                     // left and right expressions.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("implies")) {
-                        newAntecedents.add(originalExpAsInfixExp.getLeft());
-                        newConsequents.add(originalExpAsInfixExp.getRight());
+                        newAntecedents.add(originalExpAsInfixExp.getLeft().clone());
+                        newConsequents.add(originalExpAsInfixExp.getRight().clone());
                     }
                     // This must be an error!
                     else {
@@ -78,7 +78,7 @@ public class RightImpliesRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newConsequents.add(exp);
+                    newConsequents.add(exp.clone());
                 }
             }
 

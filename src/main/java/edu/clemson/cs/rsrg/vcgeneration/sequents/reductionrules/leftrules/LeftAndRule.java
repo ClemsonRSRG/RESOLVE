@@ -89,8 +89,8 @@ public class LeftAndRule extends AbstractReductionRuleApplication
                     // Replace the original "and" expression with its associated
                     // left and right expressions.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("and")) {
-                        newAntecedents.add(originalExpAsInfixExp.getLeft());
-                        newAntecedents.add(originalExpAsInfixExp.getRight());
+                        newAntecedents.add(originalExpAsInfixExp.getLeft().clone());
+                        newAntecedents.add(originalExpAsInfixExp.getRight().clone());
                     }
                     // This must be an error!
                     else {

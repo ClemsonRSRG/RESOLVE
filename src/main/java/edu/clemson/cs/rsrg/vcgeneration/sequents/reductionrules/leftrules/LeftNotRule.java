@@ -67,7 +67,7 @@ public class LeftNotRule extends AbstractReductionRuleApplication
                 if (exp.equals(originalExpAsPrefixExp)) {
                     // Add the expression inside the "not" to the consequent.
                     if (originalExpAsPrefixExp.getOperatorAsString().equals("not")) {
-                        newConsequents.add(originalExpAsPrefixExp.getArgument());
+                        newConsequents.add(originalExpAsPrefixExp.getArgument().clone());
                     }
                     // This must be an error!
                     else {
@@ -76,7 +76,7 @@ public class LeftNotRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newAntecedents.add(exp);
+                    newAntecedents.add(exp.clone());
                 }
             }
 
