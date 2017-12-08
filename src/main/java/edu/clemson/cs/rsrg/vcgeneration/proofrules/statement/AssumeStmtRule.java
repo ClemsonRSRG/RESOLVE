@@ -329,6 +329,32 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
+     * <p>Rather than using the strict {@code equals} method that is defined for
+     * {@link Exp Exps}, this method checks to see if all {@link Exp Exps}
+     * are {@code equivalent}.</p>
+     *
+     * @param originalExpList The original expression list.
+     * @param newExpList The new expression list.
+     *
+     * @return {@code true} if the lists contain {@code equivalent} {@link Exp Exps},
+     * {@code false} otherwise.
+     */
+    private boolean isEquivalentExpList(List<Exp> originalExpList,
+            List<Exp> newExpList) {
+        boolean isEquivalent = (originalExpList.size() == newExpList.size());
+
+        Iterator<Exp> originalExpIt = originalExpList.iterator();
+        Iterator<Exp> newExpIt = newExpList.iterator();
+        while (originalExpIt.hasNext() && isEquivalent) {
+            Exp originalExp = originalExpIt.next();
+            Exp newExp = newExpIt.next();
+            isEquivalent = originalExp.equivalent(newExp);
+        }
+
+        return isEquivalent;
+    }
+
+    /**
      * <p>This method uses {@code sequent} to produce
      * a list of reduced {@link Sequent Sequents}.</p>
      *
@@ -514,8 +540,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 // Check to see if there is no change to the new antecedents
                 // and consequents. If not, then we might to keep this assumed
                 // expression for further processing.
-                if (antencedentsSubtituted.equals(newAntecedents) &&
-                        consequentsSubtituted.equals(newConsequents)) {
+                if (isEquivalentExpList(antencedentsSubtituted, newAntecedents) &&
+                        isEquivalentExpList(consequentsSubtituted, newConsequents)) {
                     // Check to see if this a verification
                     // variable. If yes, we don't keep this assume.
                     // Otherwise, we need to store this for the
