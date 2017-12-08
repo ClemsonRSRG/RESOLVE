@@ -86,11 +86,14 @@ public class LeftOrRule extends AbstractReductionRuleApplication
             // YS: We just need to prove either resultingSequent1 or resultingSequent2,
             // therefore it is just the same VC.
             Sequent resultingSequent1 = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents1, myOriginalSequent.getConcequents());
+                    newAntecedents1, copyExpList(myOriginalSequent.getConcequents()));
             myResultingSequents.add(resultingSequent1);
             Sequent resultingSequent2 = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents2, myOriginalSequent.getConcequents());
+                    newAntecedents2, copyExpList(myOriginalSequent.getConcequents()));
             myResultingSequents.add(resultingSequent2);
+
+            // Indicate that this is an impacting reduction
+            myIsImpactingReductionFlag = true;
         }
         // This must be an error!
         else {

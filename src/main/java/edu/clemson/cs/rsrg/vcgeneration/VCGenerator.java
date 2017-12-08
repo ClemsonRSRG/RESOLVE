@@ -388,7 +388,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             for (VerificationCondition vc : vcs) {
                 namedVCs.add(new VerificationCondition(vc.getLocation(),
                         blockCount + "_" + vcCount,
-                        vc.getAssociatedSequents(), vc.getLocationDetailModel()));
+                        vc.getAssociatedSequents(), vc.getHasImpactingReductionFlag(),
+                        vc.getLocationDetailModel()));
                 vcCount++;
             }
 

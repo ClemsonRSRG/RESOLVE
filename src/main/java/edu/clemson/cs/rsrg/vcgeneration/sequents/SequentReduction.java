@@ -39,6 +39,12 @@ public class SequentReduction {
     // Member Fields
     // ===========================================================
 
+    /**
+     * <p>A map that indicates if a particular {@link Sequent} had
+     * an impacting reduction.</p>
+     */
+    private final Map<Sequent, Boolean> myImpactingReducedSequentMap;
+
     /** <p>The incoming {@link Sequent} we are trying to reduce.</p> */
     private final Sequent myOriginalSequent;
 
@@ -59,12 +65,16 @@ public class SequentReduction {
      * @param sequent A {@link Sequent} to be reduced.
      */
     public SequentReduction(Sequent sequent) {
+        myImpactingReducedSequentMap = new LinkedHashMap<>();
         myOriginalSequent = sequent;
         myReductionTree = new DefaultDirectedGraph<>(DefaultEdge.class);
         myResultingSequents = new ArrayList<>();
 
         // Add the originalSequent as our root node
         myReductionTree.addVertex(myOriginalSequent);
+
+        // Our original sequent has no reductions
+        myImpactingReducedSequentMap.put(myOriginalSequent, false);
     }
 
     // ===========================================================
@@ -185,9 +195,21 @@ public class SequentReduction {
 
         SequentReduction that = (SequentReduction) o;
 
-        return myOriginalSequent.equals(that.myOriginalSequent)
+        return myImpactingReducedSequentMap
+                .equals(that.myImpactingReducedSequentMap)
+                && myOriginalSequent.equals(that.myOriginalSequent)
                 && myResultingSequents.equals(that.myResultingSequents)
                 && myReductionTree.equals(that.myReductionTree);
+    }
+
+    /**
+     * <p>This method returns a map that indicates whether or not
+     * a {@link Sequent} had an impacting reduction.</p>
+     *
+     * @return A {@link Map} that indicates if it is impacting or not.
+     */
+    public final Map<Sequent, Boolean> getImpactingReducedSequentMap() {
+        return myImpactingReducedSequentMap;
     }
 
     /**
@@ -207,7 +229,8 @@ public class SequentReduction {
      */
     @Override
     public final int hashCode() {
-        int result = myOriginalSequent.hashCode();
+        int result = myImpactingReducedSequentMap.hashCode();
+        result = 31 * result + myOriginalSequent.hashCode();
         result = 31 * result + myResultingSequents.hashCode();
         result = 31 * result + myReductionTree.hashCode();
         return result;
@@ -237,6 +260,17 @@ public class SequentReduction {
         for (Sequent resultSeq : ruleResultingSeqs) {
             myReductionTree.addVertex(resultSeq);
             myReductionTree.addEdge(sequent, resultSeq);
+
+            // Check to see if the rule generated an impacting reduction
+            // Note if our parent is a result from an impacting reduction,
+            // this is always set to true.
+            if (myImpactingReducedSequentMap.get(sequent)) {
+                myImpactingReducedSequentMap.put(resultSeq, true);
+            }
+            else {
+                myImpactingReducedSequentMap.put(resultSeq, ruleApplication
+                        .isIsImpactingReductionFlag());
+            }
         }
 
         return ruleResultingSeqs;

@@ -85,11 +85,13 @@ public class RightAndRule extends AbstractReductionRuleApplication
             // Construct new sequents
             // YS: resultingSequent2 clones the location, because this is a new VC that
             // we are trying to prove. Simply proving resultingSequent1 is not good enough.
+            // Since this is not creating a new associated sequent, it is not considered as
+            // an impacting reduction.
             Sequent resultingSequent1 = new Sequent(myOriginalSequent.getLocation(),
-                    myOriginalSequent.getAntecedents(), newConsequents1);
+                    copyExpList(myOriginalSequent.getAntecedents()), newConsequents1);
             myResultingSequents.add(resultingSequent1);
             Sequent resultingSequent2 = new Sequent(myOriginalSequent.getLocation().clone(),
-                    myOriginalSequent.getAntecedents(), newConsequents2);
+                    copyExpList(myOriginalSequent.getAntecedents()), newConsequents2);
             myResultingSequents.add(resultingSequent2);
         }
         // This must be an error!

@@ -51,6 +51,12 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     /** <p>The {@link AssumeStmt} we are applying the rule to.</p> */
     private final AssumeStmt myAssumeStmt;
 
+    /**
+     * <p>A map that indicates if a particular {@link Sequent} had
+     * an impacting reduction.</p>
+     */
+    private final Map<Sequent, Boolean> myImpactingReducedSequentMap;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -70,6 +76,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
         myAssumeStmt = assumeStmt;
+        myImpactingReducedSequentMap = new LinkedHashMap<>();
     }
 
     // ===========================================================
@@ -137,19 +144,30 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             // Build the new list of VCs
             List<VerificationCondition> newVCs = new ArrayList<>();
             for (VerificationCondition vc : myCurrentAssertiveCodeBlock.getVCs()) {
+                // A flag that indicates if this VC had an impacting reduction
+                boolean hasImpactingReduction = vc.getHasImpactingReductionFlag();
+
                 List<Sequent> newSequents = new ArrayList<>();
                 for (Sequent sequent : vc.getAssociatedSequents()) {
                     // YS: The substitutionStep will call applicationStep
                     Sequent resultSequent =
                             substitutionStep(sequent, assumeExps);
 
-                    // Reduce the sequent and store this as
-                    // our new list of associated sequents.
-                    newSequents.addAll(reducedSequentForm(resultSequent, stepModel));
+                    // Reduce the sequent, check to see if any of them had an
+                    // impacting reduction and store this as our new list
+                    // of associated sequents.
+                    List<Sequent> reducedSequents = reducedSequentForm(resultSequent, stepModel);
+                    for (Sequent reducedSequent : reducedSequents) {
+                        if (myImpactingReducedSequentMap.get(reducedSequent)) {
+                            hasImpactingReduction = true;
+                        }
+                    }
+
+                    newSequents.addAll(reducedSequents);
                 }
 
                 newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
-                        newSequents, vc.getLocationDetailModel()));
+                        newSequents, hasImpactingReduction, vc.getLocationDetailModel()));
             }
 
             // Set this as our new list of vcs
@@ -369,6 +387,10 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         List<Sequent> resultSequents = reduction.applyReduction();
         DirectedGraph<Sequent, DefaultEdge> reductionTree =
                 reduction.getReductionTree();
+
+        // Store the map of impacting reductions
+        myImpactingReducedSequentMap.putAll(reduction
+                .getImpactingReducedSequentMap());
 
         // Output the reduction tree as a dot file to the step model
         // only if we did some kind of reduction.

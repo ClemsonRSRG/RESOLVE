@@ -83,7 +83,7 @@ public class RightOrRule extends AbstractReductionRuleApplication
 
             // Construct a new sequent
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
-                    myOriginalSequent.getAntecedents(), newConsequents);
+                    copyExpList(myOriginalSequent.getAntecedents()), newConsequents);
             myResultingSequents.add(resultingSequent);
         }
         // This must be an error!

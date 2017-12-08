@@ -38,6 +38,18 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     // Member Fields
     // ===========================================================
 
+    /**
+     * <p>List of {@link Sequent Sequents} associated with
+     * this {@code VC}.</p>
+     */
+    private final List<Sequent> myAssociatedSequents;
+
+    /**
+     * <p>A flag that indicates whether or not this {@link VerificationCondition}
+     * contains a {@link Sequent} that had an impacting reduction.</p>
+     */
+    private final boolean myHasImpactingReduction;
+
     /** <p>The location for this {@code Sequent}.</p> */
     private Location myLocation;
 
@@ -51,12 +63,6 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     /** <p>Name given to the {@code VC}.</p> */
     private final String myName;
 
-    /**
-     * <p>List of {@link Sequent Sequents} associated with
-     * this {@code VC}.</p>
-     */
-    private final List<Sequent> myAssociatedSequents;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -69,15 +75,20 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      * @param name Name given to this {@code VC}.
      * @param sequents List of {@link Sequent Sequents}
      *                 associated with this {@code VC}.
+     * @param hasImpactingReduction A flag that indicates whether or not
+     *                              this {@code VC} had an impacting reduced
+     *                              {@link Sequent}.
      * @param model The {@link LocationDetailModel} associated with
      *              this {@code VC}.
      */
     public VerificationCondition(Location loc, String name,
-            List<Sequent> sequents, LocationDetailModel model) {
-        myLocation = loc;
-        myName = name;
+            List<Sequent> sequents, boolean hasImpactingReduction,
+            LocationDetailModel model) {
         myAssociatedSequents = sequents;
+        myHasImpactingReduction = hasImpactingReduction;
+        myLocation = loc;
         myLocationDetailModel = model;
+        myName = name;
     }
 
     /**
@@ -87,12 +98,15 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      * @param loc The location that created this {@code VC}.
      * @param sequents List of {@link Sequent Sequents}
      *                 associated with this {@code VC}.
+     * @param hasImpactingReduction A flag that indicates whether or not
+     *                              this {@code VC} had an impacting reduced
+     *                              {@link Sequent}.
      * @param model The {@link LocationDetailModel} associated with
      *              this {@code VC}.
      */
     public VerificationCondition(Location loc, List<Sequent> sequents,
-            LocationDetailModel model) {
-        this(loc, null, sequents, model);
+            boolean hasImpactingReduction, LocationDetailModel model) {
+        this(loc, null, sequents, hasImpactingReduction, model);
     }
 
     // ===========================================================
@@ -131,7 +145,8 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     public final VerificationCondition clone() {
         VerificationCondition newVerificationCondition =
                 new VerificationCondition(myLocation.clone(), myName,
-                        new ArrayList<Sequent>(), myLocationDetailModel.clone());
+                        new ArrayList<Sequent>(), myHasImpactingReduction,
+                        myLocationDetailModel.clone());
 
         Collections.copy(newVerificationCondition.myAssociatedSequents,
                 myAssociatedSequents);
@@ -155,11 +170,12 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
 
         VerificationCondition that = (VerificationCondition) o;
 
-        return myLocation.equals(that.myLocation)
+        return myHasImpactingReduction == that.myHasImpactingReduction
+                && myAssociatedSequents.equals(that.myAssociatedSequents)
+                && myLocation.equals(that.myLocation)
                 && myLocationDetailModel.equals(that.myLocationDetailModel)
                 && (myName != null ? myName.equals(that.myName)
-                        : that.myName == null)
-                && myAssociatedSequents.equals(that.myAssociatedSequents);
+                        : that.myName == null);
     }
 
     /**
@@ -170,6 +186,18 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      */
     public final List<Sequent> getAssociatedSequents() {
         return myAssociatedSequents;
+    }
+
+    /**
+     * <p>This method indicates if the {@link VerificationCondition} contains
+     * a {@link Sequent} that had an impacting reduction or not.</p>
+     *
+     * @return {@code true} if we have applied some kind of logical
+     * reduction to one of the associated {@link Sequent Sequents},
+     * {@code false} otherwise.
+     */
+    public final boolean getHasImpactingReductionFlag() {
+        return myHasImpactingReduction;
     }
 
     /**
@@ -208,10 +236,11 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      */
     @Override
     public final int hashCode() {
-        int result = myLocation.hashCode();
+        int result = myAssociatedSequents.hashCode();
+        result = 31 * result + (myHasImpactingReduction ? 1 : 0);
+        result = 31 * result + myLocation.hashCode();
         result = 31 * result + myLocationDetailModel.hashCode();
         result = 31 * result + (myName != null ? myName.hashCode() : 0);
-        result = 31 * result + myAssociatedSequents.hashCode();
         return result;
     }
 

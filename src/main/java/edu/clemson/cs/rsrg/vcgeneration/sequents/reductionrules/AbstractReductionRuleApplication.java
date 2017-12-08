@@ -32,6 +32,13 @@ public abstract class AbstractReductionRuleApplication
     // Member Fields
     // ===========================================================
 
+    /**
+     * <p>An impacting reduction means that either {@code myOriginalExp}
+     * is a negation {@code exp} or {@code myOriginalExp} created a new
+     * associated {@link Sequent}.</p>
+     */
+    protected boolean myIsImpactingReductionFlag;
+
     /** <p>The original expression to be reduced</p> */
     protected final Exp myOriginalExp;
 
@@ -55,9 +62,27 @@ public abstract class AbstractReductionRuleApplication
      * @param originalExp The {@link Exp} to be reduced.
      */
     protected AbstractReductionRuleApplication(Sequent originalSequent, Exp originalExp) {
+        myIsImpactingReductionFlag = false;
         myOriginalExp = originalExp;
         myOriginalSequent = originalSequent;
         myResultingSequents = new ArrayList<>();
+    }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * <p>This method indicates whether or not this {@link ReductionRuleApplication}
+     * encountered a {@code not(<exp>)} or if it created a new associated
+     * {@link Sequent}.</p>
+     *
+     * @return {@code true} if we have applied some kind of impacting
+     * logical reduction to the original {@link Sequent}, {@code false} otherwise.
+     */
+    @Override
+    public final boolean isIsImpactingReductionFlag() {
+        return myIsImpactingReductionFlag;
     }
 
     // ===========================================================
@@ -65,7 +90,24 @@ public abstract class AbstractReductionRuleApplication
     // ===========================================================
 
     /**
-     * <p>This is an helper method that throws an unexpected expression
+     * <p>An helper method that deep copies a list of {@link Exp Exps}.</p>
+     *
+     * @param originalExpList A list of {@link Exp Exps}.
+     *
+     * @return A deep copy of {@code originalExpList}.
+     */
+    protected final List<Exp> copyExpList(List<Exp> originalExpList) {
+        List<Exp> copyExpList = new ArrayList<>(originalExpList.size());
+
+        for (Exp exp : originalExpList) {
+            copyExpList.add(exp.clone());
+        }
+
+        return copyExpList;
+    }
+
+    /**
+     * <p>An helper method that throws an unexpected expression
      * error message.</p>
      */
     protected final void unexpectedExp() {

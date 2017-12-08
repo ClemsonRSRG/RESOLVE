@@ -62,7 +62,7 @@ public class LeftNotRule extends AbstractReductionRuleApplication
         if (myOriginalExp instanceof PrefixExp) {
             PrefixExp originalExpAsPrefixExp = (PrefixExp) myOriginalExp;
             List<Exp> newAntecedents = new ArrayList<>();
-            List<Exp> newConsequents = new ArrayList<>(myOriginalSequent.getConcequents());
+            List<Exp> newConsequents = copyExpList(myOriginalSequent.getConcequents());
             for (Exp exp : myOriginalSequent.getAntecedents()) {
                 if (exp.equals(originalExpAsPrefixExp)) {
                     // Add the expression inside the "not" to the consequent.
@@ -84,6 +84,9 @@ public class LeftNotRule extends AbstractReductionRuleApplication
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
                     newAntecedents, newConsequents);
             myResultingSequents.add(resultingSequent);
+
+            // Indicate that this is an impacting reduction
+            myIsImpactingReductionFlag = true;
         }
         // This must be an error!
         else {

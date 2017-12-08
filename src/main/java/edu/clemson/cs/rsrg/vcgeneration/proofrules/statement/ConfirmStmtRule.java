@@ -49,6 +49,12 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
     /** <p>The {@link ConfirmStmt} we are applying the rule to.</p> */
     private final ConfirmStmt myConfirmStmt;
 
+    /**
+     * <p>A map that indicates if a particular {@link Sequent} had
+     * an impacting reduction.</p>
+     */
+    private final Map<Sequent, Boolean> myImpactingReducedSequentMap;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -68,6 +74,7 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
             STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
         myConfirmStmt = confirmStmt;
+        myImpactingReducedSequentMap = new LinkedHashMap<>();
     }
 
     // ===========================================================
@@ -140,6 +147,10 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
         List<Sequent> resultSequents = reduction.applyReduction();
         DirectedGraph<Sequent, DefaultEdge> reductionTree = reduction.getReductionTree();
 
+        // Store the map of impacting reductions
+        myImpactingReducedSequentMap.putAll(reduction
+                .getImpactingReducedSequentMap());
+
         // YS: The confirm statement always generate new VCs,
         // so we will need to use the reduction tree to determine
         // how many new VCs to create.
@@ -152,9 +163,24 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
             associatedSequents.add(s);
             associatedSequents.addAll(sequentListMap.get(s));
 
+            // Check to see if the new VC contains sequents that had
+            // impacting reductions.
+            boolean hasImpactingReduction = false;
+            if (myImpactingReducedSequentMap.get(s)) {
+                hasImpactingReduction = true;
+            }
+            else {
+                for (Sequent associatedSeq : sequentListMap.get(s)) {
+                    if (myImpactingReducedSequentMap.get(associatedSeq)) {
+                        hasImpactingReduction = true;
+                    }
+                }
+            }
+
             // Create a new VC
             vcs.add(new VerificationCondition(myConfirmStmt.getLocation(),
-                    associatedSequents, findLocationDetailModel(associatedSequents)));
+                    associatedSequents, hasImpactingReduction,
+                    findLocationDetailModel(associatedSequents)));
         }
 
         // Output the reduction tree as a dot file to the step model
