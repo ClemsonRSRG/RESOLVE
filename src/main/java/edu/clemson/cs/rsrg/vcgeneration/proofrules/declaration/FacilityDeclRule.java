@@ -19,7 +19,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
@@ -29,6 +28,7 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
@@ -43,7 +43,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.*;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptTypeExtractor;
@@ -305,9 +304,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
                 // Retrieve the various pieces of information from the walker
                 moduleArgumentAsExp = walker.getEnsuresClause((ProgramFunctionExp) moduleArgumentExp);
-                if (myIsLocalFacilityDec) {
-                    myLocationDetails.putAll(walker.getNewLocationString());
-                }
             }
             else {
                 // Simply convert to the math equivalent expression
@@ -333,33 +329,12 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     private List<VarExp> createModuleParamExpList(List<ModuleParameterDec> formalParams) {
         List<VarExp> retExpList = new ArrayList<>(formalParams.size());
 
-        // Create a VarExp representing each of the module arguments
+        // Create a VarExp representing each of the module parameters
         for (ModuleParameterDec dec : formalParams) {
             // Use the wrapped declaration name and type to create a VarExp.
             Dec wrappedDec = dec.getWrappedDec();
             retExpList.add(Utilities.createVarExp(wrappedDec.getLocation(),
                     null, wrappedDec.getName(), wrappedDec.getMathType(), null));
-        }
-
-        return retExpList;
-    }
-
-    /**
-     * <p>An helper method that creates a list of {@link VarExp VarExps}
-     * representing each of the {@code Operation's} {@link ParameterVarDec ParameterVarDecs}.</p>
-     *
-     * @param parameterVarDecs List of operation parameters.
-     *
-     * @return A list containing the {@link VarExp VarExps} representing
-     * each operation parameter.
-     */
-    private List<VarExp> createOperationParamExpList(List<ParameterVarDec> parameterVarDecs) {
-        List<VarExp> retExpList = new ArrayList<>(parameterVarDecs.size());
-
-        // Create a VarExp representing each of the operation parameters
-        for (ParameterVarDec dec : parameterVarDecs) {
-            retExpList.add(Utilities.createVarExp(dec.getLocation(),
-                    null, dec.getName(), dec.getMathType(), null));
         }
 
         return retExpList;
@@ -506,10 +481,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                         // Store the location detail for this requires clause
                         Location conceptRealizReqLoc =
                                 conceptRealizReq.getLocation();
-                        myLocationDetails.put(conceptRealizReqLoc,
-                                new LocationDetailModel(conceptRealizReqLoc,
+                        conceptRealizReq
+                                .setLocationDetailModel(new LocationDetailModel(
+                                        conceptRealizReqLoc.clone(),
                                         myFacilityDec.getConceptRealizName()
-                                                .getLocation(),
+                                                .getLocation().clone(),
                                         "Requires Clause for "
                                                 + facConceptRealizDec.getName()
                                                         .getName() + " in "
@@ -600,9 +576,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
                 // Store the location detail for this requires clause
                 Location conceptReqLoc = conceptReq.getLocation();
-                myLocationDetails.put(conceptReqLoc, new LocationDetailModel(
-                        conceptReqLoc, myFacilityDec.getConceptName()
-                                .getLocation(), "Requires Clause for "
+                conceptReq.setLocationDetailModel(new LocationDetailModel(
+                        conceptReqLoc.clone(), myFacilityDec.getConceptName()
+                                .getLocation().clone(), "Requires Clause for "
                                 + facConceptDec.getName().getName() + " in "
                                 + getRuleDescription()));
             }
@@ -766,10 +742,11 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
                     // Store the location detail for this requires clause
                     Location realizationLoc = realizationReq.getLocation();
-                    myLocationDetails.put(realizationLoc,
-                            new LocationDetailModel(realizationLoc,
-                                    specRealizItem.getEnhancementRealizName()
-                                            .getLocation(),
+                    realizationReq
+                            .setLocationDetailModel(new LocationDetailModel(
+                                    realizationLoc.clone(), specRealizItem
+                                            .getEnhancementRealizName()
+                                            .getLocation().clone(),
                                     "Requires Clause for "
                                             + enhancementRealizModuleDec
                                                     .getName().getName()
@@ -884,13 +861,12 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
                 // Store the location detail for this requires clause
                 Location enhancementReqLoc = enhancementReq.getLocation();
-                myLocationDetails.put(enhancementReqLoc,
-                        new LocationDetailModel(enhancementReqLoc,
-                                specRealizItem.getEnhancementName()
-                                        .getLocation(), "Requires Clause for "
-                                        + enhancementModuleDec.getName()
-                                                .getName() + " in "
-                                        + getRuleDescription()));
+                enhancementReq.setLocationDetailModel(new LocationDetailModel(
+                        enhancementReqLoc.clone(), specRealizItem
+                                .getEnhancementName().getLocation().clone(),
+                        "Requires Clause for "
+                                + enhancementModuleDec.getName().getName()
+                                + " in " + getRuleDescription()));
             }
 
             // Results from applying steps 1a to 1e.
@@ -997,7 +973,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         // qualifiers to distinguish the operation from others with the same name.
         if (actualOpQualifier != null) {
             List<VarExp> actualOpParamsAsVarExp =
-                    createOperationParamExpList(actualOpDec.getParameters());
+                    Utilities.createOperationParamExpList(actualOpDec.getParameters());
             if (actualOpDec.getReturnTy() != null) {
                 actualOpParamsAsVarExp.add(Utilities.createVarExp(actualOpDec
                                 .getReturnTy().getLocation(), actualOpQualifier,
@@ -1030,8 +1006,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             if (actualOpQualifier != null) {
                 message += (actualOpQualifier.getName() + "::");
             }
-            Location retExpLoc = retExp.getLocation();
-            myLocationDetails.put(retExpLoc, new LocationDetailModel(retExpLoc, argLoc,
+            retExp.setLocationDetailModel(new LocationDetailModel(
+                    actualOpRequires.getLocation().clone(), argLoc.clone(),
                     message + actualOpDec.getName().getName() + " in " + getRuleDescription()));
         }
 
@@ -1047,8 +1023,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             if (actualOpQualifier != null) {
                 message += (actualOpQualifier.getName() + "::");
             }
-            Location impliesLoc = impliesExp.getLocation();
-            myLocationDetails.put(impliesLoc, new LocationDetailModel(impliesLoc, argLoc,
+            impliesExp.setLocationDetailModel(new LocationDetailModel(
+                    actualOpEnsures.getLocation().clone(), argLoc.clone(),
                     message + actualOpDec.getName().getName() +
                     " implies the Ensures Clause of " + formalOpDec.getName().getName() +
                     " in " + getRuleDescription()));

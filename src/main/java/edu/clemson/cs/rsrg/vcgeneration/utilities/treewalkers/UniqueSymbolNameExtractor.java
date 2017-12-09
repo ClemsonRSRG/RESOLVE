@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.AssumeStmtRule;
@@ -120,8 +120,8 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
 
             // Make sure our segment only has 1 name
             if (myExpNames.size() != 1) {
-                throw new MiscErrorException("Cannot extract name from this segment: "
-                        + segmentExp, new RuntimeException());
+                throw new SourceErrorException("[VCGenerator] Cannot extract name from this segment: "
+                        + segmentExp, segmentExp.getLocation());
             }
             else {
                 // Store this new string into tempSet
@@ -434,8 +434,8 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     public final void preProgramExp(ProgramExp exp) {
         // This is an error! We should have converted all ProgramExp
         // to their math counterparts.
-        throw new MiscErrorException("Unexpected ProgramExp: " + exp,
-                new RuntimeException());
+        throw new SourceErrorException("[VCGenerator] Unexpected ProgramExp: "
+                + exp, exp.getLocation());
     }
 
     // ===========================================================

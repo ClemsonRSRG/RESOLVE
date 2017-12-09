@@ -12,42 +12,44 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
-import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
-import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
-import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
  * <p>This class contains the logic for applying the {@code call}
- * rule to a {@link CallStmt}.</p>
+ * rule.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -60,11 +62,15 @@ public class CallStmtRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@link OperationEntry} this call statement is trying to call.</p> */
-    private final OperationEntry myAssociatedOperationEntry;
-
     /** <p>The {@link CallStmt} we are applying the rule to.</p> */
     private final CallStmt myCallStmt;
+
+    /**
+     * <p>This contains all the types declared by the {@code Concept}
+     * associated with the current module. Note that if we are in a
+     * {@code Facility}, this list will be empty.</p>
+     */
+    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
 
     /**
      * <p>The module scope for the file we are generating
@@ -73,40 +79,87 @@ public class CallStmtRule extends AbstractProofRuleApplication
     private final ModuleScope myCurrentModuleScope;
 
     /**
-     * <p>Since we could have nested function calls, this list contains
-     * the new set of arguments with all those nested function calls
-     * replaced with what they generate.</p>
+     * <p>If we are in a {@code Procedure} and it is an recursive
+     * operation implementation, then this stores the decreasing clause
+     * expression.</p>
      */
-    private final List<Exp> myModifiedArguments;
+    private final Exp myCurrentProcedureDecreasingExp;
+
+    /**
+     * <p>The {@link OperationEntry} associated with this {@code If}
+     * statement if we are inside a {@code ProcedureDec}.</p>
+     */
+    private final OperationEntry myCurrentProcedureOperationEntry;
+
+    /**
+     * <p>If our current module scope allows us to introduce new type implementations,
+     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
+
+    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
+    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
+
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
+    // -----------------------------------------------------------
+    // Nested Function Expression-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>The list of {@link ConfirmStmt ConfirmStmts} generated by some nested function in
+     * our {@link CallStmt} argument list.</p>
+     */
+    private final List<ConfirmStmt> myNestedTerminationConfirmStmts;
+
+    /**
+     * <p>The list of {@code requires} clauses generated by some nested function in
+     * our {@link CallStmt} argument list.</p>
+     */
+    private final List<Exp> myNestedRequiresClauses;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates a new application of the {@code assume}
+     * <p>This creates a new application of the {@code call}
      * rule.</p>
      *
      * @param callStmt The {@link CallStmt} we are applying
      *                 the rule to.
-     * @param associatedOpEntry The associated {@link OperationEntry}
-     *                          that the {@code callStmt} is calling.
-     * @param modifiedArguments The modified arguments that with all the nested
-     *                          function calls taken care of.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
+     * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public CallStmtRule(CallStmt callStmt, OperationEntry associatedOpEntry,
-            List<Exp> modifiedArguments, ModuleScope moduleScope,
+    public CallStmtRule(CallStmt callStmt,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
+            MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
-        myAssociatedOperationEntry = associatedOpEntry;
         myCallStmt = callStmt;
+        myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
-        myModifiedArguments = modifiedArguments;
+        myCurrentProcedureDecreasingExp = myCurrentAssertiveCodeBlock.getCorrespondingOperationDecreasingExp();
+        myCurrentProcedureOperationEntry = myCurrentAssertiveCodeBlock.getCorrespondingOperation();
+        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
+        myNestedRequiresClauses = new LinkedList<>();
+        myNestedTerminationConfirmStmts = new LinkedList<>();
+        myProcessedInstFacilityDecls = processedInstFacDecs;
+        myTypeGraph = symbolTableBuilder.getTypeGraph();
     }
 
     // ===========================================================
@@ -118,284 +171,48 @@ public class CallStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        OperationDec opDec = (OperationDec) myAssociatedOperationEntry.getDefiningElement();
+        ProgramFunctionExp functionExp = myCallStmt.getFunctionExp();
 
-        // Get the ensures clause for this operation
-        AssertionClause ensuresClause = myAssociatedOperationEntry.getEnsuresClause();
-        Exp ensuresExp =
-                Utilities.formConjunct(ensuresClause.getLocation(), null, ensuresClause);
+        // Call a method to locate the operation entry for this call
+        OperationEntry operationEntry =
+                Utilities.getOperationEntry(functionExp, myCurrentModuleScope);
+        OperationDec operationDec =
+                (OperationDec) operationEntry.getDefiningElement();
 
-        /* TODO: Recursive call
-        // Check for recursive call of itself
-        if (myCurrentOperationEntry != null
-                && myOperationDecreasingExp != null
-                && myCurrentOperationEntry.getName().equals(opEntry.getName())
-                && myCurrentOperationEntry.getReturnType().equals(
-                opEntry.getReturnType())
-                && myCurrentOperationEntry.getSourceModuleIdentifier().equals(
-                opEntry.getSourceModuleIdentifier())) {
-            // Create a new confirm statement using P_val and the decreasing clause
-            VarExp pVal =
-                    Utilities.createPValExp(myOperationDecreasingExp
-                            .getLocation(), myCurrentModuleScope);
+        // Find all the replacements that needs to happen to the requires
+        // and ensures clauses
+        List<ProgramExp> callArgs = functionExp.getArguments();
+        List<Exp> modifiedArguments = modifyArgumentList(callArgs);
 
-            // Create a new infix expression
-            IntegerExp oneExp = new IntegerExp();
-            oneExp.setValue(1);
-            oneExp.setMathType(myOperationDecreasingExp.getMathType());
-            InfixExp leftExp =
-                    new InfixExp(stmt.getLocation(), oneExp, Utilities
-                            .createPosSymbol("+"), Exp
-                            .copy(myOperationDecreasingExp));
-            leftExp.setMathType(myOperationDecreasingExp.getMathType());
-            InfixExp exp =
-                    Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
-                            pVal, BOOLEAN);
+        // Convert the formal operation parameters in VarExps for
+        // substitution purposes.
+        List<VarExp> operationParamAsVarExps =
+                Utilities.createOperationParamExpList(operationDec
+                        .getParameters());
 
-            // Create the new confirm statement
-            Location loc;
-            if (myOperationDecreasingExp.getLocation() != null) {
-                loc = (Location) myOperationDecreasingExp.getLocation().clone();
-            }
-            else {
-                loc = (Location) stmt.getLocation().clone();
-            }
-            loc.setDetails("Show Termination of Recursive Call");
-            Utilities.setLocation(exp, loc);
-            ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
-
-            // Add it to our list of assertions
-            myCurrentAssertiveCode.addCode(conf);
-        }
-        */
-
-        // Get the requires clause for this operation
-        AssertionClause requiresClause = myAssociatedOperationEntry.getRequiresClause();
+        // 1) Confirm any nested function's invoking condition, recursive termination clauses
+        //    and the modified requires clause of this calling statement.
+        //    ( Confirm Invk_Cond(exp) and Pre[ Pre_Subs ] )
         Exp requiresExp =
-                Utilities.formConjunct(requiresClause.getLocation(), null, requiresClause);
-        boolean simplify = VarExp.isLiteralTrue(requiresExp);
-
-        // Replace PreCondition variables in the requires clause
-        requiresExp =
-                replaceFormalWithActualReq(requiresExp, opDec.getParameters(), myModifiedArguments);
-
-        /* TODO:
-        // Replace facility actuals variables in the requires clause
-        requires =
-                Utilities.replaceFacilityFormalWithActual(stmt.getLocation(),
-                        requires, opDec.getParameters(),
-                        myInstantiatedFacilityArgMap, myCurrentModuleScope); */
-
-        // Loop through each of the parameters in the operation entry.
-        Map<Exp, Exp> substitutionsForSeq = new HashMap<>();
-        Map<Exp, Exp> substitutions = new HashMap<>();
-        Exp parameterEnsures = null;
-        Iterator<Exp> it = myModifiedArguments.iterator();
-        ImmutableList<ProgramParameterEntry> entries =
-                myAssociatedOperationEntry.getParameters();
-        for (ProgramParameterEntry entry : entries) {
-            ParameterVarDec parameterVarDec =
-                    (ParameterVarDec) entry.getDefiningElement();
-            ParameterMode parameterMode = entry.getParameterMode();
-            NameTy nameTy = (NameTy) parameterVarDec.getTy();
-            Location loc = parameterVarDec.getLocation();
-            Exp argument = it.next();
-
-            // TODO: Add the other parameter mode logic
-            if (parameterMode == ParameterMode.UPDATES) {
-                // Parameter variable and incoming parameter variable and NQV(parameterExp)
-                VarExp parameterExp = Utilities.createVarExp(loc.clone(), null,
-                        parameterVarDec.getName().clone(), nameTy.getMathTypeValue(), null);
-                OldExp oldParameterExp = new OldExp(loc.clone(), parameterExp.clone());
-                oldParameterExp.setMathType(nameTy.getMathTypeValue());
-                VCVarExp nqvParameterExp = Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, parameterExp);
-                myCurrentAssertiveCodeBlock.addFreeVar(nqvParameterExp);
-
-                // Add these to our substitutions map
-                substitutions.put(parameterExp, nqvParameterExp);
-                substitutions.put(oldParameterExp, Utilities.convertExp(argument, myCurrentModuleScope));
-
-                // Add this as something to substitute in our sequents
-                substitutionsForSeq.put(parameterExp.clone(), nqvParameterExp.clone());
-
-                // Query for the type entry in the symbol table
-                SymbolTableEntry ste =
-                        Utilities.searchProgramType(parameterVarDec.getLocation(), nameTy.getQualifier(),
-                                nameTy.getName(), myCurrentModuleScope);
-
-                ProgramTypeEntry typeEntry;
-                if (ste instanceof ProgramTypeEntry) {
-                    typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
-                } else {
-                    typeEntry =
-                            ste.toTypeRepresentationEntry(nameTy.getLocation())
-                                    .getDefiningTypeEntry();
-                }
-
-                AssertionClause modifiedConstraint = null;
-                if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
-                    // Parameter variable with known program type
-                    TypeFamilyDec type =
-                            (TypeFamilyDec) typeEntry.getDefiningElement();
-                    AssertionClause constraint = type.getConstraint();
-                    modifiedConstraint =
-                            Utilities.getTypeConstraintClause(constraint,
-                                    loc.clone(), null,
-                                    parameterVarDec.getName(), type.getExemplar(),
-                                    typeEntry.getModelType(), null);
-                }
-                else {
-                    Utilities.notAType(typeEntry, parameterVarDec.getLocation());
-                }
-
-                if (!VarExp.isLiteralTrue(modifiedConstraint.getAssertionExp())) {
-                    parameterEnsures =
-                            Utilities.formConjunct(myCallStmt.getLocation(),
-                                    parameterEnsures, modifiedConstraint);
-                }
-            }
-        }
-
-        /* TODO:
-        // Replace facility actuals variables in the ensures clause
-        ensures =
-                Utilities.replaceFacilityFormalWithActual(stmt.getLocation(),
-                        ensures, opDec.getParameters(),
-                        myInstantiatedFacilityArgMap, myCurrentModuleScope); */
-
-        /* TODO: Add duration
-        // NY YS
-        // Duration for CallStmt
-        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
-            Location loc = (Location) stmt.getLocation().clone();
-            ConfirmStmt finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
-            Exp finalConfirmExp = finalConfirm.getAssertion();
-
-            // Obtain the corresponding OperationProfileEntry
-            OperationProfileEntry ope =
-                    Utilities.searchOperationProfile(loc, stmt.getQualifier(),
-                            stmt.getName(), argTypes, myCurrentModuleScope);
-
-            // Add the profile ensures as additional assume
-            Exp profileEnsures = ope.getEnsuresClause();
-            if (profileEnsures != null) {
-                profileEnsures =
-                        replaceFormalWithActualEns(profileEnsures, opDec
-                                        .getParameters(), opDec.getStateVars(),
-                                replaceArgs, false);
-
-                // Obtain the current location
-                if (stmt.getName().getLocation() != null) {
-                    // Set the details of the current location
-                    Location ensuresLoc = (Location) loc.clone();
-                    ensuresLoc.setDetails("Ensures Clause of "
-                            + opDec.getName() + " from Profile "
-                            + ope.getName());
-                    Utilities.setLocation(profileEnsures, ensuresLoc);
-                }
-
-                ensures = myTypeGraph.formConjunct(ensures, profileEnsures);
-            }
-
-            // Construct the Duration Clause
-            Exp opDur = Exp.copy(ope.getDurationClause());
-
-            // Replace PostCondition variables in the duration clause
-            opDur =
-                    replaceFormalWithActualEns(opDur, opDec.getParameters(),
-                            opDec.getStateVars(), replaceArgs, false);
-
-            VarExp cumDur =
-                    Utilities.createVarExp((Location) loc.clone(), null,
-                            Utilities.createPosSymbol(Utilities
-                                    .getCumDur(finalConfirmExp)),
-                            myTypeGraph.R, null);
-            Exp durCallExp =
-                    Utilities.createDurCallExp((Location) loc.clone(), Integer
-                                    .toString(opDec.getParameters().size()), Z,
-                            myTypeGraph.R);
-            InfixExp sumEvalDur =
-                    new InfixExp((Location) loc.clone(), opDur, Utilities
-                            .createPosSymbol("+"), durCallExp);
-            sumEvalDur.setMathType(myTypeGraph.R);
-            sumEvalDur =
-                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
-                            Utilities.createPosSymbol("+"), sumEvalDur);
-            sumEvalDur.setMathType(myTypeGraph.R);
-
-            // For any evaluates mode expression, we need to finalize the variable
-            edu.clemson.cs.r2jt.collections.List<ProgramExp> assignExpList =
-                    stmt.getArguments();
-            for (int i = 0; i < assignExpList.size(); i++) {
-                ParameterVarDec p = opDec.getParameters().get(i);
-                VariableExp pExp = (VariableExp) assignExpList.get(i);
-                if (p.getMode() == Mode.EVALUATES) {
-                    VarDec v =
-                            new VarDec(Utilities.getVarName(pExp), p.getTy());
-                    FunctionExp finalDur =
-                            Utilities.createFinalizAnyDur(v, myTypeGraph.R);
-                    sumEvalDur =
-                            new InfixExp((Location) loc.clone(), sumEvalDur,
-                                    Utilities.createPosSymbol("+"), finalDur);
-                    sumEvalDur.setMathType(myTypeGraph.R);
-                }
-            }
-
-            // Replace Cum_Dur in our final ensures clause
-            finalConfirmExp =
-                    Utilities.replace(finalConfirmExp, cumDur, sumEvalDur);
-            myCurrentAssertiveCode.setFinalConfirm(finalConfirmExp,
-                    finalConfirm.getSimplify());
-        } */
-
-        // We will need to confirm the requires clause
+                createModifiedReqExp(operationEntry, operationParamAsVarExps,
+                        modifiedArguments);
         ConfirmStmt confirmStmt =
-                new ConfirmStmt(myCallStmt.getLocation().clone(), requiresExp, simplify);
+                new ConfirmStmt(myCallStmt.getLocation().clone(), requiresExp,
+                        VarExp.isLiteralTrue(requiresExp));
         myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
 
-        // Store the location detail for the confirm statement
-        Location confirmLoc = confirmStmt.getLocation();
-        myLocationDetails.put(confirmLoc, new LocationDetailModel(
-                confirmLoc, confirmLoc, "Requires Clause of " + opDec.getName()));
-
-        if (parameterEnsures != null) {
-            if (VarExp.isLiteralTrue(ensuresExp)) {
-                ensuresExp = parameterEnsures;
-            }
-            else {
-                ensuresExp =
-                        InfixExp.formConjunct(myCallStmt.getLocation().clone(),
-                                parameterEnsures, ensuresExp);
-            }
-        }
-        ensuresExp = ensuresExp.substitute(substitutions);
-
-        // We can assume the ensures clause.
+        // 2) Assume any ensures clause and ensures clauses generated by the parameter modes.
+        //    YS: The rule does say separate the explicit and implicit post-conditions and deal
+        //    with them separately, but rather than invoking some kind of split function, we simply
+        //    defer everything to the assume rule!
+        //    ( Assume Implicit_Post[ Post_Subs ] and ( w = #w )[ w⇝e, #w⇝#e ] and
+        //      T6.Constraint(g) and T7.Is_Initial( NQV(RS, h) ) )
+        Exp ensuresExp =
+                createModifiedEnsExp(operationEntry, modifiedArguments);
         AssumeStmt assumeStmt =
-                new AssumeStmt(myCallStmt.getLocation().clone(), ensuresExp, false);
+                new AssumeStmt(myCallStmt.getLocation().clone(), ensuresExp,
+                        false);
         myCurrentAssertiveCodeBlock.addStatement(assumeStmt);
-
-        // Store the location detail for the assume statement
-        Location assumeLoc = assumeStmt.getLocation();
-        myLocationDetails.put(assumeLoc, new LocationDetailModel(
-                assumeLoc, assumeLoc, "Ensures Clause of " + opDec.getName()));
-
-        // Retrieve the list of VCs and use the sequent
-        // substitution map to do replacements.
-        List<VerificationCondition> vcs = myCurrentAssertiveCodeBlock.getVCs();
-        List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
-        for (VerificationCondition vc : vcs) {
-            List<Sequent> sequents = vc.getAssociatedSequents();
-            List<Sequent> newSequent = new ArrayList<>(sequents.size());
-            for (Sequent s : sequents) {
-                newSequent.add(createReplacementSequent(s, substitutionsForSeq));
-            }
-
-            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequent));
-        }
-
-        // Store the new list of vcs
-        myCurrentAssertiveCodeBlock.setVCs(newVCs);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
@@ -420,75 +237,585 @@ public class CallStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>An helper method that performs the substitution on all the
-     * {@link Exp} in the {@link Sequent}.</p>
-     *
-     * @param s The original {@link Sequent}.
-     * @param substitutions A map of substitutions.
-     *
-     * @return A modified {@link Sequent}.
+     * TODO: Add duration
      */
-    private Sequent createReplacementSequent(Sequent s, Map<Exp, Exp> substitutions) {
-        List<Exp> newAntecedents = new ArrayList<>();
-        List<Exp> newConsequents = new ArrayList<>();
+    private void createDurationEnsExp() {
+    /*
+    // NY YS
+    // Duration for CallStmt
+    if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+        Location loc = (Location) stmt.getLocation().clone();
+        ConfirmStmt finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+        Exp finalConfirmExp = finalConfirm.getAssertion();
 
-        for (Exp antencedent : s.getAntecedents()) {
-            newAntecedents.add(antencedent.substitute(substitutions));
+        // Obtain the corresponding OperationProfileEntry
+        OperationProfileEntry ope =
+                Utilities.searchOperationProfile(loc, stmt.getQualifier(),
+                        stmt.getName(), argTypes, myCurrentModuleScope);
+
+        // Add the profile ensures as additional assume
+        Exp profileEnsures = ope.getEnsuresClause();
+        if (profileEnsures != null) {
+            profileEnsures =
+                    replaceFormalWithActualEns(profileEnsures, opDec
+                                    .getParameters(), opDec.getStateVars(),
+                            replaceArgs, false);
+
+            // Obtain the current location
+            if (stmt.getName().getLocation() != null) {
+                // Set the details of the current location
+                Location ensuresLoc = (Location) loc.clone();
+                ensuresLoc.setDetails("Ensures Clause of "
+                        + opDec.getName() + " from Profile "
+                        + ope.getName());
+                Utilities.setLocation(profileEnsures, ensuresLoc);
+            }
+
+            ensures = myTypeGraph.formConjunct(ensures, profileEnsures);
         }
 
-        for (Exp consequent : s.getConcequents()) {
-            newConsequents.add(consequent.substitute(substitutions));
+        // Construct the Duration Clause
+        Exp opDur = Exp.copy(ope.getDurationClause());
+
+        // Replace PostCondition variables in the duration clause
+        opDur =
+                replaceFormalWithActualEns(opDur, opDec.getParameters(),
+                        opDec.getStateVars(), replaceArgs, false);
+
+        VarExp cumDur =
+                Utilities.createVarExp((Location) loc.clone(), null,
+                        Utilities.createPosSymbol(Utilities
+                                .getCumDur(finalConfirmExp)),
+                        myTypeGraph.R, null);
+        Exp durCallExp =
+                Utilities.createDurCallExp((Location) loc.clone(), Integer
+                                .toString(opDec.getParameters().size()), Z,
+                        myTypeGraph.R);
+        InfixExp sumEvalDur =
+                new InfixExp((Location) loc.clone(), opDur, Utilities
+                        .createPosSymbol("+"), durCallExp);
+        sumEvalDur.setMathType(myTypeGraph.R);
+        sumEvalDur =
+                new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                        Utilities.createPosSymbol("+"), sumEvalDur);
+        sumEvalDur.setMathType(myTypeGraph.R);
+
+        // For any evaluates mode expression, we need to finalize the variable
+        edu.clemson.cs.r2jt.collections.List<ProgramExp> assignExpList =
+                stmt.getArguments();
+        for (int i = 0; i < assignExpList.size(); i++) {
+            ParameterVarDec p = opDec.getParameters().get(i);
+            VariableExp pExp = (VariableExp) assignExpList.get(i);
+            if (p.getMode() == Mode.EVALUATES) {
+                VarDec v =
+                        new VarDec(Utilities.getVarName(pExp), p.getTy());
+                FunctionExp finalDur =
+                        Utilities.createFinalizAnyDur(v, myTypeGraph.R);
+                sumEvalDur =
+                        new InfixExp((Location) loc.clone(), sumEvalDur,
+                                Utilities.createPosSymbol("+"), finalDur);
+                sumEvalDur.setMathType(myTypeGraph.R);
+            }
         }
 
-        return new Sequent(s.getLocation(), newAntecedents, newConsequents);
+        // Replace Cum_Dur in our final ensures clause
+        finalConfirmExp =
+                Utilities.replace(finalConfirmExp, cumDur, sumEvalDur);
+        myCurrentAssertiveCode.setFinalConfirm(finalConfirmExp,
+                finalConfirm.getSimplify());
+    } */
     }
 
     /**
-     * <p>An helper method that replaces the formal with the actual variables
-     * inside the requires clause.</p>
+     * <p>An helper method for creating the modified {@code ensures} clause
+     * that contains the modified {@code ensures} clause from the call statement as
+     * well as any parameter {@code ensures} clauses.</p>
      *
-     * @param requires The requires clause.
-     * @param paramList The list of parameter variables.
-     * @param argList The list of arguments from the operation call.
+     * <p>Note that this helper method also does all the appropriate substitutions to
+     * the {@code VCs} in the assertive code block.</p>
      *
-     * @return The requires clause in <code>Exp</code> form.
+     * @param operationEntry Calling statement's {@link OperationEntry}.
+     * @param modifiedArguments List of modified calling arguments.
+     *
+     * @return The modified {@code ensures} clause expression.
      */
-    private Exp replaceFormalWithActualReq(Exp requires, List<ParameterVarDec> paramList, List<Exp> argList) {
-        // YS: We need two replacement maps in case we happen to have the
-        // same names in formal parameter arguments and in the argument list.
-        Map<Exp, Exp> paramToTemp = new HashMap<>();
-        Map<Exp, Exp> tempToActual = new HashMap<>();
+    private Exp createModifiedEnsExp(OperationEntry operationEntry, List<Exp> modifiedArguments) {
+        OperationDec operationDec =
+                (OperationDec) operationEntry.getDefiningElement();
 
-        // Replace precondition variables in the requires clause
-        for (int i = 0; i < argList.size(); i++) {
+        // Get the ensures clause for this operation and
+        // store it's associated location detail.
+        AssertionClause ensuresClause = operationEntry.getEnsuresClause();
+        Exp ensuresExp = Utilities.formConjunct(ensuresClause.getLocation(),
+                null, ensuresClause, new LocationDetailModel(
+                        ensuresClause.getLocation().clone(), myCallStmt.getLocation().clone(),
+                        "Ensures Clause of " + operationDec.getName()));
+
+        // Substitution maps
+        // 1) substitutions: Contains all the replacements for the ensures clause.
+        // 2) substitutionsForSeq: Contains all the replacements for the VC's sequents.
+        Map<Exp, Exp> substitutionsForSeq = new LinkedHashMap<>();
+        Map<Exp, Exp> substitutions = new LinkedHashMap<>();
+
+        // Loop through each of the operation parameters.
+        Exp parameterEnsures = null;
+        List<ParameterVarDec> paramList = operationDec.getParameters();
+        for (int i = 0; i < paramList.size(); i++) {
             ParameterVarDec varDec = paramList.get(i);
-            Exp exp = argList.get(i);
+            NameTy nameTy = (NameTy) varDec.getTy();
+            Exp exp = modifiedArguments.get(i);
 
-            // Convert the pExp into a something we can use
-            Exp replExp = Utilities.convertExp(exp, myCurrentModuleScope);
+            // Parameter variable and incoming parameter variable
+            VarExp parameterExp = Utilities.createVarExp(varDec.getLocation().clone(), null,
+                    varDec.getName().clone(), varDec.getTy().getMathTypeValue(), null);
+            OldExp oldParameterExp = new OldExp(varDec.getLocation().clone(), parameterExp.clone());
+            oldParameterExp.setMathType(varDec.getTy().getMathTypeValue());
 
-            // VarExp form of the parameter variable
-            VarExp paramExpAsVarExp =
-                    Utilities.createVarExp(varDec.getLocation(), null,
-                            varDec.getName(), exp.getMathType(), exp.getMathTypeValue());
+            // Query for the type entry in the symbol table
+            SymbolTableEntry ste =
+                    Utilities.searchProgramType(nameTy.getLocation(), nameTy
+                                    .getQualifier(), nameTy.getName(),
+                            myCurrentModuleScope);
+            ProgramTypeEntry typeEntry;
+            if (ste instanceof ProgramTypeEntry) {
+                typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
+            }
+            else {
+                typeEntry =
+                        ste.toTypeRepresentationEntry(nameTy.getLocation())
+                                .getDefiningTypeEntry();
+            }
 
-            // A temporary VarExp that avoids any formal with the same name as the actual.
-            VarExp tempExp =
-                    Utilities.createVarExp(varDec.getLocation(), null,
-                            new PosSymbol(varDec.getLocation(), "_" + varDec.getName().getName()),
-                            replExp.getMathType(), replExp.getMathTypeValue());
+            // 1) ALTERS Mode
+            Exp varDecEnsures = null;
+            if (varDec.getMode().equals(ParameterMode.ALTERS)) {
+                // NQV(exp)
+                VCVarExp nqvExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
 
-            // Add a substitution entry from formal parameter to temp
-            paramToTemp.put(paramExpAsVarExp, tempExp);
+                // Generate a constraint ensures clause if the type is not generic.
+                if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+                    TypeFamilyDec type =
+                            (TypeFamilyDec) typeEntry.getDefiningElement();
 
-            // Add a substitution entry from temp to actual parameter
-            tempToActual.put(tempExp, replExp);
+                    if (!VarExp.isLiteralTrue(type.getConstraint()
+                            .getAssertionExp())) {
+                        AssertionClause constraintClause =
+                                type.getConstraint();
+                        AssertionClause modifiedConstraint =
+                                Utilities.getTypeConstraintClause(constraintClause,
+                                        exp.getLocation().clone(), null, varDec.getName(),
+                                        type.getExemplar(), typeEntry.getModelType(), null);
+                        varDecEnsures = modifiedConstraint.getAssertionExp().clone();
+
+                        // Local substitution
+                        Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
+                        ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
+                        varDecEnsures.substitute(ensuresSubMap);
+
+                        // Store the new location detail.
+                        varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
+                                .getLocation().clone(), exp.getLocation().clone(),
+                                "Ensures Clause of " + operationDec.getName() + " (Condition from \""
+                                        + ParameterMode.ALTERS.name()
+                                        + "\" parameter mode)"));
+                    }
+                }
+
+                // Substitutions for Ensures Clause:
+                // 1) oldParameterExp ~> exp
+                substitutions.put(oldParameterExp, exp);
+
+                // Substitutions for sequents in VCs
+                // 1) exp ~> NQV(exp)
+                substitutionsForSeq.put(exp.clone(), nqvExp.clone());
+            }
+            // 2) CLEARS Mode
+            else if (varDec.getMode().equals(ParameterMode.CLEARS)) {
+                // NQV(exp)
+                VCVarExp nqvExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
+
+                // For all type family types, we need to generate the appropriate EqualsExp
+                // that says the expression contains the initial value
+                // - h = <init_value>
+                if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+                    TypeFamilyDec type =
+                            (TypeFamilyDec) typeEntry.getDefiningElement();
+                    AssertionClause initEnsures =
+                            type.getInitialization().getEnsures();
+                    AssertionClause modifiedInitEnsures =
+                            Utilities.getTypeEnsuresClause(initEnsures, exp
+                                    .getLocation(), null, varDec.getName(), type
+                                    .getExemplar(), typeEntry.getModelType(), null);
+
+                    // TODO: Logic for types in concept realizations
+
+                    varDecEnsures =
+                            new EqualsExp(varDec.getLocation().clone(),
+                                    parameterExp.clone(), null, EqualsExp.Operator.EQUAL,
+                                    modifiedInitEnsures.getAssertionExp().clone());
+                }
+                // For all generic types, all we can do is generate:
+                // an "Is_Initial" function.
+                // - T7.Is_Initial( NQV(RS, h) )
+                else {
+                    varDecEnsures = Utilities.createInitExp(
+                            new VarDec(varDec.getName(), nameTy), myTypeGraph.BOOLEAN);
+                }
+
+                // Local substitution
+                Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
+                ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
+                varDecEnsures.substitute(ensuresSubMap);
+
+                // Store the new location detail.
+                varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
+                        .getLocation().clone(), exp.getLocation().clone(),
+                        "Ensures Clause of " + operationDec.getName() + " (Condition from \""
+                                + ParameterMode.CLEARS.name()
+                                + "\" parameter mode)"));
+
+                // Substitutions for Ensures Clause:
+                // 1) oldParameterExp ~> exp
+                substitutions.put(oldParameterExp, exp);
+
+                // Substitutions for sequents in VCs
+                // 1) exp ~> NQV(exp)
+                substitutionsForSeq.put(exp.clone(), nqvExp.clone());
+            }
+            // 3) REPLACES Mode
+            else if (varDec.getMode().equals(ParameterMode.REPLACES)) {
+                // NQV(exp)
+                VCVarExp nqvExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
+
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> NQV(exp)
+                substitutions.put(parameterExp, nqvExp);
+
+                // Substitutions for sequents in VCs
+                // 1) exp ~> NQV(exp)
+                substitutionsForSeq.put(exp.clone(), nqvExp.clone());
+            }
+            // 4) RESTORES Mode
+            else if (varDec.getMode().equals(ParameterMode.RESTORES)) {
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> exp
+                substitutions.put(parameterExp, exp);
+            }
+            // 5) UPDATES Mode
+            else if (varDec.getMode().equals(ParameterMode.UPDATES)) {
+                // NQV(exp)
+                VCVarExp nqvExp =
+                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp);
+                myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
+
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> NQV(exp)
+                // 2) oldParameterExp ~> exp
+                substitutions.put(parameterExp, nqvExp);
+                substitutions.put(oldParameterExp, exp);
+
+                // Substitutions for sequents in VCs
+                // 1) parameterExp ~> NQV(exp)
+                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
+            }
+            // 6) PRESERVES and EVALUATES Mode
+            else {
+                // Substitutions for Ensures Clause:
+                // 1) parameterExp ~> exp
+                substitutions.put(parameterExp, exp);
+            }
+
+            // Combine with other parameter ensures
+            if (varDecEnsures != null && VarExp.isLiteralTrue(varDecEnsures)) {
+                if (parameterEnsures == null) {
+                    parameterEnsures = varDecEnsures;
+                }
+                else {
+                    parameterEnsures =
+                            MathExp.formConjunct(myCallStmt.getLocation().clone(),
+                                    parameterEnsures, varDecEnsures);
+                }
+            }
         }
 
-        // Replace from formal to temp and then from temp to actual
-        requires = requires.substitute(paramToTemp);
-        requires = requires.substitute(tempToActual);
+        // TODO: Add global state variable logic here!
 
-        return requires;
+        // Form the final conjunct ensures clause expression
+        if (parameterEnsures != null) {
+            if (VarExp.isLiteralTrue(ensuresExp)) {
+                ensuresExp = parameterEnsures;
+            }
+            else {
+                ensuresExp =
+                        MathExp.formConjunct(myCallStmt.getLocation().clone(),
+                                parameterEnsures, ensuresExp);
+            }
+        }
+
+        // Apply substitutions
+        ensuresExp = ensuresExp.substitute(substitutions);
+
+        // Apply any replacements if it isn't just "ensures true;"
+        if (!VarExp.isLiteralTrue(ensuresExp)) {
+            // Replace any facility declaration instantiation arguments
+            // in the ensures clause.
+            ensuresExp =
+                    Utilities.replaceFacilityFormalWithActual(ensuresExp,
+                            operationDec.getParameters(), myCurrentModuleScope
+                                    .getDefiningElement().getName(),
+                            myCurrentConceptDeclaredTypes,
+                            myLocalRepresentationTypeDecs,
+                            myProcessedInstFacilityDecls);
+        }
+
+        // Retrieve the list of VCs and use the sequent
+        // substitution map to do replacements.
+        List<VerificationCondition> newVCs =
+                createReplacementVCs(myCurrentAssertiveCodeBlock.getVCs(), substitutionsForSeq);
+
+        // Store the new list of vcs
+        myCurrentAssertiveCodeBlock.setVCs(newVCs);
+
+        return ensuresExp;
+    }
+
+    /**
+     * <p>An helper method for creating the modified {@code requires} clause
+     * that contains all invoking conditions for nested function calls as well as
+     * the modified {@code requires} clause from the call statement.</p>
+     *
+     * <p>Note that if any of the function or regular calls happen to be recursive,
+     * then this will also generate the appropriate termination clauses and add it
+     * to our current {@link AssertiveCodeBlock}.</p>
+     *
+     * @param operationEntry Calling statement's {@link OperationEntry}.
+     * @param operationParamAsVarExps List of operation parameters as {@link VarExp VarExps}.
+     * @param modifiedArguments List of modified calling arguments.
+     *
+     * @return The modified {@code requires} clause expression.
+     */
+    private Exp createModifiedReqExp(OperationEntry operationEntry,
+            List<VarExp> operationParamAsVarExps, List<Exp> modifiedArguments) {
+        OperationDec operationDec =
+                (OperationDec) operationEntry.getDefiningElement();
+
+        // Get the requires assertion for this operation and
+        // store it's associated location detail.
+        // YS: We don't need confirm it's which_entails clause,
+        //     that has been taken care of already. Maybe add it as
+        //     as something we can assume?
+        AssertionClause requiresClause = operationDec.getRequires();
+        Exp requiresExp = requiresClause.getAssertionExp().clone();
+        requiresExp.setLocationDetailModel(new LocationDetailModel(
+                requiresClause.getLocation().clone(), myCallStmt.getLocation()
+                        .clone(), "Requires Clause of "
+                        + operationDec.getName()));
+
+        // Apply any replacements if it isn't just "requires true;"
+        if (!VarExp.isLiteralTrue(requiresExp)) {
+            // Replace formals in the original requires clause with the
+            // actuals from the call statement.
+            requiresExp =
+                    Utilities.replaceFormalWithActual(requiresExp,
+                            operationParamAsVarExps, modifiedArguments);
+
+            // Replace any facility declaration instantiation arguments
+            // in the requires clause.
+            requiresExp =
+                    Utilities.replaceFacilityFormalWithActual(requiresExp,
+                            operationDec.getParameters(), myCurrentModuleScope
+                                    .getDefiningElement().getName(),
+                            myCurrentConceptDeclaredTypes,
+                            myLocalRepresentationTypeDecs,
+                            myProcessedInstFacilityDecls);
+        }
+
+        // Add any nested termination clauses to our current assertive code block.
+        for (ConfirmStmt confirmStmt : myNestedTerminationConfirmStmts) {
+            myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
+        }
+
+        // Check to see if we are recursively calling ourselves. If yes,
+        // generate a termination confirm clause and add it to our current
+        // assertive code block.
+        Exp terminationExp =
+                VarExp.getTrueVarExp(myCallStmt.getLocation(), myTypeGraph);
+        if (myCurrentProcedureOperationEntry != null
+                && myCurrentProcedureOperationEntry.equals(operationEntry)
+                && myCurrentProcedureDecreasingExp != null) {
+            terminationExp = createTerminationReqExp();
+        }
+
+        if (!VarExp.isLiteralTrue(terminationExp)) {
+            myCurrentAssertiveCodeBlock
+                    .addStatement(new ConfirmStmt(terminationExp.getLocation()
+                            .clone(), terminationExp, false));
+        }
+
+        // Form the final conjunct requires clause expression
+        Exp conjunctRequiresExp =
+                VarExp.getTrueVarExp(myCallStmt.getLocation().clone(),
+                        myTypeGraph);
+        for (Exp innerRequiresExp : myNestedRequiresClauses) {
+            if (VarExp.isLiteralTrue(conjunctRequiresExp)) {
+                conjunctRequiresExp = innerRequiresExp.clone();
+            }
+            else {
+                conjunctRequiresExp =
+                        MathExp.formConjunct(myCallStmt.getLocation().clone(),
+                                conjunctRequiresExp, innerRequiresExp.clone());
+            }
+        }
+
+        if (VarExp.isLiteralTrue(conjunctRequiresExp)) {
+            conjunctRequiresExp = requiresExp;
+        }
+        else {
+            conjunctRequiresExp =
+                    MathExp.formConjunct(myCallStmt.getLocation().clone(),
+                            conjunctRequiresExp, requiresExp);
+        }
+
+        return conjunctRequiresExp;
+    }
+
+    /**
+     * <p>An helper method for generating a termination clause if our current
+     * {@link CallStmt} is a recursive call to our current recursive {@code procedure}.</p>
+     *
+     * @return An {@link Exp} that contains the termination clause.
+     */
+    private Exp createTerminationReqExp() {
+        // Create a new NQV(RS, P_Val)
+        VCVarExp nqvPValExp =
+                Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, Utilities
+                        .createPValExp(myCurrentProcedureDecreasingExp
+                                .getLocation().clone(), myCurrentModuleScope));
+
+        // Generate the termination of recursive call: 1 + P_Exp <= NQV(RS, P_Val)
+        IntegerExp oneExp =
+                new IntegerExp(myCurrentProcedureDecreasingExp.getLocation()
+                        .clone(), null, 1);
+        oneExp.setMathType(myCurrentProcedureDecreasingExp.getMathType());
+
+        InfixExp sumExp =
+                new InfixExp(myCurrentProcedureDecreasingExp.getLocation()
+                        .clone(), oneExp, null, new PosSymbol(
+                        myCurrentProcedureDecreasingExp.getLocation().clone(),
+                        "+"), myCurrentProcedureDecreasingExp.clone());
+        sumExp.setMathType(myCurrentProcedureDecreasingExp.getMathType());
+
+        InfixExp terminationExp =
+                new InfixExp(myCurrentProcedureDecreasingExp.getLocation()
+                        .clone(), sumExp, null, new PosSymbol(
+                        myCurrentProcedureDecreasingExp.getLocation().clone(),
+                        "<="), nqvPValExp.clone());
+        terminationExp.setMathType(myTypeGraph.BOOLEAN);
+
+        // Store the location detail for the recursive function call's
+        // termination expression.
+        terminationExp.setLocationDetailModel(new LocationDetailModel(
+                myCurrentProcedureDecreasingExp.getLocation().clone(),
+                myCallStmt.getFunctionExp().getLocation().clone(),
+                "Termination of Recursive Call"));
+
+        return terminationExp;
+    }
+
+    /**
+     * <p>An helper method for modifying the argument expression list
+     * if we have a nested function call.</p>
+     *
+     * @param callArgs The original list of arguments.
+     *
+     * @return The modified list of arguments.
+     */
+    private List<Exp> modifyArgumentList(List<ProgramExp> callArgs) {
+        // Find all the replacements that needs to happen to the requires
+        // and ensures clauses
+        List<Exp> replaceArgs = new ArrayList<>();
+        for (ProgramExp exp : callArgs) {
+            // If our argument is a ProgramFunctionExp, then we will
+            // need to use the ProgramFunctionExpWalker to extract all
+            // relevant information.
+            if (exp instanceof ProgramFunctionExp) {
+                // Use the walker to convert to mathematical expression
+                ProgramFunctionExp expAsProgramFunctionexp = (ProgramFunctionExp) exp;
+                ProgramFunctionExpWalker walker;
+                if (myCurrentProcedureOperationEntry == null) {
+                    walker =
+                            new ProgramFunctionExpWalker(
+                                    myCurrentAssertiveCodeBlock,
+                                    myCurrentConceptDeclaredTypes,
+                                    myLocalRepresentationTypeDecs,
+                                    myProcessedInstFacilityDecls,
+                                    myCurrentModuleScope, myTypeGraph);
+                }
+                else {
+                    walker =
+                            new ProgramFunctionExpWalker(
+                                    myCurrentProcedureOperationEntry,
+                                    myCurrentProcedureDecreasingExp,
+                                    myCurrentAssertiveCodeBlock,
+                                    myCurrentConceptDeclaredTypes,
+                                    myLocalRepresentationTypeDecs,
+                                    myProcessedInstFacilityDecls,
+                                    myCurrentModuleScope, myTypeGraph);
+                }
+                TreeWalker.visit(walker, expAsProgramFunctionexp);
+
+                // Retrieve the various pieces of information from the walker
+                Exp generatedRequires =
+                        walker.getRequiresClause(expAsProgramFunctionexp.
+                                getLocation().clone());
+                Exp generatedEnsures =
+                        walker.getEnsuresClause(expAsProgramFunctionexp);
+                List<Exp> restoresParamExps =
+                        walker.getRestoresParamEnsuresClauses();
+                List<ConfirmStmt> terminationConfirms =
+                        walker.getTerminationConfirmStmts();
+
+                // Form a conjunct using the restoresParamExps
+                Exp restoresParamEnsures =
+                        VarExp.getTrueVarExp(expAsProgramFunctionexp
+                                .getLocation(), myTypeGraph);
+                for (Exp restoresExp : restoresParamExps) {
+                    if (VarExp.isLiteralTrue(restoresParamEnsures)) {
+                        restoresParamEnsures = restoresExp;
+                    }
+                    else {
+                        restoresParamEnsures =
+                                MathExp.formConjunct(expAsProgramFunctionexp.getLocation().clone(),
+                                        restoresParamEnsures, exp);
+                    }
+                }
+
+                // 1) If the argument expression contains recursive calls,
+                //    we need to add all the termination confirm statements.
+                myNestedTerminationConfirmStmts.addAll(terminationConfirms);
+
+                // 2) If the argument expression has any requires clauses,
+                //    we need to add it as something we will need to confirm.
+                if (!VarExp.isLiteralTrue(generatedRequires)) {
+                    myNestedRequiresClauses.add(generatedRequires.clone());
+                }
+
+                // Add the modified ensures clause as the new expression we want
+                // to replace in the CallStmt's ensures clause.
+                replaceArgs.add(generatedEnsures.clone());
+            }
+            // For all other types of arguments, simply convert and add it to the list to be replaced
+            else {
+                replaceArgs.add(Utilities.convertExp(exp, myCurrentModuleScope));
+            }
+        }
+
+        return replaceArgs;
     }
 }

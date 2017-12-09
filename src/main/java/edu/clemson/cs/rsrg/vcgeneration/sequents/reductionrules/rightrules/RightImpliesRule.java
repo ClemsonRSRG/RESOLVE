@@ -61,15 +61,15 @@ public class RightImpliesRule extends AbstractReductionRuleApplication
     public final List<Sequent> applyRule() {
         if (myOriginalExp instanceof InfixExp) {
             InfixExp originalExpAsInfixExp = (InfixExp) myOriginalExp;
-            List<Exp> newAntecedents = new ArrayList<>(myOriginalSequent.getAntecedents());
+            List<Exp> newAntecedents = copyExpList(myOriginalSequent.getAntecedents());
             List<Exp> newConsequents = new ArrayList<>();
             for (Exp exp : myOriginalSequent.getConcequents()) {
                 if (exp.equals(originalExpAsInfixExp)) {
-                    // Replace the original "and" expression with its associated
-                    // left and right expressions.
+                    // Place the left expression in the antecedent and right expression
+                    // as a new consequent in the sequent.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("implies")) {
-                        newAntecedents.add(originalExpAsInfixExp.getLeft());
-                        newConsequents.add(originalExpAsInfixExp.getRight());
+                        newAntecedents.add(originalExpAsInfixExp.getLeft().clone());
+                        newConsequents.add(originalExpAsInfixExp.getRight().clone());
                     }
                     // This must be an error!
                     else {
@@ -78,7 +78,7 @@ public class RightImpliesRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newConsequents.add(exp);
+                    newConsequents.add(exp.clone());
                 }
             }
 
@@ -86,6 +86,9 @@ public class RightImpliesRule extends AbstractReductionRuleApplication
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
                     newAntecedents, newConsequents);
             myResultingSequents.add(resultingSequent);
+
+            // Indicate that this is an impacting reduction
+            myIsImpactingReductionFlag = true;
         }
         // This must be an error!
         else {

@@ -12,14 +12,12 @@
  */
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
-import java.util.*;
 
 /**
  * <p>This is the abstract base class for all the mathematical expression objects
@@ -280,16 +278,6 @@ public abstract class MathExp extends Exp {
 
     /**
      * <p>This method must be implemented by the inherited mathematical
-     * expression classes to apply VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link Exp} from applying the remember rule.
-     */
-    public abstract Exp remember();
-
-    /**
-     * <p>This method must be implemented by the inherited mathematical
      * expression classes to apply VC Generator's simplification step.
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
@@ -297,22 +285,6 @@ public abstract class MathExp extends Exp {
      * @return The resulting {@link Exp} from applying the simplification step.
      */
     public abstract Exp simplify();
-
-    /**
-     * <p>This method is used to convert a {@link Exp} into the prover's
-     * version of {@link PExp}. By default, this method throws an exception
-     * unless the concrete subclass overrides this method.</p>
-     *
-     * @param assumpts The assumption expressions for this expression.
-     * @param single Boolean flag to indicate whether or not this is a
-     *               standalone expression.
-     *
-     * @return A list of {link Exp} objects.
-     */
-    public List<InfixExp> split(MathExp assumpts, boolean single) {
-        throw new UnsupportedOperationException("Split for classes of type "
-                + this.getClass() + " is not currently supported.");
-    }
 
     // ===========================================================
     // Private Methods

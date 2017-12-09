@@ -40,4 +40,14 @@ public interface ReductionRuleApplication {
      */
     String getRuleDescription();
 
+    /**
+     * <p>This method indicates whether or not this {@link ReductionRuleApplication}
+     * encountered a {@code not(<exp>)} or if it created a new associated
+     * {@link Sequent}.</p>
+     *
+     * @return {@code true} if we have applied some kind of impacting
+     * logical reduction to the original {@link Sequent}, {@code false} otherwise.
+     */
+    boolean isIsImpactingReductionFlag();
+
 }

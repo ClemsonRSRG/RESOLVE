@@ -213,18 +213,6 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link VarExp} from applying the remember rule.
-     */
-    @Override
-    public final VarExp remember() {
-        return (VarExp) this.clone();
-    }
-
-    /**
      * <p>Sets the qualifier for this expression.</p>
      *
      * @param qualifier The qualifier for this expression.

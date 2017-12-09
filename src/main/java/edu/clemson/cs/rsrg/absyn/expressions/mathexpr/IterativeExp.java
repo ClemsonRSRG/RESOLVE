@@ -295,22 +295,6 @@ public class IterativeExp extends MathExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link IterativeExp} from applying the remember rule.
-     */
-    @Override
-    public final IterativeExp remember() {
-        Exp newWhere = ((MathExp) myWhereExp).remember();
-        Exp newBody = ((MathExp) myBodyExp).remember();
-
-        return new IterativeExp(cloneLocation(), myOperator, (MathVarDec) myVar
-                .clone(), newWhere, newBody);
-    }
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.

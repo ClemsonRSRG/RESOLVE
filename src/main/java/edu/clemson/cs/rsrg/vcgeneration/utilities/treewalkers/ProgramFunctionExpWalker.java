@@ -23,18 +23,15 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
-import edu.clemson.cs.rsrg.typeandpopulate.exception.SymbolNotOfKindTypeException;
-import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
@@ -93,12 +90,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * this list will be empty.</p>
      */
     private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
-    /**
-     * <p>A map that stores all the details associated with
-     * a particular {@link Location}.</p>
-     */
-    private final Map<Location, LocationDetailModel> myLocationDetails;
 
     /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
     private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
@@ -178,7 +169,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         myDecreasingExp = decreasingExp;
         myEnsuresClauseMap = new HashMap<>();
         myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
-        myLocationDetails = new HashMap<>();
         myProcessedInstFacilityDecls = processedInstFacDecs;
         myRequiresClauseList = new LinkedList<>();
         myRestoresParamEnsuresClauses = new LinkedList<>();
@@ -208,7 +198,8 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         }
 
         // Call a method to locate the operation entry for this call
-        OperationEntry operationEntry = getOperationEntry(exp);
+        OperationEntry operationEntry =
+                Utilities.getOperationEntry(exp, myCurrentModuleScope);
         OperationDec operationDec =
                 (OperationDec) operationEntry.getDefiningElement();
 
@@ -221,6 +212,12 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             .getAssertionExp(), operationDec.getParameters(),
                             exp.getArguments());
 
+            // Store the location detail for the function call's requires clause
+            requiresExp.setLocationDetailModel(new LocationDetailModel(
+                    operationDec.getRequires().getLocation().clone(), exp
+                            .getLocation().clone(), "Requires Clause of "
+                            + fullOperationName));
+
             // Replace any facility declaration instantiation arguments
             // in the requires clause.
             requiresExp =
@@ -230,12 +227,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             myConceptDeclaredTypes,
                             myLocalRepresentationTypeDecs,
                             myProcessedInstFacilityDecls);
-
-            // Store the location detail for the function call's requires clause
-            Location requiresLoc = requiresExp.getLocation();
-            myLocationDetails.put(requiresLoc, new LocationDetailModel(
-                    requiresLoc, requiresLoc, "Requires Clause of "
-                            + fullOperationName));
 
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
@@ -249,6 +240,11 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                         .getAssertionExp(), operationDec.getParameters(), exp
                         .getArguments());
 
+        // Store the location detail for the function call's ensures clause
+        ensuresExp.setLocationDetailModel(new LocationDetailModel(operationDec
+                .getEnsures().getLocation().clone(), exp.getLocation().clone(),
+                "Ensures Clause of " + fullOperationName));
+
         // Replace any facility declaration instantiation arguments
         // in the ensures clause.
         ensuresExp =
@@ -257,11 +253,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                                 .getDefiningElement().getName(),
                         myConceptDeclaredTypes, myLocalRepresentationTypeDecs,
                         myProcessedInstFacilityDecls);
-
-        // Store the location detail for the function call's ensures clause
-        Location ensuresLoc = ensuresExp.getLocation();
-        myLocationDetails.put(ensuresLoc, new LocationDetailModel(ensuresLoc,
-                ensuresLoc, "Ensures Clause of " + fullOperationName));
 
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);
@@ -296,7 +287,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      *
      * @return The complete ensures clause as an {@link Exp}.
      *
-     * @throws MiscErrorException This is thrown when we can't locate the
+     * @throws SourceErrorException This is thrown when we can't locate the
      * ensures clause for {@code exp}.
      */
     public final Exp getEnsuresClause(ProgramFunctionExp exp) {
@@ -304,29 +295,17 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
         // Attempt to locate the ensures clause for exp
         if (myEnsuresClauseMap.containsKey(exp)) {
-            ensures = myEnsuresClauseMap.remove(exp);
+            ensures = formConditionExp(myEnsuresClauseMap.remove(exp));
         }
         else {
-            throw new MiscErrorException(
+            throw new SourceErrorException(
                     "[VCGenerator] Cannot locate the ensures clause for: "
                             + exp.toString()
                             + ". Our ensures clause map contains: "
-                            + myEnsuresClauseMap.toString(),
-                    new RuntimeException());
+                            + myEnsuresClauseMap.toString(), exp.getLocation());
         }
 
         return ensures;
-    }
-
-    /**
-     * <p>This method returns a map containing details about
-     * a {@link Location} object that was generated while visiting
-     * function calls.</p>
-     *
-     * @return A map from {@link Location} to location detail strings.
-     */
-    public final Map<Location, LocationDetailModel> getNewLocationString() {
-        return myLocationDetails;
     }
 
     /**
@@ -384,28 +363,48 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns a newly created {@link VarExp}
-     * with {@code P_Val} as the name and {@code N} as its math type.</p>
+     * <p>An helper method for sanity checking the generated expression from
+     * the {@link ProgramFunctionExpWalker}.</p>
      *
-     * @param loc New {@link VarExp VarExp's} {@link Location}.
-     * @param scope The module scope to start our search.
+     * @param generatedExp The generated {@code ensures} clause
+     *                     expression.
      *
-     * @return {@code P_Val} variable expression.
+     * @return The appropriate mathematical form of
+     * the condition {@link Exp}.
      */
-    private VarExp createPValExp(Location loc, ModuleScope scope) {
-        // TODO: Use the one defined in Utilities when we merge with the branch that has it.
-        VarExp retExp = null;
+    private Exp formConditionExp(Exp generatedExp) {
+        Exp retExp;
 
-        // Locate "N" (Natural Number)
-        MathSymbolEntry mse = Utilities.searchMathSymbol(loc, "N", scope);
-        try {
-            // Create a variable with the name P_val
-            retExp =
-                    Utilities.createVarExp(loc.clone(), null, new PosSymbol(loc
-                            .clone(), "P_Val"), mse.getTypeValue(), null);
+        // Make sure we have an EqualsExp, else it is an error.
+        if (generatedExp instanceof EqualsExp) {
+            // Has to be a VarExp on the left hand side (containing the name
+            // of the function operation)
+            EqualsExp generatedExpAsEqualsexp = (EqualsExp) generatedExp;
+            if (generatedExpAsEqualsexp.getLeft() instanceof VarExp) {
+                retExp = generatedExpAsEqualsexp.getRight().clone();
+            }
+            else {
+                // Something went wrong with the program function walker.
+                // We should have generated an equals expression containing the
+                // results of the program function call.
+                throw new SourceErrorException(
+                        "[VCGenerator] Condition expression: "
+                                + generatedExp.toString()
+                                + " is not of the form: <OperationName> = <expression> "
+                                + generatedExp.getLocation(), generatedExp
+                                .getLocation());
+            }
         }
-        catch (SymbolNotOfKindTypeException e) {
-            Utilities.notAType(mse, loc);
+        else {
+            // Something went wrong with the program function walker.
+            // We should have generated an equals expression containing the
+            // results of the program function call.
+            throw new SourceErrorException(
+                    "[VCGenerator] Condition expression: "
+                            + generatedExp.toString()
+                            + " is not an equivalence expression "
+                            + generatedExp.getLocation(), generatedExp
+                            .getLocation());
         }
 
         return retExp;
@@ -441,10 +440,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 EqualsExp equalsExp =
                         new EqualsExp(expAsVarExp.getLocation().clone(),
                                 expAsVarExp, null, Operator.EQUAL, oldExp);
-                Location equalsLoc = equalsExp.getLocation();
-                myLocationDetails.put(equalsLoc, new LocationDetailModel(
-                        equalsLoc, equalsLoc, "Ensures Clause of " + opName
-                                + " (Condition from \""
+                equalsExp.setLocationDetailModel(new LocationDetailModel(varDec
+                        .getLocation().clone(), exp.getLocation().clone(),
+                        "Ensures Clause of " + opName + " (Condition from \""
                                 + ParameterMode.RESTORES.name()
                                 + "\" parameter mode)"));
                 myRestoresParamEnsuresClauses.add(equalsExp);
@@ -460,18 +458,18 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     private void generateTerminationConfirmStmt(ProgramFunctionExp functionExp) {
         // Make sure we have a decreasing clause
         if (myDecreasingExp == null) {
-            throw new MiscErrorException(
+            throw new SourceErrorException(
                     "[VCGenerator] Cannot locate the decreasing clause for: "
-                            + functionExp.toString(), new RuntimeException());
+                            + functionExp.toString(), functionExp.getLocation());
         }
         else {
             VCVarExp nqvPValExp =
                     Utilities.createVCVarExp(myCurrentAssertiveCodeBlock,
-                            createPValExp(
-                                    myDecreasingExp.getLocation().clone(),
+                            Utilities.createPValExp(myDecreasingExp
+                                    .getLocation().clone(),
                                     myCurrentModuleScope));
 
-            // Generate the termination of recursive call: P_Exp <= 1 + NQV(RS, P_Val)
+            // Generate the termination of recursive call: 1 + P_Exp <= NQV(RS, P_Val)
             IntegerExp oneExp =
                     new IntegerExp(myDecreasingExp.getLocation().clone(), null,
                             1);
@@ -480,47 +478,28 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
             InfixExp sumExp =
                     new InfixExp(myDecreasingExp.getLocation().clone(), oneExp,
                             null, new PosSymbol(myDecreasingExp.getLocation()
-                                    .clone(), "+"), nqvPValExp.clone());
+                                    .clone(), "+"), myDecreasingExp.clone());
             sumExp.setMathType(myDecreasingExp.getMathType());
 
             InfixExp terminationExp =
-                    new InfixExp(
-                            myDecreasingExp.getLocation().clone(),
-                            myDecreasingExp.clone(),
-                            null,
-                            new PosSymbol(
-                                    myDecreasingExp.getLocation().clone(), "<="),
-                            sumExp);
+                    new InfixExp(myDecreasingExp.getLocation().clone(), sumExp,
+                            null, new PosSymbol(myDecreasingExp.getLocation()
+                                    .clone(), "<="), nqvPValExp.clone());
             terminationExp.setMathType(myTypeGraph.BOOLEAN);
+
+            // Store the location detail for the recursive function call's
+            // termination expression.
+            terminationExp.setLocationDetailModel(new LocationDetailModel(
+                    myDecreasingExp.getLocation().clone(), functionExp
+                            .getLocation().clone(),
+                    "Termination of Recursive Call"));
 
             // Generate a new ConfirmStmt using terminationExp
             ConfirmStmt confirmStmt =
                     new ConfirmStmt(terminationExp.getLocation().clone(),
                             terminationExp, false);
-            Location confirmLoc = confirmStmt.getLocation();
-            myLocationDetails.put(confirmLoc, new LocationDetailModel(
-                    confirmLoc, confirmLoc, "Termination of Recursive Call"));
             myTerminationConfirmStmts.add(confirmStmt);
         }
-    }
-
-    /**
-     * <p>An helper method that returns {@link ProgramFunctionExp ProgramFunctionExp's}
-     * corresponding {@link OperationEntry}.</p>
-     *
-     * @param functionExp A program function expression.
-     *
-     * @return The corresponding {@link OperationEntry}.
-     */
-    private OperationEntry getOperationEntry(ProgramFunctionExp functionExp) {
-        // Obtain the corresponding OperationEntry
-        List<PTType> argTypes = new LinkedList<>();
-        for (ProgramExp arg : functionExp.getArguments()) {
-            argTypes.add(arg.getProgramType());
-        }
-
-        return Utilities.searchOperation(functionExp.getLocation(), functionExp.getQualifier(),
-                functionExp.getName(), argTypes, myCurrentModuleScope);
     }
 
     /**
@@ -557,14 +536,14 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                     // The replacement will be the inner operation's
                     // ensures clause. We are done processing the
                     // inner function call, so we can remove it from our map.
-                    replExp = myEnsuresClauseMap.remove(exp);
+                    replExp = formConditionExp(myEnsuresClauseMap.remove(exp));
                 }
                 else {
                     // Something went wrong with the walking mechanism.
                     // We should have seen this inner operation call before
                     // processing the outer operation call.
-                    throw new MiscErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
-                            exp.toString() + " " + exp.getLocation(), new RuntimeException());
+                    throw new SourceErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
+                            exp.toString(), exp.getLocation());
                 }
             }
             // All other types of expressions
@@ -639,8 +618,8 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                     // Something went wrong with the walking mechanism.
                     // We should have seen this inner operation call before
                     // processing the outer operation call.
-                    throw new MiscErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
-                            exp.toString() + " " + exp.getLocation(), new RuntimeException());
+                    throw new SourceErrorException("[VCGenerator] Could not find the modified ensures clause of: " +
+                            exp.toString(), exp.getLocation());
                 }
             }
             // All other types of expressions
