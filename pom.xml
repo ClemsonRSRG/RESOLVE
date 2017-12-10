@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>Spring17a</version>
+    <version>Fall17a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -104,22 +104,22 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>1.0.1</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-ext</artifactId>
-            <version>1.0.1</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20140107</version>
+            <version>20171018</version>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.10</version>
+            <version>0.9.11</version>
         </dependency>
     </dependencies>
 
@@ -128,7 +128,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.7.0</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -250,7 +250,7 @@
             <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
