@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree;
 
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -30,11 +30,11 @@ public interface ReductionTreeExporter {
      * <p>This method returns the {@code reductionTree}
      * as a string.</p>
      *
-     * @param reductionTree A {@link DirectedGraph} representing
+     * @param reductionTree A {@link Graph} representing
      *                      a reduction tree.
      *
      * @return A string.
      */
-    String output(DirectedGraph<Sequent, DefaultEdge> reductionTree);
+    String output(Graph<Sequent, DefaultEdge> reductionTree);
 
 }
