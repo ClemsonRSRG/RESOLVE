@@ -51,7 +51,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.FormalActualLis
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedEnhSpecRealizItem;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
@@ -1006,7 +1006,7 @@ public class Utilities {
      * @return {@code true} if there is a path in the reduction tree,
      * {@code false} otherwise.
      */
-    public static boolean pathExist(DirectedGraph<Sequent, DefaultEdge> g, Sequent seq1, Sequent seq2) {
+    public static boolean pathExist(Graph<Sequent, DefaultEdge> g, Sequent seq1, Sequent seq2) {
         boolean retVal = true;
 
         // Check to see if the seq1 and seq2 is in the tree.
@@ -1042,7 +1042,7 @@ public class Utilities {
      * have a path from {@code originalSequent} in the reduction tree,
      * {@code false} otherwise.
      */
-    public static boolean pathsExist(DirectedGraph<Sequent, DefaultEdge> g,
+    public static boolean pathsExist(Graph<Sequent, DefaultEdge> g,
             Sequent originalSequent, List<Sequent> resultSequents) {
         boolean retVal = true;
 

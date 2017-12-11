@@ -16,11 +16,8 @@ import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.ext.ComponentAttributeProvider;
-import org.jgrapht.ext.DOTExporter;
-import org.jgrapht.ext.IntegerComponentNameProvider;
-import org.jgrapht.ext.StringComponentNameProvider;
+import org.jgrapht.Graph;
+import org.jgrapht.io.*;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -62,13 +59,13 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
      * <p>This method returns the {@code reductionTree}
      * as a string.</p>
      *
-     * @param reductionTree A {@link DirectedGraph} representing
+     * @param reductionTree A {@link Graph} representing
      *                      a reduction tree.
      *
      * @return A string.
      */
     @Override
-    public final String output(DirectedGraph<Sequent, DefaultEdge> reductionTree) {
+    public final String output(Graph<Sequent, DefaultEdge> reductionTree) {
         // Output the reduction tree as a dot file to the step model
         StringWriter writer = new StringWriter();
         myDotExporter.exportGraph(reductionTree, writer);
@@ -98,13 +95,13 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
          * @return A map containing the attributes for a {@code sequent} node.
          */
         @Override
-        public final Map<String, String> getComponentAttributes(T sequent) {
-            Map<String, String> attributesMap = new LinkedHashMap<>();
+        public final Map<String, Attribute> getComponentAttributes(T sequent) {
+            Map<String, Attribute> attributesMap = new LinkedHashMap<>();
 
             // Add the attributes for the sequent to the map
-            attributesMap.put("shape", "box");
+            attributesMap.put("shape", DefaultAttribute.createAttribute("box"));
             if (sequent.consistOfAtomicFormulas()) {
-                attributesMap.put("color", "red");
+                attributesMap.put("color", DefaultAttribute.createAttribute("red"));
             }
 
             return attributesMap;

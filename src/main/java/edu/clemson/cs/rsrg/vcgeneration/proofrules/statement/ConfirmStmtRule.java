@@ -26,7 +26,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -145,7 +145,7 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
         SequentReduction reduction =
                 new SequentReduction(sequentToBeReduced);
         List<Sequent> resultSequents = reduction.applyReduction();
-        DirectedGraph<Sequent, DefaultEdge> reductionTree = reduction.getReductionTree();
+        Graph<Sequent, DefaultEdge> reductionTree = reduction.getReductionTree();
 
         // Store the map of impacting reductions
         myImpactingReducedSequentMap.putAll(reduction
@@ -197,13 +197,13 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
      * <p>An helper method to build a map of {@code sequent} to its associated
      * {@code sequents}.</p>
      *
-     * @param reductionTree A {@link DirectedGraph} representing a reduction tree.
+     * @param reductionTree A {@link Graph} representing a reduction tree.
      * @param sequents A list of {@link Sequent Sequents}.
      *
      * @return A map from {@link Sequent} to list of {@link Sequent Sequents}.
      */
     private Map<Sequent, List<Sequent>> buildAssociatedSequentsMap(
-            DirectedGraph<Sequent, DefaultEdge> reductionTree, List<Sequent> sequents) {
+            Graph<Sequent, DefaultEdge> reductionTree, List<Sequent> sequents) {
         Map<Sequent, List<Sequent>> sequentListMap = new LinkedHashMap<>();
 
         // Create a boolean array to store whether or not

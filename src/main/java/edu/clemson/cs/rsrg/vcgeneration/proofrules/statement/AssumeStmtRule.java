@@ -27,7 +27,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.UniqueSymbolNameExtractor;
 import java.util.*;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.stringtemplate.v4.ST;
@@ -120,7 +120,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             // as some kind of reduction, so we build a reduction tree
             // ourselves.
             if (assumeExps.size() != 1) {
-                DirectedGraph<Sequent, DefaultEdge> reductionTree =
+                Graph<Sequent, DefaultEdge> reductionTree =
                         new DefaultDirectedGraph<>(DefaultEdge.class);
 
                 // Create a root node using the original assumeExp and
@@ -385,7 +385,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         // Apply the various sequent reduction rules.
         SequentReduction reduction = new SequentReduction(sequent);
         List<Sequent> resultSequents = reduction.applyReduction();
-        DirectedGraph<Sequent, DefaultEdge> reductionTree =
+        Graph<Sequent, DefaultEdge> reductionTree =
                 reduction.getReductionTree();
 
         // Store the map of impacting reductions
