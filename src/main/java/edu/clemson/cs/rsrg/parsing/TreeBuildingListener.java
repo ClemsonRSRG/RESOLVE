@@ -53,6 +53,7 @@ import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.parsing.sanitychecking.ValidFunctionOpDeclChecker;
 import edu.clemson.cs.rsrg.parsing.utilities.SyntacticSugarConverter;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
@@ -2602,8 +2603,20 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.ENSURES);
         }
 
-        myNodes.put(ctx, new OperationDec(createPosSymbol(ctx.name), varDecs,
-                returnTy, affectsClause, requires, ensures));
+        // Build the operation declaration
+        OperationDec dec =
+                new OperationDec(createPosSymbol(ctx.name), varDecs, returnTy,
+                        affectsClause, requires, ensures);
+
+        // If this is a function operation declaration, then we need to make sure
+        // it is a valid declaration.
+        if (dec.getReturnTy() != null) {
+            ValidFunctionOpDeclChecker declChecker =
+                    new ValidFunctionOpDeclChecker(dec);
+            declChecker.checkFunctionOpDecl();
+        }
+
+        myNodes.put(ctx, dec);
     }
 
     /**

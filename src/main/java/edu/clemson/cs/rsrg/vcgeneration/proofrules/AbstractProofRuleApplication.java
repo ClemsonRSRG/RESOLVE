@@ -12,12 +12,11 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
-import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -42,10 +41,10 @@ public abstract class AbstractProofRuleApplication
     protected final AssertiveCodeBlock myCurrentAssertiveCodeBlock;
 
     /**
-     * <p>A map that stores all the details associated with
-     * a particular {@link Location}.</p>
+     * <p>A map that stores string template models for generated
+     * {@link AssertiveCodeBlock AssertiveCodeBlocks}.</p>
      */
-    protected final Map<Location, String> myLocationDetails;
+    protected final Map<AssertiveCodeBlock, ST> myNewAssertiveCodeBlockModels;
 
     /**
      * <p>A double ended queue that contains all the assertive code blocks
@@ -77,7 +76,7 @@ public abstract class AbstractProofRuleApplication
     protected AbstractProofRuleApplication(AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
         myResultingAssertiveCodeBlocks = new LinkedList<>();
         myCurrentAssertiveCodeBlock = block;
-        myLocationDetails = new HashMap<>();
+        myNewAssertiveCodeBlockModels = new HashMap<>();
         mySTGroup = stGroup;
         myBlockModel = blockModel;
     }
@@ -112,15 +111,73 @@ public abstract class AbstractProofRuleApplication
     }
 
     /**
-     * <p>This method returns a map containing details about
-     * a {@link Location} object that was generated during the proof
-     * application process.</p>
+     * <p>This method returns the a map containing the new string template
+     * block models associated with any {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
+     * that resulted from applying the {@code Proof Rule}.</p>
      *
-     * @return A map from {@link Location} to location detail strings.
+     * @return A map from {@link AssertiveCodeBlock AssertiveCodeBlock(s)} to
+     * {@link ST} block models.
      */
     @Override
-    public final Map<Location, String> getNewLocationString() {
-        return myLocationDetails;
+    public final Map<AssertiveCodeBlock, ST> getNewAssertiveCodeBlockModels() {
+        return myNewAssertiveCodeBlockModels;
     }
 
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method that performs the substitution on all the
+     * {@link Exp} in each {@link VerificationCondition}.</p>
+     *
+     * @param vcs The original list of {@link VerificationCondition}.
+     * @param substitutions A map of substitutions.
+     *
+     * @return A modified list of {@link VerificationCondition}.
+     */
+    protected final List<VerificationCondition> createReplacementVCs(
+            List<VerificationCondition> vcs, Map<Exp, Exp> substitutions) {
+        List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
+        for (VerificationCondition vc : vcs) {
+            List<Sequent> sequents = vc.getAssociatedSequents();
+            List<Sequent> newSequent = new ArrayList<>(sequents.size());
+            for (Sequent s : sequents) {
+                newSequent.add(createReplacementSequent(s, substitutions));
+            }
+
+            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
+                    newSequent, vc.getHasImpactingReductionFlag(), vc.getLocationDetailModel()));
+        }
+
+        return newVCs;
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method that performs the substitution on all the
+     * {@link Exp} in the {@link Sequent}.</p>
+     *
+     * @param s The original {@link Sequent}.
+     * @param substitutions A map of substitutions.
+     *
+     * @return A modified {@link Sequent}.
+     */
+    private Sequent createReplacementSequent(Sequent s, Map<Exp, Exp> substitutions) {
+        List<Exp> newAntecedents = new ArrayList<>();
+        List<Exp> newConsequents = new ArrayList<>();
+
+        for (Exp antencedent : s.getAntecedents()) {
+            newAntecedents.add(antencedent.substitute(substitutions));
+        }
+
+        for (Exp consequent : s.getConcequents()) {
+            newConsequents.add(consequent.substitute(substitutions));
+        }
+
+        return new Sequent(s.getLocation(), newAntecedents, newConsequents);
+    }
 }

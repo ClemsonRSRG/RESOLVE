@@ -68,7 +68,7 @@ public class SequentReductionTest {
             FAKE_LOCATION =
                     new Location(new ResolveFile("SequentReductionTest",
                             ModuleType.THEORY, new UnbufferedCharStream(
-                                    new StringReader("")),
+                                    new StringReader("")), null,
                             new ArrayList<String>(), ""), 0, 0);
 
             // Create a fake typegraph

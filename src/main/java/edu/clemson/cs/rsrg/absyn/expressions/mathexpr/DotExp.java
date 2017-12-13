@@ -14,8 +14,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -191,33 +189,6 @@ public class DotExp extends MathExp {
         int result = super.hashCode();
         result = 31 * result + mySegmentExps.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link DotExp} from applying the remember rule.
-     */
-    @Override
-    public final DotExp remember() {
-        List<Exp> newSegmentExps = new ArrayList<>();
-        for (Exp e : mySegmentExps) {
-            Exp copyExp;
-            if (e instanceof MathExp){
-                copyExp = ((MathExp) e).remember();
-            }
-            else {
-                throw new MiscErrorException("We encountered an expression of the type " +
-                        e.getClass().getName(),
-                        new InvalidClassException(""));
-            }
-
-            newSegmentExps.add(copyExp);
-        }
-
-        return new DotExp(cloneLocation(), newSegmentExps);
     }
 
     /**

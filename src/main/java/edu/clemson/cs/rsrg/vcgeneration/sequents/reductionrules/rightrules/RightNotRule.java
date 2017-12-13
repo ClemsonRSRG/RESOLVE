@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.rightrules;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.PrefixExp;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.AbstractReductionRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules.ReductionRuleApplication;
@@ -61,13 +62,20 @@ public class RightNotRule extends AbstractReductionRuleApplication
     public final List<Sequent> applyRule() {
         if (myOriginalExp instanceof PrefixExp) {
             PrefixExp originalExpAsPrefixExp = (PrefixExp) myOriginalExp;
-            List<Exp> newAntecedents = new ArrayList<>(myOriginalSequent.getAntecedents());
+            List<Exp> newAntecedents = copyExpList(myOriginalSequent.getAntecedents());
             List<Exp> newConsequents = new ArrayList<>();
             for (Exp exp : myOriginalSequent.getConcequents()) {
                 if (exp.equals(originalExpAsPrefixExp)) {
                     // Add the expression inside the "not" to the consequent.
                     if (originalExpAsPrefixExp.getOperatorAsString().equals("not")) {
-                        newAntecedents.add(originalExpAsPrefixExp.getArgument());
+                        // Copy the entire PrefixExp so we get a new copy of
+                        // the LocationDetailModel if it exists.
+                        PrefixExp copyExp = (PrefixExp) originalExpAsPrefixExp.clone();
+                        Exp argumentExp = copyExp.getArgument();
+                        argumentExp.setLocationDetailModel(copyExp.getLocationDetailModel());
+
+                        // Add this modified argumentExp
+                        newAntecedents.add(argumentExp);
                     }
                     // This must be an error!
                     else {
@@ -76,7 +84,7 @@ public class RightNotRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newConsequents.add(exp);
+                    newConsequents.add(exp.clone());
                 }
             }
 
@@ -84,6 +92,9 @@ public class RightNotRule extends AbstractReductionRuleApplication
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
                     newAntecedents, newConsequents);
             myResultingSequents.add(resultingSequent);
+
+            // Indicate that this is an impacting reduction
+            myIsImpactingReductionFlag = true;
         }
         // This must be an error!
         else {

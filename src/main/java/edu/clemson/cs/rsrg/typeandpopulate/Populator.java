@@ -2776,7 +2776,32 @@ public class Populator extends TreeWalkerVisitor {
             ProgramVariableEntry entry =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new ProgramVariableQuery(exp.getQualifier(), exp.getName()));
-            exp.setProgramType(entry.getProgramType());
+
+            // YS - For generic concept types, we need to query the actual type
+            //      and not just assign the PTElement that is associated with the actual parameter.
+            if (entry.getDefiningElement() instanceof ConceptTypeParamDec) {
+                ConceptTypeParamDec typeParamDec =
+                        (ConceptTypeParamDec) entry.getDefiningElement();
+
+                try {
+                    ProgramTypeEntry typeEntry =
+                            myBuilder.getInnermostActiveScope().queryForOne(
+                                    GenericProgramTypeQuery.INSTANCE);
+
+                    exp.setProgramType(typeEntry.getProgramType());
+                }
+                catch (NoSuchSymbolException nsse2) {
+                    noSuchSymbol(null, typeParamDec.getName());
+                }
+                catch (DuplicateSymbolException dse2) {
+                    duplicateSymbol(typeParamDec.getName());
+                }
+            }
+            // YS - For all other types, simply assign the program type from the
+            //      associated program variable.
+            else {
+                exp.setProgramType(entry.getProgramType());
+            }
 
             // Handle math typing stuff
             postSymbolExp(exp.getQualifier(), exp.getName().getName(), exp);

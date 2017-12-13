@@ -17,7 +17,7 @@ outputVCGenDetails(fileHeader, assertiveCodeBlocks) ::= <<
  * of the verbose mode section.
  */
 outputConceptHeader(conceptName) ::= <<
-    Concept Name: <conceptName>
+    Concept Name:   <conceptName>
 >>
 
 /*
@@ -25,8 +25,8 @@ outputConceptHeader(conceptName) ::= <<
  * of the verbose mode section.
  */
 outputConceptRealizHeader(realizName, conceptName) ::= <<
-    Concept Realization Name: <realizName>
-    Concept Name: <conceptName>
+    Concept Realization Name:   <realizName>
+    Concept Name:               <conceptName>
 >>
 
 /*
@@ -34,8 +34,8 @@ outputConceptRealizHeader(realizName, conceptName) ::= <<
  * of the verbose mode section.
  */
 outputEnhancementHeader(enhancementName, conceptName) ::= <<
-    Enhancement Name: <enhancementName>
-    Concept Name: <conceptName>
+    Enhancement Name:   <enhancementName>
+    Concept Name:       <conceptName>
 >>
 
 /*
@@ -43,9 +43,9 @@ outputEnhancementHeader(enhancementName, conceptName) ::= <<
  * of the verbose mode section.
  */
 outputEnhancementRealizHeader(realizName, enhancementName, conceptName) ::= <<
-    Enhancement Realization Name: <realizName>
-    Enhancement Name: <enhancementName>
-    Concept Name: <conceptName>
+    Enhancement Realization Name:   <realizName>
+    Enhancement Name:               <enhancementName>
+    Concept Name:                   <conceptName>
 >>
 
 /*
@@ -53,17 +53,34 @@ outputEnhancementRealizHeader(realizName, enhancementName, conceptName) ::= <<
  * of the verbose mode section.
  */
 outputFacilityHeader(facilityName) ::= <<
-    Facility Name: <facilityName>
+    Facility Name:   <facilityName>
 >>
 
 /*
- * Template for displaying the name of a assertive code block and each of
- * its transformation through proof rule applications.
+ * Template for displaying the name of a assertive code block,
+ * any branching conditions and each of its transformations
+ * through proof rule applications.
  */
-outputAssertiveCodeBlock(blockName, vcGenSteps) ::= <<
+outputAssertiveCodeBlock(blockName, branchingConditions, vcGenSteps) ::= <<
 ========================= <blockName> =========================
 
+<if(branchingConditions)>
+<branchingConditions>
+<endif>
 <vcGenSteps; separator = "\n">
+>>
+
+/*
+ * Template for displaying the various different branching conditions that
+ * generated this assertive code block.
+ */
+outputBranchingConditions(conditions) ::= <<
+---------------------
+Branching Conditions
+---------------------
+<conditions : {condition | <i>. <condition>}; separator = "\n">
+---------------------
+
 >>
 
 /*

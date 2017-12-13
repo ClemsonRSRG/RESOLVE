@@ -25,7 +25,7 @@ echo ""
 echo ""
 echo "---- PRE-EXECUTION SETUP ----"
 echo ""
-cp RESOLVE/target/RESOLVE-Spring17a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
+cp RESOLVE/target/RESOLVE-Fall17a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
 cd RESOLVE-Workspace/RESOLVE/Main/
 echo ""
 echo "---- DONE WITH PRE-EXECUTION SETUP ----"

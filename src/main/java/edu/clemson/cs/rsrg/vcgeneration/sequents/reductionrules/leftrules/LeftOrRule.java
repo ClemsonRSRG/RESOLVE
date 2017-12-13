@@ -67,8 +67,8 @@ public class LeftOrRule extends AbstractReductionRuleApplication
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Add the left and right into the different antecedent lists
                     if (originalExpAsInfixExp.getOperatorAsString().equals("or")) {
-                        newAntecedents1.add(originalExpAsInfixExp.getLeft());
-                        newAntecedents2.add(originalExpAsInfixExp.getRight());
+                        newAntecedents1.add(originalExpAsInfixExp.getLeft().clone());
+                        newAntecedents2.add(originalExpAsInfixExp.getRight().clone());
                     }
                     // This must be an error!
                     else {
@@ -77,8 +77,8 @@ public class LeftOrRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newAntecedents1.add(exp);
-                    newAntecedents2.add(exp);
+                    newAntecedents1.add(exp.clone());
+                    newAntecedents2.add(exp.clone());
                 }
             }
 
@@ -86,11 +86,14 @@ public class LeftOrRule extends AbstractReductionRuleApplication
             // YS: We just need to prove either resultingSequent1 or resultingSequent2,
             // therefore it is just the same VC.
             Sequent resultingSequent1 = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents1, myOriginalSequent.getConcequents());
+                    newAntecedents1, copyExpList(myOriginalSequent.getConcequents()));
             myResultingSequents.add(resultingSequent1);
             Sequent resultingSequent2 = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents2, myOriginalSequent.getConcequents());
+                    newAntecedents2, copyExpList(myOriginalSequent.getConcequents()));
             myResultingSequents.add(resultingSequent2);
+
+            // Indicate that this is an impacting reduction
+            myIsImpactingReductionFlag = true;
         }
         // This must be an error!
         else {

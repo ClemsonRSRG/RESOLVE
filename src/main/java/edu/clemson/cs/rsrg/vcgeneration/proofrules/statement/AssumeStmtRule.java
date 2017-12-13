@@ -27,7 +27,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.UniqueSymbolNameExtractor;
 import java.util.*;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.stringtemplate.v4.ST;
@@ -51,6 +51,12 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     /** <p>The {@link AssumeStmt} we are applying the rule to.</p> */
     private final AssumeStmt myAssumeStmt;
 
+    /**
+     * <p>A map that indicates if a particular {@link Sequent} had
+     * an impacting reduction.</p>
+     */
+    private final Map<Sequent, Boolean> myImpactingReducedSequentMap;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -70,6 +76,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             STGroup stGroup, ST blockModel) {
         super(block, stGroup, blockModel);
         myAssumeStmt = assumeStmt;
+        myImpactingReducedSequentMap = new LinkedHashMap<>();
     }
 
     // ===========================================================
@@ -78,8 +85,6 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
 
     /**
      * <p>This method applies the {@code Proof Rule}.</p>
-     *
-     * TODO: Add the actual proof rule to the JavaDoc.
      */
     @Override
     public final void applyRule() {
@@ -115,7 +120,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             // as some kind of reduction, so we build a reduction tree
             // ourselves.
             if (assumeExps.size() != 1) {
-                DirectedGraph<Sequent, DefaultEdge> reductionTree =
+                Graph<Sequent, DefaultEdge> reductionTree =
                         new DefaultDirectedGraph<>(DefaultEdge.class);
 
                 // Create a root node using the original assumeExp and
@@ -139,18 +144,30 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             // Build the new list of VCs
             List<VerificationCondition> newVCs = new ArrayList<>();
             for (VerificationCondition vc : myCurrentAssertiveCodeBlock.getVCs()) {
+                // A flag that indicates if this VC had an impacting reduction
+                boolean hasImpactingReduction = vc.getHasImpactingReductionFlag();
+
                 List<Sequent> newSequents = new ArrayList<>();
                 for (Sequent sequent : vc.getAssociatedSequents()) {
                     // YS: The substitutionStep will call applicationStep
                     Sequent resultSequent =
                             substitutionStep(sequent, assumeExps);
 
-                    // Reduce the sequent and store this as
-                    // our new list of associated sequents.
-                    newSequents.addAll(reducedSequentForm(resultSequent, stepModel));
+                    // Reduce the sequent, check to see if any of them had an
+                    // impacting reduction and store this as our new list
+                    // of associated sequents.
+                    List<Sequent> reducedSequents = reducedSequentForm(resultSequent, stepModel);
+                    for (Sequent reducedSequent : reducedSequents) {
+                        if (myImpactingReducedSequentMap.get(reducedSequent)) {
+                            hasImpactingReduction = true;
+                        }
+                    }
+
+                    newSequents.addAll(reducedSequents);
                 }
 
-                newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(), newSequents));
+                newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
+                        newSequents, hasImpactingReduction, vc.getLocationDetailModel()));
             }
 
             // Set this as our new list of vcs
@@ -330,6 +347,32 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
+     * <p>Rather than using the strict {@code equals} method that is defined for
+     * {@link Exp Exps}, this method checks to see if all {@link Exp Exps}
+     * are {@code equivalent}.</p>
+     *
+     * @param originalExpList The original expression list.
+     * @param newExpList The new expression list.
+     *
+     * @return {@code true} if the lists contain {@code equivalent} {@link Exp Exps},
+     * {@code false} otherwise.
+     */
+    private boolean isEquivalentExpList(List<Exp> originalExpList,
+            List<Exp> newExpList) {
+        boolean isEquivalent = (originalExpList.size() == newExpList.size());
+
+        Iterator<Exp> originalExpIt = originalExpList.iterator();
+        Iterator<Exp> newExpIt = newExpList.iterator();
+        while (originalExpIt.hasNext() && isEquivalent) {
+            Exp originalExp = originalExpIt.next();
+            Exp newExp = newExpIt.next();
+            isEquivalent = originalExp.equivalent(newExp);
+        }
+
+        return isEquivalent;
+    }
+
+    /**
      * <p>This method uses {@code sequent} to produce
      * a list of reduced {@link Sequent Sequents}.</p>
      *
@@ -342,8 +385,12 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         // Apply the various sequent reduction rules.
         SequentReduction reduction = new SequentReduction(sequent);
         List<Sequent> resultSequents = reduction.applyReduction();
-        DirectedGraph<Sequent, DefaultEdge> reductionTree =
+        Graph<Sequent, DefaultEdge> reductionTree =
                 reduction.getReductionTree();
+
+        // Store the map of impacting reductions
+        myImpactingReducedSequentMap.putAll(reduction
+                .getImpactingReducedSequentMap());
 
         // Output the reduction tree as a dot file to the step model
         // only if we did some kind of reduction.
@@ -453,9 +500,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 boolean isLeftReplaceable = containsReplaceableExp(equalsExp.getLeft());
                 boolean isRightReplaceable = containsReplaceableExp(equalsExp.getRight());
 
-                // Check to see if we have P_val or Cum_Dur
-                // TODO: Make sure this still works!
-                if (equalsExp.getLeft().containsVar("P_val", false) ||
+                // Check to see if we have P_Val or Cum_Dur
+                if (equalsExp.getLeft().containsVar("P_Val", false) ||
                         equalsExp.getLeft().containsVar("Cum_Dur", false)) {
                     hasVerificationVar = true;
                 }
@@ -503,25 +549,28 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 assumeExpCopyList.set(k, newAssumeExp);
             }
 
-            // Check to see if this is a stipulate assume clause
-            // If yes, we keep a copy of the current
-            // assume expression.
-            if (myAssumeStmt.getIsStipulate()) {
-                remAssumeExpList.add(currentAssumeExp.clone());
-            }
-
             List<Exp> antencedentsSubtituted = substituteExps(newAntecedents, substitutions);
             List<Exp> consequentsSubtituted = substituteExps(newConsequents, substitutions);
 
-            // No substitutions
-            if (antencedentsSubtituted.equals(newAntecedents) &&
-                    consequentsSubtituted.equals(newConsequents)) {
-                // Check to see if this a verification
-                // variable. If yes, we don't keep this assume.
-                // Otherwise, we need to store this for the
-                // step that generates the parsimonious vcs.
-                if (!hasVerificationVar) {
-                    remAssumeExpList.add(currentAssumeExp.clone());
+            // Check to see if this is a stipulate assume clause
+            // If yes, then we will have to add it for further processing
+            // regardless if we did a substitution or not.
+            if (myAssumeStmt.getIsStipulate()) {
+                remAssumeExpList.add(currentAssumeExp.clone());
+            }
+            else {
+                // Check to see if there is no change to the new antecedents
+                // and consequents. If not, then we might to keep this assumed
+                // expression for further processing.
+                if (isEquivalentExpList(antencedentsSubtituted, newAntecedents) &&
+                        isEquivalentExpList(consequentsSubtituted, newConsequents)) {
+                    // Check to see if this a verification
+                    // variable. If yes, we don't keep this assume.
+                    // Otherwise, we need to store this for the
+                    // step that generates the parsimonious vcs.
+                    if (!hasVerificationVar) {
+                        remAssumeExpList.add(currentAssumeExp.clone());
+                    }
                 }
             }
 

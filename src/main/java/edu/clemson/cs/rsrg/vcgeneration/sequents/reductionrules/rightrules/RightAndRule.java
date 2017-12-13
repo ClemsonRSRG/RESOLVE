@@ -67,8 +67,8 @@ public class RightAndRule extends AbstractReductionRuleApplication
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Add the left and right into the different antecedent lists
                     if (originalExpAsInfixExp.getOperatorAsString().equals("and")) {
-                        newConsequents1.add(originalExpAsInfixExp.getLeft());
-                        newConsequents2.add(originalExpAsInfixExp.getRight());
+                        newConsequents1.add(originalExpAsInfixExp.getLeft().clone());
+                        newConsequents2.add(originalExpAsInfixExp.getRight().clone());
                     }
                     // This must be an error!
                     else {
@@ -77,19 +77,21 @@ public class RightAndRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newConsequents1.add(exp);
-                    newConsequents2.add(exp);
+                    newConsequents1.add(exp.clone());
+                    newConsequents2.add(exp.clone());
                 }
             }
 
             // Construct new sequents
             // YS: resultingSequent2 clones the location, because this is a new VC that
             // we are trying to prove. Simply proving resultingSequent1 is not good enough.
+            // Since this is not creating a new associated sequent, it is not considered as
+            // an impacting reduction.
             Sequent resultingSequent1 = new Sequent(myOriginalSequent.getLocation(),
-                    myOriginalSequent.getAntecedents(), newConsequents1);
+                    copyExpList(myOriginalSequent.getAntecedents()), newConsequents1);
             myResultingSequents.add(resultingSequent1);
             Sequent resultingSequent2 = new Sequent(myOriginalSequent.getLocation().clone(),
-                    myOriginalSequent.getAntecedents(), newConsequents2);
+                    copyExpList(myOriginalSequent.getAntecedents()), newConsequents2);
             myResultingSequents.add(resultingSequent2);
         }
         // This must be an error!

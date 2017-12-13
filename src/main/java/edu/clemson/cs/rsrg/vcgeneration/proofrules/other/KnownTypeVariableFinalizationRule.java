@@ -20,6 +20,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -86,11 +88,17 @@ public class KnownTypeVariableFinalizationRule
      */
     @Override
     public final void applyRule() {
-        // Create an assume statement with the finalization ensures clause.
+        // Create an assume statement with the finalization ensures clause and add
+        // the location detail associated with it.
         AssertionClause finalEnsuresClause = myFinalItem.getEnsures();
+        Location finalEnsuresLoc =
+                finalEnsuresClause.getAssertionExp().getLocation();
         Exp assumeExp =
-                Utilities.formConjunct(finalEnsuresClause.getLocation(),
-                        null, finalEnsuresClause);
+                Utilities.formConjunct(finalEnsuresLoc, null,
+                        finalEnsuresClause, new LocationDetailModel(
+                                finalEnsuresLoc.clone(), finalEnsuresLoc.clone(),
+                                "Finalization Ensures Clause of "
+                                        + myVarDec.getName()));
 
         // Create a replacement map
         Map<Exp, Exp> substitutions = new LinkedHashMap<>();
