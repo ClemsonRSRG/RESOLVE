@@ -146,15 +146,29 @@ public class Utilities {
     }
 
     /**
-     * <p>Converts the specified pathname to a <code>File</code>
-     * representing the absolute path to the pathname.</p>
+     * <p>Converts the specified pathname to a {@link File}
+     * representing the absolute path to the file.</p>
      *
      * @param pathname The file path.
      *
-     * @return The <code>File</code> specified by the path.
+     * @return The {@link File} specified by the path.
      */
     public static File getAbsoluteFile(String pathname) {
         return new File(pathname).getAbsoluteFile();
+    }
+
+    /**
+     * <p>Uses the workspace directory and converts the specified file pathname
+     * to a {@link File} representing the absolute path to the file.</p>
+     *
+     * @param workspacePathFile A {@link File} that points to our current
+     *                          working directory.
+     * @param pathname The file path.
+     *
+     * @return The {@link File} specified by the path.
+     */
+    public static File getAbsoluteFile(File workspacePathFile, String pathname) {
+        return new File(workspacePathFile, pathname).getAbsoluteFile();
     }
 
     /**
@@ -185,7 +199,7 @@ public class Utilities {
         String relativePath = filePath.substring(workspacePath.length() + 1);
 
         // Add all package names using the Java Collections
-        List<String> pkgList = new LinkedList<String>();
+        List<String> pkgList = new LinkedList<>();
         Collections.addAll(pkgList, relativePath.split(Pattern
                 .quote(File.separator)));
 

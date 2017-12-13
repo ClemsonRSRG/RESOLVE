@@ -326,7 +326,17 @@ public class ResolveCompiler {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // Convert to a file object
-            File file = Utilities.getAbsoluteFile(fileString);
+            // 1) Find the file using any specified workspace directory.
+            // 2) Find the file in the current directory.
+            File file;
+            if (compileEnvironment.flags.isFlagSet(FLAG_WORKSPACE_DIR)) {
+                file =
+                        Utilities.getAbsoluteFile(compileEnvironment
+                                .getWorkspaceDir(), fileString);
+            }
+            else {
+                file = Utilities.getAbsoluteFile(fileString);
+            }
 
             // Error if we can't locate the file
             if (!file.isFile()) {
