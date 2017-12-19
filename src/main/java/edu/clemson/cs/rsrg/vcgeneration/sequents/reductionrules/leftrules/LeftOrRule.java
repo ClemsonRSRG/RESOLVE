@@ -67,8 +67,10 @@ public class LeftOrRule extends AbstractReductionRuleApplication
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Add the left and right into the different antecedent lists
                     if (originalExpAsInfixExp.getOperatorAsString().equals("or")) {
-                        newAntecedents1.add(originalExpAsInfixExp.getLeft().clone());
-                        newAntecedents2.add(originalExpAsInfixExp.getRight().clone());
+                        newAntecedents1.add(copyExp(originalExpAsInfixExp.getLeft(),
+                                myOriginalExp.getLocationDetailModel()));
+                        newAntecedents2.add(copyExp(originalExpAsInfixExp.getRight(),
+                                myOriginalExp.getLocationDetailModel()));
                     }
                     // This must be an error!
                     else {
@@ -84,12 +86,13 @@ public class LeftOrRule extends AbstractReductionRuleApplication
 
             // Construct new sequents
             // YS: We just need to prove either resultingSequent1 or resultingSequent2,
-            // therefore it is just the same VC.
+            //     therefore it is just the same VC. Don't pass a location detail model
+            //     so we don't accidentally change a goal's location detail model
             Sequent resultingSequent1 = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents1, copyExpList(myOriginalSequent.getConcequents()));
+                    newAntecedents1, copyExpList(myOriginalSequent.getConcequents(), null));
             myResultingSequents.add(resultingSequent1);
             Sequent resultingSequent2 = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents2, copyExpList(myOriginalSequent.getConcequents()));
+                    newAntecedents2, copyExpList(myOriginalSequent.getConcequents(), null));
             myResultingSequents.add(resultingSequent2);
 
             // Indicate that this is an impacting reduction
