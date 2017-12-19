@@ -91,6 +91,35 @@ public abstract class AbstractReductionRuleApplication
     // ===========================================================
 
     /**
+     * <p>An helper method that deep copies an {@link Exp}.</p>
+     *
+     * @param originalExp The expression to copy.
+     * @param parentLocationDetail Location detail for the parent expression.
+     *
+     * @return A deep copy of {@code originalExp}.
+     */
+    protected final Exp copyExp(Exp originalExp,
+            LocationDetailModel parentLocationDetail) {
+        Exp expCopy = originalExp.clone();
+
+        // Check to see if we have a location detail model
+        // If we have one, the clone method must have made a
+        // a copy already.
+        if (expCopy.getLocationDetailModel() == null) {
+            // Attempt to copy our parent's model.
+            // YS: At this point, someone should have
+            //     some sort of location detail model.
+            //     If not, the VC generator didn't generate
+            //     the expression properly.
+            if (parentLocationDetail != null) {
+                expCopy.setLocationDetailModel(parentLocationDetail.clone());
+            }
+        }
+
+        return expCopy;
+    }
+
+    /**
      * <p>An helper method that deep copies a list of {@link Exp Exps}.</p>
      *
      * @param originalExpList A list of {@link Exp Exps}.
@@ -107,7 +136,7 @@ public abstract class AbstractReductionRuleApplication
             // Check to see if we have a location detail model
             // If we have one, the clone method must have made a
             // a copy already.
-            if (exp.getLocationDetailModel() == null) {
+            if (expCopy.getLocationDetailModel() == null) {
                 // Attempt to copy our parent's model.
                 // YS: At this point, someone should have
                 //     some sort of location detail model.
