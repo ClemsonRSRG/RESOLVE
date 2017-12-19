@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.ArrayList;
@@ -93,14 +94,31 @@ public abstract class AbstractReductionRuleApplication
      * <p>An helper method that deep copies a list of {@link Exp Exps}.</p>
      *
      * @param originalExpList A list of {@link Exp Exps}.
+     * @param parentLocationDetail Location detail for the parent expression.
      *
      * @return A deep copy of {@code originalExpList}.
      */
-    protected final List<Exp> copyExpList(List<Exp> originalExpList) {
+    protected final List<Exp> copyExpList(List<Exp> originalExpList, LocationDetailModel parentLocationDetail) {
         List<Exp> copyExpList = new ArrayList<>(originalExpList.size());
 
         for (Exp exp : originalExpList) {
-            copyExpList.add(exp.clone());
+            Exp expCopy = exp.clone();
+
+            // Check to see if we have a location detail model
+            // If we have one, the clone method must have made a
+            // a copy already.
+            if (exp.getLocationDetailModel() == null) {
+                // Attempt to copy our parent's model.
+                // YS: At this point, someone should have
+                //     some sort of location detail model.
+                //     If not, the VC generator didn't generate
+                //     the expression properly.
+                if (parentLocationDetail != null) {
+                    expCopy.setLocationDetailModel(parentLocationDetail.clone());
+                }
+            }
+
+            copyExpList.add(expCopy);
         }
 
         return copyExpList;
