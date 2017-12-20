@@ -61,15 +61,17 @@ public class RightImpliesRule extends AbstractReductionRuleApplication
     public final List<Sequent> applyRule() {
         if (myOriginalExp instanceof InfixExp) {
             InfixExp originalExpAsInfixExp = (InfixExp) myOriginalExp;
-            List<Exp> newAntecedents = copyExpList(myOriginalSequent.getAntecedents());
+            List<Exp> newAntecedents = copyExpList(myOriginalSequent.getAntecedents(), null);
             List<Exp> newConsequents = new ArrayList<>();
             for (Exp exp : myOriginalSequent.getConcequents()) {
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Place the left expression in the antecedent and right expression
                     // as a new consequent in the sequent.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("implies")) {
-                        newAntecedents.add(originalExpAsInfixExp.getLeft().clone());
-                        newConsequents.add(originalExpAsInfixExp.getRight().clone());
+                        newAntecedents.add(copyExp(originalExpAsInfixExp.getLeft(),
+                                myOriginalExp.getLocationDetailModel()));
+                        newConsequents.add(copyExp(originalExpAsInfixExp.getRight(),
+                                myOriginalExp.getLocationDetailModel()));
                     }
                     // This must be an error!
                     else {

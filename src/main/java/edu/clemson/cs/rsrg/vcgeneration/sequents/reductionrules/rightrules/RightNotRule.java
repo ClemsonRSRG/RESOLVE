@@ -62,7 +62,7 @@ public class RightNotRule extends AbstractReductionRuleApplication
     public final List<Sequent> applyRule() {
         if (myOriginalExp instanceof PrefixExp) {
             PrefixExp originalExpAsPrefixExp = (PrefixExp) myOriginalExp;
-            List<Exp> newAntecedents = copyExpList(myOriginalSequent.getAntecedents());
+            List<Exp> newAntecedents = copyExpList(myOriginalSequent.getAntecedents(), null);
             List<Exp> newConsequents = new ArrayList<>();
             for (Exp exp : myOriginalSequent.getConcequents()) {
                 if (exp.equals(originalExpAsPrefixExp)) {
