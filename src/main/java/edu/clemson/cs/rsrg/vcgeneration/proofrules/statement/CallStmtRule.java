@@ -795,25 +795,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
                                 getLocation().clone());
                 Exp generatedEnsures =
                         walker.getEnsuresClause(expAsProgramFunctionexp);
-                List<Exp> restoresParamExps =
-                        walker.getRestoresParamEnsuresClauses();
                 List<ConfirmStmt> terminationConfirms =
                         walker.getTerminationConfirmStmts();
-
-                // Form a conjunct using the restoresParamExps
-                Exp restoresParamEnsures =
-                        VarExp.getTrueVarExp(expAsProgramFunctionexp
-                                .getLocation(), myTypeGraph);
-                for (Exp restoresExp : restoresParamExps) {
-                    if (VarExp.isLiteralTrue(restoresParamEnsures)) {
-                        restoresParamEnsures = restoresExp;
-                    }
-                    else {
-                        restoresParamEnsures =
-                                MathExp.formConjunct(expAsProgramFunctionexp.getLocation().clone(),
-                                        restoresParamEnsures, exp);
-                    }
-                }
 
                 // 1) If the argument expression contains recursive calls,
                 //    we need to add all the termination confirm statements.

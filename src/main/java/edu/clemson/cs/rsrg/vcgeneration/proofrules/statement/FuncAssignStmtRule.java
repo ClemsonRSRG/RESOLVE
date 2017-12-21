@@ -15,11 +15,9 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
-import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
@@ -184,26 +182,8 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
                     walker.getRequiresClause(assignProgramFunctionExp.getLocation());
             Exp generatedEnsures =
                     walker.getEnsuresClause(assignProgramFunctionExp);
-            List<Exp> restoresParamExps =
-                    walker.getRestoresParamEnsuresClauses();
             List<ConfirmStmt> terminationConfirms =
                     walker.getTerminationConfirmStmts();
-
-            // Form a conjunct using the restoresParamExps
-            Exp restoresParamEnsures =
-                    VarExp.getTrueVarExp(assignProgramFunctionExp
-                            .getLocation().clone(), myTypeGraph);
-            for (Exp exp : restoresParamExps) {
-                if (VarExp.isLiteralTrue(restoresParamEnsures)) {
-                    restoresParamEnsures = exp.clone();
-                }
-                else {
-                    restoresParamEnsures =
-                            MathExp.formConjunct(assignProgramFunctionExp
-                                    .getLocation().clone(),
-                                    restoresParamEnsures, exp);
-                }
-            }
 
             // If the program function contains recursive calls,
             // we need to add all the termination confirm statements
@@ -219,15 +199,6 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
                 myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(
                         assignProgramFunctionExp.getLocation().clone(),
                         generatedRequires, false));
-            }
-
-            // If the ProgramFunctionExp walker generated any restores
-            // parameter ensures clauses, we need to add it as a new
-            // assume statement.
-            if (!VarExp.isLiteralTrue(restoresParamEnsures)) {
-                myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(
-                        assignProgramFunctionExp.getLocation().clone(),
-                        restoresParamEnsures, false));
             }
 
             // Set the generated ensures as our new assign expression

@@ -257,11 +257,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);
 
-        // Add any ensures clauses for restores parameter to our restores parameter
-        // ensures clause list.
-        generateRestoresParamEnsuresClause(fullOperationName, operationDec
-                .getParameters(), exp.getArguments());
-
         // Check to see if this function is calling itself recursively
         // and generate the appropriate termination VC.
         if (myCurrentOperationEntry != null
@@ -336,17 +331,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method returns the list of @code restores} parameter's
-     * ensures clauses (if any).</p>
-     *
-     * @return {@code Ensures} clauses generated from {@code restores}
-     * parameters.
-     */
-    public final List<Exp> getRestoresParamEnsuresClauses() {
-        return myRestoresParamEnsuresClauses;
-    }
-
-    /**
      * <p>This method returns the list of termination
      * {@code Confirm} clauses (if any).</p>
      *
@@ -408,46 +392,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         }
 
         return retExp;
-    }
-
-    /**
-     * <p>An helper method that generates {@code ensures} clauses for any parameters
-     * with {@code restores} parameter mode.</p>
-     *
-     * @param opName Name of the operation we are calling.
-     * @param paramList The list of parameter variables.
-     * @param argList The list of arguments from the operation call.
-     */
-    private void generateRestoresParamEnsuresClause(String opName,
-            List<ParameterVarDec> paramList, List<ProgramExp> argList) {
-        for (int i = 0; i < argList.size(); i++) {
-            ParameterVarDec varDec = paramList.get(i);
-            Exp exp = argList.get(i);
-
-            // Only do this if it is a restores parameter mode
-            if (varDec.getMode().equals(ParameterMode.RESTORES)) {
-                // YS: Can safely cast this as VarExp because it is the only thing that
-                // we can pass to a restores parameter.
-                VarExp expAsVarExp =
-                        (VarExp) Utilities
-                                .convertExp(exp, myCurrentModuleScope);
-                OldExp oldExp =
-                        new OldExp(expAsVarExp.getLocation().clone(),
-                                expAsVarExp.clone());
-
-                // Generate the restores parameter ensures clause and
-                // store the new location detail.
-                EqualsExp equalsExp =
-                        new EqualsExp(expAsVarExp.getLocation().clone(),
-                                expAsVarExp, null, Operator.EQUAL, oldExp);
-                equalsExp.setLocationDetailModel(new LocationDetailModel(varDec
-                        .getLocation().clone(), exp.getLocation().clone(),
-                        "Ensures Clause of " + opName + " (Condition from \""
-                                + ParameterMode.RESTORES.name()
-                                + "\" parameter mode)"));
-                myRestoresParamEnsuresClauses.add(equalsExp);
-            }
-        }
     }
 
     /**
