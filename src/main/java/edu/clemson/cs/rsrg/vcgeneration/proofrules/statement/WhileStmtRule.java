@@ -130,6 +130,7 @@ public class WhileStmtRule extends AbstractProofRuleApplication
         AssertionClause decreasingClause = whileLoopItem.getDecreasingClause();
         VCVarExp nqvPValExp = Utilities.createVCVarExp(myCurrentAssertiveCodeBlock,
                 Utilities.createPValExp(decreasingClause.getLocation().clone(), myCurrentModuleScope));
+        myCurrentAssertiveCodeBlock.addFreeVar(nqvPValExp);
 
         // Create a statement assuming the invariant and NQV(RS, P_Val) = P_Exp
         EqualsExp equalsPExp = new EqualsExp(decreasingClause.getLocation().clone(),

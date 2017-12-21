@@ -715,6 +715,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, Utilities
                         .createPValExp(myCurrentProcedureDecreasingExp
                                 .getLocation().clone(), myCurrentModuleScope));
+        myCurrentAssertiveCodeBlock.addFreeVar(nqvPValExp);
 
         // Generate the termination of recursive call: 1 + P_Exp <= NQV(RS, P_Val)
         IntegerExp oneExp =

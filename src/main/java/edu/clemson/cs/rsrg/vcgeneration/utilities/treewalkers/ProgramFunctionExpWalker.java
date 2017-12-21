@@ -468,6 +468,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             Utilities.createPValExp(myDecreasingExp
                                     .getLocation().clone(),
                                     myCurrentModuleScope));
+            myCurrentAssertiveCodeBlock.addFreeVar(nqvPValExp);
 
             // Generate the termination of recursive call: 1 + P_Exp <= NQV(RS, P_Val)
             IntegerExp oneExp =
