@@ -175,7 +175,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      */
     public final void addFreeVar(Exp var) {
         if (!containsFreeVar(var)) {
-            myFreeVars.add(var);
+            myFreeVars.add(var.clone());
         }
     }
 

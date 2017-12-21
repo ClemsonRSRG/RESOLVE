@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
 import edu.clemson.cs.rsrg.absyn.statements.ChangeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
@@ -75,8 +76,10 @@ public class ChangeStmtRule extends AbstractProofRuleApplication
         List<Exp> changeVars = myChangeStmt.getChangingVars();
         Map<Exp, Exp> replacementMap = new LinkedHashMap<>(changeVars.size());
         for (Exp exp : changeVars) {
-            replacementMap.put(exp.clone(),
-                    Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp.clone()));
+            VCVarExp vcVarExp =
+                    Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp.clone());
+            myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
+            replacementMap.put(exp.clone(), vcVarExp);
         }
 
         // Loop through each verification condition and replace the variable

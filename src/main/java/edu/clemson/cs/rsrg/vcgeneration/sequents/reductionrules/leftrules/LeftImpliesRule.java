@@ -62,16 +62,18 @@ public class LeftImpliesRule extends AbstractReductionRuleApplication
         if (myOriginalExp instanceof InfixExp) {
             InfixExp originalExpAsInfixExp = (InfixExp) myOriginalExp;
             List<Exp> newAntecedents1 = new ArrayList<>();
-            List<Exp> newConsequents1 = copyExpList(myOriginalSequent.getConcequents());
+            List<Exp> newConsequents1 = copyExpList(myOriginalSequent.getConcequents(), null);
             List<Exp> newAntecedents2 = new ArrayList<>();
-            List<Exp> newConsequents2 = copyExpList(myOriginalSequent.getConcequents());
+            List<Exp> newConsequents2 = copyExpList(myOriginalSequent.getConcequents(), null);
             for (Exp exp : myOriginalSequent.getAntecedents()) {
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Place the left expression as a new consequent in the second sequent
                     // and place the right expression as a new antecedent in the first sequent.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("implies")) {
-                        newAntecedents1.add(originalExpAsInfixExp.getRight().clone());
-                        newConsequents2.add(originalExpAsInfixExp.getLeft().clone());
+                        newAntecedents1.add(copyExp(originalExpAsInfixExp.getRight(),
+                                myOriginalExp.getLocationDetailModel()));
+                        newConsequents2.add(copyExp(originalExpAsInfixExp.getLeft(),
+                                myOriginalExp.getLocationDetailModel()));
                     }
                     // This must be an error!
                     else {

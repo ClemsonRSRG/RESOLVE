@@ -67,8 +67,10 @@ public class RightOrRule extends AbstractReductionRuleApplication
                     // Replace the original "and" expression with its associated
                     // left and right expressions.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("or")) {
-                        newConsequents.add(originalExpAsInfixExp.getLeft().clone());
-                        newConsequents.add(originalExpAsInfixExp.getRight().clone());
+                        newConsequents.add(copyExp(originalExpAsInfixExp.getLeft(),
+                                myOriginalExp.getLocationDetailModel()));
+                        newConsequents.add(copyExp(originalExpAsInfixExp.getRight(),
+                                myOriginalExp.getLocationDetailModel()));
                     }
                     // This must be an error!
                     else {
@@ -83,7 +85,7 @@ public class RightOrRule extends AbstractReductionRuleApplication
 
             // Construct a new sequent
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
-                    copyExpList(myOriginalSequent.getAntecedents()), newConsequents);
+                    copyExpList(myOriginalSequent.getAntecedents(), null), newConsequents);
             myResultingSequents.add(resultingSequent);
         }
         // This must be an error!

@@ -15,7 +15,6 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
@@ -191,40 +190,8 @@ public class IfStmtRule extends AbstractProofRuleApplication
                             .getLocation());
             Exp generatedEnsures =
                     walker.getEnsuresClause(ifConditionAsProgramFunctionExp);
-            List<Exp> restoresParamExps =
-                    walker.getRestoresParamEnsuresClauses();
             List<ConfirmStmt> terminationConfirms =
                     walker.getTerminationConfirmStmts();
-
-            // Form a conjunct using the restoresParamExps
-            // YS: We also make a copy of this for the else part,
-            //     while storing the associated location details.
-            Exp restoresParamEnsuresIfPart =
-                    VarExp.getTrueVarExp(ifConditionItem.getTest()
-                            .getLocation(), myTypeGraph);
-            Exp restoresParamEnsuresElsePart =
-                    VarExp.getTrueVarExp(ifConditionItem.getTest()
-                            .getLocation(), myTypeGraph);
-            for (Exp exp : restoresParamExps) {
-                // Make a copy of the expression for the else part
-                // and add the new location detail.
-                Exp expCopy = exp.clone();
-
-                if (VarExp.isLiteralTrue(restoresParamEnsuresIfPart)) {
-                    restoresParamEnsuresIfPart = exp;
-                    restoresParamEnsuresElsePart = expCopy;
-                }
-                else {
-                    restoresParamEnsuresIfPart =
-                            MathExp.formConjunct(ifConditionItem.getTest()
-                                    .getLocation().clone(),
-                                    restoresParamEnsuresIfPart, exp);
-                    restoresParamEnsuresElsePart =
-                            MathExp.formConjunct(ifConditionItem.getTest()
-                                    .getLocation().clone(),
-                                    restoresParamEnsuresElsePart, expCopy);
-                }
-            }
 
             // If part of the rule
             // 1) If the testing condition contains recursive calls,
@@ -251,15 +218,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
                             .getLocation(), "If Statement Condition"));
             myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(ifCondition
                     .getLocation().clone(), ifConditionBEExp, true));
-
-            // 4) If the ProgramFunctionExp walker generated any restores
-            //    parameter ensures clauses, we need to add it as a new
-            //    assume statement.
-            if (!VarExp.isLiteralTrue(restoresParamEnsuresIfPart)) {
-                myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(
-                        ifConditionItem.getTest().getLocation().clone(),
-                        restoresParamEnsuresIfPart, false));
-            }
 
             // 5) Add all the statements inside the if-part to the
             //    if-assertive code block.
