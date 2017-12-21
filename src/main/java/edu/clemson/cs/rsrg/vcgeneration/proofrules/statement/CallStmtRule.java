@@ -352,10 +352,15 @@ public class CallStmtRule extends AbstractProofRuleApplication
                         "Ensures Clause of " + operationDec.getName()));
 
         // Substitution maps
-        // 1) substitutions: Contains all the replacements for the ensures clause.
-        // 2) substitutionsForSeq: Contains all the replacements for the VC's sequents.
+        // YS: We need two replacement maps in case we happen to have the
+        //     same names in formal parameters expressions and in the argument list.
+        //     The third one is for replacing expressions in sequents.
+        // 1) substitutionParamToTemp: Contains all the replacements from formal to a temp variable.
+        // 2) substitutionTempToActual: Contains all the replacements from the temp variable to actual.
+        // 3) substitutionsForSeq: Contains all the replacements for the VC's sequents.
+        Map<Exp, Exp> substitutionParamToTemp = new LinkedHashMap<>();
+        Map<Exp, Exp> substitutionTempToActual = new LinkedHashMap<>();
         Map<Exp, Exp> substitutionsForSeq = new LinkedHashMap<>();
-        Map<Exp, Exp> substitutions = new LinkedHashMap<>();
 
         // Loop through each of the operation parameters.
         Exp parameterEnsures = null;
@@ -370,6 +375,15 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     varDec.getName().clone(), varDec.getTy().getMathTypeValue(), null);
             OldExp oldParameterExp = new OldExp(varDec.getLocation().clone(), parameterExp.clone());
             oldParameterExp.setMathType(varDec.getTy().getMathTypeValue());
+
+            // Temporary variables corresponding to the parameter variable
+            // and the incoming parameter variable.
+            // A temporary VarExp that avoids any formal with the same name as the actual.
+            VarExp tempParamExp = Utilities.createVarExp(varDec.getLocation().clone(), null,
+                    new PosSymbol(parameterExp.getLocation().clone(), "_" + parameterExp.getName().getName()),
+                    exp.getMathType(), exp.getMathTypeValue());
+            OldExp tempOldParamExp = new OldExp(varDec.getLocation().clone(), parameterExp.clone());
+            tempOldParamExp.setMathType(varDec.getTy().getMathTypeValue());
 
             // Query for the type entry in the symbol table
             SymbolTableEntry ste =
@@ -409,11 +423,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
                                         type.getExemplar(), typeEntry.getModelType(), null);
                         varDecEnsures = modifiedConstraint.getAssertionExp().clone();
 
-                        // Local substitution
-                        Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
-                        ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
-                        varDecEnsures.substitute(ensuresSubMap);
-
                         // Store the new location detail.
                         varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
                                 .getLocation().clone(), exp.getLocation().clone(),
@@ -424,8 +433,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 }
 
                 // Substitutions for Ensures Clause:
-                // 1) oldParameterExp ~> exp
-                substitutions.put(oldParameterExp, exp);
+                // 1) oldParameterExp ~> tempOldParamExp // tempOldParamExp ~> exp
+                substitutionParamToTemp.put(oldParameterExp, tempOldParamExp.clone());
+                substitutionTempToActual.put(tempOldParamExp, exp);
 
                 // Substitutions for sequents in VCs
                 // 1) exp ~> NQV(exp)
@@ -479,8 +489,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
                                 + "\" parameter mode)"));
 
                 // Substitutions for Ensures Clause:
-                // 1) oldParameterExp ~> exp
-                substitutions.put(oldParameterExp, exp);
+                // 1) oldParameterExp ~> tempOldParamExp // tempOldParamExp ~> exp
+                substitutionParamToTemp.put(oldParameterExp, tempOldParamExp.clone());
+                substitutionTempToActual.put(tempOldParamExp, exp);
 
                 // Substitutions for sequents in VCs
                 // 1) exp ~> NQV(exp)
@@ -494,8 +505,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
 
                 // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> NQV(exp)
-                substitutions.put(parameterExp, nqvExp);
+                // 1) parameterExp ~> tempParameterExp // tempParameterExp ~> NQV(exp)
+                substitutionParamToTemp.put(parameterExp, tempParamExp.clone());
+                substitutionTempToActual.put(tempParamExp, nqvExp);
 
                 // Substitutions for sequents in VCs
                 // 1) exp ~> NQV(exp)
@@ -504,8 +516,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
             // 4) RESTORES Mode
             else if (varDec.getMode().equals(ParameterMode.RESTORES)) {
                 // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> exp
-                substitutions.put(parameterExp, exp);
+                // 1) parameterExp ~> tempParameterExp // tempParameterExp ~> exp
+                substitutionParamToTemp.put(parameterExp, tempParamExp.clone());
+                substitutionTempToActual.put(tempParamExp, exp);
             }
             // 5) UPDATES Mode
             else if (varDec.getMode().equals(ParameterMode.UPDATES)) {
@@ -515,20 +528,24 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 myCurrentAssertiveCodeBlock.addFreeVar(nqvExp);
 
                 // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> NQV(exp)
-                // 2) oldParameterExp ~> exp
-                substitutions.put(parameterExp, nqvExp);
-                substitutions.put(oldParameterExp, exp);
+                // 1) parameterExp ~> tempParameterExp // tempParameterExp ~> NQV(exp)
+                substitutionParamToTemp.put(parameterExp, tempParamExp.clone());
+                substitutionTempToActual.put(tempParamExp, nqvExp);
+
+                // 2) oldParameterExp ~> tempOldParamExp // tempOldParamExp ~> exp
+                substitutionParamToTemp.put(oldParameterExp, tempOldParamExp.clone());
+                substitutionTempToActual.put(tempOldParamExp, exp);
 
                 // Substitutions for sequents in VCs
-                // 1) parameterExp ~> NQV(exp)
-                substitutionsForSeq.put(parameterExp.clone(), nqvExp.clone());
+                // 1) exp ~> NQV(exp)
+                substitutionsForSeq.put(exp.clone(), nqvExp.clone());
             }
             // 6) PRESERVES and EVALUATES Mode
             else {
                 // Substitutions for Ensures Clause:
-                // 1) parameterExp ~> exp
-                substitutions.put(parameterExp, exp);
+                // 1) parameterExp ~> tempParameterExp // tempParameterExp ~> exp
+                substitutionParamToTemp.put(parameterExp, tempParamExp.clone());
+                substitutionTempToActual.put(tempParamExp, exp);
             }
 
             // Combine with other parameter ensures
@@ -558,8 +575,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
             }
         }
 
-        // Apply substitutions
-        ensuresExp = ensuresExp.substitute(substitutions);
+        // Replace from formal to temp and then from temp to actual
+        ensuresExp = ensuresExp.substitute(substitutionParamToTemp);
+        ensuresExp = ensuresExp.substitute(substitutionTempToActual);
 
         // Apply any replacements if it isn't just "ensures true;"
         if (!VarExp.isLiteralTrue(ensuresExp)) {
