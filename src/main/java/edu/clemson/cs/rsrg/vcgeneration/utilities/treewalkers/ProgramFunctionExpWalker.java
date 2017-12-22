@@ -18,7 +18,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
@@ -28,10 +27,8 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
@@ -56,12 +53,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * {@code Facility}, this list will be empty.</p>
      */
     private final List<TypeFamilyDec> myConceptDeclaredTypes;
-
-    /**
-     * <p>The current {@link AssertiveCodeBlock} we are using to
-     * generate {@code VCs}.</p>
-     */
-    private final AssertiveCodeBlock myCurrentAssertiveCodeBlock;
 
     /**
      * <p>The module scope for the file we are generating
@@ -100,9 +91,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      */
     private final List<Exp> myRequiresClauseList;
 
-    /** <p>A list that contains all the restores parameter ensures clauses</p> */
-    private final List<Exp> myRestoresParamEnsuresClauses;
-
     /** <p>A list that contains any generated termination {@code Confirm} statements.</p> */
     private final List<ConfirmStmt> myTerminationConfirmStmts;
 
@@ -124,20 +112,17 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * <p>Note that this constructor is used by non-recursive declarations,
      * where there isn't a {@code decreasing} clause.</p>
      *
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
      * @param typeFamilyDecs List of abstract types we are implementing or extending.
      * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
-    public ProgramFunctionExpWalker(AssertiveCodeBlock block,
-            List<TypeFamilyDec> typeFamilyDecs,
+    public ProgramFunctionExpWalker(List<TypeFamilyDec> typeFamilyDecs,
             List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
             ModuleScope moduleScope, TypeGraph g) {
-        this(null, null, block, typeFamilyDecs, localRepresentationTypeDecs,
+        this(null, null, typeFamilyDecs, localRepresentationTypeDecs,
                 processedInstFacDecs, moduleScope, g);
     }
 
@@ -149,8 +134,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * @param entry The current visiting {@code Procedure} declaration's
      *              {@link OperationEntry}.
      * @param decreasingExp The {@code decreasing} clause for the visiting
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
      * @param typeFamilyDecs List of abstract types we are implementing or extending.
      * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
@@ -158,12 +141,11 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * @param g The current type graph.
      */
     public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp,
-            AssertiveCodeBlock block, List<TypeFamilyDec> typeFamilyDecs,
+            List<TypeFamilyDec> typeFamilyDecs,
             List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
             ModuleScope moduleScope, TypeGraph g) {
         myConceptDeclaredTypes = typeFamilyDecs;
-        myCurrentAssertiveCodeBlock = block;
         myCurrentModuleScope = moduleScope;
         myCurrentOperationEntry = entry;
         myDecreasingExp = decreasingExp;
@@ -171,7 +153,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myProcessedInstFacilityDecls = processedInstFacDecs;
         myRequiresClauseList = new LinkedList<>();
-        myRestoresParamEnsuresClauses = new LinkedList<>();
         myTerminationConfirmStmts = new LinkedList<>();
         myTypeGraph = g;
     }
@@ -407,14 +388,10 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             + functionExp.toString(), functionExp.getLocation());
         }
         else {
-            VCVarExp nqvPValExp =
-                    Utilities.createVCVarExp(myCurrentAssertiveCodeBlock,
-                            Utilities.createPValExp(myDecreasingExp
-                                    .getLocation().clone(),
-                                    myCurrentModuleScope));
-            myCurrentAssertiveCodeBlock.addFreeVar(nqvPValExp);
-
-            // Generate the termination of recursive call: 1 + P_Exp <= NQV(RS, P_Val)
+            // Generate the termination of recursive call: 1 + P_Exp <= P_Val
+            VarExp pValExp =
+                    Utilities.createPValExp(myDecreasingExp.getLocation()
+                            .clone(), myCurrentModuleScope);
             IntegerExp oneExp =
                     new IntegerExp(myDecreasingExp.getLocation().clone(), null,
                             1);
@@ -429,7 +406,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
             InfixExp terminationExp =
                     new InfixExp(myDecreasingExp.getLocation().clone(), sumExp,
                             null, new PosSymbol(myDecreasingExp.getLocation()
-                                    .clone(), "<="), nqvPValExp.clone());
+                                    .clone(), "<="), pValExp.clone());
             terminationExp.setMathType(myTypeGraph.BOOLEAN);
 
             // Store the location detail for the recursive function call's
