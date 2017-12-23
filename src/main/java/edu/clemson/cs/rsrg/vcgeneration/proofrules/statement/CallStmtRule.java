@@ -423,6 +423,11 @@ public class CallStmtRule extends AbstractProofRuleApplication
                                         type.getExemplar(), typeEntry.getModelType(), null);
                         varDecEnsures = modifiedConstraint.getAssertionExp().clone();
 
+                        // Local substitution
+                        Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
+                        ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
+                        varDecEnsures = varDecEnsures.substitute(ensuresSubMap);
+
                         // Store the new location detail.
                         varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
                                 .getLocation().clone(), exp.getLocation().clone(),
@@ -463,10 +468,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
 
                     // TODO: Logic for types in concept realizations
 
-                    varDecEnsures =
-                            new EqualsExp(varDec.getLocation().clone(),
-                                    parameterExp.clone(), null, EqualsExp.Operator.EQUAL,
-                                    modifiedInitEnsures.getAssertionExp().clone());
+                    varDecEnsures = modifiedInitEnsures.getAssertionExp().clone();
                 }
                 // For all generic types, all we can do is generate:
                 // an "Is_Initial" function.
@@ -479,7 +481,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 // Local substitution
                 Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
                 ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
-                varDecEnsures.substitute(ensuresSubMap);
+                varDecEnsures = varDecEnsures.substitute(ensuresSubMap);
 
                 // Store the new location detail.
                 varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
@@ -549,7 +551,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
             }
 
             // Combine with other parameter ensures
-            if (varDecEnsures != null && VarExp.isLiteralTrue(varDecEnsures)) {
+            if (varDecEnsures != null && !VarExp.isLiteralTrue(varDecEnsures)) {
                 if (parameterEnsures == null) {
                     parameterEnsures = varDecEnsures;
                 }
