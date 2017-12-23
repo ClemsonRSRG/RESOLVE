@@ -17,7 +17,6 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -143,15 +142,16 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      */
     @Override
     public final VerificationCondition clone() {
-        VerificationCondition newVerificationCondition =
-                new VerificationCondition(myLocation.clone(), myName,
-                        new ArrayList<Sequent>(), myHasImpactingReduction,
-                        myLocationDetailModel.clone());
+        // YS: Collections.copy complains about source does not fit in dest,
+        // so we manually copy everything.
+        List<Sequent> copySequents = new ArrayList<>(myAssociatedSequents.size());
+        for (Sequent s : myAssociatedSequents) {
+            copySequents.add(s.clone());
+        }
 
-        Collections.copy(newVerificationCondition.myAssociatedSequents,
-                myAssociatedSequents);
-
-        return newVerificationCondition;
+        return new VerificationCondition(myLocation.clone(), myName,
+                copySequents, myHasImpactingReduction,
+                myLocationDetailModel.clone());
     }
 
     /**

@@ -423,6 +423,11 @@ public class CallStmtRule extends AbstractProofRuleApplication
                                         type.getExemplar(), typeEntry.getModelType(), null);
                         varDecEnsures = modifiedConstraint.getAssertionExp().clone();
 
+                        // Local substitution
+                        Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
+                        ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
+                        varDecEnsures = varDecEnsures.substitute(ensuresSubMap);
+
                         // Store the new location detail.
                         varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
                                 .getLocation().clone(), exp.getLocation().clone(),
@@ -463,10 +468,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
 
                     // TODO: Logic for types in concept realizations
 
-                    varDecEnsures =
-                            new EqualsExp(varDec.getLocation().clone(),
-                                    parameterExp.clone(), null, EqualsExp.Operator.EQUAL,
-                                    modifiedInitEnsures.getAssertionExp().clone());
+                    varDecEnsures = modifiedInitEnsures.getAssertionExp().clone();
                 }
                 // For all generic types, all we can do is generate:
                 // an "Is_Initial" function.
@@ -479,7 +481,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 // Local substitution
                 Map<Exp, Exp> ensuresSubMap = new LinkedHashMap<>();
                 ensuresSubMap.put(parameterExp.clone(), nqvExp.clone());
-                varDecEnsures.substitute(ensuresSubMap);
+                varDecEnsures = varDecEnsures.substitute(ensuresSubMap);
 
                 // Store the new location detail.
                 varDecEnsures.setLocationDetailModel(new LocationDetailModel(varDec
@@ -549,7 +551,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
             }
 
             // Combine with other parameter ensures
-            if (varDecEnsures != null && VarExp.isLiteralTrue(varDecEnsures)) {
+            if (varDecEnsures != null && !VarExp.isLiteralTrue(varDecEnsures)) {
                 if (parameterEnsures == null) {
                     parameterEnsures = varDecEnsures;
                 }
@@ -710,14 +712,10 @@ public class CallStmtRule extends AbstractProofRuleApplication
      * @return An {@link Exp} that contains the termination clause.
      */
     private Exp createTerminationReqExp() {
-        // Create a new NQV(RS, P_Val)
-        VCVarExp nqvPValExp =
-                Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, Utilities
-                        .createPValExp(myCurrentProcedureDecreasingExp
-                                .getLocation().clone(), myCurrentModuleScope));
-        myCurrentAssertiveCodeBlock.addFreeVar(nqvPValExp);
-
-        // Generate the termination of recursive call: 1 + P_Exp <= NQV(RS, P_Val)
+        // Generate the termination of recursive call: 1 + P_Exp <= P_Val
+        VarExp pValExp =
+                Utilities.createPValExp(myCurrentProcedureDecreasingExp
+                        .getLocation().clone(), myCurrentModuleScope);
         IntegerExp oneExp =
                 new IntegerExp(myCurrentProcedureDecreasingExp.getLocation()
                         .clone(), null, 1);
@@ -734,7 +732,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 new InfixExp(myCurrentProcedureDecreasingExp.getLocation()
                         .clone(), sumExp, null, new PosSymbol(
                         myCurrentProcedureDecreasingExp.getLocation().clone(),
-                        "<="), nqvPValExp.clone());
+                        "<="), pValExp.clone());
         terminationExp.setMathType(myTypeGraph.BOOLEAN);
 
         // Store the location detail for the recursive function call's
@@ -770,7 +768,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 if (myCurrentProcedureOperationEntry == null) {
                     walker =
                             new ProgramFunctionExpWalker(
-                                    myCurrentAssertiveCodeBlock,
                                     myCurrentConceptDeclaredTypes,
                                     myLocalRepresentationTypeDecs,
                                     myProcessedInstFacilityDecls,
@@ -781,7 +778,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
                             new ProgramFunctionExpWalker(
                                     myCurrentProcedureOperationEntry,
                                     myCurrentProcedureDecreasingExp,
-                                    myCurrentAssertiveCodeBlock,
                                     myCurrentConceptDeclaredTypes,
                                     myLocalRepresentationTypeDecs,
                                     myProcessedInstFacilityDecls,

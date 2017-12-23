@@ -24,6 +24,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
@@ -168,7 +169,36 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // TODO: Assume decreasing expression if it is recursive
+        // Check to see if this is a recursive procedure.
+        // If yes, we will need to add an additional assume clause
+        // (P_Val = <decreasing clause>).
+        if (myCurrentProcedureDecreasingExp != null) {
+            // Create P_Val and add it as a free variable
+            VarExp pValExp =
+                    Utilities.createPValExp(myCurrentProcedureDecreasingExp
+                            .getLocation().clone(), myCurrentModuleScope);
+            myCurrentAssertiveCodeBlock.addFreeVar(pValExp);
+
+            // Generate progress metric recursive call: P_Val = P_Exp
+            EqualsExp equalsExp =
+                    new EqualsExp(myCurrentProcedureDecreasingExp.getLocation()
+                            .clone(), pValExp.clone(), null, Operator.EQUAL,
+                            myCurrentProcedureDecreasingExp.clone());
+            equalsExp.setMathType(myTypeGraph.BOOLEAN);
+
+            // Store the location detail for the recursive operation's
+            // progress metric expression.
+            equalsExp.setLocationDetailModel(new LocationDetailModel(
+                    myCurrentProcedureDecreasingExp.getLocation().clone(),
+                    myCurrentProcedureDecreasingExp.getLocation().clone(),
+                    "Progress Metric for Recursive Procedure"));
+
+            // Add this expression as something we can assume to be true.
+            AssumeStmt progressMetricAssume =
+                    new AssumeStmt(myCurrentProcedureDecreasingExp.getLocation().clone(),
+                            equalsExp, false);
+            myCurrentAssertiveCodeBlock.addStatement(progressMetricAssume);
+        }
 
         // Add all the statements
         myCurrentAssertiveCodeBlock.addStatements(myProcedureDec.getStatements());

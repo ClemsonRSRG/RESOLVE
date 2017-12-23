@@ -165,7 +165,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
             if (myCurrentProcedureOperationEntry == null) {
                 walker =
                         new ProgramFunctionExpWalker(
-                                myCurrentAssertiveCodeBlock,
                                 myCurrentConceptDeclaredTypes,
                                 myLocalRepresentationTypeDecs,
                                 myProcessedInstFacilityDecls,
@@ -176,7 +175,6 @@ public class IfStmtRule extends AbstractProofRuleApplication
                         new ProgramFunctionExpWalker(
                                 myCurrentProcedureOperationEntry,
                                 myCurrentProcedureDecreasingExp,
-                                myCurrentAssertiveCodeBlock,
                                 myCurrentConceptDeclaredTypes,
                                 myLocalRepresentationTypeDecs,
                                 myProcessedInstFacilityDecls,
