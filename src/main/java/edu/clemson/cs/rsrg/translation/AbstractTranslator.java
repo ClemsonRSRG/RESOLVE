@@ -830,4 +830,24 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 name.getLocation());
     }
 
+    /**
+     * <p>An helper method that throws the appropriate unsupported
+     * shared variable translation message.</p>
+     *
+     * <p>Note: Remove this once we figure out how to translate shared
+     * variables to Java/C.</p>
+     *
+     * @param name Name of the file that contains a shared variable.
+     */
+    private void unsupportedSharedTranslation(PosSymbol name) {
+        throw new SourceErrorException(
+                "["
+                        + getClass().getCanonicalName()
+                        + "] "
+                        + "Module: "
+                        + name
+                        + " contains share variables and can't be translated appropriately.",
+                name.getLocation());
+    }
+
 }
