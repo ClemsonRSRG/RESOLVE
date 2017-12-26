@@ -13,9 +13,7 @@
 package edu.clemson.cs.rsrg.translation;
 
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.FacilityModuleDec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
-import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ShortFacilityModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
@@ -223,6 +221,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public final void preModuleDec(ModuleDec dec) {
         try {
+            // Check for any shared variables in the current scope.
+            noSharedVarModule(dec);
+
             myCurrentModuleScope =
                     myBuilder.getModuleScope(new ModuleIdentifier(dec));
 
@@ -814,6 +815,47 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 + getTypeName(type));
 
         myActiveTemplates.peek().add("variables", variable);
+    }
+
+    /**
+     * <p>An helper method that checks to see if the specified
+     * module contains shared variables.</p>
+     *
+     * @param dec A module declaration.
+     */
+    private void noSharedVarModule(ModuleDec dec) {
+        boolean containsSharedVar = false;
+        if (dec instanceof ConceptModuleDec) {
+            containsSharedVar = ((ConceptModuleDec) dec).isSharingConcept();
+        }
+        else if (dec instanceof FacilityModuleDec || dec instanceof ShortFacilityModuleDec) {
+            containsSharedVar = false;
+        }
+        else {
+            PosSymbol conceptName;
+            if (dec instanceof ConceptRealizModuleDec) {
+                conceptName = ((ConceptRealizModuleDec) dec).getConceptName();
+            }
+            else if (dec instanceof EnhancementModuleDec) {
+                conceptName = ((EnhancementModuleDec) dec).getConceptName();
+            }
+            else {
+                conceptName = ((EnhancementRealizModuleDec) dec).getConceptName();
+            }
+
+            try {
+                ConceptModuleDec conceptModuleDec = (ConceptModuleDec) myCompileEnvironment.getModuleAST(new ModuleIdentifier(conceptName.getName()));
+                containsSharedVar = conceptModuleDec.isSharingConcept();
+            }
+            catch (NoSuchSymbolException nsse) {
+                noSuchModule(conceptName.getLocation());
+            }
+        }
+
+        // Throw error if we detect there is a shared variable
+        if (containsSharedVar) {
+            unsupportedSharedTranslation(dec.getName());
+        }
     }
 
     /**
