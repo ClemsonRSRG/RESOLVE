@@ -222,6 +222,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public final void preModuleDec(ModuleDec dec) {
         try {
             // Check for any shared variables in the current scope.
+            // TODO: Add the proper translation and remove the following method.
             noSharedVarModule(dec);
 
             myCurrentModuleScope =
@@ -828,7 +829,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         if (dec instanceof ConceptModuleDec) {
             containsSharedVar = ((ConceptModuleDec) dec).isSharingConcept();
         }
-        else if (dec instanceof FacilityModuleDec || dec instanceof ShortFacilityModuleDec) {
+        else if (dec instanceof FacilityModuleDec
+                || dec instanceof ShortFacilityModuleDec) {
             containsSharedVar = false;
         }
         else {
@@ -840,11 +842,15 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 conceptName = ((EnhancementModuleDec) dec).getConceptName();
             }
             else {
-                conceptName = ((EnhancementRealizModuleDec) dec).getConceptName();
+                conceptName =
+                        ((EnhancementRealizModuleDec) dec).getConceptName();
             }
 
             try {
-                ConceptModuleDec conceptModuleDec = (ConceptModuleDec) myCompileEnvironment.getModuleAST(new ModuleIdentifier(conceptName.getName()));
+                ConceptModuleDec conceptModuleDec =
+                        (ConceptModuleDec) myCompileEnvironment
+                                .getModuleAST(new ModuleIdentifier(conceptName
+                                        .getName()));
                 containsSharedVar = conceptModuleDec.isSharingConcept();
             }
             catch (NoSuchSymbolException nsse) {
