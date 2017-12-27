@@ -202,6 +202,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     private static final String FLAG_SECTION_NAME = "VCGenerator";
     private static final String FLAG_DESC_VERIFY_VC = "Generate VCs.";
     private static final String FLAG_DESC_PERF_VC = "Generate Performance VCs";
+    private static final String FLAG_DESC_ADD_CONSTRAINT = "Add constraints as givens.";
 
     // ===========================================================
     // Flags
@@ -220,10 +221,20 @@ public class VCGenerator extends TreeWalkerVisitor {
             new Flag(FLAG_SECTION_NAME, "PVCs", FLAG_DESC_PERF_VC);
 
     /**
+     * <p>Tells the compiler to generate VCs.</p>
+     */
+    public static final Flag FLAG_ADD_CONSTRAINT =
+            new Flag(FLAG_SECTION_NAME, "addConstraint", FLAG_DESC_ADD_CONSTRAINT);
+
+    /**
      * <p>Add all the required and implied flags for the {@code VCGenerator}.</p>
      */
     public static void setUpFlags() {
         FlagDependencies.addImplies(FLAG_PVCS_VC, FLAG_VERIFY_VC);
+
+        // Make sure we have one of these on.
+        Flag[] dependencies = {FLAG_VERIFY_VC, FLAG_PVCS_VC};
+        FlagDependencies.addRequires(FLAG_ADD_CONSTRAINT, dependencies);
     }
 
     // ===========================================================
