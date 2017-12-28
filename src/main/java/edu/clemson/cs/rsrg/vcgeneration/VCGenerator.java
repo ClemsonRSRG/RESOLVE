@@ -582,7 +582,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 myCurrentModuleScope, myCurrentAssertiveCodeBlock,
                                 myGlobalRequires, myGlobalConstraints,
                                 myGlobalLocationDetails, correspondingOperation,
-                                isLocal), false);
+                                myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal),
+                        false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create Remember statement

@@ -399,7 +399,8 @@ public class Utilities {
             List<AssertionClause> moduleLevelRequiresClauses,
             Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses,
             Map<AssertionClause, LocationDetailModel> moduleLevelLocationDetails,
-            OperationEntry correspondingOperationEntry, boolean isLocalOperation) {
+            OperationEntry correspondingOperationEntry, boolean addConstraints,
+            boolean isLocalOperation) {
         // Add all the expressions we can assume from the current context
         Exp retExp =
                 createTopLevelAssumeExpFromContext(loc,
@@ -424,130 +425,17 @@ public class Utilities {
                                                     .getName()));
         }
 
-        // Loop through each of the parameters in the operation entry.
-        ImmutableList<ProgramParameterEntry> entries =
-                correspondingOperationEntry.getParameters();
-        for (ProgramParameterEntry entry : entries) {
-            ParameterVarDec parameterVarDec =
-                    (ParameterVarDec) entry.getDefiningElement();
-            PTType declaredType = entry.getDeclaredType();
-            ParameterMode parameterMode = entry.getParameterMode();
-
-            // Only deal with actual types and don't deal
-            // with entry types passed in to the concept realization
-            if (!(declaredType instanceof PTGeneric)) {
-                // Query for the type entry in the symbol table
-                NameTy nameTy = (NameTy) parameterVarDec.getTy();
-                SymbolTableEntry ste =
-                        Utilities.searchProgramType(loc, nameTy.getQualifier(),
-                                nameTy.getName(), scope);
-
-                ProgramTypeEntry typeEntry;
-                if (ste instanceof ProgramTypeEntry) {
-                    typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
-                }
-                else {
-                    typeEntry =
-                            ste.toTypeRepresentationEntry(nameTy.getLocation())
-                                    .getDefiningTypeEntry();
-                }
-
-                // Obtain the original dec from the AST
-                TypeFamilyDec typeFamilyDec =
-                        (TypeFamilyDec) typeEntry.getDefiningElement();
-
-                // Other than the replaces mode, constraints for the
-                // other parameter modes needs to be added
-                // to the requires clause as conjuncts.
-                if (parameterMode != ParameterMode.REPLACES) {
-                    if (!VarExp.isLiteralTrue(typeFamilyDec.getConstraint()
-                            .getAssertionExp())) {
-                        AssertionClause constraintClause =
-                                typeFamilyDec.getConstraint();
-                        AssertionClause modifiedConstraintClause =
-                                getTypeConstraintClause(constraintClause, loc,
-                                        null, parameterVarDec.getName(),
-                                        typeFamilyDec.getExemplar(), typeEntry
-                                                .getModelType(), null);
-
-                        // Form a conjunct with the modified constraint clause and add
-                        // the location detail associated with it.
-                        Location constraintLoc =
-                                modifiedConstraintClause.getAssertionExp()
-                                        .getLocation();
-                        retExp =
-                                formConjunct(loc, retExp,
-                                        modifiedConstraintClause,
-                                        new LocationDetailModel(constraintLoc
-                                                .clone(),
-                                                constraintLoc.clone(),
-                                                "Constraint Clause of "
-                                                        + parameterVarDec
-                                                                .getName()));
-                    }
-                }
-
-                // TODO: Handle type representations from concept realizations
-                /*
-                // If the type is a type representation, then our requires clause
-                // should really say something about the conceptual type and not
-                // the variable
-                if (ste instanceof RepresentationTypeEntry && !isLocal) {
-                    requires =
-                            Utilities.replace(requires, parameterExp,
-                                    Utilities
-                                            .createConcVarExp(opLocation,
-                                                    parameterExp,
-                                                    parameterExp
-                                                            .getMathType(),
-                                                    BOOLEAN));
-                    requires.setLocation((Location) opLocation.clone());
-                }
-
-                // If the type is a type representation, then we need to add
-                // all the type constraints from all the variable declarations
-                // in the type representation.
-                if (ste instanceof RepresentationTypeEntry) {
-                    Exp repConstraintExp = null;
-                    Set<VarExp> keys =
-                            myRepresentationConstraintMap.keySet();
-                    for (VarExp varExp : keys) {
-                        if (varExp.getQualifier() == null
-                                && varExp.getName().getName().equals(
-                                pNameTy.getName().getName())) {
-                            if (repConstraintExp == null) {
-                                repConstraintExp =
-                                        myRepresentationConstraintMap
-                                                .get(varExp);
-                            }
-                            else {
-                                Utilities.ambiguousTy(pNameTy, pNameTy
-                                        .getLocation());
-                            }
-                        }
-                    }
-
-                    // Only do the following if the expression is not simply true
-                    if (!repConstraintExp.isLiteralTrue()) {
-                        // Replace the exemplar with the actual parameter variable expression
-                        repConstraintExp =
-                                Utilities.replace(repConstraintExp,
-                                        exemplar, parameterExp);
-
-                        // Add this to our requires clause
-                        requires =
-                                myTypeGraph.formConjunct(requires,
-                                        repConstraintExp);
-                        requires.setLocation((Location) opLocation.clone());
-                    }
-                }*/
-            }
-
-            // Add the current variable to our list of free variables
-            currentBlock.addFreeVar(Utilities.createVarExp(parameterVarDec
-                    .getLocation(), null, parameterVarDec.getName(),
-                    declaredType.toMath(), null));
-
+        // Store the operation parameter's type constraints.
+        // YS: We are not adding these automatically. Most of the time, these
+        //     constraints wouldn't really help us prove any of the VCs. If you
+        //     are ever interested in adding these to the givens list, use the
+        //     "addConstraints" flag. Note that these constraints still need to be
+        //     processed by the parsimonious step, so there is no guarantee that they
+        //     will show up in all of the VCs.
+        if (addConstraints) {
+            retExp =
+                    addParamTypeConstraints(loc, retExp, scope, currentBlock,
+                            correspondingOperationEntry.getParameters());
         }
 
         return retExp;
@@ -1440,5 +1328,149 @@ public class Utilities {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method that adds the operation's type constraints.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param exp The top level assume expression we have built so far.
+     * @param scope The module scope to start our search.
+     * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
+     * @param entries List of operation's parameter entries.
+     *
+     * @return The original {@code exp} plus any operation parameter's type constraints.
+     */
+    private static Exp addParamTypeConstraints(Location loc, Exp exp,
+            ModuleScope scope, AssertiveCodeBlock currentBlock,
+            ImmutableList<ProgramParameterEntry> entries) {
+        Exp retExp = exp;
+
+        // Loop through each of the parameters in the operation entry.
+        for (ProgramParameterEntry entry : entries) {
+            ParameterVarDec parameterVarDec =
+                    (ParameterVarDec) entry.getDefiningElement();
+            PTType declaredType = entry.getDeclaredType();
+            ParameterMode parameterMode = entry.getParameterMode();
+
+            // Only deal with actual types and don't deal
+            // with entry types passed in to the concept realization
+            if (!(declaredType instanceof PTGeneric)) {
+                // Query for the type entry in the symbol table
+                NameTy nameTy = (NameTy) parameterVarDec.getTy();
+                SymbolTableEntry ste =
+                        Utilities.searchProgramType(loc, nameTy.getQualifier(),
+                                nameTy.getName(), scope);
+
+                ProgramTypeEntry typeEntry;
+                if (ste instanceof ProgramTypeEntry) {
+                    typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
+                }
+                else {
+                    typeEntry =
+                            ste.toTypeRepresentationEntry(nameTy.getLocation())
+                                    .getDefiningTypeEntry();
+                }
+
+                // Obtain the original dec from the AST
+                TypeFamilyDec typeFamilyDec =
+                        (TypeFamilyDec) typeEntry.getDefiningElement();
+
+                // Other than the replaces mode, constraints for the
+                // other parameter modes needs to be added
+                // to the requires clause as conjuncts.
+                if (parameterMode != ParameterMode.REPLACES) {
+                    if (!VarExp.isLiteralTrue(typeFamilyDec.getConstraint()
+                            .getAssertionExp())) {
+                        AssertionClause constraintClause =
+                                typeFamilyDec.getConstraint();
+                        AssertionClause modifiedConstraintClause =
+                                getTypeConstraintClause(constraintClause, loc,
+                                        null, parameterVarDec.getName(),
+                                        typeFamilyDec.getExemplar(), typeEntry
+                                                .getModelType(), null);
+
+                        // Form a conjunct with the modified constraint clause and add
+                        // the location detail associated with it.
+                        Location constraintLoc =
+                                modifiedConstraintClause.getAssertionExp()
+                                        .getLocation();
+                        retExp =
+                                formConjunct(loc, retExp,
+                                        modifiedConstraintClause,
+                                        new LocationDetailModel(constraintLoc
+                                                .clone(),
+                                                constraintLoc.clone(),
+                                                "Constraint Clause of "
+                                                        + parameterVarDec
+                                                                .getName()));
+                    }
+                }
+
+                // TODO: Handle type representations from concept realizations
+                /*
+                // If the type is a type representation, then our requires clause
+                // should really say something about the conceptual type and not
+                // the variable
+                if (ste instanceof RepresentationTypeEntry && !isLocal) {
+                    requires =
+                            Utilities.replace(requires, parameterExp,
+                                    Utilities
+                                            .createConcVarExp(opLocation,
+                                                    parameterExp,
+                                                    parameterExp
+                                                            .getMathType(),
+                                                    BOOLEAN));
+                    requires.setLocation((Location) opLocation.clone());
+                }
+
+                // If the type is a type representation, then we need to add
+                // all the type constraints from all the variable declarations
+                // in the type representation.
+                if (ste instanceof RepresentationTypeEntry) {
+                    Exp repConstraintExp = null;
+                    Set<VarExp> keys =
+                            myRepresentationConstraintMap.keySet();
+                    for (VarExp varExp : keys) {
+                        if (varExp.getQualifier() == null
+                                && varExp.getName().getName().equals(
+                                pNameTy.getName().getName())) {
+                            if (repConstraintExp == null) {
+                                repConstraintExp =
+                                        myRepresentationConstraintMap
+                                                .get(varExp);
+                            }
+                            else {
+                                Utilities.ambiguousTy(pNameTy, pNameTy
+                                        .getLocation());
+                            }
+                        }
+                    }
+
+                    // Only do the following if the expression is not simply true
+                    if (!repConstraintExp.isLiteralTrue()) {
+                        // Replace the exemplar with the actual parameter variable expression
+                        repConstraintExp =
+                                Utilities.replace(repConstraintExp,
+                                        exemplar, parameterExp);
+
+                        // Add this to our requires clause
+                        requires =
+                                myTypeGraph.formConjunct(requires,
+                                        repConstraintExp);
+                        requires.setLocation((Location) opLocation.clone());
+                    }
+                }*/
+            }
+
+            // Add the current variable to our list of free variables
+            currentBlock.addFreeVar(Utilities.createVarExp(parameterVarDec
+                    .getLocation(), null, parameterVarDec.getName(),
+                    declaredType.toMath(), null));
+
+        }
+
+        return retExp;
+    }
 
 }
