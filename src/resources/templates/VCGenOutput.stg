@@ -18,7 +18,7 @@ VC <vcNum>
 
 <locationDetail><if(hasImpactingReduction)> [After Logical Reduction(s)]<endif>: <location>
 
-<sequents; separator = "\n">
+<sequents; separator = "\n-- or --\n\n">
 >>
 
 /**
