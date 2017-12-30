@@ -195,7 +195,7 @@ public class FlagDependencies {
             }
             else {
                 throw new FlagDependencyException("The -" + m.getFlagReason(f)
-                        + " flag requires that at least one of the following "
+                        + " flag requires that at least one of the following"
                         + " flags be set: " + flagList);
             }
         }

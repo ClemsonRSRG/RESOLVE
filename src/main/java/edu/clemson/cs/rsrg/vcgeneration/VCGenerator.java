@@ -202,6 +202,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     private static final String FLAG_SECTION_NAME = "VCGenerator";
     private static final String FLAG_DESC_VERIFY_VC = "Generate VCs.";
     private static final String FLAG_DESC_PERF_VC = "Generate Performance VCs";
+    private static final String FLAG_DESC_ADD_CONSTRAINT =
+            "Add constraints as givens.";
 
     // ===========================================================
     // Flags
@@ -220,10 +222,21 @@ public class VCGenerator extends TreeWalkerVisitor {
             new Flag(FLAG_SECTION_NAME, "PVCs", FLAG_DESC_PERF_VC);
 
     /**
+     * <p>Tells the compiler to generate VCs.</p>
+     */
+    public static final Flag FLAG_ADD_CONSTRAINT =
+            new Flag(FLAG_SECTION_NAME, "addConstraints",
+                    FLAG_DESC_ADD_CONSTRAINT);
+
+    /**
      * <p>Add all the required and implied flags for the {@code VCGenerator}.</p>
      */
     public static void setUpFlags() {
         FlagDependencies.addImplies(FLAG_PVCS_VC, FLAG_VERIFY_VC);
+
+        // Make sure we have one of these on.
+        Flag[] dependencies = { FLAG_VERIFY_VC, FLAG_PVCS_VC };
+        FlagDependencies.addRequires(FLAG_ADD_CONSTRAINT, dependencies);
     }
 
     // ===========================================================
@@ -569,7 +582,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 myCurrentModuleScope, myCurrentAssertiveCodeBlock,
                                 myGlobalRequires, myGlobalConstraints,
                                 myGlobalLocationDetails, correspondingOperation,
-                                isLocal), false);
+                                myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal),
+                        false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create Remember statement
@@ -1000,8 +1014,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                         conceptModuleDec.getRequires());
 
                 // Store the concept's type constraints from the module parameters
-                storeModuleParameterTypeConstraints(conceptModuleDec
-                        .getLocation(), conceptModuleDec.getParameterDecs());
+                // YS: We are not adding these automatically. Most of the time, these
+                //     constraints wouldn't really help us prove any of the VCs. If you
+                //     are ever interested in adding these to the givens list, use the
+                //     "addConstraints" flag. Note that these constraints still need to be
+                //     processed by the parsimonious step, so there is no guarantee that they
+                //     will show up in all of the VCs.
+                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+                    storeModuleParameterTypeConstraints(conceptModuleDec
+                            .getLocation(), conceptModuleDec.getParameterDecs());
+                }
             }
 
             // Store the concept's module constraints and
@@ -1080,8 +1102,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                         realizModuleDec.getRequires());
 
                 // Store the concept realization's type constraints from the module parameters
-                storeModuleParameterTypeConstraints(realizModuleDec
-                        .getLocation(), realizModuleDec.getParameterDecs());
+                // YS: We are not adding these automatically. Most of the time, these
+                //     constraints wouldn't really help us prove any of the VCs. If you
+                //     are ever interested in adding these to the givens list, use the
+                //     "addConstraints" flag. Note that these constraints still need to be
+                //     processed by the parsimonious step, so there is no guarantee that they
+                //     will show up in all of the VCs.
+                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+                    storeModuleParameterTypeConstraints(realizModuleDec
+                            .getLocation(), realizModuleDec.getParameterDecs());
+                }
             }
         }
         catch (NoSuchSymbolException e) {
@@ -1115,8 +1145,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                         enhancementModuleDec.getRequires());
 
                 // Store the enhancement's type constraints from the module parameters
-                storeModuleParameterTypeConstraints(enhancementModuleDec
-                        .getLocation(), enhancementModuleDec.getParameterDecs());
+                // YS: We are not adding these automatically. Most of the time, these
+                //     constraints wouldn't really help us prove any of the VCs. If you
+                //     are ever interested in adding these to the givens list, use the
+                //     "addConstraints" flag. Note that these constraints still need to be
+                //     processed by the parsimonious step, so there is no guarantee that they
+                //     will show up in all of the VCs.
+                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+                    storeModuleParameterTypeConstraints(enhancementModuleDec
+                            .getLocation(), enhancementModuleDec
+                            .getParameterDecs());
+                }
             }
         }
         catch (NoSuchSymbolException e) {
@@ -1150,8 +1189,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                         realizModuleDec.getRequires());
 
                 // Store the enhancement realization's type constraints from the module parameters
-                storeModuleParameterTypeConstraints(realizModuleDec
-                        .getLocation(), realizModuleDec.getParameterDecs());
+                // YS: We are not adding these automatically. Most of the time, these
+                //     constraints wouldn't really help us prove any of the VCs. If you
+                //     are ever interested in adding these to the givens list, use the
+                //     "addConstraints" flag. Note that these constraints still need to be
+                //     processed by the parsimonious step, so there is no guarantee that they
+                //     will show up in all of the VCs.
+                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+                    storeModuleParameterTypeConstraints(realizModuleDec
+                            .getLocation(), realizModuleDec.getParameterDecs());
+                }
             }
         }
         catch (NoSuchSymbolException e) {

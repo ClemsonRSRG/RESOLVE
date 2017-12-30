@@ -425,13 +425,18 @@ public class ResolveCompiler {
             }
         }
         catch (FlagDependencyException fde) {
-            // YS - The status handler object might have changed.
-            statusHandler = compileEnvironment.getStatusHandler();
-            statusHandler.error(null, fde.getMessage());
-            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
-                statusHandler.printStackTrace(fde);
+            // YS - Check to see if we have a status handler.
+            if (compileEnvironment != null && compileEnvironment.getStatusHandler() != null) {
+                statusHandler = compileEnvironment.getStatusHandler();
+                statusHandler.error(null, fde.getMessage());
+                if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
+                    statusHandler.printStackTrace(fde);
+                }
+                statusHandler.stopLogging();
             }
-            statusHandler.stopLogging();
+            else {
+                System.err.println(fde.getMessage());
+            }
         }
         catch (IOException | NullPointerException e) {
             e.printStackTrace();
