@@ -23,7 +23,6 @@ import edu.clemson.cs.rsrg.vcgeneration.sequents.SequentReduction;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeDotExporter;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeExporter;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
 import org.jgrapht.Graph;
@@ -151,36 +150,14 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
         myImpactingReducedSequentMap.putAll(reduction
                 .getImpactingReducedSequentMap());
 
-        // YS: The confirm statement always generate new VCs,
-        // so we will need to use the reduction tree to determine
-        // how many new VCs to create.
+        // YS: The confirm statement always generate new VCs.
         List<VerificationCondition> vcs = new ArrayList<>();
-        Map<Sequent, List<Sequent>> sequentListMap =
-                buildAssociatedSequentsMap(reductionTree, resultSequents);
-        for (Sequent s : sequentListMap.keySet()) {
-            // Form a list with all associated sequents
-            List<Sequent> associatedSequents = new ArrayList<>();
-            associatedSequents.add(s);
-            associatedSequents.addAll(sequentListMap.get(s));
-
-            // Check to see if the new VC contains sequents that had
-            // impacting reductions.
-            boolean hasImpactingReduction = false;
-            if (myImpactingReducedSequentMap.get(s)) {
-                hasImpactingReduction = true;
-            }
-            else {
-                for (Sequent associatedSeq : sequentListMap.get(s)) {
-                    if (myImpactingReducedSequentMap.get(associatedSeq)) {
-                        hasImpactingReduction = true;
-                    }
-                }
-            }
-
-            // Create a new VC
-            vcs.add(new VerificationCondition(myConfirmStmt.getLocation(),
-                    associatedSequents, hasImpactingReduction,
-                    findLocationDetailModel(associatedSequents)));
+        for (Sequent s : resultSequents) {
+            // Check to see if the sequent has an impacting reduction and
+            // create the VC appropriately.
+            vcs.add(new VerificationCondition(myConfirmStmt.getLocation().clone(),
+                    s.clone(), myImpactingReducedSequentMap.get(s),
+                    findLocationDetailModel(s)));
         }
 
         // Output the reduction tree as a dot file to the step model
@@ -194,85 +171,37 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>An helper method to build a map of {@code sequent} to its associated
-     * {@code sequents}.</p>
-     *
-     * @param reductionTree A {@link Graph} representing a reduction tree.
-     * @param sequents A list of {@link Sequent Sequents}.
-     *
-     * @return A map from {@link Sequent} to list of {@link Sequent Sequents}.
-     */
-    private Map<Sequent, List<Sequent>> buildAssociatedSequentsMap(
-            Graph<Sequent, DefaultEdge> reductionTree, List<Sequent> sequents) {
-        Map<Sequent, List<Sequent>> sequentListMap = new LinkedHashMap<>();
-
-        // Create a boolean array to store whether or not
-        // sequent corresponding to the index has been processed.
-        boolean[] processed = new boolean[sequents.size()];
-        Arrays.fill(processed, false);
-
-        // Loop through all the sequents
-        for (int i = 0; i < sequents.size(); i++) {
-            // Only deal with the ones we haven't processed
-            if (!processed[i]) {
-                Sequent sequentAtI = sequents.get(i);
-
-                // Form a list with all associated sequents
-                List<Sequent> associatedSequents = new ArrayList<>();
-                for (int j = i+1; j < sequents.size(); j++) {
-                    Sequent sequentAtJ = sequents.get(j);
-                    if (Utilities.pathExist(reductionTree, sequentAtI, sequentAtJ)) {
-                        associatedSequents.add(sequentAtJ);
-                        processed[j] = true;
-                    }
-                }
-
-                // Put sequentAtI and its associated sequents in our map.
-                sequentListMap.put(sequentAtI, associatedSequents);
-                processed[i] = true;
-            }
-        }
-
-        return sequentListMap;
-    }
-
-    /**
      * <p>This method finds the location details that will be associated
      * with a {@code VC}.</p>
      *
-     * @param associatedSequents A list of associated {@link Sequent Sequents}.
+     * @param sequent A {@link Sequent}.
      *
      * @return A {@link LocationDetailModel}.
      */
-    private LocationDetailModel findLocationDetailModel(
-            List<Sequent> associatedSequents) {
+    private LocationDetailModel findLocationDetailModel(Sequent sequent) {
         // YS: All the expressions inside the consequent should have a
         //     LocationDetailModel. We simply return the first one we
         //     find.
         LocationDetailModel model = null;
-        Iterator<Sequent> sequentIt = associatedSequents.iterator();
-        while (sequentIt.hasNext() && model == null) {
-            Sequent sequent = sequentIt.next();
 
-            // First check to see if we have any consequent. If yes, we simply
-            // return the first one we find.
-            Iterator<Exp> consequentExpIt = sequent.getConcequents().iterator();
-            while (consequentExpIt.hasNext() && model == null) {
-                Exp exp = consequentExpIt.next();
-                if (exp.getLocationDetailModel() != null) {
-                    model = exp.getLocationDetailModel();
-                }
+        // First check to see if we have any consequent. If yes, we simply
+        // return the first one we find.
+        Iterator<Exp> consequentExpIt = sequent.getConcequents().iterator();
+        while (consequentExpIt.hasNext() && model == null) {
+            Exp exp = consequentExpIt.next();
+            if (exp.getLocationDetailModel() != null) {
+                model = exp.getLocationDetailModel();
             }
+        }
 
-            // Second if we still didn't find it, we must have done some kind of
-            // sequent reduction and ended up putting the consequent in the antecedent
-            // as a negation. We simply return the first one we find.
-            Iterator<Exp> antecedentIt = sequent.getAntecedents().iterator();
-            while (antecedentIt.hasNext() && model == null) {
-                Exp exp = antecedentIt.next();
-                if (exp.getLocationDetailModel() != null) {
-                    model = exp.getLocationDetailModel();
-                }
+        // Second if we still didn't find it, we must have done some kind of
+        // sequent reduction and ended up putting the consequent in the antecedent
+        // as a negation. We simply return the first one we find.
+        Iterator<Exp> antecedentIt = sequent.getAntecedents().iterator();
+        while (antecedentIt.hasNext() && model == null) {
+            Exp exp = antecedentIt.next();
+            if (exp.getLocationDetailModel() != null) {
+                model = exp.getLocationDetailModel();
             }
         }
 

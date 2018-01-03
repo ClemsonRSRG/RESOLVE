@@ -883,40 +883,6 @@ public class Utilities {
     }
 
     /**
-     * <p>This method is used to check for there is a path
-     * in either direction from {@code seq1} to {@code seq2}
-     * in the reduction tree.</p>
-     *
-     * @param g The reduction tree.
-     * @param seq1 A {@link Sequent}.
-     * @param seq2 Another {@link Sequent}.
-     *
-     * @return {@code true} if there is a path in the reduction tree,
-     * {@code false} otherwise.
-     */
-    public static boolean pathExist(Graph<Sequent, DefaultEdge> g, Sequent seq1, Sequent seq2) {
-        boolean retVal = true;
-
-        // Check to see if the seq1 and seq2 is in the tree.
-        // YS: Should be in here, but just in case it isn't...
-        if (g.containsVertex(seq1) && g.containsVertex(seq2)) {
-            // Check to see if there is a path from seq1 to seq2 or from seq2 to seq1.
-            // YS: We choose to use Dijkstra's algorithm, but we could chose
-            // other ones if needed.
-            ShortestPathAlgorithm<Sequent, DefaultEdge> pathAlgorithm = new DijkstraShortestPath<>(g);
-            if (pathAlgorithm.getPath(seq1, seq2) == null &&
-                    pathAlgorithm.getPath(seq2, seq1) == null) {
-                retVal = false;
-            }
-        }
-        else {
-            retVal = false;
-        }
-
-        return retVal;
-    }
-
-    /**
      * <p>This method is used to check for there are paths from
      * {@code originalSequent} to each sequent in {@code resultSequents}
      * in the reduction tree.</p>
