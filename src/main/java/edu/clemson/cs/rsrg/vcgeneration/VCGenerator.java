@@ -425,7 +425,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     public final void preConceptModuleDec(ConceptModuleDec concept) {
         PosSymbol conceptName = concept.getName();
 
-        // Store the enhancement realization requires clause
+        // Store the concept requires clause
         storeRequiresClause(conceptName.getName(), concept.getRequires());
 
         // Add to VC detail model
@@ -473,6 +473,29 @@ public class VCGenerator extends TreeWalkerVisitor {
                         "realizName", enhancementRealizName.getName()).add(
                         "enhancementName", enhancementName.getName()).add(
                         "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
+    // Facility Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link FacilityModuleDec}.</p>
+     *
+     * @param facility A concept module declaration.
+     */
+    @Override
+    public final void preFacilityModuleDec(FacilityModuleDec facility) {
+        PosSymbol facilityName = facility.getName();
+
+        // Store the facility requires clause
+        storeRequiresClause(facilityName.getName(), facility.getRequires());
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputFacilityHeader").add(
+                        "facilityName", facilityName.getName());
         myVCGenDetailsModel.add("fileHeader", header.render());
     }
 
