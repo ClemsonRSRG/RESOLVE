@@ -367,7 +367,11 @@ public class SequentReduction {
             ReductionRuleApplication ruleApplication = null;
             Exp exp = consequentIt.next();
 
-            if (exp instanceof InfixExp) {
+            if (exp instanceof BetweenExp) {
+                // BetweenExp are joined together by the "and" operator.
+                ruleApplication = new RightAndRule(sequent, exp);
+            }
+            else if (exp instanceof InfixExp) {
                 // Use the operator to determine which rule to call.
                 String operator = ((InfixExp) exp).getOperatorAsString();
                 switch (operator) {
