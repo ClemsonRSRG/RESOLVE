@@ -140,14 +140,9 @@ public abstract class AbstractProofRuleApplication
             List<VerificationCondition> vcs, Map<Exp, Exp> substitutions) {
         List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
         for (VerificationCondition vc : vcs) {
-            List<Sequent> sequents = vc.getAssociatedSequents();
-            List<Sequent> newSequent = new ArrayList<>(sequents.size());
-            for (Sequent s : sequents) {
-                newSequent.add(createReplacementSequent(s, substitutions));
-            }
-
             newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
-                    newSequent, vc.getHasImpactingReductionFlag(), vc.getLocationDetailModel()));
+                    createReplacementSequent(vc.getSequent(), substitutions),
+                    vc.getHasImpactingReductionFlag(), vc.getLocationDetailModel()));
         }
 
         return newVCs;

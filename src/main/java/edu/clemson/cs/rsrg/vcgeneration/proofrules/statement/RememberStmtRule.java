@@ -67,14 +67,9 @@ public class RememberStmtRule extends AbstractProofRuleApplication
         List<VerificationCondition> vcs = myCurrentAssertiveCodeBlock.getVCs();
         List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
         for (VerificationCondition vc : vcs) {
-            List<Sequent> sequents = vc.getAssociatedSequents();
-            List<Sequent> newSequent = new ArrayList<>(sequents.size());
-            for (Sequent s : sequents) {
-                newSequent.add(createReplacementSequent(s));
-            }
-
             newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
-                    newSequent, vc.getHasImpactingReductionFlag(), vc.getLocationDetailModel()));
+                    createReplacementSequent(vc.getSequent()), vc.getHasImpactingReductionFlag(),
+                    vc.getLocationDetailModel()));
         }
 
         // Store the new list of vcs

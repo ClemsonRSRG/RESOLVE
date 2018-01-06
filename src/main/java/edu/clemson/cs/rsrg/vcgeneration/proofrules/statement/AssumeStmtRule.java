@@ -144,30 +144,26 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
             // Build the new list of VCs
             List<VerificationCondition> newVCs = new ArrayList<>();
             for (VerificationCondition vc : myCurrentAssertiveCodeBlock.getVCs()) {
-                // A flag that indicates if this VC had an impacting reduction
-                boolean hasImpactingReduction = vc.getHasImpactingReductionFlag();
+                // YS: The substitutionStep will call applicationStep
+                Sequent resultSequent = substitutionStep(vc.getSequent(), assumeExps);
 
-                List<Sequent> newSequents = new ArrayList<>();
-                for (Sequent sequent : vc.getAssociatedSequents()) {
-                    // YS: The substitutionStep will call applicationStep
-                    Sequent resultSequent =
-                            substitutionStep(sequent, assumeExps);
+                // Reduce the sequent, check to see if any of them had an
+                // impacting reduction and create a new VC for each sequent
+                // that was generated.
+                List<Sequent> reducedSequents = reducedSequentForm(resultSequent, stepModel);
+                for (Sequent reducedSequent : reducedSequents) {
+                    // A flag that checks if this new sequent got some kind of
+                    // impacting reduction. Note that if the original VC got an impacting
+                    // reduction, this is automatically true.
+                    boolean hasImpactingReduction =
+                            vc.getHasImpactingReductionFlag() ||
+                                    myImpactingReducedSequentMap.get(reducedSequent);
 
-                    // Reduce the sequent, check to see if any of them had an
-                    // impacting reduction and store this as our new list
-                    // of associated sequents.
-                    List<Sequent> reducedSequents = reducedSequentForm(resultSequent, stepModel);
-                    for (Sequent reducedSequent : reducedSequents) {
-                        if (myImpactingReducedSequentMap.get(reducedSequent)) {
-                            hasImpactingReduction = true;
-                        }
-                    }
-
-                    newSequents.addAll(reducedSequents);
+                    // Create a new VC for each reduced sequent.
+                    newVCs.add(new VerificationCondition(vc.getLocation().clone(),
+                            reducedSequent, hasImpactingReduction,
+                            vc.getLocationDetailModel().clone()));
                 }
-
-                newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
-                        newSequents, hasImpactingReduction, vc.getLocationDetailModel()));
             }
 
             // Set this as our new list of vcs

@@ -19,6 +19,8 @@ import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTFamily;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import java.util.Iterator;
 import java.util.List;
 
@@ -98,12 +100,29 @@ public class ValidFunctionCallChecker {
                 if (!(argExp instanceof ProgramCharExp
                         || argExp instanceof ProgramFunctionExp
                         || argExp instanceof ProgramIntegerExp || argExp instanceof ProgramStringExp)) {
-                    throw new SourceErrorException(
-                            "An EVALUATES mode can only accept program"
-                                    + " character/function/integer/string expressions.\n"
-                                    + "Found a program expression: " + argExp
-                                    + " with type: " + argExp.getProgramType(),
-                            myLocation);
+                    // YS: We are making a small optimization to variables of standard types
+                    // (Boolean, Char_Str, Character, and Integer) and not requiring them
+                    // to be functions.
+                    PTType argPTType = argExp.getProgramType();
+                    boolean isValid = false;
+                    if (argPTType instanceof PTFamily) {
+                        String typeName = ((PTFamily) argPTType).getName();
+                        if (typeName.equals("Boolean")
+                                || typeName.equals("Char_Str")
+                                || typeName.equals("Character")
+                                || typeName.equals("Integer")) {
+                            isValid = true;
+                        }
+                    }
+
+                    if (!isValid) {
+                        throw new SourceErrorException(
+                                "An EVALUATES mode can only accept program"
+                                        + " character/function/integer/string expressions.\n"
+                                        + "Found a program expression: "
+                                        + argExp + " with type: "
+                                        + argExp.getProgramType(), myLocation);
+                    }
                 }
             }
         }

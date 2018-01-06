@@ -20,6 +20,7 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
@@ -94,7 +95,18 @@ public class OperationEntry extends SymbolTableEntry {
      * @return An {@link AffectsClause} representation object.
      */
     public final AffectsClause getAffectsClause() {
-        return ((OperationDec) getDefiningElement()).getAffectedVars().clone();
+        AffectsClause affectsClause;
+        ResolveConceptualElement element = getDefiningElement();
+        if (element instanceof OperationDec) {
+            affectsClause = ((OperationDec) element).getAffectedVars().clone();
+        }
+        else {
+            affectsClause =
+                    ((OperationProcedureDec) element).getWrappedOpDec()
+                            .getAffectedVars().clone();
+        }
+
+        return affectsClause;
     }
 
     /**
@@ -103,7 +115,18 @@ public class OperationEntry extends SymbolTableEntry {
      * @return An {@link AssertionClause} representation object.
      */
     public final AssertionClause getEnsuresClause() {
-        return ((OperationDec) getDefiningElement()).getEnsures().clone();
+        AssertionClause ensuresClause;
+        ResolveConceptualElement element = getDefiningElement();
+        if (element instanceof OperationDec) {
+            ensuresClause = ((OperationDec) element).getEnsures().clone();
+        }
+        else {
+            ensuresClause =
+                    ((OperationProcedureDec) element).getWrappedOpDec()
+                            .getEnsures().clone();
+        }
+
+        return ensuresClause;
     }
 
     /**
@@ -131,7 +154,18 @@ public class OperationEntry extends SymbolTableEntry {
      * @return An {@link AssertionClause} representation object.
      */
     public final AssertionClause getRequiresClause() {
-        return ((OperationDec) getDefiningElement()).getRequires().clone();
+        AssertionClause requiresClause;
+        ResolveConceptualElement element = getDefiningElement();
+        if (element instanceof OperationDec) {
+            requiresClause = ((OperationDec) element).getRequires().clone();
+        }
+        else {
+            requiresClause =
+                    ((OperationProcedureDec) element).getWrappedOpDec()
+                            .getRequires().clone();
+        }
+
+        return requiresClause;
     }
 
     /**

@@ -92,14 +92,9 @@ public class SwapStmtRule extends AbstractProofRuleApplication
         List<VerificationCondition> vcs = myCurrentAssertiveCodeBlock.getVCs();
         List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
         for (VerificationCondition vc : vcs) {
-            List<Sequent> sequents = vc.getAssociatedSequents();
-            List<Sequent> newSequent = new ArrayList<>(sequents.size());
-            for (Sequent s : sequents) {
-                newSequent.add(performSwap(s));
-            }
-
             newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
-                    newSequent, vc.getHasImpactingReductionFlag(), vc.getLocationDetailModel()));
+                    performSwap(vc.getSequent()), vc.getHasImpactingReductionFlag(),
+                    vc.getLocationDetailModel()));
         }
 
         // NY YS

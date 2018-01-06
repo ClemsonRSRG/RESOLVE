@@ -159,16 +159,14 @@ public class FileOutputListener implements OutputListener {
                                             + " is missing information about how this VC got generated.");
                 }
 
-                // Output each of the associated sequents
-                List<Sequent> sequents = vc.getAssociatedSequents();
-                for (Sequent s : sequents) {
-                    ST sequentModel = group.getInstanceOf("outputSequent");
-                    sequentModel.add("consequents", s.getConcequents());
-                    sequentModel.add("antecedents", s.getAntecedents());
+                // Output the associated sequent
+                Sequent sequent = vc.getSequent();
+                ST sequentModel = group.getInstanceOf("outputSequent");
+                sequentModel.add("consequents", sequent.getConcequents());
+                sequentModel.add("antecedents", sequent.getAntecedents());
 
-                    // Add this sequent to our vc model
-                    vcModel.add("sequents", sequentModel.render());
-                }
+                // Add this sequent to our vc model
+                vcModel.add("sequent", sequentModel.render());
 
                 // Add the VC to the model
                 model.add("vcs", vcModel.render());

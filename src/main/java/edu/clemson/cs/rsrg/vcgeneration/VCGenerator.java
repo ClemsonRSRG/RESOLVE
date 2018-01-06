@@ -17,6 +17,8 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
@@ -401,7 +403,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             for (VerificationCondition vc : vcs) {
                 namedVCs.add(new VerificationCondition(vc.getLocation(),
                         blockCount + "_" + vcCount,
-                        vc.getAssociatedSequents(), vc.getHasImpactingReductionFlag(),
+                        vc.getSequent(), vc.getHasImpactingReductionFlag(),
                         vc.getLocationDetailModel()));
                 vcCount++;
             }
@@ -425,7 +427,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     public final void preConceptModuleDec(ConceptModuleDec concept) {
         PosSymbol conceptName = concept.getName();
 
-        // Store the enhancement realization requires clause
+        // Store the concept requires clause
         storeRequiresClause(conceptName.getName(), concept.getRequires());
 
         // Add to VC detail model
@@ -473,6 +475,29 @@ public class VCGenerator extends TreeWalkerVisitor {
                         "realizName", enhancementRealizName.getName()).add(
                         "enhancementName", enhancementName.getName()).add(
                         "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
+    // Facility Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link FacilityModuleDec}.</p>
+     *
+     * @param facility A concept module declaration.
+     */
+    @Override
+    public final void preFacilityModuleDec(FacilityModuleDec facility) {
+        PosSymbol facilityName = facility.getName();
+
+        // Store the facility requires clause
+        storeRequiresClause(facilityName.getName(), facility.getRequires());
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputFacilityHeader").add(
+                        "facilityName", facilityName.getName());
         myVCGenDetailsModel.add("fileHeader", header.render());
     }
 
@@ -530,6 +555,110 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Operation-Related
     // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link OperationProcedureDec}.</p>
+     *
+     * @param dec A local operation with procedure declaration.
+     */
+    @Override
+    public final void preOperationProcedureDec(OperationProcedureDec dec) {
+        // Store the associated OperationEntry for future use
+        List<PTType> argTypes = new LinkedList<>();
+        for (ParameterVarDec p : dec.getWrappedOpDec().getParameters()) {
+            argTypes.add(p.getTy().getProgramType());
+        }
+        OperationEntry correspondingOperation =
+                Utilities.searchOperation(dec.getLocation(), null, dec
+                        .getName(), argTypes, myCurrentModuleScope);
+
+        // TODO: Add the performance logic
+        // Obtain the performance duration clause
+        /*if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            myCurrentOperationProfileEntry =
+                    Utilities.searchOperationProfile(dec.getLocation(), null,
+                            dec.getName(), argTypes, myCurrentModuleScope);
+        }*/
+
+        // Create a new assertive code block
+        if (dec.getRecursive()) {
+            // Store any decreasing clauses for future use
+            myCurrentAssertiveCodeBlock =
+                    new AssertiveCodeBlock(dec.getName(), dec, correspondingOperation,
+                            dec.getDecreasing().getAssertionExp(), myTypeGraph);
+        }
+        else {
+            myCurrentAssertiveCodeBlock =
+                    new AssertiveCodeBlock(dec.getName(), dec, correspondingOperation,
+                            myTypeGraph);
+        }
+
+        // Create the top most level assume statement and
+        // add it to the assertive code block as the first statement
+        AssumeStmt topLevelAssumeStmt =
+                new AssumeStmt(dec.getLocation().clone(),
+                        Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
+                                myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                                myGlobalRequires, myGlobalConstraints,
+                                myGlobalLocationDetails, correspondingOperation,
+                                myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), true),
+                        false);
+        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+        // Create Remember statement
+        MemoryStmt rememberStmt = new MemoryStmt(dec.getLocation().clone(), StatementType.REMEMBER);
+        myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+
+        // TODO: NY - Add any procedure duration clauses
+
+        // Create a new model for this assertive code block
+        ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        blockModel.add("blockName", dec.getName());
+        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+        stepModel.add("proofRuleName", "Procedure Declaration Rule (Part 1)").add(
+                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        blockModel.add("vcGenSteps", stepModel.render());
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, blockModel);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link OperationProcedureDec}.</p>
+     *
+     * @param dec A local operation with procedure declaration.
+     */
+    @Override
+    public final void postOperationProcedureDec(OperationProcedureDec dec) {
+        // Apply procedure declaration rule
+        // TODO: Recheck logic to make sure everything still works!
+        OperationDec wrappedOpDec = dec.getWrappedOpDec();
+        ProcedureDec procedureDec =
+                new ProcedureDec(dec.getName(), wrappedOpDec.getParameters(),
+                        wrappedOpDec.getReturnTy(), wrappedOpDec
+                                .getAffectedVars(), dec.getDecreasing(), dec
+                                .getFacilities(), dec.getVariables(), dec
+                                .getStatements(), dec.getRecursive());
+        ProofRuleApplication declRule =
+                new ProcedureDeclRule(procedureDec, myVariableSpecFinalItems,
+                        myCurrentConceptDeclaredTypes,
+                        myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls, myBuilder,
+                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                        mySTGroup, myAssertiveCodeBlockModels
+                                .remove(myCurrentAssertiveCodeBlock));
+        declRule.applyRule();
+
+        // Update the current assertive code block and its associated block model.
+        myCurrentAssertiveCodeBlock =
+                declRule.getAssertiveCodeBlocks().getFirst();
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, declRule
+                .getBlockModel());
+
+        // Add this as a new incomplete assertive code block
+        myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
+
+        myVariableSpecFinalItems.clear();
+        myCurrentAssertiveCodeBlock = null;
+    }
 
     /**
      * <p>Code that gets executed before visiting a {@link ProcedureDec}.</p>

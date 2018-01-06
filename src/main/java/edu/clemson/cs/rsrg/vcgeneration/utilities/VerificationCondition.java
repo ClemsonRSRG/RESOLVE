@@ -16,17 +16,10 @@ import edu.clemson.cs.rsrg.parsing.data.BasicCapabilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>This class represents a possibly-named {@code verification condition} ({@code VC})
- * with a list of associated {@link Sequent Sequents}.</p>
- *
- * <p>When proving a {@link VerificationCondition}, only one of the associated {@link Sequent}
- * needs to be {@code true}. This is because the associated {@link Sequent Sequents} share
- * one or more {@code consequents}. This means that proving one of the {@link Sequent} is
- * good enough for us.</p>
+ * represented by a {@link Sequent}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -37,11 +30,8 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     // Member Fields
     // ===========================================================
 
-    /**
-     * <p>List of {@link Sequent Sequents} associated with
-     * this {@code VC}.</p>
-     */
-    private final List<Sequent> myAssociatedSequents;
+    /** <p>{@link Sequent} associated with this {@code VC}.</p> */
+    private final Sequent mySequent;
 
     /**
      * <p>A flag that indicates whether or not this {@link VerificationCondition}
@@ -67,45 +57,42 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     // ===========================================================
 
     /**
-     * <p>This creates a {@code VC} with a name and associated
-     * {@link Sequent Sequents}.</p>
+     * <p>This creates a {@code VC} with a name and it's associated
+     * {@link Sequent}.</p>
      *
      * @param loc The location that created this {@code VC}.
      * @param name Name given to this {@code VC}.
-     * @param sequents List of {@link Sequent Sequents}
-     *                 associated with this {@code VC}.
+     * @param sequent {@link Sequent}associated with this {@code VC}.
      * @param hasImpactingReduction A flag that indicates whether or not
      *                              this {@code VC} had an impacting reduced
      *                              {@link Sequent}.
      * @param model The {@link LocationDetailModel} associated with
      *              this {@code VC}.
      */
-    public VerificationCondition(Location loc, String name,
-            List<Sequent> sequents, boolean hasImpactingReduction,
-            LocationDetailModel model) {
-        myAssociatedSequents = sequents;
+    public VerificationCondition(Location loc, String name, Sequent sequent,
+            boolean hasImpactingReduction, LocationDetailModel model) {
         myHasImpactingReduction = hasImpactingReduction;
         myLocation = loc;
         myLocationDetailModel = model;
         myName = name;
+        mySequent = sequent;
     }
 
     /**
      * <p>This creates a nameless {@code VC} with the associated
-     * {@link Sequent Sequents}.</p>
+     * {@link Sequent}.</p>
      *
      * @param loc The location that created this {@code VC}.
-     * @param sequents List of {@link Sequent Sequents}
-     *                 associated with this {@code VC}.
+     * @param sequent {@link Sequent}associated with this {@code VC}.
      * @param hasImpactingReduction A flag that indicates whether or not
      *                              this {@code VC} had an impacting reduced
      *                              {@link Sequent}.
      * @param model The {@link LocationDetailModel} associated with
      *              this {@code VC}.
      */
-    public VerificationCondition(Location loc, List<Sequent> sequents,
+    public VerificationCondition(Location loc, Sequent sequent,
             boolean hasImpactingReduction, LocationDetailModel model) {
-        this(loc, null, sequents, hasImpactingReduction, model);
+        this(loc, null, sequent, hasImpactingReduction, model);
     }
 
     // ===========================================================
@@ -125,14 +112,7 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        StringBuilder sb = new StringBuilder();
-
-        for (Sequent sequent : myAssociatedSequents) {
-            sb.append(sequent.asString(indentSize, innerIndentInc));
-            sb.append("\n");
-        }
-
-        return sb.toString();
+        return mySequent.asString(indentSize, innerIndentInc) + "\n";
     }
 
     /**
@@ -142,16 +122,9 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
      */
     @Override
     public final VerificationCondition clone() {
-        // YS: Collections.copy complains about source does not fit in dest,
-        // so we manually copy everything.
-        List<Sequent> copySequents = new ArrayList<>(myAssociatedSequents.size());
-        for (Sequent s : myAssociatedSequents) {
-            copySequents.add(s.clone());
-        }
-
-        return new VerificationCondition(myLocation.clone(), myName,
-                copySequents, myHasImpactingReduction,
-                myLocationDetailModel.clone());
+        return new VerificationCondition(myLocation.clone(), myName, mySequent
+                .clone(), myHasImpactingReduction, myLocationDetailModel
+                .clone());
     }
 
     /**
@@ -171,21 +144,11 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
         VerificationCondition that = (VerificationCondition) o;
 
         return myHasImpactingReduction == that.myHasImpactingReduction
-                && myAssociatedSequents.equals(that.myAssociatedSequents)
+                && mySequent.equals(that.mySequent)
                 && myLocation.equals(that.myLocation)
                 && myLocationDetailModel.equals(that.myLocationDetailModel)
                 && (myName != null ? myName.equals(that.myName)
                         : that.myName == null);
-    }
-
-    /**
-     * <p>This method returns the list of {@code sequents} stored inside
-     * this {@code VC}.</p>
-     *
-     * @return A list of {@link Sequent Sequents}.
-     */
-    public final List<Sequent> getAssociatedSequents() {
-        return myAssociatedSequents;
     }
 
     /**
@@ -230,13 +193,23 @@ public class VerificationCondition implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method returns the {@code sequent} stored inside
+     * this {@code VC}.</p>
+     *
+     * @return The associated {@link Sequent Sequent}.
+     */
+    public final Sequent getSequent() {
+        return mySequent;
+    }
+
+    /**
      * <p>This method overrides the default {@code hashCode} method implementation.</p>
      *
      * @return The hash code associated with the object.
      */
     @Override
     public final int hashCode() {
-        int result = myAssociatedSequents.hashCode();
+        int result = mySequent.hashCode();
         result = 31 * result + (myHasImpactingReduction ? 1 : 0);
         result = 31 * result + myLocation.hashCode();
         result = 31 * result + myLocationDetailModel.hashCode();
