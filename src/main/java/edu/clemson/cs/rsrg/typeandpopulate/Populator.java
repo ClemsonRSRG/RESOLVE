@@ -1220,7 +1220,32 @@ public class Populator extends TreeWalkerVisitor {
             else {
                 try {
                     SymbolTableEntry ste = es.get(0);
-                    ProgramTypeEntry e = ste.toProgramTypeEntry(argExpAsProgVarNameExp.getLocation());
+                    ResolveConceptualElement rce = ste.getDefiningElement();
+                    PTType pt;
+
+                    // Store it's math type
+                    if (rce instanceof TypeFamilyDec) {
+                        pt = ste.toProgramTypeEntry(
+                                argExpAsProgVarNameExp.getLocation()).getProgramType();
+                    }
+                    else if (rce instanceof OperationDec
+                            || rce instanceof OperationProcedureDec) {
+                        pt = ste.toOperationEntry(
+                                argExpAsProgVarNameExp.getLocation()).getReturnType();
+                    }
+                    else if (rce instanceof FacilityTypeRepresentationDec) {
+                        pt = ste.toFacilityTypeRepresentationEntry(
+                                argExpAsProgVarNameExp.getLocation()).getRepresentationType();
+                    }
+                    else {
+                        pt = ste.toProgramVariableEntry(
+                                argExpAsProgVarNameExp.getLocation()).getProgramType();
+                    }
+                    argExpAsProgVarNameExp.setMathType(pt.toMath());
+
+                    // Store it's program type
+                    ProgramTypeEntry e =
+                            ste.toProgramTypeEntry(argExpAsProgVarNameExp.getLocation());
                     argExpAsProgVarNameExp.setProgramType(e.getProgramType());
                 }
                 catch (SourceErrorException see) {
