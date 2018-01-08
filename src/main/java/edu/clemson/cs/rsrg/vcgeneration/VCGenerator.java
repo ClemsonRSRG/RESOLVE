@@ -593,16 +593,22 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myTypeGraph);
         }
 
-        // Create the top most level assume statement and
-        // add it to the assertive code block as the first statement
+        // Create the top most level assume statement, replace any facility formal
+        // with actual and add it to the assertive code block as the first statement.
+        Exp topLevelAssumeExp =
+                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
+                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                        myGlobalRequires, myGlobalConstraints, myGlobalLocationDetails,
+                        correspondingOperation, myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
+                        true);
+        topLevelAssumeExp =
+                Utilities.replaceFacilityFormalWithActual(topLevelAssumeExp,
+                        dec.getWrappedOpDec().getParameters(),
+                        myCurrentModuleScope.getDefiningElement().getName(),
+                        myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls);
         AssumeStmt topLevelAssumeStmt =
-                new AssumeStmt(dec.getLocation().clone(),
-                        Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                                myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                                myGlobalRequires, myGlobalConstraints,
-                                myGlobalLocationDetails, correspondingOperation,
-                                myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), true),
-                        false);
+                new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create Remember statement
@@ -702,17 +708,23 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myTypeGraph);
         }
 
-        // Create the top most level assume statement and
-        // add it to the assertive code block as the first statement
+        // Create the top most level assume statement, replace any facility formal
+        // with actual and add it to the assertive code block as the first statement.
         // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
+        Exp topLevelAssumeExp =
+                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
+                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                        myGlobalRequires, myGlobalConstraints,
+                        myGlobalLocationDetails, correspondingOperation,
+                        myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal);
+        topLevelAssumeExp =
+                Utilities.replaceFacilityFormalWithActual(topLevelAssumeExp,
+                        dec.getParameters(),
+                        myCurrentModuleScope.getDefiningElement().getName(),
+                        myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls);
         AssumeStmt topLevelAssumeStmt =
-                new AssumeStmt(dec.getLocation().clone(),
-                        Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                                myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                                myGlobalRequires, myGlobalConstraints,
-                                myGlobalLocationDetails, correspondingOperation,
-                                myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal),
-                        false);
+                new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create Remember statement
