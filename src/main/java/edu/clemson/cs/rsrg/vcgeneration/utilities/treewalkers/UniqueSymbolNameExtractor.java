@@ -392,7 +392,16 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
      */
     @Override
     public final void preVarExp(VarExp exp) {
-        myExpNames.add(exp.getName().getName());
+        // Build the name
+        StringBuilder sb = new StringBuilder();
+        if (exp.getQualifier() != null) {
+            sb.append(exp.getQualifier().getName());
+            sb.append("::");
+        }
+        sb.append(exp.getName().getName());
+
+        // Add the possibility qualified name.
+        myExpNames.add(sb.toString());
     }
 
     /**

@@ -28,6 +28,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
 import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
@@ -1175,6 +1176,91 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(facility.getName().getName(), facility.getName()
                     .getLocation());
         }
+    }
+
+    /**
+     * <p>This method redefines how a {@link ModuleArgumentItem} should be walked.</p>
+     *
+     * @param item A module argument item from a facility declaration.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkModuleArgumentItem(ModuleArgumentItem item) {
+        preAny(item);
+
+        // YS - There are two possible scenarios for a module argument item.
+        // 1. It is a program variable name that refers to some definition,
+        //    operation or type.
+        // 2. It is a program expression that is getting evaluated.
+        // For #1, we will need to query for a symbol table entry with the
+        // same name and assign whatever type we find. Sanity checking happens
+        // when we reach postFacilityDec. For #2, we simply walk the expression and
+        // use the existing logic.
+        ProgramExp argumentExp = item.getArgumentExp();
+        if (argumentExp instanceof ProgramVariableNameExp) {
+            // YS - My guess is that this is the only kind of program variable
+            // we will have to deal with. I don't see any case where we could
+            // possibly pass a ProgramVariableDotExp in a module argument item
+            // that isn't used as an evaluated expression. If this ever comes up,
+            // we will need to do some kind of special logic.
+            ProgramVariableNameExp argExpAsProgVarNameExp = (ProgramVariableNameExp) argumentExp;
+            List<SymbolTableEntry> es =
+                    myBuilder.getInnermostActiveScope().query(
+                            new NameQuery(argExpAsProgVarNameExp.getQualifier(),
+                                    argExpAsProgVarNameExp.getName(), ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE, false));
+
+            if (es.isEmpty()) {
+                noSuchSymbol(argExpAsProgVarNameExp.getQualifier(), argExpAsProgVarNameExp.getName());
+            }
+            else if (es.size() > 1) {
+                ambiguousSymbol(argExpAsProgVarNameExp.getName(), es);
+            }
+            else {
+                try {
+                    SymbolTableEntry ste = es.get(0);
+                    ResolveConceptualElement rce = ste.getDefiningElement();
+                    PTType pt;
+
+                    // Store it's math type
+                    if (rce instanceof TypeFamilyDec) {
+                        pt = ste.toProgramTypeEntry(
+                                argExpAsProgVarNameExp.getLocation()).getProgramType();
+                    }
+                    else if (rce instanceof OperationDec
+                            || rce instanceof OperationProcedureDec) {
+                        pt = ste.toOperationEntry(
+                                argExpAsProgVarNameExp.getLocation()).getReturnType();
+                    }
+                    else if (rce instanceof FacilityTypeRepresentationDec) {
+                        pt = ste.toFacilityTypeRepresentationEntry(
+                                argExpAsProgVarNameExp.getLocation()).getRepresentationType();
+                    }
+                    else {
+                        pt = ste.toProgramVariableEntry(
+                                argExpAsProgVarNameExp.getLocation()).getProgramType();
+                    }
+                    argExpAsProgVarNameExp.setMathType(pt.toMath());
+
+                    // Store it's program type
+                    ProgramTypeEntry e =
+                            ste.toProgramTypeEntry(argExpAsProgVarNameExp.getLocation());
+                    argExpAsProgVarNameExp.setProgramType(e.getProgramType());
+                }
+                catch (SourceErrorException see) {
+                    // YS - Our sanity check will detect this as an error.
+                    argExpAsProgVarNameExp.setProgramType(PTVoid.getInstance(myTypeGraph));
+                }
+            }
+        }
+        else {
+            TreeWalker.visit(this, argumentExp);
+        }
+
+        postAny(item);
+
+        return true;
     }
 
     // -----------------------------------------------------------
@@ -3883,7 +3969,7 @@ public class Populator extends TreeWalkerVisitor {
      * @param <T> A type that extends from {@link SymbolTableEntry}.
      */
     private <T extends SymbolTableEntry> void ambiguousSymbol(String symbolName, Location l, List<T> candidates) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         sb.append("Ambiguous symbol.  Candidates: ");
         boolean first = true;

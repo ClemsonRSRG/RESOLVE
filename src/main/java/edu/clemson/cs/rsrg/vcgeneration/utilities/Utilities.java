@@ -388,6 +388,10 @@ public class Utilities {
      * @param moduleLevelLocationDetails A map containing {@link LocationDetailModel} for
      *                                   the module level clauses.
      * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
+     *                             so far.
      * @param isLocalOperation {@code true} if it is a local operation, {@code false} otherwise.
      *
      * @return The top-level assumed expression.
@@ -399,8 +403,11 @@ public class Utilities {
             List<AssertionClause> moduleLevelRequiresClauses,
             Map<Dec, List<AssertionClause>> moduleLevelConstraintClauses,
             Map<AssertionClause, LocationDetailModel> moduleLevelLocationDetails,
-            OperationEntry correspondingOperationEntry, boolean addConstraints,
-            boolean isLocalOperation) {
+            OperationEntry correspondingOperationEntry,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
+            boolean addConstraints, boolean isLocalOperation) {
         // Add all the expressions we can assume from the current context
         Exp retExp =
                 createTopLevelAssumeExpFromContext(loc,
@@ -435,7 +442,9 @@ public class Utilities {
         if (addConstraints) {
             retExp =
                     addParamTypeConstraints(loc, retExp, scope, currentBlock,
-                            correspondingOperationEntry.getParameters());
+                            correspondingOperationEntry.getParameters(),
+                            typeFamilyDecs, localRepresentationTypeDecs,
+                            processedInstFacDecs);
         }
 
         return retExp;
@@ -1304,12 +1313,19 @@ public class Utilities {
      * @param scope The module scope to start our search.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param entries List of operation's parameter entries.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
+     *                             so far.
      *
      * @return The original {@code exp} plus any operation parameter's type constraints.
      */
     private static Exp addParamTypeConstraints(Location loc, Exp exp,
             ModuleScope scope, AssertiveCodeBlock currentBlock,
-            ImmutableList<ProgramParameterEntry> entries) {
+            ImmutableList<ProgramParameterEntry> entries,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs) {
         Exp retExp = exp;
 
         // Loop through each of the parameters in the operation entry.
@@ -1355,6 +1371,44 @@ public class Utilities {
                                         null, parameterVarDec.getName(),
                                         typeFamilyDec.getExemplar(), typeEntry
                                                 .getModelType(), null);
+
+                        // Replace any facility formal with actual
+                        Exp constraintExp =
+                                modifiedConstraintClause.getAssertionExp();
+                        constraintExp =
+                                Utilities
+                                        .replaceFacilityFormalWithActual(
+                                                constraintExp,
+                                                Collections
+                                                        .singletonList(parameterVarDec),
+                                                scope.getDefiningElement()
+                                                        .getName(),
+                                                typeFamilyDecs,
+                                                localRepresentationTypeDecs,
+                                                processedInstFacDecs);
+
+                        Exp whichEntailsExp =
+                                modifiedConstraintClause.getWhichEntailsExp();
+                        if (whichEntailsExp != null) {
+                            whichEntailsExp =
+                                    Utilities
+                                            .replaceFacilityFormalWithActual(
+                                                    whichEntailsExp,
+                                                    Collections
+                                                            .singletonList(parameterVarDec),
+                                                    scope.getDefiningElement()
+                                                            .getName(),
+                                                    typeFamilyDecs,
+                                                    localRepresentationTypeDecs,
+                                                    processedInstFacDecs);
+                        }
+
+                        modifiedConstraintClause =
+                                new AssertionClause(modifiedConstraintClause
+                                        .getLocation().clone(),
+                                        modifiedConstraintClause
+                                                .getClauseType(),
+                                        constraintExp, whichEntailsExp);
 
                         // Form a conjunct with the modified constraint clause and add
                         // the location detail associated with it.
