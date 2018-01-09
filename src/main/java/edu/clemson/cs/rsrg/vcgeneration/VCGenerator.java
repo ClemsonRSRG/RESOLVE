@@ -599,14 +599,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
                         myGlobalRequires, myGlobalConstraints, myGlobalLocationDetails,
-                        correspondingOperation, myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
+                        correspondingOperation, myCurrentConceptDeclaredTypes,
+                        myLocalRepresentationTypeDecs, myProcessedInstFacilityDecls,
+                        myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
                         true);
-        topLevelAssumeExp =
-                Utilities.replaceFacilityFormalWithActual(topLevelAssumeExp,
-                        dec.getWrappedOpDec().getParameters(),
-                        myCurrentModuleScope.getDefiningElement().getName(),
-                        myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -716,13 +712,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
                         myGlobalRequires, myGlobalConstraints,
                         myGlobalLocationDetails, correspondingOperation,
+                        myCurrentConceptDeclaredTypes,
+                        myLocalRepresentationTypeDecs, myProcessedInstFacilityDecls,
                         myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal);
-        topLevelAssumeExp =
-                Utilities.replaceFacilityFormalWithActual(topLevelAssumeExp,
-                        dec.getParameters(),
-                        myCurrentModuleScope.getDefiningElement().getName(),
-                        myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
