@@ -903,7 +903,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Create a new assertive code block
             PosSymbol name =
                     new PosSymbol(clause.getLocation(),
-                            "Which_Entails Expression Located at  "
+                            "Which_Entails Expression Located at "
                                     + clause.getLocation());
             AssertiveCodeBlock block =
                     new AssertiveCodeBlock(name, clause, myTypeGraph);
