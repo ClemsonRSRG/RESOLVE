@@ -46,7 +46,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
@@ -108,9 +107,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * between different math types.</p>
      */
     private final TypeGraph myTypeGraph;
-
-    /** <p>The mathematical type Z.</p> */
-    private MTType Z;
 
     // -----------------------------------------------------------
     // Facility Declaration-Related
@@ -290,9 +286,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         try {
             myCurrentModuleScope =
                     myBuilder.getModuleScope(new ModuleIdentifier(dec));
-
-            // Get "Z" from the TypeGraph
-            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
 
             // Apply the facility declaration rule to imported facility declarations.
             List<FacilityEntry> results =
