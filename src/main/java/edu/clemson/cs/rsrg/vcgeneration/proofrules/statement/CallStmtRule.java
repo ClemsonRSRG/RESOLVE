@@ -382,7 +382,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
             VarExp tempParamExp = Utilities.createVarExp(varDec.getLocation().clone(), null,
                     new PosSymbol(parameterExp.getLocation().clone(), "_" + parameterExp.getName().getName()),
                     exp.getMathType(), exp.getMathTypeValue());
-            OldExp tempOldParamExp = new OldExp(varDec.getLocation().clone(), parameterExp.clone());
+            OldExp tempOldParamExp = new OldExp(varDec.getLocation().clone(), tempParamExp.clone());
             tempOldParamExp.setMathType(varDec.getTy().getMathTypeValue());
 
             // Query for the type entry in the symbol table
