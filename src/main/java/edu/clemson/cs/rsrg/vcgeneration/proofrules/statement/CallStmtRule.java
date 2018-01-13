@@ -33,6 +33,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTFamily;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -208,7 +210,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
         //    ( Assume Implicit_Post[ Post_Subs ] and ( w = #w )[ w⇝e, #w⇝#e ] and
         //      T6.Constraint(g) and T7.Is_Initial( NQV(RS, h) ) )
         Exp ensuresExp =
-                createModifiedEnsExp(operationEntry, modifiedArguments);
+                createModifiedEnsExp(operationEntry, callArgs,
+                        modifiedArguments);
         AssumeStmt assumeStmt =
                 new AssumeStmt(myCallStmt.getLocation().clone(), ensuresExp,
                         false);
@@ -335,11 +338,13 @@ public class CallStmtRule extends AbstractProofRuleApplication
      * the {@code VCs} in the assertive code block.</p>
      *
      * @param operationEntry Calling statement's {@link OperationEntry}.
+     * @param callArgs List of calling arguments.
      * @param modifiedArguments List of modified calling arguments.
      *
      * @return The modified {@code ensures} clause expression.
      */
-    private Exp createModifiedEnsExp(OperationEntry operationEntry, List<Exp> modifiedArguments) {
+    private Exp createModifiedEnsExp(OperationEntry operationEntry,
+            List<ProgramExp> callArgs, List<Exp> modifiedArguments) {
         OperationDec operationDec =
                 (OperationDec) operationEntry.getDefiningElement();
 
@@ -386,10 +391,22 @@ public class CallStmtRule extends AbstractProofRuleApplication
             tempOldParamExp.setMathType(varDec.getTy().getMathTypeValue());
 
             // Query for the type entry in the symbol table
-            SymbolTableEntry ste =
-                    Utilities.searchProgramType(nameTy.getLocation(), nameTy
-                                    .getQualifier(), nameTy.getName(),
-                            myCurrentModuleScope);
+            // Note: If the parameter type is generic, then we check to see if the calling arguments
+            // contains a type that is instantiated. If it is, then we use the instantiated type
+            // from the calling arg.
+            SymbolTableEntry ste;
+            ProgramExp callingArg = callArgs.get(i);
+            if (nameTy.getProgramType() instanceof PTGeneric &&
+                    callingArg.getProgramType() instanceof PTFamily) {
+                PTFamily callingType = (PTFamily) callingArg.getProgramType();
+                ste = Utilities.searchProgramType(callingArg.getLocation(), null,
+                        new PosSymbol(callingArg.getLocation(), callingType.getName()), myCurrentModuleScope);
+            }
+            else {
+                ste = Utilities.searchProgramType(nameTy.getLocation(),
+                        nameTy.getQualifier(), nameTy.getName(), myCurrentModuleScope);
+            }
+
             ProgramTypeEntry typeEntry;
             if (ste instanceof ProgramTypeEntry) {
                 typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
