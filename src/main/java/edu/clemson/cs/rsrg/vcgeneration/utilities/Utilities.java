@@ -570,29 +570,6 @@ public class Utilities {
     }
 
     /**
-     * <p>An helper method that returns the math type for "Z".</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param scope The module scope to start our search.
-     *
-     * @return The <code>MTType</code> for "Z".
-     */
-    public static MTType getMathTypeZ(Location loc, ModuleScope scope) {
-        // Locate "Z" (Integer)
-        MathSymbolEntry mse = searchMathSymbol(loc, "Z", scope);
-        MTType Z = null;
-        try {
-            Z = mse.getTypeValue();
-        }
-        catch (SymbolNotOfKindTypeException e) {
-            notAType(mse, loc);
-        }
-
-        return Z;
-    }
-
-    /**
      * <p>An helper method that returns {@link ProgramFunctionExp ProgramFunctionExp's}
      * corresponding {@link OperationEntry}.</p>
      *
