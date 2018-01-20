@@ -479,7 +479,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     AssertionClause initEnsures =
                             type.getInitialization().getEnsures();
                     AssertionClause modifiedInitEnsures =
-                            Utilities.getTypeEnsuresClause(initEnsures, exp
+                            Utilities.getTypeInitEnsuresClause(initEnsures, exp
                                     .getLocation(), null, varDec.getName(), type
                                     .getExemplar(), typeEntry.getModelType(), null);
 

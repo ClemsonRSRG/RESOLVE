@@ -634,26 +634,25 @@ public class Utilities {
     }
 
     /**
-     * <p>Given the original {@code ensures} clause, use the provided
-     * information on the actual parameter variable to substitute the {@code exemplar} in
+     * <p>Given the original {@code initialization ensures} clause, use the provided
+     * information on a program variable to substitute the {@code exemplar} in
      * the {@code initialization ensures} clause and create a new {@link AssertionClause}.</p>
      *
-     * @param originalEnsuresClause The {@link AssertionClause} containing the
-     *                              original {@code ensures} clause.
+     * @param originalInitEnsuresClause The {@link AssertionClause} containing the
+     *                                  original {@code initialization ensures} clause.
      * @param loc The location in the AST that we are
      *            currently visiting.
-     * @param qualifier The parameter variable's qualifier.
-     * @param name The parameter variable's name.
+     * @param qualifier The program variable's qualifier.
+     * @param name The program variable's name.
      * @param exemplarName The {@code exemplar} name for the corresponding type.
      * @param type The mathematical type associated with this type.
      * @param typeValue The mathematical type value associated with this type.
      *
      * @return A modified {@link AssertionClause} containing the new
-     * {@code ensures} clause.
+     * {@code initialization ensures} clause.
      */
-    public static AssertionClause getTypeEnsuresClause(AssertionClause originalEnsuresClause,
-            Location loc, PosSymbol qualifier, PosSymbol name,
-            PosSymbol exemplarName, MTType type, MTType typeValue) {
+    public static AssertionClause getTypeInitEnsuresClause(AssertionClause originalInitEnsuresClause, Location loc,
+            PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
         // Create a variable expression from the declared variable
         VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
 
@@ -666,16 +665,16 @@ public class Utilities {
 
         // Create new assertion clause by replacing the exemplar with the actual
         Location newLoc = loc.clone();
-        Exp constraintWithReplacements =
-                originalEnsuresClause.getAssertionExp().substitute(substitutions);
+        Exp initEnsuresWithReplacements =
+                originalInitEnsuresClause.getAssertionExp().substitute(substitutions);
         Exp whichEntailsWithReplacements = null;
-        if (originalEnsuresClause.getWhichEntailsExp() != null) {
+        if (originalInitEnsuresClause.getWhichEntailsExp() != null) {
             whichEntailsWithReplacements =
-                    originalEnsuresClause.getWhichEntailsExp().substitute(substitutions);
+                    originalInitEnsuresClause.getWhichEntailsExp().substitute(substitutions);
         }
 
         return new AssertionClause(newLoc, AssertionClause.ClauseType.ENSURES,
-                constraintWithReplacements, whichEntailsWithReplacements);
+                initEnsuresWithReplacements, whichEntailsWithReplacements);
     }
 
     /**

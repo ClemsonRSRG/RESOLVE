@@ -422,7 +422,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                     AssertionClause initEnsures =
                             type.getInitialization().getEnsures();
                     modifiedInitEnsures =
-                            Utilities.getTypeEnsuresClause(initEnsures,
+                            Utilities.getTypeInitEnsuresClause(initEnsures,
                                     procedureLoc.clone(), null,
                                     parameterVarDec.getName(), type.getExemplar(),
                                     typeEntry.getModelType(), null);

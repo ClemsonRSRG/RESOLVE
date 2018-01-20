@@ -825,7 +825,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 AssertionClause initEnsures =
                         type.getInitialization().getEnsures();
                 AssertionClause modifiedInitEnsures =
-                        Utilities.getTypeEnsuresClause(initEnsures, dec
+                        Utilities.getTypeInitEnsuresClause(initEnsures, dec
                                 .getLocation(), null, dec.getName(), type
                                 .getExemplar(), typeEntry.getModelType(), null);
 
@@ -847,7 +847,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     myVariableSpecFinalItems.put(dec, new SpecInitFinalItem(
                             type.getFinalization().getLocation(), type
                                     .getFinalization().getClauseType(),
-                            finalAffects, Utilities.getTypeEnsuresClause(
+                            finalAffects, Utilities.getTypeInitEnsuresClause(
                                     finalEnsures, dec.getLocation(), null, dec
                                             .getName(), type.getExemplar(),
                                     typeEntry.getModelType(), null)));
