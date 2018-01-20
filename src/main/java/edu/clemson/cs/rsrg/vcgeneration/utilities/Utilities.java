@@ -634,6 +634,53 @@ public class Utilities {
     }
 
     /**
+     * <p>Given the original {@code finalization ensures} clause, use the provided
+     * information on a program variable to substitute the {@code exemplar} in
+     * the {@code finalization ensures} clause and create a new {@link AssertionClause}.</p>
+     *
+     * @param originalFinalEnsuresClause The {@link AssertionClause} containing the
+     *                                   original {@code finalization ensures} clause.
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The program variable's qualifier.
+     * @param name The program variable's name.
+     * @param exemplarName The {@code exemplar} name for the corresponding type.
+     * @param type The mathematical type associated with this type.
+     * @param typeValue The mathematical type value associated with this type.
+     *
+     * @return A modified {@link AssertionClause} containing the new
+     * {@code finalization ensures} clause.
+     */
+    public static AssertionClause getTypeFinalEnsuresClause(AssertionClause originalFinalEnsuresClause, Location loc,
+        PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
+        // Create an incoming variable expression from the declared variable
+        // YS: Finalization ensures always talks about the incoming value and never
+        //     about the outgoing value since it is finalized...
+        VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
+        OldExp oldVarDecExp = new OldExp(loc.clone(), varDecExp);
+
+        // Create a variable expression from the type exemplar
+        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
+
+        // Create a replacement map
+        Map<Exp, Exp> substitutions = new HashMap<>();
+        substitutions.put(exemplar, oldVarDecExp);
+
+        // Create new assertion clause by replacing the exemplar with the actual
+        Location newLoc = loc.clone();
+        Exp finalEnsuresWithReplacements =
+                originalFinalEnsuresClause.getAssertionExp().substitute(substitutions);
+        Exp whichEntailsWithReplacements = null;
+        if (originalFinalEnsuresClause.getWhichEntailsExp() != null) {
+            whichEntailsWithReplacements =
+                    originalFinalEnsuresClause.getWhichEntailsExp().substitute(substitutions);
+        }
+
+        return new AssertionClause(newLoc, AssertionClause.ClauseType.ENSURES,
+                finalEnsuresWithReplacements, whichEntailsWithReplacements);
+    }
+
+    /**
      * <p>Given the original {@code initialization ensures} clause, use the provided
      * information on a program variable to substitute the {@code exemplar} in
      * the {@code initialization ensures} clause and create a new {@link AssertionClause}.</p>

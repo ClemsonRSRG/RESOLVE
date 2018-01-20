@@ -847,7 +847,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     myVariableSpecFinalItems.put(dec, new SpecInitFinalItem(
                             type.getFinalization().getLocation(), type
                                     .getFinalization().getClauseType(),
-                            finalAffects, Utilities.getTypeInitEnsuresClause(
+                            finalAffects, Utilities.getTypeFinalEnsuresClause(
                                     finalEnsures, dec.getLocation(), null, dec
                                             .getName(), type.getExemplar(),
                                     typeEntry.getModelType(), null)));
