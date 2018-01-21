@@ -222,7 +222,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>Tells the compiler to generate VCs.</p>
      */
-    public static final Flag FLAG_ADD_CONSTRAINT =
+    private static final Flag FLAG_ADD_CONSTRAINT =
             new Flag(FLAG_SECTION_NAME, "addConstraints",
                     FLAG_DESC_ADD_CONSTRAINT);
 
