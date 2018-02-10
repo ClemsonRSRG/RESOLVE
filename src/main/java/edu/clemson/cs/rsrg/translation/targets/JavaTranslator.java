@@ -636,7 +636,7 @@ public class JavaTranslator extends AbstractTranslator {
         ProgramExp argumentExp = item.getArgumentExp();
         Dec wrappedDec = myFacilityBindings.get(item).getWrappedDec();
 
-        // Case 1: This is an operation name as argument.
+        // Case 1: The wrapped declaration is an operation name as argument.
         if (wrappedDec instanceof OperationDec) {
             ProgramVariableNameExp operationName =
                     (ProgramVariableNameExp) argumentExp;
@@ -648,35 +648,35 @@ public class JavaTranslator extends AbstractTranslator {
 
             myActiveTemplates.peek().add("arguments", argItem);
         }
-        // Case 2: This is some constant value.
+        // Case 2: The wrapped declaration is some constant value.
         else if (wrappedDec instanceof ConstantParamDec) {
-            myActiveTemplates.peek().add("arguments", wrappedDec.getName());
+            //myActiveTemplates.peek().add("arguments", wrappedDec.getName());
         }
+        // Case 3: The wrapped declaration is a concept type.
+        else if (wrappedDec instanceof ConceptTypeParamDec) {
+            PTType type = item.getProgramTypeValue();
 
-        /*if (type instanceof PTVoid) {
+            // Case 3.1: A generic type passed as module parameter
+            if (type instanceof PTGeneric) {
+                ProgramVariableNameExp typeName =
+                        (ProgramVariableNameExp) item.getArgumentExp();
+                myActiveTemplates.peek().add("arguments", typeName.getName());
+            }
+            // Case 3.2: A facility declared type that doesn't have a concept model
+            else if (type instanceof PTFacilityRepresentation) {
+                myActiveTemplates.peek().add("arguments",
+                        "new " + getTypeName(type) + "()");
+            }
+            // Case 3.3: A facility instantiated type passed as module parameter
+            else {
+                ST argItem =
+                        mySTGroup.getInstanceOf("var_init").add("facility",
+                                getDefiningFacilityEntry(type).getName()).add(
+                                "type", getVariableTypeTemplate(type));
 
+                myActiveTemplates.peek().add("arguments", argItem);
+            }
         }
-        // Case 3: This is a generic type.
-        else if (type instanceof PTGeneric) {
-            ProgramVariableNameExp typeName =
-                    (ProgramVariableNameExp) item.getArgumentExp();
-            myActiveTemplates.peek().add("arguments", typeName.getName());
-        }
-        // Case 4: This is a facility instantiated type.
-        else if (type instanceof PTFacilityRepresentation) {
-            myActiveTemplates.peek().add("arguments",
-                    "new " + getTypeName(type) + "()");
-        }
-        // Case 5: An evaluates parameter variable
-        /*else if (node.getEvalExp() == null) {
-
-            ST argItem =
-                    myGroup.getInstanceOf("var_init").add("facility",
-                            getDefiningFacilityEntry(type).getName()).add(
-                            "type", getVariableTypeTemplate(type));
-
-            myActiveTemplates.peek().add("arguments", argItem);
-        }*/
     }
 
     // -----------------------------------------------------------
