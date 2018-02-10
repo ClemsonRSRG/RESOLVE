@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.translation.targets;
 
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
@@ -21,6 +22,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableNameExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -630,21 +633,18 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     public final void preModuleArgumentItem(ModuleArgumentItem item) {
-    /* TODO: Figure out how to refactor this.
-    PTType type = item.getProgramTypeValue();
-
-    if (type instanceof PTVoid) {
+        ProgramExp argumentExp = item.getArgumentExp();
         Dec wrappedDec = myFacilityBindings.get(item).getWrappedDec();
+
         // Case 1: This is an operation name as argument.
         if (wrappedDec instanceof OperationDec) {
             ProgramVariableNameExp operationName =
-                    (ProgramVariableNameExp) item.getArgumentExp();
+                    (ProgramVariableNameExp) argumentExp;
             ST argItem =
                     getOperationArgItemTemplate(
                             (OperationDec) myFacilityBindings.get(item)
                                     .getWrappedDec(), operationName
-                                    .getQualifier(), operationName
-                                    .getName());
+                                    .getQualifier(), operationName.getName());
 
             myActiveTemplates.peek().add("arguments", argItem);
         }
@@ -652,27 +652,31 @@ public class JavaTranslator extends AbstractTranslator {
         else if (wrappedDec instanceof ConstantParamDec) {
             myActiveTemplates.peek().add("arguments", wrappedDec.getName());
         }
-    }
-    // Case 3: This is a generic type.
-    else if (type instanceof PTGeneric) {
-        ProgramVariableNameExp typeName =
-                (ProgramVariableNameExp) item.getArgumentExp();
-        myActiveTemplates.peek().add("arguments", typeName.getName());
-    }
-    // Case 4: This is an instantiated type.
-    else if (type instanceof PTFacilityRepresentation) {
-        myActiveTemplates.peek().add("arguments",
-                "new " + getTypeName(type) + "()");
-    }
-    else if (node.getEvalExp() == null) {
 
-        ST argItem =
-                myGroup.getInstanceOf("var_init").add("facility",
-                        getDefiningFacilityEntry(type).getName()).add(
-                        "type", getVariableTypeTemplate(type));
+        /*if (type instanceof PTVoid) {
 
-        myActiveTemplates.peek().add("arguments", argItem);
-    }*/
+        }
+        // Case 3: This is a generic type.
+        else if (type instanceof PTGeneric) {
+            ProgramVariableNameExp typeName =
+                    (ProgramVariableNameExp) item.getArgumentExp();
+            myActiveTemplates.peek().add("arguments", typeName.getName());
+        }
+        // Case 4: This is a facility instantiated type.
+        else if (type instanceof PTFacilityRepresentation) {
+            myActiveTemplates.peek().add("arguments",
+                    "new " + getTypeName(type) + "()");
+        }
+        // Case 5: An evaluates parameter variable
+        /*else if (node.getEvalExp() == null) {
+
+            ST argItem =
+                    myGroup.getInstanceOf("var_init").add("facility",
+                            getDefiningFacilityEntry(type).getName()).add(
+                            "type", getVariableTypeTemplate(type));
+
+            myActiveTemplates.peek().add("arguments", argItem);
+        }*/
     }
 
     // -----------------------------------------------------------
