@@ -22,8 +22,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableNameExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -34,6 +33,7 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
@@ -627,12 +627,17 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link ModuleArgumentItem}.</p>
+     * <p>This method redefines how a {@link ModuleArgumentItem} should be walked.</p>
      *
      * @param item A module argument used in instantiating a {@link FacilityDec}.
+     *
+     * @return {@code true}
      */
     @Override
-    public final void preModuleArgumentItem(ModuleArgumentItem item) {
+    public final boolean walkModuleArgumentItem(ModuleArgumentItem item) {
+        preAny(item);
+
+        // No need to walk 'argumentExp' unless it is an evaluated expression.
         ProgramExp argumentExp = item.getArgumentExp();
         Dec wrappedDec = myFacilityBindings.get(item).getWrappedDec();
 
@@ -650,7 +655,8 @@ public class JavaTranslator extends AbstractTranslator {
         }
         // Case 2: The wrapped declaration is some constant value.
         else if (wrappedDec instanceof ConstantParamDec) {
-            //myActiveTemplates.peek().add("arguments", wrappedDec.getName());
+            // Let the tree walking methods for ProgramExp handle the rest.
+            TreeWalker.visit(this, argumentExp);
         }
         // Case 3: The wrapped declaration is a concept type.
         else if (wrappedDec instanceof ConceptTypeParamDec) {
@@ -677,6 +683,10 @@ public class JavaTranslator extends AbstractTranslator {
                 myActiveTemplates.peek().add("arguments", argItem);
             }
         }
+
+        postAny(item);
+
+        return true;
     }
 
     // -----------------------------------------------------------
