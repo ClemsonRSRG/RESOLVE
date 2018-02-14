@@ -508,40 +508,42 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     public final void postFacilityDec(FacilityDec dec) {
-    /* TODO: Might have to refactor module argument items first before dealing with this.
-    String facilityType = node.getConceptName().getName();
-    List<String> pathPieces =
-            getPathList(getFile(null, node.getConceptName().getName()));
+        String facilityType = dec.getConceptName().getName();
+        List<String> pathPieces =
+                getFile(dec.getConceptName().getName()).getPkgList();
 
-    // Basically: If we are an enhanced facility, clear the stack of only
-    // the templates pushed for each EnhancementBodyItem plus the base
-    // instantiation.. THEN push on the formed (enhanced) rhs.
-    if (myActiveTemplates.peek() != myBaseInstantiation) {
+        // Basically: If we are an enhanced facility, clear the stack of only
+        // the templates pushed for each EnhancementSpecItem plus the base
+        // instantiation.. THEN push on the formed (enhanced) rhs.
+        if (myActiveTemplates.peek() != myBaseInstantiation) {
+            for (int i = 0; i < myCurrentFacilityEntry.getEnhancements().size(); i++) {
+                myActiveTemplates.pop();
+            }
 
-        for (ModuleParameterization p : myCurrentFacilityEntry
-                .getEnhancements()) {
             myActiveTemplates.pop();
+            myActiveTemplates.push(myBaseEnhancement);
         }
-        myActiveTemplates.pop();
-        myActiveTemplates.push(myBaseEnhancement);
-    }
 
-    // TODO : Figure out why the hell node.getEnhancements().size() is 0
-    //        in BPStack.fa where there is clearly one enhancement!
-    if (node.getEnhancementBodies().size() == 1) {
-        facilityType =
-                node.getEnhancementBodies().get(0).getName().getName();
-    }
+        // YS: If we have one enhancement/enhancement realization pair,
+        //     we don't need to create a proxy. Simply create a new variable
+        //     with the enhancement's name and use it to instantiate that part
+        //     of the facility.
+        if (dec.getEnhancementRealizPairs().size() == 1) {
+            facilityType =
+                    dec.getEnhancementRealizPairs().get(0).getEnhancementName()
+                            .getName();
+        }
 
-    ST facilityVariable =
-            myGroup.getInstanceOf("var_decl").add("type", facilityType)
-                    .add("name", node.getName().getName()).add("init",
-                            myActiveTemplates.pop());
+        // Create a new facility variable. This includes a "createProxy" call if needed.
+        ST facilityVariable =
+                mySTGroup.getInstanceOf("var_decl").add("type", facilityType)
+                        .add("name", dec.getName().getName()).add("init",
+                                myActiveTemplates.pop());
 
-    myActiveTemplates.peek().add("variables", facilityVariable);
+        myActiveTemplates.peek().add("variables", facilityVariable);
 
-    myDynamicImports.add(myGroup.getInstanceOf("include").add(
-            "directories", pathPieces).render()); */
+        myDynamicImports.add(mySTGroup.getInstanceOf("include").add(
+                "directories", pathPieces).render());
     }
 
     /**
