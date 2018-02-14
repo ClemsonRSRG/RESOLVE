@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
@@ -33,12 +34,15 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.*;
 import edu.clemson.cs.rsrg.typeandpopulate.query.EntryTypeQuery;
+import edu.clemson.cs.rsrg.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.*;
+
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleParameterization;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -510,9 +514,99 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
+     * <p>This method searches for a {@code qualifier} associated with the
+     * operation call.</p>
+     *
+     * @param qualifier A qualifier symbol
+     * @param name Name of the operation we are calling.
+     * @param args The arguments passed to this operation.
+     *
+     * @return The {@code qualifier} associated with this operation call.
+     */
+    protected final String getCallQualifier(PosSymbol qualifier, PosSymbol name, List<ProgramExp> args) {
+        String result = null;
+        List<PTType> argTypes = new LinkedList<>();
+        FacilityEntry definingFacility = null;
+
+        try {
+            for (ProgramExp arg : args) {
+                argTypes.add(arg.getProgramType());
+            }
+
+            OperationEntry oe =
+                    myCurrentModuleScope.queryForOne(
+                            new OperationQuery(null, name, argTypes)).toOperationEntry(null);
+
+            // We're dealing with local operation, then no qualifier.
+            if (myCurrentModuleScope.getModuleIdentifier().equals(
+                    oe.getSourceModuleIdentifier())) {
+                return null;
+            }
+
+            // Grab FacilityEntries in scope whose specification matches
+            // oe's SourceModuleIdentifier.
+            List<FacilityEntry> facilities =
+                    myCurrentModuleScope.query(new EntryTypeQuery<>(FacilityEntry.class,
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+
+            boolean comesFromEnhancement = false;
+            for (FacilityEntry f : facilities) {
+                if (qualifier != null
+                        && f.getName().equals(qualifier.getName())) {
+                    definingFacility = f;
+                    break;
+                }
+
+                if (oe.getSourceModuleIdentifier().equals(
+                        f.getFacility().getSpecification()
+                                .getModuleIdentifier())) {
+                    definingFacility = f;
+                }
+
+                for (ModuleParameterization p : f.getEnhancements()) {
+                    if (oe.getSourceModuleIdentifier().equals(
+                            p.getModuleIdentifier())) {
+                        definingFacility = f;
+                        comesFromEnhancement = true;
+                    }
+                }
+            }
+
+            // If we're in an enhancement realization, some calls rightly won't
+            // have a facility, and hence no qualifier should be returned.
+            if (definingFacility == null) {
+                return null;
+            }
+
+            // This is the idiotic part, really this is mixing the model and
+            // view (since I've put the '(' .. ')' cast parens in but it was
+            // mostly so I wouldn't have to write yet another super specific
+            // template -- there is likely a more elegant way.
+            if (definingFacility.getEnhancements().size() >= 2
+                    && comesFromEnhancement) {
+                result =
+                        "((" + oe.getSourceModuleIdentifier() + ")"
+                                + definingFacility.getName() + ")";
+            }
+            else {
+                result = definingFacility.getName();
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(qualifier, name.getName(), null);
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse); // shouldn't fire.
+        }
+
+        return result;
+    }
+
+    /**
      * <p>This method searches for the {@link FacilityEntry} responsible for
      * bringing the {@link SymbolTableEntry} referenced by {@code type} into the
-     * <code>ModuleScope</code> being translated.</p>
+     * {@link ModuleScope} being translated.</p>
      *
      * @param type The {@link PTType} we want symbol table info for.
      *

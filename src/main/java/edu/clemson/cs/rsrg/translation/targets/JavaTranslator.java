@@ -25,6 +25,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
+import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
@@ -544,6 +545,10 @@ public class JavaTranslator extends AbstractTranslator {
 
         myDynamicImports.add(mySTGroup.getInstanceOf("include").add(
                 "directories", pathPieces).render());
+
+        // Debugging message
+        emitDebug(dec.getLocation(), "Translated facility declaration: "
+                + dec.getName());
     }
 
     /**
@@ -692,27 +697,43 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     // -----------------------------------------------------------
-    // Variable Declaration-Related
+    // Statement-Related
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ParameterVarDec}.</p>
+     * <p>Code that gets executed before visiting a {@link CallStmt}.</p>
      *
-     * @param dec A parameter declaration.
+     * @param stmt An operation call statement.
      */
     @Override
-    public final void preParameterVarDec(ParameterVarDec dec) {
-        PTType type = dec.getTy().getProgramType();
+    public final void preCallStmt(CallStmt stmt) {
+        ST callStmt;
+        ProgramFunctionExp callingFunctionExp = stmt.getFunctionExp();
+        String qualifier =
+                getCallQualifier(callingFunctionExp.getQualifier(),
+                        callingFunctionExp.getName(), callingFunctionExp
+                                .getArguments());
+        String name = callingFunctionExp.getName().getName();
 
-        ST parameter =
-                mySTGroup.getInstanceOf("parameter").add("type",
-                        getParameterTypeTemplate(type)).add("name",
-                        dec.getName().getName());
+        // If the call references an operation passed as a parameter, we need
+        // to specially qualify it.
+        if (myParameterOperationNames.contains(name)) {
+            callStmt =
+                    mySTGroup.getInstanceOf("qualified_call").add("name", name)
+                            .add("qualifier", name + "Param");
+        }
+        else if (qualifier != null) {
+            callStmt =
+                    mySTGroup.getInstanceOf("qualified_call").add("name", name)
+                            .add("qualifier", qualifier);
+        }
+        else {
+            callStmt =
+                    mySTGroup.getInstanceOf("unqualified_call").add("name",
+                            name);
+        }
 
-        myActiveTemplates.peek().add("parameters", parameter);
-
-        emitDebug(dec.getLocation(), "Adding parameter variable: "
-                + dec.getName());
+        myActiveTemplates.push(callStmt);
     }
 
     // -----------------------------------------------------------
@@ -754,6 +775,30 @@ public class JavaTranslator extends AbstractTranslator {
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse); // shouldn't fire.
         }
+    }
+
+    // -----------------------------------------------------------
+    // Variable Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ParameterVarDec}.</p>
+     *
+     * @param dec A parameter declaration.
+     */
+    @Override
+    public final void preParameterVarDec(ParameterVarDec dec) {
+        PTType type = dec.getTy().getProgramType();
+
+        ST parameter =
+                mySTGroup.getInstanceOf("parameter").add("type",
+                        getParameterTypeTemplate(type)).add("name",
+                        dec.getName().getName());
+
+        myActiveTemplates.peek().add("parameters", parameter);
+
+        emitDebug(dec.getLocation(), "Adding parameter variable: "
+                + dec.getName());
     }
 
     // ===========================================================
