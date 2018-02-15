@@ -339,15 +339,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             List<ResolveParser.FacilityItemContext> itemContexts = ctx.facilityItems().facilityItem();
             for (ResolveParser.FacilityItemContext item : itemContexts) {
                 // Add any new array facility declarations that was generated
-                // by this facility shared state representation.
-                if (item.facilitySharedStateRepresentationDecl() != null) {
-                    if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.facilitySharedStateRepresentationDecl())) {
-                        decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.facilitySharedStateRepresentationDecl()));
-                    }
-                }
-                // Add any new array facility declarations that was generated
                 // by this facility type representation.
-                else if (item.facilityTypeRepresentationDecl() != null){
+                if (item.facilityTypeRepresentationDecl() != null){
                     if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.facilityTypeRepresentationDecl())) {
                         decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.facilityTypeRepresentationDecl()));
                     }
@@ -1864,105 +1857,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 new SharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
                         convention, correspondence, initItem, finalItem);
         myCopySSRList.add((SharedStateRealizationDec) realizationDec.clone());
-
-        myNodes.put(ctx, realizationDec);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <br>
-     * <p>We create a new object to store all the new array facilities
-     * that can be created by the syntactic sugar conversions.</p>
-     *
-     * @param ctx Facility shared state realization declaration node in ANTLR4 AST.
-     */
-    @Override
-    public void enterFacilitySharedStateRepresentationDecl(
-            ResolveParser.FacilitySharedStateRepresentationDeclContext ctx) {
-        // Create a new container
-        myArrayFacilityDecContainerStack
-                .push(new ArrayFacilityDecContainer(ctx));
-    }
-
-    /**
-     * {@inheritDoc}
-     * <br>
-     * <p>This method generates a representation of a facility shared state realization
-     * declaration.</p>
-     *
-     * @param ctx Facility shared state realization declaration node in ANTLR4 AST.
-     */
-    @Override
-    public void exitFacilitySharedStateRepresentationDecl(
-            ResolveParser.FacilitySharedStateRepresentationDeclContext ctx) {
-        List<VarDec> sharedStateVars = new ArrayList<>();
-        List<ResolveParser.VariableDeclContext> variableDeclContexts = ctx.variableDecl();
-        for (ResolveParser.VariableDeclContext variableDeclContext : variableDeclContexts) {
-            for (TerminalNode ident : variableDeclContext.variableDeclGroup().IDENTIFIER()) {
-                sharedStateVars.add((VarDec) myNodes.removeFrom(ident));
-            }
-        }
-
-        // Obtain any array facility declarations and
-        // store it into our module level members
-        ArrayFacilityDecContainer innerMostContainer =
-                myArrayFacilityDecContainerStack.pop();
-        myModuleLevelDecs.newFacilityDecsMap.put(ctx, innerMostContainer.newFacilityDecs);
-
-        AssertionClause convention;
-        if (ctx.conventionClause() != null) {
-            convention =
-                    (AssertionClause) myNodes
-                            .removeFrom(ctx.conventionClause());
-        }
-        else {
-            convention =
-                    createTrueAssertionClause(createLocation(ctx),
-                            AssertionClause.ClauseType.CONVENTION);
-        }
-
-        FacilityTypeInitFinalItem initItem;
-        if (ctx.facilityRepresentationInit() != null) {
-            initItem =
-                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
-                            .facilityRepresentationInit());
-        }
-        else {
-            initItem =
-                    new FacilityTypeInitFinalItem(createLocation(ctx),
-                            FacilityTypeInitFinalItem.ItemType.INITIALIZATION,
-                            null, createTrueAssertionClause(
-                            createLocation(ctx),
-                            AssertionClause.ClauseType.REQUIRES),
-                            createTrueAssertionClause(createLocation(ctx),
-                                    AssertionClause.ClauseType.ENSURES),
-                            new ArrayList<FacilityDec>(),
-                            new ArrayList<VarDec>(), new ArrayList<Statement>());
-        }
-
-        FacilityTypeInitFinalItem finalItem;
-        if (ctx.facilityRepresentationFinal() != null) {
-            finalItem =
-                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
-                            .facilityRepresentationFinal());
-        }
-        else {
-            finalItem =
-                    new FacilityTypeInitFinalItem(createLocation(ctx),
-                            FacilityTypeInitFinalItem.ItemType.FINALIZATION,
-                            null, createTrueAssertionClause(
-                            createLocation(ctx),
-                            AssertionClause.ClauseType.REQUIRES),
-                            createTrueAssertionClause(createLocation(ctx),
-                                    AssertionClause.ClauseType.ENSURES),
-                            new ArrayList<FacilityDec>(),
-                            new ArrayList<VarDec>(), new ArrayList<Statement>());
-        }
-
-        FacilitySharedStateRealizationDec realizationDec =
-                new FacilitySharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
-                        convention, initItem, finalItem);
-        myCopySSRList.add((FacilitySharedStateRealizationDec) realizationDec.clone());
 
         myNodes.put(ctx, realizationDec);
     }
