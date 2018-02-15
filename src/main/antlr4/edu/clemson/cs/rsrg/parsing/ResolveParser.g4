@@ -52,7 +52,6 @@ facilityItems
 
 facilityItem
     :   facilityDecl
-    |   facilitySharedStateRepresentationDecl
     |   facilityTypeRepresentationDecl
     |   recursiveOperationProcedureDecl
     |   operationProcedureDecl
@@ -338,15 +337,6 @@ sharedStateRepresentationDecl
         (correspondenceClause)?
         (representationInit)?
         (representationFinal)?
-        END SHAREDVARIABLES SEMICOLON
-    ;
-
-facilitySharedStateRepresentationDecl
-    :   SHAREDVARIABLES IS REALIZED BY
-        (variableDecl)+
-        (conventionClause)?
-        (facilityRepresentationInit)?
-        (facilityRepresentationFinal)?
         END SHAREDVARIABLES SEMICOLON
     ;
 
