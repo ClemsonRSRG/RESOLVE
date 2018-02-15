@@ -28,7 +28,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.AbstractSharedStateRealizationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.FacilitySharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
@@ -120,8 +119,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * <p>This is a deep copy of all the shared state representations created during the
-     * tree building process. Note that the list contains either all
-     * {@link SharedStateRealizationDec}s or all {@link FacilitySharedStateRealizationDec}s.</p>
+     * tree building process. Note that the list contains all
+     * {@link SharedStateRealizationDec}s.</p>
      */
     private final List<AbstractSharedStateRealizationDec> myCopySSRList;
 
