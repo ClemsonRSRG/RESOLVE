@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.utilities;
+package edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts;
 
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
@@ -41,7 +41,7 @@ public class FinalizeVarStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a temporary statement that indicates
+     * <p>This constructs an helper statement that indicates
      * finalization logic for a variable happens here.</p>
      *
      * @param varDec The variable declaration we are applying the
