@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.statements.CallStmt;
+import edu.clemson.cs.rsrg.absyn.statements.SwapStmt;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.flag.Flag;
@@ -734,6 +735,35 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         myActiveTemplates.push(callStmt);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link SwapStmt}.</p>
+     *
+     * @param stmt A swap statement.
+     */
+    @Override
+    public final void preSwapStmt(SwapStmt stmt) {
+        ST swapStmt;
+        boolean translatingEnhancement =
+                myCurrentModuleScope.getDefiningElement() instanceof EnhancementRealizModuleDec;
+
+        if (stmt.getLeft().getProgramType() instanceof PTGeneric
+                || translatingEnhancement) {
+            swapStmt =
+                    mySTGroup.getInstanceOf("unqualified_call").add("name",
+                            "swap");
+        }
+        else {
+            FacilityEntry definingFacility =
+                    getDefiningFacilityEntry(stmt.getLeft().getProgramType());
+
+            swapStmt =
+                    mySTGroup.getInstanceOf("qualified_call").add("qualifier",
+                            definingFacility.getName()).add("name", "swap");
+        }
+
+        myActiveTemplates.push(swapStmt);
     }
 
     // -----------------------------------------------------------
