@@ -40,9 +40,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
-import java.util.*;
-
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleParameterization;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -97,6 +96,15 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * parameters.</p>
      */
     protected final List<String> myOperationParameterNames;
+
+    /**
+     * <p>This flag is <code>true</code> when walking the children of a
+     * <code>WhileStmtChanging</code> clause; <code>false</code> otherwise.</p>
+     */
+    // TODO : This global can be safely removed once walk methods for virtual
+    //        list nodes are fixed. Talk to Blair about this.
+    protected boolean myWhileStmtChangingClause = false;
+    protected boolean myWalkingInitFinalItemFlag = false;
 
     /**
      * <p>These are special files that should already exist in

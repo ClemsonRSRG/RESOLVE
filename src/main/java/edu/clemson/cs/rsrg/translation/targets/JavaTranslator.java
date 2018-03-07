@@ -449,6 +449,44 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     // -----------------------------------------------------------
+    // Expression-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProgramVariableNameExp}.</p>
+     *
+     * @param exp A programming variable name expression.
+     */
+    @Override
+    public final void preProgramVariableNameExp(ProgramVariableNameExp exp) {
+        boolean nonLocal = false;
+        ST nameExp = mySTGroup.getInstanceOf("name_exp");
+
+        if (myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec) {
+            ConceptRealizModuleDec thisModule =
+                    ((ConceptRealizModuleDec) myCurrentModuleScope.getDefiningElement());
+
+            List<ProgramParameterEntry> formals =
+                    getModuleFormalParameters(thisModule.getConceptName());
+
+            for (ProgramParameterEntry e : formals) {
+                if (e.getName().equals(exp.getName().getName())) {
+                    nonLocal = true;
+                }
+            }
+        }
+
+        nameExp =
+                (nonLocal) ? nameExp.add("name", "get"
+                        + exp.getName().getName() + "()") : nameExp.add(
+                        "name", exp.getName().getName());
+
+        if (!myWhileStmtChangingClause) {
+            myActiveTemplates.peek().add("arguments", nameExp);
+        }
+    }
+
+    // -----------------------------------------------------------
     // Facility Declaration-Related
     // -----------------------------------------------------------
 
