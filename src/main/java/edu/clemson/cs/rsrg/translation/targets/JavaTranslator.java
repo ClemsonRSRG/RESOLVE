@@ -329,6 +329,58 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     // -----------------------------------------------------------
+    // Facility Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link FacilityModuleDec}.</p>
+     *
+     * @param dec A facility module declaration.
+     */
+    @Override
+    public final void preFacilityModuleDec(FacilityModuleDec dec) {
+        addPackageTemplate(dec);
+
+        ST facility =
+                mySTGroup.getInstanceOf("facility_class").add("name",
+                        dec.getName().getName());
+
+        myActiveTemplates.push(facility);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link FacilityModuleDec}.</p>
+     *
+     * @param dec A facility module declaration.
+     */
+    @Override
+    public final void postFacilityModuleDec(FacilityModuleDec dec) {
+        String invocationName = null;
+
+        boolean buildingJar =
+                myCompileEnvironment.flags.isFlagSet("createJar");
+
+        List<OperationEntry> locals =
+                myCurrentModuleScope.query(new EntryTypeQuery<>(OperationEntry.class,
+                        MathSymbolTable.ImportStrategy.IMPORT_NONE,
+                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+
+        for (OperationEntry o : locals) {
+            if (o.getName().equals("Main") || o.getName().equals("main")) {
+                invocationName = o.getName();
+            }
+        }
+
+        if (invocationName == null && buildingJar) {
+            throw new SourceErrorException(
+                    "Cannot find the operation 'Main' in facility file "
+                            + dec.getName().getName(), dec.getLocation());
+        }
+
+        myActiveTemplates.peek().add("invoker", invocationName);
+    }
+
+    // -----------------------------------------------------------
     // Module parameter declarations
     // -----------------------------------------------------------
 
@@ -464,7 +516,8 @@ public class JavaTranslator extends AbstractTranslator {
 
         if (myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec) {
             ConceptRealizModuleDec thisModule =
-                    ((ConceptRealizModuleDec) myCurrentModuleScope.getDefiningElement());
+                    ((ConceptRealizModuleDec) myCurrentModuleScope
+                            .getDefiningElement());
 
             List<ProgramParameterEntry> formals =
                     getModuleFormalParameters(thisModule.getConceptName());
@@ -478,8 +531,8 @@ public class JavaTranslator extends AbstractTranslator {
 
         nameExp =
                 (nonLocal) ? nameExp.add("name", "get"
-                        + exp.getName().getName() + "()") : nameExp.add(
-                        "name", exp.getName().getName());
+                        + exp.getName().getName() + "()") : nameExp.add("name",
+                        exp.getName().getName());
 
         if (!myWhileStmtChangingClause) {
             myActiveTemplates.peek().add("arguments", nameExp);

@@ -68,7 +68,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>The current job's compilation environment
      * that stores all necessary objects and flags.</p>
      */
-    private final CompileEnvironment myCompileEnvironment;
+    protected final CompileEnvironment myCompileEnvironment;
 
     /**
      * <p>A pointer to a {@link SymbolTableEntry} that corresponds to
