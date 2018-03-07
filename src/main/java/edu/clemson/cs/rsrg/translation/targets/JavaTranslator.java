@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
@@ -798,6 +799,71 @@ public class JavaTranslator extends AbstractTranslator {
 
             emitDebug(dec.getLocation(), "Adding type family declaration: "
                     + dec.getName());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, dec.getName());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse); // shouldn't fire.
+        }
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a {@code Concept Realization}.
+     */
+    @Override
+    public final void preTypeRepresentationDec(TypeRepresentationDec dec) {
+        List<SymbolTableEntry> types =
+                myCurrentModuleScope.query(new NameQuery(null, dec.getName()));
+
+        PTType repType =
+                types.get(0).toProgramTypeEntry(dec.getLocation())
+                        .getProgramType();
+
+        ST record =
+                mySTGroup.getInstanceOf("record_class").add("name",
+                        dec.getName().getName()).add("implement",
+                        getVariableTypeTemplate(repType));
+
+        myActiveTemplates.push(record);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a {@code Concept Realization}.
+     */
+    @Override
+    public final void postTypeRepresentationDec(TypeRepresentationDec dec) {
+        ST instance =
+                mySTGroup.getInstanceOf("facility_init").add("realization",
+                        dec.getName().getName());
+
+        ST record = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("classes", record);
+
+        // Now build the "create<TYPENAME>" method for that record.
+        try {
+            ProgramTypeEntry pte =
+                    myCurrentModuleScope.queryForOne(
+                            new UnqualifiedNameQuery(dec.getName().getName()))
+                            .toProgramTypeEntry(dec.getLocation());
+
+            ST returnStmt =
+                    mySTGroup.getInstanceOf("return_stmt")
+                            .add("name", instance);
+
+            ST createMethod =
+                    getOperationLikeTemplate(pte.getProgramType(),
+                            "create" + dec.getName().getName(), true).add(
+                            "stmts", returnStmt);
+
+            myActiveTemplates.peek().add("functions", createMethod);
+
+            emitDebug(dec.getLocation(),
+                    "Adding type representation declaration: " + dec.getName());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, dec.getName());
