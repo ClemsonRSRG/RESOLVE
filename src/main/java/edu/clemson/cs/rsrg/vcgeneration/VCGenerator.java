@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration;
 
-import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
@@ -56,8 +55,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
@@ -65,6 +62,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -797,6 +795,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postVarDec(VarDec dec) {
+        // YS: Simply create a initialization statement that
+        //     allow us to deal with generating question mark variables
+        //     and duration logic when we backtrack through the code.
+        myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(dec));
+
+        /* TODO: Move/Refactor this logic
         // Ty should always be a NameTy
         if (dec.getTy() instanceof NameTy) {
             NameTy nameTy = (NameTy) dec.getTy();
@@ -878,7 +882,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Shouldn't be possible but just in case it ever happens
             // by accident.
             Utilities.tyNotHandled(dec.getTy(), dec.getLocation());
-        }
+        }*/
     }
 
     // -----------------------------------------------------------
