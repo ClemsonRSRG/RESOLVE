@@ -1035,6 +1035,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 myCurrentModuleScope, assertiveCodeBlock,
                                 mySTGroup, blockModel);
             }
+            else if (statement instanceof InitializeVarStmt) {
+                // Generate a new variable declaration/initialization rule application.
+                ruleApplication =
+                        new InitializeVarStmtRule(
+                                (InitializeVarStmt) statement,
+                                assertiveCodeBlock, mySTGroup, blockModel);
+            }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
                     // Generate a new remember rule application.
