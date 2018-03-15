@@ -195,13 +195,14 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
 
             // Add this expression as something we can assume to be true.
             AssumeStmt progressMetricAssume =
-                    new AssumeStmt(myCurrentProcedureDecreasingExp.getLocation().clone(),
-                            equalsExp, false);
+                    new AssumeStmt(myCurrentProcedureDecreasingExp
+                            .getLocation().clone(), equalsExp, false);
             myCurrentAssertiveCodeBlock.addStatement(progressMetricAssume);
         }
 
         // Add all the statements
-        myCurrentAssertiveCodeBlock.addStatements(myProcedureDec.getStatements());
+        myCurrentAssertiveCodeBlock.addStatements(myProcedureDec
+                .getStatements());
 
         // TODO: Add the finalization duration ensures (if any)
 
@@ -238,8 +239,8 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
 
         // Use the ensures clause to create a final confirm statement
         ConfirmStmt finalConfirmStmt =
-                new ConfirmStmt(myProcedureDec.getLocation().clone(), finalConfirmExp,
-                        VarExp.isLiteralTrue(finalConfirmExp));
+                new ConfirmStmt(myProcedureDec.getLocation().clone(),
+                        finalConfirmExp, VarExp.isLiteralTrue(finalConfirmExp));
         myCurrentAssertiveCodeBlock.addStatement(finalConfirmStmt);
 
         // Add the different details to the various different output models

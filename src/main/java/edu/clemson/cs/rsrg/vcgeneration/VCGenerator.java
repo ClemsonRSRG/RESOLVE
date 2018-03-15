@@ -62,6 +62,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
 import java.util.*;
@@ -1013,6 +1014,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new confirm rule application.
                 ruleApplication =
                         new ConfirmStmtRule((ConfirmStmt) statement,
+                                assertiveCodeBlock, mySTGroup, blockModel);
+            }
+            else if (statement instanceof FinalizeVarStmt) {
+                // Generate a new variable finalization rule application.
+                ruleApplication =
+                        new FinalizeVarStmtRule((FinalizeVarStmt) statement,
                                 assertiveCodeBlock, mySTGroup, blockModel);
             }
             else if (statement instanceof FuncAssignStmt) {
