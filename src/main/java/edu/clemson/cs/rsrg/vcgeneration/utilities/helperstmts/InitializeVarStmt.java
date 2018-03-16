@@ -60,7 +60,13 @@ public class InitializeVarStmt extends Statement {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        return null;
+        StringBuffer sb = new StringBuffer();
+        printSpace(indentSize, sb);
+        sb.append("_Initialize(");
+        sb.append(myVarDec.asString(0, innerIndentInc));
+        sb.append(");");
+
+        return sb.toString();
     }
 
     /**
@@ -68,7 +74,14 @@ public class InitializeVarStmt extends Statement {
      */
     @Override
     public final boolean equals(Object o) {
-        return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        InitializeVarStmt that = (InitializeVarStmt) o;
+
+        return myVarDec.equals(that.myVarDec);
     }
 
     /**
@@ -76,7 +89,7 @@ public class InitializeVarStmt extends Statement {
      */
     @Override
     public final int hashCode() {
-        return 0;
+        return myVarDec.hashCode();
     }
 
     // ===========================================================
