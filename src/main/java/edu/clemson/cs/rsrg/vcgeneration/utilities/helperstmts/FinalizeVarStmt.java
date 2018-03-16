@@ -21,7 +21,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule
  * <p>This is the class that builds a special kind of statement
  * that acts as a placeholder for finalizing a variable declaration. The only usage
  * of this class should be the {@link ProcedureDeclRule}. Since the user cannot
- * supply their own {@code FinalizeVarStmt} statements, any instances of this
+ * supply their own {@code _Finalize} statements, any instances of this
  * class will solely be created by the {@link VCGenerator}.</p>
  *
  * @author Yu-Shan Sun
@@ -61,7 +61,13 @@ public class FinalizeVarStmt extends Statement {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        return null;
+        StringBuffer sb = new StringBuffer();
+        printSpace(indentSize, sb);
+        sb.append("_Finalize(");
+        sb.append(myVarDec.asString(0, innerIndentInc));
+        sb.append(");");
+
+        return sb.toString();
     }
 
     /**
@@ -69,7 +75,14 @@ public class FinalizeVarStmt extends Statement {
      */
     @Override
     public final boolean equals(Object o) {
-        return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        FinalizeVarStmt that = (FinalizeVarStmt) o;
+
+        return myVarDec.equals(that.myVarDec);
     }
 
     /**
@@ -77,7 +90,7 @@ public class FinalizeVarStmt extends Statement {
      */
     @Override
     public final int hashCode() {
-        return 0;
+        return myVarDec.hashCode();
     }
 
     // ===========================================================
