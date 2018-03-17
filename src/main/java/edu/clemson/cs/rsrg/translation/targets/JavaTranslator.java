@@ -215,6 +215,53 @@ public class JavaTranslator extends AbstractTranslator {
     // Concept Realization Module
     // -----------------------------------------------------------
 
+    /**
+     * <p>Code that gets executed before visiting a {@link ConceptRealizModuleDec}.</p>
+     *
+     * @param dec A concept realization module declaration.
+     */
+    @Override
+    public final void preConceptRealizModuleDec(ConceptRealizModuleDec dec) {
+        addPackageTemplate(dec);
+
+        ST conceptBody =
+                mySTGroup.getInstanceOf("concept_body_class").add("name",
+                        dec.getName().getName()).add("implement",
+                        dec.getConceptName().getName());
+
+        myActiveTemplates.push(conceptBody);
+
+        List<ProgramParameterEntry> formals =
+                getModuleFormalParameters(dec.getConceptName());
+
+        for (ProgramParameterEntry p : formals) {
+            addParameterTemplate(dec.getLocation(), p.getDeclaredType(), p
+                    .getName());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ConceptRealizModuleDec}.</p>
+     *
+     * @param dec A concept realization module declaration.
+     */
+    @Override
+    public final void postConceptRealizModuleDec(ConceptRealizModuleDec dec) {
+        for (ProgramParameterEntry p : getModuleFormalParameters(dec
+                .getConceptName())) {
+            String name =
+                    (p.getDeclaredType() instanceof PTElement) ? "getType"
+                            + p.getName() : "get" + p.getName();
+            ST result =
+                    getOperationLikeTemplate(p.getDeclaredType(), name, true);
+
+            myActiveTemplates.peek().add(
+                    "functions",
+                    result.add("stmts", mySTGroup.getInstanceOf("return_stmt")
+                            .add("name", p.getName())));
+        }
+    }
+
     // -----------------------------------------------------------
     // Enhancement Module
     // -----------------------------------------------------------
@@ -971,7 +1018,8 @@ public class JavaTranslator extends AbstractTranslator {
      * @param dec A type representation declared in a facility.
      */
     @Override
-    public final void preFacilityTypeRepresentationDec(FacilityTypeRepresentationDec dec) {
+    public final void preFacilityTypeRepresentationDec(
+            FacilityTypeRepresentationDec dec) {
         ST record =
                 mySTGroup.getInstanceOf("record_class").add("name",
                         dec.getName().getName()).add("facility", true);
@@ -985,7 +1033,8 @@ public class JavaTranslator extends AbstractTranslator {
      * @param dec A type representation declared in a facility.
      */
     @Override
-    public final void postFacilityTypeRepresentationDec(FacilityTypeRepresentationDec dec) {
+    public final void postFacilityTypeRepresentationDec(
+            FacilityTypeRepresentationDec dec) {
         ST result = myActiveTemplates.pop();
 
         myActiveTemplates.peek().add("records", result);
