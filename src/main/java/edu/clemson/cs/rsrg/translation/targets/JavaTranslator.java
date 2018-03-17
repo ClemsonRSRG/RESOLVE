@@ -20,6 +20,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -962,6 +963,32 @@ public class JavaTranslator extends AbstractTranslator {
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse); // shouldn't fire.
         }
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link FacilityTypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a facility.
+     */
+    @Override
+    public final void preFacilityTypeRepresentationDec(FacilityTypeRepresentationDec dec) {
+        ST record =
+                mySTGroup.getInstanceOf("record_class").add("name",
+                        dec.getName().getName()).add("facility", true);
+
+        myActiveTemplates.push(record);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link FacilityTypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a facility.
+     */
+    @Override
+    public final void postFacilityTypeRepresentationDec(FacilityTypeRepresentationDec dec) {
+        ST result = myActiveTemplates.pop();
+
+        myActiveTemplates.peek().add("records", result);
     }
 
     // -----------------------------------------------------------
