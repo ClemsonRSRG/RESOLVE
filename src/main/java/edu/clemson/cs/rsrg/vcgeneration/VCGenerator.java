@@ -55,6 +55,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
@@ -796,12 +797,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postVarDec(VarDec dec) {
-        // YS: Simply create a initialization statement that
-        //     allow us to deal with generating question mark variables
-        //     and duration logic when we backtrack through the code.
-        myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(dec));
-
-        /* TODO: Move/Refactor this logic
         // Ty should always be a NameTy
         if (dec.getTy() instanceof NameTy) {
             NameTy nameTy = (NameTy) dec.getTy();
@@ -821,11 +816,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .getDefiningTypeEntry();
             }
 
-            // Generate the corresponding proof rule
-            ProofRuleApplication declRule;
+            // Check to see if the variable's type is known or it is generic.
             if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+                // YS: Simply create the proper variable initialization statement that
+                //     allow us to deal with generating question mark variables
+                //     and duration logic when we backtrack through the code.
+                myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(
+                        dec));
+
                 // Variable declaration rule for known types
-                TypeFamilyDec type =
+                /*TypeFamilyDec type =
                         (TypeFamilyDec) typeEntry.getDefiningElement();
                 AssertionClause initEnsures =
                         type.getInitialization().getEnsures();
@@ -856,34 +856,32 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     finalEnsures, dec.getLocation(), null, dec
                                             .getName(), type.getExemplar(),
                                     typeEntry.getModelType(), null)));
-                }
+                }*/
+
+                // NY YS
+                // TODO: Initialization duration for this variable
             }
             else {
                 // Variable declaration rule for generic types
-                declRule =
+                ProofRuleApplication declRule =
                         new GenericTypeVariableDeclRule(dec,
                                 myCurrentAssertiveCodeBlock, mySTGroup,
                                 myAssertiveCodeBlockModels
                                         .remove(myCurrentAssertiveCodeBlock));
+                declRule.applyRule();
+
+                // Update the current assertive code block and its associated block model.
+                myCurrentAssertiveCodeBlock =
+                        declRule.getAssertiveCodeBlocks().getFirst();
+                myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
+                        declRule.getBlockModel());
             }
-
-            // Apply the variable declaration rule.
-            declRule.applyRule();
-
-            // NY YS
-            // TODO: Initialization duration for this variable
-
-            // Update the current assertive code block and its associated block model.
-            myCurrentAssertiveCodeBlock =
-                    declRule.getAssertiveCodeBlocks().getFirst();
-            myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
-                    declRule.getBlockModel());
         }
         else {
             // Shouldn't be possible but just in case it ever happens
             // by accident.
             Utilities.tyNotHandled(dec.getTy(), dec.getLocation());
-        }*/
+        }
     }
 
     // -----------------------------------------------------------
