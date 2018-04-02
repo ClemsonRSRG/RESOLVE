@@ -817,6 +817,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             // Check to see if the variable's type is known or it is generic.
+            ST blockModel =
+                    myAssertiveCodeBlockModels
+                            .remove(myCurrentAssertiveCodeBlock);
             if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
                 // YS: Simply create the proper variable initialization statement that
                 //     allow us to deal with generating question mark variables
@@ -860,14 +863,17 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // NY YS
                 // TODO: Initialization duration for this variable
+
+                // Update the associated block model.
+                myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
+                        blockModel);
             }
             else {
                 // Variable declaration rule for generic types
                 ProofRuleApplication declRule =
                         new GenericTypeVariableDeclRule(dec,
                                 myCurrentAssertiveCodeBlock, mySTGroup,
-                                myAssertiveCodeBlockModels
-                                        .remove(myCurrentAssertiveCodeBlock));
+                                blockModel);
                 declRule.applyRule();
 
                 // Update the current assertive code block and its associated block model.
