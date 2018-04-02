@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration;
 
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
@@ -24,6 +25,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -37,11 +39,9 @@ import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
@@ -582,13 +582,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Create the top most level assume statement, replace any facility formal
         // with actual and add it to the assertive code block as the first statement.
         Exp topLevelAssumeExp =
-                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        myGlobalRequires, myGlobalConstraints, myGlobalLocationDetails,
-                        correspondingOperation, myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs, myProcessedInstFacilityDecls,
-                        myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
-                        true);
+                createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
+                        myCurrentAssertiveCodeBlock, correspondingOperation,
+                        myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls,
+                        myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), true);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -694,12 +692,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         // with actual and add it to the assertive code block as the first statement.
         // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
         Exp topLevelAssumeExp =
-                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        myGlobalRequires, myGlobalConstraints,
-                        myGlobalLocationDetails, correspondingOperation,
-                        myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs, myProcessedInstFacilityDecls,
+                createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
+                        myCurrentAssertiveCodeBlock, correspondingOperation,
+                        myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
+                        myProcessedInstFacilityDecls,
                         myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
@@ -967,6 +963,195 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>An helper method that adds the operation's type constraints.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param exp The top level assume expression we have built so far.
+     * @param scope The module scope to start our search.
+     * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
+     * @param entries List of operation's parameter entries.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
+     *                             so far.
+     *
+     * @return The original {@code exp} plus any operation parameter's type constraints.
+     */
+    private static Exp addParamTypeConstraints(Location loc, Exp exp,
+                                               ModuleScope scope, AssertiveCodeBlock currentBlock,
+                                               ImmutableList<ProgramParameterEntry> entries,
+                                               List<TypeFamilyDec> typeFamilyDecs,
+                                               List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+                                               List<InstantiatedFacilityDecl> processedInstFacDecs) {
+        Exp retExp = exp;
+
+        // Loop through each of the parameters in the operation entry.
+        for (ProgramParameterEntry entry : entries) {
+            ParameterVarDec parameterVarDec =
+                    (ParameterVarDec) entry.getDefiningElement();
+            PTType declaredType = entry.getDeclaredType();
+            ProgramParameterEntry.ParameterMode parameterMode = entry.getParameterMode();
+
+            // Only deal with actual types and don't deal
+            // with entry types passed in to the concept realization
+            if (!(declaredType instanceof PTGeneric)) {
+                // Query for the type entry in the symbol table
+                NameTy nameTy = (NameTy) parameterVarDec.getTy();
+                SymbolTableEntry ste =
+                        Utilities.searchProgramType(loc, nameTy.getQualifier(),
+                                nameTy.getName(), scope);
+
+                ProgramTypeEntry typeEntry;
+                if (ste instanceof ProgramTypeEntry) {
+                    typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
+                }
+                else {
+                    typeEntry =
+                            ste.toTypeRepresentationEntry(nameTy.getLocation())
+                                    .getDefiningTypeEntry();
+                }
+
+                // Obtain the original dec from the AST
+                TypeFamilyDec typeFamilyDec =
+                        (TypeFamilyDec) typeEntry.getDefiningElement();
+
+                // Other than the replaces mode, constraints for the
+                // other parameter modes needs to be added
+                // to the requires clause as conjuncts.
+                if (parameterMode != ProgramParameterEntry.ParameterMode.REPLACES) {
+                    if (!VarExp.isLiteralTrue(typeFamilyDec.getConstraint()
+                            .getAssertionExp())) {
+                        AssertionClause constraintClause =
+                                typeFamilyDec.getConstraint();
+                        AssertionClause modifiedConstraintClause =
+                                Utilities.getTypeConstraintClause(constraintClause, loc,
+                                        null, parameterVarDec.getName(),
+                                        typeFamilyDec.getExemplar(), typeEntry
+                                                .getModelType(), null);
+
+                        // Replace any facility formal with actual
+                        Exp constraintExp =
+                                modifiedConstraintClause.getAssertionExp();
+                        constraintExp =
+                                Utilities
+                                        .replaceFacilityFormalWithActual(
+                                                constraintExp,
+                                                Collections
+                                                        .singletonList(parameterVarDec),
+                                                scope.getDefiningElement()
+                                                        .getName(),
+                                                typeFamilyDecs,
+                                                localRepresentationTypeDecs,
+                                                processedInstFacDecs);
+
+                        Exp whichEntailsExp =
+                                modifiedConstraintClause.getWhichEntailsExp();
+                        if (whichEntailsExp != null) {
+                            whichEntailsExp =
+                                    Utilities
+                                            .replaceFacilityFormalWithActual(
+                                                    whichEntailsExp,
+                                                    Collections
+                                                            .singletonList(parameterVarDec),
+                                                    scope.getDefiningElement()
+                                                            .getName(),
+                                                    typeFamilyDecs,
+                                                    localRepresentationTypeDecs,
+                                                    processedInstFacDecs);
+                        }
+
+                        modifiedConstraintClause =
+                                new AssertionClause(modifiedConstraintClause
+                                        .getLocation().clone(),
+                                        modifiedConstraintClause
+                                                .getClauseType(),
+                                        constraintExp, whichEntailsExp);
+
+                        // Form a conjunct with the modified constraint clause and add
+                        // the location detail associated with it.
+                        Location constraintLoc =
+                                modifiedConstraintClause.getAssertionExp()
+                                        .getLocation();
+                        retExp =
+                                Utilities.formConjunct(loc, retExp,
+                                        modifiedConstraintClause,
+                                        new LocationDetailModel(constraintLoc
+                                                .clone(),
+                                                constraintLoc.clone(),
+                                                "Constraint Clause of "
+                                                        + parameterVarDec
+                                                        .getName()));
+                    }
+                }
+
+                // TODO: Handle type representations from concept realizations
+                /*
+                // If the type is a type representation, then our requires clause
+                // should really say something about the conceptual type and not
+                // the variable
+                if (ste instanceof RepresentationTypeEntry && !isLocal) {
+                    requires =
+                            Utilities.replace(requires, parameterExp,
+                                    Utilities
+                                            .createConcVarExp(opLocation,
+                                                    parameterExp,
+                                                    parameterExp
+                                                            .getMathType(),
+                                                    BOOLEAN));
+                    requires.setLocation((Location) opLocation.clone());
+                }
+
+                // If the type is a type representation, then we need to add
+                // all the type constraints from all the variable declarations
+                // in the type representation.
+                if (ste instanceof RepresentationTypeEntry) {
+                    Exp repConstraintExp = null;
+                    Set<VarExp> keys =
+                            myRepresentationConstraintMap.keySet();
+                    for (VarExp varExp : keys) {
+                        if (varExp.getQualifier() == null
+                                && varExp.getName().getName().equals(
+                                pNameTy.getName().getName())) {
+                            if (repConstraintExp == null) {
+                                repConstraintExp =
+                                        myRepresentationConstraintMap
+                                                .get(varExp);
+                            }
+                            else {
+                                Utilities.ambiguousTy(pNameTy, pNameTy
+                                        .getLocation());
+                            }
+                        }
+                    }
+
+                    // Only do the following if the expression is not simply true
+                    if (!repConstraintExp.isLiteralTrue()) {
+                        // Replace the exemplar with the actual parameter variable expression
+                        repConstraintExp =
+                                Utilities.replace(repConstraintExp,
+                                        exemplar, parameterExp);
+
+                        // Add this to our requires clause
+                        requires =
+                                myTypeGraph.formConjunct(requires,
+                                        repConstraintExp);
+                        requires.setLocation((Location) opLocation.clone());
+                    }
+                }*/
+            }
+
+            // Add the current variable to our list of free variables
+            currentBlock.addFreeVar(Utilities.createVarExp(parameterVarDec
+                            .getLocation(), null, parameterVarDec.getName(),
+                    declaredType.toMath(), null));
+
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>Applies each of the statement proof rules. After this call, we are
      * done processing {@code assertiveCodeBlock}.</p>
      *
@@ -1127,6 +1312,95 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         myAssertiveCodeBlockModels.put(assertiveCodeBlock, blockModel);
+    }
+
+    /**
+     * <p>An helper method that uses all the {@code requires} and {@code constraint}
+     * clauses from the various different sources (see below for complete list)
+     * and builds the appropriate {@code assume} clause that goes at the
+     * beginning an {@link AssertiveCodeBlock}.</p>
+     *
+     * <p>List of different places where clauses can originate from:</p>
+     * <ul>
+     *     <li>{@code Concept}'s {@code requires} clause.</li>
+     *     <li>{@code Concept}'s module {@code constraint} clause.</li>
+     *     <li>{@code Shared Variables}' {@code constraint} clause.</li>
+     *     <li>{@code Concept Realization}'s {@code requires} clause.</li>
+     *     <li>{@code Shared Variables}' {@code convention} clause.</li>
+     *     <li>{@code Shared Variables}' {@code correspondence} clause.</li>
+     *     <li>{@code constraint} clauses for all the parameters with the
+     *     appropriate substitutions made.</li>
+     *     <li>The {@code operation}'s {@code requires} clause with the following
+     *     change if it is an implementation for a {@code concept}'s operation:</li>
+     *     <li>
+     *         <ul>
+     *             <li>Substitute the parameter name with {@code Conc.<name>} if this
+     *             is the type we are implementing in a {@code concept realization}.</li>
+     *         </ul>
+     *     </li>
+     *     <li>Any {@code which_entails} expressions that originated from any of the
+     *     clauses above.</li>
+     * </ul>
+     *
+     * <p>See the {@code Procedure} declaration rule for more detail.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
+     * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
+     * @param typeFamilyDecs List of abstract types we are implementing or extending.
+     * @param localRepresentationTypeDecs List of local representation types.
+     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
+     *                             so far.
+     * @param isLocalOperation {@code true} if it is a local operation, {@code false} otherwise.
+     *
+     * @return The top-level assumed expression.
+     */
+    private Exp createTopLevelAssumeExpForProcedureDec(Location loc,
+            AssertiveCodeBlock currentBlock,
+            OperationEntry correspondingOperationEntry,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs,
+            boolean addConstraints, boolean isLocalOperation) {
+        // Add all the expressions we can assume from the current context
+        Exp retExp =
+                myCurrentVerificationContext
+                        .createTopLevelAssumeExpFromContext(loc);
+
+        // Add the operation's requires clause (and any which_entails clause)
+        AssertionClause requiresClause =
+                correspondingOperationEntry.getRequiresClause();
+        Exp requiresExp = requiresClause.getAssertionExp().clone();
+        if (!VarExp.isLiteralTrue(requiresExp)) {
+            // Form a conjunct with the requires clause and add
+            // the location detail associated with it.
+            retExp =
+                    Utilities.formConjunct(loc, retExp, requiresClause,
+                            new LocationDetailModel(requiresClause
+                                    .getLocation().clone(), requiresClause
+                                    .getLocation().clone(),
+                                    "Requires Clause of "
+                                            + correspondingOperationEntry
+                                                    .getName()));
+        }
+
+        // Add the operation parameter's type constraints.
+        // YS: We are not adding these automatically. Most of the time, these
+        //     constraints wouldn't really help us prove any of the VCs. If you
+        //     are ever interested in adding these to the givens list, use the
+        //     "addConstraints" flag. Note that these constraints still need to be
+        //     processed by the parsimonious step, so there is no guarantee that they
+        //     will show up in all of the VCs.
+        if (addConstraints) {
+            retExp =
+                    addParamTypeConstraints(loc, retExp, myCurrentModuleScope, currentBlock,
+                            correspondingOperationEntry.getParameters(),
+                            typeFamilyDecs, localRepresentationTypeDecs,
+                            processedInstFacDecs);
+        }
+
+        return retExp;
     }
 
     /**
