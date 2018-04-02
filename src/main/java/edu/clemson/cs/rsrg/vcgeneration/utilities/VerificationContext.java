@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -131,6 +132,55 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         return "";
+    }
+
+    /**
+     * <p>This method uses all the {@code requires} and {@code constraint}
+     * clauses from the various different sources (see below for complete list)
+     * and builds the appropriate {@code assume} clause that goes at the
+     * beginning an {@link AssertiveCodeBlock}.</p>
+     *
+     * <p>List of different places where clauses can originate from:</p>
+     * <ul>
+     *     <li>{@code Concept}'s {@code requires} clause.</li>
+     *     <li>{@code Concept}'s module {@code constraint} clause.</li>
+     *     <li>{@code Shared Variables}' {@code constraint} clause.</li>
+     *     <li>{@code Concept Realization}'s {@code requires} clause.</li>
+     *     <li>{@code Shared Variables}' {@code convention} clause.</li>
+     *     <li>{@code Shared Variables}' {@code correspondence} clause.</li>
+     *     <li>{@code constraint} clauses for all the parameters with the
+     *     appropriate substitutions made.</li>
+     *     <li>Any {@code which_entails} expressions that originated from any of the
+     *     clauses above.</li>
+     * </ul>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     *
+     * @return The top-level assumed expression.
+     */
+    public final Exp createTopLevelAssumeExpFromContext(Location loc) {
+        Exp retExp = null;
+
+        // Add all the module level requires clause.
+        for (AssertionClause clause : myModuleLevelRequires) {
+            retExp =
+                    Utilities.formConjunct(loc, retExp, clause,
+                            myModuleLevelLocationDetails.get(clause));
+        }
+
+        // Add all the module level constraint clauses.
+        for (Dec dec : myModuleLevelConstraints.keySet()) {
+            for (AssertionClause clause : myModuleLevelConstraints.get(dec)) {
+                retExp =
+                        Utilities.formConjunct(loc, retExp, clause,
+                                myModuleLevelLocationDetails.get(clause));
+            }
+        }
+
+        // TODO: Add any shared variable's constraint, convention, correspondence here.
+
+        return retExp;
     }
 
     /**

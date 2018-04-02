@@ -505,10 +505,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
         AssumeStmt topLevelAssumeStmt =
-                new AssumeStmt(dec.getLocation().clone(), Utilities
-                        .createTopLevelAssumeExpFromContext(dec.getLocation(),
-                                myGlobalRequires, myGlobalConstraints,
-                                myGlobalLocationDetails), false);
+                new AssumeStmt(dec.getLocation().clone(),
+                        myCurrentVerificationContext
+                                .createTopLevelAssumeExpFromContext(dec
+                                        .getLocation()), false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create a new model for this assertive code block
