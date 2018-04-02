@@ -37,7 +37,8 @@ import static edu.clemson.cs.rsrg.vcgeneration.VCGenerator.FLAG_ADD_CONSTRAINT;
 import java.util.*;
 
 /**
- * <p>This class all the items relevant to the module we are generating VCs for.</p>
+ * <p>This class contains all the module-level items relevant to the
+ * file we are generating VCs for.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
