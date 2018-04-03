@@ -59,7 +59,6 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
@@ -110,9 +109,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * between different math types.</p>
      */
     private final TypeGraph myTypeGraph;
-
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     // -----------------------------------------------------------
     // Operation Declaration-Related
@@ -222,7 +218,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCompileEnvironment = compileEnvironment;
         myFinalAssertiveCodeBlocks = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
-        myProcessedInstFacilityDecls = new LinkedList<>();
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
         myVariableSpecFinalItems = new LinkedHashMap<>();
@@ -288,7 +283,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     ruleApplication.applyRule();
 
                     // Store this facility's InstantiatedFacilityDecl for future use
-                    myProcessedInstFacilityDecls.add(ruleApplication.getInstantiatedFacilityDecl());
+                    myCurrentVerificationContext.storeInstantiatedFacilityDecl(
+                            ruleApplication.getInstantiatedFacilityDecl());
 
                     // Store all requires/constraint from the imported concept
                     PosSymbol conceptName = facDec.getConceptName();
@@ -508,8 +504,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         declRule.applyRule();
 
         // Store this facility's InstantiatedFacilityDecl for future use
-        myProcessedInstFacilityDecls
-                .add(declRule.getInstantiatedFacilityDecl());
+        myCurrentVerificationContext.storeInstantiatedFacilityDecl(declRule
+                .getInstantiatedFacilityDecl());
 
         // Update the current assertive code block and its associated block model.
         myCurrentAssertiveCodeBlock =
@@ -567,7 +563,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         Exp topLevelAssumeExp =
                 createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
                         myCurrentAssertiveCodeBlock, correspondingOperation,
-                        myProcessedInstFacilityDecls, myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
+                         myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
                         true);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
@@ -951,15 +947,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param scope The module scope to start our search.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param entries List of operation's parameter entries.
-     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
-     *                             so far.
      *
      * @return The original {@code exp} plus any operation parameter's type constraints.
      */
     private Exp addParamTypeConstraints(Location loc, Exp exp,
             ModuleScope scope, AssertiveCodeBlock currentBlock,
-            ImmutableList<ProgramParameterEntry> entries,
-            List<InstantiatedFacilityDecl> processedInstFacDecs) {
+            ImmutableList<ProgramParameterEntry> entries) {
         Exp retExp = exp;
 
         // Loop through each of the parameters in the operation entry.
@@ -1023,7 +1016,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .getConceptDeclaredTypes(),
                                                 myCurrentVerificationContext
                                                         .getLocalTypeRepresentationDecs(),
-                                                processedInstFacDecs);
+                                                myCurrentVerificationContext
+                                                        .getProcessedInstFacilityDecls());
 
                         Exp whichEntailsExp =
                                 modifiedConstraintClause.getWhichEntailsExp();
@@ -1040,7 +1034,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                             .getConceptDeclaredTypes(),
                                                     myCurrentVerificationContext
                                                             .getLocalTypeRepresentationDecs(),
-                                                    processedInstFacDecs);
+                                                    myCurrentVerificationContext
+                                                            .getProcessedInstFacilityDecls());
                         }
 
                         modifiedConstraintClause =
@@ -1330,17 +1325,14 @@ public class VCGenerator extends TreeWalkerVisitor {
      *            currently visiting.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
-     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
-     *                             so far.
      * @param isLocalOperation {@code true} if it is a local operation, {@code false} otherwise.
      *
      * @return The top-level assumed expression.
      */
     private Exp createTopLevelAssumeExpForProcedureDec(Location loc,
             AssertiveCodeBlock currentBlock,
-            OperationEntry correspondingOperationEntry,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
-            boolean addConstraints, boolean isLocalOperation) {
+            OperationEntry correspondingOperationEntry, boolean addConstraints,
+            boolean isLocalOperation) {
         // Add all the expressions we can assume from the current context
         Exp retExp =
                 myCurrentVerificationContext
@@ -1374,7 +1366,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             retExp =
                     addParamTypeConstraints(loc, retExp, myCurrentModuleScope,
                             currentBlock, correspondingOperationEntry
-                                    .getParameters(), processedInstFacDecs);
+                                    .getParameters());
         }
 
         return retExp;

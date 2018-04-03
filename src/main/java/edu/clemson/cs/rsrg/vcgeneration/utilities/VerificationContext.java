@@ -34,7 +34,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
-import static edu.clemson.cs.rsrg.vcgeneration.VCGenerator.FLAG_ADD_CONSTRAINT;
+import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
 
 /**
@@ -91,6 +92,13 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     private final List<AssertionClause> myModuleLevelRequires;
 
     // -----------------------------------------------------------
+    // Processed Facility Declarations
+    // -----------------------------------------------------------
+
+    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
+    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
+
+    // -----------------------------------------------------------
     // Type Declarations and Representations
     // -----------------------------------------------------------
 
@@ -134,6 +142,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
         myModuleLevelLocationDetails = new LinkedHashMap<>();
         myModuleLevelRequires = new LinkedList<>();
         myName = name;
+        myProcessedInstFacilityDecls = new LinkedList<>();
     }
 
     // ===========================================================
@@ -227,6 +236,15 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method returns a list of all instantiated {@code Facilities}.</p>
+     *
+     * @return A list of {@link InstantiatedFacilityDecl} containing all the information.
+     */
+    public final List<InstantiatedFacilityDecl> getProcessedInstFacilityDecls() {
+        return myProcessedInstFacilityDecls;
+    }
+
+    /**
      * <p>This method stores a {@code concept}'s module level {@code requires}
      * and {@code constraint} clauses for future use.</p>
      *
@@ -258,7 +276,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(conceptModuleDec
                             .getLocation(), conceptModuleDec.getParameterDecs());
                 }
@@ -318,7 +336,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(realizModuleDec
                             .getLocation(), realizModuleDec.getParameterDecs());
                 }
@@ -397,7 +415,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(enhancementModuleDec
                             .getLocation(), enhancementModuleDec
                             .getParameterDecs());
@@ -440,7 +458,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(realizModuleDec
                             .getLocation(), realizModuleDec.getParameterDecs());
                 }
@@ -477,7 +495,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             //     "addConstraints" flag. Note that these constraints still need to be
             //     processed by the parsimonious step, so there is no guarantee that they
             //     will show up in all of the VCs.
-            if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+            if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                 storeModuleParameterTypeConstraints(facilityModuleDec
                         .getLocation(), facilityModuleDec.getParameterDecs());
             }
@@ -485,6 +503,17 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(loc);
         }
+    }
+
+    /**
+     * <p>This method stores an object that records all relevant information
+     * of an instantiated {@code Facility} for future use.</p>
+     *
+     * @param decl A {@link InstantiatedFacilityDecl} containing all the information.
+     */
+    public final void storeInstantiatedFacilityDecl(
+            InstantiatedFacilityDecl decl) {
+        myProcessedInstFacilityDecls.add(decl);
     }
 
     /**
