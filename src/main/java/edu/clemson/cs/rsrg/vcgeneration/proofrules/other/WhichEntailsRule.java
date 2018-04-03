@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
@@ -74,37 +75,35 @@ public class WhichEntailsRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Check to see if we have a which_entails expression
-        if (myClause.getWhichEntailsExp() != null) {
-            // Use the first part of the assertion clause as what we can
-            // assume to be true and add the location detail associated with it.
-            Exp assertionExp = myClause.getAssertionExp().clone();
-            assertionExp.setLocationDetailModel(new LocationDetailModel(
-                    assertionExp.getLocation().clone(), assertionExp
-                            .getLocation().clone(), myClause.getClauseType()
-                            .toString()
-                            + " Clause"));
-            myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(myClause
-                    .getAssertionExp().getLocation().clone(), assertionExp,
-                    false));
+        // Use the first part of the assertion clause as what we can
+        // assume to be true and add the location detail associated with it.
+        Exp assertionExp = myClause.getAssertionExp().clone();
+        Location clauseLoc = myClause.getAssertionExp().getLocation();
+        assertionExp.setLocationDetailModel(new LocationDetailModel(clauseLoc
+                .clone(), clauseLoc.clone(), myClause.getClauseType().name()
+                + " Clause Located at " + clauseLoc.clone()));
 
-            // Confirm the which_entails expression and add the location detail associated with it.
-            Exp whichEntailsExp = myClause.getWhichEntailsExp().clone();
-            whichEntailsExp.setLocationDetailModel(new LocationDetailModel(
-                    whichEntailsExp.getLocation().clone(), whichEntailsExp
-                            .getLocation().clone(),
-                    "Which_Entails Expression Located at "
-                            + myClause.getLocation()));
-            myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(myClause
-                    .getWhichEntailsExp().getLocation().clone(),
-                    whichEntailsExp, false));
+        // Confirm the which_entails expression and add the location detail associated with it.
+        Exp whichEntailsExp = myClause.getWhichEntailsExp().clone();
+        Location entailsLoc = myClause.getWhichEntailsExp().getLocation();
+        whichEntailsExp.setLocationDetailModel(new LocationDetailModel(
+                entailsLoc.clone(), entailsLoc.clone(),
+                "Which_Entails Expression Located at " + clauseLoc.clone()));
 
-            // Add the different details to the various different output models
-            ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-            stepModel.add("proofRuleName", getRuleDescription()).add(
-                    "currentStateOfBlock", myCurrentAssertiveCodeBlock);
-            myBlockModel.add("vcGenSteps", stepModel.render());
-        }
+        // Apply the rule
+        myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(myClause
+                .getAssertionExp().getLocation().clone(), assertionExp, false));
+        myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(myClause
+                .getWhichEntailsExp().getLocation().clone(), whichEntailsExp,
+                false));
+
+        // Add the different details to the various different output models
+        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+        stepModel.add("proofRuleName", getRuleDescription()).add(
+                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+
+        // Add the different details to the various different output models
+        myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
     /**
@@ -115,7 +114,7 @@ public class WhichEntailsRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Which_Entails Rule";
+        return "Which_Entails Declaration Rule";
     }
 
 }

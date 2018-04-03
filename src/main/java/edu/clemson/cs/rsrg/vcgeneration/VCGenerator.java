@@ -53,6 +53,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.WhichEntailsRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -867,35 +868,18 @@ public class VCGenerator extends TreeWalkerVisitor {
             AssertiveCodeBlock block =
                     new AssertiveCodeBlock(name, clause, myTypeGraph);
 
-            // Make a copy of the clause expression and add
-            // the location detail associated with it.
-            Exp clauseExp = clause.getAssertionExp().clone();
-            Location clauseLoc = clause.getWhichEntailsExp().getLocation();
-            clauseExp.setLocationDetailModel(new LocationDetailModel(clauseLoc
-                    .clone(), clauseLoc.clone(), clause.getClauseType().name()
-                    + " Clause Located at " + clauseLoc.clone()));
-
-            // Make a copy of the which_entails clause and add
-            // the location detail associated with it.
-            Exp whichEntailsExp = clause.getWhichEntailsExp().clone();
-            Location entailsLoc = clause.getWhichEntailsExp().getLocation();
-            whichEntailsExp.setLocationDetailModel(new LocationDetailModel(
-                    entailsLoc.clone(), entailsLoc.clone(), name.getName()));
-
-            // Apply the rule
-            block.addStatement(new AssumeStmt(clause.getLocation().clone(),
-                    clauseExp, false));
-            block.addStatement(new ConfirmStmt(clause.getLocation().clone(),
-                    whichEntailsExp, false));
-
             // Create a new model for this assertive code block
             ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
             blockModel.add("blockName", name);
-            ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-            stepModel.add("proofRuleName", "Which_Entails Declaration Rule")
-                    .add("currentStateOfBlock", block);
-            blockModel.add("vcGenSteps", stepModel.render());
-            myAssertiveCodeBlockModels.put(block, blockModel);
+
+            // Apply which_entails rule
+            WhichEntailsRule entailsRule =
+                    new WhichEntailsRule(clause, block,
+                            myCurrentVerificationContext, mySTGroup, blockModel);
+            entailsRule.applyRule();
+
+            // Store this block model.
+            myAssertiveCodeBlockModels.put(block, entailsRule.getBlockModel());
 
             // Add this as a new incomplete assertive code block
             myIncompleteAssertiveCodeBlocks.add(block);
