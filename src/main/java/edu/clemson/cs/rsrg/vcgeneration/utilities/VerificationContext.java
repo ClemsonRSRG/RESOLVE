@@ -206,6 +206,27 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method returns a list containing the various
+     * {@link TypeFamilyDec TypeFamilyDecs} in the current context.</p>
+     *
+     * @return A list containing {@link TypeFamilyDec TypeFamilyDecs}.
+     */
+    public final List<TypeFamilyDec> getConceptDeclaredTypes() {
+        return myConceptDeclaredTypes;
+    }
+
+    /**
+     * <p>This method returns a list containing the various
+     * {@link AbstractTypeRepresentationDec AbstractTypeRepresentationDecs}
+     * in the current context.</p>
+     *
+     * @return A list containing {@link AbstractTypeRepresentationDec AbstractTypeRepresentationDecs}.
+     */
+    public final List<AbstractTypeRepresentationDec> getLocalTypeRepresentationDecs() {
+        return myLocalTypeRepresentationDecs;
+    }
+
+    /**
      * <p>This method stores a {@code concept}'s module level {@code requires}
      * and {@code constraint} clauses for future use.</p>
      *

@@ -567,9 +567,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         Exp topLevelAssumeExp =
                 createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
                         myCurrentAssertiveCodeBlock, correspondingOperation,
-                        myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls,
-                        myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), true);
+                        myProcessedInstFacilityDecls, myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
+                        true);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -677,7 +676,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         Exp topLevelAssumeExp =
                 createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
                         myCurrentAssertiveCodeBlock, correspondingOperation,
-                        myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
                         myProcessedInstFacilityDecls,
                         myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal);
         AssumeStmt topLevelAssumeStmt =
@@ -953,18 +951,14 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param scope The module scope to start our search.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param entries List of operation's parameter entries.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
      *                             so far.
      *
      * @return The original {@code exp} plus any operation parameter's type constraints.
      */
-    private static Exp addParamTypeConstraints(Location loc, Exp exp,
+    private Exp addParamTypeConstraints(Location loc, Exp exp,
             ModuleScope scope, AssertiveCodeBlock currentBlock,
             ImmutableList<ProgramParameterEntry> entries,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs) {
         Exp retExp = exp;
 
@@ -1025,8 +1019,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .singletonList(parameterVarDec),
                                                 scope.getDefiningElement()
                                                         .getName(),
-                                                typeFamilyDecs,
-                                                localRepresentationTypeDecs,
+                                                myCurrentVerificationContext
+                                                        .getConceptDeclaredTypes(),
+                                                myCurrentVerificationContext
+                                                        .getLocalTypeRepresentationDecs(),
                                                 processedInstFacDecs);
 
                         Exp whichEntailsExp =
@@ -1040,8 +1036,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                             .singletonList(parameterVarDec),
                                                     scope.getDefiningElement()
                                                             .getName(),
-                                                    typeFamilyDecs,
-                                                    localRepresentationTypeDecs,
+                                                    myCurrentVerificationContext
+                                                            .getConceptDeclaredTypes(),
+                                                    myCurrentVerificationContext
+                                                            .getLocalTypeRepresentationDecs(),
                                                     processedInstFacDecs);
                         }
 
@@ -1332,8 +1330,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      *            currently visiting.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
      * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
      *                             so far.
      * @param isLocalOperation {@code true} if it is a local operation, {@code false} otherwise.
@@ -1343,8 +1339,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp createTopLevelAssumeExpForProcedureDec(Location loc,
             AssertiveCodeBlock currentBlock,
             OperationEntry correspondingOperationEntry,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
             List<InstantiatedFacilityDecl> processedInstFacDecs,
             boolean addConstraints, boolean isLocalOperation) {
         // Add all the expressions we can assume from the current context
@@ -1380,8 +1374,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             retExp =
                     addParamTypeConstraints(loc, retExp, myCurrentModuleScope,
                             currentBlock, correspondingOperationEntry
-                                    .getParameters(), typeFamilyDecs,
-                            localRepresentationTypeDecs, processedInstFacDecs);
+                                    .getParameters(), processedInstFacDecs);
         }
 
         return retExp;
