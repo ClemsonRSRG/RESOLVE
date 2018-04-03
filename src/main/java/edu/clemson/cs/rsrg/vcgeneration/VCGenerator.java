@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.vcgeneration;
 
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
@@ -111,24 +110,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * between different math types.</p>
      */
     private final TypeGraph myTypeGraph;
-
-    // -----------------------------------------------------------
-    // Facility Declaration-Related
-    // -----------------------------------------------------------
-
-    /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
-
-    /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
 
     /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
     private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
@@ -239,9 +220,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertiveCodeBlockModels = new LinkedHashMap<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
-        myCurrentConceptDeclaredTypes = new LinkedList<>();
         myFinalAssertiveCodeBlocks = new LinkedList<>();
-        myLocalRepresentationTypeDecs = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
         myProcessedInstFacilityDecls = new LinkedList<>();
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
@@ -282,6 +261,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     FacilityStrategy.FACILITY_INSTANTIATE));
 
             for (SymbolTableEntry s : results) {
+                // YS: Only deal with imported facility declarations right now.
+                //     The facility declarations from this module will be handled in
+                //     postFacilityDec.
                 if (s.getSourceModuleIdentifier().compareTo(
                         myCurrentModuleScope.getModuleIdentifier()) != 0) {
                     // Do all the facility declaration logic, but don't add this
@@ -445,7 +427,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 .getLocation(), coId, false);
 
         // Store all the type families declared in the concept
-        storeConceptTypeFamilyDecs(conceptName.getLocation(), coId);
+        myCurrentVerificationContext.storeConceptTypeFamilyDecs(conceptName
+                .getLocation(), coId);
 
         // Store all requires/constraint from the imported enhancement
         PosSymbol enhancementName = enhancementRealization.getEnhancementName();
@@ -761,8 +744,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postAbstractTypeRepresentationDec(
             AbstractTypeRepresentationDec dec) {
-        myLocalRepresentationTypeDecs.add((AbstractTypeRepresentationDec) dec
-                .clone());
+        myCurrentVerificationContext.storeLocalTypeRepresentationDec(dec);
     }
 
     /**
@@ -772,7 +754,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postTypeFamilyDec(TypeFamilyDec dec) {
-        myCurrentConceptDeclaredTypes.add((TypeFamilyDec) dec.clone());
+        myCurrentVerificationContext.storeConceptTypeFamilyDec(dec);
     }
 
     // -----------------------------------------------------------
@@ -979,11 +961,11 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The original {@code exp} plus any operation parameter's type constraints.
      */
     private static Exp addParamTypeConstraints(Location loc, Exp exp,
-                                               ModuleScope scope, AssertiveCodeBlock currentBlock,
-                                               ImmutableList<ProgramParameterEntry> entries,
-                                               List<TypeFamilyDec> typeFamilyDecs,
-                                               List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-                                               List<InstantiatedFacilityDecl> processedInstFacDecs) {
+            ModuleScope scope, AssertiveCodeBlock currentBlock,
+            ImmutableList<ProgramParameterEntry> entries,
+            List<TypeFamilyDec> typeFamilyDecs,
+            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
+            List<InstantiatedFacilityDecl> processedInstFacDecs) {
         Exp retExp = exp;
 
         // Loop through each of the parameters in the operation entry.
@@ -991,7 +973,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             ParameterVarDec parameterVarDec =
                     (ParameterVarDec) entry.getDefiningElement();
             PTType declaredType = entry.getDeclaredType();
-            ProgramParameterEntry.ParameterMode parameterMode = entry.getParameterMode();
+            ProgramParameterEntry.ParameterMode parameterMode =
+                    entry.getParameterMode();
 
             // Only deal with actual types and don't deal
             // with entry types passed in to the concept realization
@@ -1025,8 +1008,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                         AssertionClause constraintClause =
                                 typeFamilyDec.getConstraint();
                         AssertionClause modifiedConstraintClause =
-                                Utilities.getTypeConstraintClause(constraintClause, loc,
-                                        null, parameterVarDec.getName(),
+                                Utilities.getTypeConstraintClause(
+                                        constraintClause, loc, null,
+                                        parameterVarDec.getName(),
                                         typeFamilyDec.getExemplar(), typeEntry
                                                 .getModelType(), null);
 
@@ -1081,7 +1065,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                 constraintLoc.clone(),
                                                 "Constraint Clause of "
                                                         + parameterVarDec
-                                                        .getName()));
+                                                                .getName()));
                     }
                 }
 
@@ -1143,7 +1127,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Add the current variable to our list of free variables
             currentBlock.addFreeVar(Utilities.createVarExp(parameterVarDec
-                            .getLocation(), null, parameterVarDec.getName(),
+                    .getLocation(), null, parameterVarDec.getName(),
                     declaredType.toMath(), null));
 
         }
@@ -1394,40 +1378,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         //     will show up in all of the VCs.
         if (addConstraints) {
             retExp =
-                    addParamTypeConstraints(loc, retExp, myCurrentModuleScope, currentBlock,
-                            correspondingOperationEntry.getParameters(),
-                            typeFamilyDecs, localRepresentationTypeDecs,
-                            processedInstFacDecs);
+                    addParamTypeConstraints(loc, retExp, myCurrentModuleScope,
+                            currentBlock, correspondingOperationEntry
+                                    .getParameters(), typeFamilyDecs,
+                            localRepresentationTypeDecs, processedInstFacDecs);
         }
 
         return retExp;
-    }
-
-    /**
-     * <p>An helper method for storing the imported {@code concept's}
-     * {@code Type Family} declarations for future use.</p>
-     *
-     * @param loc The location of the imported {@code module}.
-     * @param id A {@link ModuleIdentifier} referring to an
-     *           importing {@code concept}.
-     */
-    private void storeConceptTypeFamilyDecs(Location loc, ModuleIdentifier id) {
-        try {
-            ConceptModuleDec conceptModuleDec =
-                    (ConceptModuleDec) myBuilder.getModuleScope(id)
-                            .getDefiningElement();
-            List<Dec> decs = conceptModuleDec.getDecList();
-
-            for (Dec dec : decs) {
-                if (dec instanceof TypeFamilyDec) {
-                    myCurrentConceptDeclaredTypes.add((TypeFamilyDec) dec
-                            .clone());
-                }
-            }
-        }
-        catch (NoSuchSymbolException e) {
-            Utilities.noSuchModule(loc);
-        }
     }
 
 }

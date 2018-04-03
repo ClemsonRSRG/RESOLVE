@@ -18,6 +18,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
@@ -89,6 +90,24 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
      */
     private final List<AssertionClause> myModuleLevelRequires;
 
+    // -----------------------------------------------------------
+    // Type Declarations and Representations
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This contains all the types declared by the {@code Concept}
+     * associated with the current module. Note that if we are in a
+     * {@code Facility}, this list will be empty.</p>
+     */
+    private final List<TypeFamilyDec> myConceptDeclaredTypes;
+
+    /**
+     * <p>If our current module scope allows us to introduce new type implementations,
+     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<AbstractTypeRepresentationDec> myLocalTypeRepresentationDecs;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -108,7 +127,9 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             MathSymbolTableBuilder builder, CompileEnvironment compileEnvironment) {
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
+        myConceptDeclaredTypes = new LinkedList<>();
         myCurrentModuleScope = moduleScope;
+        myLocalTypeRepresentationDecs = new LinkedList<>();
         myModuleLevelConstraints = new LinkedHashMap<>();
         myModuleLevelLocationDetails = new LinkedHashMap<>();
         myModuleLevelRequires = new LinkedList<>();
@@ -288,6 +309,43 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method stores a {@code concept's}
+     * {@code Type Family} declarations for future use.</p>
+     *
+     * @param dec A type family declared in a {@code Concept}.
+     */
+    public final void storeConceptTypeFamilyDec(TypeFamilyDec dec) {
+        myConceptDeclaredTypes.add((TypeFamilyDec) dec.clone());
+    }
+
+    /**
+     * <p>This method stores the imported {@code concept's}
+     * {@code Type Family} declarations for future use.</p>
+     *
+     * @param loc The location of the imported {@code module}.
+     * @param id A {@link ModuleIdentifier} referring to an
+     *           importing {@code concept}.
+     */
+    public final void storeConceptTypeFamilyDecs(Location loc,
+            ModuleIdentifier id) {
+        try {
+            ConceptModuleDec conceptModuleDec =
+                    (ConceptModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+            List<Dec> decs = conceptModuleDec.getDecList();
+
+            for (Dec dec : decs) {
+                if (dec instanceof TypeFamilyDec) {
+                    myConceptDeclaredTypes.add((TypeFamilyDec) dec.clone());
+                }
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(loc);
+        }
+    }
+
+    /**
      * <p>This method stores a {@code enhancement}'s module level {@code requires}
      * and {@code constraint} clauses for future use.</p>
      *
@@ -406,6 +464,18 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(loc);
         }
+    }
+
+    /**
+     * <p>This method stores a type representation declaration
+     * for future use.</p>
+     *
+     * @param dec A type representation.
+     */
+    public final void storeLocalTypeRepresentationDec(
+            AbstractTypeRepresentationDec dec) {
+        myLocalTypeRepresentationDecs.add((AbstractTypeRepresentationDec) dec
+                .clone());
     }
 
     /**
