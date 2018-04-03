@@ -24,6 +24,7 @@ import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,12 +69,15 @@ public class SwapStmtRule extends AbstractProofRuleApplication
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public SwapStmtRule(SwapStmt swapStmt, ModuleScope moduleScope,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
+            AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
         mySwapStmt = swapStmt;
     }

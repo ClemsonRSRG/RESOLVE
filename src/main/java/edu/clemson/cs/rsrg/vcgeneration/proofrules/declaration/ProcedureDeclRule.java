@@ -15,7 +15,6 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -40,7 +39,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -62,13 +61,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
-
-    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -87,18 +79,8 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      */
     private final OperationEntry myCurrentProcedureOperationEntry;
 
-    /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
     /** <p>The {@link ProcedureDec} we are applying the rule to.</p> */
     private final ProcedureDec myProcedureDec;
-
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     /**
      * <p>This stores all the local {@link VarDec VarDec's}
@@ -127,33 +109,27 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      *                     the rule to.
      * @param procVarFinalItems The local variable declaration's
      *                          {@code finalization} specification items.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public ProcedureDeclRule(ProcedureDec procedureDec,
             Map<VarDec, SpecInitFinalItem> procVarFinalItems,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
-        myCurrentConceptDeclaredTypes = typeFamilyDecs;
+            AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
         myCurrentProcedureDecreasingExp =
                 myCurrentAssertiveCodeBlock
                         .getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry =
                 myCurrentAssertiveCodeBlock.getCorrespondingOperation();
-        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
-        myProcessedInstFacilityDecls = processedInstFacDecs;
         mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
         myProcedureDec = procedureDec;
@@ -233,9 +209,11 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 Utilities.replaceFacilityFormalWithActual(finalConfirmExp,
                         myProcedureDec.getParameters(), myCurrentModuleScope
                                 .getDefiningElement().getName(),
-                        myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls);
+                        myCurrentVerificationContext.getConceptDeclaredTypes(),
+                        myCurrentVerificationContext
+                                .getLocalTypeRepresentationDecs(),
+                        myCurrentVerificationContext
+                                .getProcessedInstFacilityDecls());
 
         // Use the ensures clause to create a final confirm statement
         ConfirmStmt finalConfirmStmt =

@@ -25,6 +25,7 @@ import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeDotE
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeExporter;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.UniqueSymbolNameExtractor;
 import java.util.*;
 import org.jgrapht.Graph;
@@ -69,12 +70,14 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
      *                   the rule to.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public AssumeStmtRule(AssumeStmt assumeStmt, AssertiveCodeBlock block,
-            STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
+            VerificationContext context, STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myAssumeStmt = assumeStmt;
         myImpactingReducedSequentMap = new LinkedHashMap<>();
     }

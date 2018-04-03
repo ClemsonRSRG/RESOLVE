@@ -274,12 +274,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                     FacilityDeclRule ruleApplication =
                             new FacilityDeclRule(facDec, false,
-                                    myCurrentConceptDeclaredTypes,
-                                    myLocalRepresentationTypeDecs,
-                                    myProcessedInstFacilityDecls,
                                     myBuilder, myCurrentModuleScope,
                                     new AssertiveCodeBlock(facDec.getName(), facDec, myTypeGraph),
-                                    mySTGroup, blockModel);
+                                    myCurrentVerificationContext, mySTGroup, blockModel);
                     ruleApplication.applyRule();
 
                     // Store this facility's InstantiatedFacilityDecl for future use
@@ -496,11 +493,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Apply facility declaration rule
         FacilityDeclRule declRule =
-                new FacilityDeclRule(dec, true, myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls, myBuilder,
+                new FacilityDeclRule(dec, true, myBuilder,
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        mySTGroup, blockModel);
+                        myCurrentVerificationContext, mySTGroup, blockModel);
         declRule.applyRule();
 
         // Store this facility's InstantiatedFacilityDecl for future use
@@ -601,13 +596,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .getAffectedVars(), dec.getDecreasing(), dec
                                 .getFacilities(), dec.getVariables(), dec
                                 .getStatements(), dec.getRecursive());
-        ProofRuleApplication declRule =
+        ProcedureDeclRule declRule =
                 new ProcedureDeclRule(procedureDec, myVariableSpecFinalItems,
-                        myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls, myBuilder,
-                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        mySTGroup, myAssertiveCodeBlockModels
+                        myBuilder, myCurrentModuleScope,
+                        myCurrentAssertiveCodeBlock,
+                        myCurrentVerificationContext, mySTGroup,
+                        myAssertiveCodeBlockModels
                                 .remove(myCurrentAssertiveCodeBlock));
         declRule.applyRule();
 
@@ -672,7 +666,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         Exp topLevelAssumeExp =
                 createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
                         myCurrentAssertiveCodeBlock, correspondingOperation,
-                        myProcessedInstFacilityDecls,
                         myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
@@ -703,13 +696,11 @@ public class VCGenerator extends TreeWalkerVisitor {
     public final void postProcedureDec(ProcedureDec dec) {
         // Apply procedure declaration rule
         // TODO: Recheck logic to make sure everything still works!
-        ProofRuleApplication declRule =
-                new ProcedureDeclRule(dec, myVariableSpecFinalItems,
-                        myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls, myBuilder,
+        ProcedureDeclRule declRule =
+                new ProcedureDeclRule(dec, myVariableSpecFinalItems, myBuilder,
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        mySTGroup, myAssertiveCodeBlockModels
+                        myCurrentVerificationContext, mySTGroup,
+                        myAssertiveCodeBlockModels
                                 .remove(myCurrentAssertiveCodeBlock));
         declRule.applyRule();
 
@@ -835,9 +826,10 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             else {
                 // Variable declaration rule for generic types
-                ProofRuleApplication declRule =
+                GenericTypeVariableDeclRule declRule =
                         new GenericTypeVariableDeclRule(dec,
-                                myCurrentAssertiveCodeBlock, mySTGroup,
+                                myCurrentAssertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
                                 blockModel);
                 declRule.applyRule();
 
@@ -1151,68 +1143,74 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new assume rule application.
                 ruleApplication =
                         new AssumeStmtRule((AssumeStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof CallStmt) {
                 // Generate a new call rule application.
                 ruleApplication =
-                        new CallStmtRule((CallStmt) statement,
-                                myCurrentConceptDeclaredTypes,
-                                myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myBuilder,
+                        new CallStmtRule((CallStmt) statement, myBuilder,
                                 myCurrentModuleScope, assertiveCodeBlock,
-                                mySTGroup, blockModel);
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof ChangeStmt) {
                 // Generate a new change rule application.
                 ruleApplication =
                         new ChangeStmtRule((ChangeStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof ConfirmStmt) {
                 // Generate a new confirm rule application.
                 ruleApplication =
                         new ConfirmStmtRule((ConfirmStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof FinalizeVarStmt) {
                 // Generate a new variable finalization rule application.
                 ruleApplication =
                         new FinalizeVarStmtRule((FinalizeVarStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof FuncAssignStmt) {
                 // Generate a new function assignment rule application.
                 ruleApplication =
                         new FuncAssignStmtRule((FuncAssignStmt) statement,
-                                myCurrentConceptDeclaredTypes,
-                                myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myBuilder,
-                                myCurrentModuleScope, assertiveCodeBlock,
-                                mySTGroup, blockModel);
+                                myBuilder, myCurrentModuleScope,
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof IfStmt) {
                 // Generate a new if-else rule application.
                 ruleApplication =
-                        new IfStmtRule((IfStmt) statement,
-                                myCurrentConceptDeclaredTypes,
-                                myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myBuilder,
+                        new IfStmtRule((IfStmt) statement, myBuilder,
                                 myCurrentModuleScope, assertiveCodeBlock,
-                                mySTGroup, blockModel);
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof InitializeVarStmt) {
                 // Generate a new variable declaration/initialization rule application.
                 ruleApplication =
                         new InitializeVarStmtRule(
                                 (InitializeVarStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
                     // Generate a new remember rule application.
                     ruleApplication =
-                            new RememberStmtRule(assertiveCodeBlock, mySTGroup,
+                            new RememberStmtRule(assertiveCodeBlock,
+                                    myCurrentVerificationContext, mySTGroup,
                                     blockModel);
                 }
                 else {
@@ -1225,27 +1223,34 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new presume rule application.
                 ruleApplication =
                         new PresumeStmtRule((PresumeStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof SwapStmt) {
                 // Generate a new swap rule application.
                 ruleApplication =
                         new SwapStmtRule((SwapStmt) statement,
                                 myCurrentModuleScope, assertiveCodeBlock,
-                                mySTGroup, blockModel);
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof VCConfirmStmt) {
                 // Generate a new VCConfirm rule application.
                 ruleApplication =
                         new VCConfirmStmtRule((VCConfirmStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof WhileStmt) {
                 // Generate a new while rule application
                 ruleApplication =
                         new WhileStmtRule((WhileStmt) statement,
                                 myCurrentModuleScope, myTypeGraph,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else {
                 throw new SourceErrorException(

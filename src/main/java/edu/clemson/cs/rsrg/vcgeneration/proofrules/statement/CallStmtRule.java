@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -43,7 +42,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -68,13 +67,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
     private final CallStmt myCallStmt;
 
     /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
-
-    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -92,16 +84,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
      * statement if we are inside a {@code ProcedureDec}.</p>
      */
     private final OperationEntry myCurrentProcedureOperationEntry;
-
-    /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     /**
      * <p>This is the math type graph that indicates relationship
@@ -135,32 +117,25 @@ public class CallStmtRule extends AbstractProofRuleApplication
      *
      * @param callStmt The {@link CallStmt} we are applying
      *                 the rule to.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public CallStmtRule(CallStmt callStmt,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
+            AssertiveCodeBlock block, VerificationContext context, STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myCallStmt = callStmt;
-        myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
         myCurrentProcedureDecreasingExp = myCurrentAssertiveCodeBlock.getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry = myCurrentAssertiveCodeBlock.getCorrespondingOperation();
-        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myNestedRequiresClauses = new LinkedList<>();
         myNestedTerminationConfirmStmts = new LinkedList<>();
-        myProcessedInstFacilityDecls = processedInstFacDecs;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
     }
 
@@ -606,9 +581,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     Utilities.replaceFacilityFormalWithActual(ensuresExp,
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
-                            myCurrentConceptDeclaredTypes,
-                            myLocalRepresentationTypeDecs,
-                            myProcessedInstFacilityDecls);
+                            myCurrentVerificationContext.getConceptDeclaredTypes(),
+                            myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
+                            myCurrentVerificationContext.getProcessedInstFacilityDecls());
         }
 
         // Retrieve the list of VCs and use the sequent
@@ -668,9 +643,12 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     Utilities.replaceFacilityFormalWithActual(requiresExp,
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
-                            myCurrentConceptDeclaredTypes,
-                            myLocalRepresentationTypeDecs,
-                            myProcessedInstFacilityDecls);
+                            myCurrentVerificationContext
+                                    .getConceptDeclaredTypes(),
+                            myCurrentVerificationContext
+                                    .getLocalTypeRepresentationDecs(),
+                            myCurrentVerificationContext
+                                    .getProcessedInstFacilityDecls());
         }
 
         // Add any nested termination clauses to our current assertive code block.
@@ -785,9 +763,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 if (myCurrentProcedureOperationEntry == null) {
                     walker =
                             new ProgramFunctionExpWalker(
-                                    myCurrentConceptDeclaredTypes,
-                                    myLocalRepresentationTypeDecs,
-                                    myProcessedInstFacilityDecls,
+                                    myCurrentVerificationContext.getConceptDeclaredTypes(),
+                                    myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
+                                    myCurrentVerificationContext.getProcessedInstFacilityDecls(),
                                     myCurrentModuleScope, myTypeGraph);
                 }
                 else {
@@ -795,9 +773,9 @@ public class CallStmtRule extends AbstractProofRuleApplication
                             new ProgramFunctionExpWalker(
                                     myCurrentProcedureOperationEntry,
                                     myCurrentProcedureDecreasingExp,
-                                    myCurrentConceptDeclaredTypes,
-                                    myLocalRepresentationTypeDecs,
-                                    myProcessedInstFacilityDecls,
+                                    myCurrentVerificationContext.getConceptDeclaredTypes(),
+                                    myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
+                                    myCurrentVerificationContext.getProcessedInstFacilityDecls(),
                                     myCurrentModuleScope, myTypeGraph);
                 }
                 TreeWalker.visit(walker, expAsProgramFunctionexp);

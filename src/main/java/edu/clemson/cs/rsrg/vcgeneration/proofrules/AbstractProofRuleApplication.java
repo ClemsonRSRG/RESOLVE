@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -39,6 +40,12 @@ public abstract class AbstractProofRuleApplication
      * will operate on.</p>
      */
     protected final AssertiveCodeBlock myCurrentAssertiveCodeBlock;
+
+    /**
+     * <p>The {@link VerificationContext} where all the information for the
+     * current {@code Assertive Code Block} is located.</p>
+     */
+    protected final VerificationContext myCurrentVerificationContext;
 
     /**
      * <p>A map that stores string template models for generated
@@ -70,12 +77,16 @@ public abstract class AbstractProofRuleApplication
      *
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    protected AbstractProofRuleApplication(AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
+    protected AbstractProofRuleApplication(AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
         myResultingAssertiveCodeBlocks = new LinkedList<>();
         myCurrentAssertiveCodeBlock = block;
+        myCurrentVerificationContext = context;
         myNewAssertiveCodeBlockModels = new HashMap<>();
         mySTGroup = stGroup;
         myBlockModel = blockModel;

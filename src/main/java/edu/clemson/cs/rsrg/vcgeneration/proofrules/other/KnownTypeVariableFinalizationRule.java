@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.stringtemplate.v4.ST;
@@ -68,12 +69,14 @@ public class KnownTypeVariableFinalizationRule
      * @param finalItem The {@code finalization} specification item
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public KnownTypeVariableFinalizationRule(VarDec varDec, SpecInitFinalItem finalItem,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
+            AssertiveCodeBlock block, VerificationContext context, STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myFinalItem = finalItem;
         myNewFreeVarSubstitutions = new LinkedHashMap<>();
         myVarDec = varDec;

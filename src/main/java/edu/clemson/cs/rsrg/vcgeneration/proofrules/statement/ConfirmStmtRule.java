@@ -24,6 +24,7 @@ import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeDotE
 import edu.clemson.cs.rsrg.vcgeneration.sequents.reductiontree.ReductionTreeExporter;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import java.util.*;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
@@ -66,12 +67,14 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication
      *                    the rule to.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public ConfirmStmtRule(ConfirmStmt confirmStmt, AssertiveCodeBlock block,
-            STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
+            VerificationContext context, STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myConfirmStmt = confirmStmt;
         myImpactingReducedSequentMap = new LinkedHashMap<>();
     }

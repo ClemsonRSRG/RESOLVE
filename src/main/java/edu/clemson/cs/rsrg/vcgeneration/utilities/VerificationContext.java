@@ -276,7 +276,8 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags
+                        .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(conceptModuleDec
                             .getLocation(), conceptModuleDec.getParameterDecs());
                 }
@@ -336,7 +337,8 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags
+                        .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(realizModuleDec
                             .getLocation(), realizModuleDec.getParameterDecs());
                 }
@@ -415,7 +417,8 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags
+                        .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(enhancementModuleDec
                             .getLocation(), enhancementModuleDec
                             .getParameterDecs());
@@ -458,7 +461,8 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags
+                        .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(realizModuleDec
                             .getLocation(), realizModuleDec.getParameterDecs());
                 }
@@ -495,7 +499,8 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             //     "addConstraints" flag. Note that these constraints still need to be
             //     processed by the parsimonious step, so there is no guarantee that they
             //     will show up in all of the VCs.
-            if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+            if (myCompileEnvironment.flags
+                    .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
                 storeModuleParameterTypeConstraints(facilityModuleDec
                         .getLocation(), facilityModuleDec.getParameterDecs());
             }
