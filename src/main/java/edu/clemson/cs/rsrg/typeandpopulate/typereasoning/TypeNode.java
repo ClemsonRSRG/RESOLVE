@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
-import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSolutionException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;

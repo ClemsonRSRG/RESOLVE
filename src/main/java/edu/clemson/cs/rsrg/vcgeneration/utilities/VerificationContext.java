@@ -34,9 +34,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
-import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
+import static edu.clemson.cs.rsrg.vcgeneration.VCGenerator.FLAG_ADD_CONSTRAINT;
 
 /**
  * <p>This class contains all the module-level items relevant to the
@@ -276,8 +276,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags
-                        .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(conceptModuleDec
                             .getLocation(), conceptModuleDec.getParameterDecs());
                 }
@@ -337,8 +336,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags
-                        .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(realizModuleDec
                             .getLocation(), realizModuleDec.getParameterDecs());
                 }
@@ -417,8 +415,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags
-                        .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(enhancementModuleDec
                             .getLocation(), enhancementModuleDec
                             .getParameterDecs());
@@ -461,8 +458,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 //     "addConstraints" flag. Note that these constraints still need to be
                 //     processed by the parsimonious step, so there is no guarantee that they
                 //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags
-                        .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(realizModuleDec
                             .getLocation(), realizModuleDec.getParameterDecs());
                 }
@@ -499,8 +495,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             //     "addConstraints" flag. Note that these constraints still need to be
             //     processed by the parsimonious step, so there is no guarantee that they
             //     will show up in all of the VCs.
-            if (myCompileEnvironment.flags
-                    .isFlagSet(VCGenerator.FLAG_ADD_CONSTRAINT)) {
+            if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
                 storeModuleParameterTypeConstraints(facilityModuleDec
                         .getLocation(), facilityModuleDec.getParameterDecs());
             }

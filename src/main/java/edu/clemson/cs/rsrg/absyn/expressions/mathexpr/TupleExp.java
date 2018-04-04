@@ -16,7 +16,6 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
-import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

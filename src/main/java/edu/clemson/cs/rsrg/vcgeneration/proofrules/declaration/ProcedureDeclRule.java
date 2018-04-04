@@ -180,8 +180,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         myCurrentAssertiveCodeBlock.addStatements(myProcedureDec
                 .getStatements());
 
-        // TODO: Add the finalization duration ensures (if any)
-
         // TODO: Correct_Op_Hyp rule (Shared Variables and Type)
         // Correct_Op_Hyp rule: Only applies to non-local operations
         // in concept realizations.
@@ -199,6 +197,8 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         for (VarDec dec : varDecs) {
             myCurrentAssertiveCodeBlock.addStatement(new FinalizeVarStmt(dec));
         }
+
+        // TODO: Add the finalization duration ensures (if any)
 
         // Create the final confirm expression
         Exp finalConfirmExp = createFinalConfirmExp();
