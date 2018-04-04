@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual;
 
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
@@ -24,8 +25,8 @@ import java.util.List;
  * that will be useful for the various different {@code Proof Rules}. This
  * includes {@link FacilityDec FacilityDec's} formal parameters
  * in the specifications/implementations and their actual arguments in the
- * instantiation. It also includes the types declarations that will be
- * instantiated.</p>
+ * instantiation. It also includes the shared state variables and types
+ * declarations that will be instantiated.</p>
  *
  * @author Yu-Shan Sun
  * @version 2.0
@@ -51,6 +52,9 @@ public class InstantiatedFacilityDecl {
      */
     private final FormalActualLists myConceptRealizParamArgs;
 
+    /** <p>This contains all the shared state declared by the {@code Concept}.</p> */
+    private final List<SharedStateDec> myConceptSharedStates;
+
     /**
      * <p>A list that contains the {@code Enhancement} and {@code Enhancement Realization}'s
      * formal arguments to the instantiated actual arguments.</p>
@@ -69,6 +73,7 @@ public class InstantiatedFacilityDecl {
      * information related to the instantiated {@code Facility}.</p>
      *
      * @param dec The instantiated {@code Facility} declaration.
+     * @param conceptSharedStates The shared states in the instantiating {@code Concept}.
      * @param conceptDeclaredTypes The types in the instantiating {@code Concept}.
      * @param cFormalParamList The formal parameters from the {@code Concept}.
      * @param cActualArgList The processed arguments used to instantiate the {@code Concept}.
@@ -77,6 +82,7 @@ public class InstantiatedFacilityDecl {
      * @param enhSpecRealizItems A list of {@link InstantiatedEnhSpecRealizItem InstantiatedEnhSpecRealizItems}.
      */
     public InstantiatedFacilityDecl(FacilityDec dec,
+            List<SharedStateDec> conceptSharedStates,
             List<TypeFamilyDec> conceptDeclaredTypes,
             List<VarExp> cFormalParamList, List<Exp> cActualArgList,
             List<VarExp> crFormalParamList, List<Exp> crActualArgList,
@@ -87,6 +93,7 @@ public class InstantiatedFacilityDecl {
                 new FormalActualLists(cFormalParamList, cActualArgList);
         myConceptRealizParamArgs =
                 new FormalActualLists(crFormalParamList, crActualArgList);
+        myConceptSharedStates = conceptSharedStates;
         myInstantiatedEnhSpecRealizItems = enhSpecRealizItems;
     }
 
@@ -115,6 +122,8 @@ public class InstantiatedFacilityDecl {
         if (!myConceptParamArgs.equals(that.myConceptParamArgs))
             return false;
         if (!myConceptRealizParamArgs.equals(that.myConceptRealizParamArgs))
+            return false;
+        if (!myConceptSharedStates.equals(that.myConceptSharedStates))
             return false;
         if (!myInstantiatedEnhSpecRealizItems
                 .equals(that.myInstantiatedEnhSpecRealizItems))
@@ -157,6 +166,16 @@ public class InstantiatedFacilityDecl {
     }
 
     /**
+     * <p>This method the list of {@link SharedStateDec SharedStateDecs}
+     * instantiated by this {@code Facility}.</p>
+     *
+     * @return A list of {@link SharedStateDec}.
+     */
+    public final List<SharedStateDec> getConceptSharedStates() {
+        return myConceptSharedStates;
+    }
+
+    /**
      * <p>This method returns a list of {@link InstantiatedEnhSpecRealizItem} containing
      * the {@code Enhancement's} and {@code Enhancement Realization's} formal and actual arguments
      * for the instantiated {@code Facility}.</p>
@@ -195,6 +214,7 @@ public class InstantiatedFacilityDecl {
         int result = myConceptDeclaredTypes.hashCode();
         result = 31 * result + myConceptParamArgs.hashCode();
         result = 31 * result + myConceptRealizParamArgs.hashCode();
+        result = 31 * result + myConceptSharedStates.hashCode();
         result = 31 * result + myInstantiatedEnhSpecRealizItems.hashCode();
         result = 31 * result + myInstantiatedFacilityDec.hashCode();
         return result;

@@ -19,6 +19,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -419,6 +421,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentVerificationContext.storeConceptAssertionClauses(conceptName
                 .getLocation(), coId, false);
 
+        // Store all the shared states declared in the concept
+        myCurrentVerificationContext.storeConceptSharedStateDecs(conceptName
+                .getLocation(), coId);
+
         // Store all the type families declared in the concept
         myCurrentVerificationContext.storeConceptTypeFamilyDecs(conceptName
                 .getLocation(), coId);
@@ -718,7 +724,35 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
-    // Type Realization-Related
+    // Shared State/Realization-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link SharedStateDec}.</p>
+     *
+     * @param dec A shared state declared in a {@code Concept}.
+     */
+    @Override
+    public final void postSharedStateDec(SharedStateDec dec) {
+        myCurrentVerificationContext.storeConceptSharedStateDec(dec);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link SharedStateRealizationDec}.</p>
+     *
+     * @param dec A shared state realization in a {@code Concept Realization}.
+     */
+    @Override
+    public final void postSharedStateRealizationDec(
+            SharedStateRealizationDec dec) {
+        // TODO: Add the proof rule for this.
+
+        // Store this for future use.
+        myCurrentVerificationContext.storeLocalSharedRealizationDec(dec);
+    }
+
+    // -----------------------------------------------------------
+    // Type Family/Representation-Related
     // -----------------------------------------------------------
 
     /**

@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
@@ -45,6 +46,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.*;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptSharedStateExtractor;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptTypeExtractor;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
 import java.util.*;
@@ -125,6 +127,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     private final List<VarExp> myConceptRealizFormalParamList;
 
+    /** <p>This contains all the shared state declared by the {@code Concept}.</p> */
+    private final List<SharedStateDec> myConceptSharedStates;
+
     /**
      * <p>A list that contains the {@code Enhancement} and {@code Enhancement Realization}'s
      * formal arguments to the instantiated actual arguments.</p>
@@ -168,6 +173,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         myConceptFormalParamList = new ArrayList<>();
         myConceptRealizActualArgList = new ArrayList<>();
         myConceptRealizFormalParamList = new ArrayList<>();
+        myConceptSharedStates = new LinkedList<>();
         myInstantiatedEnhSpecRealizItems = new LinkedList<>();
     }
 
@@ -227,9 +233,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     public final InstantiatedFacilityDecl getInstantiatedFacilityDecl() {
         return new InstantiatedFacilityDecl(myFacilityDec,
-                myConceptDeclaredTypes, myConceptFormalParamList,
-                myConceptActualArgList, myConceptRealizFormalParamList,
-                myConceptRealizActualArgList, myInstantiatedEnhSpecRealizItems);
+                myConceptSharedStates, myConceptDeclaredTypes,
+                myConceptFormalParamList, myConceptActualArgList,
+                myConceptRealizFormalParamList, myConceptRealizActualArgList,
+                myInstantiatedEnhSpecRealizItems);
     }
 
     /**
@@ -377,6 +384,13 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     (ConceptModuleDec) mySymbolTable.getModuleScope(
                             new ModuleIdentifier(myFacilityDec.getConceptName()
                                     .getName())).getDefiningElement();
+
+            // Extract the concept's shared state variables
+            ConceptSharedStateExtractor sharedStateExtractor =
+                    new ConceptSharedStateExtractor();
+            TreeWalker.visit(sharedStateExtractor, facConceptDec);
+            myConceptSharedStates.addAll(sharedStateExtractor
+                    .getSharedStateDecs());
 
             // Extract the concept's type declarations
             ConceptTypeExtractor typeExtractor = new ConceptTypeExtractor();

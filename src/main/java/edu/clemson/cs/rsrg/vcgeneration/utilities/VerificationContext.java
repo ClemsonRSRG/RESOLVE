@@ -18,6 +18,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -99,6 +101,20 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     // -----------------------------------------------------------
+    // Shared State Declarations and Representations
+    // -----------------------------------------------------------
+
+    /** <p>This contains all the shared state declared by the {@code Concept}.</p> */
+    private final List<SharedStateDec> myConceptSharedStates;
+
+    /**
+     * <p>If our current module scope allows us to introduce new shared state realizations,
+     * this will contain all the {@link SharedStateRealizationDec}. Otherwise,
+     * this list will be empty.</p>
+     */
+    private final List<SharedStateRealizationDec> myLocalSharedStateRealizationDecs;
+
+    // -----------------------------------------------------------
     // Type Declarations and Representations
     // -----------------------------------------------------------
 
@@ -136,7 +152,9 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
         myConceptDeclaredTypes = new LinkedList<>();
+        myConceptSharedStates = new LinkedList<>();
         myCurrentModuleScope = moduleScope;
+        myLocalSharedStateRealizationDecs = new LinkedList<>();
         myLocalTypeRepresentationDecs = new LinkedList<>();
         myModuleLevelConstraints = new LinkedHashMap<>();
         myModuleLevelLocationDetails = new LinkedHashMap<>();
@@ -222,6 +240,27 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
      */
     public final List<TypeFamilyDec> getConceptDeclaredTypes() {
         return myConceptDeclaredTypes;
+    }
+
+    /**
+     * <p>This method returns a list containing the various
+     * {@link SharedStateDec SharedStateDecs} in the current context.</p>
+     *
+     * @return A list containing {@link SharedStateDec SharedStateDecs}.
+     */
+    public final List<SharedStateDec> getConceptSharedVars() {
+        return myConceptSharedStates;
+    }
+
+    /**
+     * <p>This method returns a list containing the various
+     * {@link SharedStateRealizationDec SharedStateRealizationDecs}
+     * in the current context.</p>
+     *
+     * @return A list containing {@link SharedStateRealizationDec SharedStateRealizationDecs}.
+     */
+    public final List<SharedStateRealizationDec> getLocalSharedStateRealizationDecs() {
+        return myLocalSharedStateRealizationDecs;
     }
 
     /**
@@ -339,6 +378,43 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                 if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
                     storeModuleParameterTypeConstraints(realizModuleDec
                             .getLocation(), realizModuleDec.getParameterDecs());
+                }
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(loc);
+        }
+    }
+
+    /**
+     * <p>This method stores a {@code concept's}
+     * {@code Shared Variables} declarations for future use.</p>
+     *
+     * @param dec A {@link SharedStateDec} declared in a {@code Concept}.
+     */
+    public final void storeConceptSharedStateDec(SharedStateDec dec) {
+        myConceptSharedStates.add((SharedStateDec) dec.clone());
+    }
+
+    /**
+     * <p>This method stores the imported {@code concept's}
+     * {@code Shared Variables} declarations for future use.</p>
+     *
+     * @param loc The location of the imported {@code module}.
+     * @param id A {@link ModuleIdentifier} referring to an
+     *           importing {@code concept}.
+     */
+    public final void storeConceptSharedStateDecs(Location loc,
+            ModuleIdentifier id) {
+        try {
+            ConceptModuleDec conceptModuleDec =
+                    (ConceptModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+            List<Dec> decs = conceptModuleDec.getDecList();
+
+            for (Dec dec : decs) {
+                if (dec instanceof SharedStateDec) {
+                    myConceptSharedStates.add((SharedStateDec) dec.clone());
                 }
             }
         }
@@ -514,6 +590,18 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     public final void storeInstantiatedFacilityDecl(
             InstantiatedFacilityDecl decl) {
         myProcessedInstFacilityDecls.add(decl);
+    }
+
+    /**
+     * <p>This method stores a shared realization declaration
+     * for future use.</p>
+     *
+     * @param dec A shared state realization.
+     */
+    public final void storeLocalSharedRealizationDec(
+            SharedStateRealizationDec dec) {
+        myLocalSharedStateRealizationDecs.add((SharedStateRealizationDec) dec
+                .clone());
     }
 
     /**
