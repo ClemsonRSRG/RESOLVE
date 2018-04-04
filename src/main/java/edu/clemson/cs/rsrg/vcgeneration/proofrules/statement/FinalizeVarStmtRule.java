@@ -12,21 +12,33 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -115,46 +127,21 @@ public class FinalizeVarStmtRule extends AbstractProofRuleApplication
                                             .clone(),
                                     "Finalization Ensures Clause of "
                                             + dec.getName()));
+
+            // Replace any formal shared variables with the correct facility
+            // instantiation (if possible).
+            NameTy decTyAsNameTy = (NameTy) dec.getTy();
+            PosSymbol facQualifier = getFacilityQualifier(decTyAsNameTy);
+            finalizationEnsuresExp =
+                    createModifiedTypeFinalEnsExp(dec.getLocation(),
+                            finalizationEnsuresExp, facQualifier, type
+                                    .getFinalization().getAffectedVars());
         }
         // Case #2: A local type representation.
         else {
             // TODO: Change this!
             finalizationEnsuresExp = null;
         }
-
-        /* Refactor this:
-        // Create an assume statement with the finalization ensures clause and add
-        // the location detail associated with it.
-        AssertionClause finalEnsuresClause = myFinalItem.getEnsures();
-        Location finalEnsuresLoc =
-                finalEnsuresClause.getAssertionExp().getLocation();
-        Exp assumeExp =
-                Utilities.formConjunct(finalEnsuresLoc, null,
-                        finalEnsuresClause, new LocationDetailModel(
-                                finalEnsuresLoc.clone(), finalEnsuresLoc.clone(),
-                                "Finalization Ensures Clause of "
-                                        + myVarDec.getName()));
-
-        // Create a replacement map
-        Map<Exp, Exp> substitutions = new LinkedHashMap<>();
-
-        // Create replacements for any affected variables
-        AffectsClause affectsClause = myFinalItem.getAffectedVars();
-        if (affectsClause != null) {
-            for (Exp affectedExp : affectsClause.getAffectedExps()) {
-                // Create a VCVarExp using the affectedExp
-                VCVarExp vcVarExp =
-                        Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, affectedExp);
-                myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
-                substitutions.put(affectedExp, vcVarExp);
-                myNewFreeVarSubstitutions.put(affectedExp.clone(), vcVarExp.clone());
-
-                // Replace all instances of incoming affectedExp with affectedExp
-                substitutions.put(new OldExp(affectedExp.getLocation(), affectedExp),
-                        affectedExp.clone());
-            }
-        }
-        assumeExp = assumeExp.substitute(substitutions);*/
 
         AssumeStmt finalAssumeStmt =
                 new AssumeStmt(dec.getLocation(), finalizationEnsuresExp, false);
@@ -176,6 +163,97 @@ public class FinalizeVarStmtRule extends AbstractProofRuleApplication
     @Override
     public final String getRuleDescription() {
         return "Variable Finalization Rule (Known Program Type)";
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method for creating the modified {@code ensures} clause
+     * that modifies the shared variables appropriately.</p>
+     *
+     * <p>Note that this helper method also does all the appropriate substitutions to
+     * the {@code VCs} in the assertive code block.</p>
+     *
+     * @param loc Location where we are creating a replacement for.
+     * @param originalExp The original expression.
+     * @param facQualifier A facility qualifier (if any).
+     * @param affectsClause The {@code affects} clause associated with the ensures clause.
+     *
+     * @return The modified {@code ensures} clause expression.
+     */
+    private Exp createModifiedTypeFinalEnsExp(Location loc, Exp originalExp,
+            PosSymbol facQualifier, AffectsClause affectsClause) {
+        // Create a replacement maps
+        // 1) substitutions: Contains all the replacements for the originalExp
+        // 2) substitutionsForSeq: Contains all the replacements for the VC's sequents.
+        Map<Exp, Exp> substitutions = new LinkedHashMap<>();
+        Map<Exp, Exp> substitutionsForSeq = new LinkedHashMap<>();
+
+        // Create replacements for any affected variables (if needed)
+        if (affectsClause != null) {
+            for (Exp affectedExp : affectsClause.getAffectedExps()) {
+                // Replace any #originalAffectsExp with the facility qualified modifiedAffectsExp
+                VarExp originalAffectsExp = (VarExp) affectedExp;
+                VarExp modifiedAffectsExp =
+                        Utilities.createVarExp(loc.clone(), facQualifier, originalAffectsExp.getName(),
+                                affectedExp.getMathType(), affectedExp.getMathTypeValue());
+                substitutions.put(new OldExp(originalAffectsExp.getLocation(), originalAffectsExp),
+                        modifiedAffectsExp);
+
+                // Replace any originalAffectsExp with NQV(modifiedAffectsExp)
+                VCVarExp vcVarExp = Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, modifiedAffectsExp);
+                myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
+                substitutions.put(originalAffectsExp, vcVarExp);
+
+                // Add modifiedAffectsExp with NQV(modifiedAffectsExp) as a substitution for VC's sequents
+                substitutionsForSeq.put(modifiedAffectsExp.clone(), vcVarExp.clone());
+            }
+
+            // Retrieve the list of VCs and use the sequent
+            // substitution map to do replacements.
+            List<VerificationCondition> newVCs =
+                    createReplacementVCs(myCurrentAssertiveCodeBlock.getVCs(), substitutionsForSeq);
+
+            // Store the new list of vcs
+            myCurrentAssertiveCodeBlock.setVCs(newVCs);
+        }
+
+        return originalExp.substitute(substitutions);
+    }
+
+    /**
+     * <p>An helper method for locating a facility qualifier (if any) from
+     * a raw program type.</p>
+     *
+     * @param ty A raw program type.
+     *
+     * @return A facility qualifier if the program type came from a facility
+     * instantiation, {@code null} otherwise.
+     */
+    private PosSymbol getFacilityQualifier(NameTy ty) {
+        PosSymbol facQualifier = ty.getQualifier();
+
+        // Check to see if there is a facility that instantiated a type
+        // that matches "ty".
+        if (facQualifier == null) {
+            Iterator<InstantiatedFacilityDecl> it =
+                    myCurrentVerificationContext
+                            .getProcessedInstFacilityDecls().iterator();
+            while (it.hasNext() && facQualifier == null) {
+                InstantiatedFacilityDecl decl = it.next();
+
+                // One we find one, we are done!
+                for (TypeFamilyDec dec : decl.getConceptDeclaredTypes()) {
+                    if (dec.getName().getName().equals(ty.getName().getName())) {
+                        facQualifier = decl.getInstantiatedFacilityName();
+                    }
+                }
+            }
+        }
+
+        return facQualifier;
     }
 
 }
