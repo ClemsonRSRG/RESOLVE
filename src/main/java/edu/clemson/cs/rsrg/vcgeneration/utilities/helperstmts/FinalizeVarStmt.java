@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts;
 
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
 
@@ -36,20 +37,27 @@ public class FinalizeVarStmt extends Statement {
     /** <p>The variable declaration we are applying the rule to.</p> */
     private final VarDec myVarDec;
 
+    /**
+     * <p>The symbol table entry representing program type associated
+     * with the variable we are trying to finalize.</p>
+     */
+    private final SymbolTableEntry myVarTypeEntry;
+
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
      * <p>This constructs an helper statement that indicates
-     * finalization logic for a variable happens here.</p>
+     * finalization logic for a variable with known type happens here.</p>
      *
-     * @param varDec The variable declaration we are applying the
-     *               rule to.
+     * @param varDec A variable declaration with known type.
+     * @param symbolTableEntry The program type entry associated with {@code varDec}.
      */
-    public FinalizeVarStmt(VarDec varDec) {
+    public FinalizeVarStmt(VarDec varDec, SymbolTableEntry symbolTableEntry) {
         super(varDec.getLocation());
         myVarDec = varDec;
+        myVarTypeEntry = symbolTableEntry;
     }
 
     // ===========================================================
@@ -82,7 +90,30 @@ public class FinalizeVarStmt extends Statement {
 
         FinalizeVarStmt that = (FinalizeVarStmt) o;
 
-        return myVarDec.equals(that.myVarDec);
+        if (!myVarDec.equals(that.myVarDec))
+            return false;
+        return myVarTypeEntry.equals(that.myVarTypeEntry);
+    }
+
+    /**
+     * <p>This method returns the program variable we are
+     * trying to finalize.</p>
+     *
+     * @return A {@link VarDec}.
+     */
+    public final VarDec getVarDec() {
+        return myVarDec;
+    }
+
+    /**
+     * <p>This method returns the symbol table entry associated
+     * with the program type for the variable declaration we are
+     * trying to finalize.</p>
+     *
+     * @return A {@link SymbolTableEntry}.
+     */
+    public final SymbolTableEntry getVarProgramTypeEntry() {
+        return myVarTypeEntry;
     }
 
     /**
@@ -90,7 +121,9 @@ public class FinalizeVarStmt extends Statement {
      */
     @Override
     public final int hashCode() {
-        return myVarDec.hashCode();
+        int result = myVarDec.hashCode();
+        result = 31 * result + myVarTypeEntry.hashCode();
+        return result;
     }
 
     // ===========================================================
@@ -102,6 +135,6 @@ public class FinalizeVarStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new FinalizeVarStmt((VarDec) myVarDec.clone());
+        return new FinalizeVarStmt((VarDec) myVarDec.clone(), myVarTypeEntry);
     }
 }

@@ -471,7 +471,7 @@ public class Utilities {
 
     /**
      * <p>Given the original {@code finalization ensures} clause, use the provided
-     * information on a program variable to substitute the {@code exemplar} in
+     * information on a program variable to substitute the {@code #exemplar} in
      * the {@code finalization ensures} clause and create a new {@link AssertionClause}.</p>
      *
      * @param originalFinalEnsuresClause The {@link AssertionClause} containing the
@@ -490,17 +490,17 @@ public class Utilities {
     public static AssertionClause getTypeFinalEnsuresClause(AssertionClause originalFinalEnsuresClause, Location loc,
         PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
         // Create an incoming variable expression from the declared variable
-        // YS: Finalization ensures always talks about the incoming value and never
-        //     about the outgoing value since it is finalized...
         VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
-        OldExp oldVarDecExp = new OldExp(loc.clone(), varDecExp);
 
         // Create a variable expression from the type exemplar
+        // YS: Finalization ensures always talks about the incoming exemplar value and never
+        //     about the outgoing exemplar value since it is finalized...
         VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
+        OldExp oldExemplarExp = new OldExp(loc.clone(), exemplar);
 
         // Create a replacement map
         Map<Exp, Exp> substitutions = new HashMap<>();
-        substitutions.put(exemplar, oldVarDecExp);
+        substitutions.put(oldExemplarExp, varDecExp);
 
         // Create new assertion clause by replacing the exemplar with the actual
         Location newLoc = loc.clone();

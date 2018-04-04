@@ -25,7 +25,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.*;
@@ -117,9 +116,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     /**
      * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
-     * {@code finalization} specification item if we were able to generate one.</p>
+     * program type entry.</p>
      */
-    private final Map<VarDec, SpecInitFinalItem> myVariableSpecFinalItems;
+    private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
 
     // -----------------------------------------------------------
     // VC Generation-Related
@@ -221,7 +220,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
-        myVariableSpecFinalItems = new LinkedHashMap<>();
+        myVariableTypeEntries = new LinkedHashMap<>();
         myVCGenDetailsModel = mySTGroup.getInstanceOf("outputVCGenDetails");
     }
 
@@ -598,7 +597,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .getFacilities(), dec.getVariables(), dec
                                 .getStatements(), dec.getRecursive());
         ProcedureDeclRule declRule =
-                new ProcedureDeclRule(procedureDec, myVariableSpecFinalItems,
+                new ProcedureDeclRule(procedureDec, myVariableTypeEntries,
                         myBuilder, myCurrentModuleScope,
                         myCurrentAssertiveCodeBlock,
                         myCurrentVerificationContext, mySTGroup,
@@ -615,7 +614,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
 
-        myVariableSpecFinalItems.clear();
+        myVariableTypeEntries.clear();
         myCurrentAssertiveCodeBlock = null;
     }
 
@@ -698,7 +697,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply procedure declaration rule
         // TODO: Recheck logic to make sure everything still works!
         ProcedureDeclRule declRule =
-                new ProcedureDeclRule(dec, myVariableSpecFinalItems, myBuilder,
+                new ProcedureDeclRule(dec, myVariableTypeEntries, myBuilder,
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
                         myCurrentVerificationContext, mySTGroup,
                         myAssertiveCodeBlockModels
@@ -714,7 +713,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
 
-        myVariableSpecFinalItems.clear();
+        myVariableTypeEntries.clear();
         myCurrentAssertiveCodeBlock = null;
     }
 
@@ -820,6 +819,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // NY YS
                 // TODO: Initialization duration for this variable
+
+                // Store the program type entry for this variable for when we deal with finalization.
+                myVariableTypeEntries.put(dec, ste);
 
                 // Update the associated block model.
                 myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
@@ -1119,7 +1121,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply a statement proof rule to each of the assertions.
         while (assertiveCodeBlock.hasMoreStatements()) {
             // Work our way from the last statement
-            Statement statement = assertiveCodeBlock.removeLastSatement();
+            Statement statement = assertiveCodeBlock.removeLastStatement();
 
             // Generate one of the statement proof rule applications
             ProofRuleApplication ruleApplication;

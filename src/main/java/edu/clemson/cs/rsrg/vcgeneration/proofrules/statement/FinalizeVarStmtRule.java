@@ -12,9 +12,19 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import org.stringtemplate.v4.ST;
@@ -72,6 +82,46 @@ public class FinalizeVarStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
+        // Obtain the program variable and type from the statement
+        VarDec dec = myFinalVarStmt.getVarDec();
+        SymbolTableEntry typeEntry = myFinalVarStmt.getVarProgramTypeEntry();
+
+        // Case #1: A type from some concept.
+        Exp finalizationEnsuresExp;
+        if (typeEntry instanceof ProgramTypeEntry) {
+            // Extract the finalization ensure clause from the type.
+            ProgramTypeEntry programTypeEntry =
+                    typeEntry.toProgramTypeEntry(dec.getLocation());
+            TypeFamilyDec type =
+                    (TypeFamilyDec) programTypeEntry.getDefiningElement();
+            AssertionClause finalEnsuresClause =
+                    type.getFinalization().getEnsures();
+
+            // Create the modified finalization ensures clause with
+            // the exemplar replaced with the variable declaration name.
+            AssertionClause modifiedFinalEnsures =
+                    Utilities.getTypeFinalEnsuresClause(finalEnsuresClause, dec
+                            .getLocation(), null, dec.getName(), type
+                            .getExemplar(), programTypeEntry.getModelType(),
+                            null);
+
+            // Create the finalization ensures expression.
+            Location finalEnsuresLoc =
+                    modifiedFinalEnsures.getAssertionExp().getLocation();
+            finalizationEnsuresExp =
+                    Utilities.formConjunct(finalEnsuresLoc, null,
+                            modifiedFinalEnsures, new LocationDetailModel(
+                                    finalEnsuresLoc.clone(), dec.getLocation()
+                                            .clone(),
+                                    "Finalization Ensures Clause of "
+                                            + dec.getName()));
+        }
+        // Case #2: A local type representation.
+        else {
+            // TODO: Change this!
+            finalizationEnsuresExp = null;
+        }
+
         /* Refactor this:
         // Create an assume statement with the finalization ensures clause and add
         // the location detail associated with it.
@@ -104,11 +154,11 @@ public class FinalizeVarStmtRule extends AbstractProofRuleApplication
                         affectedExp.clone());
             }
         }
-        assumeExp = assumeExp.substitute(substitutions);
+        assumeExp = assumeExp.substitute(substitutions);*/
 
         AssumeStmt finalAssumeStmt =
-                new AssumeStmt(finalEnsuresClause.getLocation(), assumeExp, false);
-        myCurrentAssertiveCodeBlock.addStatement(finalAssumeStmt); */
+                new AssumeStmt(dec.getLocation(), finalizationEnsuresExp, false);
+        myCurrentAssertiveCodeBlock.addStatement(finalAssumeStmt);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");

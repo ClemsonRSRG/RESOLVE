@@ -83,10 +83,10 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     private final ProcedureDec myProcedureDec;
 
     /**
-     * <p>This stores all the local {@link VarDec VarDec's}
-     * {@code finalization} specification item if we were able to generate one.</p>
+     * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
+     * program type entry.</p>
      */
-    private final Map<VarDec, SpecInitFinalItem> myVariableSpecFinalItems;
+    private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
 
     /** <p>The symbol table we are currently building.</p> */
     private final MathSymbolTableBuilder mySymbolTable;
@@ -107,8 +107,8 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      *
      * @param procedureDec The {@link ProcedureDec} we are applying
      *                     the rule to.
-     * @param procVarFinalItems The local variable declaration's
-     *                          {@code finalization} specification items.
+     * @param procVarTypeEntries The local variable declaration's
+     *                           program type entries.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
@@ -119,7 +119,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public ProcedureDeclRule(ProcedureDec procedureDec,
-            Map<VarDec, SpecInitFinalItem> procVarFinalItems,
+            Map<VarDec, SymbolTableEntry> procVarTypeEntries,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
@@ -133,7 +133,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
         myProcedureDec = procedureDec;
-        myVariableSpecFinalItems = procVarFinalItems;
+        myVariableTypeEntries = procVarTypeEntries;
     }
 
     // ===========================================================
@@ -195,7 +195,11 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         //     and duration logic when we backtrack through the code.
         List<VarDec> varDecs = myProcedureDec.getVariables();
         for (VarDec dec : varDecs) {
-            myCurrentAssertiveCodeBlock.addStatement(new FinalizeVarStmt(dec));
+            // Only need to finalize non-generic type variables.
+            if (myVariableTypeEntries.containsKey(dec)) {
+                myCurrentAssertiveCodeBlock.addStatement(new FinalizeVarStmt(
+                        dec, myVariableTypeEntries.remove(dec)));
+            }
         }
 
         // TODO: Add the finalization duration ensures (if any)

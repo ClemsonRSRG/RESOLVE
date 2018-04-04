@@ -453,7 +453,7 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
      *
      * @return A {@link Statement} representation object.
      */
-    public final Statement removeLastSatement() {
+    public final Statement removeLastStatement() {
         return myStatements.removeLast();
     }
 
