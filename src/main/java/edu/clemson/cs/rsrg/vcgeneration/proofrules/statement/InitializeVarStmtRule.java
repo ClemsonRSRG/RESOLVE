@@ -137,7 +137,7 @@ public class InitializeVarStmtRule extends AbstractProofRuleApplication
                 initializationEnsuresExp =
                         createEnsuresExpWithModifiedSharedVars(dec
                                 .getLocation(), initializationEnsuresExp,
-                                facQualifier, type.getFinalization()
+                                facQualifier, type.getInitialization()
                                         .getAffectedVars());
             }
             // Case #3: A type representation that implements a type from some concept.
