@@ -281,9 +281,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             if (moduleArgumentExp instanceof ProgramFunctionExp) {
                 // Use the walker to retrieve the ensures clause.
                 ProgramFunctionExpWalker walker =
-                        new ProgramFunctionExpWalker(myCurrentVerificationContext.getConceptDeclaredTypes(),
-                                myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
-                                myCurrentVerificationContext.getProcessedInstFacilityDecls(),
+                        new ProgramFunctionExpWalker(myCurrentVerificationContext,
                                 myCurrentModuleScope, myTypeGraph);
                 TreeWalker.visit(walker, moduleArgumentExp);
 

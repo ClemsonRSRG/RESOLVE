@@ -13,8 +13,6 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
@@ -30,13 +28,17 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import java.util.*;
 
 /**
  * <p>This class extracts ensures clauses (with the appropriate substitutions)
  * from walking potentially nested {@link ProgramFunctionExp}. This visitor logic
  * is implemented as a {@link TreeWalkerVisitor}.</p>
+ *
+ * <p><strong>Note:</strong> We don't have to worry about any shared variables
+ * being affected. By definition a function operation can't have side effects,
+ * therefore modifying a shared variables would count as a side-effect.</p>
  *
  * @author Yu-Shan Sun
  * @version 2.0
@@ -48,13 +50,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myConceptDeclaredTypes;
-
-    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -62,6 +57,12 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
     /** <p>The current procedure declaration we are processing.</p> */
     private final OperationEntry myCurrentOperationEntry;
+
+    /**
+     * <p>The {@link VerificationContext} where all the information for the
+     * current {@code Assertive Code Block} is located.</p>
+     */
+    private final VerificationContext myCurrentVerificationContext;
 
     /**
      * <p>If this is a {@code Recursive Procedure}, then this will contain
@@ -74,16 +75,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * replaced with the actuals for each of the nested function calls.</p>
      */
     private final Map<ProgramFunctionExp, Exp> myEnsuresClauseMap;
-
-    /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     /**
      * <p>A list that contains the modified requires clauses with the formal
@@ -112,18 +103,14 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * <p>Note that this constructor is used by non-recursive declarations,
      * where there isn't a {@code decreasing} clause.</p>
      *
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
-    public ProgramFunctionExpWalker(List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
+    public ProgramFunctionExpWalker(VerificationContext context,
             ModuleScope moduleScope, TypeGraph g) {
-        this(null, null, typeFamilyDecs, localRepresentationTypeDecs,
-                processedInstFacDecs, moduleScope, g);
+        this(null, null, context, moduleScope, g);
     }
 
     /**
@@ -134,24 +121,18 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * @param entry The current visiting {@code Procedure} declaration's
      *              {@link OperationEntry}.
      * @param decreasingExp The {@code decreasing} clause for the visiting
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param moduleScope The current module scope we are visiting.
      * @param g The current type graph.
      */
     public ProgramFunctionExpWalker(OperationEntry entry, Exp decreasingExp,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
-            ModuleScope moduleScope, TypeGraph g) {
-        myConceptDeclaredTypes = typeFamilyDecs;
+            VerificationContext context, ModuleScope moduleScope, TypeGraph g) {
         myCurrentModuleScope = moduleScope;
         myCurrentOperationEntry = entry;
+        myCurrentVerificationContext = context;
         myDecreasingExp = decreasingExp;
         myEnsuresClauseMap = new HashMap<>();
-        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
-        myProcessedInstFacilityDecls = processedInstFacDecs;
         myRequiresClauseList = new LinkedList<>();
         myTerminationConfirmStmts = new LinkedList<>();
         myTypeGraph = g;
@@ -205,9 +186,12 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                     Utilities.replaceFacilityFormalWithActual(requiresExp,
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
-                            myConceptDeclaredTypes,
-                            myLocalRepresentationTypeDecs,
-                            myProcessedInstFacilityDecls);
+                            myCurrentVerificationContext
+                                    .getConceptDeclaredTypes(),
+                            myCurrentVerificationContext
+                                    .getLocalTypeRepresentationDecs(),
+                            myCurrentVerificationContext
+                                    .getProcessedInstFacilityDecls());
 
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
@@ -232,8 +216,11 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 Utilities.replaceFacilityFormalWithActual(ensuresExp,
                         operationDec.getParameters(), myCurrentModuleScope
                                 .getDefiningElement().getName(),
-                        myConceptDeclaredTypes, myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls);
+                        myCurrentVerificationContext.getConceptDeclaredTypes(),
+                        myCurrentVerificationContext
+                                .getLocalTypeRepresentationDecs(),
+                        myCurrentVerificationContext
+                                .getProcessedInstFacilityDecls());
 
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);

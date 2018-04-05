@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
@@ -43,6 +44,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -322,6 +324,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
             List<ProgramExp> callArgs, List<Exp> modifiedArguments) {
         OperationDec operationDec =
                 (OperationDec) operationEntry.getDefiningElement();
+        InstantiatedFacilityDecl instantiatedFacilityDecl =
+                Utilities.getInstantiatingFacility(operationEntry, myCurrentVerificationContext);
 
         // Get the ensures clause for this operation and
         // store it's associated location detail.
@@ -555,8 +559,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
             }
         }
 
-        // TODO: Add global state variable logic here!
-
         // Form the final conjunct ensures clause expression
         if (parameterEnsures != null) {
             if (VarExp.isLiteralTrue(ensuresExp)) {
@@ -566,6 +568,42 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 ensuresExp =
                         MathExp.formConjunct(myCallStmt.getLocation().clone(),
                                 parameterEnsures, ensuresExp);
+            }
+        }
+
+        // Check to see if the operation affects any shared variables
+        if (operationDec.getAffectedVars() != null) {
+            AffectsClause clause = operationDec.getAffectedVars();
+
+            // Apply substitution of shared variables with the proper
+            // facility instantiated version.
+            if (instantiatedFacilityDecl != null) {
+                PosSymbol facQualifier = instantiatedFacilityDecl.getInstantiatedFacilityName();
+
+                // Generate any facility qualified substitutions
+                Map<Exp, Exp> sharedVarSubstitution = new LinkedHashMap<>();
+                for (Exp affectedExp : clause.getAffectedExps()) {
+                    // 1) #originalAffectsExp ~> facility qualified modifiedAffectsExp
+                    VarExp originalAffectsExp = (VarExp) affectedExp;
+                    VarExp modifiedAffectsExp =
+                            Utilities.createVarExp(clause.getLocation().clone(),
+                                    facQualifier, originalAffectsExp.getName(),
+                                    affectedExp.getMathType(), affectedExp.getMathTypeValue());
+                    sharedVarSubstitution.put(new OldExp(originalAffectsExp.getLocation(), originalAffectsExp),
+                            modifiedAffectsExp);
+
+                    // 2) originalAffectsExp ~> NQV(modifiedAffectsExp)
+                    VCVarExp vcVarExp =
+                            Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, modifiedAffectsExp);
+                    myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
+                    sharedVarSubstitution.put(originalAffectsExp, vcVarExp);
+
+                    // Add modifiedAffectsExp with NQV(modifiedAffectsExp) as a substitution for VC's sequents
+                    substitutionsForSeq.put(modifiedAffectsExp.clone(), vcVarExp.clone());
+                }
+
+                // Apply any facility qualified substitutions.
+                ensuresExp = ensuresExp.substitute(sharedVarSubstitution);
             }
         }
 
@@ -616,6 +654,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
             List<VarExp> operationParamAsVarExps, List<Exp> modifiedArguments) {
         OperationDec operationDec =
                 (OperationDec) operationEntry.getDefiningElement();
+        InstantiatedFacilityDecl instantiatedFacilityDecl =
+                Utilities.getInstantiatingFacility(operationEntry, myCurrentVerificationContext);
 
         // Get the requires assertion for this operation and
         // store it's associated location detail.
@@ -649,6 +689,32 @@ public class CallStmtRule extends AbstractProofRuleApplication
                                     .getLocalTypeRepresentationDecs(),
                             myCurrentVerificationContext
                                     .getProcessedInstFacilityDecls());
+
+            // Check to see if the operation affects any shared variables
+            if (operationDec.getAffectedVars() != null) {
+                AffectsClause clause = operationDec.getAffectedVars();
+
+                // Apply substitution of shared variables with the proper
+                // facility instantiated version.
+                if (instantiatedFacilityDecl != null) {
+                    PosSymbol facQualifier = instantiatedFacilityDecl.getInstantiatedFacilityName();
+
+                    // Generate any facility qualified substitutions
+                    Map<Exp, Exp> sharedVarSubstitution = new LinkedHashMap<>();
+                    for (Exp affectedExp : clause.getAffectedExps()) {
+                        // 1) originalAffectsExp ~> facility qualified modifiedAffectsExp
+                        VarExp originalAffectsExp = (VarExp) affectedExp;
+                        VarExp modifiedAffectsExp =
+                                Utilities.createVarExp(clause.getLocation().clone(),
+                                        facQualifier, originalAffectsExp.getName(),
+                                        affectedExp.getMathType(), affectedExp.getMathTypeValue());
+                        sharedVarSubstitution.put(originalAffectsExp, modifiedAffectsExp);
+                    }
+
+                    // Apply any facility qualified substitutions.
+                    requiresExp = requiresExp.substitute(sharedVarSubstitution);
+                }
+            }
         }
 
         // Add any nested termination clauses to our current assertive code block.
@@ -763,9 +829,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 if (myCurrentProcedureOperationEntry == null) {
                     walker =
                             new ProgramFunctionExpWalker(
-                                    myCurrentVerificationContext.getConceptDeclaredTypes(),
-                                    myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
-                                    myCurrentVerificationContext.getProcessedInstFacilityDecls(),
+                                    myCurrentVerificationContext,
                                     myCurrentModuleScope, myTypeGraph);
                 }
                 else {
@@ -773,9 +837,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                             new ProgramFunctionExpWalker(
                                     myCurrentProcedureOperationEntry,
                                     myCurrentProcedureDecreasingExp,
-                                    myCurrentVerificationContext.getConceptDeclaredTypes(),
-                                    myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
-                                    myCurrentVerificationContext.getProcessedInstFacilityDecls(),
+                                    myCurrentVerificationContext,
                                     myCurrentModuleScope, myTypeGraph);
                 }
                 TreeWalker.visit(walker, expAsProgramFunctionexp);

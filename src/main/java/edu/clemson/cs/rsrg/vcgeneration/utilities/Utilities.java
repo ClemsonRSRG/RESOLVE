@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -21,6 +22,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
+import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -42,6 +44,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.Facility
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.FormalActualLists;
@@ -437,6 +440,55 @@ public class Utilities {
         }
 
         return facQualifier;
+    }
+
+    /**
+     * <p>An helper method for locating the instantiating facility (if any) from
+     * an operation entry.</p>
+     *
+     * @param operationEntry An {@link OperationEntry}.
+     * @param context The current {@link VerificationContext}.
+     *
+     * @return A {@link InstantiatedFacilityDecl} if {@code operationEntry} is from
+     * a module that has been instantiated, {@code null} otherwise.
+     */
+    public static InstantiatedFacilityDecl getInstantiatingFacility(
+            OperationEntry operationEntry, VerificationContext context) {
+        InstantiatedFacilityDecl instantiatedFacilityDecl = null;
+        ModuleIdentifier sourceModuleIdentifier =
+                operationEntry.getSourceModuleIdentifier();
+
+        // Loop and attempt to find the one that instantiated this
+        // operation entry.
+        Iterator<InstantiatedFacilityDecl> it =
+                context.getProcessedInstFacilityDecls().iterator();
+        while (it.hasNext() && instantiatedFacilityDecl == null) {
+            InstantiatedFacilityDecl decl = it.next();
+            FacilityDec facilityDec = decl.getInstantiatedFacilityDec();
+
+            // YS: There are two potential scenarios: either it is
+            // an operation declared in a concept or an operation from
+            // an enhancement. Can't be private operations from
+            // concept realizations or enhancement realizations.
+            if (sourceModuleIdentifier.equals(new ModuleIdentifier(facilityDec
+                    .getConceptName().getName()))) {
+                instantiatedFacilityDecl = decl;
+            }
+            else {
+                Iterator<EnhancementSpecRealizItem> specRealizItemIt =
+                        facilityDec.getEnhancementRealizPairs().iterator();
+                while (specRealizItemIt.hasNext()
+                        && instantiatedFacilityDecl == null) {
+                    EnhancementSpecRealizItem item = specRealizItemIt.next();
+                    if (sourceModuleIdentifier.equals(new ModuleIdentifier(item
+                            .getEnhancementName().getName()))) {
+                        instantiatedFacilityDecl = decl;
+                    }
+                }
+            }
+        }
+
+        return instantiatedFacilityDecl;
     }
 
     /**

@@ -133,9 +133,7 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
             if (myCurrentProcedureOperationEntry == null) {
                 walker =
                         new ProgramFunctionExpWalker(
-                                myCurrentVerificationContext.getConceptDeclaredTypes(),
-                                myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
-                                myCurrentVerificationContext.getProcessedInstFacilityDecls(),
+                                myCurrentVerificationContext,
                                 myCurrentModuleScope, myTypeGraph);
             }
             else {
@@ -143,9 +141,7 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
                         new ProgramFunctionExpWalker(
                                 myCurrentProcedureOperationEntry,
                                 myCurrentProcedureDecreasingExp,
-                                myCurrentVerificationContext.getConceptDeclaredTypes(),
-                                myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
-                                myCurrentVerificationContext.getProcessedInstFacilityDecls(),
+                                myCurrentVerificationContext,
                                 myCurrentModuleScope, myTypeGraph);
             }
             TreeWalker.visit(walker, assignProgramFunctionExp);
