@@ -406,6 +406,40 @@ public class Utilities {
     }
 
     /**
+     * <p>An helper method for locating a facility qualifier (if any) from
+     * a raw program type.</p>
+     *
+     * @param ty A raw program type.
+     * @param context The current {@link VerificationContext}.
+     *
+     * @return A facility qualifier if the program type came from a facility
+     * instantiation, {@code null} otherwise.
+     */
+    public static PosSymbol getFacilityQualifier(NameTy ty,
+            VerificationContext context) {
+        PosSymbol facQualifier = ty.getQualifier();
+
+        // Check to see if there is a facility that instantiated a type
+        // that matches "ty".
+        if (facQualifier == null) {
+            Iterator<InstantiatedFacilityDecl> it =
+                    context.getProcessedInstFacilityDecls().iterator();
+            while (it.hasNext() && facQualifier == null) {
+                InstantiatedFacilityDecl decl = it.next();
+
+                // One we find one, we are done!
+                for (TypeFamilyDec dec : decl.getConceptDeclaredTypes()) {
+                    if (dec.getName().getName().equals(ty.getName().getName())) {
+                        facQualifier = decl.getInstantiatedFacilityName();
+                    }
+                }
+            }
+        }
+
+        return facQualifier;
+    }
+
+    /**
      * <p>An helper method that returns {@link ProgramFunctionExp ProgramFunctionExp's}
      * corresponding {@link OperationEntry}.</p>
      *

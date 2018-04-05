@@ -12,10 +12,19 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityTypeRepresentationEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.TypeRepresentationEntry;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -90,53 +99,72 @@ public class InitializeVarStmtRule extends AbstractProofRuleApplication
                             .getTypeGraph().BOOLEAN);
         }
         else {
-            // TODO: Change this!
-            initializationEnsuresExp = null;
+            // Case #2: A type from some concept.
+            if (typeEntry instanceof ProgramTypeEntry) {
+                // Extract the initialization ensures clause from the type.
+                ProgramTypeEntry programTypeEntry =
+                        typeEntry.toProgramTypeEntry(dec.getLocation());
+                TypeFamilyDec type =
+                        (TypeFamilyDec) programTypeEntry.getDefiningElement();
+                AssertionClause initEnsuresClause =
+                        type.getInitialization().getEnsures();
+
+                // Create the modified initialization ensures clause with
+                // the exemplar replaced with the variable declaration name.
+                AssertionClause modifiedInitEnsures =
+                        Utilities.getTypeInitEnsuresClause(initEnsuresClause,
+                                dec.getLocation(), null, dec.getName(), type
+                                        .getExemplar(), programTypeEntry
+                                        .getModelType(), null);
+
+                // Create the initialization ensures expression.
+                Location initEnsuresLoc =
+                        modifiedInitEnsures.getAssertionExp().getLocation();
+                initializationEnsuresExp =
+                        Utilities.formConjunct(initEnsuresLoc, null,
+                                modifiedInitEnsures, new LocationDetailModel(
+                                        initEnsuresLoc.clone(), dec
+                                                .getLocation().clone(),
+                                        "Initialization Ensures Clause of "
+                                                + dec.getName()));
+
+                // Replace any formal shared variables with the correct facility
+                // instantiation (if possible).
+                NameTy decTyAsNameTy = (NameTy) dec.getTy();
+                PosSymbol facQualifier =
+                        Utilities.getFacilityQualifier(decTyAsNameTy,
+                                myCurrentVerificationContext);
+                initializationEnsuresExp =
+                        createEnsuresExpWithModifiedSharedVars(dec
+                                .getLocation(), initializationEnsuresExp,
+                                facQualifier, type.getFinalization()
+                                        .getAffectedVars());
+            }
+            // Case #3: A type representation that implements a type from some concept.
+            else if (typeEntry instanceof TypeRepresentationEntry) {
+                TypeRepresentationEntry representationEntry =
+                        typeEntry.toTypeRepresentationEntry(dec.getLocation());
+                ProgramTypeEntry programTypeEntry =
+                        representationEntry.getDefiningTypeEntry();
+
+                // TODO: Logic for type representations associated with a concept.
+                initializationEnsuresExp = null;
+            }
+            // Case #4: A local type representation.
+            else {
+                FacilityTypeRepresentationEntry representationEntry =
+                        typeEntry.toFacilityTypeRepresentationEntry(dec
+                                .getLocation());
+
+                // TODO: Logic for local type representation.
+                initializationEnsuresExp = null;
+            }
         }
 
-        // Case #1: A type from some concept.
-        /*
-        if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+        // NY YS
+        // TODO: Initialization duration for this variable
 
-
-            // Variable declaration rule for known types
-            /*TypeFamilyDec type =
-                    (TypeFamilyDec) typeEntry.getDefiningElement();
-            AssertionClause initEnsures =
-                    type.getInitialization().getEnsures();
-            AssertionClause modifiedInitEnsures =
-                    Utilities.getTypeInitEnsuresClause(initEnsures, dec
-                            .getLocation(), null, dec.getName(), type
-                            .getExemplar(), typeEntry.getModelType(), null);
-
-            // TODO: Logic for types in concept realizations
-
-            declRule =
-                    new KnownTypeVariableDeclRule(dec, modifiedInitEnsures,
-                            myCurrentAssertiveCodeBlock, mySTGroup,
-                            myAssertiveCodeBlockModels
-                                    .remove(myCurrentAssertiveCodeBlock));
-
-            // Store the variable's finalization item for
-            // future use.
-            AffectsClause finalAffects =
-                    type.getFinalization().getAffectedVars();
-            AssertionClause finalEnsures =
-                    type.getFinalization().getEnsures();
-            if (!VarExp.isLiteralTrue(finalEnsures.getAssertionExp())) {
-                myVariableSpecFinalItems.put(dec, new SpecInitFinalItem(
-                        type.getFinalization().getLocation(), type
-                                .getFinalization().getClauseType(),
-                        finalAffects, Utilities.getTypeFinalEnsuresClause(
-                                finalEnsures, dec.getLocation(), null, dec
-                                        .getName(), type.getExemplar(),
-                                typeEntry.getModelType(), null)));
-            }
-
-            // NY YS
-            // TODO: Initialization duration for this variable
-        }*/
-
+        // Assume that initialization has happened.
         AssumeStmt initAssumeStmt =
                 new AssumeStmt(dec.getLocation(), initializationEnsuresExp,
                         false);

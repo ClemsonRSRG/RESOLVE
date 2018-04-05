@@ -12,9 +12,16 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import java.util.*;
@@ -137,6 +144,60 @@ public abstract class AbstractProofRuleApplication
     // ===========================================================
     // Protected Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method for creating the modified {@code ensures} clause
+     * that modifies the shared variables appropriately.</p>
+     *
+     * <p>Note that this helper method also does all the appropriate substitutions to
+     * the {@code VCs} in the assertive code block.</p>
+     *
+     * @param loc Location where we are creating a replacement for.
+     * @param originalExp The original expression.
+     * @param facQualifier A facility qualifier (if any).
+     * @param affectsClause The {@code affects} clause associated with the ensures clause.
+     *
+     * @return The modified {@code ensures} clause expression.
+     */
+    protected final Exp createEnsuresExpWithModifiedSharedVars(Location loc, Exp originalExp,
+            PosSymbol facQualifier, AffectsClause affectsClause) {
+        // Create a replacement maps
+        // 1) substitutions: Contains all the replacements for the originalExp
+        // 2) substitutionsForSeq: Contains all the replacements for the VC's sequents.
+        Map<Exp, Exp> substitutions = new LinkedHashMap<>();
+        Map<Exp, Exp> substitutionsForSeq = new LinkedHashMap<>();
+
+        // Create replacements for any affected variables (if needed)
+        if (affectsClause != null) {
+            for (Exp affectedExp : affectsClause.getAffectedExps()) {
+                // Replace any #originalAffectsExp with the facility qualified modifiedAffectsExp
+                VarExp originalAffectsExp = (VarExp) affectedExp;
+                VarExp modifiedAffectsExp =
+                        Utilities.createVarExp(loc.clone(), facQualifier, originalAffectsExp.getName(),
+                                affectedExp.getMathType(), affectedExp.getMathTypeValue());
+                substitutions.put(new OldExp(originalAffectsExp.getLocation(), originalAffectsExp),
+                        modifiedAffectsExp);
+
+                // Replace any originalAffectsExp with NQV(modifiedAffectsExp)
+                VCVarExp vcVarExp = Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, modifiedAffectsExp);
+                myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
+                substitutions.put(originalAffectsExp, vcVarExp);
+
+                // Add modifiedAffectsExp with NQV(modifiedAffectsExp) as a substitution for VC's sequents
+                substitutionsForSeq.put(modifiedAffectsExp.clone(), vcVarExp.clone());
+            }
+
+            // Retrieve the list of VCs and use the sequent
+            // substitution map to do replacements.
+            List<VerificationCondition> newVCs =
+                    createReplacementVCs(myCurrentAssertiveCodeBlock.getVCs(), substitutionsForSeq);
+
+            // Store the new list of vcs
+            myCurrentAssertiveCodeBlock.setVCs(newVCs);
+        }
+
+        return originalExp.substitute(substitutions);
+    }
 
     /**
      * <p>An helper method that performs the substitution on all the
