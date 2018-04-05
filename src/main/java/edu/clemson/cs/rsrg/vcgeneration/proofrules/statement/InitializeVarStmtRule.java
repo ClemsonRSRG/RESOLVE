@@ -13,9 +13,13 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
 import org.stringtemplate.v4.ST;
@@ -72,6 +76,76 @@ public class InitializeVarStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
+        // Obtain the program variable and type from the statement
+        VarDec dec = myInitVarStmt.getVarDec();
+        SymbolTableEntry typeEntry = myInitVarStmt.getVarProgramTypeEntry();
+        boolean isGenericVar = myInitVarStmt.isGenericVar();
+
+        // Case #1: Generic type
+        Exp initializationEnsuresExp;
+        if (isGenericVar) {
+            // Create an "Is_Initial" predicate using the generic variable declaration.
+            initializationEnsuresExp =
+                    Utilities.createInitExp(dec, myCurrentAssertiveCodeBlock
+                            .getTypeGraph().BOOLEAN);
+        }
+        else {
+            // TODO: Change this!
+            initializationEnsuresExp = null;
+        }
+
+        // Case #1: A type from some concept.
+        /*
+        if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+
+
+            // Variable declaration rule for known types
+            /*TypeFamilyDec type =
+                    (TypeFamilyDec) typeEntry.getDefiningElement();
+            AssertionClause initEnsures =
+                    type.getInitialization().getEnsures();
+            AssertionClause modifiedInitEnsures =
+                    Utilities.getTypeInitEnsuresClause(initEnsures, dec
+                            .getLocation(), null, dec.getName(), type
+                            .getExemplar(), typeEntry.getModelType(), null);
+
+            // TODO: Logic for types in concept realizations
+
+            declRule =
+                    new KnownTypeVariableDeclRule(dec, modifiedInitEnsures,
+                            myCurrentAssertiveCodeBlock, mySTGroup,
+                            myAssertiveCodeBlockModels
+                                    .remove(myCurrentAssertiveCodeBlock));
+
+            // Store the variable's finalization item for
+            // future use.
+            AffectsClause finalAffects =
+                    type.getFinalization().getAffectedVars();
+            AssertionClause finalEnsures =
+                    type.getFinalization().getEnsures();
+            if (!VarExp.isLiteralTrue(finalEnsures.getAssertionExp())) {
+                myVariableSpecFinalItems.put(dec, new SpecInitFinalItem(
+                        type.getFinalization().getLocation(), type
+                                .getFinalization().getClauseType(),
+                        finalAffects, Utilities.getTypeFinalEnsuresClause(
+                                finalEnsures, dec.getLocation(), null, dec
+                                        .getName(), type.getExemplar(),
+                                typeEntry.getModelType(), null)));
+            }
+
+            // NY YS
+            // TODO: Initialization duration for this variable
+        }*/
+
+        AssumeStmt initAssumeStmt =
+                new AssumeStmt(dec.getLocation(), initializationEnsuresExp,
+                        false);
+        myCurrentAssertiveCodeBlock.addStatement(initAssumeStmt);
+
+        // Add this as a free variable
+        myCurrentAssertiveCodeBlock.addFreeVar(Utilities.createVarExp(dec
+                .getLocation(), null, dec.getName(), dec.getMathType(), null));
+
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
         stepModel.add("proofRuleName", getRuleDescription()).add(
@@ -87,7 +161,17 @@ public class InitializeVarStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Variable Declaration/Initialization Rule";
+        StringBuilder builder = new StringBuilder();
+        builder.append("Variable Declaration/Initialization Rule ");
+
+        if (myInitVarStmt.isGenericVar()) {
+            builder.append("(Generic Program Type)");
+        }
+        else {
+            builder.append("(Known Program Type)");
+        }
+
+        return builder.toString();
     }
 
 }

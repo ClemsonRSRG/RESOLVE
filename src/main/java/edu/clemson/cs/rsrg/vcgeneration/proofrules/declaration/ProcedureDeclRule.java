@@ -21,7 +21,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
@@ -200,9 +199,9 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 myCurrentAssertiveCodeBlock.addStatement(new FinalizeVarStmt(
                         dec, myVariableTypeEntries.remove(dec)));
             }
-        }
 
-        // TODO: Add the finalization duration ensures (if any)
+            // TODO: Add the finalization duration ensures (if any)
+        }
 
         // Create the final confirm expression
         Exp finalConfirmExp = createFinalConfirmExp();

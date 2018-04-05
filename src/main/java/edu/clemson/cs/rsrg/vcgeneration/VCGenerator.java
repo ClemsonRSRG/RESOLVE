@@ -52,7 +52,6 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.WhichEntailsRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
@@ -807,75 +806,29 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             // Check to see if the variable's type is known or it is generic.
+            boolean isGenericVar = true;
+            if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
+                // The program type has an associated TypeFamilyDec,
+                // therefore it is not generic.
+                isGenericVar = false;
+
+                // Store the symbol table entry for this variable for
+                // when we deal with finalization.
+                myVariableTypeEntries.put(dec, ste);
+            }
+
+            // YS: Simply create the proper variable initialization statement that
+            //     allow us to deal with generating question mark variables
+            //     and duration logic when we backtrack through the code.
             ST blockModel =
                     myAssertiveCodeBlockModels
                             .remove(myCurrentAssertiveCodeBlock);
-            if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
-                // YS: Simply create the proper variable initialization statement that
-                //     allow us to deal with generating question mark variables
-                //     and duration logic when we backtrack through the code.
-                myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(
-                        dec));
+            myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(dec,
+                    ste, isGenericVar));
 
-                // Variable declaration rule for known types
-                /*TypeFamilyDec type =
-                        (TypeFamilyDec) typeEntry.getDefiningElement();
-                AssertionClause initEnsures =
-                        type.getInitialization().getEnsures();
-                AssertionClause modifiedInitEnsures =
-                        Utilities.getTypeInitEnsuresClause(initEnsures, dec
-                                .getLocation(), null, dec.getName(), type
-                                .getExemplar(), typeEntry.getModelType(), null);
-
-                // TODO: Logic for types in concept realizations
-
-                declRule =
-                        new KnownTypeVariableDeclRule(dec, modifiedInitEnsures,
-                                myCurrentAssertiveCodeBlock, mySTGroup,
-                                myAssertiveCodeBlockModels
-                                        .remove(myCurrentAssertiveCodeBlock));
-
-                // Store the variable's finalization item for
-                // future use.
-                AffectsClause finalAffects =
-                        type.getFinalization().getAffectedVars();
-                AssertionClause finalEnsures =
-                        type.getFinalization().getEnsures();
-                if (!VarExp.isLiteralTrue(finalEnsures.getAssertionExp())) {
-                    myVariableSpecFinalItems.put(dec, new SpecInitFinalItem(
-                            type.getFinalization().getLocation(), type
-                                    .getFinalization().getClauseType(),
-                            finalAffects, Utilities.getTypeFinalEnsuresClause(
-                                    finalEnsures, dec.getLocation(), null, dec
-                                            .getName(), type.getExemplar(),
-                                    typeEntry.getModelType(), null)));
-                }*/
-
-                // NY YS
-                // TODO: Initialization duration for this variable
-
-                // Store the program type entry for this variable for when we deal with finalization.
-                myVariableTypeEntries.put(dec, ste);
-
-                // Update the associated block model.
-                myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
-                        blockModel);
-            }
-            else {
-                // Variable declaration rule for generic types
-                GenericTypeVariableDeclRule declRule =
-                        new GenericTypeVariableDeclRule(dec,
-                                myCurrentAssertiveCodeBlock,
-                                myCurrentVerificationContext, mySTGroup,
-                                blockModel);
-                declRule.applyRule();
-
-                // Update the current assertive code block and its associated block model.
-                myCurrentAssertiveCodeBlock =
-                        declRule.getAssertiveCodeBlocks().getFirst();
-                myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
-                        declRule.getBlockModel());
-            }
+            // Update the associated block model.
+            myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
+                    blockModel);
         }
         else {
             // Shouldn't be possible but just in case it ever happens
