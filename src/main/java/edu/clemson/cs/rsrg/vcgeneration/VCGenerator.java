@@ -826,6 +826,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(dec,
                     ste, isGenericVar));
 
+            // Add this as a free variable
+            myCurrentAssertiveCodeBlock.addFreeVar(Utilities.createVarExp(dec
+                    .getLocation(), null, dec.getName(), dec.getMathType(),
+                    null));
+
             // Update the associated block model.
             myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
                     blockModel);

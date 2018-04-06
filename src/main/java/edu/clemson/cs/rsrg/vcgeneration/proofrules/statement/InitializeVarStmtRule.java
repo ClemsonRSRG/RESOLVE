@@ -170,10 +170,6 @@ public class InitializeVarStmtRule extends AbstractProofRuleApplication
                         false);
         myCurrentAssertiveCodeBlock.addStatement(initAssumeStmt);
 
-        // Add this as a free variable
-        myCurrentAssertiveCodeBlock.addFreeVar(Utilities.createVarExp(dec
-                .getLocation(), null, dec.getName(), dec.getMathType(), null));
-
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
         stepModel.add("proofRuleName", getRuleDescription()).add(
