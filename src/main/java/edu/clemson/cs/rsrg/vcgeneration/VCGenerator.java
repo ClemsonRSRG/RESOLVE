@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -60,6 +61,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
@@ -483,6 +485,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCodeBlock =
                 new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
 
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
+
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
         AssumeStmt topLevelAssumeStmt =
@@ -557,6 +562,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                     new AssertiveCodeBlock(dec.getName(), dec, correspondingOperation,
                             myTypeGraph);
         }
+
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
 
         // Create the top most level assume statement, replace any facility formal
         // with actual and add it to the assertive code block as the first statement.
@@ -664,6 +672,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                     new AssertiveCodeBlock(dec.getName(), dec, correspondingOperation,
                             myTypeGraph);
         }
+
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
 
         // Create the top most level assume statement, replace any facility formal
         // with actual and add it to the assertive code block as the first statement.
@@ -861,6 +872,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                             + clause.getWhichEntailsExp().getLocation());
             AssertiveCodeBlock block =
                     new AssertiveCodeBlock(name, clause, myTypeGraph);
+
+            // Add shared variables in scope to the free variable's list
+            addSharedVarsToFreeVariableList(block);
 
             // Create a new model for this assertive code block
             ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
@@ -1096,6 +1110,40 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return retExp;
+    }
+
+    /**
+     * <p>An helper method that adds the all the {@code Shared Variables}
+     * to the assertive code block's free variables list.</p>
+     *
+     * @param block An {@link AssertiveCodeBlock}.
+     */
+    private void addSharedVarsToFreeVariableList(AssertiveCodeBlock block) {
+        // TODO: Do something different when we are in a concept realization
+        // Add all shared variables to the free variables list.
+        List<SharedStateDec> sharedStateDecs =
+                myCurrentVerificationContext.getConceptSharedVars();
+        for (SharedStateDec stateDec : sharedStateDecs) {
+            for (MathVarDec varDec : stateDec.getAbstractStateVars()) {
+                block.addFreeVar(Utilities.createVarExp(varDec.getLocation(),
+                        null, varDec.getName(), varDec.getMathType(), null));
+            }
+        }
+
+        // Add all facility instantiated shared variables to the free variables list.
+        List<InstantiatedFacilityDecl> facilityDecls =
+                myCurrentVerificationContext.getProcessedInstFacilityDecls();
+        for (InstantiatedFacilityDecl facilityDecl : facilityDecls) {
+            for (SharedStateDec stateDec : facilityDecl
+                    .getConceptSharedStates()) {
+                for (MathVarDec varDec : stateDec.getAbstractStateVars()) {
+                    block.addFreeVar(Utilities.createVarExp(varDec
+                            .getLocation(), facilityDecl
+                            .getInstantiatedFacilityName(), varDec.getName(),
+                            varDec.getMathType(), null));
+                }
+            }
+        }
     }
 
     /**
