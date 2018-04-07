@@ -494,7 +494,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 new AssumeStmt(dec.getLocation().clone(),
                         myCurrentVerificationContext
                                 .createTopLevelAssumeExpFromContext(dec
-                                        .getLocation()), false);
+                                        .getLocation(), false), false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create a new model for this assertive code block
@@ -570,9 +570,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // with actual and add it to the assertive code block as the first statement.
         Exp topLevelAssumeExp =
                 createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                        myCurrentAssertiveCodeBlock, correspondingOperation,
-                         myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
-                        true);
+                        myCurrentAssertiveCodeBlock, correspondingOperation, false);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -681,8 +679,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
         Exp topLevelAssumeExp =
                 createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                        myCurrentAssertiveCodeBlock, correspondingOperation,
-                        myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal);
+                        myCurrentAssertiveCodeBlock, correspondingOperation, !isLocal);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -1356,18 +1353,21 @@ public class VCGenerator extends TreeWalkerVisitor {
      *            currently visiting.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
-     * @param isLocalOperation {@code true} if it is a local operation, {@code false} otherwise.
+     * @param addConventionCorrespondenceFlag A flag that indicates whether or not we need
+     *                                        to add the {@code Shared Variable}'s {@code convention} and
+     *                                        {@code correspondence}.
      *
      * @return The top-level assumed expression.
      */
     private Exp createTopLevelAssumeExpForProcedureDec(Location loc,
             AssertiveCodeBlock currentBlock,
-            OperationEntry correspondingOperationEntry, boolean addConstraints,
-            boolean isLocalOperation) {
+            OperationEntry correspondingOperationEntry,
+            boolean addConventionCorrespondenceFlag) {
         // Add all the expressions we can assume from the current context
         Exp retExp =
                 myCurrentVerificationContext
-                        .createTopLevelAssumeExpFromContext(loc);
+                        .createTopLevelAssumeExpFromContext(loc,
+                                addConventionCorrespondenceFlag);
 
         // Add the operation's requires clause (and any which_entails clause)
         AssertionClause requiresClause =
@@ -1393,7 +1393,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         //     "addConstraints" flag. Note that these constraints still need to be
         //     processed by the parsimonious step, so there is no guarantee that they
         //     will show up in all of the VCs.
-        if (addConstraints) {
+        if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
             retExp =
                     addParamTypeConstraints(loc, retExp, myCurrentModuleScope,
                             currentBlock, correspondingOperationEntry

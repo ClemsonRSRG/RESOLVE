@@ -205,10 +205,14 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
      *
      * @param loc The location in the AST that we are
      *            currently visiting.
+     * @param addConventionCorrespondenceFlag A flag that indicates whether or not we need
+     *                                        to add the {@code Shared Variable}'s {@code convention} and
+     *                                        {@code correspondence}.
      *
      * @return The top-level assumed expression.
      */
-    public final Exp createTopLevelAssumeExpFromContext(Location loc) {
+    public final Exp createTopLevelAssumeExpFromContext(Location loc,
+            boolean addConventionCorrespondenceFlag) {
         Exp retExp = null;
 
         // Add all the module level requires clause.
@@ -227,7 +231,45 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             }
         }
 
-        // TODO: Add any shared variable's constraint, convention, correspondence here.
+        // Add all share variable's constraints.
+        // YS: We are not adding these automatically. Most of the time, these
+        //     constraints wouldn't really help us prove any of the VCs. If you
+        //     are ever interested in adding these to the givens list, use the
+        //     "addConstraints" flag. Note that these constraints still need to be
+        //     processed by the parsimonious step, so there is no guarantee that they
+        //     will show up in all of the VCs.
+        if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+            // Add any facility instantiated shared state constraints
+            for (InstantiatedFacilityDecl facilityDecl : myProcessedInstFacilityDecls) {
+                for (SharedStateDec stateDec : facilityDecl
+                        .getConceptSharedStates()) {
+                    AssertionClause stateConstraintClause =
+                            stateDec.getConstraint();
+
+                    retExp =
+                            Utilities.formConjunct(loc, retExp,
+                                    stateConstraintClause,
+                                    myModuleLevelLocationDetails
+                                            .get(stateConstraintClause));
+                }
+            }
+
+            // Add concept shared state constraints
+            for (SharedStateDec stateDec : myConceptSharedStates) {
+                AssertionClause stateConstraintClause =
+                        stateDec.getConstraint();
+                retExp =
+                        Utilities.formConjunct(loc, retExp,
+                                stateConstraintClause,
+                                myModuleLevelLocationDetails
+                                        .get(stateConstraintClause));
+            }
+        }
+
+        // Add the share variable realization's convention and correspondence.
+        if (addConventionCorrespondenceFlag) {
+            // TODO: Add any shared variable's convention, correspondence here.
+        }
 
         return retExp;
     }
