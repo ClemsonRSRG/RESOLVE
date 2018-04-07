@@ -215,7 +215,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         // or display anything to our models if it isn't local.
         if (myIsLocalFacilityDec) {
             myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(confirmExp
-                    .getLocation(), confirmExp, false));
+                    .getLocation(), confirmExp, true));
 
             // Add the different details to the various different output models
             ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
