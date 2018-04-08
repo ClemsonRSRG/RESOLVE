@@ -993,12 +993,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .singletonList(parameterVarDec),
                                                 scope.getDefiningElement()
                                                         .getName(),
-                                                myCurrentVerificationContext
-                                                        .getConceptDeclaredTypes(),
-                                                myCurrentVerificationContext
-                                                        .getLocalTypeRepresentationDecs(),
-                                                myCurrentVerificationContext
-                                                        .getProcessedInstFacilityDecls());
+                                                myCurrentVerificationContext);
 
                         Exp whichEntailsExp =
                                 modifiedConstraintClause.getWhichEntailsExp();
@@ -1011,12 +1006,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                             .singletonList(parameterVarDec),
                                                     scope.getDefiningElement()
                                                             .getName(),
-                                                    myCurrentVerificationContext
-                                                            .getConceptDeclaredTypes(),
-                                                    myCurrentVerificationContext
-                                                            .getLocalTypeRepresentationDecs(),
-                                                    myCurrentVerificationContext
-                                                            .getProcessedInstFacilityDecls());
+                                                    myCurrentVerificationContext);
                         }
 
                         modifiedConstraintClause =

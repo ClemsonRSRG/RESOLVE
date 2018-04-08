@@ -212,11 +212,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 Utilities.replaceFacilityFormalWithActual(finalConfirmExp,
                         myProcedureDec.getParameters(), myCurrentModuleScope
                                 .getDefiningElement().getName(),
-                        myCurrentVerificationContext.getConceptDeclaredTypes(),
-                        myCurrentVerificationContext
-                                .getLocalTypeRepresentationDecs(),
-                        myCurrentVerificationContext
-                                .getProcessedInstFacilityDecls());
+                        myCurrentVerificationContext);
 
         // Use the ensures clause to create a final confirm statement
         ConfirmStmt finalConfirmStmt =

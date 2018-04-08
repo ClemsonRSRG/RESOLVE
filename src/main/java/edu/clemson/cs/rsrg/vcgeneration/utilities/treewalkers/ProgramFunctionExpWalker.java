@@ -186,12 +186,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                     Utilities.replaceFacilityFormalWithActual(requiresExp,
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
-                            myCurrentVerificationContext
-                                    .getConceptDeclaredTypes(),
-                            myCurrentVerificationContext
-                                    .getLocalTypeRepresentationDecs(),
-                            myCurrentVerificationContext
-                                    .getProcessedInstFacilityDecls());
+                            myCurrentVerificationContext);
 
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
@@ -216,11 +211,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 Utilities.replaceFacilityFormalWithActual(ensuresExp,
                         operationDec.getParameters(), myCurrentModuleScope
                                 .getDefiningElement().getName(),
-                        myCurrentVerificationContext.getConceptDeclaredTypes(),
-                        myCurrentVerificationContext
-                                .getLocalTypeRepresentationDecs(),
-                        myCurrentVerificationContext
-                                .getProcessedInstFacilityDecls());
+                        myCurrentVerificationContext);
 
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);

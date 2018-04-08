@@ -619,9 +619,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     Utilities.replaceFacilityFormalWithActual(ensuresExp,
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
-                            myCurrentVerificationContext.getConceptDeclaredTypes(),
-                            myCurrentVerificationContext.getLocalTypeRepresentationDecs(),
-                            myCurrentVerificationContext.getProcessedInstFacilityDecls());
+                            myCurrentVerificationContext);
         }
 
         // Retrieve the list of VCs and use the sequent
@@ -683,12 +681,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     Utilities.replaceFacilityFormalWithActual(requiresExp,
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
-                            myCurrentVerificationContext
-                                    .getConceptDeclaredTypes(),
-                            myCurrentVerificationContext
-                                    .getLocalTypeRepresentationDecs(),
-                            myCurrentVerificationContext
-                                    .getProcessedInstFacilityDecls());
+                            myCurrentVerificationContext);
 
             // Check to see if the operation affects any shared variables
             if (operationDec.getAffectedVars() != null) {

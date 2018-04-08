@@ -14,8 +14,11 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -887,18 +890,13 @@ public class Utilities {
      * @param paramList List of parameter declarations from the operation we are
      *                  trying to call.
      * @param currentModuleName Name of the current module.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs List of {@link InstantiatedFacilityDecl} we have processed
-     *                             so far.
+     * @param context The current {@link VerificationContext}.
      *
      * @return The modified {@link Exp}.
      */
     public static Exp replaceFacilityFormalWithActual(Exp clauseExp,
             List<ParameterVarDec> paramList, PosSymbol currentModuleName,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs) {
+            VerificationContext context) {
         // Make a copy of the clauseExp for modification
         Exp modifiedClauseExp = clauseExp.clone();
 
@@ -921,7 +919,8 @@ public class Utilities {
                 boolean isInstantiatedType = true;
                 if (decTyAsNameTy.getQualifier() == null) {
                     // Check all concept types
-                    Iterator<TypeFamilyDec> it = typeFamilyDecs.iterator();
+                    Iterator<TypeFamilyDec> it =
+                            context.getConceptDeclaredTypes().iterator();
                     while (it.hasNext() && isInstantiatedType) {
                         // If the name matches, then it must be a concept abstract type
                         if (decTyAsNameTy.getName().getName().equals(
@@ -932,7 +931,7 @@ public class Utilities {
 
                     // Check all representation types.
                     Iterator<AbstractTypeRepresentationDec> it2 =
-                            localRepresentationTypeDecs.iterator();
+                            context.getLocalTypeRepresentationDecs().iterator();
                     while (it2.hasNext() && isInstantiatedType) {
                         // If the name matches, then it must be the representation type
                         if (decTyAsNameTy.getName().getName().equals(
@@ -956,7 +955,7 @@ public class Utilities {
                 if (isInstantiatedType) {
                     InstantiatedFacilityDecl instantiatedFacilityDecl = null;
                     Iterator<InstantiatedFacilityDecl> it =
-                            processedInstFacDecs.iterator();
+                            context.getProcessedInstFacilityDecls().iterator();
                     if (decTyAsNameTy.getQualifier() == null) {
                         while (it.hasNext() && instantiatedFacilityDecl == null) {
                             InstantiatedFacilityDecl nextDec = it.next();
@@ -1008,6 +1007,60 @@ public class Utilities {
                                         conceptFormalActuals
                                                 .getFormalParamList(),
                                         conceptFormalActuals.getActualArgList());
+
+                        // Replace all concept's shared variables by adding
+                        // the facility qualifier.
+                        PosSymbol facName =
+                                instantiatedFacilityDecl.getInstantiatedFacilityName();
+                        List<SharedStateDec> sharedStateDecs =
+                                instantiatedFacilityDecl.getConceptSharedStates();
+                        for (SharedStateDec sharedStateDec : sharedStateDecs) {
+                            List<VarExp> sharedVarsAsVarExps = new ArrayList<>();
+                            List<Exp> qualifiedSharedVars = new ArrayList<>();
+                            for (MathVarDec mathVarDec : sharedStateDec.getAbstractStateVars()) {
+                                // Convert to VarExp
+                                sharedVarsAsVarExps.add(Utilities.createVarExp(mathVarDec.getLocation().clone(),
+                                        null, mathVarDec.getName().clone(),
+                                        mathVarDec.getMathType(), null));
+
+                                // Convert to VarExp with the facility qualifier name.
+                                qualifiedSharedVars.add(Utilities.createVarExp(mathVarDec.getLocation().clone(),
+                                        facName.clone(), mathVarDec.getName().clone(),
+                                        mathVarDec.getMathType(), null));
+                            }
+
+                            // Replace in clause
+                            modifiedClauseExp =
+                                    replaceFormalWithActual(modifiedClauseExp,
+                                            sharedVarsAsVarExps, qualifiedSharedVars);
+                        }
+
+                        // Replace all concept's definition variables by adding
+                        // the facility qualifier.
+                        List<TypeFamilyDec> typeFamilyDecs =
+                                instantiatedFacilityDecl.getConceptDeclaredTypes();
+                        for (TypeFamilyDec typeFamilyDec : typeFamilyDecs) {
+                            List<VarExp> defVarsExp = new ArrayList<>();
+                            List<Exp> qualifiedDefVars = new ArrayList<>();
+                            for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+                                MathVarDec mathVarDec = mathDefVariableDec.getVariable();
+
+                                // Convert to VarExp
+                                defVarsExp.add(Utilities.createVarExp(mathVarDec.getLocation().clone(),
+                                        null, mathVarDec.getName().clone(),
+                                        mathVarDec.getMathType(), null));
+
+                                // Convert to VarExp with the facility qualifier name.
+                                qualifiedDefVars.add(Utilities.createVarExp(mathVarDec.getLocation().clone(),
+                                        facName.clone(), mathVarDec.getName().clone(),
+                                        mathVarDec.getMathType(), null));
+                            }
+
+                            // Replace in clause
+                            modifiedClauseExp =
+                                    replaceFormalWithActual(modifiedClauseExp,
+                                            defVarsExp, qualifiedDefVars);
+                        }
 
                         // Replace concept realization formal parameters
                         // with actual instantiation arguments
