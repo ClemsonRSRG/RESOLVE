@@ -12,9 +12,9 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -33,6 +33,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTFamily;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -41,6 +43,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
 import java.util.*;
@@ -66,13 +69,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
     private final CallStmt myCallStmt;
 
     /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
-
-    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -90,16 +86,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
      * statement if we are inside a {@code ProcedureDec}.</p>
      */
     private final OperationEntry myCurrentProcedureOperationEntry;
-
-    /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     /**
      * <p>This is the math type graph that indicates relationship
@@ -133,32 +119,25 @@ public class CallStmtRule extends AbstractProofRuleApplication
      *
      * @param callStmt The {@link CallStmt} we are applying
      *                 the rule to.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public CallStmtRule(CallStmt callStmt,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
+            AssertiveCodeBlock block, VerificationContext context, STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myCallStmt = callStmt;
-        myCurrentConceptDeclaredTypes = typeFamilyDecs;
         myCurrentModuleScope = moduleScope;
         myCurrentProcedureDecreasingExp = myCurrentAssertiveCodeBlock.getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry = myCurrentAssertiveCodeBlock.getCorrespondingOperation();
-        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
         myNestedRequiresClauses = new LinkedList<>();
         myNestedTerminationConfirmStmts = new LinkedList<>();
-        myProcessedInstFacilityDecls = processedInstFacDecs;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
     }
 
@@ -208,7 +187,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
         //    ( Assume Implicit_Post[ Post_Subs ] and ( w = #w )[ w⇝e, #w⇝#e ] and
         //      T6.Constraint(g) and T7.Is_Initial( NQV(RS, h) ) )
         Exp ensuresExp =
-                createModifiedEnsExp(operationEntry, modifiedArguments);
+                createModifiedEnsExp(operationEntry, callArgs,
+                        modifiedArguments);
         AssumeStmt assumeStmt =
                 new AssumeStmt(myCallStmt.getLocation().clone(), ensuresExp,
                         false);
@@ -335,13 +315,17 @@ public class CallStmtRule extends AbstractProofRuleApplication
      * the {@code VCs} in the assertive code block.</p>
      *
      * @param operationEntry Calling statement's {@link OperationEntry}.
+     * @param callArgs List of calling arguments.
      * @param modifiedArguments List of modified calling arguments.
      *
      * @return The modified {@code ensures} clause expression.
      */
-    private Exp createModifiedEnsExp(OperationEntry operationEntry, List<Exp> modifiedArguments) {
+    private Exp createModifiedEnsExp(OperationEntry operationEntry,
+            List<ProgramExp> callArgs, List<Exp> modifiedArguments) {
         OperationDec operationDec =
                 (OperationDec) operationEntry.getDefiningElement();
+        InstantiatedFacilityDecl instantiatedFacilityDecl =
+                Utilities.getInstantiatingFacility(operationEntry, myCurrentVerificationContext);
 
         // Get the ensures clause for this operation and
         // store it's associated location detail.
@@ -382,14 +366,26 @@ public class CallStmtRule extends AbstractProofRuleApplication
             VarExp tempParamExp = Utilities.createVarExp(varDec.getLocation().clone(), null,
                     new PosSymbol(parameterExp.getLocation().clone(), "_" + parameterExp.getName().getName()),
                     exp.getMathType(), exp.getMathTypeValue());
-            OldExp tempOldParamExp = new OldExp(varDec.getLocation().clone(), parameterExp.clone());
+            OldExp tempOldParamExp = new OldExp(varDec.getLocation().clone(), tempParamExp.clone());
             tempOldParamExp.setMathType(varDec.getTy().getMathTypeValue());
 
             // Query for the type entry in the symbol table
-            SymbolTableEntry ste =
-                    Utilities.searchProgramType(nameTy.getLocation(), nameTy
-                                    .getQualifier(), nameTy.getName(),
-                            myCurrentModuleScope);
+            // Note: If the parameter type is generic, then we check to see if the calling arguments
+            // contains a type that is instantiated. If it is, then we use the instantiated type
+            // from the calling arg.
+            SymbolTableEntry ste;
+            ProgramExp callingArg = callArgs.get(i);
+            if (nameTy.getProgramType() instanceof PTGeneric &&
+                    callingArg.getProgramType() instanceof PTFamily) {
+                PTFamily callingType = (PTFamily) callingArg.getProgramType();
+                ste = Utilities.searchProgramType(callingArg.getLocation(), null,
+                        new PosSymbol(callingArg.getLocation(), callingType.getName()), myCurrentModuleScope);
+            }
+            else {
+                ste = Utilities.searchProgramType(nameTy.getLocation(),
+                        nameTy.getQualifier(), nameTy.getName(), myCurrentModuleScope);
+            }
+
             ProgramTypeEntry typeEntry;
             if (ste instanceof ProgramTypeEntry) {
                 typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
@@ -462,7 +458,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     AssertionClause initEnsures =
                             type.getInitialization().getEnsures();
                     AssertionClause modifiedInitEnsures =
-                            Utilities.getTypeEnsuresClause(initEnsures, exp
+                            Utilities.getTypeInitEnsuresClause(initEnsures, exp
                                     .getLocation(), null, varDec.getName(), type
                                     .getExemplar(), typeEntry.getModelType(), null);
 
@@ -563,8 +559,6 @@ public class CallStmtRule extends AbstractProofRuleApplication
             }
         }
 
-        // TODO: Add global state variable logic here!
-
         // Form the final conjunct ensures clause expression
         if (parameterEnsures != null) {
             if (VarExp.isLiteralTrue(ensuresExp)) {
@@ -574,6 +568,42 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 ensuresExp =
                         MathExp.formConjunct(myCallStmt.getLocation().clone(),
                                 parameterEnsures, ensuresExp);
+            }
+        }
+
+        // Check to see if the operation affects any shared variables
+        if (operationDec.getAffectedVars() != null) {
+            AffectsClause clause = operationDec.getAffectedVars();
+
+            // Apply substitution of shared variables with the proper
+            // facility instantiated version.
+            if (instantiatedFacilityDecl != null) {
+                PosSymbol facQualifier = instantiatedFacilityDecl.getInstantiatedFacilityName();
+
+                // Generate any facility qualified substitutions
+                Map<Exp, Exp> sharedVarSubstitution = new LinkedHashMap<>();
+                for (Exp affectedExp : clause.getAffectedExps()) {
+                    // 1) #originalAffectsExp ~> facility qualified modifiedAffectsExp
+                    VarExp originalAffectsExp = (VarExp) affectedExp;
+                    VarExp modifiedAffectsExp =
+                            Utilities.createVarExp(clause.getLocation().clone(),
+                                    facQualifier, originalAffectsExp.getName(),
+                                    affectedExp.getMathType(), affectedExp.getMathTypeValue());
+                    sharedVarSubstitution.put(new OldExp(originalAffectsExp.getLocation(), originalAffectsExp),
+                            modifiedAffectsExp);
+
+                    // 2) originalAffectsExp ~> NQV(modifiedAffectsExp)
+                    VCVarExp vcVarExp =
+                            Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, modifiedAffectsExp);
+                    myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
+                    sharedVarSubstitution.put(originalAffectsExp, vcVarExp);
+
+                    // Add modifiedAffectsExp with NQV(modifiedAffectsExp) as a substitution for VC's sequents
+                    substitutionsForSeq.put(modifiedAffectsExp.clone(), vcVarExp.clone());
+                }
+
+                // Apply any facility qualified substitutions.
+                ensuresExp = ensuresExp.substitute(sharedVarSubstitution);
             }
         }
 
@@ -589,9 +619,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     Utilities.replaceFacilityFormalWithActual(ensuresExp,
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
-                            myCurrentConceptDeclaredTypes,
-                            myLocalRepresentationTypeDecs,
-                            myProcessedInstFacilityDecls);
+                            myCurrentVerificationContext);
         }
 
         // Retrieve the list of VCs and use the sequent
@@ -624,6 +652,8 @@ public class CallStmtRule extends AbstractProofRuleApplication
             List<VarExp> operationParamAsVarExps, List<Exp> modifiedArguments) {
         OperationDec operationDec =
                 (OperationDec) operationEntry.getDefiningElement();
+        InstantiatedFacilityDecl instantiatedFacilityDecl =
+                Utilities.getInstantiatingFacility(operationEntry, myCurrentVerificationContext);
 
         // Get the requires assertion for this operation and
         // store it's associated location detail.
@@ -651,9 +681,33 @@ public class CallStmtRule extends AbstractProofRuleApplication
                     Utilities.replaceFacilityFormalWithActual(requiresExp,
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
-                            myCurrentConceptDeclaredTypes,
-                            myLocalRepresentationTypeDecs,
-                            myProcessedInstFacilityDecls);
+                            myCurrentVerificationContext);
+
+            // Check to see if the operation affects any shared variables
+            if (operationDec.getAffectedVars() != null) {
+                AffectsClause clause = operationDec.getAffectedVars();
+
+                // Apply substitution of shared variables with the proper
+                // facility instantiated version.
+                if (instantiatedFacilityDecl != null) {
+                    PosSymbol facQualifier = instantiatedFacilityDecl.getInstantiatedFacilityName();
+
+                    // Generate any facility qualified substitutions
+                    Map<Exp, Exp> sharedVarSubstitution = new LinkedHashMap<>();
+                    for (Exp affectedExp : clause.getAffectedExps()) {
+                        // 1) originalAffectsExp ~> facility qualified modifiedAffectsExp
+                        VarExp originalAffectsExp = (VarExp) affectedExp;
+                        VarExp modifiedAffectsExp =
+                                Utilities.createVarExp(clause.getLocation().clone(),
+                                        facQualifier, originalAffectsExp.getName(),
+                                        affectedExp.getMathType(), affectedExp.getMathTypeValue());
+                        sharedVarSubstitution.put(originalAffectsExp, modifiedAffectsExp);
+                    }
+
+                    // Apply any facility qualified substitutions.
+                    requiresExp = requiresExp.substitute(sharedVarSubstitution);
+                }
+            }
         }
 
         // Add any nested termination clauses to our current assertive code block.
@@ -768,9 +822,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 if (myCurrentProcedureOperationEntry == null) {
                     walker =
                             new ProgramFunctionExpWalker(
-                                    myCurrentConceptDeclaredTypes,
-                                    myLocalRepresentationTypeDecs,
-                                    myProcessedInstFacilityDecls,
+                                    myCurrentVerificationContext,
                                     myCurrentModuleScope, myTypeGraph);
                 }
                 else {
@@ -778,9 +830,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                             new ProgramFunctionExpWalker(
                                     myCurrentProcedureOperationEntry,
                                     myCurrentProcedureDecreasingExp,
-                                    myCurrentConceptDeclaredTypes,
-                                    myLocalRepresentationTypeDecs,
-                                    myProcessedInstFacilityDecls,
+                                    myCurrentVerificationContext,
                                     myCurrentModuleScope, myTypeGraph);
                 }
                 TreeWalker.visit(walker, expAsProgramFunctionexp);

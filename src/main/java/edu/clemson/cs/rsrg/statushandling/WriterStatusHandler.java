@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.statushandling;
 
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
-
 import java.io.IOException;
 import java.io.Writer;
 

@@ -15,14 +15,12 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.EqualsExp.Operator;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
@@ -38,10 +36,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.KnownTypeVariableFinalizationRule;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -62,13 +60,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
-
-    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -87,24 +78,14 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      */
     private final OperationEntry myCurrentProcedureOperationEntry;
 
-    /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
     /** <p>The {@link ProcedureDec} we are applying the rule to.</p> */
     private final ProcedureDec myProcedureDec;
 
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
-
     /**
-     * <p>This stores all the local {@link VarDec VarDec's}
-     * {@code finalization} specification item if we were able to generate one.</p>
+     * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
+     * program type entry.</p>
      */
-    private final Map<VarDec, SpecInitFinalItem> myVariableSpecFinalItems;
+    private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
 
     /** <p>The symbol table we are currently building.</p> */
     private final MathSymbolTableBuilder mySymbolTable;
@@ -125,39 +106,33 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      *
      * @param procedureDec The {@link ProcedureDec} we are applying
      *                     the rule to.
-     * @param procVarFinalItems The local variable declaration's
-     *                          {@code finalization} specification items.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
+     * @param procVarTypeEntries The local variable declaration's
+     *                           program type entries.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public ProcedureDeclRule(ProcedureDec procedureDec,
-            Map<VarDec, SpecInitFinalItem> procVarFinalItems,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
+            Map<VarDec, SymbolTableEntry> procVarTypeEntries,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
-        myCurrentConceptDeclaredTypes = typeFamilyDecs;
+            AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
         myCurrentProcedureDecreasingExp =
                 myCurrentAssertiveCodeBlock
                         .getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry =
                 myCurrentAssertiveCodeBlock.getCorrespondingOperation();
-        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
-        myProcessedInstFacilityDecls = processedInstFacDecs;
         mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
         myProcedureDec = procedureDec;
-        myVariableSpecFinalItems = procVarFinalItems;
+        myVariableTypeEntries = procVarTypeEntries;
     }
 
     // ===========================================================
@@ -195,15 +170,14 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
 
             // Add this expression as something we can assume to be true.
             AssumeStmt progressMetricAssume =
-                    new AssumeStmt(myCurrentProcedureDecreasingExp.getLocation().clone(),
-                            equalsExp, false);
+                    new AssumeStmt(myCurrentProcedureDecreasingExp
+                            .getLocation().clone(), equalsExp, false);
             myCurrentAssertiveCodeBlock.addStatement(progressMetricAssume);
         }
 
         // Add all the statements
-        myCurrentAssertiveCodeBlock.addStatements(myProcedureDec.getStatements());
-
-        // TODO: Add the finalization duration ensures (if any)
+        myCurrentAssertiveCodeBlock.addStatements(myProcedureDec
+                .getStatements());
 
         // TODO: Correct_Op_Hyp rule (Shared Variables and Type)
         // Correct_Op_Hyp rule: Only applies to non-local operations
@@ -215,21 +189,18 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         // will occur if this is a correspondence function or an implies
         // will be formed if this is a correspondence relation.
 
-        // Add the variable finalization expressions
+        // YS: Simply create a finalization statement for each variable that
+        //     allow us to deal with generating question mark variables
+        //     and duration logic when we backtrack through the code.
         List<VarDec> varDecs = myProcedureDec.getVariables();
-        Map<Exp, Exp> newFreeVarSubstitutions = new LinkedHashMap<>();
         for (VarDec dec : varDecs) {
-            if (myVariableSpecFinalItems.containsKey(dec)) {
-                KnownTypeVariableFinalizationRule finalizationRule =
-                        new KnownTypeVariableFinalizationRule(dec,
-                                myVariableSpecFinalItems.get(dec),
-                                myCurrentAssertiveCodeBlock, mySTGroup,
-                                myBlockModel);
-                finalizationRule.applyRule();
-
-                // Add all the free variables.
-                newFreeVarSubstitutions.putAll(finalizationRule.getNewFreeVarSubstitutions());
+            // Only need to finalize non-generic type variables.
+            if (myVariableTypeEntries.containsKey(dec)) {
+                myCurrentAssertiveCodeBlock.addStatement(new FinalizeVarStmt(
+                        dec, myVariableTypeEntries.remove(dec)));
             }
+
+            // TODO: Add the finalization duration ensures (if any)
         }
 
         // Create the final confirm expression
@@ -241,18 +212,12 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 Utilities.replaceFacilityFormalWithActual(finalConfirmExp,
                         myProcedureDec.getParameters(), myCurrentModuleScope
                                 .getDefiningElement().getName(),
-                        myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls);
-
-        // Replace any new free variables expressions generated by the
-        // variable finalization rule.
-        finalConfirmExp = finalConfirmExp.substitute(newFreeVarSubstitutions);
+                        myCurrentVerificationContext);
 
         // Use the ensures clause to create a final confirm statement
         ConfirmStmt finalConfirmStmt =
-                new ConfirmStmt(myProcedureDec.getLocation().clone(), finalConfirmExp,
-                        VarExp.isLiteralTrue(finalConfirmExp));
+                new ConfirmStmt(myProcedureDec.getLocation().clone(),
+                        finalConfirmExp, VarExp.isLiteralTrue(finalConfirmExp));
         myCurrentAssertiveCodeBlock.addStatement(finalConfirmStmt);
 
         // Add the different details to the various different output models
@@ -422,7 +387,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                     AssertionClause initEnsures =
                             type.getInitialization().getEnsures();
                     modifiedInitEnsures =
-                            Utilities.getTypeEnsuresClause(initEnsures,
+                            Utilities.getTypeInitEnsuresClause(initEnsures,
                                     procedureLoc.clone(), null,
                                     parameterVarDec.getName(), type.getExemplar(),
                                     typeEntry.getModelType(), null);

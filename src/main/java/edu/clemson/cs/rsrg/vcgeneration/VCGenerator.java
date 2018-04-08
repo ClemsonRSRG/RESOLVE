@@ -12,23 +12,22 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration;
 
-import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
-import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
-import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
-import edu.clemson.cs.rsrg.absyn.items.mathitems.SpecInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.absyn.statements.*;
@@ -41,12 +40,9 @@ import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
-import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
@@ -57,16 +53,18 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.GenericTypeVariableDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.KnownTypeVariableDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.WhichEntailsRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.VCConfirmStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -98,6 +96,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     private final CompileEnvironment myCompileEnvironment;
 
     /**
+     * <p>The verification context for the file we are generating
+     * {@code VCs} for.</p>
+     */
+    private VerificationContext myCurrentVerificationContext;
+
+    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -109,39 +113,15 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private final TypeGraph myTypeGraph;
 
-    /** <p>The mathematical type Z.</p> */
-    private MTType Z;
-
-    // -----------------------------------------------------------
-    // Facility Declaration-Related
-    // -----------------------------------------------------------
-
-    /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
-
-    /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
-
     // -----------------------------------------------------------
     // Operation Declaration-Related
     // -----------------------------------------------------------
 
     /**
      * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
-     * {@code finalization} specification item if we were able to generate one.</p>
+     * program type entry.</p>
      */
-    private final Map<VarDec, SpecInitFinalItem> myVariableSpecFinalItems;
+    private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
 
     // -----------------------------------------------------------
     // VC Generation-Related
@@ -158,24 +138,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * that only contain the final {@link Sequent Sequents}.</p>
      */
     private final List<AssertiveCodeBlock> myFinalAssertiveCodeBlocks;
-
-    /**
-     * <p>A list that stores all the module level {@code constraint}
-     * clauses for the various different declarations.</p>
-     */
-    private final Map<Dec, List<AssertionClause>> myGlobalConstraints;
-
-    /**
-     * <p>A map that stores all the details associated with
-     * a particular {@link AssertionClause}.</p>
-     */
-    private final Map<AssertionClause, LocationDetailModel> myGlobalLocationDetails;
-
-    /**
-     * <p>A list that stores all the module level {@code requires}
-     * clauses.</p>
-     */
-    private final List<AssertionClause> myGlobalRequires;
 
     /**
      * <p>All the {@link AssertiveCodeBlock AssertiveCodeBlocks} generated by
@@ -257,17 +219,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertiveCodeBlockModels = new LinkedHashMap<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
-        myCurrentConceptDeclaredTypes = new LinkedList<>();
         myFinalAssertiveCodeBlocks = new LinkedList<>();
-        myGlobalConstraints = new LinkedHashMap<>();
-        myGlobalLocationDetails = new LinkedHashMap<>();
-        myGlobalRequires = new LinkedList<>();
-        myLocalRepresentationTypeDecs = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
-        myProcessedInstFacilityDecls = new LinkedList<>();
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
-        myVariableSpecFinalItems = new LinkedHashMap<>();
+        myVariableTypeEntries = new LinkedHashMap<>();
         myVCGenDetailsModel = mySTGroup.getInstanceOf("outputVCGenDetails");
     }
 
@@ -290,9 +246,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         try {
             myCurrentModuleScope =
                     myBuilder.getModuleScope(new ModuleIdentifier(dec));
-
-            // Get "Z" from the TypeGraph
-            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
+            myCurrentVerificationContext =
+                    new VerificationContext(dec.getName(), myCurrentModuleScope,
+                            myBuilder, myCompileEnvironment);
 
             // Apply the facility declaration rule to imported facility declarations.
             List<FacilityEntry> results =
@@ -303,6 +259,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     FacilityStrategy.FACILITY_INSTANTIATE));
 
             for (SymbolTableEntry s : results) {
+                // YS: Only deal with imported facility declarations right now.
+                //     The facility declarations from this module will be handled in
+                //     postFacilityDec.
                 if (s.getSourceModuleIdentifier().compareTo(
                         myCurrentModuleScope.getModuleIdentifier()) != 0) {
                     // Do all the facility declaration logic, but don't add this
@@ -318,43 +277,42 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                     FacilityDeclRule ruleApplication =
                             new FacilityDeclRule(facDec, false,
-                                    myCurrentConceptDeclaredTypes,
-                                    myLocalRepresentationTypeDecs,
-                                    myProcessedInstFacilityDecls,
                                     myBuilder, myCurrentModuleScope,
                                     new AssertiveCodeBlock(facDec.getName(), facDec, myTypeGraph),
-                                    mySTGroup, blockModel);
+                                    myCurrentVerificationContext, mySTGroup, blockModel);
                     ruleApplication.applyRule();
 
                     // Store this facility's InstantiatedFacilityDecl for future use
-                    myProcessedInstFacilityDecls.add(ruleApplication.getInstantiatedFacilityDecl());
+                    myCurrentVerificationContext.storeInstantiatedFacilityDecl(
+                            ruleApplication.getInstantiatedFacilityDecl());
 
                     // Store all requires/constraint from the imported concept
                     PosSymbol conceptName = facDec.getConceptName();
                     ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
-                    storeConceptAssertionClauses(conceptName.getLocation(), coId, true);
+                    myCurrentVerificationContext.storeConceptAssertionClauses(
+                            conceptName.getLocation(), coId, true);
 
                     // Store all requires/constraint from the imported concept realization
                     // if it is not externally realized
                     if (!facDec.getExternallyRealizedFlag()) {
                         PosSymbol conceptRealizName = facDec.getConceptRealizName();
                         ModuleIdentifier coRealizId = new ModuleIdentifier(conceptRealizName.getName());
-                        storeConceptRealizAssertionClauses(conceptRealizName.getLocation(),
-                                coRealizId, true);
+                        myCurrentVerificationContext.storeConceptRealizAssertionClauses(
+                                conceptRealizName.getLocation(), coRealizId, true);
                     }
 
                     for (EnhancementSpecRealizItem specRealizItem : facDec.getEnhancementRealizPairs()) {
                         // Store all requires/constraint from the imported enhancement(s)
                         PosSymbol enhancementName = specRealizItem.getEnhancementName();
                         ModuleIdentifier enId = new ModuleIdentifier(enhancementName.getName());
-                        storeEnhancementAssertionClauses(enhancementName.getLocation(),
-                                enId, true);
+                        myCurrentVerificationContext.storeEnhancementAssertionClauses(
+                                enhancementName.getLocation(), enId, true);
 
                         // Store all requires/constraint from the imported enhancement realization(s)
                         PosSymbol enhancementRealizName = specRealizItem.getEnhancementRealizName();
                         ModuleIdentifier enRealizId = new ModuleIdentifier(enhancementRealizName.getName());
-                        storeEnhancementRealizAssertionClauses(enhancementRealizName.getLocation(),
-                                enRealizId, true);
+                        myCurrentVerificationContext.storeEnhancementRealizAssertionClauses(
+                                enhancementRealizName.getLocation(), enRealizId, true);
                     }
                 }
             }
@@ -427,8 +385,10 @@ public class VCGenerator extends TreeWalkerVisitor {
     public final void preConceptModuleDec(ConceptModuleDec concept) {
         PosSymbol conceptName = concept.getName();
 
-        // Store the concept requires clause
-        storeRequiresClause(conceptName.getName(), concept.getRequires());
+        // Store the concept requires and constraint clauses
+        myCurrentVerificationContext.storeConceptAssertionClauses(conceptName
+                .getLocation(), new ModuleIdentifier(conceptName.getName()),
+                false);
 
         // Add to VC detail model
         ST header =
@@ -452,22 +412,29 @@ public class VCGenerator extends TreeWalkerVisitor {
         PosSymbol enhancementRealizName = enhancementRealization.getName();
 
         // Store the enhancement realization requires clause
-        storeRequiresClause(enhancementRealizName.getName(),
-                enhancementRealization.getRequires());
+        myCurrentVerificationContext.storeEnhancementAssertionClauses(
+                enhancementRealizName.getLocation(), new ModuleIdentifier(
+                        enhancementRealizName.getName()), false);
 
         // Store all requires/constraint from the imported concept
         PosSymbol conceptName = enhancementRealization.getConceptName();
         ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
-        storeConceptAssertionClauses(conceptName.getLocation(), coId, false);
+        myCurrentVerificationContext.storeConceptAssertionClauses(conceptName
+                .getLocation(), coId, false);
+
+        // Store all the shared states declared in the concept
+        myCurrentVerificationContext.storeConceptSharedStateDecs(conceptName
+                .getLocation(), coId);
 
         // Store all the type families declared in the concept
-        storeConceptTypeFamilyDecs(conceptName.getLocation(), coId);
+        myCurrentVerificationContext.storeConceptTypeFamilyDecs(conceptName
+                .getLocation(), coId);
 
         // Store all requires/constraint from the imported enhancement
         PosSymbol enhancementName = enhancementRealization.getEnhancementName();
         ModuleIdentifier enId = new ModuleIdentifier(enhancementName.getName());
-        storeEnhancementAssertionClauses(enhancementName.getLocation(), enId,
-                false);
+        myCurrentVerificationContext.storeEnhancementAssertionClauses(
+                enhancementName.getLocation(), enId, false);
 
         // Add to VC detail model
         ST header =
@@ -492,7 +459,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         PosSymbol facilityName = facility.getName();
 
         // Store the facility requires clause
-        storeRequiresClause(facilityName.getName(), facility.getRequires());
+        myCurrentVerificationContext.storeFacilityModuleAssertionClauses(
+                facilityName.getLocation(), new ModuleIdentifier(facilityName
+                        .getName()));
 
         // Add to VC detail model
         ST header =
@@ -516,13 +485,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCodeBlock =
                 new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
 
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
+
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
         AssumeStmt topLevelAssumeStmt =
-                new AssumeStmt(dec.getLocation().clone(), Utilities
-                        .createTopLevelAssumeExpFromContext(dec.getLocation(),
-                                myGlobalRequires, myGlobalConstraints,
-                                myGlobalLocationDetails), false);
+                new AssumeStmt(dec.getLocation().clone(),
+                        myCurrentVerificationContext
+                                .createTopLevelAssumeExpFromContext(dec
+                                        .getLocation(), false), false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create a new model for this assertive code block
@@ -531,16 +503,14 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Apply facility declaration rule
         FacilityDeclRule declRule =
-                new FacilityDeclRule(dec, true, myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls, myBuilder,
+                new FacilityDeclRule(dec, true, myBuilder,
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        mySTGroup, blockModel);
+                        myCurrentVerificationContext, mySTGroup, blockModel);
         declRule.applyRule();
 
         // Store this facility's InstantiatedFacilityDecl for future use
-        myProcessedInstFacilityDecls
-                .add(declRule.getInstantiatedFacilityDecl());
+        myCurrentVerificationContext.storeInstantiatedFacilityDecl(declRule
+                .getInstantiatedFacilityDecl());
 
         // Update the current assertive code block and its associated block model.
         myCurrentAssertiveCodeBlock =
@@ -593,16 +563,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myTypeGraph);
         }
 
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
+
         // Create the top most level assume statement, replace any facility formal
         // with actual and add it to the assertive code block as the first statement.
         Exp topLevelAssumeExp =
-                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        myGlobalRequires, myGlobalConstraints, myGlobalLocationDetails,
-                        correspondingOperation, myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs, myProcessedInstFacilityDecls,
-                        myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT),
-                        true);
+                createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
+                        myCurrentAssertiveCodeBlock, correspondingOperation, false);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -639,13 +607,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .getAffectedVars(), dec.getDecreasing(), dec
                                 .getFacilities(), dec.getVariables(), dec
                                 .getStatements(), dec.getRecursive());
-        ProofRuleApplication declRule =
-                new ProcedureDeclRule(procedureDec, myVariableSpecFinalItems,
-                        myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls, myBuilder,
-                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        mySTGroup, myAssertiveCodeBlockModels
+        ProcedureDeclRule declRule =
+                new ProcedureDeclRule(procedureDec, myVariableTypeEntries,
+                        myBuilder, myCurrentModuleScope,
+                        myCurrentAssertiveCodeBlock,
+                        myCurrentVerificationContext, mySTGroup,
+                        myAssertiveCodeBlockModels
                                 .remove(myCurrentAssertiveCodeBlock));
         declRule.applyRule();
 
@@ -658,7 +625,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
 
-        myVariableSpecFinalItems.clear();
+        myVariableTypeEntries.clear();
         myCurrentAssertiveCodeBlock = null;
     }
 
@@ -704,17 +671,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myTypeGraph);
         }
 
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
+
         // Create the top most level assume statement, replace any facility formal
         // with actual and add it to the assertive code block as the first statement.
         // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
         Exp topLevelAssumeExp =
-                Utilities.createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                        myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        myGlobalRequires, myGlobalConstraints,
-                        myGlobalLocationDetails, correspondingOperation,
-                        myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs, myProcessedInstFacilityDecls,
-                        myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT), isLocal);
+                createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
+                        myCurrentAssertiveCodeBlock, correspondingOperation, !isLocal);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -744,13 +709,11 @@ public class VCGenerator extends TreeWalkerVisitor {
     public final void postProcedureDec(ProcedureDec dec) {
         // Apply procedure declaration rule
         // TODO: Recheck logic to make sure everything still works!
-        ProofRuleApplication declRule =
-                new ProcedureDeclRule(dec, myVariableSpecFinalItems,
-                        myCurrentConceptDeclaredTypes,
-                        myLocalRepresentationTypeDecs,
-                        myProcessedInstFacilityDecls, myBuilder,
+        ProcedureDeclRule declRule =
+                new ProcedureDeclRule(dec, myVariableTypeEntries, myBuilder,
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
-                        mySTGroup, myAssertiveCodeBlockModels
+                        myCurrentVerificationContext, mySTGroup,
+                        myAssertiveCodeBlockModels
                                 .remove(myCurrentAssertiveCodeBlock));
         declRule.applyRule();
 
@@ -763,12 +726,40 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
 
-        myVariableSpecFinalItems.clear();
+        myVariableTypeEntries.clear();
         myCurrentAssertiveCodeBlock = null;
     }
 
     // -----------------------------------------------------------
-    // Type Realization-Related
+    // Shared State/Realization-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed after visiting a {@link SharedStateDec}.</p>
+     *
+     * @param dec A shared state declared in a {@code Concept}.
+     */
+    @Override
+    public final void postSharedStateDec(SharedStateDec dec) {
+        myCurrentVerificationContext.storeConceptSharedStateDec(dec);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link SharedStateRealizationDec}.</p>
+     *
+     * @param dec A shared state realization in a {@code Concept Realization}.
+     */
+    @Override
+    public final void postSharedStateRealizationDec(
+            SharedStateRealizationDec dec) {
+        // TODO: Add the proof rule for this.
+
+        // Store this for future use.
+        myCurrentVerificationContext.storeLocalSharedRealizationDec(dec);
+    }
+
+    // -----------------------------------------------------------
+    // Type Family/Representation-Related
     // -----------------------------------------------------------
 
     /**
@@ -779,8 +770,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postAbstractTypeRepresentationDec(
             AbstractTypeRepresentationDec dec) {
-        myLocalRepresentationTypeDecs.add((AbstractTypeRepresentationDec) dec
-                .clone());
+        myCurrentVerificationContext.storeLocalTypeRepresentationDec(dec);
     }
 
     /**
@@ -790,7 +780,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postTypeFamilyDec(TypeFamilyDec dec) {
-        myCurrentConceptDeclaredTypes.add((TypeFamilyDec) dec.clone());
+        myCurrentVerificationContext.storeConceptTypeFamilyDec(dec);
     }
 
     // -----------------------------------------------------------
@@ -823,63 +813,35 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .getDefiningTypeEntry();
             }
 
-            // Generate the corresponding proof rule
-            ProofRuleApplication declRule;
+            // Check to see if the variable's type is known or it is generic.
+            boolean isGenericVar = true;
             if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
-                // Variable declaration rule for known types
-                TypeFamilyDec type =
-                        (TypeFamilyDec) typeEntry.getDefiningElement();
-                AssertionClause initEnsures =
-                        type.getInitialization().getEnsures();
-                AssertionClause modifiedInitEnsures =
-                        Utilities.getTypeEnsuresClause(initEnsures, dec
-                                .getLocation(), null, dec.getName(), type
-                                .getExemplar(), typeEntry.getModelType(), null);
+                // The program type has an associated TypeFamilyDec,
+                // therefore it is not generic.
+                isGenericVar = false;
 
-                // TODO: Logic for types in concept realizations
-
-                declRule =
-                        new KnownTypeVariableDeclRule(dec, modifiedInitEnsures,
-                                myCurrentAssertiveCodeBlock, mySTGroup,
-                                myAssertiveCodeBlockModels
-                                        .remove(myCurrentAssertiveCodeBlock));
-
-                // Store the variable's finalization item for
-                // future use.
-                AffectsClause finalAffects =
-                        type.getFinalization().getAffectedVars();
-                AssertionClause finalEnsures =
-                        type.getFinalization().getEnsures();
-                if (!VarExp.isLiteralTrue(finalEnsures.getAssertionExp())) {
-                    myVariableSpecFinalItems.put(dec, new SpecInitFinalItem(
-                            type.getFinalization().getLocation(), type
-                                    .getFinalization().getClauseType(),
-                            finalAffects, Utilities.getTypeEnsuresClause(
-                                    finalEnsures, dec.getLocation(), null, dec
-                                            .getName(), type.getExemplar(),
-                                    typeEntry.getModelType(), null)));
-                }
-            }
-            else {
-                // Variable declaration rule for generic types
-                declRule =
-                        new GenericTypeVariableDeclRule(dec,
-                                myCurrentAssertiveCodeBlock, mySTGroup,
-                                myAssertiveCodeBlockModels
-                                        .remove(myCurrentAssertiveCodeBlock));
+                // Store the symbol table entry for this variable for
+                // when we deal with finalization.
+                myVariableTypeEntries.put(dec, ste);
             }
 
-            // Apply the variable declaration rule.
-            declRule.applyRule();
+            // YS: Simply create the proper variable initialization statement that
+            //     allow us to deal with generating question mark variables
+            //     and duration logic when we backtrack through the code.
+            ST blockModel =
+                    myAssertiveCodeBlockModels
+                            .remove(myCurrentAssertiveCodeBlock);
+            myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(dec,
+                    ste, isGenericVar));
 
-            // NY YS
-            // TODO: Initialization duration for this variable
+            // Add this as a free variable
+            myCurrentAssertiveCodeBlock.addFreeVar(Utilities.createVarExp(dec
+                    .getLocation(), null, dec.getName(), dec.getMathType(),
+                    null));
 
-            // Update the current assertive code block and its associated block model.
-            myCurrentAssertiveCodeBlock =
-                    declRule.getAssertiveCodeBlocks().getFirst();
+            // Update the associated block model.
             myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
-                    declRule.getBlockModel());
+                    blockModel);
         }
         else {
             // Shouldn't be possible but just in case it ever happens
@@ -902,41 +864,27 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (clause.getWhichEntailsExp() != null) {
             // Create a new assertive code block
             PosSymbol name =
-                    new PosSymbol(clause.getLocation(),
-                            "Which_Entails Expression Located at  "
-                                    + clause.getLocation());
+                    new PosSymbol(clause.getWhichEntailsExp().getLocation()
+                            .clone(), "Which_Entails Expression Located at "
+                            + clause.getWhichEntailsExp().getLocation());
             AssertiveCodeBlock block =
                     new AssertiveCodeBlock(name, clause, myTypeGraph);
 
-            // Make a copy of the clause expression and add
-            // the location detail associated with it.
-            Exp clauseExp = clause.getAssertionExp().clone();
-            Location clauseLoc = clause.getWhichEntailsExp().getLocation();
-            clauseExp.setLocationDetailModel(new LocationDetailModel(clauseLoc
-                    .clone(), clauseLoc.clone(), clause.getClauseType().name()
-                    + " Clause Located at " + clauseLoc.clone()));
-
-            // Make a copy of the which_entails clause and add
-            // the location detail associated with it.
-            Exp whichEntailsExp = clause.getWhichEntailsExp().clone();
-            Location entailsLoc = clause.getWhichEntailsExp().getLocation();
-            whichEntailsExp.setLocationDetailModel(new LocationDetailModel(
-                    entailsLoc.clone(), entailsLoc.clone(), name.getName()));
-
-            // Apply the rule
-            block.addStatement(new AssumeStmt(clause.getLocation().clone(),
-                    clauseExp, false));
-            block.addStatement(new ConfirmStmt(clause.getLocation().clone(),
-                    whichEntailsExp, false));
+            // Add shared variables in scope to the free variable's list
+            addSharedVarsToFreeVariableList(block);
 
             // Create a new model for this assertive code block
             ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
             blockModel.add("blockName", name);
-            ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-            stepModel.add("proofRuleName", "Which_Entails Declaration Rule")
-                    .add("currentStateOfBlock", block);
-            blockModel.add("vcGenSteps", stepModel.render());
-            myAssertiveCodeBlockModels.put(block, blockModel);
+
+            // Apply which_entails rule
+            WhichEntailsRule entailsRule =
+                    new WhichEntailsRule(clause, block,
+                            myCurrentVerificationContext, mySTGroup, blockModel);
+            entailsRule.applyRule();
+
+            // Store this block model.
+            myAssertiveCodeBlockModels.put(block, entailsRule.getBlockModel());
 
             // Add this as a new incomplete assertive code block
             myIncompleteAssertiveCodeBlocks.add(block);
@@ -972,6 +920,220 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>An helper method that adds the operation's type constraints.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param exp The top level assume expression we have built so far.
+     * @param scope The module scope to start our search.
+     * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
+     * @param entries List of operation's parameter entries.
+     *
+     * @return The original {@code exp} plus any operation parameter's type constraints.
+     */
+    private Exp addParamTypeConstraints(Location loc, Exp exp,
+            ModuleScope scope, AssertiveCodeBlock currentBlock,
+            ImmutableList<ProgramParameterEntry> entries) {
+        Exp retExp = exp;
+
+        // Loop through each of the parameters in the operation entry.
+        for (ProgramParameterEntry entry : entries) {
+            ParameterVarDec parameterVarDec =
+                    (ParameterVarDec) entry.getDefiningElement();
+            PTType declaredType = entry.getDeclaredType();
+            ProgramParameterEntry.ParameterMode parameterMode =
+                    entry.getParameterMode();
+
+            // Only deal with actual types and don't deal
+            // with entry types passed in to the concept realization
+            if (!(declaredType instanceof PTGeneric)) {
+                // Query for the type entry in the symbol table
+                NameTy nameTy = (NameTy) parameterVarDec.getTy();
+                SymbolTableEntry ste =
+                        Utilities.searchProgramType(loc, nameTy.getQualifier(),
+                                nameTy.getName(), scope);
+
+                ProgramTypeEntry typeEntry;
+                if (ste instanceof ProgramTypeEntry) {
+                    typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
+                }
+                else {
+                    typeEntry =
+                            ste.toTypeRepresentationEntry(nameTy.getLocation())
+                                    .getDefiningTypeEntry();
+                }
+
+                // Obtain the original dec from the AST
+                TypeFamilyDec typeFamilyDec =
+                        (TypeFamilyDec) typeEntry.getDefiningElement();
+
+                // Other than the replaces mode, constraints for the
+                // other parameter modes needs to be added
+                // to the requires clause as conjuncts.
+                if (parameterMode != ProgramParameterEntry.ParameterMode.REPLACES) {
+                    if (!VarExp.isLiteralTrue(typeFamilyDec.getConstraint()
+                            .getAssertionExp())) {
+                        AssertionClause constraintClause =
+                                typeFamilyDec.getConstraint();
+                        AssertionClause modifiedConstraintClause =
+                                Utilities.getTypeConstraintClause(
+                                        constraintClause, loc, null,
+                                        parameterVarDec.getName(),
+                                        typeFamilyDec.getExemplar(), typeEntry
+                                                .getModelType(), null);
+
+                        // Replace any facility formal with actual
+                        Exp constraintExp =
+                                modifiedConstraintClause.getAssertionExp();
+                        constraintExp =
+                                Utilities
+                                        .replaceFacilityFormalWithActual(
+                                                constraintExp,
+                                                Collections
+                                                        .singletonList(parameterVarDec),
+                                                scope.getDefiningElement()
+                                                        .getName(),
+                                                myCurrentVerificationContext);
+
+                        Exp whichEntailsExp =
+                                modifiedConstraintClause.getWhichEntailsExp();
+                        if (whichEntailsExp != null) {
+                            whichEntailsExp =
+                                    Utilities
+                                            .replaceFacilityFormalWithActual(
+                                                    whichEntailsExp,
+                                                    Collections
+                                                            .singletonList(parameterVarDec),
+                                                    scope.getDefiningElement()
+                                                            .getName(),
+                                                    myCurrentVerificationContext);
+                        }
+
+                        modifiedConstraintClause =
+                                new AssertionClause(modifiedConstraintClause
+                                        .getLocation().clone(),
+                                        modifiedConstraintClause
+                                                .getClauseType(),
+                                        constraintExp, whichEntailsExp);
+
+                        // Form a conjunct with the modified constraint clause and add
+                        // the location detail associated with it.
+                        Location constraintLoc =
+                                modifiedConstraintClause.getAssertionExp()
+                                        .getLocation();
+                        retExp =
+                                Utilities.formConjunct(loc, retExp,
+                                        modifiedConstraintClause,
+                                        new LocationDetailModel(constraintLoc
+                                                .clone(),
+                                                constraintLoc.clone(),
+                                                "Constraint Clause of "
+                                                        + parameterVarDec
+                                                                .getName()));
+                    }
+                }
+
+                // TODO: Handle type representations from concept realizations
+                /*
+                // If the type is a type representation, then our requires clause
+                // should really say something about the conceptual type and not
+                // the variable
+                if (ste instanceof RepresentationTypeEntry && !isLocal) {
+                    requires =
+                            Utilities.replace(requires, parameterExp,
+                                    Utilities
+                                            .createConcVarExp(opLocation,
+                                                    parameterExp,
+                                                    parameterExp
+                                                            .getMathType(),
+                                                    BOOLEAN));
+                    requires.setLocation((Location) opLocation.clone());
+                }
+
+                // If the type is a type representation, then we need to add
+                // all the type constraints from all the variable declarations
+                // in the type representation.
+                if (ste instanceof RepresentationTypeEntry) {
+                    Exp repConstraintExp = null;
+                    Set<VarExp> keys =
+                            myRepresentationConstraintMap.keySet();
+                    for (VarExp varExp : keys) {
+                        if (varExp.getQualifier() == null
+                                && varExp.getName().getName().equals(
+                                pNameTy.getName().getName())) {
+                            if (repConstraintExp == null) {
+                                repConstraintExp =
+                                        myRepresentationConstraintMap
+                                                .get(varExp);
+                            }
+                            else {
+                                Utilities.ambiguousTy(pNameTy, pNameTy
+                                        .getLocation());
+                            }
+                        }
+                    }
+
+                    // Only do the following if the expression is not simply true
+                    if (!repConstraintExp.isLiteralTrue()) {
+                        // Replace the exemplar with the actual parameter variable expression
+                        repConstraintExp =
+                                Utilities.replace(repConstraintExp,
+                                        exemplar, parameterExp);
+
+                        // Add this to our requires clause
+                        requires =
+                                myTypeGraph.formConjunct(requires,
+                                        repConstraintExp);
+                        requires.setLocation((Location) opLocation.clone());
+                    }
+                }*/
+            }
+
+            // Add the current variable to our list of free variables
+            currentBlock.addFreeVar(Utilities.createVarExp(parameterVarDec
+                    .getLocation(), null, parameterVarDec.getName(),
+                    declaredType.toMath(), null));
+
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>An helper method that adds the all the {@code Shared Variables}
+     * to the assertive code block's free variables list.</p>
+     *
+     * @param block An {@link AssertiveCodeBlock}.
+     */
+    private void addSharedVarsToFreeVariableList(AssertiveCodeBlock block) {
+        // TODO: Do something different when we are in a concept realization
+        // Add all shared variables to the free variables list.
+        List<SharedStateDec> sharedStateDecs =
+                myCurrentVerificationContext.getConceptSharedVars();
+        for (SharedStateDec stateDec : sharedStateDecs) {
+            for (MathVarDec varDec : stateDec.getAbstractStateVars()) {
+                block.addFreeVar(Utilities.createVarExp(varDec.getLocation(),
+                        null, varDec.getName(), varDec.getMathType(), null));
+            }
+        }
+
+        // Add all facility instantiated shared variables to the free variables list.
+        List<InstantiatedFacilityDecl> facilityDecls =
+                myCurrentVerificationContext.getProcessedInstFacilityDecls();
+        for (InstantiatedFacilityDecl facilityDecl : facilityDecls) {
+            for (SharedStateDec stateDec : facilityDecl
+                    .getConceptSharedStates()) {
+                for (MathVarDec varDec : stateDec.getAbstractStateVars()) {
+                    block.addFreeVar(Utilities.createVarExp(varDec
+                            .getLocation(), facilityDecl
+                            .getInstantiatedFacilityName(), varDec.getName(),
+                            varDec.getMathType(), null));
+                }
+            }
+        }
+    }
+
+    /**
      * <p>Applies each of the statement proof rules. After this call, we are
      * done processing {@code assertiveCodeBlock}.</p>
      *
@@ -986,7 +1148,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply a statement proof rule to each of the assertions.
         while (assertiveCodeBlock.hasMoreStatements()) {
             // Work our way from the last statement
-            Statement statement = assertiveCodeBlock.removeLastSatement();
+            Statement statement = assertiveCodeBlock.removeLastStatement();
 
             // Generate one of the statement proof rule applications
             ProofRuleApplication ruleApplication;
@@ -994,55 +1156,74 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new assume rule application.
                 ruleApplication =
                         new AssumeStmtRule((AssumeStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof CallStmt) {
                 // Generate a new call rule application.
                 ruleApplication =
-                        new CallStmtRule((CallStmt) statement,
-                                myCurrentConceptDeclaredTypes,
-                                myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myBuilder,
+                        new CallStmtRule((CallStmt) statement, myBuilder,
                                 myCurrentModuleScope, assertiveCodeBlock,
-                                mySTGroup, blockModel);
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof ChangeStmt) {
                 // Generate a new change rule application.
                 ruleApplication =
                         new ChangeStmtRule((ChangeStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof ConfirmStmt) {
                 // Generate a new confirm rule application.
                 ruleApplication =
                         new ConfirmStmtRule((ConfirmStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
+            }
+            else if (statement instanceof FinalizeVarStmt) {
+                // Generate a new variable finalization rule application.
+                ruleApplication =
+                        new FinalizeVarStmtRule((FinalizeVarStmt) statement,
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof FuncAssignStmt) {
                 // Generate a new function assignment rule application.
                 ruleApplication =
                         new FuncAssignStmtRule((FuncAssignStmt) statement,
-                                myCurrentConceptDeclaredTypes,
-                                myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myBuilder,
-                                myCurrentModuleScope, assertiveCodeBlock,
-                                mySTGroup, blockModel);
+                                myBuilder, myCurrentModuleScope,
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof IfStmt) {
                 // Generate a new if-else rule application.
                 ruleApplication =
-                        new IfStmtRule((IfStmt) statement,
-                                myCurrentConceptDeclaredTypes,
-                                myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myBuilder,
+                        new IfStmtRule((IfStmt) statement, myBuilder,
                                 myCurrentModuleScope, assertiveCodeBlock,
-                                mySTGroup, blockModel);
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
+            }
+            else if (statement instanceof InitializeVarStmt) {
+                // Generate a new variable declaration/initialization rule application.
+                ruleApplication =
+                        new InitializeVarStmtRule(
+                                (InitializeVarStmt) statement,
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof MemoryStmt) {
                 if (((MemoryStmt) statement).getStatementType() == StatementType.REMEMBER) {
                     // Generate a new remember rule application.
                     ruleApplication =
-                            new RememberStmtRule(assertiveCodeBlock, mySTGroup,
+                            new RememberStmtRule(assertiveCodeBlock,
+                                    myCurrentVerificationContext, mySTGroup,
                                     blockModel);
                 }
                 else {
@@ -1055,27 +1236,34 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new presume rule application.
                 ruleApplication =
                         new PresumeStmtRule((PresumeStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof SwapStmt) {
                 // Generate a new swap rule application.
                 ruleApplication =
                         new SwapStmtRule((SwapStmt) statement,
                                 myCurrentModuleScope, assertiveCodeBlock,
-                                mySTGroup, blockModel);
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof VCConfirmStmt) {
                 // Generate a new VCConfirm rule application.
                 ruleApplication =
                         new VCConfirmStmtRule((VCConfirmStmt) statement,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else if (statement instanceof WhileStmt) {
                 // Generate a new while rule application
                 ruleApplication =
                         new WhileStmtRule((WhileStmt) statement,
                                 myCurrentModuleScope, myTypeGraph,
-                                assertiveCodeBlock, mySTGroup, blockModel);
+                                assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
             }
             else {
                 throw new SourceErrorException(
@@ -1122,317 +1310,87 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method for storing the imported {@code concept's}
-     * {@code requires} clause and its associated location detail for
-     * future use.</p>
+     * <p>An helper method that uses all the {@code requires} and {@code constraint}
+     * clauses from the various different sources (see below for complete list)
+     * and builds the appropriate {@code assume} clause that goes at the
+     * beginning an {@link AssertiveCodeBlock}.</p>
      *
-     * @param loc The location of the imported {@code module}.
-     * @param id A {@link ModuleIdentifier} referring to an
-     *           importing {@code concept}.
-     * @param isFacilityImport A flag that indicates whether or not
-     *                         we are storing information that originated
-     *                         from a {@link FacilityDec}.
-     */
-    private void storeConceptAssertionClauses(Location loc,
-            ModuleIdentifier id, boolean isFacilityImport) {
-        try {
-            ConceptModuleDec conceptModuleDec =
-                    (ConceptModuleDec) myBuilder.getModuleScope(id)
-                            .getDefiningElement();
-
-            // We only need to store these if they are part of a FacilityDec
-            if (!isFacilityImport) {
-                // Store the concept's requires clause
-                storeRequiresClause(conceptModuleDec.getName().getName(),
-                        conceptModuleDec.getRequires());
-
-                // Store the concept's type constraints from the module parameters
-                // YS: We are not adding these automatically. Most of the time, these
-                //     constraints wouldn't really help us prove any of the VCs. If you
-                //     are ever interested in adding these to the givens list, use the
-                //     "addConstraints" flag. Note that these constraints still need to be
-                //     processed by the parsimonious step, so there is no guarantee that they
-                //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
-                    storeModuleParameterTypeConstraints(conceptModuleDec
-                            .getLocation(), conceptModuleDec.getParameterDecs());
-                }
-            }
-
-            // Store the concept's module constraints and
-            // its associated location detail for future use.
-            if (!conceptModuleDec.getConstraints().isEmpty()) {
-                myGlobalConstraints.put(conceptModuleDec, conceptModuleDec
-                        .getConstraints());
-
-                for (AssertionClause constraint : conceptModuleDec
-                        .getConstraints()) {
-                    Location constraintLoc =
-                            constraint.getAssertionExp().getLocation();
-                    myGlobalLocationDetails.put(constraint,
-                            new LocationDetailModel(constraintLoc.clone(),
-                                    constraintLoc.clone(),
-                                    "Constraint Clause of "
-                                            + conceptModuleDec.getName()));
-                }
-            }
-        }
-        catch (NoSuchSymbolException e) {
-            Utilities.noSuchModule(loc);
-        }
-    }
-
-    /**
-     * <p>An helper method for storing the imported {@code concept's}
-     * {@code Type Family} declarations for future use.</p>
+     * <p>List of different places where clauses can originate from:</p>
+     * <ul>
+     *     <li>{@code Concept}'s {@code requires} clause.</li>
+     *     <li>{@code Concept}'s module {@code constraint} clause.</li>
+     *     <li>{@code Shared Variables}' {@code constraint} clause.</li>
+     *     <li>{@code Concept Realization}'s {@code requires} clause.</li>
+     *     <li>{@code Shared Variables}' {@code convention} clause.</li>
+     *     <li>{@code Shared Variables}' {@code correspondence} clause.</li>
+     *     <li>{@code constraint} clauses for all the parameters with the
+     *     appropriate substitutions made.</li>
+     *     <li>The {@code operation}'s {@code requires} clause with the following
+     *     change if it is an implementation for a {@code concept}'s operation:</li>
+     *     <li>
+     *         <ul>
+     *             <li>Substitute the parameter name with {@code Conc.<name>} if this
+     *             is the type we are implementing in a {@code concept realization}.</li>
+     *         </ul>
+     *     </li>
+     *     <li>Any {@code which_entails} expressions that originated from any of the
+     *     clauses above.</li>
+     * </ul>
      *
-     * @param loc The location of the imported {@code module}.
-     * @param id A {@link ModuleIdentifier} referring to an
-     *           importing {@code concept}.
-     */
-    private void storeConceptTypeFamilyDecs(Location loc, ModuleIdentifier id) {
-        try {
-            ConceptModuleDec conceptModuleDec =
-                    (ConceptModuleDec) myBuilder.getModuleScope(id)
-                            .getDefiningElement();
-            List<Dec> decs = conceptModuleDec.getDecList();
-
-            for (Dec dec : decs) {
-                if (dec instanceof TypeFamilyDec) {
-                    myCurrentConceptDeclaredTypes.add((TypeFamilyDec) dec
-                            .clone());
-                }
-            }
-        }
-        catch (NoSuchSymbolException e) {
-            Utilities.noSuchModule(loc);
-        }
-    }
-
-    /**
-     * <p>An helper method for storing the imported {@code concept realization's}
-     * {@code requires} clause and its associated location detail for
-     * future use.</p>
+     * <p>See the {@code Procedure} declaration rule for more detail.</p>
      *
-     * @param loc The location of the imported {@code module}.
-     * @param id A {@link ModuleIdentifier} referring to an
-     *           importing {@code concept realization}.
-     * @param isFacilityImport A flag that indicates whether or not
-     *                         we are storing information that originated
-     *                         from a {@link FacilityDec}.
-     */
-    private void storeConceptRealizAssertionClauses(Location loc,
-            ModuleIdentifier id, boolean isFacilityImport) {
-        try {
-            ConceptRealizModuleDec realizModuleDec =
-                    (ConceptRealizModuleDec) myBuilder.getModuleScope(id)
-                            .getDefiningElement();
-
-            // We only need to store these if they are part of a FacilityDec
-            if (!isFacilityImport) {
-                // Store the concept realization's requires clause
-                storeRequiresClause(realizModuleDec.getName().getName(),
-                        realizModuleDec.getRequires());
-
-                // Store the concept realization's type constraints from the module parameters
-                // YS: We are not adding these automatically. Most of the time, these
-                //     constraints wouldn't really help us prove any of the VCs. If you
-                //     are ever interested in adding these to the givens list, use the
-                //     "addConstraints" flag. Note that these constraints still need to be
-                //     processed by the parsimonious step, so there is no guarantee that they
-                //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
-                    storeModuleParameterTypeConstraints(realizModuleDec
-                            .getLocation(), realizModuleDec.getParameterDecs());
-                }
-            }
-        }
-        catch (NoSuchSymbolException e) {
-            Utilities.noSuchModule(loc);
-        }
-    }
-
-    /**
-     * <p>An helper method for storing the imported {@code enhancement's}
-     * {@code requires} clause and its associated location detail for
-     * future use.</p>
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
+     * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
+     * @param addConventionCorrespondenceFlag A flag that indicates whether or not we need
+     *                                        to add the {@code Shared Variable}'s {@code convention} and
+     *                                        {@code correspondence}.
      *
-     * @param loc The location of the imported {@code module}.
-     * @param id A {@link ModuleIdentifier} referring to an
-     *           importing {@code enhancement}.
-     * @param isFacilityImport A flag that indicates whether or not
-     *                         we are storing information that originated
-     *                         from a {@link FacilityDec}.
+     * @return The top-level assumed expression.
      */
-    private void storeEnhancementAssertionClauses(Location loc,
-            ModuleIdentifier id, boolean isFacilityImport) {
-        try {
-            EnhancementModuleDec enhancementModuleDec =
-                    (EnhancementModuleDec) myBuilder.getModuleScope(id)
-                            .getDefiningElement();
+    private Exp createTopLevelAssumeExpForProcedureDec(Location loc,
+            AssertiveCodeBlock currentBlock,
+            OperationEntry correspondingOperationEntry,
+            boolean addConventionCorrespondenceFlag) {
+        // Add all the expressions we can assume from the current context
+        Exp retExp =
+                myCurrentVerificationContext
+                        .createTopLevelAssumeExpFromContext(loc,
+                                addConventionCorrespondenceFlag);
 
-            // We only need to store these if they are part of a FacilityDec
-            if (!isFacilityImport) {
-                // Store the enhancement's requires clause
-                storeRequiresClause(enhancementModuleDec.getName().getName(),
-                        enhancementModuleDec.getRequires());
-
-                // Store the enhancement's type constraints from the module parameters
-                // YS: We are not adding these automatically. Most of the time, these
-                //     constraints wouldn't really help us prove any of the VCs. If you
-                //     are ever interested in adding these to the givens list, use the
-                //     "addConstraints" flag. Note that these constraints still need to be
-                //     processed by the parsimonious step, so there is no guarantee that they
-                //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
-                    storeModuleParameterTypeConstraints(enhancementModuleDec
-                            .getLocation(), enhancementModuleDec
-                            .getParameterDecs());
-                }
-            }
+        // Add the operation's requires clause (and any which_entails clause)
+        AssertionClause requiresClause =
+                correspondingOperationEntry.getRequiresClause();
+        Exp requiresExp = requiresClause.getAssertionExp().clone();
+        if (!VarExp.isLiteralTrue(requiresExp)) {
+            // Form a conjunct with the requires clause and add
+            // the location detail associated with it.
+            retExp =
+                    Utilities.formConjunct(loc, retExp, requiresClause,
+                            new LocationDetailModel(requiresClause
+                                    .getLocation().clone(), requiresClause
+                                    .getLocation().clone(),
+                                    "Requires Clause of "
+                                            + correspondingOperationEntry
+                                                    .getName()));
         }
-        catch (NoSuchSymbolException e) {
-            Utilities.noSuchModule(loc);
+
+        // Add the operation parameter's type constraints.
+        // YS: We are not adding these automatically. Most of the time, these
+        //     constraints wouldn't really help us prove any of the VCs. If you
+        //     are ever interested in adding these to the givens list, use the
+        //     "addConstraints" flag. Note that these constraints still need to be
+        //     processed by the parsimonious step, so there is no guarantee that they
+        //     will show up in all of the VCs.
+        if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
+            retExp =
+                    addParamTypeConstraints(loc, retExp, myCurrentModuleScope,
+                            currentBlock, correspondingOperationEntry
+                                    .getParameters());
         }
-    }
 
-    /**
-     * <p>An helper method for storing the imported {@code enhancement realization's}
-     * {@code requires} clause and its associated location detail for
-     * future use.</p>
-     *
-     * @param loc The location of the imported {@code module}.
-     * @param id A {@link ModuleIdentifier} referring to an
-     *           importing {@code enhancement realization}.
-     * @param isFacilityImport A flag that indicates whether or not
-     *                         we are storing information that originated
-     *                         from a {@link FacilityDec}.
-     */
-    private void storeEnhancementRealizAssertionClauses(Location loc,
-            ModuleIdentifier id, boolean isFacilityImport) {
-        try {
-            EnhancementRealizModuleDec realizModuleDec =
-                    (EnhancementRealizModuleDec) myBuilder.getModuleScope(id)
-                            .getDefiningElement();
-
-            // We only need to store these if they are part of a FacilityDec
-            if (!isFacilityImport) {
-                // Store the enhancement realization's requires clause
-                storeRequiresClause(realizModuleDec.getName().getName(),
-                        realizModuleDec.getRequires());
-
-                // Store the enhancement realization's type constraints from the module parameters
-                // YS: We are not adding these automatically. Most of the time, these
-                //     constraints wouldn't really help us prove any of the VCs. If you
-                //     are ever interested in adding these to the givens list, use the
-                //     "addConstraints" flag. Note that these constraints still need to be
-                //     processed by the parsimonious step, so there is no guarantee that they
-                //     will show up in all of the VCs.
-                if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
-                    storeModuleParameterTypeConstraints(realizModuleDec
-                            .getLocation(), realizModuleDec.getParameterDecs());
-                }
-            }
-        }
-        catch (NoSuchSymbolException e) {
-            Utilities.noSuchModule(loc);
-        }
-    }
-
-    /**
-     * <p>An helper method for storing all the {@code constraint} clauses
-     * for a list of {@link ModuleParameterDec ModuleParameterDecs}.</p>
-     *
-     * @param loc The location of the {@code module} that contains the
-     *            module parameters.
-     * @param moduleParameterDecs A list of {@link ModuleParameterDec}.
-     */
-    private void storeModuleParameterTypeConstraints(Location loc,
-            List<ModuleParameterDec> moduleParameterDecs) {
-        for (ModuleParameterDec m : moduleParameterDecs) {
-            Dec wrappedDec = m.getWrappedDec();
-            if (wrappedDec instanceof ConstantParamDec) {
-                ConstantParamDec dec = (ConstantParamDec) wrappedDec;
-                ProgramTypeEntry typeEntry;
-
-                if (dec.getVarDec().getTy() instanceof NameTy) {
-                    NameTy pNameTy = (NameTy) dec.getVarDec().getTy();
-
-                    // Query for the type entry in the symbol table
-                    SymbolTableEntry ste =
-                            Utilities.searchProgramType(pNameTy.getLocation(),
-                                    pNameTy.getQualifier(), pNameTy.getName(),
-                                    myCurrentModuleScope);
-
-                    if (ste instanceof ProgramTypeEntry) {
-                        typeEntry =
-                                ste.toProgramTypeEntry(pNameTy.getLocation());
-                    }
-                    else {
-                        typeEntry =
-                                ste.toTypeRepresentationEntry(
-                                        pNameTy.getLocation())
-                                        .getDefiningTypeEntry();
-                    }
-
-                    // Make sure we don't have a generic type
-                    if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
-                        // Obtain the original dec from the AST
-                        TypeFamilyDec type =
-                                (TypeFamilyDec) typeEntry.getDefiningElement();
-
-                        if (!VarExp.isLiteralTrue(type.getConstraint()
-                                .getAssertionExp())) {
-                            AssertionClause constraintClause =
-                                    type.getConstraint();
-                            AssertionClause modifiedConstraint =
-                                    Utilities.getTypeConstraintClause(
-                                            constraintClause,
-                                            dec.getLocation(), null, dec
-                                                    .getName(), type
-                                                    .getExemplar(), typeEntry
-                                                    .getModelType(), null);
-
-                            // Store the constraint and its associated location detail for future use
-                            Location constraintLoc =
-                                    modifiedConstraint.getLocation();
-                            myGlobalLocationDetails.put(modifiedConstraint,
-                                    new LocationDetailModel(constraintLoc,
-                                            constraintLoc,
-                                            "Constraint Clause of "
-                                                    + dec.getName()));
-                            myGlobalConstraints.put(dec, Collections
-                                    .singletonList(modifiedConstraint));
-                        }
-                    }
-                }
-                else {
-                    Utilities.tyNotHandled(dec.getVarDec().getTy(), loc);
-                }
-            }
-        }
-    }
-
-    /**
-     * <p>An helper method for storing a {@code requires} clause and its
-     * associated location detail for future use.</p>
-     *
-     * @param decName Name of the declaration that contains
-     *                the {@code requiresClause}.
-     * @param requiresClause An {@link AssertionClause} containing a {@code requires} clause.
-     */
-    private void storeRequiresClause(String decName,
-            AssertionClause requiresClause) {
-        if (!VarExp.isLiteralTrue(requiresClause.getAssertionExp())) {
-            myGlobalRequires.add(requiresClause);
-
-            // Add the location details for the requires clause
-            Location assertionLoc =
-                    requiresClause.getAssertionExp().getLocation();
-            myGlobalLocationDetails.put(requiresClause,
-                    new LocationDetailModel(assertionLoc.clone(), assertionLoc
-                            .clone(), "Requires Clause of " + decName));
-        }
+        return retExp;
     }
 
 }

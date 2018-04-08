@@ -10,12 +10,13 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.utilities;
+package edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts;
 
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.WhileStmtRule;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -48,7 +49,9 @@ public class VCConfirmStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs an assume statement.</p>
+     * <p>This constructs an helper statement that temporary
+     * holds all the {@link VerificationCondition VCs}
+     * after applying the {@link WhileStmtRule}.</p>
      *
      * @param l A {@link Location} representation object.
      * @param vcs A list of {@link VerificationCondition} to

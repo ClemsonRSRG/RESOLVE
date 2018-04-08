@@ -26,6 +26,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.*;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,13 +77,15 @@ public class WhileStmtRule extends AbstractProofRuleApplication
      * @param g The current type graph.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public WhileStmtRule(WhileStmt whileStmt, ModuleScope moduleScope,
-            TypeGraph g, AssertiveCodeBlock block, STGroup stGroup,
-            ST blockModel) {
-        super(block, stGroup, blockModel);
+            TypeGraph g, AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
         myTypeGraph = g;
         myWhileStmt = whileStmt;

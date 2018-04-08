@@ -12,8 +12,6 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
 
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
@@ -30,7 +28,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
 import java.util.HashMap;
 import java.util.List;
@@ -52,13 +50,6 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
     // ===========================================================
     // Member Fields
     // ===========================================================
-
-    /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
 
     /**
      * <p>The module scope for the file we are generating
@@ -83,16 +74,6 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
     private final FuncAssignStmt myFuncAssignStmt;
 
     /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
-
-    /**
      * <p>This is the math type graph that indicates relationship
      * between different math types.</p>
      */
@@ -108,24 +89,20 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
      *
      * @param funcAssignStmt The {@link FuncAssignStmt} we are applying
      *                       the rule to.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public FuncAssignStmtRule(FuncAssignStmt funcAssignStmt,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
-        myCurrentConceptDeclaredTypes = typeFamilyDecs;
+            AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
         myCurrentProcedureDecreasingExp =
                 myCurrentAssertiveCodeBlock
@@ -133,8 +110,6 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
         myCurrentProcedureOperationEntry =
                 myCurrentAssertiveCodeBlock.getCorrespondingOperation();
         myFuncAssignStmt = funcAssignStmt;
-        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
-        myProcessedInstFacilityDecls = processedInstFacDecs;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
     }
 
@@ -158,9 +133,7 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
             if (myCurrentProcedureOperationEntry == null) {
                 walker =
                         new ProgramFunctionExpWalker(
-                                myCurrentConceptDeclaredTypes,
-                                myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls,
+                                myCurrentVerificationContext,
                                 myCurrentModuleScope, myTypeGraph);
             }
             else {
@@ -168,9 +141,7 @@ public class FuncAssignStmtRule extends AbstractProofRuleApplication
                         new ProgramFunctionExpWalker(
                                 myCurrentProcedureOperationEntry,
                                 myCurrentProcedureDecreasingExp,
-                                myCurrentConceptDeclaredTypes,
-                                myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls,
+                                myCurrentVerificationContext,
                                 myCurrentModuleScope, myTypeGraph);
             }
             TreeWalker.visit(walker, assignProgramFunctionExp);

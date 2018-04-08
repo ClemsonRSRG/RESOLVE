@@ -17,7 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.InfixExp;
@@ -44,7 +44,9 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.*;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptSharedStateExtractor;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptTypeExtractor;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ProgramFunctionExpWalker;
 import java.util.*;
@@ -71,13 +73,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
     // -----------------------------------------------------------
 
     /**
-     * <p>This contains all the types declared by the {@code Concept}
-     * associated with the current module. Note that if we are in a
-     * {@code Facility}, this list will be empty.</p>
-     */
-    private final List<TypeFamilyDec> myCurrentConceptDeclaredTypes;
-
-    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -88,16 +83,6 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
 
     /** <p>A flag that indicates if this is a local facility declaration or not.</p> */
     private final boolean myIsLocalFacilityDec;
-
-    /**
-     * <p>If our current module scope allows us to introduce new type implementations,
-     * this will contain all the {@link AbstractTypeRepresentationDec}. Otherwise,
-     * this list will be empty.</p>
-     */
-    private final List<AbstractTypeRepresentationDec> myLocalRepresentationTypeDecs;
-
-    /** <p>The list of processed {@link InstantiatedFacilityDecl}. </p> */
-    private final List<InstantiatedFacilityDecl> myProcessedInstFacilityDecls;
 
     /** <p>The symbol table we are currently building.</p> */
     private final MathSymbolTableBuilder mySymbolTable;
@@ -142,6 +127,9 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     private final List<VarExp> myConceptRealizFormalParamList;
 
+    /** <p>This contains all the shared state declared by the {@code Concept}.</p> */
+    private final List<SharedStateDec> myConceptSharedStates;
+
     /**
      * <p>A list that contains the {@code Enhancement} and {@code Enhancement Realization}'s
      * formal arguments to the instantiated actual arguments.</p>
@@ -159,29 +147,23 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      * @param facilityDec The {@code facility} declaration we are applying the
      *                    rule to.
      * @param isLocalFacDec A flag that indicates if this is a local {@link FacilityDec}.
-     * @param typeFamilyDecs List of abstract types we are implementing or extending.
-     * @param localRepresentationTypeDecs List of local representation types.
-     * @param processedInstFacDecs The list of processed {@link InstantiatedFacilityDecl}.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public FacilityDeclRule(FacilityDec facilityDec, boolean isLocalFacDec,
-            List<TypeFamilyDec> typeFamilyDecs,
-            List<AbstractTypeRepresentationDec> localRepresentationTypeDecs,
-            List<InstantiatedFacilityDecl> processedInstFacDecs,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
-            AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
-        myCurrentConceptDeclaredTypes = typeFamilyDecs;
+            AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
         myFacilityDec = facilityDec;
         myIsLocalFacilityDec = isLocalFacDec;
-        myLocalRepresentationTypeDecs = localRepresentationTypeDecs;
-        myProcessedInstFacilityDecls = processedInstFacDecs;
         mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
 
@@ -191,6 +173,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         myConceptFormalParamList = new ArrayList<>();
         myConceptRealizActualArgList = new ArrayList<>();
         myConceptRealizFormalParamList = new ArrayList<>();
+        myConceptSharedStates = new LinkedList<>();
         myInstantiatedEnhSpecRealizItems = new LinkedList<>();
     }
 
@@ -232,7 +215,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
         // or display anything to our models if it isn't local.
         if (myIsLocalFacilityDec) {
             myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(confirmExp
-                    .getLocation(), confirmExp, false));
+                    .getLocation(), confirmExp, true));
 
             // Add the different details to the various different output models
             ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
@@ -250,9 +233,10 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
      */
     public final InstantiatedFacilityDecl getInstantiatedFacilityDecl() {
         return new InstantiatedFacilityDecl(myFacilityDec,
-                myConceptDeclaredTypes, myConceptFormalParamList,
-                myConceptActualArgList, myConceptRealizFormalParamList,
-                myConceptRealizActualArgList, myInstantiatedEnhSpecRealizItems);
+                myConceptSharedStates, myConceptDeclaredTypes,
+                myConceptFormalParamList, myConceptActualArgList,
+                myConceptRealizFormalParamList, myConceptRealizActualArgList,
+                myInstantiatedEnhSpecRealizItems);
     }
 
     /**
@@ -297,8 +281,8 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
             if (moduleArgumentExp instanceof ProgramFunctionExp) {
                 // Use the walker to retrieve the ensures clause.
                 ProgramFunctionExpWalker walker =
-                        new ProgramFunctionExpWalker(myCurrentConceptDeclaredTypes, myLocalRepresentationTypeDecs,
-                                myProcessedInstFacilityDecls, myCurrentModuleScope, myTypeGraph);
+                        new ProgramFunctionExpWalker(myCurrentVerificationContext,
+                                myCurrentModuleScope, myTypeGraph);
                 TreeWalker.visit(walker, moduleArgumentExp);
 
                 // Retrieve the various pieces of information from the walker
@@ -398,6 +382,13 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                     (ConceptModuleDec) mySymbolTable.getModuleScope(
                             new ModuleIdentifier(myFacilityDec.getConceptName()
                                     .getName())).getDefiningElement();
+
+            // Extract the concept's shared state variables
+            ConceptSharedStateExtractor sharedStateExtractor =
+                    new ConceptSharedStateExtractor();
+            TreeWalker.visit(sharedStateExtractor, facConceptDec);
+            myConceptSharedStates.addAll(sharedStateExtractor
+                    .getSharedStateDecs());
 
             // Extract the concept's type declarations
             ConceptTypeExtractor typeExtractor = new ConceptTypeExtractor();
