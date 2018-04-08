@@ -15,7 +15,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -62,9 +61,7 @@ public class FunctionExp extends AbstractFunctionExp {
         // The qualifier should be part of the function expression
         // and not part of the variable name.
         if (name.getQualifier() != null) {
-            throw new MiscErrorException(
-                    "The qualifier should be part of the function expression",
-                    new IllegalArgumentException());
+            name.setQualifier(null);
         }
 
         myFuncNameExp = name;

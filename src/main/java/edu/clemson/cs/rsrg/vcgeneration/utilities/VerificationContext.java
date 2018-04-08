@@ -22,6 +22,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -246,9 +247,40 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                     AssertionClause stateConstraintClause =
                             stateDec.getConstraint();
 
+                    // All shared variables should be add facilityDecl's name.
+                    Map<Exp, Exp> substitutions = new LinkedHashMap<>();
+                    for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                        // Convert mathVarDec to VarExp. Also create a new qualified version of it.
+                        VarExp mathVarDecAsVarExp =
+                                Utilities.createVarExp(mathVarDec.getLocation().clone(),
+                                        null, mathVarDec.getName().clone(),
+                                        mathVarDec.getMathType(), null);
+                        VarExp qualifiedVarExp = (VarExp) mathVarDecAsVarExp.clone();
+                        qualifiedVarExp.setQualifier(facilityDecl.getInstantiatedFacilityName().clone());
+
+                        // Put them into our substitutions map.
+                        substitutions.put(mathVarDecAsVarExp, qualifiedVarExp);
+                    }
+
+                    // Generate the proper facility qualified constraint
+                    // and which_entails clauses (if any).
+                    Exp modifiedConstraint =
+                            stateConstraintClause.getAssertionExp().substitute(substitutions);
+                    Exp modifiedWhichEntails =
+                            stateConstraintClause.getWhichEntailsExp();
+                    if (modifiedWhichEntails != null) {
+                        modifiedWhichEntails =
+                                modifiedWhichEntails.substitute(substitutions);
+                    }
+
+                    // Create the modified state constraint clause and add it to the retExp.
+                    AssertionClause modifiedStateConstraintClause =
+                            new AssertionClause(stateConstraintClause.getLocation().clone(),
+                                    stateConstraintClause.getClauseType(),
+                                    modifiedConstraint, modifiedWhichEntails);
                     retExp =
                             Utilities.formConjunct(loc, retExp,
-                                    stateConstraintClause,
+                                    modifiedStateConstraintClause,
                                     myModuleLevelLocationDetails
                                             .get(stateConstraintClause));
                 }
