@@ -412,7 +412,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         PosSymbol enhancementRealizName = enhancementRealization.getName();
 
         // Store the enhancement realization requires clause
-        myCurrentVerificationContext.storeEnhancementAssertionClauses(
+        myCurrentVerificationContext.storeEnhancementRealizAssertionClauses(
                 enhancementRealizName.getLocation(), new ModuleIdentifier(
                         enhancementRealizName.getName()), false);
 
