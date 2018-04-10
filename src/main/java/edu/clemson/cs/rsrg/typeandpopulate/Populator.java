@@ -1662,7 +1662,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         addBinding(varName, dec.getName().getLocation(), q, dec,
-                mathTypeValue, null);
+                mathTypeValue, new HashMap<String, MTType>());
 
         emitDebug(dec.getLocation(), "\t\tNew variable: " + varName + " of type "
                 + mathTypeValue.toString() + " with quantification " + q + ".");
@@ -3019,12 +3019,6 @@ public class Populator extends TreeWalkerVisitor {
             notAType(typeExp);
         }
 
-        // YS: If we happen to have any concept type parameters
-        // we might need to substitute any instances of the concept
-        // type with its actual math type.
-        mathTypeValue =
-                TypeGraph.getCopyWithVariablesSubstituted(mathTypeValue, myGenericTypes);
-
         ty.setMathType(mathType);
         ty.setMathTypeValue(mathTypeValue);
     }
@@ -3477,7 +3471,7 @@ public class Populator extends TreeWalkerVisitor {
                 try {
                     emitDebug(e.getLocation(), "\t" + nsee2.getMessage());
 
-                    if (myDefinitionSchematicTypes != null) {
+                    if (!myDefinitionSchematicTypes.isEmpty()) {
                         // Create a copy of the original expression and assign it the conservative type
                         AbstractFunctionExp eCopy = (AbstractFunctionExp) e.clone();
                         eCopy.setMathType(eType);
