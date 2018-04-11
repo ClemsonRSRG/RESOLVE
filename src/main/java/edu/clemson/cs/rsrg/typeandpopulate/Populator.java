@@ -2009,8 +2009,8 @@ public class Populator extends TreeWalkerVisitor {
         MTFunction foundExpType;
         foundExpType = exp.getConservativePreApplicationType(myTypeGraph);
 
-        emitDebug(exp.getLocation(), "\tExpression: " + exp.toString() + "("
-                + exp.getLocation() + ") of type "
+        emitDebug(exp.getLocation(), "\tExpression: " + exp.toString() + "["
+                + exp.getLocation() + "] of type "
                 + foundExpType.toString());
 
         MathSymbolEntry intendedEntry = getIntendedFunction(exp);
@@ -3162,10 +3162,8 @@ public class Populator extends TreeWalkerVisitor {
      * @param type The mathematical type associated with the object.
      * @param typeValue The mathematical type value associated with the object.
      * @param schematicTypes The schematic types associated with the object.
-     *
-     * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q,
+    private void addBinding(String name, Location l, SymbolTableEntry.Quantification q,
             ResolveConceptualElement definingElement, MTType type, MTType typeValue,
             Map<String, MTType> schematicTypes) {
         if (type == null) {
@@ -3173,8 +3171,8 @@ public class Populator extends TreeWalkerVisitor {
         }
         else {
             try {
-                return myBuilder.getInnermostActiveScope().addBinding(name, q, definingElement, type, typeValue,
-                        schematicTypes, myGenericTypes);
+                myBuilder.getInnermostActiveScope().addBinding(name, q, definingElement,
+                        type, typeValue, schematicTypes, myGenericTypes);
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(name, l);
@@ -3192,13 +3190,11 @@ public class Populator extends TreeWalkerVisitor {
      * @param type The mathematical type associated with the object.
      * @param typeValue The mathematical type value associated with the object.
      * @param schematicTypes The schematic types associated with the object.
-     *
-     * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement,
+    private void addBinding(String name, Location l, ResolveConceptualElement definingElement,
             MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
-        return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type,
-                typeValue, schematicTypes);
+        addBinding(name, l, SymbolTableEntry.Quantification.NONE,
+                definingElement, type, typeValue, schematicTypes);
     }
 
     /**
@@ -3211,13 +3207,11 @@ public class Populator extends TreeWalkerVisitor {
      * @param definingElement The object that is receiving the binding.
      * @param type The mathematical type associated with the object.
      * @param schematicTypes The schematic types associated with the object.
-     *
-     * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q,
+    private void addBinding(String name, Location l, SymbolTableEntry.Quantification q,
             ResolveConceptualElement definingElement, MTType type,
             Map<String, MTType> schematicTypes) {
-        return addBinding(name, l, q, definingElement, type, null, schematicTypes);
+        addBinding(name, l, q, definingElement, type, null, schematicTypes);
     }
 
     /**
@@ -3507,12 +3501,17 @@ public class Populator extends TreeWalkerVisitor {
                             "No function applicable for " + "domain: "
                                     + eType.getDomain() + "\t[" + e.getLocation() + "]\n\nCandidates:\n";
 
+                    StringBuilder sb = new StringBuilder(errorMessage);
                     for (SymbolTableEntry entry : sameNameFunctions) {
                         if (entry instanceof MathSymbolEntry
                                 && ((MathSymbolEntry) entry).getType() instanceof MTFunction) {
-                            errorMessage +=
-                                    "\t[" + entry.getDefiningElement().getLocation() + "]\t" +
-                                            entry.getName() + " : " + ((MathSymbolEntry) entry).getType() + "\n";
+                            sb.append("\t[");
+                            sb.append(entry.getDefiningElement().getLocation());
+                            sb.append("]\t");
+                            sb.append(entry.getName());
+                            sb.append(" : ");
+                            sb.append(((MathSymbolEntry) entry).getType());
+                            sb.append("\n");
 
                             foundOne = true;
                         }
@@ -3523,7 +3522,7 @@ public class Populator extends TreeWalkerVisitor {
                                 .getLocation());
                     }
 
-                    throw new SourceErrorException(errorMessage, (Location) null);
+                    throw new SourceErrorException(sb.toString(), (Location) null);
                 }
             }
         }
