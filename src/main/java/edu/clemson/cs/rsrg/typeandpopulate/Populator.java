@@ -2736,6 +2736,14 @@ public class Populator extends TreeWalkerVisitor {
         // Our quantifier might have changed, so set it using the
         // corresponding MathSymbolEntry
         exp.setQuantification(intendedEntry.getQuantification());
+
+        // YS: Check to see if this refers to a definition name from a Precis.
+        //     This information will be used by the VC generator to generate
+        //     parsimonious VCs.
+        ModuleIdentifier id = intendedEntry.getSourceModuleIdentifier();
+        if (myCompileEnvironment.getModuleAST(id) instanceof PrecisModuleDec) {
+            exp.setIsPrecisDefinitionName();
+        }
     }
 
     // -----------------------------------------------------------
