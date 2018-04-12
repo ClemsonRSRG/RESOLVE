@@ -35,6 +35,7 @@ import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
 import edu.clemson.cs.rsrg.absyn.statements.SwapStmt;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
@@ -2739,9 +2740,11 @@ public class Populator extends TreeWalkerVisitor {
 
         // YS: Check to see if this refers to a definition name from a Precis.
         //     This information will be used by the VC generator to generate
-        //     parsimonious VCs.
+        //     parsimonious VCs. Note that we also have to consider things from
+        //     that are built-in.
         ModuleIdentifier id = intendedEntry.getSourceModuleIdentifier();
-        if (myCompileEnvironment.getModuleAST(id) instanceof PrecisModuleDec) {
+        if (id.equals(ModuleIdentifier.GLOBAL) ||
+                myCompileEnvironment.getModuleAST(id) instanceof PrecisModuleDec) {
             exp.setIsPrecisDefinitionName();
         }
     }

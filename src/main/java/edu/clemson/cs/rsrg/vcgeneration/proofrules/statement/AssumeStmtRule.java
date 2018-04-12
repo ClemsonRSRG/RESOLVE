@@ -520,6 +520,17 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                     if (hasVerificationVar || isConceptualVar) {
                         substitutions.put(equalsExp.getLeft(), equalsExp.getRight());
                     }
+                    // This is a special case where we have two VarExps, but one of them
+                    // refers to a Precis' definition. If that is the case, then it is safe
+                    // to do the substitution. Usually, these appear on the right hand side,
+                    // so we are only implementing the logic for this side only. Might have to
+                    // modify it in the future if it ever changes.
+                    else {
+                        if (equalsExp.getRight() instanceof VarExp &&
+                                ((VarExp) equalsExp.getRight()).isIsPrecisDefinitionName()) {
+                            substitutions.put(equalsExp.getLeft(), equalsExp.getRight());
+                        }
+                    }
                 }
                 // Check if left hand side is replaceable
                 else if (isLeftReplaceable) {
