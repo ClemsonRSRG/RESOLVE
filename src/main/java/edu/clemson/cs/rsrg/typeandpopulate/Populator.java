@@ -35,6 +35,7 @@ import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
 import edu.clemson.cs.rsrg.absyn.statements.SwapStmt;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
@@ -1662,7 +1663,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         addBinding(varName, dec.getName().getLocation(), q, dec,
-                mathTypeValue, null);
+                mathTypeValue, new HashMap<String, MTType>());
 
         emitDebug(dec.getLocation(), "\t\tNew variable: " + varName + " of type "
                 + mathTypeValue.toString() + " with quantification " + q + ".");
@@ -2009,8 +2010,8 @@ public class Populator extends TreeWalkerVisitor {
         MTFunction foundExpType;
         foundExpType = exp.getConservativePreApplicationType(myTypeGraph);
 
-        emitDebug(exp.getLocation(), "\tExpression: " + exp.toString() + "("
-                + exp.getLocation() + ") of type "
+        emitDebug(exp.getLocation(), "\tExpression: " + exp.toString() + "["
+                + exp.getLocation() + "] of type "
                 + foundExpType.toString());
 
         MathSymbolEntry intendedEntry = getIntendedFunction(exp);
@@ -2736,6 +2737,16 @@ public class Populator extends TreeWalkerVisitor {
         // Our quantifier might have changed, so set it using the
         // corresponding MathSymbolEntry
         exp.setQuantification(intendedEntry.getQuantification());
+
+        // YS: Check to see if this refers to a definition name from a Precis.
+        //     This information will be used by the VC generator to generate
+        //     parsimonious VCs. Note that we also have to consider things from
+        //     that are built-in.
+        ModuleIdentifier id = intendedEntry.getSourceModuleIdentifier();
+        if (id.equals(ModuleIdentifier.GLOBAL) ||
+                myCompileEnvironment.getModuleAST(id) instanceof PrecisModuleDec) {
+            exp.setIsPrecisDefinitionName();
+        }
     }
 
     // -----------------------------------------------------------
@@ -3019,12 +3030,6 @@ public class Populator extends TreeWalkerVisitor {
             notAType(typeExp);
         }
 
-        // YS: If we happen to have any concept type parameters
-        // we might need to substitute any instances of the concept
-        // type with its actual math type.
-        mathTypeValue =
-                TypeGraph.getCopyWithVariablesSubstituted(mathTypeValue, myGenericTypes);
-
         ty.setMathType(mathType);
         ty.setMathTypeValue(mathTypeValue);
     }
@@ -3168,10 +3173,8 @@ public class Populator extends TreeWalkerVisitor {
      * @param type The mathematical type associated with the object.
      * @param typeValue The mathematical type value associated with the object.
      * @param schematicTypes The schematic types associated with the object.
-     *
-     * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q,
+    private void addBinding(String name, Location l, SymbolTableEntry.Quantification q,
             ResolveConceptualElement definingElement, MTType type, MTType typeValue,
             Map<String, MTType> schematicTypes) {
         if (type == null) {
@@ -3179,8 +3182,8 @@ public class Populator extends TreeWalkerVisitor {
         }
         else {
             try {
-                return myBuilder.getInnermostActiveScope().addBinding(name, q, definingElement, type, typeValue,
-                        schematicTypes, myGenericTypes);
+                myBuilder.getInnermostActiveScope().addBinding(name, q, definingElement,
+                        type, typeValue, schematicTypes, myGenericTypes);
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(name, l);
@@ -3198,13 +3201,11 @@ public class Populator extends TreeWalkerVisitor {
      * @param type The mathematical type associated with the object.
      * @param typeValue The mathematical type value associated with the object.
      * @param schematicTypes The schematic types associated with the object.
-     *
-     * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, ResolveConceptualElement definingElement,
+    private void addBinding(String name, Location l, ResolveConceptualElement definingElement,
             MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
-        return addBinding(name, l, SymbolTableEntry.Quantification.NONE, definingElement, type,
-                typeValue, schematicTypes);
+        addBinding(name, l, SymbolTableEntry.Quantification.NONE,
+                definingElement, type, typeValue, schematicTypes);
     }
 
     /**
@@ -3217,13 +3218,11 @@ public class Populator extends TreeWalkerVisitor {
      * @param definingElement The object that is receiving the binding.
      * @param type The mathematical type associated with the object.
      * @param schematicTypes The schematic types associated with the object.
-     *
-     * @return A new {@link SymbolTableEntry} with the types bound to the object.
      */
-    private SymbolTableEntry addBinding(String name, Location l, SymbolTableEntry.Quantification q,
+    private void addBinding(String name, Location l, SymbolTableEntry.Quantification q,
             ResolveConceptualElement definingElement, MTType type,
             Map<String, MTType> schematicTypes) {
-        return addBinding(name, l, q, definingElement, type, null, schematicTypes);
+        addBinding(name, l, q, definingElement, type, null, schematicTypes);
     }
 
     /**
@@ -3477,7 +3476,7 @@ public class Populator extends TreeWalkerVisitor {
                 try {
                     emitDebug(e.getLocation(), "\t" + nsee2.getMessage());
 
-                    if (myDefinitionSchematicTypes != null) {
+                    if (!myDefinitionSchematicTypes.isEmpty()) {
                         // Create a copy of the original expression and assign it the conservative type
                         AbstractFunctionExp eCopy = (AbstractFunctionExp) e.clone();
                         eCopy.setMathType(eType);
@@ -3513,12 +3512,17 @@ public class Populator extends TreeWalkerVisitor {
                             "No function applicable for " + "domain: "
                                     + eType.getDomain() + "\t[" + e.getLocation() + "]\n\nCandidates:\n";
 
+                    StringBuilder sb = new StringBuilder(errorMessage);
                     for (SymbolTableEntry entry : sameNameFunctions) {
                         if (entry instanceof MathSymbolEntry
                                 && ((MathSymbolEntry) entry).getType() instanceof MTFunction) {
-                            errorMessage +=
-                                    "\t[" + entry.getDefiningElement().getLocation() + "]\t" +
-                                            entry.getName() + " : " + ((MathSymbolEntry) entry).getType() + "\n";
+                            sb.append("\t[");
+                            sb.append(entry.getDefiningElement().getLocation());
+                            sb.append("]\t");
+                            sb.append(entry.getName());
+                            sb.append(" : ");
+                            sb.append(((MathSymbolEntry) entry).getType());
+                            sb.append("\n");
 
                             foundOne = true;
                         }
@@ -3529,7 +3533,7 @@ public class Populator extends TreeWalkerVisitor {
                                 .getLocation());
                     }
 
-                    throw new SourceErrorException(errorMessage, (Location) null);
+                    throw new SourceErrorException(sb.toString(), (Location) null);
                 }
             }
         }
