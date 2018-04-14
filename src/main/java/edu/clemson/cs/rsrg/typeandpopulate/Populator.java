@@ -35,7 +35,6 @@ import edu.clemson.cs.rsrg.absyn.statements.FuncAssignStmt;
 import edu.clemson.cs.rsrg.absyn.statements.SwapStmt;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
-import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.misc.Utilities.Indirect;
@@ -1725,6 +1724,12 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void preTypeFamilyDec(TypeFamilyDec dec) {
+        // Sanity checks to make sure the type family declaration has
+        // valid initialization and finalization ensures.
+        ValidTypeFamilyChecker validTypeFamilyChecker = new ValidTypeFamilyChecker(dec);
+        validTypeFamilyChecker.hasValidAssertionClauses();
+
+        // Create a new scope if we pass the sanity check.
         myBuilder.startScope(dec);
     }
 
