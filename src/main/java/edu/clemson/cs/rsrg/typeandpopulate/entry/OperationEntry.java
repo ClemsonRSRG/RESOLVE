@@ -140,6 +140,24 @@ public class OperationEntry extends SymbolTableEntry {
     }
 
     /**
+     * <p>This method returns the operation declaration associated with this entry.</p>
+     *
+     * @return An {@link OperationDec} representation object.
+     */
+    public final OperationDec getOperationDec() {
+        OperationDec operationDec;
+        ResolveConceptualElement element = getDefiningElement();
+        if (element instanceof OperationDec) {
+            operationDec = (OperationDec) element;
+        }
+        else {
+            operationDec = ((OperationProcedureDec) element).getWrappedOpDec();
+        }
+
+        return operationDec;
+    }
+
+    /**
      * <p>This method returns the program parameters associated with this entry.</p>
      *
      * @return An immutable list containing {@link ProgramParameterEntry} objects.

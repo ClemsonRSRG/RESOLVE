@@ -510,8 +510,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                             .getQualifier(), operationNameExp
                                             .getName());
                             OperationDec actualOperationDec =
-                                    (OperationDec) actualOperationEntry
-                                            .getDefiningElement();
+                                    actualOperationEntry.getOperationDec();
 
                             // Step 2: Substitute any operations's requires and ensures clauses
                             //         passed to the concept realization instantiation.
@@ -772,8 +771,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                                         .getQualifier(), operationNameExp
                                         .getName());
                         OperationDec actualOperationDec =
-                                (OperationDec) actualOperationEntry
-                                        .getDefiningElement();
+                                actualOperationEntry.getOperationDec();
 
                         // Step 2: Substitute any operations's requires and ensures clauses
                         //         passed to the enhancement realization instantiation.

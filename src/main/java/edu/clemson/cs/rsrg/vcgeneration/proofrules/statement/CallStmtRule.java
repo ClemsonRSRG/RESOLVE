@@ -155,8 +155,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
         // Call a method to locate the operation entry for this call
         OperationEntry operationEntry =
                 Utilities.getOperationEntry(functionExp, myCurrentModuleScope);
-        OperationDec operationDec =
-                (OperationDec) operationEntry.getDefiningElement();
+        OperationDec operationDec = operationEntry.getOperationDec();
 
         // Find all the replacements that needs to happen to the requires
         // and ensures clauses
@@ -322,8 +321,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
      */
     private Exp createModifiedEnsExp(OperationEntry operationEntry,
             List<ProgramExp> callArgs, List<Exp> modifiedArguments) {
-        OperationDec operationDec =
-                (OperationDec) operationEntry.getDefiningElement();
+        OperationDec operationDec = operationEntry.getOperationDec();
         InstantiatedFacilityDecl instantiatedFacilityDecl =
                 Utilities.getInstantiatingFacility(operationEntry, myCurrentVerificationContext);
 
@@ -650,8 +648,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
      */
     private Exp createModifiedReqExp(OperationEntry operationEntry,
             List<VarExp> operationParamAsVarExps, List<Exp> modifiedArguments) {
-        OperationDec operationDec =
-                (OperationDec) operationEntry.getDefiningElement();
+        OperationDec operationDec = operationEntry.getOperationDec();
         InstantiatedFacilityDecl instantiatedFacilityDecl =
                 Utilities.getInstantiatingFacility(operationEntry, myCurrentVerificationContext);
 
