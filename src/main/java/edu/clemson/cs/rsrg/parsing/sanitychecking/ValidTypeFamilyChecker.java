@@ -10,14 +10,15 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.typeandpopulate.sanitychecking;
+package edu.clemson.cs.rsrg.parsing.sanitychecking;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 
 /**
- * <p>This is a sanity checker for making sure the declared {@link TypeFamilyDec} is valid.</p>
+ * <p>This is a sanity checker for making sure the {@link TypeFamilyDec}
+ * has valid {@code initialization} and {@code finalization ensures} clauses.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0

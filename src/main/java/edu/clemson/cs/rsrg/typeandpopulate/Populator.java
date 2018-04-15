@@ -1724,12 +1724,6 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void preTypeFamilyDec(TypeFamilyDec dec) {
-        // Sanity checks to make sure the type family declaration has
-        // valid initialization and finalization ensures.
-        ValidTypeFamilyChecker validTypeFamilyChecker = new ValidTypeFamilyChecker(dec);
-        validTypeFamilyChecker.hasValidAssertionClauses();
-
-        // Create a new scope if we pass the sanity check.
         myBuilder.startScope(dec);
     }
 
