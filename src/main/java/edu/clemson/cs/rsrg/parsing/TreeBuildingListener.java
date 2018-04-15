@@ -3329,7 +3329,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitStandardPrefixSignature(
             ResolveParser.StandardPrefixSignatureContext ctx) {
         Token nameToken;
-        if (ctx.getStart() == ctx.prefixOp().getStart()) {
+        if (ctx.prefixOp() != null) {
             nameToken = ctx.prefixOp().getStart();
         }
         else {
