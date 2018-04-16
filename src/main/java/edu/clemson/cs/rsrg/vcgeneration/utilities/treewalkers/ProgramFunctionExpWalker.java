@@ -162,8 +162,7 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         // Call a method to locate the operation entry for this call
         OperationEntry operationEntry =
                 Utilities.getOperationEntry(exp, myCurrentModuleScope);
-        OperationDec operationDec =
-                (OperationDec) operationEntry.getDefiningElement();
+        OperationDec operationDec = operationEntry.getOperationDec();
 
         // Only need to do something if it is not "requires true"
         if (!VarExp.isLiteralTrue(operationDec.getRequires().getAssertionExp())) {

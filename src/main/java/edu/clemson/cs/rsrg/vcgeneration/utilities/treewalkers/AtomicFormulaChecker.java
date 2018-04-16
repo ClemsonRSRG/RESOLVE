@@ -71,6 +71,30 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This method redefines how an {@link EqualsExp} should be walked.</p>
+     *
+     * @param exp An equality/inequality expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkEqualsExp(EqualsExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preEqualsExp(exp);
+
+        // No need to walk any of our children. This is definitely atomic.
+
+        postEqualsExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
      * <p>This method redefines how a {@link FunctionExp} should be walked.</p>
      *
      * @param exp A function expression.

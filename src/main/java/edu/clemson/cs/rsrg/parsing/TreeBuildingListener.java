@@ -53,6 +53,8 @@ import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.parsing.sanitychecking.ValidFunctionOpDeclChecker;
+import edu.clemson.cs.rsrg.parsing.sanitychecking.ValidSharedStateChecker;
+import edu.clemson.cs.rsrg.parsing.sanitychecking.ValidTypeFamilyChecker;
 import edu.clemson.cs.rsrg.parsing.utilities.SyntacticSugarConverter;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
@@ -1421,10 +1423,19 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        myNodes
-                .put(ctx, new TypeFamilyDec(createPosSymbol(ctx.name), mathTy,
+        // Build the type family declaration
+        TypeFamilyDec typeFamilyDec =
+                new TypeFamilyDec(createPosSymbol(ctx.name), mathTy,
                         createPosSymbol(ctx.exemplar), mathDefVariableDecs,
-                        constraint, initItem, finalItem));
+                        constraint, initItem, finalItem);
+
+        // Sanity checks to make sure the type family declaration has
+        // valid initialization and finalization ensures clauses.
+        ValidTypeFamilyChecker validTypeFamilyChecker =
+                new ValidTypeFamilyChecker(typeFamilyDec);
+        validTypeFamilyChecker.hasValidAssertionClauses();
+
+        myNodes.put(ctx, typeFamilyDec);
     }
 
     /**
@@ -1756,8 +1767,18 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.start), abstractStateVars,
-                constraint, initItem, finalItem));
+        // Build the shared state declaration
+        SharedStateDec sharedStateDec =
+                new SharedStateDec(createPosSymbol(ctx.start), abstractStateVars,
+                        constraint, initItem, finalItem);
+
+        // Sanity checks to make sure the shared state has
+        // valid initialization ensures clause.
+        ValidSharedStateChecker validSharedStateChecker =
+                new ValidSharedStateChecker(sharedStateDec);
+        validSharedStateChecker.hasValidAssertionClauses();
+
+        myNodes.put(ctx, sharedStateDec);
     }
 
     /**
@@ -3308,7 +3329,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitStandardPrefixSignature(
             ResolveParser.StandardPrefixSignatureContext ctx) {
         Token nameToken;
-        if (ctx.getStart() == ctx.prefixOp()) {
+        if (ctx.prefixOp() != null) {
             nameToken = ctx.prefixOp().getStart();
         }
         else {
