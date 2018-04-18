@@ -185,12 +185,6 @@ class Controller {
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                     myStatusHandler.info(null, "Done Compiling: " + m.toString());
                 }
-
-                // YS: The garbage collector doesn't seem to be called while we are
-                //     in the loop, hence we have observed a huge spike in memory that
-                //     needs to be garbage collected. This is here to make sure it gets
-                //     called every time we are done processing a file.
-                System.gc();
             }
         }
         catch (Throwable e) {
