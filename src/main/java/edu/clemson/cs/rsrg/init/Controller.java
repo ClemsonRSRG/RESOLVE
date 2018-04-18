@@ -351,6 +351,7 @@ class Controller {
     private void findDependencies(
             DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
             ModuleDec root, Path parentPath) {
+        ModuleIdentifier rootId = new ModuleIdentifier(root);
         Map<PosSymbol, Boolean> allImports = root.getModuleDependencies();
         for (PosSymbol importRequest : allImports.keySet()) {
             // Don't try to import the built-in Cls_Theory
@@ -359,14 +360,9 @@ class Controller {
                 // or not. If yes, we add it as an external import and move on.
                 // If no, we add it as a new dependency that must be imported.
                 if (!allImports.get(importRequest)) {
-                    ResolveFile file =
-                            findResolveFile(importRequest.getName(), parentPath);
+                    // Only need to deal with imports we haven't seen yet.
                     ModuleIdentifier id =
                             new ModuleIdentifier(importRequest.getName());
-                    ModuleIdentifier rootId = new ModuleIdentifier(root);
-                    ModuleDec module;
-
-                    // Search for the file in our processed modules
                     if (!myCompileEnvironment.containsID(id)) {
                         // Print out debugging message
                         if (myCompileEnvironment.flags
@@ -375,28 +371,41 @@ class Controller {
                                     + id.toString());
                         }
 
-                        module = createModuleAST(file);
-                        myCompileEnvironment.constructRecord(file, module);
-
-                        // Now check this new module for dependencies
-                        findDependencies(g, module, file.getParentPath());
+                        ResolveFile file =
+                                findResolveFile(importRequest.getName(),
+                                        parentPath);
+                        ModuleDec module = createModuleAST(file);
+                        if (module == null) {
+                            // Import error
+                            throw new ImportException("Invalid import: "
+                                    + importRequest.toString()
+                                    + "; Cannot import module of " + "type: "
+                                    + file.getModuleType().getExtension());
+                        }
+                        else {
+                            // Construct a record and check this new module for dependencies
+                            myCompileEnvironment.constructRecord(file, module);
+                            findDependencies(g, module, file.getParentPath());
+                        }
                     }
                     else {
-                        module = myCompileEnvironment.getModuleAST(id);
-                    }
-
-                    // Import error
-                    if (module == null) {
-                        throw new ImportException("Invalid import "
-                                + importRequest.toString()
-                                + "; Cannot import module of " + "type: "
-                                + file.getModuleType().getExtension());
+                        ModuleDec module =
+                                myCompileEnvironment.getModuleAST(id);
+                        if (module == null) {
+                            // Import error
+                            throw new ImportException(
+                                    "Import error: "
+                                            + importRequest.toString()
+                                            + "; Module does not exist in our current compile environment.");
+                        }
                     }
 
                     // Check for circular dependency
                     if (pathExists(g, id, rootId)) {
                         throw new CircularDependencyException(
-                                "Circular dependency detected.");
+                                "Circular dependency detected: "
+                                        + importRequest.getName() + "<->"
+                                        + root.getName());
                     }
 
                     // Add new edge to our graph indicating the relationship between
