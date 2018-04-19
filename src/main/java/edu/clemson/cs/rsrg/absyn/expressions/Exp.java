@@ -199,7 +199,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * 		   {@link Exp}s are {@code null}; or both are not {@code null} and are
      *         equivalent.
      */
-    public final static boolean equivalent(Exp e1, Exp e2) {
+    public static boolean equivalent(Exp e1, Exp e2) {
         return !((e1 == null ^ e2 == null))
                 && ((e1 == null && e2 == null) || e1.equivalent(e2));
     }
