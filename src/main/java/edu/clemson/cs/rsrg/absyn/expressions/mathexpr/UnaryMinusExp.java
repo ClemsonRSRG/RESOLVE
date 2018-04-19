@@ -157,16 +157,6 @@ public class UnaryMinusExp extends MathExp {
         return result;
     }
 
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link Exp} from applying the simplification step.
-     */
-    @Override
-    public final Exp simplify() {
-        return this.clone();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

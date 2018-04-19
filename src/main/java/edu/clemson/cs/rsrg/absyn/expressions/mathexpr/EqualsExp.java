@@ -150,25 +150,6 @@ public class EqualsExp extends InfixExp {
         return result;
     }
 
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        Exp simplified;
-        if (myLeftHandSide.equivalent(myRightHandSide)) {
-            simplified =
-                    MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
-        }
-        else {
-            simplified = this.clone();
-        }
-
-        return (MathExp) simplified;
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
