@@ -113,17 +113,6 @@ public class DummyExp extends MathExp {
         return new ArrayList<>();
     }
 
-    /**
-     * <p>This method is not supported, so any caller of this method will
-     * get a {@link UnsupportedOperationException} wrapped inside a
-     * {@link MiscErrorException}.</p>
-     */
-    @Override
-    public final MathExp simplify() {
-        throw new MiscErrorException("Cannot simplify a DummyExp.",
-                new UnsupportedOperationException());
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

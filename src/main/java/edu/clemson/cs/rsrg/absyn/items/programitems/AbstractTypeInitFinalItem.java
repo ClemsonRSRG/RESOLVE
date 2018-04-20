@@ -95,7 +95,7 @@ public abstract class AbstractTypeInitFinalItem
      * @param variables List of variables in this block.
      * @param statements List of statements in this block.
      */
-    public AbstractTypeInitFinalItem(Location l, ItemType type,
+    protected AbstractTypeInitFinalItem(Location l, ItemType type,
             AffectsClause affects, List<FacilityDec> facilities,
             List<VarDec> variables, List<Statement> statements) {
         super(l);

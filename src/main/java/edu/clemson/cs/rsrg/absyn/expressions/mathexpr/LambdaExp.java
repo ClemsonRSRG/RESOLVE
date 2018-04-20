@@ -202,16 +202,6 @@ public class LambdaExp extends MathExp {
         return result;
     }
 
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
