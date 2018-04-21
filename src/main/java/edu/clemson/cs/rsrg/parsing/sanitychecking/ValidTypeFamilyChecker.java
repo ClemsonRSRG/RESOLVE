@@ -84,24 +84,28 @@ public class ValidTypeFamilyChecker {
         }
 
         // Check finalization ensures clause
+        // YS: Really hackish, but no idea how to sanity check when there are receptacles involved
+        //     in the specifications. For now, we simply skip over them.
         AssertionClause finalEnsuresClause =
                 myTypeFamilyDec.getFinalization().getEnsures();
-        if (finalEnsuresClause.getAssertionExp().containsVar(exemplarAsString,
-                false)) {
-            throw new SourceErrorException(
-                    "Finalization ensures clause cannot be expressed using '"
-                            + exemplarAsString + "'.", finalEnsuresClause
-                            .getLocation());
-        }
+        if (!finalEnsuresClause.getAssertionExp().containsVar("recp", false)) {
+            if (finalEnsuresClause.getAssertionExp().containsVar(
+                    exemplarAsString, false)) {
+                throw new SourceErrorException(
+                        "Finalization ensures clause cannot be expressed using '"
+                                + exemplarAsString + "'.", finalEnsuresClause
+                                .getLocation());
+            }
 
-        // Check any which_entails clauses inside finalization ensures clause
-        if (finalEnsuresClause.getWhichEntailsExp() != null
-                && finalEnsuresClause.getWhichEntailsExp().containsVar(
-                        exemplarAsString, false)) {
-            throw new SourceErrorException(
-                    "Finalization ensures clause cannot contain an 'which_entails' clause that uses '"
-                            + exemplarAsString + "'.", finalEnsuresClause
-                            .getWhichEntailsExp().getLocation());
+            // Check any which_entails clauses inside finalization ensures clause
+            if (finalEnsuresClause.getWhichEntailsExp() != null
+                    && finalEnsuresClause.getWhichEntailsExp().containsVar(
+                            exemplarAsString, false)) {
+                throw new SourceErrorException(
+                        "Finalization ensures clause cannot contain an 'which_entails' clause that uses '"
+                                + exemplarAsString + "'.", finalEnsuresClause
+                                .getWhichEntailsExp().getLocation());
+            }
         }
     }
 
