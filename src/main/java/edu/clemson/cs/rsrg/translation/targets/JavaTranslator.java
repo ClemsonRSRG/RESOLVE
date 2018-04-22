@@ -1302,10 +1302,10 @@ public class JavaTranslator extends AbstractTranslator {
     // TODO: Add javadoc.
     private ST getOperationArgItemTemplate(OperationDec operation,
             PosSymbol qualifier, PosSymbol name) {
-        /* TODO : Try to refactor/rethink this method + op_arg_template. Too ugly.
+        // TODO : Try to refactor/rethink this method + op_arg_template. Too ugly.
         int parameterNum = 0;
         ST result =
-                myGroup.getInstanceOf("operation_argument_item").add(
+                mySTGroup.getInstanceOf("operation_argument_item").add(
                         "actualName", name.getName());
 
         if (qualifier != null) {
@@ -1314,17 +1314,20 @@ public class JavaTranslator extends AbstractTranslator {
 
         try {
             OperationEntry o =
-                    myScope.queryForOne(
-                            new NameQuery(qualifier, name,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                    false))
-                            .toOperationEntry(name.getLocation());
+                    myCurrentModuleScope
+                            .queryForOne(
+                                    new NameQuery(
+                                            qualifier,
+                                            name,
+                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            false)).toOperationEntry(
+                                    name.getLocation());
 
             for (ProgramParameterEntry p : o.getParameters()) {
                 ST castedType = getVariableTypeTemplate(p.getDeclaredType());
                 ST castedArg =
-                        myGroup.getInstanceOf("parameter").add("type",
+                        mySTGroup.getInstanceOf("parameter").add("type",
                                 castedType).add("name", "p" + parameterNum);
                 result.add("castedArguments", castedArg);
                 parameterNum++;
@@ -1346,7 +1349,7 @@ public class JavaTranslator extends AbstractTranslator {
 
             PTType returnType =
                     (operation.getReturnTy() != null) ? operation.getReturnTy()
-                            .getProgramTypeValue() : null;
+                            .getProgramType() : null;
 
             ST interior =
                     getOperationLikeTemplate(returnType, operation.getName()
@@ -1355,8 +1358,8 @@ public class JavaTranslator extends AbstractTranslator {
             myActiveTemplates.push(interior);
 
             for (ParameterVarDec p : operation.getParameters()) {
-                addParameterTemplate(p.getTy().getProgramTypeValue(), "p"
-                        + parameterNum);
+                addParameterTemplate(p.getLocation(), p.getTy()
+                        .getProgramType(), "p" + parameterNum);
                 parameterNum++;
             }
 
@@ -1364,15 +1367,15 @@ public class JavaTranslator extends AbstractTranslator {
                     realization).add("hasReturn", returnType != null);
         }
         catch (NoneProvidedException npe) {
-
+            noSuchModule(name);
         }
         catch (NoSuchSymbolException nsse) {
-            throw new RuntimeException(nsse);
+            noSuchSymbol(qualifier, name);
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse);
         }
-        return result;*/
-        return null; // TODO: Remove once we finish refactoring.
+
+        return result;
     }
 }
