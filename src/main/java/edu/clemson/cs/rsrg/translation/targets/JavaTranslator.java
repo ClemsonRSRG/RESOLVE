@@ -1299,7 +1299,16 @@ public class JavaTranslator extends AbstractTranslator {
         }
     }
 
-    // TODO: Add javadoc.
+    /**
+     * <p>This method retrieves the proper {@link ST} template for an operation
+     * as an argument.</p>
+     *
+     * @param operation An operation declaration.
+     * @param qualifier A qualifier name.
+     * @param name Name of the actual operation being passed as argument.
+     *
+     * @return A {@link ST} template.
+     */
     private ST getOperationArgItemTemplate(OperationDec operation,
             PosSymbol qualifier, PosSymbol name) {
         // TODO : Try to refactor/rethink this method + op_arg_template. Too ugly.
