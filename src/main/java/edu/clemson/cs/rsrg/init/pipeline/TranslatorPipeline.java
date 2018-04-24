@@ -164,4 +164,42 @@ public class TranslatorPipeline extends AbstractPipeline {
         return sb.toString();
     }
 
+    // TODO : See if there is a simpler, less verbose way of writing
+    // the next three methods. And also try to get them into the abstract
+    // translator.
+    /*private boolean needToTranslate(File file) {
+        boolean translate = false;
+        String inFile = file.toString();
+        String[] temp = inFile.split("\\.");
+        String ext = temp[temp.length - 1];
+        if (!onNoCompileList(file)) {
+            if (ext.equals("co") || ext.equals("rb") || ext.equals("en")
+                    || ext.equals("fa")) {
+                String javaName = modifyString(inFile, "\\." + ext, ".java");
+                File javaFile = new File(javaName);
+                if (!javaFile.exists() || sourceNewerThan(file, javaFile)) {
+                    translate = true;
+                }
+                else if (myInstanceEnvironment.flags
+                        .isFlagSet(JAVA_FLAG_TRANSLATE_CLEAN)) {
+                    translate = true;
+                }
+            }
+        }
+        return translate;
+    }
+
+    private String modifyString(String src, String find, String replace) {
+        Pattern pattern = Pattern.compile(find);
+        Matcher matcher = pattern.matcher(src);
+        return matcher.replaceAll(replace);
+    }
+
+    private boolean sourceNewerThan(File a, File b) {
+        if (a.lastModified() > b.lastModified()) {
+            return true;
+        }
+        return false;
+    }*/
+
 }
