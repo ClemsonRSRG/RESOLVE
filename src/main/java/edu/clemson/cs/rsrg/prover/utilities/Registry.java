@@ -134,4 +134,56 @@ public class Registry {
         return m_symbolToIndex.size() - 1;
     }
 
+    /**
+     * <p>This method uses the passed in integer index and attempts
+     * to compress the symbol indices.</p>
+     *
+     * @param index Integer index to be compressed.
+     *
+     * @return The compressed integer index.
+     */
+    public final int findAndCompress(int index) {
+        // early return for parent
+        if (m_symbolIndexParentArray.get(index) == index)
+            return index;
+
+        Stack<Integer> needToUpdate = new Stack<>();
+
+        assert index < m_symbolIndexParentArray.size() : "findAndCompress error";
+
+        int parent = m_symbolIndexParentArray.get(index);
+        while (parent != index) {
+            needToUpdate.push(index);
+            index = parent;
+            parent = m_symbolIndexParentArray.get(index);
+        }
+
+        while (!needToUpdate.isEmpty()) {
+            m_symbolIndexParentArray.set(needToUpdate.pop(), index);
+        }
+
+        return index;
+    }
+
+    /**
+     * <p>This method returns the integer index that represents
+     * this symbol.</p>
+     *
+     * @param symbol The symbol name we are searching.
+     *
+     * @return The associated integer index.
+     */
+    public final int getIndexForSymbol(String symbol) {
+        assert m_symbolToIndex.get(symbol) != null : symbol + " not found"
+                + m_symbolToIndex.toString();
+
+        if (!m_symbolToIndex.containsKey(symbol)) {
+            return -1;
+        }
+
+        int r = m_symbolToIndex.get(symbol);
+
+        return findAndCompress(r);
+    }
+
 }
