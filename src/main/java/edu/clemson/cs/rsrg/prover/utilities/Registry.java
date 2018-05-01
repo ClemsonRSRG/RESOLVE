@@ -27,6 +27,20 @@ import java.util.*;
 public class Registry {
 
     // ===========================================================
+    // Usage
+    // ===========================================================
+
+    /**
+     * <p>This defines the various usage types for a symbol.</p>
+     *
+     * @version 2.0
+     */
+    public enum Usage {
+        LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS_SINGULAR,
+        HASARGS_FORALL
+    }
+
+    // ===========================================================
     // Member Fields
     // ===========================================================
 
@@ -68,5 +82,56 @@ public class Registry {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>This method adds the symbol to the registry if it is new,
+     * otherwise it returns the integer representation for that symbol.</p>
+     *
+     * @param symbolName Symbol name
+     * @param symbolType Symbol's mathematical type.
+     * @param usage Symbol's usage type.
+     *
+     * @return An integer representing the symbol.
+     */
+    public final int addSymbol(String symbolName, MTType symbolType, Usage usage) {
+        symbolName = symbolName.replaceAll("\\p{Cc}", "");
+        if (symbolName.contains("lambda"))
+            m_lambda_names.add(symbolName);
+        assert symbolName.length() != 0 : "blank symbol error in addSymbol";
+        if (isSymbolInTable(symbolName)) {
+            return getIndexForSymbol(symbolName);
+        }
+        if (symbolName.contains(".")) {
+            m_partTypes.add(symbolName);
+        }
+
+        if (m_typeToSetOfOperators.containsKey(symbolType)) {
+            m_typeToSetOfOperators.get(symbolType).add(symbolName);
+        }
+        else {
+            TreeSet<String> t = new TreeSet<>();
+            t.add(symbolName);
+            assert symbolType != null : symbolName + " has null type";
+            if (symbolType != null) {
+                m_typeToSetOfOperators.put(symbolType, t);
+                m_typeDictionary.put(symbolType.toString().replace("'", ""),
+                        symbolType);
+            }
+        }
+
+        m_symbolToUsage.put(symbolName, usage);
+        if (usage.equals(Usage.FORALL) || usage.equals(Usage.HASARGS_FORALL)) {
+            m_foralls.add(symbolName);
+        }
+        int incomingsize = m_symbolToIndex.size();
+        m_symbolToIndex.put(symbolName, m_symbolToIndex.size());
+        m_indexToSymbol.add(symbolName);
+        m_indexToType.add(symbolType);
+        m_symbolIndexParentArray.add(incomingsize);
+        assert m_symbolToIndex.size() == m_indexToSymbol.size();
+        assert incomingsize < m_symbolToIndex.size();
+
+        return m_symbolToIndex.size() - 1;
+    }
 
 }
