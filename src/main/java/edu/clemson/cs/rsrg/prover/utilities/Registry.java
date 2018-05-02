@@ -186,6 +186,37 @@ public class Registry {
         return findAndCompress(r);
     }
 
+    /**
+     * <p>This method substitutes the indices of A and B.</p>
+     * 
+     * @param opIndexA index that becomes parent of B
+     * @param opIndexB index to be replaced by opIndexA
+     */
+    public final void substitute(int opIndexA, int opIndexB) {
+        MTType aType = getTypeByIndex(opIndexA);
+        MTType bType = getTypeByIndex(opIndexB);
+
+        // set usage to most restricted: i.e literal over created over forall
+        // this is because the earliest now becomes the parent
+        String aS = getSymbolForIndex(opIndexA);
+        String bS = getSymbolForIndex(opIndexB);
+        Usage a_us = getUsage(aS);
+        Usage b_us = getUsage(bS);
+        if (!a_us.equals(Usage.FORALL) && isSubtype(bType, aType)) {
+            m_indexToType.set(opIndexA, bType);
+        }
+        if (a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)) {
+            m_symbolToUsage.put(aS, Usage.LITERAL);
+        }
+        else if (a_us.equals(Usage.CREATED) || b_us.equals(Usage.CREATED)) {
+            m_symbolToUsage.put(aS, Usage.CREATED);
+        }
+        if (m_partTypes.contains(bS))
+            m_partTypes.add(aS);
+        m_unusedIndices.push(opIndexB);
+        m_symbolIndexParentArray.set(opIndexB, opIndexA);
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
