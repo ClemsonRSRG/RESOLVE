@@ -186,4 +186,21 @@ public class Registry {
         return findAndCompress(r);
     }
 
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method that checks to see if a symbol is in
+     * our registry table.</p>
+     *
+     * @param symbol The symbol name we are searching.
+     *
+     * @return {@code true} if it is in our registry table,
+     * {@code false} otherwise.
+     */
+    private boolean isSymbolInTable(String symbol) {
+        return m_symbolToIndex.containsKey(symbol);
+    }
+
 }
