@@ -187,8 +187,38 @@ public class Registry {
     }
 
     /**
+     * <p>This method returns the symbol located at the
+     * specified index.</p>
+     *
+     * @param index An index referring to a symbol in our registry.
+     *
+     * @return The associated symbol.
+     */
+    public final String getSymbolForIndex(int index) {
+        assert index >= 0 : "invalid index: " + index
+                + " in Registry.getSymbolForIndex";
+
+        String rS = m_indexToSymbol.get(findAndCompress(index));
+        assert rS.length() != 0 : "Blank symbol error";
+
+        return rS;
+    }
+
+    /**
+     * <p>This method returns the mathematical type of the
+     * symbol at the specified index.</p>
+     *
+     * @param index An index referring to a symbol in our registry.
+     *
+     * @return A {@link MTType}.
+     */
+    public final MTType getTypeByIndex(int index) {
+        return m_indexToType.get(findAndCompress(index));
+    }
+
+    /**
      * <p>This method substitutes the indices of A and B.</p>
-     * 
+     *
      * @param opIndexA index that becomes parent of B
      * @param opIndexB index to be replaced by opIndexA
      */
@@ -205,14 +235,18 @@ public class Registry {
         if (!a_us.equals(Usage.FORALL) && isSubtype(bType, aType)) {
             m_indexToType.set(opIndexA, bType);
         }
+
         if (a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)) {
             m_symbolToUsage.put(aS, Usage.LITERAL);
         }
         else if (a_us.equals(Usage.CREATED) || b_us.equals(Usage.CREATED)) {
             m_symbolToUsage.put(aS, Usage.CREATED);
         }
-        if (m_partTypes.contains(bS))
+
+        if (m_partTypes.contains(bS)) {
             m_partTypes.add(aS);
+        }
+
         m_unusedIndices.push(opIndexB);
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
