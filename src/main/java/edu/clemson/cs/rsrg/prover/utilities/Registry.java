@@ -187,6 +187,27 @@ public class Registry {
     }
 
     /**
+     * <p>This method returns all the parent symbols that
+     * have the same type.</p>
+     *
+     * @param t A mathematical type.
+     *
+     * @return A set of symbols that have type {@code t}.
+     */
+    public final Set<String> getParentsByType(MTType t) {
+        Set<String> rSet = getSetMatchingType(t);
+        Set<String> fSet = new HashSet<>();
+        for (String s : rSet) {
+            int id = getIndexForSymbol(s);
+            if (m_symbolIndexParentArray.get(id) == id) {
+                fSet.add(s);
+            }
+        }
+
+        return fSet;
+    }
+
+    /**
      * <p>This method returns the symbol located at the
      * specified index.</p>
      *
@@ -291,6 +312,37 @@ public class Registry {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method for retrieving all symbols
+     * that are associated with {@code t} or any of its subtypes.</p>
+     *
+     * @param t A mathematical type.
+     *
+     * @return A set of symbol names.
+     */
+    private Set<String> getSetMatchingType(MTType t) {
+        assert t != null : "request for null type";
+        Set<String> rSet = new HashSet<>();
+        Set<MTType> allTypesInSet = m_typeToSetOfOperators.keySet();
+
+        assert !m_typeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
+        assert allTypesInSet != null : "null set in Registry.getSetMatchingType";
+
+        // if there are subtypes of t, return those too
+        for (MTType m : allTypesInSet) {
+            assert m != null : "null entry in allTypesInSet";
+            if (isSubtype(m, t)) {
+                rSet.addAll(m_typeToSetOfOperators.get(m));
+            }
+        }
+
+        if (m_typeToSetOfOperators.get(t) != null) {
+            rSet.addAll(m_typeToSetOfOperators.get(t));
+        }
+
+        return rSet;
+    }
 
     /**
      * <p>An helper method that checks to see if a symbol is in
