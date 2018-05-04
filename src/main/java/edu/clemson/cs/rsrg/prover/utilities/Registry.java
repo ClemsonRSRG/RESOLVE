@@ -217,6 +217,43 @@ public class Registry {
     }
 
     /**
+     * <p>This method returns the usage type for the specified
+     * symbol.</p>
+     *
+     * @param symbol The symbol name we are searching.
+     *
+     * @return The usage type.
+     */
+    public final Usage getUsage(String symbol) {
+        return m_symbolToUsage.get(symbol);
+    }
+
+    /**
+     * <p>This method checks if {@code a} is a subtype of
+     * {@code b} and caches the result for future queries.</p>
+     *
+     * @param a Mathematical type A.
+     * @param b Mathematical type B.
+     *
+     * @return {@code true} if it is a subtype, {@code false} otherwise.
+     */
+    public final boolean isSubtype(MTType a, MTType b) {
+        String catKey = a.toString() + "," + b.toString();
+
+        // Check our cached results
+        if (m_cached_isSubtype.containsKey(catKey)) {
+            return m_cached_isSubtype.get(catKey);
+        }
+        else {
+            // Determine if it is subtype and add it to our cache
+            boolean is = a.isSubtypeOf(b);
+            m_cached_isSubtype.put(catKey, is);
+
+            return is;
+        }
+    }
+
+    /**
      * <p>This method substitutes the indices of A and B.</p>
      *
      * @param opIndexA index that becomes parent of B
