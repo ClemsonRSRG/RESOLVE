@@ -165,6 +165,47 @@ public class Registry {
         return index;
     }
 
+    //
+
+    /**
+     * <p>This method gets the set of children symbol names.</p>
+     *
+     * <p><em>Note:</em> Use sparingly, call with a parent symbol.
+     * Assumes parent array is compressed.</p>
+     *
+     * @param parent A parent symbol name.
+     *
+     * @return A set of children symbol names.
+     */
+    public final Set<String> getChildren(String parent) {
+        int pInt = getIndexForSymbol(parent);
+        HashSet<Integer> ch = new HashSet<>();
+        for (int i = 0; i < m_symbolIndexParentArray.size(); ++i) {
+            if (i == pInt)
+                continue;
+            if (m_symbolIndexParentArray.get(i) == pInt) {
+                ch.add(i);
+            }
+        }
+
+        HashSet<String> rSet = new HashSet<>();
+        for (Integer i : ch) {
+            rSet.add(m_indexToSymbol.get(i));
+        }
+
+        return rSet;
+    }
+
+    /**
+     * <p>This method returns all the symbols that are
+     * universally bounded.</p>
+     *
+     * @return A set of symbols names.
+     */
+    public final Set<String> getForAlls() {
+        return m_foralls;
+    }
+
     /**
      * <p>This method returns the integer index that represents
      * this symbol.</p>
@@ -205,6 +246,22 @@ public class Registry {
         }
 
         return fSet;
+    }
+
+    /**
+     * <p>This method returns all the root symbol for {@code sym}.</p>
+     *
+     * @param sym The symbol name we are searching.
+     *
+     * @return Root symbol name.
+     */
+    public final String getRootSymbolForSymbol(String sym) {
+        if (m_symbolToIndex.containsKey(sym)) {
+            return getSymbolForIndex(getIndexForSymbol(sym));
+        }
+        else {
+            return "";
+        }
     }
 
     /**
@@ -250,6 +307,21 @@ public class Registry {
     }
 
     /**
+     * <p>This method checks to see if the operation is
+     * commutative.</p>
+     *
+     * @param opNum An index referring to an operation.
+     *
+     * @return {@code true} if it is commutative,
+     * {@code false} otherwise.
+     */
+    public final boolean isCommutative(int opNum) {
+        String root = getSymbolForIndex(opNum);
+
+        return isCommutative(root);
+    }
+
+    /**
      * <p>This method checks if {@code a} is a subtype of
      * {@code b} and caches the result for future queries.</p>
      *
@@ -272,6 +344,26 @@ public class Registry {
 
             return is;
         }
+    }
+
+    /**
+     * <p>This method converts a mathematical type to a symbol.</p>
+     *
+     * @param symbolType A mathematical type.
+     * @param isVariable A flag that indicates if this is a variable.
+     *
+     * @return The index associated with this new symbol.
+     */
+    public final int makeSymbol(MTType symbolType, boolean isVariable) {
+        String symbolName;
+        if (isVariable) {
+            symbolName = String.format(m_cvFormat, m_uniqueCounter++);
+        }
+        else {
+            symbolName = String.format(m_ccFormat, m_uniqueCounter++);
+        }
+
+        return addSymbol(symbolName, symbolType, Usage.CREATED);
     }
 
     /**
@@ -342,6 +434,19 @@ public class Registry {
         }
 
         return rSet;
+    }
+
+    /**
+     * <p>An helper method that checks if an symbol
+     * is a commutative operator.</p>
+     *
+     * @param op The symbol name we are searching.
+     *
+     * @return {@code true} if {@code op} is an commutative
+     * operator, {@code false} otherwise.
+     */
+    private boolean isCommutative(String op) {
+        return m_commutative_operators.contains(op);
     }
 
     /**
