@@ -76,6 +76,12 @@ public class Registry {
     // Constructors
     // ===========================================================
 
+    /**
+     * <p>This constructs a registry table containing the various different
+     * pieces of information on symbols we have encountered.</p>
+     *
+     * @param g The current type graph.
+     */
     public Registry(TypeGraph g) {
         m_symbolToIndex = new TreeMap<String, Integer>();
         m_typeToSetOfOperators = new HashMap<MTType, TreeSet<String>>();
@@ -126,12 +132,16 @@ public class Registry {
      */
     public final int addSymbol(String symbolName, MTType symbolType, Usage usage) {
         symbolName = symbolName.replaceAll("\\p{Cc}", "");
-        if (symbolName.contains("lambda"))
+        if (symbolName.contains("lambda")) {
             m_lambda_names.add(symbolName);
+        }
+
         assert symbolName.length() != 0 : "blank symbol error in addSymbol";
+
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
         }
+
         if (symbolName.contains(".")) {
             m_partTypes.add(symbolName);
         }
@@ -151,14 +161,17 @@ public class Registry {
         }
 
         mySymbolToUsage.put(symbolName, usage);
+
         if (usage.equals(Usage.FORALL) || usage.equals(Usage.HASARGS_FORALL)) {
             myForAlls.add(symbolName);
         }
+
         int incomingsize = m_symbolToIndex.size();
         m_symbolToIndex.put(symbolName, m_symbolToIndex.size());
         m_indexToSymbol.add(symbolName);
         m_indexToType.add(symbolType);
         m_symbolIndexParentArray.add(incomingsize);
+
         assert m_symbolToIndex.size() == m_indexToSymbol.size();
         assert incomingsize < m_symbolToIndex.size();
 
