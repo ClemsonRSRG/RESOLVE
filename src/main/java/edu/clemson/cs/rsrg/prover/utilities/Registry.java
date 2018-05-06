@@ -44,6 +44,34 @@ public class Registry {
     // Member Fields
     // ===========================================================
 
+    /** <p>A set of symbol names that are universally quantified.</p> */
+    private final Set<String> myForAlls;
+
+    /** <p>A map from symbol name to usage type.</p> */
+    private final Map<String, Usage> mySymbolToUsage;
+
+    /** <p>A map from symbol name to type.</p> */
+    private final Map<String, MTType> myTypeDictionary;
+
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
+    // -----------------------------------------------------------
+    // MakeSymbol-related
+    // -----------------------------------------------------------
+
+    /** <p>Regex for regular symbols.</p> */
+    private final String myCCFormat = "¢c%03d";
+
+    /** <p>Regex for variable symbols.</p> */
+    private final String myCVFormat = "¢v%03d";
+
+    /** <p>Counter for keeping track of number of symbols created.</p> */
+    private int myUniqueCounter = 0;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -55,15 +83,18 @@ public class Registry {
         m_indexToType = new ArrayList<MTType>();
         m_symbolIndexParentArray = new ArrayList<Integer>();
         m_unusedIndices = new Stack<Integer>();
-        m_symbolToUsage = new HashMap<String, Usage>(2048, .5f); // entries won't change
-        m_foralls = new HashSet<String>();
-        m_typeGraph = g;
-        m_typeDictionary = new TreeMap<String, MTType>();
+        mySymbolToUsage = new HashMap<>(2048, .5f); // entries won't change
+        myForAlls = new HashSet<>();
+        myTypeGraph = g;
+        myTypeDictionary = new TreeMap<>();
+
         addSymbol("=B", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
                 Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         addSymbol("false", g.BOOLEAN, Usage.LITERAL);
+
         assert (getIndexForSymbol("=B") == 0);
+
         m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
         m_lambda_names = new HashSet<String>();
         m_partTypes = new HashSet<String>();
@@ -114,14 +145,14 @@ public class Registry {
             assert symbolType != null : symbolName + " has null type";
             if (symbolType != null) {
                 m_typeToSetOfOperators.put(symbolType, t);
-                m_typeDictionary.put(symbolType.toString().replace("'", ""),
+                myTypeDictionary.put(symbolType.toString().replace("'", ""),
                         symbolType);
             }
         }
 
-        m_symbolToUsage.put(symbolName, usage);
+        mySymbolToUsage.put(symbolName, usage);
         if (usage.equals(Usage.FORALL) || usage.equals(Usage.HASARGS_FORALL)) {
-            m_foralls.add(symbolName);
+            myForAlls.add(symbolName);
         }
         int incomingsize = m_symbolToIndex.size();
         m_symbolToIndex.put(symbolName, m_symbolToIndex.size());
@@ -203,7 +234,7 @@ public class Registry {
      * @return A set of symbols names.
      */
     public final Set<String> getForAlls() {
-        return m_foralls;
+        return myForAlls;
     }
 
     /**
@@ -295,6 +326,15 @@ public class Registry {
     }
 
     /**
+     * <p>The type graph containing all the type relationships.</p>
+     *
+     * @return The type graph for the compiler.
+     */
+    public final TypeGraph getTypeGraph() {
+        return myTypeGraph;
+    }
+
+    /**
      * <p>This method returns the usage type for the specified
      * symbol.</p>
      *
@@ -303,7 +343,7 @@ public class Registry {
      * @return The usage type.
      */
     public final Usage getUsage(String symbol) {
-        return m_symbolToUsage.get(symbol);
+        return mySymbolToUsage.get(symbol);
     }
 
     /**
@@ -357,10 +397,10 @@ public class Registry {
     public final int makeSymbol(MTType symbolType, boolean isVariable) {
         String symbolName;
         if (isVariable) {
-            symbolName = String.format(m_cvFormat, m_uniqueCounter++);
+            symbolName = String.format(myCVFormat, myUniqueCounter++);
         }
         else {
-            symbolName = String.format(m_ccFormat, m_uniqueCounter++);
+            symbolName = String.format(myCCFormat, myUniqueCounter++);
         }
 
         return addSymbol(symbolName, symbolType, Usage.CREATED);
@@ -387,10 +427,10 @@ public class Registry {
         }
 
         if (a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)) {
-            m_symbolToUsage.put(aS, Usage.LITERAL);
+            mySymbolToUsage.put(aS, Usage.LITERAL);
         }
         else if (a_us.equals(Usage.CREATED) || b_us.equals(Usage.CREATED)) {
-            m_symbolToUsage.put(aS, Usage.CREATED);
+            mySymbolToUsage.put(aS, Usage.CREATED);
         }
 
         if (m_partTypes.contains(bS)) {
