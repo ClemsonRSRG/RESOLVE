@@ -44,8 +44,17 @@ public class Registry {
     // Member Fields
     // ===========================================================
 
+    /** <p>A map that caches the isSubtype results.</p> */
+    private final Map<String, Boolean> myCachedIsSubtype;
+
+    /** <p>A set of operators that are commutative.</p> */
+    private final Set<String> myCommutativeOperators;
+
     /** <p>A set of symbol names that are universally quantified.</p> */
     private final Set<String> myForAlls;
+
+    /** <p>A set that keeps track of dotted symbols.</p> */
+    private final Set<String> myPartTypes;
 
     /** <p>A map from symbol name to usage type.</p> */
     private final Map<String, Usage> mySymbolToUsage;
@@ -58,6 +67,19 @@ public class Registry {
      * between different math types.</p>
      */
     private final TypeGraph myTypeGraph;
+
+    /** <p>A stack containing indices that have been set to unused.</p> */
+    private final Stack<Integer> myUnusedIndices;
+
+    // -----------------------------------------------------------
+    // Public fields
+    // -----------------------------------------------------------
+
+    /** <p>A tree map from symbol names to their associated index.</p> */
+    public final TreeMap<String, Integer> mySymbolToIndex;
+
+    /** <p>A map from a mathematical type to the set of associated operators.</p> */
+    public final Map<MTType, TreeSet<String>> myTypeToSetOfOperators;
 
     // -----------------------------------------------------------
     // MakeSymbol-related
@@ -83,12 +105,12 @@ public class Registry {
      * @param g The current type graph.
      */
     public Registry(TypeGraph g) {
-        m_symbolToIndex = new TreeMap<String, Integer>();
-        m_typeToSetOfOperators = new HashMap<MTType, TreeSet<String>>();
+        mySymbolToIndex = new TreeMap<>();
+        myTypeToSetOfOperators = new HashMap<>();
         m_indexToSymbol = new ArrayList<String>();
         m_indexToType = new ArrayList<MTType>();
         m_symbolIndexParentArray = new ArrayList<Integer>();
-        m_unusedIndices = new Stack<Integer>();
+        myUnusedIndices = new Stack<>();
         mySymbolToUsage = new HashMap<>(2048, .5f); // entries won't change
         myForAlls = new HashSet<>();
         myTypeGraph = g;
@@ -103,17 +125,18 @@ public class Registry {
 
         m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
         m_lambda_names = new HashSet<String>();
-        m_partTypes = new HashSet<String>();
+        myPartTypes = new HashSet<>();
         m_partTypeParentArray = new HashMap<Integer, ArrayList<Integer>>();
 
         // could look for these in theorems instead
-        m_commutative_operators = new HashSet<String>();
-        m_commutative_operators.add("+N");
-        m_commutative_operators.add("+Z");
-        m_commutative_operators.add("=B");
-        m_commutative_operators.add("andB");
-        m_commutative_operators.add("orB");
-        m_cached_isSubtype = new HashMap<String, Boolean>();
+        myCommutativeOperators = new HashSet<>();
+        myCommutativeOperators.add("+N");
+        myCommutativeOperators.add("+Z");
+        myCommutativeOperators.add("=B");
+        myCommutativeOperators.add("andB");
+        myCommutativeOperators.add("orB");
+
+        myCachedIsSubtype = new HashMap<>();
     }
 
     // ===========================================================
@@ -143,18 +166,18 @@ public class Registry {
         }
 
         if (symbolName.contains(".")) {
-            m_partTypes.add(symbolName);
+            myPartTypes.add(symbolName);
         }
 
-        if (m_typeToSetOfOperators.containsKey(symbolType)) {
-            m_typeToSetOfOperators.get(symbolType).add(symbolName);
+        if (myTypeToSetOfOperators.containsKey(symbolType)) {
+            myTypeToSetOfOperators.get(symbolType).add(symbolName);
         }
         else {
             TreeSet<String> t = new TreeSet<>();
             t.add(symbolName);
             assert symbolType != null : symbolName + " has null type";
             if (symbolType != null) {
-                m_typeToSetOfOperators.put(symbolType, t);
+                myTypeToSetOfOperators.put(symbolType, t);
                 myTypeDictionary.put(symbolType.toString().replace("'", ""),
                         symbolType);
             }
@@ -166,16 +189,16 @@ public class Registry {
             myForAlls.add(symbolName);
         }
 
-        int incomingsize = m_symbolToIndex.size();
-        m_symbolToIndex.put(symbolName, m_symbolToIndex.size());
+        int incomingsize = mySymbolToIndex.size();
+        mySymbolToIndex.put(symbolName, mySymbolToIndex.size());
         m_indexToSymbol.add(symbolName);
         m_indexToType.add(symbolType);
         m_symbolIndexParentArray.add(incomingsize);
 
-        assert m_symbolToIndex.size() == m_indexToSymbol.size();
-        assert incomingsize < m_symbolToIndex.size();
+        assert mySymbolToIndex.size() == m_indexToSymbol.size();
+        assert incomingsize < mySymbolToIndex.size();
 
-        return m_symbolToIndex.size() - 1;
+        return mySymbolToIndex.size() - 1;
     }
 
     /**
@@ -259,14 +282,14 @@ public class Registry {
      * @return The associated integer index.
      */
     public final int getIndexForSymbol(String symbol) {
-        assert m_symbolToIndex.get(symbol) != null : symbol + " not found"
-                + m_symbolToIndex.toString();
+        assert mySymbolToIndex.get(symbol) != null : symbol + " not found"
+                + mySymbolToIndex.toString();
 
-        if (!m_symbolToIndex.containsKey(symbol)) {
+        if (!mySymbolToIndex.containsKey(symbol)) {
             return -1;
         }
 
-        int r = m_symbolToIndex.get(symbol);
+        int r = mySymbolToIndex.get(symbol);
 
         return findAndCompress(r);
     }
@@ -300,7 +323,7 @@ public class Registry {
      * @return Root symbol name.
      */
     public final String getRootSymbolForSymbol(String sym) {
-        if (m_symbolToIndex.containsKey(sym)) {
+        if (mySymbolToIndex.containsKey(sym)) {
             return getSymbolForIndex(getIndexForSymbol(sym));
         }
         else {
@@ -387,13 +410,13 @@ public class Registry {
         String catKey = a.toString() + "," + b.toString();
 
         // Check our cached results
-        if (m_cached_isSubtype.containsKey(catKey)) {
-            return m_cached_isSubtype.get(catKey);
+        if (myCachedIsSubtype.containsKey(catKey)) {
+            return myCachedIsSubtype.get(catKey);
         }
         else {
             // Determine if it is subtype and add it to our cache
             boolean is = a.isSubtypeOf(b);
-            m_cached_isSubtype.put(catKey, is);
+            myCachedIsSubtype.put(catKey, is);
 
             return is;
         }
@@ -446,11 +469,11 @@ public class Registry {
             mySymbolToUsage.put(aS, Usage.CREATED);
         }
 
-        if (m_partTypes.contains(bS)) {
-            m_partTypes.add(aS);
+        if (myPartTypes.contains(bS)) {
+            myPartTypes.add(aS);
         }
 
-        m_unusedIndices.push(opIndexB);
+        myUnusedIndices.push(opIndexB);
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
 
@@ -469,21 +492,21 @@ public class Registry {
     private Set<String> getSetMatchingType(MTType t) {
         assert t != null : "request for null type";
         Set<String> rSet = new HashSet<>();
-        Set<MTType> allTypesInSet = m_typeToSetOfOperators.keySet();
+        Set<MTType> allTypesInSet = myTypeToSetOfOperators.keySet();
 
-        assert !m_typeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
+        assert !myTypeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
         assert allTypesInSet != null : "null set in Registry.getSetMatchingType";
 
         // if there are subtypes of t, return those too
         for (MTType m : allTypesInSet) {
             assert m != null : "null entry in allTypesInSet";
             if (isSubtype(m, t)) {
-                rSet.addAll(m_typeToSetOfOperators.get(m));
+                rSet.addAll(myTypeToSetOfOperators.get(m));
             }
         }
 
-        if (m_typeToSetOfOperators.get(t) != null) {
-            rSet.addAll(m_typeToSetOfOperators.get(t));
+        if (myTypeToSetOfOperators.get(t) != null) {
+            rSet.addAll(myTypeToSetOfOperators.get(t));
         }
 
         return rSet;
@@ -499,7 +522,7 @@ public class Registry {
      * operator, {@code false} otherwise.
      */
     private boolean isCommutative(String op) {
-        return m_commutative_operators.contains(op);
+        return myCommutativeOperators.contains(op);
     }
 
     /**
@@ -512,7 +535,7 @@ public class Registry {
      * {@code false} otherwise.
      */
     private boolean isSymbolInTable(String symbol) {
-        return m_symbolToIndex.containsKey(symbol);
+        return mySymbolToIndex.containsKey(symbol);
     }
 
 }
