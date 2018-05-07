@@ -53,8 +53,14 @@ public class Registry {
     /** <p>A set of symbol names that are universally quantified.</p> */
     private final Set<String> myForAlls;
 
+    /** <p>A set of names that come from some lambda expression.</p> */
+    private final Set<String> myLambdaNames;
+
     /** <p>A set that keeps track of dotted symbols.</p> */
     private final Set<String> myPartTypes;
+
+    /** <p>A map from part type index to parent array.</p> */
+    private final Map<Integer, ArrayList<Integer>> myPartTypeParentArray;
 
     /** <p>A map from symbol name to usage type.</p> */
     private final Map<String, Usage> mySymbolToUsage;
@@ -75,11 +81,20 @@ public class Registry {
     // Public fields
     // -----------------------------------------------------------
 
+    /** <p>A list of symbol names.</p> */
+    public final ArrayList<String> myIndexToSymbol;
+
+    /** <p>A list of mathematical types.</p> */
+    public final ArrayList<MTType> myIndexToType;
+
     /** <p>A tree map from symbol names to their associated index.</p> */
     public final TreeMap<String, Integer> mySymbolToIndex;
 
     /** <p>A map from a mathematical type to the set of associated operators.</p> */
     public final Map<MTType, TreeSet<String>> myTypeToSetOfOperators;
+
+    /** <p>A list of indices referring to a parent array.</p> */
+    public final ArrayList<Integer> mySymbolIndexParentArray;
 
     // -----------------------------------------------------------
     // MakeSymbol-related
@@ -107,9 +122,9 @@ public class Registry {
     public Registry(TypeGraph g) {
         mySymbolToIndex = new TreeMap<>();
         myTypeToSetOfOperators = new HashMap<>();
-        m_indexToSymbol = new ArrayList<String>();
-        m_indexToType = new ArrayList<MTType>();
-        m_symbolIndexParentArray = new ArrayList<Integer>();
+        myIndexToSymbol = new ArrayList<>();
+        myIndexToType = new ArrayList<>();
+        mySymbolIndexParentArray = new ArrayList<>();
         myUnusedIndices = new Stack<>();
         mySymbolToUsage = new HashMap<>(2048, .5f); // entries won't change
         myForAlls = new HashSet<>();
@@ -123,10 +138,9 @@ public class Registry {
 
         assert (getIndexForSymbol("=B") == 0);
 
-        m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
-        m_lambda_names = new HashSet<String>();
+        myLambdaNames = new HashSet<>();
         myPartTypes = new HashSet<>();
-        m_partTypeParentArray = new HashMap<Integer, ArrayList<Integer>>();
+        myPartTypeParentArray = new HashMap<>();
 
         // could look for these in theorems instead
         myCommutativeOperators = new HashSet<>();
@@ -156,7 +170,7 @@ public class Registry {
     public final int addSymbol(String symbolName, MTType symbolType, Usage usage) {
         symbolName = symbolName.replaceAll("\\p{Cc}", "");
         if (symbolName.contains("lambda")) {
-            m_lambda_names.add(symbolName);
+            myLambdaNames.add(symbolName);
         }
 
         assert symbolName.length() != 0 : "blank symbol error in addSymbol";
@@ -191,11 +205,11 @@ public class Registry {
 
         int incomingsize = mySymbolToIndex.size();
         mySymbolToIndex.put(symbolName, mySymbolToIndex.size());
-        m_indexToSymbol.add(symbolName);
-        m_indexToType.add(symbolType);
-        m_symbolIndexParentArray.add(incomingsize);
+        myIndexToSymbol.add(symbolName);
+        myIndexToType.add(symbolType);
+        mySymbolIndexParentArray.add(incomingsize);
 
-        assert mySymbolToIndex.size() == m_indexToSymbol.size();
+        assert mySymbolToIndex.size() == myIndexToSymbol.size();
         assert incomingsize < mySymbolToIndex.size();
 
         return mySymbolToIndex.size() - 1;
@@ -211,22 +225,22 @@ public class Registry {
      */
     public final int findAndCompress(int index) {
         // early return for parent
-        if (m_symbolIndexParentArray.get(index) == index)
+        if (mySymbolIndexParentArray.get(index) == index)
             return index;
 
         Stack<Integer> needToUpdate = new Stack<>();
 
-        assert index < m_symbolIndexParentArray.size() : "findAndCompress error";
+        assert index < mySymbolIndexParentArray.size() : "findAndCompress error";
 
-        int parent = m_symbolIndexParentArray.get(index);
+        int parent = mySymbolIndexParentArray.get(index);
         while (parent != index) {
             needToUpdate.push(index);
             index = parent;
-            parent = m_symbolIndexParentArray.get(index);
+            parent = mySymbolIndexParentArray.get(index);
         }
 
         while (!needToUpdate.isEmpty()) {
-            m_symbolIndexParentArray.set(needToUpdate.pop(), index);
+            mySymbolIndexParentArray.set(needToUpdate.pop(), index);
         }
 
         return index;
@@ -247,17 +261,17 @@ public class Registry {
     public final Set<String> getChildren(String parent) {
         int pInt = getIndexForSymbol(parent);
         HashSet<Integer> ch = new HashSet<>();
-        for (int i = 0; i < m_symbolIndexParentArray.size(); ++i) {
+        for (int i = 0; i < mySymbolIndexParentArray.size(); ++i) {
             if (i == pInt)
                 continue;
-            if (m_symbolIndexParentArray.get(i) == pInt) {
+            if (mySymbolIndexParentArray.get(i) == pInt) {
                 ch.add(i);
             }
         }
 
         HashSet<String> rSet = new HashSet<>();
         for (Integer i : ch) {
-            rSet.add(m_indexToSymbol.get(i));
+            rSet.add(myIndexToSymbol.get(i));
         }
 
         return rSet;
@@ -307,7 +321,7 @@ public class Registry {
         Set<String> fSet = new HashSet<>();
         for (String s : rSet) {
             int id = getIndexForSymbol(s);
-            if (m_symbolIndexParentArray.get(id) == id) {
+            if (mySymbolIndexParentArray.get(id) == id) {
                 fSet.add(s);
             }
         }
@@ -343,7 +357,7 @@ public class Registry {
         assert index >= 0 : "invalid index: " + index
                 + " in Registry.getSymbolForIndex";
 
-        String rS = m_indexToSymbol.get(findAndCompress(index));
+        String rS = myIndexToSymbol.get(findAndCompress(index));
         assert rS.length() != 0 : "Blank symbol error";
 
         return rS;
@@ -358,7 +372,7 @@ public class Registry {
      * @return A {@link MTType}.
      */
     public final MTType getTypeByIndex(int index) {
-        return m_indexToType.get(findAndCompress(index));
+        return myIndexToType.get(findAndCompress(index));
     }
 
     /**
@@ -459,7 +473,7 @@ public class Registry {
         Usage a_us = getUsage(aS);
         Usage b_us = getUsage(bS);
         if (!a_us.equals(Usage.FORALL) && isSubtype(bType, aType)) {
-            m_indexToType.set(opIndexA, bType);
+            myIndexToType.set(opIndexA, bType);
         }
 
         if (a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)) {
@@ -474,7 +488,7 @@ public class Registry {
         }
 
         myUnusedIndices.push(opIndexB);
-        m_symbolIndexParentArray.set(opIndexB, opIndexA);
+        mySymbolIndexParentArray.set(opIndexB, opIndexA);
     }
 
     // ===========================================================
