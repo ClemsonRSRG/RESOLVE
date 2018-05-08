@@ -27,26 +27,47 @@ public class NormalizedAtomicExpression {
     // Member Fields
     // ===========================================================
 
-    private final int[] m_expression;
-    private int m_classConstant;
-    private int arity; // number of arguments
-    private final Registry m_registry;
-    private Map<String, Integer> m_opMmap;
-    private Set<Integer> m_opIdSet;
-    private Map<String, Integer> m_argMmap;
+    /** <p>A map from argument name to its integer representation.</p> */
+    private Map<String, Integer> myArgMap;
+
+    /** <p>Number of arguments</p> */
+    private int myArity;
+
+    /** <p>Integer index representing the root symbol.</p> */
+    private int myClassConstant;
+
+    /** <p>Index for each normalized atomic expression.</p> */
+    private final int[] myExpression;
+
+    /** <p>A set of operation ids.</p> */
+    private Set<Integer> myOpIdSet;
+
+    /** <p>A map from operation name to its integer representation.</p> */
+    private Map<String, Integer> myOpMap;
+
+    /** <p>Registry for symbols that we have encountered so far.</p> */
+    private final Registry myRegistry;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
+    /**
+     * <p>This constructs a normalized atomic expression.</p>
+     *
+     * @param registry A registry of symbols encountered so far.
+     * @param intArray An integer array representing each of the symbols
+     *                 in this expression.
+     */
     public NormalizedAtomicExpression(Registry registry, int[] intArray) {
-        m_registry = registry;
-        arity = intArray.length - 1;
-        if (!m_registry.isCommutative(intArray[0])) {
-            m_expression = intArray;
+        myRegistry = registry;
+        myArity = intArray.length - 1;
+
+        if (!myRegistry.isCommutative(intArray[0])) {
+            myExpression = intArray;
         }
         else {
-            int[] ord = new int[arity];
+            int[] ord = new int[myArity];
             System.arraycopy(intArray, 1, ord, 0, intArray.length - 1);
 
             Arrays.sort(ord);
@@ -55,10 +76,10 @@ public class NormalizedAtomicExpression {
             ne[0] = intArray[0];
             System.arraycopy(ord, 0, ne, 1, ord.length);
 
-            m_expression = ne;
+            myExpression = ne;
         }
 
-        m_classConstant = -1;
+        myClassConstant = -1;
     }
 
     // ===========================================================
@@ -70,64 +91,64 @@ public class NormalizedAtomicExpression {
         if (o instanceof NormalizedAtomicExpression) {
             NormalizedAtomicExpression other = (NormalizedAtomicExpression) o;
 
-            return Arrays.equals(m_expression, other.m_expression)
-                    && other.m_registry == m_registry;
+            return Arrays.equals(myExpression, other.myExpression)
+                    && other.myRegistry == myRegistry;
         }
 
         return false;
     }
 
     public final Map<String, Integer> getOperatorsAsStrings(boolean justArguments) {
-        if (justArguments && m_argMmap != null) {
-            return new HashMap<>(m_argMmap);
+        if (justArguments && myArgMap != null) {
+            return new HashMap<>(myArgMap);
         }
-        if (!justArguments && m_opMmap != null) {
-            return new HashMap<>(m_opMmap);
+        if (!justArguments && myOpMap != null) {
+            return new HashMap<>(myOpMap);
         }
 
-        m_argMmap = new HashMap<>();
+        myArgMap = new HashMap<>();
 
-        for (int i = 1; i < m_expression.length; ++i) {
+        for (int i = 1; i < myExpression.length; ++i) {
             String curOp = readSymbol(i);
-            if (m_argMmap.containsKey(curOp)) {
-                m_argMmap.put(curOp, m_argMmap.get(curOp) + 1);
+            if (myArgMap.containsKey(curOp)) {
+                myArgMap.put(curOp, myArgMap.get(curOp) + 1);
             }
             else
-                m_argMmap.put(curOp, 1);
+                myArgMap.put(curOp, 1);
         }
 
-        m_opMmap = new HashMap<>(m_argMmap);
+        myOpMap = new HashMap<>(myArgMap);
         String fSym = readSymbol(0);
-        String rSym = m_registry.getSymbolForIndex(readRoot());
-        if (m_opMmap.containsKey(fSym)) {
-            m_opMmap.put(fSym, m_opMmap.get(fSym) + 1);
+        String rSym = myRegistry.getSymbolForIndex(readRoot());
+        if (myOpMap.containsKey(fSym)) {
+            myOpMap.put(fSym, myOpMap.get(fSym) + 1);
         }
         else {
-            m_opMmap.put(fSym, 1);
+            myOpMap.put(fSym, 1);
         }
 
-        if (m_opMmap.containsKey(rSym)) {
-            m_opMmap.put(rSym, m_opMmap.get(rSym) + 1);
+        if (myOpMap.containsKey(rSym)) {
+            myOpMap.put(rSym, myOpMap.get(rSym) + 1);
         }
         else {
-            m_opMmap.put(rSym, 1);
+            myOpMap.put(rSym, 1);
         }
 
         if (justArguments) {
-            return new HashMap<>(m_argMmap);
+            return new HashMap<>(myArgMap);
         }
         else {
-            return new HashMap<>(m_opMmap);
+            return new HashMap<>(myOpMap);
         }
     }
 
     @Override
     public final int hashCode() {
-        return Arrays.hashCode(m_expression);
+        return Arrays.hashCode(myExpression);
     }
 
     public final int readRoot() {
-        return m_classConstant;
+        return myClassConstant;
     }
 
     @Override
@@ -136,7 +157,7 @@ public class NormalizedAtomicExpression {
         String funcSymbol = readSymbol(0);
 
         StringBuilder argsBuilder = new StringBuilder();
-        for (int i = 1; i < m_expression.length; ++i) {
+        for (int i = 1; i < myExpression.length; ++i) {
             argsBuilder.append(readSymbol(i)).append(",");
         }
         String args = argsBuilder.toString();
@@ -150,7 +171,7 @@ public class NormalizedAtomicExpression {
         // if there is a root
         int root = readRoot();
         if (root >= 0) {
-            r += "=" + m_registry.getSymbolForIndex(root);
+            r += "=" + myRegistry.getSymbolForIndex(root);
         }
 
         return r;
@@ -161,32 +182,32 @@ public class NormalizedAtomicExpression {
     // ===========================================================
 
     final int getArity() {
-        return arity;
+        return myArity;
     }
 
     final Set<Integer> getOpIds() {
-        if (m_opIdSet != null) {
-            return m_opIdSet;
+        if (myOpIdSet != null) {
+            return myOpIdSet;
         }
 
-        m_opIdSet = new HashSet<>();
+        myOpIdSet = new HashSet<>();
 
-        for (int aM_expression : m_expression) {
-            m_opIdSet.add(aM_expression);
+        for (int aM_expression : myExpression) {
+            myOpIdSet.add(aM_expression);
         }
 
         int r = readRoot();
-        m_opIdSet.add(r);
+        myOpIdSet.add(r);
 
-        return m_opIdSet;
+        return myOpIdSet;
     }
 
     // return array contains 'n' if sint is an arg used at position 'n', 0 denotes operator, -1 denotes cong class
     final int[] getPositionsFor(int sint) {
-        int[] rArray = new int[arity + 2];
+        int[] rArray = new int[myArity + 2];
         int count = 0;
-        for (int i = 0; i <= arity; ++i) {
-            if (m_expression[i] == sint) {
+        for (int i = 0; i <= myArity; ++i) {
+            if (myExpression[i] == sint) {
                 rArray[count++] = i;
             }
         }
@@ -197,19 +218,19 @@ public class NormalizedAtomicExpression {
     }
 
     final Registry getRegistry() {
-        return m_registry;
+        return myRegistry;
     }
 
     final boolean hasVarOps() {
         boolean isVar = false;
-        for (int i = 0; i < m_expression.length; ++i) {
+        for (int i = 0; i < myExpression.length; ++i) {
             String s = readSymbol(i);
             if (s.startsWith("¢v")) {
                 isVar = true;
                 break;
             }
 
-            Registry.Usage us = m_registry.getUsage(s);
+            Registry.Usage us = myRegistry.getUsage(s);
 
             if (us == Registry.Usage.FORALL
                     || us == Registry.Usage.HASARGS_FORALL) {
@@ -222,11 +243,11 @@ public class NormalizedAtomicExpression {
     }
 
     final int readPosition(int position) {
-        return m_expression[position];
+        return myExpression[position];
     }
 
     final String readSymbol(int position) {
-        return m_registry.getSymbolForIndex(m_expression[position]);
+        return myRegistry.getSymbolForIndex(myExpression[position]);
     }
 
     final NormalizedAtomicExpression replaceOperator(int orig, int repl) {
@@ -238,15 +259,15 @@ public class NormalizedAtomicExpression {
             return this;
         }
 
-        int[] na = new int[m_expression.length];
+        int[] na = new int[myExpression.length];
         boolean changed = false;
-        for (int i = 0; i < m_expression.length; ++i) {
-            if (m_expression[i] == orig) {
+        for (int i = 0; i < myExpression.length; ++i) {
+            if (myExpression[i] == orig) {
                 na[i] = repl;
                 changed = true;
             }
             else {
-                na[i] = m_expression[i];
+                na[i] = myExpression[i];
             }
         }
 
@@ -256,7 +277,7 @@ public class NormalizedAtomicExpression {
 
         NormalizedAtomicExpression rNa = this;
         if (changed) {
-            rNa = new NormalizedAtomicExpression(m_registry, na);
+            rNa = new NormalizedAtomicExpression(myRegistry, na);
             rNa.writeToRoot(readRoot());
         }
 
@@ -268,12 +289,12 @@ public class NormalizedAtomicExpression {
 
     // -1 meaning wildcard.
     final int[] rootedLiterals(Map<String, String> overMap, Registry vc_Reg) {
-        int[] rArray = new int[m_expression.length + 1];
-        for (int i = 0; i <= m_expression.length; ++i) {
+        int[] rArray = new int[myExpression.length + 1];
+        for (int i = 0; i <= myExpression.length; ++i) {
             int expI =
-                    (i < m_expression.length) ? m_expression[i]
-                            : m_classConstant;
-            String k = m_registry.getSymbolForIndex(expI);
+                    (i < myExpression.length) ? myExpression[i]
+                            : myClassConstant;
+            String k = myRegistry.getSymbolForIndex(expI);
             String v = (overMap.containsKey(k)) ? overMap.get(k) : k;
 
             if (v.equals("")) {
@@ -291,19 +312,19 @@ public class NormalizedAtomicExpression {
     }
 
     final NormalizedAtomicExpression rootOps() {
-        int[] roots = new int[arity + 1];
+        int[] roots = new int[myArity + 1];
         for (int i = 0; i < roots.length; ++i) {
-            roots[i] = m_registry.findAndCompress(m_expression[i]);
+            roots[i] = myRegistry.findAndCompress(myExpression[i]);
         }
 
-        return new NormalizedAtomicExpression(m_registry, roots);
+        return new NormalizedAtomicExpression(myRegistry, roots);
     }
 
     // "" meaning mapped.
     final String[] unMappedWildcards(Map<String, String> overMap) {
-        String[] rArray = new String[m_expression.length + 1];
-        for (int i = 0; i < m_expression.length; ++i) {
-            String ks = m_registry.getSymbolForIndex(m_expression[i]);
+        String[] rArray = new String[myExpression.length + 1];
+        for (int i = 0; i < myExpression.length; ++i) {
+            String ks = myRegistry.getSymbolForIndex(myExpression[i]);
             if (overMap.containsKey(ks) && overMap.get(ks).equals("")) {
                 rArray[i] = ks;
             }
@@ -312,21 +333,21 @@ public class NormalizedAtomicExpression {
             }
         }
 
-        String ks = m_registry.getSymbolForIndex(m_classConstant);
+        String ks = myRegistry.getSymbolForIndex(myClassConstant);
         if (overMap.containsKey(ks) && overMap.get(ks).equals("")) {
-            rArray[m_expression.length] = ks;
+            rArray[myExpression.length] = ks;
         }
         else {
-            rArray[m_expression.length] = "";
+            rArray[myExpression.length] = "";
         }
 
         return rArray;
     }
 
     final void writeToRoot(int root) {
-        m_opMmap = null;
-        m_opIdSet = null;
-        m_classConstant = root;
+        myOpMap = null;
+        myOpIdSet = null;
+        myClassConstant = root;
     }
 
     // ===========================================================
@@ -336,10 +357,10 @@ public class NormalizedAtomicExpression {
     private int numberOfQuants() {
         int c = 0;
         for (String k : getOperatorsAsStrings(false).keySet()) {
-            if (m_registry.getUsage(k).equals(Registry.Usage.FORALL)
-                    || m_registry.getUsage(k).equals(
+            if (myRegistry.getUsage(k).equals(Registry.Usage.FORALL)
+                    || myRegistry.getUsage(k).equals(
                             Registry.Usage.HASARGS_FORALL)
-                    || m_registry.getUsage(k).equals(Registry.Usage.CREATED)) {
+                    || myRegistry.getUsage(k).equals(Registry.Usage.CREATED)) {
                 c++;
             }
         }
