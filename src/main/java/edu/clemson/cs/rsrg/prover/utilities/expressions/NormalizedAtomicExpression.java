@@ -212,10 +212,20 @@ public class NormalizedAtomicExpression {
     // Package-Private Methods
     // ===========================================================
 
+    /**
+     * <p>This method returns the number of arguments in this expression.</p>
+     *
+     * @return Number of arguments
+     */
     final int getArity() {
         return myArity;
     }
 
+    /**
+     * <p>This method returns a set of all the operation ids.</p>
+     *
+     * @return Operation ids.
+     */
     final Set<Integer> getOpIds() {
         if (myOpIdSet != null) {
             return myOpIdSet;
@@ -233,7 +243,15 @@ public class NormalizedAtomicExpression {
         return myOpIdSet;
     }
 
-    // return array contains 'n' if sint is an arg used at position 'n', 0 denotes operator, -1 denotes cong class
+    /**
+     * <p>This method returns an array containing {@code n} if
+     * an argument is used at position {@code n}. A {@code 0} denotes an
+     * operator and {@code -1} denotes a congruence class.</p>
+     *
+     * @param sint Index value we are searching for.
+     *
+     * @return The proper results listed above.
+     */
     final int[] getPositionsFor(int sint) {
         int[] rArray = new int[myArity + 2];
         int count = 0;
@@ -248,10 +266,22 @@ public class NormalizedAtomicExpression {
         return Arrays.copyOf(rArray, count);
     }
 
+    /**
+     * <p>This method returns the registry used by this expression.</p>
+     *
+     * @return A {@link Registry}.
+     */
     final Registry getRegistry() {
         return myRegistry;
     }
 
+    /**
+     * <p>This method checks to see if we have any variable named
+     * operations.</p>
+     *
+     * @return {@code true} if we have a variable named operation,
+     * {@code false} otherwise.
+     */
     final boolean hasVarOps() {
         boolean isVar = false;
         for (int i = 0; i < myExpression.length; ++i) {
@@ -273,14 +303,39 @@ public class NormalizedAtomicExpression {
         return isVar;
     }
 
+    /**
+     * <p>This method returns the integer index value for the
+     * symbol located at the specified position.</p>
+     *
+     * @param position A position in the expression.
+     *
+     * @return The symbol located at that position as an integer index.
+     */
     final int readPosition(int position) {
         return myExpression[position];
     }
 
+    /**
+     * <p>This method returns the symbol located at the
+     * specified position.</p>
+     *
+     * @param position A position in the expression.
+     *
+     * @return The symbol located at that position.
+     */
     final String readSymbol(int position) {
         return myRegistry.getSymbolForIndex(myExpression[position]);
     }
 
+    /**
+     * <p>This method replaces an operator in our expression.</p>
+     *
+     * @param orig Original operator.
+     * @param repl Replacement operation operator.
+     *
+     * @return A new {@link NormalizedAtomicExpression} with
+     * replacements or {@code this}.
+     */
     final NormalizedAtomicExpression replaceOperator(int orig, int repl) {
         if (orig == repl) {
             return this;
@@ -318,7 +373,15 @@ public class NormalizedAtomicExpression {
         return rNa;
     }
 
-    // -1 meaning wildcard.
+    /**
+     * <p>This method returns an integer array containing all rooted
+     * literals. Note any {@code -1} means it is a wildcard.</p>
+     *
+     * @param overMap A map from symbol to symbol.
+     * @param vc_Reg A registry for the {@code VC} we are processing.
+     *
+     * @return An integer array containing the rooted literal's index.
+     */
     final int[] rootedLiterals(Map<String, String> overMap, Registry vc_Reg) {
         int[] rArray = new int[myExpression.length + 1];
         for (int i = 0; i <= myExpression.length; ++i) {
@@ -342,6 +405,12 @@ public class NormalizedAtomicExpression {
         return rArray;
     }
 
+    /**
+     * <p>This method returns a new normalized atomic expression
+     * with the root operators.</p>
+     *
+     * @return A new {@link NormalizedAtomicExpression}.
+     */
     final NormalizedAtomicExpression rootOps() {
         int[] roots = new int[myArity + 1];
         for (int i = 0; i < roots.length; ++i) {
@@ -351,7 +420,15 @@ public class NormalizedAtomicExpression {
         return new NormalizedAtomicExpression(myRegistry, roots);
     }
 
-    // "" meaning mapped.
+    /**
+     * <p>This method returns a string array containing all the
+     * unmapped wildcard operators. Note that {@code ""} means
+     * it is being mapped.</p>
+     *
+     * @param overMap A map from symbol to symbol.
+     *
+     * @return A string array.
+     */
     final String[] unMappedWildcards(Map<String, String> overMap) {
         String[] rArray = new String[myExpression.length + 1];
         for (int i = 0; i < myExpression.length; ++i) {
@@ -375,6 +452,11 @@ public class NormalizedAtomicExpression {
         return rArray;
     }
 
+    /**
+     * <p>This method writes a new root for this expression.</p>
+     *
+     * @param root Index for new root value.
+     */
     final void writeToRoot(int root) {
         myOpMap = null;
         myOpIdSet = null;
@@ -385,6 +467,13 @@ public class NormalizedAtomicExpression {
     // Private Methods
     // ===========================================================
 
+    /**
+     * <p>An helper method for retrieving the number of universally
+     * quantifiers in this expression.</p>
+     *
+     * @return An integer representing the number of universal
+     * quantifiers.
+     */
     private int numberOfQuants() {
         int c = 0;
         for (String k : getOperatorsAsStrings(false).keySet()) {
