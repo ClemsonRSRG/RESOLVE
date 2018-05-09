@@ -86,6 +86,13 @@ public class NormalizedAtomicExpression {
     // Public Methods
     // ===========================================================
 
+    /**
+     * <p>Equals method to compare two normalized atomic expressions.</p>
+     *
+     * @param o Object to be compared.
+     *
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (o instanceof NormalizedAtomicExpression) {
@@ -98,6 +105,14 @@ public class NormalizedAtomicExpression {
         return false;
     }
 
+    /**
+     * <p>This method returns all operator symbols as a string.</p>
+     *
+     * @param justArguments A flag that indicates that we are only
+     *                      want arguments expressions.
+     *
+     * @return A map containing the results.
+     */
     public final Map<String, Integer> getOperatorsAsStrings(boolean justArguments) {
         if (justArguments && myArgMap != null) {
             return new HashMap<>(myArgMap);
@@ -142,15 +157,31 @@ public class NormalizedAtomicExpression {
         }
     }
 
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation
+     * for the {@code NormalizedAtomicExpression} class.</p>
+     *
+     * @return The hash code associated with the object.
+     */
     @Override
     public final int hashCode() {
         return Arrays.hashCode(myExpression);
     }
 
+    /**
+     * <p>This method returns the root index value for this expression.</p>
+     *
+     * @return An integer index.
+     */
     public final int readRoot() {
         return myClassConstant;
     }
 
+    /**
+     * <p>This method returns the {@code NormalizedAtomicExpression} in string format.</p>
+     *
+     * @return Expression as a string.
+     */
     @Override
     public final String toString() {
         String r;
