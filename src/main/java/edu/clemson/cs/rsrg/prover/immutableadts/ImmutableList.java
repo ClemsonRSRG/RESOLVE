@@ -17,6 +17,8 @@ import java.util.Iterator;
 /**
  * <p>An interface for immutable lists.</p>
  *
+ * @param <E> Type of elements stored inside this list.
+ *
  * @author Hampton Smith
  * @version 2.0
  */
@@ -96,12 +98,12 @@ public interface ImmutableList<E> extends Iterable<E> {
      *
      * @param index An index position where we want to insert
      *              the list {@code e}.
-     * @param e An immutable list that needs to be inserted
+     * @param l An immutable list that needs to be inserted
      *          into our current immutable list.
      *
      * @return An immutable list.
      */
-    ImmutableList<E> insert(int index, ImmutableList<E> e);
+    ImmutableList<E> insert(int index, ImmutableList<E> l);
 
     /**
      * {@inheritDoc}
