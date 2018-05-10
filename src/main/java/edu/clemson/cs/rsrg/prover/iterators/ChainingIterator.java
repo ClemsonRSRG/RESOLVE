@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.misc.iterators;
+package edu.clemson.cs.rsrg.prover.iterators;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
