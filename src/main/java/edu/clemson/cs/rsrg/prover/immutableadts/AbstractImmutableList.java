@@ -36,7 +36,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
      */
     @Override
     public final ImmutableList<E> appended(E e) {
-        return appended(new SingletonImmutableList<E>(e));
+        return appended(new SingletonImmutableList<>(e));
     }
 
     /**
@@ -49,7 +49,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
      */
     @Override
     public final ImmutableList<E> appended(ImmutableList<E> l) {
-        return new ImmutableListConcatenation<E>(this, l);
+        return new ImmutableListConcatenation<>(this, l);
     }
 
     /**
@@ -62,7 +62,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
      */
     @Override
     public final ImmutableList<E> appended(Iterable<E> i) {
-        return appended(new ArrayBackedImmutableList<E>(i));
+        return appended(new ArrayBackedImmutableList<>(i));
     }
 
     /**
@@ -87,7 +87,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
      */
     @Override
     public final ImmutableList<E> insert(int index, E e) {
-        return insert(index, new SingletonImmutableList<E>(e));
+        return insert(index, new SingletonImmutableList<>(e));
     }
 
     /**
@@ -114,11 +114,11 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
             second = l;
         }
         else {
-            first = new ImmutableListConcatenation<E>(head(index), l);
+            first = new ImmutableListConcatenation<>(head(index), l);
             second = tail(index);
         }
 
-        return new ImmutableListConcatenation<E>(first, second);
+        return new ImmutableListConcatenation<>(first, second);
     }
 
     /**
@@ -141,7 +141,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
         }
         else {
             retval =
-                    new ImmutableListConcatenation<E>(head(index),
+                    new ImmutableListConcatenation<>(head(index),
                             tail(index + 1));
         }
 
@@ -161,8 +161,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     @Override
     public final ImmutableList<E> set(int index, E e) {
         ImmutableList<E> first, second;
-
-        ImmutableList<E> insertedList = new SingletonImmutableList<E>(e);
+        ImmutableList<E> insertedList = new SingletonImmutableList<>(e);
 
         if (index == 0) {
             first = insertedList;
@@ -174,11 +173,11 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
         }
         else {
             first =
-                    new ImmutableListConcatenation<E>(head(index), insertedList);
+                    new ImmutableListConcatenation<>(head(index), insertedList);
             second = tail(index + 1);
         }
 
-        return new ImmutableListConcatenation<E>(first, second);
+        return new ImmutableListConcatenation<>(first, second);
     }
 
     /**
@@ -192,7 +191,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
      * @return An immutable sub-list of the original list.
      */
     @Override
-    public final ImmutableList<E> subList(int startIndex, int length) {
+    public ImmutableList<E> subList(int startIndex, int length) {
         return tail(startIndex).head(length);
     }
 

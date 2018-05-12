@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.prover.immutableadts;
 import java.util.Iterator;
 
 /**
- * <p>This class implements a immutable view of an immutable sub-list.</p>
+ * <p>This class implements an immutable view of an immutable sub-list.</p>
  *
  * @param <E> Type of elements stored inside this list.
  *
