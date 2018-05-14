@@ -12,10 +12,10 @@
  */
 package edu.clemson.cs.rsrg.prover;
 
-import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
+import edu.clemson.cs.rsrg.prover.utilities.ImmutableVC;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.List;
@@ -26,7 +26,7 @@ import static edu.clemson.cs.rsrg.vcgeneration.VCGenerator.FLAG_VERIFY_VC;
  * that verifies {@code VCs}.</p>
  *
  * @author Mike Kabbani
- * @version 1.0
+ * @version 2.0
  */
 public class CongruenceClassProver {
 
@@ -104,8 +104,8 @@ public class CongruenceClassProver {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      */
-    public CongruenceClassProver(List<VC> vcs, ModuleScope moduleScope,
-            CompileEnvironment compileEnvironment) {
+    public CongruenceClassProver(List<ImmutableVC> vcs,
+            ModuleScope moduleScope, CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
         myCurrentModuleScope = moduleScope;
         myTypeGraph = compileEnvironment.getTypeGraph();
