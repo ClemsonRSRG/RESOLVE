@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.prover.utilities;
+package edu.clemson.cs.rsrg.prover.output;
 
 /**
  * <p>This class contains all the different information on each {@code VC}

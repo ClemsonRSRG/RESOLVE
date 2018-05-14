@@ -12,10 +12,10 @@
  */
 package edu.clemson.cs.rsrg.init.output;
 
-import edu.clemson.cs.r2jt.rewriteprover.Metrics;
 import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.prover.utilities.PerVCProverModel;
+import edu.clemson.cs.rsrg.prover.output.Metrics;
+import edu.clemson.cs.rsrg.prover.output.PerVCProverModel;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import java.util.List;
