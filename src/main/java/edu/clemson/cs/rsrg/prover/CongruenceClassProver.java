@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.prover;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
+import edu.clemson.cs.rsrg.init.output.OutputListener;
 import edu.clemson.cs.rsrg.prover.output.PerVCProverModel;
 import edu.clemson.cs.rsrg.prover.utilities.ImmutableVC;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
@@ -48,6 +49,9 @@ public class CongruenceClassProver {
 
     /** <p>The number of tries before halting the automated prover</p> */
     private final int myNumTriesBeforeHalting;
+
+    /** <p>The various different output listeners that are expecting an update.</p> */
+    private List<OutputListener> myOutputListeners;
 
     /** <p>The number of milliseconds before stopping the prove for a VC.</p> */
     private final long myTimeout;
@@ -129,14 +133,11 @@ public class CongruenceClassProver {
             ModuleScope moduleScope, CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
         myCurrentModuleScope = moduleScope;
+        myOutputListeners = myCompileEnvironment.getOutputListeners();
         myTypeGraph = compileEnvironment.getTypeGraph();
-
-        // Only for web ide //////////////////////////////////////////
         myVCModels = new PerVCProverModel[vcs.size()];
-        if (listener != null) {
-            myProverListener = listener;
-        }
 
+        // Timeout
         if (myCompileEnvironment.flags.isFlagSet(FLAG_TIMEOUT)) {
             myTimeout =
                     Long.parseLong(myCompileEnvironment.flags.getFlagArgument(
@@ -146,6 +147,7 @@ public class CongruenceClassProver {
             myTimeout = 5000;
         }
 
+        // Number of Tries
         if (myCompileEnvironment.flags.isFlagSet(FLAG_NUMTRIES)) {
             myNumTriesBeforeHalting =
                     Integer.parseInt(myCompileEnvironment.flags
