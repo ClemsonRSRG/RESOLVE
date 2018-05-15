@@ -12,10 +12,10 @@
  */
 package edu.clemson.cs.rsrg.init.pipeline;
 
-import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.prover.CongruenceClassProver;
+import edu.clemson.cs.rsrg.prover.utilities.ImmutableVC;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -57,7 +57,7 @@ public class ProverPipeline extends AbstractPipeline {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
         StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
         CongruenceClassProver prover =
-                new CongruenceClassProver(new ArrayList<VC>(), mySymbolTable
+                new CongruenceClassProver(new ArrayList<ImmutableVC>(), mySymbolTable
                         .getModuleScope(currentTarget), myCompileEnvironment);
     }
 
