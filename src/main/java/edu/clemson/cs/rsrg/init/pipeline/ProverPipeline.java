@@ -57,8 +57,9 @@ public class ProverPipeline extends AbstractPipeline {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
         StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
         CongruenceClassProver prover =
-                new CongruenceClassProver(new ArrayList<ImmutableVC>(), mySymbolTable
-                        .getModuleScope(currentTarget), myCompileEnvironment);
+                new CongruenceClassProver(new ArrayList<ImmutableVC>(),
+                        mySymbolTable.getModuleScope(currentTarget),
+                        myCompileEnvironment);
     }
 
 }
