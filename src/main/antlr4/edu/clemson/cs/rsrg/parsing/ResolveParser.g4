@@ -702,7 +702,9 @@ decreasingClause
     ;
 
 correspondenceClause
-    :   CORR mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
+    :   CORR
+        (INVOLVES mathVarNameExp (COMMA mathVarNameExp)*)?
+        mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 conventionClause
