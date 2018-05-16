@@ -327,17 +327,17 @@ sharedStateDecl
         (constraintClause)?
         (specModelInit)?
         (specModelFinal)?
-        END SHAREDVARIABLES SEMICOLON
+        END SEMICOLON
     ;
 
 sharedStateRepresentationDecl
-    :   SHAREDVARIABLES IS REALIZED BY
+    :   SHAREDVARIABLES
         (variableDecl)+
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
         (representationFinal)?
-        END SHAREDVARIABLES SEMICOLON
+        END SEMICOLON
     ;
 
 // initialization, finalization rules
