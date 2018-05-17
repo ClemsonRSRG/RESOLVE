@@ -3464,8 +3464,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitCorrespondenceClause(
             ResolveParser.CorrespondenceClauseContext ctx) {
-        myNodes.put(ctx, createAssertionClause(createLocation(ctx),
-                AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp()));
+        if (ctx.mathVarNameExp().isEmpty()) {
+            myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                    AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp()));
+        }
+        else {
+            myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                    AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp(),
+                    ctx.mathVarNameExp()));
+        }
     }
 
     /**
