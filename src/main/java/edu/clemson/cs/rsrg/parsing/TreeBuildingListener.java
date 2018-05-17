@@ -4941,13 +4941,40 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private AssertionClause createAssertionClause(Location l,
             AssertionClause.ClauseType clauseType,
             List<ResolveParser.MathExpContext> mathExps) {
+        return createAssertionClause(l, clauseType, mathExps,
+                new ArrayList<ResolveParser.MathVarNameExpContext>());
+    }
+
+    /**
+     * <p>Create an {@link AssertionClause} for the current parser rule
+     * we are visiting.</p>
+     *
+     * @param l Location for the clause.
+     * @param clauseType The type of clause.
+     * @param mathExps List of mathematical expressions in the clause.
+     * @param involvesMathVarExps List of mathematical variable expressions
+     *                            involved (or affecting) this clause.
+     *
+     * @return An {@link AssertionClause} for the rule.
+     */
+    private AssertionClause createAssertionClause(Location l,
+            AssertionClause.ClauseType clauseType,
+            List<ResolveParser.MathExpContext> mathExps,
+            List<ResolveParser.MathVarNameExpContext> involvesMathVarExps) {
         Exp whichEntailsExp = null;
         if (mathExps.size() > 1) {
             whichEntailsExp = (Exp) myNodes.removeFrom(mathExps.get(1));
         }
         Exp assertionExp = (Exp) myNodes.removeFrom(mathExps.get(0));
 
-        return new AssertionClause(l, clauseType, assertionExp, whichEntailsExp);
+        // Obtain the list of involved shared variable expressions
+        List<Exp> involvedSharedVars = new ArrayList<>();
+        for (ResolveParser.MathVarNameExpContext context : involvesMathVarExps) {
+            involvedSharedVars.add((Exp) myNodes.removeFrom(context));
+        }
+
+        return new AssertionClause(l, clauseType, assertionExp,
+                whichEntailsExp, involvedSharedVars);
     }
 
     /**
