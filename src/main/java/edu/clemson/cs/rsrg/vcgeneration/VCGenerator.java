@@ -752,10 +752,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postSharedStateRealizationDec(
             SharedStateRealizationDec dec) {
-        // TODO: Add the proof rule for this.
-
-        // Store this for future use.
-        myCurrentVerificationContext.storeLocalSharedRealizationDec(dec);
+        // TODO: Need to figure out how we are going to find the corresponding shared state
     }
 
     // -----------------------------------------------------------
