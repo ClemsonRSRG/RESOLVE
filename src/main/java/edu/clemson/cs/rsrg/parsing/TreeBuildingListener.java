@@ -1790,7 +1790,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx Shared state realization declaration node in ANTLR4 AST.
      */
     @Override
-    public void enterSharedStateDecl(ResolveParser.SharedStateDeclContext ctx) {
+    public void enterSharedStateRepresentationDecl(
+            ResolveParser.SharedStateRepresentationDeclContext ctx) {
         // Create a new container
         myArrayFacilityDecContainerStack
                 .push(new ArrayFacilityDecContainer(ctx));

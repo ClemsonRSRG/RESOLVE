@@ -332,7 +332,7 @@ sharedStateDecl
 
 sharedStateRepresentationDecl
     :   SHAREDVARIABLES
-        (variableDecl)+
+        (variableDecl)*
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
