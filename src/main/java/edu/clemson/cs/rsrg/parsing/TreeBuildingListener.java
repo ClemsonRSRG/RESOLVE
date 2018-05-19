@@ -488,6 +488,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         createPosSymbol(ctx.name), new IllegalArgumentException());
             }
 
+            // YS: Right now we only allow 1 shared state declaration.
+            //     Throw an error if we found more than 1.
+            int numSharedStateDecs = 0;
+            for (Dec dec : decls) {
+                if (dec instanceof SharedStateDec) {
+                    numSharedStateDecs++;
+                }
+            }
+
+            if (numSharedStateDecs > 1) {
+                throw new SourceErrorException(
+                        "A sharing concept can only have one shared variable block declared!",
+                        createPosSymbol(ctx.name), new IllegalArgumentException());
+            }
+
             isSharingConcept = true;
         }
         else {
@@ -603,6 +618,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         List<Dec> decls = new ArrayList<>();
         if (ctx.conceptImplItems() != null) {
             List<ResolveParser.ConceptImplItemContext> itemContexts = ctx.conceptImplItems().conceptImplItem();
+            int numSharedStateRealizDecs = 0;
             for (ResolveParser.ConceptImplItemContext item : itemContexts) {
                 // Add any new array facility declarations that was generated
                 // by this shared state representation.
@@ -610,6 +626,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.sharedStateRepresentationDecl())) {
                         decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.sharedStateRepresentationDecl()));
                     }
+
+                    numSharedStateRealizDecs++;
                 }
                 // Add any new array facility declarations that was generated
                 // by this type representation.
@@ -621,6 +639,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
                 // Add the item to the declaration list
                 decls.add((Dec) myNodes.removeFrom(item));
+            }
+
+            // YS: Right now we only allow 1 shared state realization.
+            //     Throw an error if we found more than 1.
+            if (numSharedStateRealizDecs > 1) {
+                throw new SourceErrorException(
+                        "Found more than one shared variable realization block!",
+                        createPosSymbol(ctx.name), new IllegalArgumentException());
             }
         }
 
