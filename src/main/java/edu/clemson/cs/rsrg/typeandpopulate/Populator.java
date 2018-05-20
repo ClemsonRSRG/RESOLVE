@@ -3607,25 +3607,41 @@ public class Populator extends TreeWalkerVisitor {
                     + "OldExp, found: " + first + " (" + first.getClass() + ")");
         }
 
-        //First, we'll see if we're a Conc expression
+        // First, we'll see if we're a Conc expression
         if (firstName.getName().equals("Conc")) {
-            //Awesome.  We better be in a type definition and our second segment
-            //better refer to the exemplar
             VarExp second = (VarExp) segments.next();
 
-            if (!second.toString().equals(
-                    myTypeFamilyEntry.getProgramType().getExemplarName())) {
-                throw new RuntimeException("No idea what's going on here.");
+            // We are in a type realization and our second segment
+            // refer to the exemplar.
+            if (myTypeFamilyEntry != null) {
+                if (!second.toString().equals(
+                        myTypeFamilyEntry.getProgramType().getExemplarName())) {
+                    throw new RuntimeException("No idea what's going on here.");
+                }
+
+                second.setMathType(myTypeFamilyEntry.getModelType());
+                result = myTypeFamilyEntry.getExemplar();
+            }
+            // We are in a shared state realization and our second segment
+            // refers to one of the global variables.
+            else {
+                result =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameQuery(
+                                                null,
+                                                second.getName(),
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true)).toMathSymbolEntry(
+                                second.getLocation());
+                second.setMathType(result.getType());
             }
 
-            //The Conc segment doesn't have a sensible type, but we'll set one
-            //for completeness.
+            // The Conc segment doesn't have a sensible type, but we'll set one
+            // for completeness.
             first.setMathType(myTypeGraph.BOOLEAN);
-
-            second.setMathType(myTypeFamilyEntry.getModelType());
-
-            result = myTypeFamilyEntry.getExemplar();
-
             lastGood.data = second;
         }
         else if (firstName.getName().equals("recp")) {
@@ -3654,8 +3670,8 @@ public class Populator extends TreeWalkerVisitor {
                                                 true)).toMathSymbolEntry(
                                 second.getLocation());
 
-                //The recp segment doesn't have a sensible type, but we'll set one
-                //for completeness.
+                // The recp segment doesn't have a sensible type, but we'll set one
+                // for completeness.
                 first.setMathType(myTypeGraph.BOOLEAN);
                 second.setMathType(myTypeGraph.RECEPTACLES);
                 lastGood.data = second;
