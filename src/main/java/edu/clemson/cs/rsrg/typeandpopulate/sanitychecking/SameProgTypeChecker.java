@@ -60,8 +60,9 @@ public class SameProgTypeChecker {
      */
     public final void hasSameProgrammingType() {
         if (!myLeftExp.getProgramType().equals(myRightExp.getProgramType())) {
-            throw new TypeMismatchException("Non-matching programming types."
-                    + "\nLeft: " + myLeftExp.getProgramType() + "\nRight: "
+            throw new TypeMismatchException("Non-matching programming types. ["
+                    + myLeftExp.getLocation() + "]" + "\nLeft: "
+                    + myLeftExp.getProgramType() + "\nRight: "
                     + myRightExp.getProgramType());
         }
     }

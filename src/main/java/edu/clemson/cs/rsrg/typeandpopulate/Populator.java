@@ -2807,8 +2807,8 @@ public class Populator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
-                    + "the call with the specified arguments: ", exp
-                    .getLocation());
+                    + "to the call with the specified arguments: " + exp.getName(),
+                    exp.getLocation());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(exp.getName().getName(), exp.getLocation());
@@ -3060,7 +3060,20 @@ public class Populator extends TreeWalkerVisitor {
                                             true)).toProgramTypeEntry(
                             tyLocation);
 
-            ty.setProgramType(type.getProgramType());
+            // Check to see if we have a facility qualifier
+            if (tyQualifier != null) {
+                FacilityEntry facilityEntry =
+                        myBuilder.getInnermostActiveScope().queryForOne(
+                                new NameQuery(null, tyQualifier,
+                                        ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_INSTANTIATE,
+                                        true)).toFacilityEntry(tyLocation);
+                ty.setProgramType(new PTNamed(myTypeGraph,
+                        facilityEntry, (PTFamily) type.getProgramType()));
+            }
+            else {
+                ty.setProgramType(type.getProgramType());
+            }
+
             ty.setMathType(myTypeGraph.SSET);
             ty.setMathTypeValue(type.getModelType());
         }
@@ -3088,7 +3101,7 @@ public class Populator extends TreeWalkerVisitor {
         PTRecord record = new PTRecord(myTypeGraph, fieldMap);
 
         ty.setProgramType(record);
-        ty.setMathType(myTypeGraph.CLS);
+        ty.setMathType(myTypeGraph.SSET);
         ty.setMathTypeValue(record.toMath());
     }
 
