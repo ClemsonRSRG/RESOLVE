@@ -398,6 +398,47 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Concept Realization Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ConceptRealizModuleDec}.</p>
+     *
+     * @param conceptRealization A concept realization module declaration.
+     */
+    @Override
+    public final void preConceptRealizModuleDec(
+            ConceptRealizModuleDec conceptRealization) {
+        PosSymbol conceptRealizName = conceptRealization.getName();
+
+        // Store the concept realization requires clause
+        myCurrentVerificationContext.storeConceptRealizAssertionClauses(
+                conceptRealizName.getLocation(), new ModuleIdentifier(
+                        conceptRealizName.getName()), false);
+
+        // Store all requires/constraint from the imported concept
+        PosSymbol conceptName = conceptRealization.getConceptName();
+        ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
+        myCurrentVerificationContext.storeConceptAssertionClauses(conceptName
+                .getLocation(), coId, false);
+
+        // Store all the shared states declared in the concept
+        myCurrentVerificationContext.storeConceptSharedStateDecs(conceptName
+                .getLocation(), coId);
+
+        // Store all the type families declared in the concept
+        myCurrentVerificationContext.storeConceptTypeFamilyDecs(conceptName
+                .getLocation(), coId);
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputConceptRealizHeader").add(
+                        "realizName", conceptRealizName.getName()).add(
+                        "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
     // Enhancement Realization Module
     // -----------------------------------------------------------
 
@@ -752,7 +793,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postSharedStateRealizationDec(
             SharedStateRealizationDec dec) {
-        // TODO: Need to figure out how we are going to find the corresponding shared state
+    // TODO: Need to figure out how we are going to find the corresponding shared state
     }
 
     // -----------------------------------------------------------
