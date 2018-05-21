@@ -43,6 +43,7 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTGeneric;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
@@ -581,7 +582,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         OperationEntry correspondingOperation =
                 Utilities.searchOperation(dec.getLocation(), null, dec
-                        .getName(), argTypes, myCurrentModuleScope);
+                        .getName(), argTypes, ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_IGNORE, myCurrentModuleScope);
 
         // TODO: Add the performance logic
         // Obtain the performance duration clause
@@ -680,11 +682,19 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Store the associated OperationEntry for future use
         List<PTType> argTypes = new LinkedList<>();
         for (ParameterVarDec p : dec.getParameters()) {
-            argTypes.add(p.getTy().getProgramType());
+            // YS: If type is a PTRepresentation, we want the type family
+            //     it is pointing to. Not the realization type.
+            PTType type = p.getTy().getProgramType();
+            if (type instanceof PTRepresentation) {
+                type = ((PTRepresentation) type).getFamily().getProgramType();
+            }
+
+            argTypes.add(type);
         }
         OperationEntry correspondingOperation =
                 Utilities.searchOperation(dec.getLocation(), null, dec
-                        .getName(), argTypes, myCurrentModuleScope);
+                        .getName(), argTypes, ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_IGNORE, myCurrentModuleScope);
 
         // TODO: Add the performance logic
         // Obtain the performance duration clause

@@ -511,7 +511,8 @@ public class Utilities {
         }
 
         return Utilities.searchOperation(functionExp.getLocation(),
-                functionExp.getQualifier(), functionExp.getName(), argTypes, scope);
+                functionExp.getQualifier(), functionExp.getName(), argTypes,
+                ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_INSTANTIATE, scope);
     }
 
     /**
@@ -1207,6 +1208,8 @@ public class Utilities {
      * @param qualifier The qualifier of the operation.
      * @param name The name of the operation.
      * @param argTypes The list of argument types.
+     * @param importStrategy The import strategy to use.
+     * @param facilityStrategy The facility strategy to use.
      * @param scope The module scope to start our search.
      *
      * @return An {@link OperationEntry} from the
@@ -1214,13 +1217,14 @@ public class Utilities {
      */
     public static OperationEntry searchOperation(Location loc,
             PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
             ModuleScope scope) {
         // Query for the corresponding operation
         OperationEntry op = null;
         try {
             op =
                     scope.queryForOne(new OperationQuery(qualifier, name,
-                            argTypes));
+                            argTypes, importStrategy, facilityStrategy));
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, name.getName(), loc);
