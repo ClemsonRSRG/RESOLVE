@@ -206,14 +206,15 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
      *
      * @param loc The location in the AST that we are
      *            currently visiting.
-     * @param addConventionCorrespondenceFlag A flag that indicates whether or not we need
-     *                                        to add the {@code Shared Variable}'s {@code convention} and
-     *                                        {@code correspondence}.
+     * @param addSharedConventionFlag A flag that indicates whether or not we need
+     *                                to add the {@code Shared Variable}'s {@code convention}.
+     * @param addSharedCorrespondenceFlag A flag that indicates whether or not we need
+     *                                    to add the {@code Shared Variable}'s {@code correspondence}.
      *
      * @return The top-level assumed expression.
      */
     public final Exp createTopLevelAssumeExpFromContext(Location loc,
-            boolean addConventionCorrespondenceFlag) {
+            boolean addSharedConventionFlag, boolean addSharedCorrespondenceFlag) {
         Exp retExp = null;
 
         // Add all the module level requires clause.
@@ -298,9 +299,14 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             }
         }
 
-        // Add the share variable realization's convention and correspondence.
-        if (addConventionCorrespondenceFlag) {
-            // TODO: Add any shared variable's convention, correspondence here.
+        // Add the share variable realization's convention.
+        if (addSharedConventionFlag) {
+            // TODO: Add any shared variable's convention here.
+        }
+
+        // Add the shared variable realization's correspondence.
+        if (addSharedCorrespondenceFlag) {
+            // TODO: Add any shared variable's correspondence here.
         }
 
         return retExp;
