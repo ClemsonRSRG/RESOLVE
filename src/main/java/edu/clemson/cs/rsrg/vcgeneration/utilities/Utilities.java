@@ -241,7 +241,10 @@ public class Utilities {
         segments.add(typeNameExp);
         segments.add(isInitialExp);
 
-        return new DotExp(varDec.getLocation(), segments);
+        DotExp retExp = new DotExp(varDec.getLocation(), segments);
+        retExp.setMathType(booleanType);
+
+        return retExp;
     }
 
     /**
