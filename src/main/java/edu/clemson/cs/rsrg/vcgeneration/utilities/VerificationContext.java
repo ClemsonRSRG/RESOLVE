@@ -299,14 +299,29 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             }
         }
 
-        // Add the share variable realization's convention.
-        if (addSharedConventionFlag) {
-            // TODO: Add any shared variable's convention here.
-        }
+        // Process any local shared state realizations
+        for (SharedStateRealizationDec sharedStateRealizationDec : myLocalSharedStateRealizationDecs) {
+            // Add the share variable realization's convention if requested.
+            if (addSharedConventionFlag) {
+                AssertionClause stateConventionClause =
+                        sharedStateRealizationDec.getConvention();
+                retExp =
+                        Utilities.formConjunct(loc, retExp,
+                                stateConventionClause,
+                                myModuleLevelLocationDetails
+                                        .get(stateConventionClause));
+            }
 
-        // Add the shared variable realization's correspondence.
-        if (addSharedCorrespondenceFlag) {
-            // TODO: Add any shared variable's correspondence here.
+            // Add the shared variable realization's correspondence if requested.
+            if (addSharedCorrespondenceFlag) {
+                AssertionClause stateCorrespondenceClause =
+                        sharedStateRealizationDec.getCorrespondence();
+                retExp =
+                        Utilities.formConjunct(loc, retExp,
+                                stateCorrespondenceClause,
+                                myModuleLevelLocationDetails
+                                        .get(stateCorrespondenceClause));
+            }
         }
 
         return retExp;
