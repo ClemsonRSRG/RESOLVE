@@ -397,7 +397,13 @@ public class Utilities {
             retExp = assertionExp;
         }
         else {
-            retExp = InfixExp.formConjunct(loc, exp, assertionExp);
+            // No need to form a conjunct if it is simply "true"
+            if (!VarExp.isLiteralTrue(assertionExp)) {
+                retExp = InfixExp.formConjunct(loc, exp, assertionExp);
+            }
+            else {
+                retExp = exp;
+            }
         }
 
         // Add any which_entails
@@ -408,7 +414,11 @@ public class Utilities {
                     entailsLoc.clone(), entailsLoc.clone(),
                     "Which_Entails Expression Located at "
                             + clause.getLocation()));
-            retExp = InfixExp.formConjunct(loc, retExp, whichEntailsExp);
+
+            // No need to form a conjunct if it is simply "true"
+            if (!VarExp.isLiteralTrue(whichEntailsExp)) {
+                retExp = InfixExp.formConjunct(loc, retExp, whichEntailsExp);
+            }
         }
 
         return retExp;
