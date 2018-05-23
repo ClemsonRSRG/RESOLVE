@@ -803,7 +803,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postSharedStateRealizationDec(
             SharedStateRealizationDec dec) {
-    // TODO: Need to figure out how we are going to find the corresponding shared state
+        // TODO: Need to figure out how we are going to find the corresponding shared state
+        myCurrentVerificationContext.storeLocalSharedRealizationDec(dec);
     }
 
     // -----------------------------------------------------------
