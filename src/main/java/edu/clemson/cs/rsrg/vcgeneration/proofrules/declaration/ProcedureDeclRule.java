@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
@@ -144,6 +145,15 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
+        // Check to see if this a local operation
+        boolean isLocal =
+                Utilities.isLocationOperation(myProcedureDec.getName()
+                        .getName(), myCurrentModuleScope);
+
+        // Check to see if we are in a concept realization
+        boolean inConceptRealiz =
+                myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec;
+
         // Check to see if this is a recursive procedure.
         // If yes, we will need to add an additional assume clause
         // (P_Val = <decreasing clause>).
@@ -179,16 +189,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         myCurrentAssertiveCodeBlock.addStatements(myProcedureDec
                 .getStatements());
 
-        // TODO: Correct_Op_Hyp rule (Shared Variables and Type)
-        // Correct_Op_Hyp rule: Only applies to non-local operations
-        // in concept realizations.
-
-        // TODO: Well_Def_Corr_Hyp rule (Shared Variables and Type)
-        // Well_Def_Corr_Hyp rule: Rather than doing direct replacement,
-        // we leave that logic to the parsimonious vc step. A replacement
-        // will occur if this is a correspondence function or an implies
-        // will be formed if this is a correspondence relation.
-
         // YS: Simply create a finalization statement for each variable that
         //     allow us to deal with generating question mark variables
         //     and duration logic when we backtrack through the code.
@@ -203,11 +203,39 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             // TODO: Add the finalization duration ensures (if any)
         }
 
+        // Correct_Op_Hyp rule: Only applies to non-local operations
+        // in concept realizations.
+        if (inConceptRealiz && !isLocal) {
+            Exp correctOpHyp = createCorrectOpHypExp();
+
+            // Replace any facility declaration instantiation arguments
+            // in the correct operation hypothesis expression.
+            correctOpHyp =
+                    Utilities
+                            .replaceFacilityFormalWithActual(correctOpHyp,
+                                    myProcedureDec.getParameters(),
+                                    myCurrentModuleScope.getDefiningElement()
+                                            .getName(),
+                                    myCurrentVerificationContext);
+
+            // Use the expression to create a final confirm statement if it is not "true"
+            ConfirmStmt correctOpHypStmt =
+                    new ConfirmStmt(myProcedureDec.getLocation().clone(),
+                            correctOpHyp, true);
+            myCurrentAssertiveCodeBlock.addStatement(correctOpHypStmt);
+
+            // TODO: Well_Def_Corr_Hyp rule (Shared Variables and Type)
+            // Well_Def_Corr_Hyp rule: Rather than doing direct replacement,
+            // we leave that logic to the parsimonious vc step. A replacement
+            // will occur if this is a correspondence function or an implies
+            // will be formed if this is a correspondence relation.
+        }
+
         // Create the final confirm expression
         Exp finalConfirmExp = createFinalConfirmExp();
 
         // Replace any facility declaration instantiation arguments
-        // in the requires clause.
+        // in the ensures clause.
         finalConfirmExp =
                 Utilities.replaceFacilityFormalWithActual(finalConfirmExp,
                         myProcedureDec.getParameters(), myCurrentModuleScope
@@ -241,6 +269,23 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method that uses the {@code Shared Variable} and any parameter type
+     * {@code conventions} to build the appropriate expression that must be established
+     * for a {@code Concept Realization} operation to be correct.</p>
+     *
+     * @return The correct operation hypothesis expression.
+     */
+    private Exp createCorrectOpHypExp() {
+        // Add all shared state realization conventions
+        Location loc = myProcedureDec.getLocation().clone();
+        Exp retExp =
+                myCurrentVerificationContext
+                        .createSharedStateRealizConventionExp(loc);
+
+        return retExp;
+    }
 
     /**
      * <p>An helper method that uses the {@code ensures} clause from the operation entry
@@ -422,7 +467,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             }
 
             // TODO: See below!
-            // If the type is a type representation, then our requires clause
+            // If the type is a type representation, then our ensures clause
             // should really say something about the conceptual type and not
             // the variable
         }

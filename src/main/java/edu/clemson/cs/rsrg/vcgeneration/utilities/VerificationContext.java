@@ -24,6 +24,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentatio
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -185,6 +186,34 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method constructs an expression containing shared state conventions.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     *
+     * @return A (possible conjunct) of shared state realization's conventions
+     * or {@code true}.
+     */
+    public final Exp createSharedStateRealizConventionExp(Location loc) {
+        // Process any local shared state realizations
+        Exp retExp = null;
+        for (SharedStateRealizationDec sharedStateRealizationDec : myLocalSharedStateRealizationDecs) {
+            AssertionClause stateConventionClause =
+                    sharedStateRealizationDec.getConvention();
+            retExp =
+                    Utilities.formConjunct(loc, retExp, stateConventionClause,
+                            myModuleLevelLocationDetails
+                                    .get(stateConventionClause));
+        }
+
+        if (retExp == null) {
+            retExp = VarExp.getTrueVarExp(loc, myBuilder.getTypeGraph());
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>This method uses all the {@code requires} and {@code constraint}
      * clauses from the various different sources (see below for complete list)
      * and builds the appropriate {@code assume} clause that goes at the
@@ -299,19 +328,16 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             }
         }
 
+        // Add the share variable realization's convention (if requested).
+        if (addSharedConventionFlag) {
+            Exp conventionExp = createSharedStateRealizConventionExp(loc);
+            if (!VarExp.isLiteralTrue(conventionExp)) {
+                retExp = MathExp.formConjunct(loc, retExp, conventionExp);
+            }
+        }
+
         // Process any local shared state realizations
         for (SharedStateRealizationDec sharedStateRealizationDec : myLocalSharedStateRealizationDecs) {
-            // Add the share variable realization's convention if requested.
-            if (addSharedConventionFlag) {
-                AssertionClause stateConventionClause =
-                        sharedStateRealizationDec.getConvention();
-                retExp =
-                        Utilities.formConjunct(loc, retExp,
-                                stateConventionClause,
-                                myModuleLevelLocationDetails
-                                        .get(stateConventionClause));
-            }
-
             // Add the shared variable realization's correspondence if requested.
             if (addSharedCorrespondenceFlag) {
                 AssertionClause stateCorrespondenceClause =
