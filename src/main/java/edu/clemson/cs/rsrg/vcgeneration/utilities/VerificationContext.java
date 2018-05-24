@@ -202,8 +202,11 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                     sharedStateRealizationDec.getConvention();
             retExp =
                     Utilities.formConjunct(loc, retExp, stateConventionClause,
-                            myModuleLevelLocationDetails
-                                    .get(stateConventionClause));
+                            new LocationDetailModel(stateConventionClause
+                                    .getAssertionExp().getLocation().clone(),
+                                    stateConventionClause.getAssertionExp()
+                                            .getLocation().clone(),
+                                    "Shared Variable Convention"));
         }
 
         if (retExp == null) {
