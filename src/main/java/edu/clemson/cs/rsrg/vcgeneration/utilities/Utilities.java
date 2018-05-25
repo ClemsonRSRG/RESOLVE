@@ -173,6 +173,38 @@ public class Utilities {
     }
 
     /**
+     * <p>This method returns the conceptual version of the {@link VarDec}.</p>
+     *
+     * @param varDec The parameter variable.
+     * @param varDecType Mathematical type for the parameter variable.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return The new {@link DotExp}.
+     */
+    public static DotExp createConcVarExp(VarDec varDec, MTType varDecType, MTType booleanType) {
+        // Convert the declared variable into a VarExp
+        VarExp varExp =
+                Utilities.createVarExp(varDec.getLocation(), null, varDec.getName(),
+                        varDecType, null);
+
+        // Create a VarExp with the name "Conc"
+        VarExp concVarExp =
+                Utilities.createVarExp(varDec.getLocation(), null,
+                        new PosSymbol(varDec.getLocation(), "Conc"),
+                        booleanType, null);
+
+        // Create the DotExp
+        List<Exp> segments = new ArrayList<>();
+        segments.add(concVarExp);
+        segments.add(varExp);
+
+        DotExp retExp = new DotExp(varDec.getLocation(), segments);
+        retExp.setMathType(varDecType);
+
+        return retExp;
+    }
+
+    /**
      * <p>This method returns a {@link FunctionExp} with the specified
      * name and arguments.</p>
      *

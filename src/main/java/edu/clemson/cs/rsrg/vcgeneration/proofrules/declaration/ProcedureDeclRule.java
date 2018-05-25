@@ -16,8 +16,10 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -205,8 +207,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             // TODO: Add the finalization duration ensures (if any)
         }
 
-        // Correct_Op_Hyp rule: Only applies to non-local operations
-        // in concept realizations.
+        // Only applies to non-local operations in concept realizations.
         if (inConceptRealiz && !isLocal) {
             Exp correctOpHyp = createCorrectOpHypExp();
 
@@ -226,15 +227,14 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                             correctOpHyp, true);
             myCurrentAssertiveCodeBlock.addStatement(correctOpHypStmt);
 
-            // TODO: Well_Def_Corr_Hyp rule (Shared Variables and Type)
-            // Well_Def_Corr_Hyp rule: Rather than doing direct replacement,
+            // Add an assume with the correspondences. Rather than doing direct replacement,
             // we leave that logic to the parsimonious vc step. A replacement
             // will occur if this is a correspondence function or an implies
             // will be formed if this is a correspondence relation.
         }
 
         // Create the final confirm expression
-        Exp finalConfirmExp = createFinalConfirmExp();
+        Exp finalConfirmExp = createFinalConfirmExp(inConceptRealiz, isLocal);
 
         // Replace any facility declaration instantiation arguments
         // in the ensures clause.
@@ -343,11 +343,19 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      * and builds the appropriate {@code ensures} clause that will be an
      * {@link AssertiveCodeBlock AssertiveCodeBlock's} final {@code confirm} statement.</p>
      *
+     * @param inConceptRealiz A flag that indicates whether or not this {@link ProcedureDec}
+     *                        is inside a {@code Concept Realization}.
+     * @param isLocal A flag that indicates whether or not this is a local operation.
+     *
      * @return The final confirm expression.
      */
-    private Exp createFinalConfirmExp() {
+    private Exp createFinalConfirmExp(boolean inConceptRealiz, boolean isLocal) {
         Exp retExp;
         Location procedureLoc = myProcedureDec.getLocation();
+
+        // Create a replacement map for substituting parameter
+        // variables with representation types.
+        Map<Exp, Exp> substitutionParamToConc = new LinkedHashMap<>();
 
         // Loop through each of the parameters in the operation entry.
         Iterator<ProgramParameterEntry> specParamVarDecIt =
@@ -516,10 +524,22 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 }
             }
 
-            // TODO: See below!
             // If the type is a type representation, then our ensures clause
             // should really say something about the conceptual type and not
-            // the variable
+            // the variable. Must also be in a concept realization and not a
+            // local operation.
+            if (ste.getDefiningElement() instanceof TypeRepresentationDec && inConceptRealiz && !isLocal) {
+                DotExp concVarExp =
+                        Utilities.createConcVarExp(
+                                new VarDec(realizParamVarDec.getName(), realizParamVarDec.getTy()),
+                                parameterVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                OldExp oldConcVarExp = new OldExp(procedureLoc, concVarExp.clone());
+                oldConcVarExp.setMathType(concVarExp.getMathType());
+
+                // Add these to our substitution map
+                substitutionParamToConc.put(parameterExp, concVarExp);
+                substitutionParamToConc.put(oldParameterExp, oldConcVarExp);
+            }
         }
 
         // Add the operation's ensures clause
@@ -544,6 +564,37 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             }
         }
 
-        return retExp;
+        // If we are in a concept realization, loop through all
+        // shared variable declared from the associated concept.
+        List<SharedStateDec> sharedStateDecs =
+                myCurrentVerificationContext.getConceptSharedVars();
+        if (inConceptRealiz && !isLocal) {
+            // Our ensures clause should say something about the conceptual
+            // shared variables.
+            for (SharedStateDec stateDec : sharedStateDecs) {
+                for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                    DotExp concVarExp =
+                            Utilities.createConcVarExp(
+                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    OldExp oldConcVarExp = new OldExp(procedureLoc, concVarExp.clone());
+                    oldConcVarExp.setMathType(concVarExp.getMathType());
+
+                    // Convert the math variables to variable expressions
+                    VarExp parameterExp =
+                            Utilities.createVarExp(procedureLoc.clone(), null,
+                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
+                    OldExp oldParameterExp = new OldExp(procedureLoc.clone(), parameterExp);
+                    parameterExp.setMathType(parameterExp.getMathType());
+
+                    // Add these to our substitution map
+                    substitutionParamToConc.put(parameterExp, concVarExp);
+                    substitutionParamToConc.put(oldParameterExp, oldConcVarExp);
+                }
+            }
+        }
+
+        // Apply any substitution and return the modified expression
+        return retExp.substitute(substitutionParamToConc);
     }
 }
