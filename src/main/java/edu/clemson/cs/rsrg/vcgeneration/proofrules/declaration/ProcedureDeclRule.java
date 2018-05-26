@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
@@ -569,23 +570,61 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         List<SharedStateDec> sharedStateDecs =
                 myCurrentVerificationContext.getConceptSharedVars();
         if (inConceptRealiz && !isLocal) {
+            // Build a set of names of shared variables being affected.
+            AffectsClause affectsClause = myCurrentProcedureOperationEntry.getAffectsClause();
+            Set<String> affectedVars = new HashSet<>();
+            if (affectsClause != null) {
+                for (Exp exp : affectsClause.getAffectedExps()) {
+                    if (exp instanceof VarExp) {
+                        affectedVars.add(((VarExp) exp).getName().getName());
+                    }
+                }
+            }
+
             // Our ensures clause should say something about the conceptual
-            // shared variables.
+            // shared variables and should generate a "restores" ensures clause
+            // for non-affected shared variables.
             for (SharedStateDec stateDec : sharedStateDecs) {
                 for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
-                    DotExp concVarExp =
-                            Utilities.createConcVarExp(
-                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                    OldExp oldConcVarExp = new OldExp(procedureLoc, concVarExp.clone());
-                    oldConcVarExp.setMathType(concVarExp.getMathType());
-
                     // Convert the math variables to variable expressions
                     VarExp parameterExp =
                             Utilities.createVarExp(procedureLoc.clone(), null,
                                     mathVarDec.getName(), mathVarDec.getMathType(), null);
                     OldExp oldParameterExp = new OldExp(procedureLoc.clone(), parameterExp);
                     parameterExp.setMathType(parameterExp.getMathType());
+
+                    // Add a "restores" mode to any shared variables not being affected
+                    if (!affectedVars.contains(mathVarDec.getName().getName())) {
+                        // Construct an expression using the expression and it's
+                        // old expression equivalent.
+                        Exp restoresConditionExp =
+                                new EqualsExp(procedureLoc.clone(), parameterExp.clone(), null,
+                                        Operator.EQUAL, oldParameterExp.clone());
+                        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
+
+                        restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
+                                procedureLoc.clone(), procedureLoc.clone(),
+                                "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
+                                        + " (Condition from Non-Affected Shared Variable)"));
+
+                        // Form a conjunct if needed.
+                        if (VarExp.isLiteralTrue(retExp)) {
+                            retExp = restoresConditionExp;
+                        }
+                        else {
+                            retExp =
+                                    InfixExp.formConjunct(retExp.getLocation(),
+                                            retExp, restoresConditionExp);
+                        }
+                    }
+
+                    // Create the appropriate conceptual versions of the shared variable
+                    DotExp concVarExp =
+                            Utilities.createConcVarExp(
+                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    OldExp oldConcVarExp = new OldExp(procedureLoc, concVarExp.clone());
+                    oldConcVarExp.setMathType(concVarExp.getMathType());
 
                     // Add these to our substitution map
                     substitutionParamToConc.put(parameterExp, concVarExp);

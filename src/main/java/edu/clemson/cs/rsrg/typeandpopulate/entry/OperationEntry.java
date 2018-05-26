@@ -98,12 +98,17 @@ public class OperationEntry extends SymbolTableEntry {
         AffectsClause affectsClause;
         ResolveConceptualElement element = getDefiningElement();
         if (element instanceof OperationDec) {
-            affectsClause = ((OperationDec) element).getAffectedVars().clone();
+            affectsClause = ((OperationDec) element).getAffectedVars();
         }
         else {
             affectsClause =
                     ((OperationProcedureDec) element).getWrappedOpDec()
-                            .getAffectedVars().clone();
+                            .getAffectedVars();
+        }
+
+        // Make a deep copy if necessary
+        if (affectsClause != null) {
+            affectsClause = affectsClause.clone();
         }
 
         return affectsClause;
