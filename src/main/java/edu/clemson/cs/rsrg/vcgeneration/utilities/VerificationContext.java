@@ -217,6 +217,38 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method constructs an expression containing shared state correspondence.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     *
+     * @return A (possible conjunct) of shared state realization's correspondence
+     * or {@code true}.
+     */
+    public final Exp createSharedStateRealizCorrespondenceExp(Location loc) {
+        // Process any local shared state realizations
+        Exp retExp = null;
+        for (SharedStateRealizationDec sharedStateRealizationDec : myLocalSharedStateRealizationDecs) {
+            AssertionClause stateCorrespondenceClause =
+                    sharedStateRealizationDec.getCorrespondence();
+            retExp =
+                    Utilities.formConjunct(loc, retExp,
+                            stateCorrespondenceClause, new LocationDetailModel(
+                                    stateCorrespondenceClause.getAssertionExp()
+                                            .getLocation().clone(),
+                                    stateCorrespondenceClause.getAssertionExp()
+                                            .getLocation().clone(),
+                                    "Shared Variable Correspondence"));
+        }
+
+        if (retExp == null) {
+            retExp = VarExp.getTrueVarExp(loc, myBuilder.getTypeGraph());
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>This method uses all the {@code requires} and {@code constraint}
      * clauses from the various different sources (see below for complete list)
      * and builds the appropriate {@code assume} clause that goes at the
@@ -339,17 +371,11 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
             }
         }
 
-        // Process any local shared state realizations
-        for (SharedStateRealizationDec sharedStateRealizationDec : myLocalSharedStateRealizationDecs) {
-            // Add the shared variable realization's correspondence if requested.
-            if (addSharedCorrespondenceFlag) {
-                AssertionClause stateCorrespondenceClause =
-                        sharedStateRealizationDec.getCorrespondence();
-                retExp =
-                        Utilities.formConjunct(loc, retExp,
-                                stateCorrespondenceClause,
-                                myModuleLevelLocationDetails
-                                        .get(stateCorrespondenceClause));
+        // Add the shared variable realization's correspondence (if requested).
+        if (addSharedCorrespondenceFlag) {
+            Exp correspondenceExp = createSharedStateRealizCorrespondenceExp(loc);
+            if (!VarExp.isLiteralTrue(correspondenceExp)) {
+                retExp = MathExp.formConjunct(loc, retExp, correspondenceExp);
             }
         }
 
