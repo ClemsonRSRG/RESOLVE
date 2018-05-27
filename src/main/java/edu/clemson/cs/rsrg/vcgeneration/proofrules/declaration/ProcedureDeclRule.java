@@ -316,6 +316,8 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             NameTy nameTy = (NameTy) parameterVarDec.getTy();
             if (nameTy.getProgramType() instanceof PTRepresentation) {
                 // Query for the type entry in the symbol table
+                PTRepresentation representationType =
+                        (PTRepresentation) nameTy.getProgramType();
                 SymbolTableEntry ste =
                         Utilities.searchProgramType(loc, nameTy.getQualifier(),
                                 nameTy.getName(), myCurrentModuleScope);
@@ -324,8 +326,15 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 // (Might need to add more logic if it is not).
                 if (ste.getDefiningElement() instanceof TypeRepresentationDec) {
                     AssertionClause conventionClause =
-                            ((TypeRepresentationDec) ste.getDefiningElement())
-                                    .getConvention().clone();
+                            Utilities.getTypeConventionClause(
+                                    ((TypeRepresentationDec) ste
+                                            .getDefiningElement())
+                                            .getConvention(), loc.clone(),
+                                    parameterVarDec.getName(), new PosSymbol(
+                                            loc.clone(), representationType
+                                                    .getFamily().getExemplar()
+                                                    .getName()), nameTy
+                                            .getMathType(), null);
                     LocationDetailModel conventionDetailModel =
                             new LocationDetailModel(loc.clone(), loc.clone(),
                                     "Type Convention for "

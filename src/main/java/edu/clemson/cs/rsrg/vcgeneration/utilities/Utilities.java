@@ -605,6 +605,49 @@ public class Utilities {
     }
 
     /**
+     * <p>Given the original {@code convention} clause, use the provided information
+     * on the actual parameter variable to substitute the {@code exemplar} in the
+     * {@code convention} clause and create a new {@link AssertionClause}.</p>
+     *
+     * @param originalConventionClause The {@link AssertionClause} containing the
+     *                                 original {@code convention} clause.
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param name The parameter variable's name.
+     * @param exemplarName The {@code exemplar} name for the corresponding type.
+     * @param type The mathematical type associated with this type.
+     * @param typeValue The mathematical type value associated with this type.
+     *
+     * @return A modified {@link AssertionClause} containing the new
+     * {@code convention} clause.
+     */
+    public static AssertionClause getTypeConventionClause(AssertionClause originalConventionClause,
+            Location loc, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
+        // Create a variable expression from the declared variable
+        VarExp varDecExp = Utilities.createVarExp(loc, null, name, type, typeValue);
+
+        // Create a variable expression from the type exemplar
+        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
+
+        // Create a replacement map
+        Map<Exp, Exp> substitutions = new HashMap<>();
+        substitutions.put(exemplar, varDecExp);
+
+        // Create new assertion clause by replacing the exemplar with the actual
+        Location newLoc = loc.clone();
+        Exp conventionWithReplacements =
+                originalConventionClause.getAssertionExp().substitute(substitutions);
+        Exp whichEntailsWithReplacements = null;
+        if (originalConventionClause.getWhichEntailsExp() != null) {
+            whichEntailsWithReplacements =
+                    originalConventionClause.getWhichEntailsExp().substitute(substitutions);
+        }
+
+        return new AssertionClause(newLoc, AssertionClause.ClauseType.CONVENTION,
+                conventionWithReplacements, whichEntailsWithReplacements);
+    }
+
+    /**
      * <p>Given the original {@code correspondence} clause, use the provided information
      * on the actual parameter variable to substitute the {@code exemplar} in the
      * {@code correspondence} clause and create a new {@link AssertionClause}.</p>
