@@ -357,7 +357,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                                                 conventionClause,
                                                 conventionDetailModel);
                     }
-
                 }
             }
         }
