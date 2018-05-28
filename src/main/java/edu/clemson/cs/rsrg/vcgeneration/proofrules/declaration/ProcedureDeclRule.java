@@ -688,7 +688,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                             Utilities.createVarExp(procedureLoc.clone(), null,
                                     mathVarDec.getName(), mathVarDec.getMathType(), null);
                     OldExp oldParameterExp = new OldExp(procedureLoc.clone(), parameterExp);
-                    parameterExp.setMathType(parameterExp.getMathType());
+                    oldParameterExp.setMathType(parameterExp.getMathType());
 
                     // Add a "restores" mode to any shared variables not being affected
                     if (!affectedVars.contains(mathVarDec.getName().getName())) {
