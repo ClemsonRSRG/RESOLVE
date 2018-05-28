@@ -988,6 +988,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param loc The location in the AST that we are
      *            currently visiting.
      * @param exp The top level assume expression we have built so far.
+     * @param substitutionsMap A map of substitutions for any parameter constraints we generate.
      * @param scope The module scope to start our search.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param entries List of operation's parameter entries.
@@ -995,7 +996,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The original {@code exp} plus any operation parameter's type constraints.
      */
     private Exp addParamTypeConstraints(Location loc, Exp exp,
-            ModuleScope scope, AssertiveCodeBlock currentBlock,
+            Map<Exp, Exp> substitutionsMap, ModuleScope scope,
+            AssertiveCodeBlock currentBlock,
             ImmutableList<ProgramParameterEntry> entries) {
         Exp retExp = exp;
 
@@ -1058,6 +1060,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .getName(),
                                                 myCurrentVerificationContext);
 
+                        // Apply any pre-defined substitutions
+                        constraintExp =
+                                constraintExp.substitute(substitutionsMap);
+
                         Exp whichEntailsExp =
                                 modifiedConstraintClause.getWhichEntailsExp();
                         if (whichEntailsExp != null) {
@@ -1070,6 +1076,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                     scope.getDefiningElement()
                                                             .getName(),
                                                     myCurrentVerificationContext);
+
+                            // Apply any pre-defined substitutions
+                            whichEntailsExp =
+                                    whichEntailsExp
+                                            .substitute(substitutionsMap);
                         }
 
                         modifiedConstraintClause =
@@ -1095,61 +1106,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                                 .getName()));
                     }
                 }
-
-                // TODO: Handle type representations from concept realizations
-                /*
-                // If the type is a type representation, then our requires clause
-                // should really say something about the conceptual type and not
-                // the variable
-                if (ste instanceof RepresentationTypeEntry && !isLocal) {
-                    requires =
-                            Utilities.replace(requires, parameterExp,
-                                    Utilities
-                                            .createConcVarExp(opLocation,
-                                                    parameterExp,
-                                                    parameterExp
-                                                            .getMathType(),
-                                                    BOOLEAN));
-                    requires.setLocation((Location) opLocation.clone());
-                }
-
-                // If the type is a type representation, then we need to add
-                // all the type constraints from all the variable declarations
-                // in the type representation.
-                if (ste instanceof RepresentationTypeEntry) {
-                    Exp repConstraintExp = null;
-                    Set<VarExp> keys =
-                            myRepresentationConstraintMap.keySet();
-                    for (VarExp varExp : keys) {
-                        if (varExp.getQualifier() == null
-                                && varExp.getName().getName().equals(
-                                pNameTy.getName().getName())) {
-                            if (repConstraintExp == null) {
-                                repConstraintExp =
-                                        myRepresentationConstraintMap
-                                                .get(varExp);
-                            }
-                            else {
-                                Utilities.ambiguousTy(pNameTy, pNameTy
-                                        .getLocation());
-                            }
-                        }
-                    }
-
-                    // Only do the following if the expression is not simply true
-                    if (!repConstraintExp.isLiteralTrue()) {
-                        // Replace the exemplar with the actual parameter variable expression
-                        repConstraintExp =
-                                Utilities.replace(repConstraintExp,
-                                        exemplar, parameterExp);
-
-                        // Add this to our requires clause
-                        requires =
-                                myTypeGraph.formConjunct(requires,
-                                        repConstraintExp);
-                        requires.setLocation((Location) opLocation.clone());
-                    }
-                }*/
             }
 
             // Add the current variable to our list of free variables
@@ -1169,7 +1125,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param block An {@link AssertiveCodeBlock}.
      */
     private void addSharedVarsToFreeVariableList(AssertiveCodeBlock block) {
-        // TODO: Do something different when we are in a concept realization
         // Add all shared variables to the free variables list.
         List<SharedStateDec> sharedStateDecs =
                 myCurrentVerificationContext.getConceptSharedVars();
@@ -1432,6 +1387,32 @@ public class VCGenerator extends TreeWalkerVisitor {
         // variables with representation types.
         Map<Exp, Exp> substitutionParamToConc = new LinkedHashMap<>();
 
+        // If we are in a concept realization, loop through all
+        // shared variable declared from the associated concept.
+        List<SharedStateDec> sharedStateDecs =
+                myCurrentVerificationContext.getConceptSharedVars();
+        if (inConceptRealiz && !isLocal) {
+            // Our requires clause should say something about the conceptual
+            // shared variables.
+            for (SharedStateDec stateDec : sharedStateDecs) {
+                for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                    // Convert the math variables to variable expressions
+                    VarExp varExp =
+                            Utilities.createVarExp(loc.clone(), null,
+                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
+
+                    // Create the appropriate conceptual versions of the shared variable
+                    DotExp concVarExp =
+                            Utilities.createConcVarExp(
+                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+
+                    // Add these to our substitution map
+                    substitutionParamToConc.put(varExp, concVarExp);
+                }
+            }
+        }
+
         // Create a new expression with any conventions and correspondence
         Exp aggConventionCorrespondenceExp = VarExp.getTrueVarExp(loc, myTypeGraph);
         for (ParameterVarDec parameterVarDec : correspondingOperationEntry.getOperationDec().getParameters()) {
@@ -1529,17 +1510,37 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
+        // Add any type conventions or correspondences
+        if (inConceptRealiz && !isLocal) {
+            if (!VarExp.isLiteralTrue(aggConventionCorrespondenceExp)) {
+                retExp = MathExp.formConjunct(loc.clone(), retExp, aggConventionCorrespondenceExp);
+            }
+        }
+
         // Add the operation's requires clause (and any which_entails clause)
         AssertionClause requiresClause =
                 correspondingOperationEntry.getRequiresClause();
         Exp requiresExp = requiresClause.getAssertionExp().clone();
         if (!VarExp.isLiteralTrue(requiresExp)) {
+            // Replace any parameter variables with representation types
+            // with the conceptual counterparts
+            requiresExp = requiresExp.substitute(substitutionParamToConc);
+
+            Exp whichEntailsExp = requiresClause.getWhichEntailsExp();
+            if (whichEntailsExp != null) {
+                whichEntailsExp = whichEntailsExp.substitute(substitutionParamToConc);
+            }
+
             // Form a conjunct with the requires clause and add
             // the location detail associated with it.
+            AssertionClause modifiedRequiresClause =
+                    new AssertionClause(requiresClause.getLocation().clone(),
+                            requiresClause.getClauseType(), requiresExp, whichEntailsExp,
+                            requiresClause.getInvolvedSharedVars());
             retExp =
-                    Utilities.formConjunct(loc, retExp, requiresClause,
-                            new LocationDetailModel(requiresClause
-                                    .getLocation().clone(), requiresClause
+                    Utilities.formConjunct(loc, retExp, modifiedRequiresClause,
+                            new LocationDetailModel(modifiedRequiresClause
+                                    .getLocation().clone(), modifiedRequiresClause
                                     .getLocation().clone(),
                                     "Requires Clause of "
                                             + correspondingOperationEntry
@@ -1555,20 +1556,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         //     will show up in all of the VCs.
         if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
             retExp =
-                    addParamTypeConstraints(loc, retExp, myCurrentModuleScope,
+                    addParamTypeConstraints(loc, retExp, substitutionParamToConc, myCurrentModuleScope,
                             currentBlock, correspondingOperationEntry
                                     .getParameters());
-        }
-
-        // Replace any parameter variables with representation types
-        // with the conceptual counterparts
-        retExp = retExp.substitute(substitutionParamToConc);
-
-        // Add any conventions or correspondences
-        if (inConceptRealiz && !isLocal) {
-            if (!VarExp.isLiteralTrue(aggConventionCorrespondenceExp)) {
-                retExp = MathExp.formConjunct(loc.clone(), retExp, aggConventionCorrespondenceExp);
-            }
         }
 
         return retExp;
