@@ -93,9 +93,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      */
     private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
 
-    /** <p>The symbol table we are currently building.</p> */
-    private final MathSymbolTableBuilder mySymbolTable;
-
     /**
      * <p>This is the math type graph that indicates relationship
      * between different math types.</p>
@@ -135,7 +132,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                         .getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry =
                 myCurrentAssertiveCodeBlock.getCorrespondingOperation();
-        mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
         myProcedureDec = procedureDec;
         myVariableTypeEntries = procVarTypeEntries;
@@ -592,8 +588,18 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                                     procedureLoc.clone(), null,
                                     parameterVarDec.getName(), type.getExemplar(),
                                     typeEntry.getModelType(), null);
-
-                    // TODO: Logic for types in concept realizations
+                }
+                else if (typeEntry.getDefiningElement() instanceof TypeRepresentationDec) {
+                    // Obtain the type family declaration and obtain it's initialization ensures.
+                    PTRepresentation representationType = (PTRepresentation) typeEntry.getProgramType();
+                    TypeFamilyDec type = (TypeFamilyDec) representationType.getFamily().getDefiningElement();
+                    AssertionClause initEnsures =
+                            type.getInitialization().getEnsures();
+                    modifiedInitEnsures =
+                            Utilities.getTypeInitEnsuresClause(initEnsures,
+                                    procedureLoc.clone(), null,
+                                    parameterVarDec.getName(), type.getExemplar(),
+                                    typeEntry.getModelType(), null);
                 }
                 else {
                     VarDec parameterAsVarDec =

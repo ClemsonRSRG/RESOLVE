@@ -652,7 +652,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postOperationProcedureDec(OperationProcedureDec dec) {
         // Apply procedure declaration rule
-        // TODO: Recheck logic to make sure everything still works!
         OperationDec wrappedOpDec = dec.getWrappedOpDec();
         ProcedureDec procedureDec =
                 new ProcedureDec(dec.getName(), wrappedOpDec.getParameters(),
@@ -773,7 +772,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postProcedureDec(ProcedureDec dec) {
         // Apply procedure declaration rule
-        // TODO: Recheck logic to make sure everything still works!
         ProcedureDeclRule declRule =
                 new ProcedureDeclRule(dec, myVariableTypeEntries, myBuilder,
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
