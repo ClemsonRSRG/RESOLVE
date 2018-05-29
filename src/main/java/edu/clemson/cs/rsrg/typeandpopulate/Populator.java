@@ -4136,7 +4136,7 @@ public class Populator extends TreeWalkerVisitor {
         }
         else {
             message =
-                    "No such symbol in module: " + qualifier.getName() + "."
+                    "No such symbol in module: " + qualifier.getName() + "::"
                             + symbolName;
         }
 

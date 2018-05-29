@@ -153,8 +153,8 @@ public class OperationSearcher implements TableSearcher<OperationEntry> {
             while (result && formalParametersIter.hasNext()) {
                 actualArgumentType = actualArgumentTypeIter.next();
 
-                // If it is PTRepresentation type, we are looking for
-                // type it is instantiating.
+                // If it is a PTRepresentation type, we are looking for
+                // the family type it is instantiating inside the base type.
                 if (actualArgumentType instanceof PTRepresentation) {
                     // Special handing for a PTNamed base type
                     PTType baseType =
@@ -165,6 +165,13 @@ public class OperationSearcher implements TableSearcher<OperationEntry> {
                                 ((PTNamed) baseType)
                                         .getInstantiatedFamilyType();
                     }
+                }
+                // If it is a PTNamed type, we are looking for
+                // the family type it is instantiating.
+                else if (actualArgumentType instanceof PTNamed) {
+                    actualArgumentType =
+                            ((PTNamed) actualArgumentType)
+                                    .getInstantiatedFamilyType();
                 }
 
                 formalParameterType =
