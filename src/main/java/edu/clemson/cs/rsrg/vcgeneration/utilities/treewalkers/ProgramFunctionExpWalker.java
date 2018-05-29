@@ -13,6 +13,8 @@
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
@@ -29,6 +31,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
 
 /**
@@ -164,6 +167,35 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                 Utilities.getOperationEntry(exp, myCurrentModuleScope);
         OperationDec operationDec = operationEntry.getOperationDec();
 
+        // YS: It is possible we don't have any parameters and still have
+        //     shared variables to replace. If that is the case, we add
+        //     those to our map and perform the replacement.
+        //     If it is not empty, then "replaceFacilityFormalWithActual"
+        //     we take care of the replacement.
+        Map<Exp, Exp> substitutionFacSharedVars = new LinkedHashMap<>();
+        if (exp.getQualifier() != null && operationDec.getParameters().isEmpty()) {
+            PosSymbol qualifier = exp.getQualifier().clone();
+            for (InstantiatedFacilityDecl decl : myCurrentVerificationContext.getProcessedInstFacilityDecls()) {
+                if (decl.getInstantiatedFacilityName().getName().equals(qualifier.getName())) {
+                    // Replace any shared variables
+                    for (SharedStateDec stateDec : decl.getConceptSharedStates()) {
+                        for (MathVarDec varDec : stateDec.getAbstractStateVars()) {
+                            // Construct the qualified and not qualified version of varDec
+                            VarExp varDecAsVarExp =
+                                    Utilities.createVarExp(exp.getLocation().clone(),
+                                            null, varDec.getName(),
+                                            varDec.getMathType(), null);
+                            VarExp qualifiedVarExp = (VarExp) varDecAsVarExp.clone();
+                            qualifiedVarExp.setQualifier(qualifier);
+
+                            // Add it to our substitution map
+                            substitutionFacSharedVars.put(varDecAsVarExp, qualifiedVarExp);
+                        }
+                    }
+                }
+            }
+        }
+
         // Only need to do something if it is not "requires true"
         if (!VarExp.isLiteralTrue(operationDec.getRequires().getAssertionExp())) {
             // Replace formals in the original requires clause with the
@@ -186,6 +218,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                             operationDec.getParameters(), myCurrentModuleScope
                                     .getDefiningElement().getName(),
                             myCurrentVerificationContext);
+
+            // Apply any substitutions that are in our map
+            requiresExp = requiresExp.substitute(substitutionFacSharedVars);
 
             // Store the modified requires clause in our list
             myRequiresClauseList.add(requiresExp);
@@ -211,6 +246,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                         operationDec.getParameters(), myCurrentModuleScope
                                 .getDefiningElement().getName(),
                         myCurrentVerificationContext);
+
+        // Apply any substitutions that are in our map
+        ensuresExp = ensuresExp.substitute(substitutionFacSharedVars);
 
         // Store the modified ensures clause in our map
         myEnsuresClauseMap.put(exp, ensuresExp);
@@ -321,9 +359,9 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
         if (generatedExp instanceof EqualsExp) {
             // Has to be a VarExp on the left hand side (containing the name
             // of the function operation)
-            EqualsExp generatedExpAsEqualsexp = (EqualsExp) generatedExp;
-            if (generatedExpAsEqualsexp.getLeft() instanceof VarExp) {
-                retExp = generatedExpAsEqualsexp.getRight().clone();
+            EqualsExp generatedExpAsEqualsExp = (EqualsExp) generatedExp;
+            if (generatedExpAsEqualsExp.getLeft() instanceof VarExp) {
+                retExp = generatedExpAsEqualsExp.getRight().clone();
             }
             else {
                 // Something went wrong with the program function walker.
