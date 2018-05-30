@@ -14,6 +14,9 @@ package edu.clemson.cs.rsrg.typeandpopulate.sanitychecking;
 
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTNamed;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 
 /**
  * <p>This is a sanity checker for making sure our the two programming types are
@@ -59,11 +62,40 @@ public class SameProgTypeChecker {
      * <p>This method indicates whether the programming types match.</p>
      */
     public final void hasSameProgrammingType() {
-        if (!myLeftExp.getProgramType().equals(myRightExp.getProgramType())) {
+        if (!extractProgramType(myLeftExp.getProgramType()).equals(
+                extractProgramType(myRightExp.getProgramType()))) {
             throw new TypeMismatchException("Non-matching programming types. ["
                     + myLeftExp.getLocation() + "]" + "\nLeft: "
                     + myLeftExp.getProgramType() + "\nRight: "
                     + myRightExp.getProgramType());
         }
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method for extracting the proper program type
+     * to be compared.</p>
+     *
+     * @param type A potentially instantiated {@link PTType}.
+     *
+     * @return The actual {@link PTType}.
+     */
+    private PTType extractProgramType(PTType type) {
+        PTType retType;
+
+        if (type instanceof PTNamed) {
+            retType = ((PTNamed) type).getInstantiatedFamilyType();
+        }
+        else if (type instanceof PTRepresentation) {
+            retType = ((PTRepresentation) type).getFamily().getProgramType();
+        }
+        else {
+            retType = type;
+        }
+
+        return retType;
     }
 }
