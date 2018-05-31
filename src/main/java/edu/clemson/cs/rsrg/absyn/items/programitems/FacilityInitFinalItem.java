@@ -1,5 +1,5 @@
 /*
- * FacilityTypeInitFinalItem.java
+ * FacilityInitFinalItem.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @version 1.0
  */
-public class FacilityTypeInitFinalItem extends AbstractTypeInitFinalItem {
+public class FacilityInitFinalItem extends AbstractInitFinalItem {
 
     // ===========================================================
     // Member Fields
@@ -58,7 +58,7 @@ public class FacilityTypeInitFinalItem extends AbstractTypeInitFinalItem {
      * @param variables List of variables in this block.
      * @param statements List of statements in this block.
      */
-    public FacilityTypeInitFinalItem(Location l, ItemType type,
+    public FacilityInitFinalItem(Location l, ItemType type,
             AffectsClause affects, AssertionClause requires,
             AssertionClause ensures, List<FacilityDec> facilities,
             List<VarDec> variables, List<Statement> statements) {
@@ -121,13 +121,13 @@ public class FacilityTypeInitFinalItem extends AbstractTypeInitFinalItem {
      * {@inheritDoc}
      */
     @Override
-    public final FacilityTypeInitFinalItem clone() {
+    public final FacilityInitFinalItem clone() {
         AffectsClause newAffects = null;
         if (myAffects != null) {
             newAffects = myAffects.clone();
         }
 
-        return new FacilityTypeInitFinalItem(cloneLocation(), myItemType,
+        return new FacilityInitFinalItem(cloneLocation(), myItemType,
                 newAffects, myRequires.clone(), myEnsures.clone(),
                 copyFacDecs(), copyVars(), copyStatements());
     }
@@ -144,7 +144,7 @@ public class FacilityTypeInitFinalItem extends AbstractTypeInitFinalItem {
         if (!super.equals(o))
             return false;
 
-        FacilityTypeInitFinalItem that = (FacilityTypeInitFinalItem) o;
+        FacilityInitFinalItem that = (FacilityInitFinalItem) o;
 
         if (!myRequires.equals(that.myRequires))
             return false;

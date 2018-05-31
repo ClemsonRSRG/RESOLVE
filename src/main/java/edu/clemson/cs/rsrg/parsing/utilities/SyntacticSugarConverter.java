@@ -27,9 +27,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityTypeInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.IfConditionItem;
-import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.RealizInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -68,8 +68,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
     /**
      * <p>This is a deep copy of all the shared state representations created during the
-     * tree building process. Note that the list contains either all
-     * {@link SharedStateRealizationDec}s or all {@link FacilitySharedStateRealizationDec}s.</p>
+     * tree building process. Note that the list contains all
+     * {@link SharedStateRealizationDec}s.</p>
      */
     private final List<AbstractSharedStateRealizationDec> myCopySSRList;
 
@@ -155,12 +155,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     /**
      * <p>This should be the top-most node that we start with
      * when processing syntactic sugar conversions inside a
-     * {@link FacilityTypeInitFinalItem}.</p>
+     * {@link FacilityInitFinalItem}.</p>
      *
-     * @param e Current {@link FacilityTypeInitFinalItem} we are visiting.
+     * @param e Current {@link FacilityInitFinalItem} we are visiting.
      */
     @Override
-    public void preFacilityTypeInitFinalItem(FacilityTypeInitFinalItem e) {
+    public void preFacilityInitFinalItem(FacilityInitFinalItem e) {
         // Store the params, facility and variable declarations
         myParentNodeElementsContainer =
                 new ParentNodeElementsContainer(
@@ -175,12 +175,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     /**
      * <p>This should be the last element we walk. All syntactic
      * sugar should have been performed and we can safely create
-     * the new {@link FacilityTypeInitFinalItem} to be returned.</p>
+     * the new {@link FacilityInitFinalItem} to be returned.</p>
      *
-     * @param e Current {@link FacilityTypeInitFinalItem} we are visiting.
+     * @param e Current {@link FacilityInitFinalItem} we are visiting.
      */
     @Override
-    public void postFacilityTypeInitFinalItem(FacilityTypeInitFinalItem e) {
+    public void postFacilityInitFinalItem(FacilityInitFinalItem e) {
         // Affects clause (if any)
         AffectsClause affectsClause = null;
         if (e.getAffectedVars() != null) {
@@ -191,7 +191,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
         myFinalProcessedElement =
-                new FacilityTypeInitFinalItem(e.getLocation().clone(), e
+                new FacilityInitFinalItem(e.getLocation().clone(), e
                         .getItemType(), affectsClause, e.getRequires().clone(),
                         e.getEnsures().clone(),
                         myParentNodeElementsContainer.facilityDecs,
@@ -338,12 +338,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     /**
      * <p>This should be the top-most node that we start with
      * when processing syntactic sugar conversions inside a
-     * {@link TypeInitFinalItem}.</p>
+     * {@link RealizInitFinalItem}.</p>
      *
-     * @param e Current {@link TypeInitFinalItem} we are visiting.
+     * @param e Current {@link RealizInitFinalItem} we are visiting.
      */
     @Override
-    public void preTypeInitFinalItem(TypeInitFinalItem e) {
+    public void preRealizInitFinalItem(RealizInitFinalItem e) {
         // Store the params, facility and variable declarations
         myParentNodeElementsContainer =
                 new ParentNodeElementsContainer(
@@ -358,12 +358,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     /**
      * <p>This should be the last element we walk. All syntactic
      * sugar should have been performed and we can safely create
-     * the new {@link TypeInitFinalItem} to be returned.</p>
+     * the new {@link RealizInitFinalItem} to be returned.</p>
      *
-     * @param e Current {@link TypeInitFinalItem} we are visiting.
+     * @param e Current {@link RealizInitFinalItem} we are visiting.
      */
     @Override
-    public void postTypeInitFinalItem(TypeInitFinalItem e) {
+    public void postRealizInitFinalItem(RealizInitFinalItem e) {
         // Affects clause (if any)
         AffectsClause affectsClause = null;
         if (e.getAffectedVars() != null) {
@@ -374,8 +374,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
         myFinalProcessedElement =
-                new TypeInitFinalItem(e.getLocation().clone(), e.getItemType(),
-                        affectsClause,
+                new RealizInitFinalItem(e.getLocation().clone(), e
+                        .getItemType(), affectsClause,
                         myParentNodeElementsContainer.facilityDecs,
                         myParentNodeElementsContainer.varDecs, collector.stmts);
 
@@ -1146,7 +1146,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      *
      * @return The {@link Ty} for the array.
      *
-     * @exception MiscErrorException
+     * @exception MiscErrorException Could not find the array's
+     * instantiating type.
      */
     private NameTy findArrayType(ProgramVariableExp exp) {
         NameTy contentTy;
@@ -1264,7 +1265,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      *
      * @return A copy of the {@link ParameterVarDec} if found, else {@code null}.
      *
-     * @exception MiscErrorException
+     * @exception MiscErrorException Encountered two parameter variables with
+     * the same name.
      */
     private ParameterVarDec searchParameterVarDecs(String name) {
         ParameterVarDec parameterVarDec = null;
@@ -1294,7 +1296,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      *
      * @return A copy of the {@link Ty} if found, else {@code null}.
      *
-     * @exception MiscErrorException
+     * @exception MiscErrorException Encountered some kind of error while
+     * searching for the proper record type.
      */
     private NameTy searchRecords(NameTy rawTy, String name) {
         NameTy returnTy = null;
@@ -1340,7 +1343,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      *
      * @return A copy of the {@link VarDec} if found, else {@code null}.
      *
-     * @exception MiscErrorException
+     * @exception MiscErrorException Found two variables with the same name.
      */
     private VarDec searchSharedStates(String name) {
         // For all the shared state declarations,
@@ -1373,7 +1376,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      *
      * @return A copy of the {@link VarDec} if found, else {@code null}.
      *
-     * @exception MiscErrorException
+     * @exception MiscErrorException Found two variables with the same name.
      */
     private VarDec searchVarDecs(String name) {
         VarDec varDec = null;

@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityTypeInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.FacilityInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
@@ -32,10 +32,10 @@ public class FacilityTypeRepresentationDec
     // ===========================================================
 
     /** <p>The initialization block for the new type.</p> */
-    private final FacilityTypeInitFinalItem myTypeInitItem;
+    private final FacilityInitFinalItem myTypeInitItem;
 
     /** <p>The finalization block for the new type.</p> */
-    private final FacilityTypeInitFinalItem myTypeFinalItem;
+    private final FacilityInitFinalItem myTypeFinalItem;
 
     // ===========================================================
     // Constructors
@@ -51,8 +51,8 @@ public class FacilityTypeRepresentationDec
      * @param finalItem Finalization block for this new type.
      */
     public FacilityTypeRepresentationDec(PosSymbol name, Ty ty,
-            AssertionClause convention, FacilityTypeInitFinalItem initItem,
-            FacilityTypeInitFinalItem finalItem) {
+            AssertionClause convention, FacilityInitFinalItem initItem,
+            FacilityInitFinalItem finalItem) {
         super(name, ty, convention);
         myTypeInitItem = initItem;
         myTypeFinalItem = finalItem;
@@ -113,9 +113,9 @@ public class FacilityTypeRepresentationDec
      * <p>Returns the finalization block for this type representation.</p>
      *
      * @return The code block used for finalization
-     * in {@link FacilityTypeInitFinalItem} format.
+     * in {@link FacilityInitFinalItem} format.
      */
-    public final FacilityTypeInitFinalItem getTypeFinalItem() {
+    public final FacilityInitFinalItem getTypeFinalItem() {
         return myTypeFinalItem;
     }
 
@@ -123,9 +123,9 @@ public class FacilityTypeRepresentationDec
      * <p>Returns the initialization block for this type representation.</p>
      *
      * @return The code block used for initialization
-     * in {@link FacilityTypeInitFinalItem} format.
+     * in {@link FacilityInitFinalItem} format.
      */
-    public final FacilityTypeInitFinalItem getTypeInitItem() {
+    public final FacilityInitFinalItem getTypeInitItem() {
         return myTypeInitItem;
     }
 

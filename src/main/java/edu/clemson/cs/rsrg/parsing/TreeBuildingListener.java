@@ -1540,30 +1540,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.CORRESPONDENCE);
         }
 
-        TypeInitFinalItem initItem;
+        RealizInitFinalItem initItem;
         if (ctx.representationInit() != null) {
             initItem =
-                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                    (RealizInitFinalItem) myNodes.removeFrom(ctx
                             .representationInit());
         }
         else {
             initItem =
-                    new TypeInitFinalItem(createLocation(ctx),
-                            TypeInitFinalItem.ItemType.INITIALIZATION, null,
+                    new RealizInitFinalItem(createLocation(ctx),
+                            RealizInitFinalItem.ItemType.INITIALIZATION, null,
                             new ArrayList<FacilityDec>(),
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        TypeInitFinalItem finalItem;
+        RealizInitFinalItem finalItem;
         if (ctx.representationFinal() != null) {
             finalItem =
-                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                    (RealizInitFinalItem) myNodes.removeFrom(ctx
                             .representationFinal());
         }
         else {
             finalItem =
-                    new TypeInitFinalItem(createLocation(ctx),
-                            TypeInitFinalItem.ItemType.FINALIZATION, null,
+                    new RealizInitFinalItem(createLocation(ctx),
+                            RealizInitFinalItem.ItemType.FINALIZATION, null,
                             new ArrayList<FacilityDec>(),
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
@@ -1640,16 +1640,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.CONVENTION);
         }
 
-        FacilityTypeInitFinalItem initItem;
+        FacilityInitFinalItem initItem;
         if (ctx.facilityRepresentationInit() != null) {
             initItem =
-                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
+                    (FacilityInitFinalItem) myNodes.removeFrom(ctx
                             .facilityRepresentationInit());
         }
         else {
             initItem =
-                    new FacilityTypeInitFinalItem(createLocation(ctx),
-                            FacilityTypeInitFinalItem.ItemType.INITIALIZATION,
+                    new FacilityInitFinalItem(createLocation(ctx),
+                            FacilityInitFinalItem.ItemType.INITIALIZATION,
                             null, createTrueAssertionClause(
                                     createLocation(ctx),
                                     AssertionClause.ClauseType.REQUIRES),
@@ -1659,18 +1659,17 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        FacilityTypeInitFinalItem finalItem;
+        FacilityInitFinalItem finalItem;
         if (ctx.facilityRepresentationFinal() != null) {
             finalItem =
-                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
+                    (FacilityInitFinalItem) myNodes.removeFrom(ctx
                             .facilityRepresentationFinal());
         }
         else {
             finalItem =
-                    new FacilityTypeInitFinalItem(createLocation(ctx),
-                            FacilityTypeInitFinalItem.ItemType.FINALIZATION,
-                            null, createTrueAssertionClause(
-                                    createLocation(ctx),
+                    new FacilityInitFinalItem(createLocation(ctx),
+                            FacilityInitFinalItem.ItemType.FINALIZATION, null,
+                            createTrueAssertionClause(createLocation(ctx),
                                     AssertionClause.ClauseType.REQUIRES),
                             createTrueAssertionClause(createLocation(ctx),
                                     AssertionClause.ClauseType.ENSURES),
@@ -1872,30 +1871,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.CORRESPONDENCE);
         }
 
-        TypeInitFinalItem initItem;
+        RealizInitFinalItem initItem;
         if (ctx.representationInit() != null) {
             initItem =
-                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                    (RealizInitFinalItem) myNodes.removeFrom(ctx
                             .representationInit());
         }
         else {
             initItem =
-                    new TypeInitFinalItem(createLocation(ctx),
-                            TypeInitFinalItem.ItemType.INITIALIZATION, null,
+                    new RealizInitFinalItem(createLocation(ctx),
+                            RealizInitFinalItem.ItemType.INITIALIZATION, null,
                             new ArrayList<FacilityDec>(),
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        TypeInitFinalItem finalItem;
+        RealizInitFinalItem finalItem;
         if (ctx.representationFinal() != null) {
             finalItem =
-                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                    (RealizInitFinalItem) myNodes.removeFrom(ctx
                             .representationFinal());
         }
         else {
             finalItem =
-                    new TypeInitFinalItem(createLocation(ctx),
-                            TypeInitFinalItem.ItemType.FINALIZATION, null,
+                    new RealizInitFinalItem(createLocation(ctx),
+                            RealizInitFinalItem.ItemType.FINALIZATION, null,
                             new ArrayList<FacilityDec>(),
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
@@ -2028,8 +2027,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
         }
 
-        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
-                TypeInitFinalItem.ItemType.INITIALIZATION, affects,
+        myNodes.put(ctx, createRealizInitFinalItem(createLocation(ctx),
+                RealizInitFinalItem.ItemType.INITIALIZATION, affects,
                 getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
                         .variableDecl()), Utilities.collect(Statement.class,
                         ctx.stmt(), myNodes)));
@@ -2067,8 +2066,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
         }
 
-        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
-                TypeInitFinalItem.ItemType.FINALIZATION, affects,
+        myNodes.put(ctx, createRealizInitFinalItem(createLocation(ctx),
+                RealizInitFinalItem.ItemType.FINALIZATION, affects,
                 getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
                         .variableDecl()), Utilities.collect(Statement.class,
                         ctx.stmt(), myNodes)));
@@ -2129,7 +2128,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         myNodes.put(ctx, createFacilityTypeInitFinalItem(createLocation(ctx),
-                FacilityTypeInitFinalItem.ItemType.INITIALIZATION, affects,
+                FacilityInitFinalItem.ItemType.INITIALIZATION, affects,
                 requires, ensures, getFacilityDecls(ctx.facilityDecl()),
                 getVarDecls(ctx.variableDecl()), Utilities.collect(
                         Statement.class, ctx.stmt(), myNodes)));
@@ -2190,10 +2189,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         myNodes.put(ctx, createFacilityTypeInitFinalItem(createLocation(ctx),
-                FacilityTypeInitFinalItem.ItemType.FINALIZATION, affects,
-                requires, ensures, getFacilityDecls(ctx.facilityDecl()),
-                getVarDecls(ctx.variableDecl()), Utilities.collect(
-                        Statement.class, ctx.stmt(), myNodes)));
+                FacilityInitFinalItem.ItemType.FINALIZATION, affects, requires,
+                ensures, getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
+                        .variableDecl()), Utilities.collect(Statement.class,
+                        ctx.stmt(), myNodes)));
     }
 
     /**
@@ -5012,7 +5011,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
-     * <p>Create an {@link FacilityTypeInitFinalItem}
+     * <p>Create an {@link FacilityInitFinalItem}
      * for the current parser rule we are visiting.</p>
      *
      * @param l Location for the item.
@@ -5024,17 +5023,17 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param varDecs List of {@link VarDec}s for this item.
      * @param statements List of {@link Statement}s for this item.
      *
-     * @return A {@link FacilityTypeInitFinalItem} for the rule.
+     * @return A {@link FacilityInitFinalItem} for the rule.
      */
-    private FacilityTypeInitFinalItem createFacilityTypeInitFinalItem(
-            Location l, FacilityTypeInitFinalItem.ItemType itemType,
-            AffectsClause affects, AssertionClause requires,
-            AssertionClause ensures, List<FacilityDec> facilityDecs,
-            List<VarDec> varDecs, List<Statement> statements) {
+    private FacilityInitFinalItem createFacilityTypeInitFinalItem(Location l,
+            FacilityInitFinalItem.ItemType itemType, AffectsClause affects,
+            AssertionClause requires, AssertionClause ensures,
+            List<FacilityDec> facilityDecs, List<VarDec> varDecs,
+            List<Statement> statements) {
         // Create the finalization item that we are going to perform
         // the syntactic sugar conversions on.
-        FacilityTypeInitFinalItem beforeConversionFinalItem =
-                new FacilityTypeInitFinalItem(l.clone(), itemType, affects,
+        FacilityInitFinalItem beforeConversionFinalItem =
+                new FacilityInitFinalItem(l.clone(), itemType, affects,
                         requires, ensures, facilityDecs, varDecs, statements);
 
         // Attempt to resolve all the syntactic sugar conversions
@@ -5044,8 +5043,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         TreeWalker.visit(converter, beforeConversionFinalItem);
 
         // Obtain the new TypeInitFinalItem generated by the converter
-        FacilityTypeInitFinalItem afterConversionFinalItem =
-                (FacilityTypeInitFinalItem) converter.getProcessedElement();
+        FacilityInitFinalItem afterConversionFinalItem =
+                (FacilityInitFinalItem) converter.getProcessedElement();
         myNewElementCounter = converter.getNewElementCounter();
 
         return afterConversionFinalItem;
@@ -5151,7 +5150,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
-     * <p>Create an {@link TypeInitFinalItem}
+     * <p>Create an {@link RealizInitFinalItem}
      * for the current parser rule we are visiting.</p>
      *
      * @param l Location for the item.
@@ -5161,16 +5160,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param varDecs List of {@link VarDec}s for this item.
      * @param statements List of {@link Statement}s for this item.
      *
-     * @return A {@link TypeInitFinalItem} for the rule.
+     * @return A {@link RealizInitFinalItem} for the rule.
      */
-    private TypeInitFinalItem createTypeInitFinalItem(Location l,
-            TypeInitFinalItem.ItemType itemType, AffectsClause affects,
+    private RealizInitFinalItem createRealizInitFinalItem(Location l,
+            RealizInitFinalItem.ItemType itemType, AffectsClause affects,
             List<FacilityDec> facilityDecs, List<VarDec> varDecs,
             List<Statement> statements) {
         // Create the finalization item that we are going to perform
         // the syntactic sugar conversions on.
-        TypeInitFinalItem beforeConversionFinalItem =
-                new TypeInitFinalItem(l.clone(), itemType, affects,
+        RealizInitFinalItem beforeConversionFinalItem =
+                new RealizInitFinalItem(l.clone(), itemType, affects,
                         facilityDecs, varDecs, statements);
 
         // Attempt to resolve all the syntactic sugar conversions
@@ -5180,8 +5179,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         TreeWalker.visit(converter, beforeConversionFinalItem);
 
         // Obtain the new TypeInitFinalItem generated by the converter
-        TypeInitFinalItem afterConversionFinalItem =
-                (TypeInitFinalItem) converter.getProcessedElement();
+        RealizInitFinalItem afterConversionFinalItem =
+                (RealizInitFinalItem) converter.getProcessedElement();
         myNewElementCounter = converter.getNewElementCounter();
 
         return afterConversionFinalItem;

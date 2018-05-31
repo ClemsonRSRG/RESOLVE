@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.RealizInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
@@ -33,10 +33,10 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
     private final AssertionClause myCorrespondence;
 
     /** <p>The initialization block for the new type.</p> */
-    private final TypeInitFinalItem myTypeInitItem;
+    private final RealizInitFinalItem myTypeInitItem;
 
     /** <p>The finalization block for the new type.</p> */
-    private final TypeInitFinalItem myTypeFinalItem;
+    private final RealizInitFinalItem myTypeFinalItem;
 
     // ===========================================================
     // Constructors
@@ -54,7 +54,7 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
      */
     public TypeRepresentationDec(PosSymbol name, Ty ty,
             AssertionClause convention, AssertionClause correspondence,
-            TypeInitFinalItem initItem, TypeInitFinalItem finalItem) {
+            RealizInitFinalItem initItem, RealizInitFinalItem finalItem) {
         super(name, ty, convention);
         myCorrespondence = correspondence;
         myTypeFinalItem = finalItem;
@@ -132,9 +132,9 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
      * <p>Returns the finalization block for this type representation.</p>
      *
      * @return The code block used for finalization
-     * in {@link TypeInitFinalItem} format.
+     * in {@link RealizInitFinalItem} format.
      */
-    public final TypeInitFinalItem getTypeFinalItem() {
+    public final RealizInitFinalItem getTypeFinalItem() {
         return myTypeFinalItem;
     }
 
@@ -142,9 +142,9 @@ public class TypeRepresentationDec extends AbstractTypeRepresentationDec {
      * <p>Returns the initialization block for this type representation.</p>
      *
      * @return The code block used for initialization
-     * in {@link TypeInitFinalItem} format.
+     * in {@link RealizInitFinalItem} format.
      */
-    public final TypeInitFinalItem getTypeInitItem() {
+    public final RealizInitFinalItem getTypeInitItem() {
         return myTypeInitItem;
     }
 
