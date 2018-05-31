@@ -326,7 +326,6 @@ sharedStateDecl
         (moduleStateVariableDecl)+
         (constraintClause)?
         (specModelInit)?
-        (specModelFinal)?
         END SEMICOLON
     ;
 
@@ -336,7 +335,6 @@ sharedStateRepresentationDecl
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
-        (representationFinal)?
         END SEMICOLON
     ;
 

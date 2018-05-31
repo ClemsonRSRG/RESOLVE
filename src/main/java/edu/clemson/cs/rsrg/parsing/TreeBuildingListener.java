@@ -1778,24 +1778,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        SpecInitFinalItem finalItem;
-        if (ctx.specModelFinal() != null) {
-            finalItem =
-                    (SpecInitFinalItem) myNodes
-                            .removeFrom(ctx.specModelFinal());
-        }
-        else {
-            finalItem =
-                    new SpecInitFinalItem(createLocation(ctx),
-                            SpecInitFinalItem.ItemType.FINALIZATION, null,
-                            createTrueAssertionClause(createLocation(ctx),
-                                    AssertionClause.ClauseType.ENSURES));
-        }
-
         // Build the shared state declaration
         SharedStateDec sharedStateDec =
                 new SharedStateDec(createPosSymbol(ctx.start), abstractStateVars,
-                        constraint, initItem, finalItem);
+                        constraint, initItem);
 
         // Sanity checks to make sure the shared state has
         // valid initialization ensures clause.
@@ -1885,23 +1871,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        RealizInitFinalItem finalItem;
-        if (ctx.representationFinal() != null) {
-            finalItem =
-                    (RealizInitFinalItem) myNodes.removeFrom(ctx
-                            .representationFinal());
-        }
-        else {
-            finalItem =
-                    new RealizInitFinalItem(createLocation(ctx),
-                            RealizInitFinalItem.ItemType.FINALIZATION, null,
-                            new ArrayList<FacilityDec>(),
-                            new ArrayList<VarDec>(), new ArrayList<Statement>());
-        }
-
         SharedStateRealizationDec realizationDec =
                 new SharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
-                        convention, correspondence, initItem, finalItem);
+                        convention, correspondence, initItem);
         myCopySSRList.add((SharedStateRealizationDec) realizationDec.clone());
 
         myNodes.put(ctx, realizationDec);

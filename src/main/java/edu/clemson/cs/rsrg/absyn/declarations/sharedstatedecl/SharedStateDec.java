@@ -42,9 +42,6 @@ public class SharedStateDec extends Dec {
     /** <p>The initialization block for the new shared state.</p> */
     private final SpecInitFinalItem myStateInitItem;
 
-    /** <p>The finalization block for the new shared state.</p> */
-    private final SpecInitFinalItem myStateFinalItem;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -56,16 +53,13 @@ public class SharedStateDec extends Dec {
      * @param abstractStateVars List of abstract state variables.
      * @param constraint Shared state constraint.
      * @param initItem Initialization information for verification.
-     * @param finalItem Finalization information for verification.
      */
     public SharedStateDec(PosSymbol name, List<MathVarDec> abstractStateVars,
-            AssertionClause constraint, SpecInitFinalItem initItem,
-            SpecInitFinalItem finalItem) {
+            AssertionClause constraint, SpecInitFinalItem initItem) {
         super(name.getLocation(), name);
         myAbstractStateVars = abstractStateVars;
         myConstraint = constraint;
         myStateInitItem = initItem;
-        myStateFinalItem = finalItem;
     }
 
     // ===========================================================
@@ -99,9 +93,6 @@ public class SharedStateDec extends Dec {
         sb.append(myStateInitItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
         sb.append("\n");
-        sb.append(myStateFinalItem.asString(indentSize + innerIndentInc,
-                innerIndentInc));
-        sb.append("\n");
 
         printSpace(indentSize, sb);
         sb.append("end ");
@@ -129,9 +120,7 @@ public class SharedStateDec extends Dec {
             return false;
         if (!myConstraint.equals(that.myConstraint))
             return false;
-        if (!myStateInitItem.equals(that.myStateInitItem))
-            return false;
-        return myStateFinalItem.equals(that.myStateFinalItem);
+        return myStateInitItem.equals(that.myStateInitItem);
     }
 
     /**
@@ -141,16 +130,6 @@ public class SharedStateDec extends Dec {
      */
     public final AssertionClause getConstraint() {
         return myConstraint;
-    }
-
-    /**
-     * <p>Returns the finalization block for this shared state.</p>
-     *
-     * @return All relevant verification for finalization
-     * in {@link SpecInitFinalItem} format.
-     */
-    public final SpecInitFinalItem getFinalization() {
-        return myStateFinalItem;
     }
 
     /**
@@ -181,7 +160,6 @@ public class SharedStateDec extends Dec {
         result = 31 * result + myAbstractStateVars.hashCode();
         result = 31 * result + myConstraint.hashCode();
         result = 31 * result + myStateInitItem.hashCode();
-        result = 31 * result + myStateFinalItem.hashCode();
         return result;
     }
 
@@ -199,6 +177,6 @@ public class SharedStateDec extends Dec {
             newAbstractStateVars.add((MathVarDec) varDec.clone());
         }
 
-        return new SharedStateDec(myName.clone(), newAbstractStateVars, myConstraint.clone(), myStateInitItem.clone(), myStateFinalItem.clone());
+        return new SharedStateDec(myName.clone(), newAbstractStateVars, myConstraint.clone(), myStateInitItem.clone());
     }
 }
