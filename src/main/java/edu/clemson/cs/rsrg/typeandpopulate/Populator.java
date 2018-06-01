@@ -28,6 +28,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.AbstractInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
@@ -1956,6 +1957,27 @@ public class Populator extends TreeWalkerVisitor {
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(e.getName());
         }
+    }
+
+    /**
+     * <p>Code that gets executed before visiting an {@link AbstractInitFinalItem}.</p>
+     *
+     * @param item An initialization or finalization block.
+     */
+    @Override
+    public final void preAbstractInitFinalItem(AbstractInitFinalItem item) {
+        // Create a new list for parameter entries.
+        myCurrentParameters = new LinkedList<>();
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AbstractInitFinalItem}.</p>
+     *
+     * @param item An initialization or finalization block.
+     */
+    @Override
+    public final void postAbstractInitFinalItem(AbstractInitFinalItem item) {
+        myCurrentParameters = null;
     }
 
     // -----------------------------------------------------------
