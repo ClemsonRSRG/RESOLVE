@@ -45,6 +45,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -690,35 +691,16 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             for (SharedStateDec stateDec : sharedStateDecs) {
                 for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
                     // Convert the math variables to variable expressions
-                    VarExp parameterExp =
+                    VarExp stateVarExp =
                             Utilities.createVarExp(procedureLoc.clone(), null,
                                     mathVarDec.getName(), mathVarDec.getMathType(), null);
-                    OldExp oldParameterExp = new OldExp(procedureLoc.clone(), parameterExp);
-                    oldParameterExp.setMathType(parameterExp.getMathType());
+                    OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
+                    oldStateVarExp.setMathType(stateVarExp.getMathType());
 
                     // Add a "restores" mode to any shared variables not being affected
                     if (!affectedVars.contains(mathVarDec.getName().getName())) {
-                        // Construct an expression using the expression and it's
-                        // old expression equivalent.
-                        Exp restoresConditionExp =
-                                new EqualsExp(procedureLoc.clone(), parameterExp.clone(), null,
-                                        Operator.EQUAL, oldParameterExp.clone());
-                        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
-
-                        restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
-                                procedureLoc.clone(), procedureLoc.clone(),
-                                "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
-                                        + " (Condition from Non-Affected Shared Variable)"));
-
-                        // Form a conjunct if needed.
-                        if (VarExp.isLiteralTrue(retExp)) {
-                            retExp = restoresConditionExp;
-                        }
-                        else {
-                            retExp =
-                                    InfixExp.formConjunct(retExp.getLocation(),
-                                            retExp, restoresConditionExp);
-                        }
+                        retExp = createRestoresExpForSharedVars(procedureLoc,
+                                stateVarExp, oldStateVarExp, retExp);
                     }
 
                     // Create the appropriate conceptual versions of the shared variable
@@ -730,13 +712,95 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                     oldConcVarExp.setMathType(concVarExp.getMathType());
 
                     // Add these to our substitution map
-                    substitutionParamToConc.put(parameterExp, concVarExp);
-                    substitutionParamToConc.put(oldParameterExp, oldConcVarExp);
+                    substitutionParamToConc.put(stateVarExp, concVarExp);
+                    substitutionParamToConc.put(oldStateVarExp, oldConcVarExp);
+                }
+            }
+
+            // TODO: Do something about any definition variables.
+        }
+
+        // Build a set of names of shared variables being affected
+        // by the current procedure.
+        AffectsClause affectsClause = myProcedureDec.getAffectedVars();
+        Set<String> affectedVars = new HashSet<>();
+        if (affectsClause != null) {
+            for (Exp exp : affectsClause.getAffectedExps()) {
+                if (exp instanceof VarExp) {
+                    affectedVars.add(((VarExp) exp).getName().getName());
                 }
             }
         }
 
+        // Loop through all other shared variables and
+        // should generate a "restores" ensures clause
+        // for non-affected shared variables.
+        for (InstantiatedFacilityDecl facilityDecl :
+                myCurrentVerificationContext.getProcessedInstFacilityDecls()) {
+            for (SharedStateDec stateDec : facilityDecl.getConceptSharedStates()) {
+                for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                    // Convert the math variables to variable expressions
+                    VarExp stateVarExp =
+                            Utilities.createVarExp(procedureLoc.clone(),
+                                    facilityDecl.getInstantiatedFacilityName(),
+                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
+                    OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
+                    oldStateVarExp.setMathType(stateVarExp.getMathType());
+
+                    // Add a "restores" mode to any shared variables not being affected
+                    if (!affectedVars.contains(mathVarDec.getName().getName())) {
+                        retExp = createRestoresExpForSharedVars(procedureLoc,
+                                stateVarExp, oldStateVarExp, retExp);
+                    }
+                }
+            }
+
+            // TODO: Do something about any definition variables.
+        }
+
         // Apply any substitution and return the modified expression
         return retExp.substitute(substitutionParamToConc);
+    }
+
+    /**
+     * <p>An helper method that creates a new {@code ensures} expression
+     * that includes a {@code restores} mode clause for the given
+     * global state variable.</p>
+     *
+     * @param procedureLoc The current procedure's location.
+     * @param stateVarExp A global state variable as a {@link VarExp}.
+     * @param oldStateVarExp The incoming value of {@code stateVarExp}.
+     * @param ensuresExp The current ensures clause we are building.
+     *
+     * @return A modified {@code ensures} clause with the new
+     * {@code restores} expression.
+     */
+    private Exp createRestoresExpForSharedVars(Location procedureLoc,
+            VarExp stateVarExp, OldExp oldStateVarExp, Exp ensuresExp) {
+        // Construct an expression using the expression and it's
+        // old expression equivalent.
+        Exp restoresConditionExp =
+                new EqualsExp(procedureLoc.clone(), stateVarExp.clone(), null,
+                        Operator.EQUAL, oldStateVarExp.clone());
+        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
+
+        restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
+                procedureLoc.clone(), procedureLoc.clone(),
+                "Ensures Clause of "
+                        + myCurrentProcedureOperationEntry.getName()
+                        + " (Condition from Non-Affected Shared Variable)"));
+
+        // Form a conjunct if needed.
+        Exp retExp;
+        if (VarExp.isLiteralTrue(ensuresExp)) {
+            retExp = restoresConditionExp;
+        }
+        else {
+            retExp =
+                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
+                            restoresConditionExp);
+        }
+
+        return retExp;
     }
 }
