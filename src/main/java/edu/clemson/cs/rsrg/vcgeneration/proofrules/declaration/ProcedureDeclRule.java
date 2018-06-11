@@ -669,61 +669,21 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             }
         }
 
-        // If we are in a concept realization, loop through all
-        // shared variable declared from the associated concept.
-        List<SharedStateDec> sharedStateDecs =
-                myCurrentVerificationContext.getConceptSharedVars();
-        if (inConceptRealiz && !isLocal) {
-            // Build a set of names of shared variables being affected.
-            AffectsClause affectsClause = myCurrentProcedureOperationEntry.getAffectsClause();
-            Set<String> affectedVars = new HashSet<>();
-            if (affectsClause != null) {
-                for (Exp exp : affectsClause.getAffectedExps()) {
-                    if (exp instanceof VarExp) {
-                        affectedVars.add(((VarExp) exp).getName().getName());
-                    }
+        // Build a set of names of shared variables being affected
+        // from the OperationEntry.
+        AffectsClause operationAffectsClause = myCurrentProcedureOperationEntry.getAffectsClause();
+        Set<String> affectedVars = new LinkedHashSet<>();
+        if (operationAffectsClause != null) {
+            for (Exp exp : operationAffectsClause.getAffectedExps()) {
+                if (exp instanceof VarExp) {
+                    affectedVars.add(((VarExp) exp).getName().getName());
                 }
             }
-
-            // Our ensures clause should say something about the conceptual
-            // shared variables and should generate a "restores" ensures clause
-            // for non-affected shared variables.
-            for (SharedStateDec stateDec : sharedStateDecs) {
-                for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
-                    // Convert the math variables to variable expressions
-                    VarExp stateVarExp =
-                            Utilities.createVarExp(procedureLoc.clone(), null,
-                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
-                    OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
-                    oldStateVarExp.setMathType(stateVarExp.getMathType());
-
-                    // Add a "restores" mode to any shared variables not being affected
-                    if (!affectedVars.contains(mathVarDec.getName().getName())) {
-                        retExp = createRestoresExpForSharedVars(procedureLoc,
-                                stateVarExp, oldStateVarExp, retExp);
-                    }
-
-                    // Create the appropriate conceptual versions of the shared variable
-                    DotExp concVarExp =
-                            Utilities.createConcVarExp(
-                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                    OldExp oldConcVarExp = new OldExp(procedureLoc, concVarExp.clone());
-                    oldConcVarExp.setMathType(concVarExp.getMathType());
-
-                    // Add these to our substitution map
-                    substitutionParamToConc.put(stateVarExp, concVarExp);
-                    substitutionParamToConc.put(oldStateVarExp, oldConcVarExp);
-                }
-            }
-
-            // TODO: Do something about any definition variables.
         }
 
         // Build a set of names of shared variables being affected
-        // by the current procedure.
+        // by the current procedure declaration.
         AffectsClause affectsClause = myProcedureDec.getAffectedVars();
-        Set<String> affectedVars = new HashSet<>();
         if (affectsClause != null) {
             for (Exp exp : affectsClause.getAffectedExps()) {
                 if (exp instanceof VarExp) {
@@ -732,9 +692,51 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             }
         }
 
-        // Loop through all other shared variables and
-        // should generate a "restores" ensures clause
-        // for non-affected shared variables.
+        // If we are in a concept or enhancement realization,
+        // loop through all shared variable declared from the
+        // associated concept.
+        // Note: If we are in a facility, "getConceptSharedVars()" will return
+        //       an empty list.
+        List<SharedStateDec> sharedStateDecs =
+                myCurrentVerificationContext.getConceptSharedVars();
+        for (SharedStateDec stateDec : sharedStateDecs) {
+            for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                // Convert the math variables to variable expressions
+                VarExp stateVarExp =
+                        Utilities.createVarExp(procedureLoc.clone(), null,
+                                mathVarDec.getName(), mathVarDec.getMathType(), null);
+                OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
+                oldStateVarExp.setMathType(stateVarExp.getMathType());
+
+                // Add a "restores" mode to any shared variables not being affected
+                if (!affectedVars.contains(mathVarDec.getName().getName())) {
+                    retExp = createRestoresExpForSharedVars(procedureLoc,
+                            stateVarExp, oldStateVarExp, retExp);
+                }
+
+                // If we are in a concept realization, our non-local procedure's
+                // ensures clause should say something about the conceptual
+                // shared variables.
+                if (inConceptRealiz && !isLocal) {
+                    // Create the appropriate conceptual versions of the shared variables
+                    // and add them to our substitution maps.
+                    DotExp concVarExp =
+                            Utilities.createConcVarExp(
+                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    substitutionParamToConc.put(stateVarExp, concVarExp);
+
+                    OldExp oldConcVarExp = new OldExp(procedureLoc, concVarExp.clone());
+                    oldConcVarExp.setMathType(concVarExp.getMathType());
+                    substitutionParamToConc.put(oldStateVarExp, oldConcVarExp);
+                }
+            }
+        }
+
+        // TODO: Do something about any definition variables from the associated concept.
+
+        // Loop through all instantiated facility's shared variables and
+        // generate a "restores" ensures clause for non-affected shared variables.
         for (InstantiatedFacilityDecl facilityDecl :
                 myCurrentVerificationContext.getProcessedInstFacilityDecls()) {
             for (SharedStateDec stateDec : facilityDecl.getConceptSharedStates()) {
@@ -755,7 +757,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 }
             }
 
-            // TODO: Do something about any definition variables.
+            // TODO: Do something about any definition variables from the importing concept.
         }
 
         // Apply any substitution and return the modified expression
