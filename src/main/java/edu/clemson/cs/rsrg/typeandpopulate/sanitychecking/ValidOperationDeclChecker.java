@@ -105,10 +105,10 @@ public class ValidOperationDeclChecker {
             if (!curOpParam.getParameterMode().canBeImplementedWith(
                     curProcParam.getParameterMode())) {
                 throw new SourceErrorException(curOpParam.getParameterMode()
-                        + "-mode parameter "
+                        + " mode parameter "
                         + "cannot be implemented with "
                         + curProcParam.getParameterMode()
-                        + " mode.  "
+                        + " mode.\n"
                         + "Select one of these valid modes instead: "
                         + Arrays.toString(curOpParam.getParameterMode()
                                 .getValidImplementationModes()), curProcParam
@@ -117,21 +117,20 @@ public class ValidOperationDeclChecker {
 
             if (!curProcParam.getDeclaredType().acceptableFor(
                     curOpParam.getDeclaredType())) {
-                throw new SourceErrorException("Parameter type does not "
-                        + "match corresponding operation parameter type."
+                throw new SourceErrorException("Parameter "
+                        + curProcParam.getName() + "'s type does not "
+                        + "match corresponding operation parameter's type."
                         + "\n\nExpected: " + curOpParam.getDeclaredType()
-                        + " (" + curOpParam.getSourceModuleIdentifier() + "."
-                        + myCorrespondingOperation.getName() + ")\n\n"
-                        + "Found: " + curProcParam.getDeclaredType(),
+                        + " [" + curOpParam.getDefiningElement().getLocation()
+                        + "]\n" + "Found: " + curProcParam.getDeclaredType(),
                         curProcParam.getDefiningElement().getLocation());
             }
 
             if (!curOpParam.getName().equals(curProcParam.getName())) {
                 throw new SourceErrorException("Parameter name does not "
                         + "match corresponding operation parameter name."
-                        + "\n\nExpected name: " + curOpParam.getName() + " ("
-                        + curOpParam.getSourceModuleIdentifier() + "."
-                        + myCorrespondingOperation.getName() + ")\n\n"
+                        + "\n\nExpected name: " + curOpParam.getName() + " ["
+                        + curOpParam.getDefiningElement().getLocation() + "]\n"
                         + "Found name: " + curProcParam.getName(), curProcParam
                         .getDefiningElement().getLocation());
             }
@@ -147,13 +146,14 @@ public class ValidOperationDeclChecker {
     public final void isSameNumberOfParameters() {
         if (myCorrespondingOperation.getParameters().size() != myCurrentParameters
                 .size()) {
-            throw new SourceErrorException("Procedure parameter count "
+            throw new SourceErrorException(myCorrespondingOperation.getName()
+                    + "'s " + "parameter count "
                     + "does not correspond to the parameter count of the "
                     + "operation it implements. \n\nExpected count: "
-                    + myCorrespondingOperation.getParameters().size() + " ("
-                    + myCorrespondingOperation.getSourceModuleIdentifier()
-                    + "." + myCorrespondingOperation.getName() + ")\n\n"
-                    + "Found count: " + myCurrentParameters.size(), myLocation);
+                    + myCorrespondingOperation.getParameters().size() + " ["
+                    + myCorrespondingOperation.getOperationDec().getLocation()
+                    + "]\n" + "Found count: " + myCurrentParameters.size(),
+                    myLocation);
         }
     }
 
@@ -168,13 +168,13 @@ public class ValidOperationDeclChecker {
     public final void isSameReturnType(PTType procedureReturnType) {
         if (!procedureReturnType.equals(myCorrespondingOperation
                 .getReturnType())) {
-            throw new SourceErrorException("Procedure return type does "
+            throw new SourceErrorException(myCorrespondingOperation.getName()
+                    + "'s " + "return type does "
                     + "not correspond to the return type of the operation "
                     + "it implements.  \n\nExpected type: "
-                    + myCorrespondingOperation.getReturnType() + " ("
-                    + myCorrespondingOperation.getSourceModuleIdentifier()
-                    + "." + myCorrespondingOperation.getName() + ")\n\n"
-                    + "Found type: " + procedureReturnType, myLocation);
+                    + myCorrespondingOperation.getReturnType() + " ["
+                    + myCorrespondingOperation.getOperationDec().getLocation()
+                    + "]\n" + "Found type: " + procedureReturnType, myLocation);
         }
     }
 

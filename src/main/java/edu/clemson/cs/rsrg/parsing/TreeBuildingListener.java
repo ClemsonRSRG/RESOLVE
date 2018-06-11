@@ -1385,6 +1385,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
         }
 
+        // Note: Sanity check that we have at least 2 elements inside this record.
+        //       The reason being it's math type (MTCartesian) doesn't make sense
+        //       when it is a single element. - YS
+        if (fields.size() < 2) {
+            throw new SourceErrorException(
+                    "A record type must have 2 or more fields.",
+                    createLocation(ctx), new IllegalArgumentException());
+        }
+
         myNodes.put(ctx, new RecordTy(createLocation(ctx), fields));
     }
 
