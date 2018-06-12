@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
@@ -316,6 +317,32 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method for adding the appropriate substitutions
+     * for the different versions of {@code varExp}.</p>
+     *
+     * @param varExp A variable expression.
+     * @param oldVarExp The incoming version of {@code varExp}.
+     * @param concVarExp The conceptual version of {@code varExp}.
+     * @param substitutionMap The substitution map where these expressions
+     *                        are needed.
+     *
+     * @return An updated map.
+     */
+    private Map<Exp, Exp> addConceptualVariables(VarExp varExp,
+            OldExp oldVarExp, DotExp concVarExp, Map<Exp, Exp> substitutionMap) {
+        // Create an incoming version of the conceptual variable
+        OldExp oldConcVarExp =
+                new OldExp(concVarExp.getLocation().clone(), concVarExp.clone());
+        oldConcVarExp.setMathType(concVarExp.getMathType());
+
+        // Add these to our substitution map
+        substitutionMap.put(varExp, concVarExp);
+        substitutionMap.put(oldVarExp, oldConcVarExp);
+
+        return substitutionMap;
+    }
 
     /**
      * <p>An helper method that uses the {@code Shared Variable} and any parameter type
@@ -667,12 +694,9 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                         Utilities.createConcVarExp(
                                 new VarDec(realizParamVarDec.getName(), realizParamVarDec.getTy()),
                                 parameterVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                OldExp oldConcVarExp = new OldExp(procedureLoc, concVarExp.clone());
-                oldConcVarExp.setMathType(concVarExp.getMathType());
-
-                // Add these to our substitution map
-                substitutionParamToConc.put(parameterExp, concVarExp);
-                substitutionParamToConc.put(oldParameterExp, oldConcVarExp);
+                substitutionParamToConc =
+                        addConceptualVariables(parameterExp, oldParameterExp,
+                                concVarExp, substitutionParamToConc);
             }
         }
 
@@ -718,28 +742,59 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
                     retExp = createRestoresExpForSharedVars(procedureLoc,
                             stateVarExp, oldStateVarExp, retExp);
-                }
 
-                // If we are in a concept realization, our non-local procedure's
-                // ensures clause should say something about the conceptual
-                // shared variables.
-                if (inConceptRealiz && !isLocal) {
-                    // Create the appropriate conceptual versions of the shared variables
-                    // and add them to our substitution maps.
-                    DotExp concVarExp =
-                            Utilities.createConcVarExp(
-                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                    substitutionParamToConc.put(stateVarExp, concVarExp);
-
-                    OldExp oldConcVarExp = new OldExp(procedureLoc, concVarExp.clone());
-                    oldConcVarExp.setMathType(concVarExp.getMathType());
-                    substitutionParamToConc.put(oldStateVarExp, oldConcVarExp);
+                    // If we are in a concept realization, our non-local procedure's
+                    // ensures clause should say something about the conceptual
+                    // shared variables.
+                    if (inConceptRealiz && !isLocal) {
+                        // Create the appropriate conceptual versions of the shared variables
+                        // and add them to our substitution maps.
+                        DotExp concVarExp =
+                                Utilities.createConcVarExp(
+                                        new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                        mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                        substitutionParamToConc =
+                                addConceptualVariables(stateVarExp, oldStateVarExp,
+                                        concVarExp, substitutionParamToConc);
+                    }
                 }
             }
         }
 
-        // TODO: Do something about any definition variables from the associated concept.
+        // Loop through all concept declared types and generate a "restores" ensures
+        // clause for non-affected definition variables.
+        for (TypeFamilyDec typeFamilyDec : myCurrentVerificationContext.getConceptDeclaredTypes()) {
+            for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+                // Convert the math definition variables to variable expressions
+                MathVarDec mathVarDec = mathDefVariableDec.getVariable();
+                VarExp defVarExp =
+                        Utilities.createVarExp(procedureLoc.clone(), null,
+                                mathVarDec.getName(), mathVarDec.getMathType(), null);
+                OldExp oldDefVarExp = new OldExp(procedureLoc.clone(), defVarExp);
+                oldDefVarExp.setMathType(defVarExp.getMathType());
+
+                // Add a "restores" mode to any definition variables not being affected
+                if (!Utilities.containsEquivalentExp(myAffectedExps, defVarExp)) {
+                    retExp = createRestoresExpForDefVars(procedureLoc,
+                            defVarExp, oldDefVarExp, retExp);
+
+                    // If we are in a concept realization, our non-local procedure's
+                    // ensures clause should say something about the conceptual
+                    // definition variables.
+                    if (inConceptRealiz && !isLocal) {
+                        // Create the appropriate conceptual versions of the definition variables
+                        // and add them to our substitution maps.
+                        DotExp concVarExp =
+                                Utilities.createConcVarExp(
+                                        new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                        mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                        substitutionParamToConc =
+                                addConceptualVariables(defVarExp, oldDefVarExp,
+                                        concVarExp, substitutionParamToConc);
+                    }
+                }
+            }
+        }
 
         // Loop through all instantiated facility's shared variables and
         // generate a "restores" ensures clause for non-affected shared variables.
@@ -773,6 +828,47 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     /**
      * <p>An helper method that creates a new {@code ensures} expression
      * that includes a {@code restores} mode clause for the given
+     * math definition variable.</p>
+     *
+     * @param procedureLoc The current procedure's location.
+     * @param defVarExp A math definition variable as a {@link VarExp}.
+     * @param oldDefVarExp The incoming value of {@code defVarExp}.
+     * @param ensuresExp The current ensures clause we are building.
+     *
+     * @return A modified {@code ensures} clause with the new
+     * {@code restores} expression.
+     */
+    private Exp createRestoresExpForDefVars(Location procedureLoc,
+            VarExp defVarExp, OldExp oldDefVarExp, Exp ensuresExp) {
+        // Construct an expression using the expression and it's
+        // old expression equivalent.
+        Exp restoresConditionExp =
+                new EqualsExp(procedureLoc.clone(), defVarExp.clone(), null,
+                        Operator.EQUAL, oldDefVarExp.clone());
+        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
+        restoresConditionExp
+                .setLocationDetailModel(new LocationDetailModel(procedureLoc
+                        .clone(), procedureLoc.clone(), "Ensures Clause of "
+                        + myCurrentProcedureOperationEntry.getName()
+                        + " (Condition from Non-Affected Definition Variable)"));
+
+        // Form a conjunct if needed.
+        Exp retExp;
+        if (VarExp.isLiteralTrue(ensuresExp)) {
+            retExp = restoresConditionExp;
+        }
+        else {
+            retExp =
+                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
+                            restoresConditionExp);
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>An helper method that creates a new {@code ensures} expression
+     * that includes a {@code restores} mode clause for the given
      * global state variable.</p>
      *
      * @param procedureLoc The current procedure's location.
@@ -791,7 +887,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 new EqualsExp(procedureLoc.clone(), stateVarExp.clone(), null,
                         Operator.EQUAL, oldStateVarExp.clone());
         restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
-
         restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
                 procedureLoc.clone(), procedureLoc.clone(),
                 "Ensures Clause of "
