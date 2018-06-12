@@ -796,8 +796,8 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             }
         }
 
-        // Loop through all instantiated facility's shared variables and
-        // generate a "restores" ensures clause for non-affected shared variables.
+        // Loop through all instantiated facility's and generate a "restores" ensures clause
+        // for non-affected shared variables/math definition variables.
         for (InstantiatedFacilityDecl facilityDecl :
                 myCurrentVerificationContext.getProcessedInstFacilityDecls()) {
             for (SharedStateDec stateDec : facilityDecl.getConceptSharedStates()) {
@@ -818,7 +818,24 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 }
             }
 
-            // TODO: Do something about any definition variables from the importing concept.
+            for (TypeFamilyDec typeFamilyDec : facilityDecl.getConceptDeclaredTypes()) {
+                for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+                    // Convert the math definition variables to variable expressions
+                    MathVarDec mathVarDec = mathDefVariableDec.getVariable();
+                    VarExp defVarExp =
+                            Utilities.createVarExp(procedureLoc.clone(),
+                                    facilityDecl.getInstantiatedFacilityName(),
+                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
+                    OldExp oldDefVarExp = new OldExp(procedureLoc.clone(), defVarExp);
+                    oldDefVarExp.setMathType(defVarExp.getMathType());
+
+                    // Add a "restores" mode to any definition variables not being affected
+                    if (!Utilities.containsEquivalentExp(myAffectedExps, defVarExp)) {
+                        retExp = createRestoresExpForDefVars(procedureLoc,
+                                defVarExp, oldDefVarExp, retExp);
+                    }
+                }
+            }
         }
 
         // Apply any substitution and return the modified expression
