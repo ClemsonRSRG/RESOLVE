@@ -67,6 +67,12 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
+     * <p>All the shared variables affected by the associated
+     * {@link OperationEntry} and the current {@link ProcedureDec}.</p>
+     */
+    private final Set<Exp> myAffectedExps;
+
+    /**
      * <p>The module scope for the file we are generating
      * {@code VCs} for.</p>
      */
@@ -127,6 +133,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
+        myAffectedExps = new LinkedHashSet<>();
         myCurrentModuleScope = moduleScope;
         myCurrentProcedureDecreasingExp =
                 myCurrentAssertiveCodeBlock
@@ -136,6 +143,28 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         myTypeGraph = symbolTableBuilder.getTypeGraph();
         myProcedureDec = procedureDec;
         myVariableTypeEntries = procVarTypeEntries;
+
+        // Build a set of shared variables being affected
+        // from the OperationEntry.
+        AffectsClause operationAffectsClause = myCurrentProcedureOperationEntry.getAffectsClause();
+        if (operationAffectsClause != null) {
+            for (Exp exp : operationAffectsClause.getAffectedExps()) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps, exp)) {
+                    myAffectedExps.add(exp.clone());
+                }
+            }
+        }
+
+        // Build a set of shared variables being affected
+        // by the current procedure declaration.
+        AffectsClause affectsClause = myProcedureDec.getAffectedVars();
+        if (affectsClause != null) {
+            for (Exp exp : affectsClause.getAffectedExps()) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps, exp)) {
+                    myAffectedExps.add(exp.clone());
+                }
+            }
+        }
     }
 
     // ===========================================================
@@ -669,29 +698,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             }
         }
 
-        // Build a set of names of shared variables being affected
-        // from the OperationEntry.
-        AffectsClause operationAffectsClause = myCurrentProcedureOperationEntry.getAffectsClause();
-        Set<String> affectedVars = new LinkedHashSet<>();
-        if (operationAffectsClause != null) {
-            for (Exp exp : operationAffectsClause.getAffectedExps()) {
-                if (exp instanceof VarExp) {
-                    affectedVars.add(((VarExp) exp).getName().getName());
-                }
-            }
-        }
-
-        // Build a set of names of shared variables being affected
-        // by the current procedure declaration.
-        AffectsClause affectsClause = myProcedureDec.getAffectedVars();
-        if (affectsClause != null) {
-            for (Exp exp : affectsClause.getAffectedExps()) {
-                if (exp instanceof VarExp) {
-                    affectedVars.add(((VarExp) exp).getName().getName());
-                }
-            }
-        }
-
         // If we are in a concept or enhancement realization,
         // loop through all shared variable declared from the
         // associated concept.
@@ -709,7 +715,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 oldStateVarExp.setMathType(stateVarExp.getMathType());
 
                 // Add a "restores" mode to any shared variables not being affected
-                if (!affectedVars.contains(mathVarDec.getName().getName())) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
                     retExp = createRestoresExpForSharedVars(procedureLoc,
                             stateVarExp, oldStateVarExp, retExp);
                 }
@@ -750,7 +756,7 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                     oldStateVarExp.setMathType(stateVarExp.getMathType());
 
                     // Add a "restores" mode to any shared variables not being affected
-                    if (!affectedVars.contains(mathVarDec.getName().getName())) {
+                    if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
                         retExp = createRestoresExpForSharedVars(procedureLoc,
                                 stateVarExp, oldStateVarExp, retExp);
                     }

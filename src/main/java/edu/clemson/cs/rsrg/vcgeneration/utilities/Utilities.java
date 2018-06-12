@@ -73,6 +73,31 @@ public class Utilities {
     // ===========================================================
 
     /**
+     * <p>This method to check if an equivalent expression is in the
+     * specified collection.</p>
+     *
+     * <p><em>Note:</em> We can't use {@link Collection#contains(Object)} because it will
+     * use the strict {@link Exp#equals(Object)} method rather than {@link Exp#equivalent(Exp)}.</p>
+     *
+     * @param collection Collection of expressions.
+     * @param exp Expression to check.
+     *
+     * @return {@code true} if an equivalent {@code exp} is in the collection,
+     * {@code false} otherwise.
+     */
+    public static boolean containsEquivalentExp(Collection<Exp> collection,
+            Exp exp) {
+        boolean found = false;
+
+        Iterator<Exp> expIterator = collection.iterator();
+        while (expIterator.hasNext() && !found) {
+            found = expIterator.next().equivalent(exp);
+        }
+
+        return found;
+    }
+
+    /**
      * <p>Converts the different types of {@link Exp} to the
      * ones used by the VC Generator.</p>
      *
