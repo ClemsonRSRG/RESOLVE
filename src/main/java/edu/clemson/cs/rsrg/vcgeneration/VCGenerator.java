@@ -445,6 +445,46 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Enhancement Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link EnhancementModuleDec}.</p>
+     *
+     * @param enhancement An enhancement module declaration.
+     */
+    @Override
+    public final void preEnhancementModuleDec(EnhancementModuleDec enhancement) {
+        PosSymbol enhancementName = enhancement.getName();
+
+        // Store the enhancement requires clause
+        myCurrentVerificationContext.storeEnhancementAssertionClauses(
+                enhancementName.getLocation(), new ModuleIdentifier(
+                        enhancementName.getName()), false);
+
+        // Store all requires/constraint from the imported concept
+        PosSymbol conceptName = enhancement.getConceptName();
+        ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
+        myCurrentVerificationContext.storeConceptAssertionClauses(conceptName
+                .getLocation(), coId, false);
+
+        // Store all the shared states declared in the concept
+        myCurrentVerificationContext.storeConceptSharedStateDecs(conceptName
+                .getLocation(), coId);
+
+        // Store all the type families declared in the concept
+        myCurrentVerificationContext.storeConceptTypeFamilyDecs(conceptName
+                .getLocation(), coId);
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputEnhancementHeader").add(
+                        "enhancementName", enhancementName.getName()).add(
+                        "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
     // Enhancement Realization Module
     // -----------------------------------------------------------
 
