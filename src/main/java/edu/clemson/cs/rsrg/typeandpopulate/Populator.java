@@ -28,6 +28,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.AbstractInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.ModuleArgumentItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.*;
@@ -1958,6 +1959,27 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
+    /**
+     * <p>Code that gets executed before visiting an {@link AbstractInitFinalItem}.</p>
+     *
+     * @param item An initialization or finalization block.
+     */
+    @Override
+    public final void preAbstractInitFinalItem(AbstractInitFinalItem item) {
+        // Create a new list for parameter entries.
+        myCurrentParameters = new LinkedList<>();
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AbstractInitFinalItem}.</p>
+     *
+     * @param item An initialization or finalization block.
+     */
+    @Override
+    public final void postAbstractInitFinalItem(AbstractInitFinalItem item) {
+        myCurrentParameters = null;
+    }
+
     // -----------------------------------------------------------
     // Expression-Related
     // -----------------------------------------------------------
@@ -2807,8 +2829,8 @@ public class Populator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
-                    + "the call with the specified arguments: ", exp
-                    .getLocation());
+                    + "to the call with the specified arguments: " + exp.getName(),
+                    exp.getLocation());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(exp.getName().getName(), exp.getLocation());
@@ -3060,7 +3082,20 @@ public class Populator extends TreeWalkerVisitor {
                                             true)).toProgramTypeEntry(
                             tyLocation);
 
-            ty.setProgramType(type.getProgramType());
+            // Check to see if we have a facility qualifier
+            if (tyQualifier != null) {
+                FacilityEntry facilityEntry =
+                        myBuilder.getInnermostActiveScope().queryForOne(
+                                new NameQuery(null, tyQualifier,
+                                        ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_INSTANTIATE,
+                                        true)).toFacilityEntry(tyLocation);
+                ty.setProgramType(new PTNamed(myTypeGraph,
+                        facilityEntry, (PTFamily) type.getProgramType()));
+            }
+            else {
+                ty.setProgramType(type.getProgramType());
+            }
+
             ty.setMathType(myTypeGraph.SSET);
             ty.setMathTypeValue(type.getModelType());
         }
@@ -3088,7 +3123,7 @@ public class Populator extends TreeWalkerVisitor {
         PTRecord record = new PTRecord(myTypeGraph, fieldMap);
 
         ty.setProgramType(record);
-        ty.setMathType(myTypeGraph.CLS);
+        ty.setMathType(myTypeGraph.SSET);
         ty.setMathTypeValue(record.toMath());
     }
 
@@ -3607,25 +3642,41 @@ public class Populator extends TreeWalkerVisitor {
                     + "OldExp, found: " + first + " (" + first.getClass() + ")");
         }
 
-        //First, we'll see if we're a Conc expression
+        // First, we'll see if we're a Conc expression
         if (firstName.getName().equals("Conc")) {
-            //Awesome.  We better be in a type definition and our second segment
-            //better refer to the exemplar
             VarExp second = (VarExp) segments.next();
 
-            if (!second.toString().equals(
-                    myTypeFamilyEntry.getProgramType().getExemplarName())) {
-                throw new RuntimeException("No idea what's going on here.");
+            // We are in a type realization and our second segment
+            // refer to the exemplar.
+            if (myTypeFamilyEntry != null) {
+                if (!second.toString().equals(
+                        myTypeFamilyEntry.getProgramType().getExemplarName())) {
+                    throw new RuntimeException("No idea what's going on here.");
+                }
+
+                second.setMathType(myTypeFamilyEntry.getModelType());
+                result = myTypeFamilyEntry.getExemplar();
+            }
+            // We are in a shared state realization and our second segment
+            // refers to one of the global variables.
+            else {
+                result =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameQuery(
+                                                null,
+                                                second.getName(),
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true)).toMathSymbolEntry(
+                                second.getLocation());
+                second.setMathType(result.getType());
             }
 
-            //The Conc segment doesn't have a sensible type, but we'll set one
-            //for completeness.
+            // The Conc segment doesn't have a sensible type, but we'll set one
+            // for completeness.
             first.setMathType(myTypeGraph.BOOLEAN);
-
-            second.setMathType(myTypeFamilyEntry.getModelType());
-
-            result = myTypeFamilyEntry.getExemplar();
-
             lastGood.data = second;
         }
         else if (firstName.getName().equals("recp")) {
@@ -3654,8 +3705,8 @@ public class Populator extends TreeWalkerVisitor {
                                                 true)).toMathSymbolEntry(
                                 second.getLocation());
 
-                //The recp segment doesn't have a sensible type, but we'll set one
-                //for completeness.
+                // The recp segment doesn't have a sensible type, but we'll set one
+                // for completeness.
                 first.setMathType(myTypeGraph.BOOLEAN);
                 second.setMathType(myTypeGraph.RECEPTACLES);
                 lastGood.data = second;
@@ -4107,7 +4158,7 @@ public class Populator extends TreeWalkerVisitor {
         }
         else {
             message =
-                    "No such symbol in module: " + qualifier.getName() + "."
+                    "No such symbol in module: " + qualifier.getName() + "::"
                             + symbolName;
         }
 

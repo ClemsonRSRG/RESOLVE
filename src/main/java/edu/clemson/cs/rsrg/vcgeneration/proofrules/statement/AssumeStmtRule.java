@@ -578,7 +578,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                     // variable. If yes, we don't keep this assume.
                     // Otherwise, we need to store this for the
                     // step that generates the parsimonious vcs.
-                    if (!hasVerificationVar) {
+                    if (!hasVerificationVar && !isConceptualVar) {
                         remAssumeExpList.add(currentAssumeExp.clone());
                     }
                 }

@@ -46,9 +46,27 @@ public class OperationQuery extends BaseSymbolQuery<OperationEntry> {
      */
     public OperationQuery(PosSymbol qualifier, PosSymbol name,
             List<PTType> argumentTypes) {
-        super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
-                FacilityStrategy.FACILITY_INSTANTIATE, false),
-                new OperationSearcher(name, argumentTypes));
+        this(qualifier, name, argumentTypes, ImportStrategy.IMPORT_NAMED,
+                FacilityStrategy.FACILITY_INSTANTIATE);
+    }
+
+    /**
+     * <p>This query searches for an operation entry that matches
+     * the provided arguments.</p>
+     *
+     * @param qualifier A qualifier symbol that indicates the instantiating
+     *                  facility or module.
+     * @param name An operation name to query for.
+     * @param argumentTypes The list of program types for this operation.
+     * @param importStrategy The import strategy to use.
+     * @param facilityStrategy The facility strategy to use.
+     */
+    public OperationQuery(PosSymbol qualifier, PosSymbol name,
+            List<PTType> argumentTypes, ImportStrategy importStrategy,
+            FacilityStrategy facilityStrategy) {
+        super(new PossiblyQualifiedPath(qualifier, importStrategy,
+                facilityStrategy, false), new OperationSearcher(name,
+                argumentTypes));
     }
 
 }

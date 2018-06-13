@@ -23,10 +23,14 @@ import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
@@ -42,7 +46,9 @@ import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTGeneric;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.FacilityStrategy;
@@ -398,6 +404,87 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Concept Realization Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ConceptRealizModuleDec}.</p>
+     *
+     * @param conceptRealization A concept realization module declaration.
+     */
+    @Override
+    public final void preConceptRealizModuleDec(
+            ConceptRealizModuleDec conceptRealization) {
+        PosSymbol conceptRealizName = conceptRealization.getName();
+
+        // Store the concept realization requires clause
+        myCurrentVerificationContext.storeConceptRealizAssertionClauses(
+                conceptRealizName.getLocation(), new ModuleIdentifier(
+                        conceptRealizName.getName()), false);
+
+        // Store all requires/constraint from the imported concept
+        PosSymbol conceptName = conceptRealization.getConceptName();
+        ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
+        myCurrentVerificationContext.storeConceptAssertionClauses(conceptName
+                .getLocation(), coId, false);
+
+        // Store all the shared states declared in the concept
+        myCurrentVerificationContext.storeConceptSharedStateDecs(conceptName
+                .getLocation(), coId);
+
+        // Store all the type families declared in the concept
+        myCurrentVerificationContext.storeConceptTypeFamilyDecs(conceptName
+                .getLocation(), coId);
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputConceptRealizHeader").add(
+                        "realizName", conceptRealizName.getName()).add(
+                        "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
+    // Enhancement Module
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link EnhancementModuleDec}.</p>
+     *
+     * @param enhancement An enhancement module declaration.
+     */
+    @Override
+    public final void preEnhancementModuleDec(EnhancementModuleDec enhancement) {
+        PosSymbol enhancementName = enhancement.getName();
+
+        // Store the enhancement requires clause
+        myCurrentVerificationContext.storeEnhancementAssertionClauses(
+                enhancementName.getLocation(), new ModuleIdentifier(
+                        enhancementName.getName()), false);
+
+        // Store all requires/constraint from the imported concept
+        PosSymbol conceptName = enhancement.getConceptName();
+        ModuleIdentifier coId = new ModuleIdentifier(conceptName.getName());
+        myCurrentVerificationContext.storeConceptAssertionClauses(conceptName
+                .getLocation(), coId, false);
+
+        // Store all the shared states declared in the concept
+        myCurrentVerificationContext.storeConceptSharedStateDecs(conceptName
+                .getLocation(), coId);
+
+        // Store all the type families declared in the concept
+        myCurrentVerificationContext.storeConceptTypeFamilyDecs(conceptName
+                .getLocation(), coId);
+
+        // Add to VC detail model
+        ST header =
+                mySTGroup.getInstanceOf("outputEnhancementHeader").add(
+                        "enhancementName", enhancementName.getName()).add(
+                        "conceptName", conceptName.getName());
+        myVCGenDetailsModel.add("fileHeader", header.render());
+    }
+
+    // -----------------------------------------------------------
     // Enhancement Realization Module
     // -----------------------------------------------------------
 
@@ -494,7 +581,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 new AssumeStmt(dec.getLocation().clone(),
                         myCurrentVerificationContext
                                 .createTopLevelAssumeExpFromContext(dec
-                                        .getLocation(), false), false);
+                                        .getLocation(), false, false), false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
         // Create a new model for this assertive code block
@@ -540,7 +627,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         OperationEntry correspondingOperation =
                 Utilities.searchOperation(dec.getLocation(), null, dec
-                        .getName(), argTypes, myCurrentModuleScope);
+                        .getName(), argTypes, ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_IGNORE, myCurrentModuleScope);
 
         // TODO: Add the performance logic
         // Obtain the performance duration clause
@@ -566,11 +654,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add shared variables in scope to the free variable's list
         addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
 
+        // Check to see if we are in a concept realization
+        boolean inConceptRealiz =
+                myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec;
+
         // Create the top most level assume statement, replace any facility formal
         // with actual and add it to the assertive code block as the first statement.
         Exp topLevelAssumeExp =
                 createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                        myCurrentAssertiveCodeBlock, correspondingOperation, false);
+                        myCurrentAssertiveCodeBlock, correspondingOperation,
+                        false, false, inConceptRealiz, true);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -599,7 +692,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postOperationProcedureDec(OperationProcedureDec dec) {
         // Apply procedure declaration rule
-        // TODO: Recheck logic to make sure everything still works!
         OperationDec wrappedOpDec = dec.getWrappedOpDec();
         ProcedureDec procedureDec =
                 new ProcedureDec(dec.getName(), wrappedOpDec.getParameters(),
@@ -639,11 +731,19 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Store the associated OperationEntry for future use
         List<PTType> argTypes = new LinkedList<>();
         for (ParameterVarDec p : dec.getParameters()) {
-            argTypes.add(p.getTy().getProgramType());
+            // YS: If type is a PTRepresentation, we want the type family
+            //     it is pointing to. Not the realization type.
+            PTType type = p.getTy().getProgramType();
+            if (type instanceof PTRepresentation) {
+                type = ((PTRepresentation) type).getFamily().getProgramType();
+            }
+
+            argTypes.add(type);
         }
         OperationEntry correspondingOperation =
                 Utilities.searchOperation(dec.getLocation(), null, dec
-                        .getName(), argTypes, myCurrentModuleScope);
+                        .getName(), argTypes, ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_IGNORE, myCurrentModuleScope);
 
         // TODO: Add the performance logic
         // Obtain the performance duration clause
@@ -652,6 +752,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Utilities.searchOperationProfile(dec.getLocation(), null,
                             dec.getName(), argTypes, myCurrentModuleScope);
         }*/
+
+        // Check to see if we are in a concept realization
+        boolean inConceptRealiz =
+                myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec;
 
         // Check to see if this a local operation
         boolean isLocal =
@@ -676,10 +780,10 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Create the top most level assume statement, replace any facility formal
         // with actual and add it to the assertive code block as the first statement.
-        // TODO: Add convention/correspondence if we are in a concept realization and it isn't local
         Exp topLevelAssumeExp =
                 createTopLevelAssumeExpForProcedureDec(dec.getLocation(),
-                        myCurrentAssertiveCodeBlock, correspondingOperation, !isLocal);
+                        myCurrentAssertiveCodeBlock, correspondingOperation,
+                        !isLocal, !isLocal, inConceptRealiz, isLocal);
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(dec.getLocation().clone(), topLevelAssumeExp, false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
@@ -708,7 +812,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postProcedureDec(ProcedureDec dec) {
         // Apply procedure declaration rule
-        // TODO: Recheck logic to make sure everything still works!
         ProcedureDeclRule declRule =
                 new ProcedureDeclRule(dec, myVariableTypeEntries, myBuilder,
                         myCurrentModuleScope, myCurrentAssertiveCodeBlock,
@@ -752,9 +855,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postSharedStateRealizationDec(
             SharedStateRealizationDec dec) {
-        // TODO: Add the proof rule for this.
-
-        // Store this for future use.
+        // TODO: Need to figure out how we are going to find the corresponding shared state
         myCurrentVerificationContext.storeLocalSharedRealizationDec(dec);
     }
 
@@ -925,6 +1026,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param loc The location in the AST that we are
      *            currently visiting.
      * @param exp The top level assume expression we have built so far.
+     * @param substitutionsMap A map of substitutions for any parameter constraints we generate.
      * @param scope The module scope to start our search.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param entries List of operation's parameter entries.
@@ -932,7 +1034,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The original {@code exp} plus any operation parameter's type constraints.
      */
     private Exp addParamTypeConstraints(Location loc, Exp exp,
-            ModuleScope scope, AssertiveCodeBlock currentBlock,
+            Map<Exp, Exp> substitutionsMap, ModuleScope scope,
+            AssertiveCodeBlock currentBlock,
             ImmutableList<ProgramParameterEntry> entries) {
         Exp retExp = exp;
 
@@ -995,6 +1098,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .getName(),
                                                 myCurrentVerificationContext);
 
+                        // Apply any pre-defined substitutions
+                        constraintExp =
+                                constraintExp.substitute(substitutionsMap);
+
                         Exp whichEntailsExp =
                                 modifiedConstraintClause.getWhichEntailsExp();
                         if (whichEntailsExp != null) {
@@ -1007,6 +1114,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                     scope.getDefiningElement()
                                                             .getName(),
                                                     myCurrentVerificationContext);
+
+                            // Apply any pre-defined substitutions
+                            whichEntailsExp =
+                                    whichEntailsExp
+                                            .substitute(substitutionsMap);
                         }
 
                         modifiedConstraintClause =
@@ -1032,61 +1144,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                                 .getName()));
                     }
                 }
-
-                // TODO: Handle type representations from concept realizations
-                /*
-                // If the type is a type representation, then our requires clause
-                // should really say something about the conceptual type and not
-                // the variable
-                if (ste instanceof RepresentationTypeEntry && !isLocal) {
-                    requires =
-                            Utilities.replace(requires, parameterExp,
-                                    Utilities
-                                            .createConcVarExp(opLocation,
-                                                    parameterExp,
-                                                    parameterExp
-                                                            .getMathType(),
-                                                    BOOLEAN));
-                    requires.setLocation((Location) opLocation.clone());
-                }
-
-                // If the type is a type representation, then we need to add
-                // all the type constraints from all the variable declarations
-                // in the type representation.
-                if (ste instanceof RepresentationTypeEntry) {
-                    Exp repConstraintExp = null;
-                    Set<VarExp> keys =
-                            myRepresentationConstraintMap.keySet();
-                    for (VarExp varExp : keys) {
-                        if (varExp.getQualifier() == null
-                                && varExp.getName().getName().equals(
-                                pNameTy.getName().getName())) {
-                            if (repConstraintExp == null) {
-                                repConstraintExp =
-                                        myRepresentationConstraintMap
-                                                .get(varExp);
-                            }
-                            else {
-                                Utilities.ambiguousTy(pNameTy, pNameTy
-                                        .getLocation());
-                            }
-                        }
-                    }
-
-                    // Only do the following if the expression is not simply true
-                    if (!repConstraintExp.isLiteralTrue()) {
-                        // Replace the exemplar with the actual parameter variable expression
-                        repConstraintExp =
-                                Utilities.replace(repConstraintExp,
-                                        exemplar, parameterExp);
-
-                        // Add this to our requires clause
-                        requires =
-                                myTypeGraph.formConjunct(requires,
-                                        repConstraintExp);
-                        requires.setLocation((Location) opLocation.clone());
-                    }
-                }*/
             }
 
             // Add the current variable to our list of free variables
@@ -1106,7 +1163,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param block An {@link AssertiveCodeBlock}.
      */
     private void addSharedVarsToFreeVariableList(AssertiveCodeBlock block) {
-        // TODO: Do something different when we are in a concept realization
         // Add all shared variables to the free variables list.
         List<SharedStateDec> sharedStateDecs =
                 myCurrentVerificationContext.getConceptSharedVars();
@@ -1343,33 +1399,186 @@ public class VCGenerator extends TreeWalkerVisitor {
      *            currently visiting.
      * @param currentBlock The current {@link AssertiveCodeBlock} we are currently generating.
      * @param correspondingOperationEntry The corresponding {@link OperationEntry}.
-     * @param addConventionCorrespondenceFlag A flag that indicates whether or not we need
-     *                                        to add the {@code Shared Variable}'s {@code convention} and
-     *                                        {@code correspondence}.
+     * @param addSharedConventionFlag A flag that indicates whether or not we need
+     *                                to add the {@code Shared Variable}'s {@code convention}.
+     * @param addSharedCorrespondenceFlag A flag that indicates whether or not we need
+     *                                    to add the {@code Shared Variable}'s {@code correspondence}.
+     * @param inConceptRealiz A flag that indicates whether or not this {@link ProcedureDec}
+     *                        is inside a {@code Concept Realization}.
+     * @param isLocal A flag that indicates whether or not this is a local operation.
      *
      * @return The top-level assumed expression.
      */
     private Exp createTopLevelAssumeExpForProcedureDec(Location loc,
             AssertiveCodeBlock currentBlock,
             OperationEntry correspondingOperationEntry,
-            boolean addConventionCorrespondenceFlag) {
+            boolean addSharedConventionFlag, boolean addSharedCorrespondenceFlag,
+            boolean inConceptRealiz, boolean isLocal) {
         // Add all the expressions we can assume from the current context
         Exp retExp =
                 myCurrentVerificationContext
                         .createTopLevelAssumeExpFromContext(loc,
-                                addConventionCorrespondenceFlag);
+                                addSharedConventionFlag,
+                                addSharedCorrespondenceFlag);
+
+        // Create a replacement map for substituting parameter
+        // variables with representation types.
+        Map<Exp, Exp> substitutionParamToConc = new LinkedHashMap<>();
+
+        // If we are in a concept realization, loop through all
+        // shared variable declared from the associated concept.
+        List<SharedStateDec> sharedStateDecs =
+                myCurrentVerificationContext.getConceptSharedVars();
+        if (inConceptRealiz && !isLocal) {
+            // Our requires clause should say something about the conceptual
+            // shared variables.
+            for (SharedStateDec stateDec : sharedStateDecs) {
+                for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                    // Convert the math variables to variable expressions
+                    VarExp varExp =
+                            Utilities.createVarExp(loc.clone(), null,
+                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
+
+                    // Create the appropriate conceptual versions of the shared variable
+                    DotExp concVarExp =
+                            Utilities.createConcVarExp(
+                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+
+                    // Add these to our substitution map
+                    substitutionParamToConc.put(varExp, concVarExp);
+                }
+            }
+        }
+
+        // Create a new expression with any conventions and correspondence
+        Exp aggConventionCorrespondenceExp = VarExp.getTrueVarExp(loc, myTypeGraph);
+        for (ParameterVarDec parameterVarDec : correspondingOperationEntry.getOperationDec().getParameters()) {
+            // Query for the type entry in the symbol table
+            NameTy nameTy = (NameTy) parameterVarDec.getTy();
+            SymbolTableEntry ste =
+                    Utilities.searchProgramType(loc, nameTy.getQualifier(),
+                            nameTy.getName(), myCurrentModuleScope);
+
+            // If the type is a type representation, then our ensures clause
+            // should really say something about the conceptual type and not
+            // the variable. Must also be in a concept realization and not a
+            // local operation.
+            if (ste.getDefiningElement() instanceof TypeRepresentationDec && inConceptRealiz && !isLocal) {
+                // Add the conventions of parameters that have representation types.
+                PTFamily familyType =
+                        (PTFamily) nameTy.getProgramType();
+                AssertionClause conventionClause =
+                        Utilities.getTypeConventionClause(
+                                ((TypeRepresentationDec) ste
+                                        .getDefiningElement())
+                                        .getConvention(), loc.clone(),
+                                parameterVarDec.getName(), new PosSymbol(
+                                        loc.clone(), familyType.getExemplarName()), nameTy
+                                        .getMathType(), null);
+                LocationDetailModel conventionDetailModel =
+                        new LocationDetailModel(loc.clone(), loc.clone(),
+                                "Type Convention for "
+                                        + nameTy.getName().getName()
+                                        + " Generated by "
+                                        + correspondingOperationEntry.getName());
+
+                if (VarExp.isLiteralTrue(aggConventionCorrespondenceExp)) {
+                    aggConventionCorrespondenceExp =
+                            Utilities
+                                    .formConjunct(loc, null,
+                                            conventionClause,
+                                            conventionDetailModel);
+                }
+                else {
+                    aggConventionCorrespondenceExp =
+                            Utilities
+                                    .formConjunct(loc, aggConventionCorrespondenceExp,
+                                            conventionClause,
+                                            conventionDetailModel);
+                }
+
+                // Add the correspondence of parameters that have representation types.
+                AssertionClause correspondenceClause =
+                        Utilities.getTypeCorrespondenceClause(
+                                ((TypeRepresentationDec) ste
+                                        .getDefiningElement())
+                                        .getCorrespondence(), loc.clone(),
+                                parameterVarDec.getName(), nameTy,
+                                new PosSymbol(loc.clone(),
+                                        familyType.getExemplarName()),
+                                nameTy, nameTy.getMathType(), null,
+                                myTypeGraph.BOOLEAN);
+                LocationDetailModel correspondenceDetailModel =
+                        new LocationDetailModel(loc.clone(), loc.clone(),
+                                "Type Correspondence for "
+                                        + nameTy.getName().getName()
+                                        + " Generated by "
+                                        + correspondingOperationEntry.getName());
+
+                if (VarExp.isLiteralTrue(aggConventionCorrespondenceExp)) {
+                    aggConventionCorrespondenceExp =
+                            Utilities.formConjunct(loc, null,
+                                    correspondenceClause,
+                                    correspondenceDetailModel);
+                }
+                else {
+                    aggConventionCorrespondenceExp =
+                            Utilities.formConjunct(loc, aggConventionCorrespondenceExp,
+                                    correspondenceClause,
+                                    correspondenceDetailModel);
+                }
+
+                // Parameter variable
+                VarExp parameterExp =
+                        Utilities.createVarExp(parameterVarDec.getLocation().clone(),
+                                null, parameterVarDec.getName().clone(),
+                                nameTy.getMathTypeValue(), null);
+
+                // Conceptual parameter variable
+                DotExp concVarExp =
+                        Utilities.createConcVarExp(
+                                new VarDec(parameterVarDec.getName(), nameTy),
+                                parameterVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                OldExp oldConcVarExp = new OldExp(loc, concVarExp.clone());
+                oldConcVarExp.setMathType(concVarExp.getMathType());
+
+                // Add this to our substitution map
+                substitutionParamToConc.put(parameterExp, concVarExp);
+            }
+        }
+
+        // Add any type conventions or correspondences
+        if (inConceptRealiz && !isLocal) {
+            if (!VarExp.isLiteralTrue(aggConventionCorrespondenceExp)) {
+                retExp = MathExp.formConjunct(loc.clone(), retExp, aggConventionCorrespondenceExp);
+            }
+        }
 
         // Add the operation's requires clause (and any which_entails clause)
         AssertionClause requiresClause =
                 correspondingOperationEntry.getRequiresClause();
         Exp requiresExp = requiresClause.getAssertionExp().clone();
         if (!VarExp.isLiteralTrue(requiresExp)) {
+            // Replace any parameter variables with representation types
+            // with the conceptual counterparts
+            requiresExp = requiresExp.substitute(substitutionParamToConc);
+
+            Exp whichEntailsExp = requiresClause.getWhichEntailsExp();
+            if (whichEntailsExp != null) {
+                whichEntailsExp = whichEntailsExp.substitute(substitutionParamToConc);
+            }
+
             // Form a conjunct with the requires clause and add
             // the location detail associated with it.
+            AssertionClause modifiedRequiresClause =
+                    new AssertionClause(requiresClause.getLocation().clone(),
+                            requiresClause.getClauseType(), requiresExp, whichEntailsExp,
+                            requiresClause.getInvolvedSharedVars());
             retExp =
-                    Utilities.formConjunct(loc, retExp, requiresClause,
-                            new LocationDetailModel(requiresClause
-                                    .getLocation().clone(), requiresClause
+                    Utilities.formConjunct(loc, retExp, modifiedRequiresClause,
+                            new LocationDetailModel(modifiedRequiresClause
+                                    .getLocation().clone(), modifiedRequiresClause
                                     .getLocation().clone(),
                                     "Requires Clause of "
                                             + correspondingOperationEntry
@@ -1385,12 +1594,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         //     will show up in all of the VCs.
         if (myCompileEnvironment.flags.isFlagSet(FLAG_ADD_CONSTRAINT)) {
             retExp =
-                    addParamTypeConstraints(loc, retExp, myCurrentModuleScope,
+                    addParamTypeConstraints(loc, retExp, substitutionParamToConc, myCurrentModuleScope,
                             currentBlock, correspondingOperationEntry
                                     .getParameters());
         }
 
         return retExp;
     }
-
 }

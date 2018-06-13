@@ -15,6 +15,9 @@ package edu.clemson.cs.rsrg.absyn.clauses;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * <p>This is the class for all mathematical assertion clause objects
@@ -128,6 +131,9 @@ public class AssertionClause extends ResolveConceptualElement {
     /** <p>The type of clause</p> */
     private final ClauseType myClauseType;
 
+    /** <p>The list of shared variable expressions that is affecting this clause.</p> */
+    private final List<Exp> myInvolvedSharedVars;
+
     /** <p>The which_entails mathematical assertion expression</p> */
     private final Exp myWhichEntailsExp;
 
@@ -157,9 +163,27 @@ public class AssertionClause extends ResolveConceptualElement {
      */
     public AssertionClause(Location l, ClauseType type, Exp assertionExp,
             Exp whichEntailsExp) {
+        this(l, type, assertionExp, whichEntailsExp, new ArrayList<Exp>());
+    }
+
+    /**
+     * <p>This constructs a mathematical assertion clause with a
+     * {@code which_entails} assertion and a list of variable
+     * expressions that is affecting this clause.</p>
+     *
+     * @param l A {@link Location} representation object.
+     * @param type Indicates which type of assertion clause.
+     * @param assertionExp A {@link Exp} representing the mathematical assertion.
+     * @param whichEntailsExp A {@link Exp} representing the {@code which_entails} mathematical assertion.
+     * @param involvedSharedVars  The list of variable expressions that are listed to be involved
+     *                            in this assertion clause.
+     */
+    public AssertionClause(Location l, ClauseType type, Exp assertionExp,
+            Exp whichEntailsExp, List<Exp> involvedSharedVars) {
         super(l);
         myAssertionExp = assertionExp;
         myClauseType = type;
+        myInvolvedSharedVars = involvedSharedVars;
         myWhichEntailsExp = whichEntailsExp;
     }
 
@@ -175,7 +199,31 @@ public class AssertionClause extends ResolveConceptualElement {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
         sb.append(myClauseType.toString());
-        sb.append(myAssertionExp.asString(0, innerIndentInc));
+
+        // Indent size for the printing the assertion expression
+        int assertionIndentSize = 0;
+
+        // Add any shared variables being involved
+        if (!myInvolvedSharedVars.isEmpty()) {
+            sb.append("\n");
+            printSpace(indentSize + innerIndentInc, sb);
+
+            sb.append("involves ");
+            Iterator<Exp> it = myInvolvedSharedVars.iterator();
+            while (it.hasNext()) {
+                Exp exp = it.next();
+                sb.append(exp.asString(0, innerIndentInc));
+
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(";\n");
+
+            assertionIndentSize = indentSize + innerIndentInc;
+        }
+
+        sb.append(myAssertionExp.asString(assertionIndentSize, innerIndentInc));
 
         // Add any which entails clauses
         if (myWhichEntailsExp != null) {
@@ -197,8 +245,13 @@ public class AssertionClause extends ResolveConceptualElement {
             newWhichEntailsExp = myWhichEntailsExp.clone();
         }
 
+        List<Exp> newInvolvesExp = new ArrayList<>();
+        for (Exp exp : myInvolvedSharedVars) {
+            newInvolvesExp.add(exp.clone());
+        }
+
         return new AssertionClause(cloneLocation(), myClauseType,
-                myAssertionExp.clone(), newWhichEntailsExp);
+                myAssertionExp.clone(), newWhichEntailsExp, newInvolvesExp);
     }
 
     /**
@@ -217,10 +270,11 @@ public class AssertionClause extends ResolveConceptualElement {
             return false;
         if (myClauseType != that.myClauseType)
             return false;
+        if (!myInvolvedSharedVars.equals(that.myInvolvedSharedVars))
+            return false;
         return myWhichEntailsExp != null ? myWhichEntailsExp
                 .equals(that.myWhichEntailsExp)
                 : that.myWhichEntailsExp == null;
-
     }
 
     /**
@@ -242,6 +296,16 @@ public class AssertionClause extends ResolveConceptualElement {
     }
 
     /**
+     * <p>Returns the list of shared variable expressions that are involved
+     * in this clause.</p>
+     *
+     * @return The list of involved {@link Exp}s.
+     */
+    public final List<Exp> getInvolvedSharedVars() {
+        return myInvolvedSharedVars;
+    }
+
+    /**
      * <p>This method returns the {@code which_entails} mathematical assertion
      * for this clause.</p>
      *
@@ -258,6 +322,7 @@ public class AssertionClause extends ResolveConceptualElement {
     public final int hashCode() {
         int result = myAssertionExp.hashCode();
         result = 31 * result + myClauseType.hashCode();
+        result = 31 * result + myInvolvedSharedVars.hashCode();
         result =
                 31
                         * result

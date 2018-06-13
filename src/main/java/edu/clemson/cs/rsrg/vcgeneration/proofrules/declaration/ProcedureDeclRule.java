@@ -12,10 +12,16 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause.ClauseType;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -31,6 +37,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTCartesian;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -39,6 +46,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -58,6 +66,12 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>All the shared variables affected by the associated
+     * {@link OperationEntry} and the current {@link ProcedureDec}.</p>
+     */
+    private final Set<Exp> myAffectedExps;
 
     /**
      * <p>The module scope for the file we are generating
@@ -86,9 +100,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      * program type entry.</p>
      */
     private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
-
-    /** <p>The symbol table we are currently building.</p> */
-    private final MathSymbolTableBuilder mySymbolTable;
 
     /**
      * <p>This is the math type graph that indicates relationship
@@ -123,16 +134,38 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
+        myAffectedExps = new LinkedHashSet<>();
         myCurrentModuleScope = moduleScope;
         myCurrentProcedureDecreasingExp =
                 myCurrentAssertiveCodeBlock
                         .getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry =
                 myCurrentAssertiveCodeBlock.getCorrespondingOperation();
-        mySymbolTable = symbolTableBuilder;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
         myProcedureDec = procedureDec;
         myVariableTypeEntries = procVarTypeEntries;
+
+        // Build a set of shared variables being affected
+        // from the OperationEntry.
+        AffectsClause operationAffectsClause = myCurrentProcedureOperationEntry.getAffectsClause();
+        if (operationAffectsClause != null) {
+            for (Exp exp : operationAffectsClause.getAffectedExps()) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps, exp)) {
+                    myAffectedExps.add(exp.clone());
+                }
+            }
+        }
+
+        // Build a set of shared variables being affected
+        // by the current procedure declaration.
+        AffectsClause affectsClause = myProcedureDec.getAffectedVars();
+        if (affectsClause != null) {
+            for (Exp exp : affectsClause.getAffectedExps()) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps, exp)) {
+                    myAffectedExps.add(exp.clone());
+                }
+            }
+        }
     }
 
     // ===========================================================
@@ -144,6 +177,15 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
+        // Check to see if this a local operation
+        boolean isLocal =
+                Utilities.isLocationOperation(myProcedureDec.getName()
+                        .getName(), myCurrentModuleScope);
+
+        // Check to see if we are in a concept realization
+        boolean inConceptRealiz =
+                myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec;
+
         // Check to see if this is a recursive procedure.
         // If yes, we will need to add an additional assume clause
         // (P_Val = <decreasing clause>).
@@ -179,16 +221,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
         myCurrentAssertiveCodeBlock.addStatements(myProcedureDec
                 .getStatements());
 
-        // TODO: Correct_Op_Hyp rule (Shared Variables and Type)
-        // Correct_Op_Hyp rule: Only applies to non-local operations
-        // in concept realizations.
-
-        // TODO: Well_Def_Corr_Hyp rule (Shared Variables and Type)
-        // Well_Def_Corr_Hyp rule: Rather than doing direct replacement,
-        // we leave that logic to the parsimonious vc step. A replacement
-        // will occur if this is a correspondence function or an implies
-        // will be formed if this is a correspondence relation.
-
         // YS: Simply create a finalization statement for each variable that
         //     allow us to deal with generating question mark variables
         //     and duration logic when we backtrack through the code.
@@ -203,11 +235,55 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             // TODO: Add the finalization duration ensures (if any)
         }
 
+        // Only applies to non-local operations in concept realizations.
+        if (inConceptRealiz && !isLocal) {
+            // Make sure that the convention still holds.
+            Exp correctOpHyp = createCorrectOpHypExp();
+
+            // Replace any facility declaration instantiation arguments
+            // in the correct operation hypothesis expression.
+            correctOpHyp =
+                    Utilities
+                            .replaceFacilityFormalWithActual(correctOpHyp,
+                                    myProcedureDec.getParameters(),
+                                    myCurrentModuleScope.getDefiningElement()
+                                            .getName(),
+                                    myCurrentVerificationContext);
+
+            // Use the expression to create a confirm statement if it is not "true"
+            ConfirmStmt correctOpHypStmt =
+                    new ConfirmStmt(myProcedureDec.getLocation().clone(),
+                            correctOpHyp, true);
+            myCurrentAssertiveCodeBlock.addStatement(correctOpHypStmt);
+
+            // Add an assume with the correspondences. Rather than doing direct replacement,
+            // we leave that logic to the parsimonious vc step. A replacement
+            // will occur if this is a correspondence function or an implies
+            // will be formed if this is a correspondence relation.
+            Exp correspondenceExp = createCorrespondenceExp();
+
+            // Replace any facility declaration instantiation arguments
+            // in the correct operation hypothesis expression.
+            correspondenceExp =
+                    Utilities
+                            .replaceFacilityFormalWithActual(correspondenceExp,
+                                    myProcedureDec.getParameters(),
+                                    myCurrentModuleScope.getDefiningElement()
+                                            .getName(),
+                                    myCurrentVerificationContext);
+
+            // Use the expression to create an assume statement if it is not "true"
+            AssumeStmt correspondenceStmt =
+                    new AssumeStmt(myProcedureDec.getLocation().clone(),
+                            correspondenceExp, false);
+            myCurrentAssertiveCodeBlock.addStatement(correspondenceStmt);
+        }
+
         // Create the final confirm expression
-        Exp finalConfirmExp = createFinalConfirmExp();
+        Exp finalConfirmExp = createFinalConfirmExp(inConceptRealiz, isLocal);
 
         // Replace any facility declaration instantiation arguments
-        // in the requires clause.
+        // in the ensures clause.
         finalConfirmExp =
                 Utilities.replaceFacilityFormalWithActual(finalConfirmExp,
                         myProcedureDec.getParameters(), myCurrentModuleScope
@@ -243,16 +319,194 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
+     * <p>An helper method for adding the appropriate substitutions
+     * for the different versions of {@code varExp}.</p>
+     *
+     * @param varExp A variable expression.
+     * @param oldVarExp The incoming version of {@code varExp}.
+     * @param concVarExp The conceptual version of {@code varExp}.
+     * @param substitutionMap The substitution map where these expressions
+     *                        are needed.
+     *
+     * @return An updated map.
+     */
+    private Map<Exp, Exp> addConceptualVariables(VarExp varExp,
+            OldExp oldVarExp, DotExp concVarExp, Map<Exp, Exp> substitutionMap) {
+        // Create an incoming version of the conceptual variable
+        OldExp oldConcVarExp =
+                new OldExp(concVarExp.getLocation().clone(), concVarExp.clone());
+        oldConcVarExp.setMathType(concVarExp.getMathType());
+
+        // Add these to our substitution map
+        substitutionMap.put(varExp, concVarExp);
+        substitutionMap.put(oldVarExp, oldConcVarExp);
+
+        return substitutionMap;
+    }
+
+    /**
+     * <p>An helper method that uses the {@code Shared Variable} and any parameter type
+     * {@code conventions} to build the appropriate expression that must be established
+     * for a {@code Concept Realization} operation to be correct.</p>
+     *
+     * @return The correct operation hypothesis expression.
+     */
+    private Exp createCorrectOpHypExp() {
+        // Add all shared state realization conventions
+        Location loc = myProcedureDec.getLocation().clone();
+        Exp retExp =
+                myCurrentVerificationContext
+                        .createSharedStateRealizConventionExp(loc);
+        LocationDetailModel model = retExp.getLocationDetailModel().clone();
+        retExp.setLocationDetailModel(new LocationDetailModel(model
+                .getSourceLoc(), model.getDestinationLoc(), model
+                .getDetailMessage()
+                + " Generated by " + myProcedureDec.getName().getName()));
+
+        // Add the conventions of parameters that have representation types.
+        for (ParameterVarDec parameterVarDec : myProcedureDec.getParameters()) {
+            // Check to see if we have a representation type.
+            NameTy nameTy = (NameTy) parameterVarDec.getTy();
+            if (nameTy.getProgramType() instanceof PTRepresentation) {
+                // Query for the type entry in the symbol table
+                PTRepresentation representationType =
+                        (PTRepresentation) nameTy.getProgramType();
+                SymbolTableEntry ste =
+                        Utilities.searchProgramType(loc, nameTy.getQualifier(),
+                                nameTy.getName(), myCurrentModuleScope);
+
+                // Only process this if it is TypeRepresentationDec
+                // (Might need to add more logic if it is not).
+                if (ste.getDefiningElement() instanceof TypeRepresentationDec) {
+                    AssertionClause conventionClause =
+                            Utilities.getTypeConventionClause(
+                                    ((TypeRepresentationDec) ste
+                                            .getDefiningElement())
+                                            .getConvention(), loc.clone(),
+                                    parameterVarDec.getName(), new PosSymbol(
+                                            loc.clone(), representationType
+                                                    .getFamily().getExemplar()
+                                                    .getName()), nameTy
+                                            .getMathType(), null);
+                    LocationDetailModel conventionDetailModel =
+                            new LocationDetailModel(loc.clone(), loc.clone(),
+                                    "Type Convention for "
+                                            + nameTy.getName().getName()
+                                            + " Generated by "
+                                            + myProcedureDec.getName()
+                                                    .getName());
+
+                    if (VarExp.isLiteralTrue(retExp)) {
+                        retExp =
+                                Utilities
+                                        .formConjunct(loc, null,
+                                                conventionClause,
+                                                conventionDetailModel);
+                    }
+                    else {
+                        retExp =
+                                Utilities
+                                        .formConjunct(loc, retExp,
+                                                conventionClause,
+                                                conventionDetailModel);
+                    }
+                }
+            }
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>An helper method that uses the {@code Shared Variable} and any parameter type
+     * {@code correspondence} to build the appropriate expression.</p>
+     *
+     * @return An {@link Exp}.
+     */
+    private Exp createCorrespondenceExp() {
+        // Add all shared state realization correspondence
+        Location loc = myProcedureDec.getLocation().clone();
+        Exp retExp =
+                myCurrentVerificationContext
+                        .createSharedStateRealizCorrespondenceExp(loc);
+        LocationDetailModel model = retExp.getLocationDetailModel().clone();
+        retExp.setLocationDetailModel(new LocationDetailModel(model
+                .getSourceLoc(), model.getDestinationLoc(), model
+                .getDetailMessage()
+                + " Generated by " + myProcedureDec.getName().getName()));
+
+        // Add the correspondence of parameters that have representation types.
+        for (ParameterVarDec parameterVarDec : myProcedureDec.getParameters()) {
+            // Check to see if we have a representation type.
+            NameTy nameTy = (NameTy) parameterVarDec.getTy();
+            if (nameTy.getProgramType() instanceof PTRepresentation) {
+                // Query for the type entry in the symbol table
+                PTRepresentation representationType =
+                        (PTRepresentation) nameTy.getProgramType();
+                SymbolTableEntry ste =
+                        Utilities.searchProgramType(loc, nameTy.getQualifier(),
+                                nameTy.getName(), myCurrentModuleScope);
+
+                // Only process this if it is TypeRepresentationDec
+                // (Might need to add more logic if it is not).
+                if (ste.getDefiningElement() instanceof TypeRepresentationDec) {
+                    AssertionClause correspondenceClause =
+                            Utilities.getTypeCorrespondenceClause(
+                                    ((TypeRepresentationDec) ste
+                                            .getDefiningElement())
+                                            .getCorrespondence(), loc.clone(),
+                                    parameterVarDec.getName(), nameTy,
+                                    new PosSymbol(loc.clone(),
+                                            representationType.getFamily()
+                                                    .getExemplar().getName()),
+                                    nameTy, nameTy.getMathType(), null,
+                                    myTypeGraph.BOOLEAN);
+                    LocationDetailModel correspondenceDetailModel =
+                            new LocationDetailModel(loc.clone(), loc.clone(),
+                                    "Type Correspondence for "
+                                            + nameTy.getName().getName()
+                                            + " Generated by "
+                                            + myProcedureDec.getName()
+                                                    .getName());
+
+                    if (VarExp.isLiteralTrue(retExp)) {
+                        retExp =
+                                Utilities.formConjunct(loc, null,
+                                        correspondenceClause,
+                                        correspondenceDetailModel);
+                    }
+                    else {
+                        retExp =
+                                Utilities.formConjunct(loc, retExp,
+                                        correspondenceClause,
+                                        correspondenceDetailModel);
+                    }
+                }
+            }
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>An helper method that uses the {@code ensures} clause from the operation entry
      * and adds in additional {@code ensures} clauses for different parameter modes
      * and builds the appropriate {@code ensures} clause that will be an
      * {@link AssertiveCodeBlock AssertiveCodeBlock's} final {@code confirm} statement.</p>
      *
+     * @param inConceptRealiz A flag that indicates whether or not this {@link ProcedureDec}
+     *                        is inside a {@code Concept Realization}.
+     * @param isLocal A flag that indicates whether or not this is a local operation.
+     *
      * @return The final confirm expression.
      */
-    private Exp createFinalConfirmExp() {
+    private Exp createFinalConfirmExp(boolean inConceptRealiz, boolean isLocal) {
         Exp retExp;
         Location procedureLoc = myProcedureDec.getLocation();
+
+        // Create a replacement map for substituting parameter
+        // variables with representation types.
+        Map<Exp, Exp> substitutionParamToConc = new LinkedHashMap<>();
 
         // Loop through each of the parameters in the operation entry.
         Iterator<ProgramParameterEntry> specParamVarDecIt =
@@ -391,8 +645,18 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                                     procedureLoc.clone(), null,
                                     parameterVarDec.getName(), type.getExemplar(),
                                     typeEntry.getModelType(), null);
-
-                    // TODO: Logic for types in concept realizations
+                }
+                else if (typeEntry.getDefiningElement() instanceof TypeRepresentationDec) {
+                    // Obtain the type family declaration and obtain it's initialization ensures.
+                    PTRepresentation representationType = (PTRepresentation) typeEntry.getProgramType();
+                    TypeFamilyDec type = (TypeFamilyDec) representationType.getFamily().getDefiningElement();
+                    AssertionClause initEnsures =
+                            type.getInitialization().getEnsures();
+                    modifiedInitEnsures =
+                            Utilities.getTypeInitEnsuresClause(initEnsures,
+                                    procedureLoc.clone(), null,
+                                    parameterVarDec.getName(), type.getExemplar(),
+                                    typeEntry.getModelType(), null);
                 }
                 else {
                     VarDec parameterAsVarDec =
@@ -421,10 +685,19 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                 }
             }
 
-            // TODO: See below!
-            // If the type is a type representation, then our requires clause
+            // If the type is a type representation, then our ensures clause
             // should really say something about the conceptual type and not
-            // the variable
+            // the variable. Must also be in a concept realization and not a
+            // local operation.
+            if (ste.getDefiningElement() instanceof TypeRepresentationDec && inConceptRealiz && !isLocal) {
+                DotExp concVarExp =
+                        Utilities.createConcVarExp(
+                                new VarDec(realizParamVarDec.getName(), realizParamVarDec.getTy()),
+                                parameterVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                substitutionParamToConc =
+                        addConceptualVariables(parameterExp, oldParameterExp,
+                                concVarExp, substitutionParamToConc);
+            }
         }
 
         // Add the operation's ensures clause
@@ -447,6 +720,205 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
                         InfixExp.formConjunct(ensuresExp.getLocation(),
                                 ensuresExp, paramEnsuresExp);
             }
+        }
+
+        // If we are in a concept or enhancement realization,
+        // loop through all shared variable declared from the
+        // associated concept.
+        // Note: If we are in a facility, "getConceptSharedVars()" will return
+        //       an empty list.
+        List<SharedStateDec> sharedStateDecs =
+                myCurrentVerificationContext.getConceptSharedVars();
+        for (SharedStateDec stateDec : sharedStateDecs) {
+            for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                // Convert the math variables to variable expressions
+                VarExp stateVarExp =
+                        Utilities.createVarExp(procedureLoc.clone(), null,
+                                mathVarDec.getName(), mathVarDec.getMathType(), null);
+                OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
+                oldStateVarExp.setMathType(stateVarExp.getMathType());
+
+                // Add a "restores" mode to any shared variables not being affected
+                if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
+                    retExp = createRestoresExpForSharedVars(procedureLoc,
+                            stateVarExp, oldStateVarExp, retExp);
+
+                    // If we are in a concept realization, our non-local procedure's
+                    // ensures clause should say something about the conceptual
+                    // shared variables.
+                    if (inConceptRealiz && !isLocal) {
+                        // Create the appropriate conceptual versions of the shared variables
+                        // and add them to our substitution maps.
+                        DotExp concVarExp =
+                                Utilities.createConcVarExp(
+                                        new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                        mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                        substitutionParamToConc =
+                                addConceptualVariables(stateVarExp, oldStateVarExp,
+                                        concVarExp, substitutionParamToConc);
+                    }
+                }
+            }
+        }
+
+        // Loop through all concept declared types and generate a "restores" ensures
+        // clause for non-affected definition variables.
+        for (TypeFamilyDec typeFamilyDec : myCurrentVerificationContext.getConceptDeclaredTypes()) {
+            for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+                // Convert the math definition variables to variable expressions
+                MathVarDec mathVarDec = mathDefVariableDec.getVariable();
+                VarExp defVarExp =
+                        Utilities.createVarExp(procedureLoc.clone(), null,
+                                mathVarDec.getName(), mathVarDec.getMathType(), null);
+                OldExp oldDefVarExp = new OldExp(procedureLoc.clone(), defVarExp);
+                oldDefVarExp.setMathType(defVarExp.getMathType());
+
+                // Add a "restores" mode to any definition variables not being affected
+                if (!Utilities.containsEquivalentExp(myAffectedExps, defVarExp)) {
+                    retExp = createRestoresExpForDefVars(procedureLoc,
+                            defVarExp, oldDefVarExp, retExp);
+
+                    // If we are in a concept realization, our non-local procedure's
+                    // ensures clause should say something about the conceptual
+                    // definition variables.
+                    if (inConceptRealiz && !isLocal) {
+                        // Create the appropriate conceptual versions of the definition variables
+                        // and add them to our substitution maps.
+                        DotExp concVarExp =
+                                Utilities.createConcVarExp(
+                                        new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                        mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                        substitutionParamToConc =
+                                addConceptualVariables(defVarExp, oldDefVarExp,
+                                        concVarExp, substitutionParamToConc);
+                    }
+                }
+            }
+        }
+
+        // Loop through all instantiated facility's and generate a "restores" ensures clause
+        // for non-affected shared variables/math definition variables.
+        for (InstantiatedFacilityDecl facilityDecl :
+                myCurrentVerificationContext.getProcessedInstFacilityDecls()) {
+            for (SharedStateDec stateDec : facilityDecl.getConceptSharedStates()) {
+                for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                    // Convert the math variables to variable expressions
+                    VarExp stateVarExp =
+                            Utilities.createVarExp(procedureLoc.clone(),
+                                    facilityDecl.getInstantiatedFacilityName(),
+                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
+                    OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
+                    oldStateVarExp.setMathType(stateVarExp.getMathType());
+
+                    // Add a "restores" mode to any shared variables not being affected
+                    if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
+                        retExp = createRestoresExpForSharedVars(procedureLoc,
+                                stateVarExp, oldStateVarExp, retExp);
+                    }
+                }
+            }
+
+            for (TypeFamilyDec typeFamilyDec : facilityDecl.getConceptDeclaredTypes()) {
+                for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+                    // Convert the math definition variables to variable expressions
+                    MathVarDec mathVarDec = mathDefVariableDec.getVariable();
+                    VarExp defVarExp =
+                            Utilities.createVarExp(procedureLoc.clone(),
+                                    facilityDecl.getInstantiatedFacilityName(),
+                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
+                    OldExp oldDefVarExp = new OldExp(procedureLoc.clone(), defVarExp);
+                    oldDefVarExp.setMathType(defVarExp.getMathType());
+
+                    // Add a "restores" mode to any definition variables not being affected
+                    if (!Utilities.containsEquivalentExp(myAffectedExps, defVarExp)) {
+                        retExp = createRestoresExpForDefVars(procedureLoc,
+                                defVarExp, oldDefVarExp, retExp);
+                    }
+                }
+            }
+        }
+
+        // Apply any substitution and return the modified expression
+        return retExp.substitute(substitutionParamToConc);
+    }
+
+    /**
+     * <p>An helper method that creates a new {@code ensures} expression
+     * that includes a {@code restores} mode clause for the given
+     * math definition variable.</p>
+     *
+     * @param procedureLoc The current procedure's location.
+     * @param defVarExp A math definition variable as a {@link VarExp}.
+     * @param oldDefVarExp The incoming value of {@code defVarExp}.
+     * @param ensuresExp The current ensures clause we are building.
+     *
+     * @return A modified {@code ensures} clause with the new
+     * {@code restores} expression.
+     */
+    private Exp createRestoresExpForDefVars(Location procedureLoc,
+            VarExp defVarExp, OldExp oldDefVarExp, Exp ensuresExp) {
+        // Construct an expression using the expression and it's
+        // old expression equivalent.
+        Exp restoresConditionExp =
+                new EqualsExp(procedureLoc.clone(), defVarExp.clone(), null,
+                        Operator.EQUAL, oldDefVarExp.clone());
+        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
+        restoresConditionExp
+                .setLocationDetailModel(new LocationDetailModel(procedureLoc
+                        .clone(), procedureLoc.clone(), "Ensures Clause of "
+                        + myCurrentProcedureOperationEntry.getName()
+                        + " (Condition from Non-Affected Definition Variable)"));
+
+        // Form a conjunct if needed.
+        Exp retExp;
+        if (VarExp.isLiteralTrue(ensuresExp)) {
+            retExp = restoresConditionExp;
+        }
+        else {
+            retExp =
+                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
+                            restoresConditionExp);
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>An helper method that creates a new {@code ensures} expression
+     * that includes a {@code restores} mode clause for the given
+     * global state variable.</p>
+     *
+     * @param procedureLoc The current procedure's location.
+     * @param stateVarExp A global state variable as a {@link VarExp}.
+     * @param oldStateVarExp The incoming value of {@code stateVarExp}.
+     * @param ensuresExp The current ensures clause we are building.
+     *
+     * @return A modified {@code ensures} clause with the new
+     * {@code restores} expression.
+     */
+    private Exp createRestoresExpForSharedVars(Location procedureLoc,
+            VarExp stateVarExp, OldExp oldStateVarExp, Exp ensuresExp) {
+        // Construct an expression using the expression and it's
+        // old expression equivalent.
+        Exp restoresConditionExp =
+                new EqualsExp(procedureLoc.clone(), stateVarExp.clone(), null,
+                        Operator.EQUAL, oldStateVarExp.clone());
+        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
+        restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
+                procedureLoc.clone(), procedureLoc.clone(),
+                "Ensures Clause of "
+                        + myCurrentProcedureOperationEntry.getName()
+                        + " (Condition from Non-Affected Shared Variable)"));
+
+        // Form a conjunct if needed.
+        Exp retExp;
+        if (VarExp.isLiteralTrue(ensuresExp)) {
+            retExp = restoresConditionExp;
+        }
+        else {
+            retExp =
+                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
+                            restoresConditionExp);
         }
 
         return retExp;

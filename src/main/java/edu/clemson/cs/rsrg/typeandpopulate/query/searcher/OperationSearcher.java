@@ -19,6 +19,8 @@ import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTNamed;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.SymbolTable;
 import java.util.Iterator;
@@ -150,6 +152,28 @@ public class OperationSearcher implements TableSearcher<OperationEntry> {
             PTType actualArgumentType, formalParameterType;
             while (result && formalParametersIter.hasNext()) {
                 actualArgumentType = actualArgumentTypeIter.next();
+
+                // If it is a PTRepresentation type, we are looking for
+                // the family type it is instantiating inside the base type.
+                if (actualArgumentType instanceof PTRepresentation) {
+                    // Special handing for a PTNamed base type
+                    PTType baseType =
+                            ((PTRepresentation) actualArgumentType)
+                                    .getBaseType();
+                    if (baseType instanceof PTNamed) {
+                        actualArgumentType =
+                                ((PTNamed) baseType)
+                                        .getInstantiatedFamilyType();
+                    }
+                }
+                // If it is a PTNamed type, we are looking for
+                // the family type it is instantiating.
+                else if (actualArgumentType instanceof PTNamed) {
+                    actualArgumentType =
+                            ((PTNamed) actualArgumentType)
+                                    .getInstantiatedFamilyType();
+                }
+
                 formalParameterType =
                         formalParametersIter.next().getDeclaredType();
 

@@ -14,7 +14,7 @@ package edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
-import edu.clemson.cs.rsrg.absyn.items.programitems.TypeInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.RealizInitFinalItem;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.List;
 
@@ -33,14 +33,11 @@ public class SharedStateRealizationDec
     // Member Fields
     // ===========================================================
 
-    /** <p>The correspondence clause for the new type.</p> */
+    /** <p>The correspondence clause for the new shared state.</p> */
     private final AssertionClause myCorrespondence;
 
-    /** <p>The initialization block for the new type.</p> */
-    private final TypeInitFinalItem myTypeInitItem;
-
-    /** <p>The finalization block for the new type.</p> */
-    private final TypeInitFinalItem myTypeFinalItem;
+    /** <p>The initialization block for the new shared state.</p> */
+    private final RealizInitFinalItem myTypeInitItem;
 
     // ===========================================================
     // Constructors
@@ -54,15 +51,13 @@ public class SharedStateRealizationDec
      * @param convention Shared state convention.
      * @param correspondence Shared state correspondence.
      * @param initItem Initialization block for this new shared state.
-     * @param finalItem Finalization block for this new shared state.
      */
     public SharedStateRealizationDec(PosSymbol name, List<VarDec> stateVarDecs,
             AssertionClause convention, AssertionClause correspondence,
-            TypeInitFinalItem initItem, TypeInitFinalItem finalItem) {
+            RealizInitFinalItem initItem) {
         super(name, stateVarDecs, convention);
         myCorrespondence = correspondence;
         myTypeInitItem = initItem;
-        myTypeFinalItem = finalItem;
     }
 
     // ===========================================================
@@ -101,10 +96,8 @@ public class SharedStateRealizationDec
                 innerIndentInc));
         sb.append("\n");
 
-        // initialization/finalization
+        // initialization block
         sb.append(myTypeInitItem.asString(indentSize + innerIndentInc,
-                innerIndentInc));
-        sb.append(myTypeFinalItem.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
         printSpace(indentSize, sb);
@@ -131,13 +124,11 @@ public class SharedStateRealizationDec
 
         if (!myCorrespondence.equals(that.myCorrespondence))
             return false;
-        if (!myTypeInitItem.equals(that.myTypeInitItem))
-            return false;
-        return myTypeFinalItem.equals(that.myTypeFinalItem);
+        return myTypeInitItem.equals(that.myTypeInitItem);
     }
 
     /**
-     * <p>Returns the correspondence for this type representation.</p>
+     * <p>Returns the correspondence for this shared state representation.</p>
      *
      * @return The type correspondence in {@link AssertionClause} format.
      */
@@ -146,22 +137,12 @@ public class SharedStateRealizationDec
     }
 
     /**
-     * <p>Returns the finalization block for this type representation.</p>
-     *
-     * @return The code block used for finalization
-     * in {@link TypeInitFinalItem} format.
-     */
-    public final TypeInitFinalItem getTypeFinalItem() {
-        return myTypeFinalItem;
-    }
-
-    /**
-     * <p>Returns the initialization block for this type representation.</p>
+     * <p>Returns the initialization block for this shared state representation.</p>
      *
      * @return The code block used for initialization
-     * in {@link TypeInitFinalItem} format.
+     * in {@link RealizInitFinalItem} format.
      */
-    public final TypeInitFinalItem getTypeInitItem() {
+    public final RealizInitFinalItem getInitItem() {
         return myTypeInitItem;
     }
 
@@ -173,7 +154,6 @@ public class SharedStateRealizationDec
         int result = super.hashCode();
         result = 31 * result + myCorrespondence.hashCode();
         result = 31 * result + myTypeInitItem.hashCode();
-        result = 31 * result + myTypeFinalItem.hashCode();
         return result;
     }
 
@@ -188,7 +168,7 @@ public class SharedStateRealizationDec
     protected final SharedStateRealizationDec copy() {
         return new SharedStateRealizationDec(myName.clone(), copyStateVars(),
                 myConvention.clone(), myCorrespondence.clone(), myTypeInitItem
-                        .clone(), myTypeFinalItem.clone());
+                        .clone());
     }
 
 }
