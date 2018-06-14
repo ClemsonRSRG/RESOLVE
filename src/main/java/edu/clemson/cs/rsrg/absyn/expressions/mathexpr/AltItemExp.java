@@ -145,11 +145,19 @@ public class AltItemExp extends MathExp {
 
             result = eAsAltItemExp.myAssignmentExp.equivalent(myAssignmentExp);
 
-            if (myTestingExp != null && eAsAltItemExp.myTestingExp != null) {
-                result &= eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
+            if (myTestingExp != null) {
+                if (eAsAltItemExp.myTestingExp != null) {
+                    result &=
+                            eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
+                }
+                else {
+                    return false;
+                }
             }
             else {
-                result = false;
+                if (eAsAltItemExp.myTestingExp != null) {
+                    result = false;
+                }
             }
         }
 
