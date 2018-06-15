@@ -145,8 +145,8 @@ public class SetExp extends MathExp {
             retval =
                     myVar.getName().equals(eAsSetExp.myVar.getName())
                             && myVar.getTy().equals(eAsSetExp.myVar.getTy());
-            retval &= myWhereExp.equivalent(eAsSetExp.myWhereExp);
-            retval &= myBodyExp.equivalent(eAsSetExp.myBodyExp);
+            retval &= equivalent(myWhereExp, eAsSetExp.myWhereExp);
+            retval &= equivalent(myBodyExp, eAsSetExp.myBodyExp);
         }
 
         return retval;
