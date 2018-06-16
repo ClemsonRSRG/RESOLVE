@@ -155,7 +155,7 @@ public class TupleExp extends MathExp {
      */
     @Override
     public final boolean equivalent(Exp e) {
-        boolean result = (e instanceof DotExp);
+        boolean result = (e instanceof TupleExp);
 
         if (result) {
             TupleExp eAsTupleExp = (TupleExp) e;

@@ -226,8 +226,8 @@ public class IterativeExp extends MathExp {
                     myVar.getName().equals(eAsIterativeExp.myVar.getName())
                             && myVar.getTy().equals(
                                     eAsIterativeExp.myVar.getTy());
-            retval &= myWhereExp.equivalent(eAsIterativeExp.myWhereExp);
-            retval &= myBodyExp.equivalent(eAsIterativeExp.myBodyExp);
+            retval &= equivalent(myWhereExp, eAsIterativeExp.myWhereExp);
+            retval &= equivalent(myBodyExp, eAsIterativeExp.myBodyExp);
         }
 
         return retval;
