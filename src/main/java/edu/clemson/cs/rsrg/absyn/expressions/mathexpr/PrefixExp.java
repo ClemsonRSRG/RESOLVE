@@ -180,52 +180,6 @@ public class PrefixExp extends AbstractFunctionExp {
         return result;
     }
 
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final Exp simplify() {
-        Exp newArgument;
-        if (myArgument instanceof EqualsExp) {
-            EqualsExp equalsExp = (EqualsExp) myArgument;
-
-            EqualsExp.Operator newOperator;
-            if (equalsExp.getOperator() == EqualsExp.Operator.EQUAL) {
-                newOperator = EqualsExp.Operator.NOT_EQUAL;
-            }
-            else {
-                newOperator = EqualsExp.Operator.EQUAL;
-            }
-
-            PosSymbol newOpQualifier = equalsExp.getQualifier();
-            if (myQualifier != null) {
-                newOpQualifier = myQualifier.clone();
-            }
-
-            Location newLoc = null;
-            if (equalsExp.getLocation() != null) {
-                newLoc = equalsExp.getLocation().clone();
-            }
-
-            newArgument =
-                    new EqualsExp(newLoc, equalsExp.getLeft(), newOpQualifier,
-                            newOperator, equalsExp.getRight());
-        }
-        else {
-            newArgument = this.clone();
-        }
-
-        PosSymbol qualifier = null;
-        if (myQualifier != null) {
-            qualifier = myQualifier.clone();
-        }
-
-        return new PrefixExp(cloneLocation(), qualifier, myOperationName
-                .clone(), newArgument);
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

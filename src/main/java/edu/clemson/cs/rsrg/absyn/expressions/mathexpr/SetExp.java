@@ -145,8 +145,8 @@ public class SetExp extends MathExp {
             retval =
                     myVar.getName().equals(eAsSetExp.myVar.getName())
                             && myVar.getTy().equals(eAsSetExp.myVar.getTy());
-            retval &= myWhereExp.equivalent(eAsSetExp.myWhereExp);
-            retval &= myBodyExp.equivalent(eAsSetExp.myBodyExp);
+            retval &= equivalent(myWhereExp, eAsSetExp.myWhereExp);
+            retval &= equivalent(myBodyExp, eAsSetExp.myBodyExp);
         }
 
         return retval;
@@ -201,16 +201,6 @@ public class SetExp extends MathExp {
         result = 31 * result + (myWhereExp != null ? myWhereExp.hashCode() : 0);
         result = 31 * result + myBodyExp.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

@@ -1,5 +1,5 @@
 /*
- * TypeInitFinalItem.java
+ * RealizInitFinalItem.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -20,19 +20,19 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.List;
 
 /**
- * <p>This is the class for all the type initialization/finalization block objects
+ * <p>This is the class for all the initialization/finalization block objects
  * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class TypeInitFinalItem extends AbstractTypeInitFinalItem {
+public class RealizInitFinalItem extends AbstractInitFinalItem {
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a type initialization/finalization block that happens
+     * <p>This constructs a initialization/finalization block that happens
      * when a variable of this type is initialized/finalized.</p>
      *
      * @param l A {@link Location} representation object.
@@ -43,9 +43,9 @@ public class TypeInitFinalItem extends AbstractTypeInitFinalItem {
      * @param variables List of variables in this block.
      * @param statements List of statements in this block.
      */
-    public TypeInitFinalItem(Location l, ItemType type, AffectsClause affects,
-            List<FacilityDec> facilities, List<VarDec> variables,
-            List<Statement> statements) {
+    public RealizInitFinalItem(Location l, ItemType type,
+            AffectsClause affects, List<FacilityDec> facilities,
+            List<VarDec> variables, List<Statement> statements) {
         super(l, type, affects, facilities, variables, statements);
     }
 
@@ -98,13 +98,13 @@ public class TypeInitFinalItem extends AbstractTypeInitFinalItem {
      * {@inheritDoc}
      */
     @Override
-    public final TypeInitFinalItem clone() {
+    public final RealizInitFinalItem clone() {
         AffectsClause newAffects = null;
         if (myAffects != null) {
             newAffects = myAffects.clone();
         }
 
-        return new TypeInitFinalItem(cloneLocation(), myItemType, newAffects,
+        return new RealizInitFinalItem(cloneLocation(), myItemType, newAffects,
                 copyFacDecs(), copyVars(), copyStatements());
     }
 

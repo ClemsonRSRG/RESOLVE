@@ -1,5 +1,5 @@
 /*
- * AbstractTypeInitFinalItem.java
+ * AbstractInitFinalItem.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -22,14 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the type initialization/finalization
+ * <p>This is the abstract base class for all the initialization/finalization
  * block objects that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 1.0
  */
-public abstract class AbstractTypeInitFinalItem
-        extends
-            ResolveConceptualElement {
+public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
 
     // ===========================================================
     // ItemType
@@ -95,7 +93,7 @@ public abstract class AbstractTypeInitFinalItem
      * @param variables List of variables in this block.
      * @param statements List of statements in this block.
      */
-    public AbstractTypeInitFinalItem(Location l, ItemType type,
+    protected AbstractInitFinalItem(Location l, ItemType type,
             AffectsClause affects, List<FacilityDec> facilities,
             List<VarDec> variables, List<Statement> statements) {
         super(l);
@@ -120,7 +118,7 @@ public abstract class AbstractTypeInitFinalItem
         if (o == null || getClass() != o.getClass())
             return false;
 
-        AbstractTypeInitFinalItem that = (AbstractTypeInitFinalItem) o;
+        AbstractInitFinalItem that = (AbstractInitFinalItem) o;
 
         if (myAffects != null ? !myAffects.equals(that.myAffects)
                 : that.myAffects != null)

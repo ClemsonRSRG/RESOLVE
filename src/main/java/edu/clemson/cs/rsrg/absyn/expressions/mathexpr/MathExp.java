@@ -276,16 +276,6 @@ public abstract class MathExp extends Exp {
         return retval;
     }
 
-    /**
-     * <p>This method must be implemented by the inherited mathematical
-     * expression classes to apply VC Generator's simplification step.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link Exp} from applying the simplification step.
-     */
-    public abstract Exp simplify();
-
     // ===========================================================
     // Private Methods
     // ===========================================================

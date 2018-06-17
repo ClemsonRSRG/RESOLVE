@@ -187,7 +187,7 @@ public class TypeAssertionExp extends MathExp {
      */
     @Override
     public final List<Exp> getSubExpressions() {
-        return new ArrayList(Collections.singletonList(myExp));
+        return new ArrayList<>(Collections.singletonList(myExp));
     }
 
     /**
@@ -199,16 +199,6 @@ public class TypeAssertionExp extends MathExp {
         result = 31 * result + myExp.hashCode();
         result = 31 * result + myAssertedTy.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

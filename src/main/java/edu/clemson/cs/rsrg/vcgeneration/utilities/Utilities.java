@@ -73,6 +73,31 @@ public class Utilities {
     // ===========================================================
 
     /**
+     * <p>This method to check if an equivalent expression is in the
+     * specified collection.</p>
+     *
+     * <p><em>Note:</em> We can't use {@link Collection#contains(Object)} because it will
+     * use the strict {@link Exp#equals(Object)} method rather than {@link Exp#equivalent(Exp)}.</p>
+     *
+     * @param collection Collection of expressions.
+     * @param exp Expression to check.
+     *
+     * @return {@code true} if an equivalent {@code exp} is in the collection,
+     * {@code false} otherwise.
+     */
+    public static boolean containsEquivalentExp(Collection<Exp> collection,
+            Exp exp) {
+        boolean found = false;
+
+        Iterator<Exp> expIterator = collection.iterator();
+        while (expIterator.hasNext() && !found) {
+            found = expIterator.next().equivalent(exp);
+        }
+
+        return found;
+    }
+
+    /**
      * <p>Converts the different types of {@link Exp} to the
      * ones used by the VC Generator.</p>
      *
@@ -173,6 +198,38 @@ public class Utilities {
     }
 
     /**
+     * <p>This method returns the conceptual version of the {@link VarDec}.</p>
+     *
+     * @param varDec The parameter variable.
+     * @param varDecType Mathematical type for the parameter variable.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return The new {@link DotExp}.
+     */
+    public static DotExp createConcVarExp(VarDec varDec, MTType varDecType, MTType booleanType) {
+        // Convert the declared variable into a VarExp
+        VarExp varExp =
+                Utilities.createVarExp(varDec.getLocation(), null, varDec.getName(),
+                        varDecType, null);
+
+        // Create a VarExp with the name "Conc"
+        VarExp concVarExp =
+                Utilities.createVarExp(varDec.getLocation(), null,
+                        new PosSymbol(varDec.getLocation(), "Conc"),
+                        booleanType, null);
+
+        // Create the DotExp
+        List<Exp> segments = new ArrayList<>();
+        segments.add(concVarExp);
+        segments.add(varExp);
+
+        DotExp retExp = new DotExp(varDec.getLocation(), segments);
+        retExp.setMathType(varDecType);
+
+        return retExp;
+    }
+
+    /**
      * <p>This method returns a {@link FunctionExp} with the specified
      * name and arguments.</p>
      *
@@ -241,7 +298,10 @@ public class Utilities {
         segments.add(typeNameExp);
         segments.add(isInitialExp);
 
-        return new DotExp(varDec.getLocation(), segments);
+        DotExp retExp = new DotExp(varDec.getLocation(), segments);
+        retExp.setMathType(booleanType);
+
+        return retExp;
     }
 
     /**
@@ -394,7 +454,13 @@ public class Utilities {
             retExp = assertionExp;
         }
         else {
-            retExp = InfixExp.formConjunct(loc, exp, assertionExp);
+            // No need to form a conjunct if it is simply "true"
+            if (!VarExp.isLiteralTrue(assertionExp)) {
+                retExp = InfixExp.formConjunct(loc, exp, assertionExp);
+            }
+            else {
+                retExp = exp;
+            }
         }
 
         // Add any which_entails
@@ -405,7 +471,11 @@ public class Utilities {
                     entailsLoc.clone(), entailsLoc.clone(),
                     "Which_Entails Expression Located at "
                             + clause.getLocation()));
-            retExp = InfixExp.formConjunct(loc, retExp, whichEntailsExp);
+
+            // No need to form a conjunct if it is simply "true"
+            if (!VarExp.isLiteralTrue(whichEntailsExp)) {
+                retExp = InfixExp.formConjunct(loc, retExp, whichEntailsExp);
+            }
         }
 
         return retExp;
@@ -511,7 +581,8 @@ public class Utilities {
         }
 
         return Utilities.searchOperation(functionExp.getLocation(),
-                functionExp.getQualifier(), functionExp.getName(), argTypes, scope);
+                functionExp.getQualifier(), functionExp.getName(), argTypes,
+                ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_INSTANTIATE, scope);
     }
 
     /**
@@ -556,6 +627,103 @@ public class Utilities {
 
         return new AssertionClause(newLoc, AssertionClause.ClauseType.CONSTRAINT,
                 constraintWithReplacements, whichEntailsWithReplacements);
+    }
+
+    /**
+     * <p>Given the original {@code convention} clause, use the provided information
+     * on the actual parameter variable to substitute the {@code exemplar} in the
+     * {@code convention} clause and create a new {@link AssertionClause}.</p>
+     *
+     * @param originalConventionClause The {@link AssertionClause} containing the
+     *                                 original {@code convention} clause.
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param name The parameter variable's name.
+     * @param exemplarName The {@code exemplar} name for the corresponding type.
+     * @param type The mathematical type associated with this type.
+     * @param typeValue The mathematical type value associated with this type.
+     *
+     * @return A modified {@link AssertionClause} containing the new
+     * {@code convention} clause.
+     */
+    public static AssertionClause getTypeConventionClause(AssertionClause originalConventionClause,
+            Location loc, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
+        // Create a variable expression from the declared variable
+        VarExp varDecExp = Utilities.createVarExp(loc, null, name, type, typeValue);
+
+        // Create a variable expression from the type exemplar
+        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
+
+        // Create a replacement map
+        Map<Exp, Exp> substitutions = new HashMap<>();
+        substitutions.put(exemplar, varDecExp);
+
+        // Create new assertion clause by replacing the exemplar with the actual
+        Location newLoc = loc.clone();
+        Exp conventionWithReplacements =
+                originalConventionClause.getAssertionExp().substitute(substitutions);
+        Exp whichEntailsWithReplacements = null;
+        if (originalConventionClause.getWhichEntailsExp() != null) {
+            whichEntailsWithReplacements =
+                    originalConventionClause.getWhichEntailsExp().substitute(substitutions);
+        }
+
+        return new AssertionClause(newLoc, AssertionClause.ClauseType.CONVENTION,
+                conventionWithReplacements, whichEntailsWithReplacements);
+    }
+
+    /**
+     * <p>Given the original {@code correspondence} clause, use the provided information
+     * on the actual parameter variable to substitute the {@code exemplar} in the
+     * {@code correspondence} clause and create a new {@link AssertionClause}.</p>
+     *
+     * @param originalCorrespondenceClause The {@link AssertionClause} containing the
+     *                                     original {@code correspondence} clause.
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param name The parameter variable's name.
+     * @param ty The parameter's raw type.
+     * @param exemplarName The {@code exemplar} name for the corresponding type.
+     * @param exemplarTy The {@code exemplar}'s raw type.
+     * @param type The mathematical type associated with this type.
+     * @param typeValue The mathematical type value associated with this type.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return A modified {@link AssertionClause} containing the new
+     * {@code correspondence} clause.
+     */
+    public static AssertionClause getTypeCorrespondenceClause(AssertionClause originalCorrespondenceClause,
+            Location loc, PosSymbol name, Ty ty, PosSymbol exemplarName, Ty exemplarTy,
+            MTType type, MTType typeValue, MTType booleanType) {
+        // Create a variable expression from the declared variable
+        VarExp varDecExp = Utilities.createVarExp(loc, null, name, type, typeValue);
+
+        // Create a conceptual variable expression from the declared variable
+        DotExp concVarDecExp = Utilities.createConcVarExp(new VarDec(name, ty), type, booleanType);
+
+        // Create a variable expression from the type exemplar
+        VarExp exemplar = Utilities.createVarExp(loc, null, exemplarName, type, typeValue);
+
+        // Create a conceptual variable expression from the type exemplar
+        DotExp concExemplarExp = Utilities.createConcVarExp(new VarDec(exemplarName, exemplarTy), type, booleanType);
+
+        // Create a replacement map
+        Map<Exp, Exp> substitutions = new HashMap<>();
+        substitutions.put(exemplar, varDecExp);
+        substitutions.put(concExemplarExp, concVarDecExp);
+
+        // Create new assertion clause by replacing the exemplar with the actual
+        Location newLoc = loc.clone();
+        Exp correspondenceWithReplacements =
+                originalCorrespondenceClause.getAssertionExp().substitute(substitutions);
+        Exp whichEntailsWithReplacements = null;
+        if (originalCorrespondenceClause.getWhichEntailsExp() != null) {
+            whichEntailsWithReplacements =
+                    originalCorrespondenceClause.getWhichEntailsExp().substitute(substitutions);
+        }
+
+        return new AssertionClause(newLoc, AssertionClause.ClauseType.CORRESPONDENCE,
+                correspondenceWithReplacements, whichEntailsWithReplacements);
     }
 
     /**
@@ -1207,6 +1375,8 @@ public class Utilities {
      * @param qualifier The qualifier of the operation.
      * @param name The name of the operation.
      * @param argTypes The list of argument types.
+     * @param importStrategy The import strategy to use.
+     * @param facilityStrategy The facility strategy to use.
      * @param scope The module scope to start our search.
      *
      * @return An {@link OperationEntry} from the
@@ -1214,13 +1384,14 @@ public class Utilities {
      */
     public static OperationEntry searchOperation(Location loc,
             PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
             ModuleScope scope) {
         // Query for the corresponding operation
         OperationEntry op = null;
         try {
             op =
                     scope.queryForOne(new OperationQuery(qualifier, name,
-                            argTypes));
+                            argTypes, importStrategy, facilityStrategy));
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, name.getName(), loc);

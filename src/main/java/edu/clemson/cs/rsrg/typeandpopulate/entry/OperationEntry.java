@@ -98,12 +98,17 @@ public class OperationEntry extends SymbolTableEntry {
         AffectsClause affectsClause;
         ResolveConceptualElement element = getDefiningElement();
         if (element instanceof OperationDec) {
-            affectsClause = ((OperationDec) element).getAffectedVars().clone();
+            affectsClause = ((OperationDec) element).getAffectedVars();
         }
         else {
             affectsClause =
                     ((OperationProcedureDec) element).getWrappedOpDec()
-                            .getAffectedVars().clone();
+                            .getAffectedVars();
+        }
+
+        // Make a deep copy if necessary
+        if (affectsClause != null) {
+            affectsClause = affectsClause.clone();
         }
 
         return affectsClause;
@@ -137,6 +142,24 @@ public class OperationEntry extends SymbolTableEntry {
     @Override
     public final String getEntryTypeDescription() {
         return "an operation";
+    }
+
+    /**
+     * <p>This method returns the operation declaration associated with this entry.</p>
+     *
+     * @return An {@link OperationDec} representation object.
+     */
+    public final OperationDec getOperationDec() {
+        OperationDec operationDec;
+        ResolveConceptualElement element = getDefiningElement();
+        if (element instanceof OperationDec) {
+            operationDec = (OperationDec) element;
+        }
+        else {
+            operationDec = ((OperationProcedureDec) element).getWrappedOpDec();
+        }
+
+        return operationDec;
     }
 
     /**

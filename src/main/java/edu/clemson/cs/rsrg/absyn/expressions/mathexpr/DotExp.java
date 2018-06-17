@@ -191,16 +191,6 @@ public class DotExp extends MathExp {
         return result;
     }
 
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
@@ -219,8 +209,23 @@ public class DotExp extends MathExp {
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         List<Exp> newSegments = new ArrayList<>();
+
+        // YS: Need additional logic to deal with receptacles
+        boolean foundReceptacleNotation = false;
         for (Exp e : mySegmentExps) {
+            if (e instanceof VarExp) {
+                VarExp eAsVarExp = (VarExp) e;
+                if (eAsVarExp.getName().getName().equals("recp") ||
+                        eAsVarExp.getName().getName().equals("Receptacles")) {
+                    foundReceptacleNotation = true;
+                }
+            }
             newSegments.add(substitute(e, substitutions));
+        }
+
+        // If we found a receptacle notation, then ignore all substitutions done
+        if (foundReceptacleNotation) {
+            newSegments = copyExps();
         }
 
         return new DotExp(cloneLocation(), newSegments);

@@ -61,10 +61,7 @@ public class SetCollectionExp extends MathExp {
 
         sb.append("{");
         if (myMembers != null) {
-            if (myMembers.isEmpty()) {
-                sb.append("");
-            }
-            else {
+            if (!myMembers.isEmpty()) {
                 Iterator<MathExp> i = myMembers.iterator();
                 while (i.hasNext()) {
                     MathExp m = i.next();
@@ -146,20 +143,30 @@ public class SetCollectionExp extends MathExp {
         if (result) {
             SetCollectionExp eAsSetCollectionExp = (SetCollectionExp) e;
 
-            if (myMembers != null && eAsSetCollectionExp.myMembers != null) {
+            if (myMembers != null && eAsSetCollectionExp.myMembers != null
+                    && myMembers.size() == eAsSetCollectionExp.myMembers.size()) {
+                // YS: This is a very expensive method to call. Sets don't have order
+                //     so it is possible that we have the same elements, but different order.
+                //     So for each element in our set, we will need to iterate all elements in "e"
+                //     to find a match.
                 Iterator<MathExp> thisMemberExps = myMembers.iterator();
-                Iterator<MathExp> eMemberExps =
-                        eAsSetCollectionExp.myMembers.iterator();
-                while (result && thisMemberExps.hasNext()
-                        && eMemberExps.hasNext()) {
-                    result &=
-                            thisMemberExps.next()
-                                    .equivalent(eMemberExps.next());
-                }
+                while (result && thisMemberExps.hasNext()) {
+                    MathExp innerExp = thisMemberExps.next();
 
-                //Both had better have run out at the same time
-                result &=
-                        (!thisMemberExps.hasNext()) && (!eMemberExps.hasNext());
+                    // Attempt to find an equivalent expression
+                    boolean found = false;
+                    Iterator<MathExp> eMemberExps =
+                            eAsSetCollectionExp.myMembers.iterator();
+                    while (!found && eMemberExps.hasNext()) {
+                        found = innerExp.equivalent(eMemberExps.next());
+                    }
+
+                    // Set this as our result.
+                    result = found;
+                }
+            }
+            else {
+                result = false;
             }
         }
 
@@ -195,16 +202,6 @@ public class SetCollectionExp extends MathExp {
         int result = super.hashCode();
         result = 31 * result + myMembers.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

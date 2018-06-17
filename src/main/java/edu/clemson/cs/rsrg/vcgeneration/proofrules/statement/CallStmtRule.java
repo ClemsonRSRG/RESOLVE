@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -35,6 +36,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTGeneric;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -155,8 +157,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
         // Call a method to locate the operation entry for this call
         OperationEntry operationEntry =
                 Utilities.getOperationEntry(functionExp, myCurrentModuleScope);
-        OperationDec operationDec =
-                (OperationDec) operationEntry.getDefiningElement();
+        OperationDec operationDec = operationEntry.getOperationDec();
 
         // Find all the replacements that needs to happen to the requires
         // and ensures clauses
@@ -322,8 +323,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
      */
     private Exp createModifiedEnsExp(OperationEntry operationEntry,
             List<ProgramExp> callArgs, List<Exp> modifiedArguments) {
-        OperationDec operationDec =
-                (OperationDec) operationEntry.getDefiningElement();
+        OperationDec operationDec = operationEntry.getOperationDec();
         InstantiatedFacilityDecl instantiatedFacilityDecl =
                 Utilities.getInstantiatingFacility(operationEntry, myCurrentVerificationContext);
 
@@ -370,16 +370,23 @@ public class CallStmtRule extends AbstractProofRuleApplication
             tempOldParamExp.setMathType(varDec.getTy().getMathTypeValue());
 
             // Query for the type entry in the symbol table
-            // Note: If the parameter type is generic, then we check to see if the calling arguments
-            // contains a type that is instantiated. If it is, then we use the instantiated type
-            // from the calling arg.
             SymbolTableEntry ste;
             ProgramExp callingArg = callArgs.get(i);
-            if (nameTy.getProgramType() instanceof PTGeneric &&
-                    callingArg.getProgramType() instanceof PTFamily) {
-                PTFamily callingType = (PTFamily) callingArg.getProgramType();
-                ste = Utilities.searchProgramType(callingArg.getLocation(), null,
-                        new PosSymbol(callingArg.getLocation(), callingType.getName()), myCurrentModuleScope);
+            if (nameTy.getProgramType() instanceof PTGeneric) {
+                // Note: If the parameter type is generic, then we check to see if the calling arguments
+                // contains a type that is instantiated. If it is, then we use the instantiated type
+                // from the calling arg.
+                if (callingArg.getProgramType() instanceof PTFamily) {
+                    PTFamily callingType = (PTFamily) callingArg.getProgramType();
+                    ste = Utilities.searchProgramType(callingArg.getLocation(), null,
+                            new PosSymbol(callingArg.getLocation(), callingType.getName()), myCurrentModuleScope);
+                }
+                // Note 2: Both parameters must be generic, so look
+                else {
+                    PTGeneric callingType = (PTGeneric) callingArg.getProgramType();
+                    ste = Utilities.searchProgramType(nameTy.getLocation(), null,
+                            new PosSymbol(callingArg.getLocation(), callingType.getName()), myCurrentModuleScope);
+                }
             }
             else {
                 ste = Utilities.searchProgramType(nameTy.getLocation(),
@@ -461,9 +468,24 @@ public class CallStmtRule extends AbstractProofRuleApplication
                             Utilities.getTypeInitEnsuresClause(initEnsures, exp
                                     .getLocation(), null, varDec.getName(), type
                                     .getExemplar(), typeEntry.getModelType(), null);
-
-                    // TODO: Logic for types in concept realizations
-
+                    varDecEnsures = modifiedInitEnsures.getAssertionExp().clone();
+                }
+                // For all type representation types, we first need to obtain the type
+                // family it is implementing. Then, we need to generate the appropriate EqualsExp
+                // that says the expression contains the initial value
+                // - h = <init_value>
+                else if (typeEntry.getDefiningElement() instanceof TypeRepresentationDec) {
+                    // Obtain the type family declaration and obtain it's initialization ensures.
+                    PTRepresentation representationType = (PTRepresentation) typeEntry.getProgramType();
+                    TypeFamilyDec type =
+                            (TypeFamilyDec) representationType.getFamily().getDefiningElement();
+                    AssertionClause initEnsures =
+                            type.getInitialization().getEnsures();
+                    AssertionClause modifiedInitEnsures =
+                            Utilities.getTypeInitEnsuresClause(initEnsures,
+                                    exp.getLocation().clone(), null,
+                                    varDec.getName(), type.getExemplar(),
+                                    typeEntry.getModelType(), null);
                     varDecEnsures = modifiedInitEnsures.getAssertionExp().clone();
                 }
                 // For all generic types, all we can do is generate:
@@ -650,8 +672,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
      */
     private Exp createModifiedReqExp(OperationEntry operationEntry,
             List<VarExp> operationParamAsVarExps, List<Exp> modifiedArguments) {
-        OperationDec operationDec =
-                (OperationDec) operationEntry.getDefiningElement();
+        OperationDec operationDec = operationEntry.getOperationDec();
         InstantiatedFacilityDecl instantiatedFacilityDecl =
                 Utilities.getInstantiatingFacility(operationEntry, myCurrentVerificationContext);
 

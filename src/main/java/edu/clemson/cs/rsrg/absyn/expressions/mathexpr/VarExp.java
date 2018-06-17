@@ -38,6 +38,12 @@ public class VarExp extends MathExp {
     /** <p>The expression's name</p> */
     private final PosSymbol myName;
 
+    /**
+     * <p>A boolean that indicates whether or not this {@code VarExp}
+     * is referencing a definition name from a {@code Precis}.</p>
+     */
+    private boolean myIsPrecisDefinitionName;
+
     /** <p>The object's quantification (if any).</p> */
     private SymbolTableEntry.Quantification myQuantification;
 
@@ -54,7 +60,7 @@ public class VarExp extends MathExp {
      * @param name A {@link PosSymbol} name object.
      */
     public VarExp(Location l, PosSymbol qualifier, PosSymbol name) {
-        this(l, qualifier, name, SymbolTableEntry.Quantification.NONE);
+        this(l, qualifier, name, SymbolTableEntry.Quantification.NONE, false);
     }
 
     /**
@@ -68,10 +74,28 @@ public class VarExp extends MathExp {
      */
     public VarExp(Location l, PosSymbol qualifier, PosSymbol name,
             SymbolTableEntry.Quantification quantifier) {
+        this(l, qualifier, name, quantifier, false);
+    }
+
+    /**
+     * <p>This constructs a variable expression with the
+     * passed in quantification.</p>
+     *
+     * @param l A {@link Location} representation object.
+     * @param qualifier A {@link PosSymbol} qualifier object.
+     * @param name A {@link PosSymbol} name object.
+     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier object.
+     * @param isPrecisDefinitionName A boolean that indicates whether or not this {@code VarExp} is
+     *                               referencing a definition name from a {@code Precis}.
+     */
+    private VarExp(Location l, PosSymbol qualifier, PosSymbol name,
+            SymbolTableEntry.Quantification quantifier,
+            boolean isPrecisDefinitionName) {
         super(l);
         myQualifier = qualifier;
         myName = name;
         myQuantification = quantifier;
+        myIsPrecisDefinitionName = isPrecisDefinitionName;
     }
 
     // ===========================================================
@@ -116,10 +140,8 @@ public class VarExp extends MathExp {
     @Override
     public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean retval = false;
-        if (myName != null) {
-            if (!IsOldExp && myName.equals(varName)) {
-                retval = true;
-            }
+        if (!IsOldExp && myName.getName().equals(varName)) {
+            retval = true;
         }
 
         return retval;
@@ -139,6 +161,8 @@ public class VarExp extends MathExp {
 
         VarExp varExp = (VarExp) o;
 
+        if (myIsPrecisDefinitionName != varExp.myIsPrecisDefinitionName)
+            return false;
         if (myQualifier != null ? !myQualifier.equals(varExp.myQualifier)
                 : varExp.myQualifier != null)
             return false;
@@ -208,8 +232,27 @@ public class VarExp extends MathExp {
                 31 * result
                         + (myQualifier != null ? myQualifier.hashCode() : 0);
         result = 31 * result + myName.hashCode();
+        result = 31 * result + (myIsPrecisDefinitionName ? 1 : 0);
         result = 31 * result + myQuantification.hashCode();
         return result;
+    }
+
+    /**
+     * <p>This method checks to see if this variable expression refers
+     * to a definition from a {@code Precis}.</p>
+     *
+     * @return {@code true} if it is a {@code Precis} definition name,
+     * {@code false} otherwise.
+     */
+    public final boolean isIsPrecisDefinitionName() {
+        return myIsPrecisDefinitionName;
+    }
+
+    /**
+     * <p>Sets the flag for whether or not this refers to a definition name.</p>
+     */
+    public final void setIsPrecisDefinitionName() {
+        myIsPrecisDefinitionName = true;
     }
 
     /**
@@ -230,16 +273,6 @@ public class VarExp extends MathExp {
         myQuantification = q;
     }
 
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
@@ -256,7 +289,7 @@ public class VarExp extends MathExp {
         PosSymbol newName = myName.clone();
 
         return new VarExp(cloneLocation(), newQualifier, newName,
-                myQuantification);
+                myQuantification, myIsPrecisDefinitionName);
     }
 
     /**
@@ -271,7 +304,7 @@ public class VarExp extends MathExp {
         PosSymbol newName = myName.clone();
 
         return new VarExp(cloneLocation(), newQualifier, newName,
-                myQuantification);
+                myQuantification, myIsPrecisDefinitionName);
     }
 
 }

@@ -155,7 +155,7 @@ public class TupleExp extends MathExp {
      */
     @Override
     public final boolean equivalent(Exp e) {
-        boolean result = (e instanceof DotExp);
+        boolean result = (e instanceof TupleExp);
 
         if (result) {
             TupleExp eAsTupleExp = (TupleExp) e;
@@ -270,16 +270,6 @@ public class TupleExp extends MathExp {
         }
 
         return soFar;
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

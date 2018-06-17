@@ -149,7 +149,7 @@ public class IfExp extends MathExp {
      */
     @Override
     public final boolean equivalent(Exp e) {
-        boolean result = e instanceof AltItemExp;
+        boolean result = e instanceof IfExp;
 
         if (result) {
             IfExp eAsIfExp = (IfExp) e;
@@ -212,16 +212,6 @@ public class IfExp extends MathExp {
         result = 31 * result + myThenExp.hashCode();
         result = 31 * result + myElseExp.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

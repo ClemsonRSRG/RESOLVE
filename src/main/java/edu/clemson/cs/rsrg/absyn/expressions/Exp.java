@@ -156,6 +156,14 @@ public abstract class Exp extends ResolveConceptualElement {
 
         Exp exp = (Exp) o;
 
+        // YS: Note that this check should be in here for completeness,
+        //     but so many things have been built without checking for
+        //     location equality. At some point someone should add this
+        //     back in and make sure everything still works as intended!
+        /*if (myLoc != null ? !myLoc.equals(exp.myLoc) : exp.myLoc != null)
+            return false;
+         */
+
         if (myLocationDetailModel != null ? !myLocationDetailModel
                 .equals(exp.myLocationDetailModel)
                 : exp.myLocationDetailModel != null)
@@ -199,7 +207,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * 		   {@link Exp}s are {@code null}; or both are not {@code null} and are
      *         equivalent.
      */
-    public final static boolean equivalent(Exp e1, Exp e2) {
+    public static boolean equivalent(Exp e1, Exp e2) {
         return !((e1 == null ^ e2 == null))
                 && ((e1 == null && e2 == null) || e1.equivalent(e2));
     }

@@ -326,18 +326,16 @@ sharedStateDecl
         (moduleStateVariableDecl)+
         (constraintClause)?
         (specModelInit)?
-        (specModelFinal)?
-        END SHAREDVARIABLES SEMICOLON
+        END SEMICOLON
     ;
 
 sharedStateRepresentationDecl
-    :   SHAREDVARIABLES IS REALIZED BY
-        (variableDecl)+
+    :   SHAREDVARIABLES
+        (variableDecl)*
         (conventionClause)?
         (correspondenceClause)?
         (representationInit)?
-        (representationFinal)?
-        END SHAREDVARIABLES SEMICOLON
+        END SEMICOLON
     ;
 
 // initialization, finalization rules
@@ -702,7 +700,9 @@ decreasingClause
     ;
 
 correspondenceClause
-    :   CORR mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
+    :   CORR
+        (INVOLVES mathVarNameExp (COMMA mathVarNameExp)* SEMICOLON)?
+        mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
 
 conventionClause

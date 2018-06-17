@@ -145,11 +145,19 @@ public class AltItemExp extends MathExp {
 
             result = eAsAltItemExp.myAssignmentExp.equivalent(myAssignmentExp);
 
-            if (myTestingExp != null && eAsAltItemExp.myTestingExp != null) {
-                result &= eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
+            if (myTestingExp != null) {
+                if (eAsAltItemExp.myTestingExp != null) {
+                    result &=
+                            eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
+                }
+                else {
+                    return false;
+                }
             }
             else {
-                result = false;
+                if (eAsAltItemExp.myTestingExp != null) {
+                    result = false;
+                }
             }
         }
 
@@ -204,16 +212,6 @@ public class AltItemExp extends MathExp {
                         + (myAssignmentExp != null ? myAssignmentExp.hashCode()
                                 : 0);
         return result;
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================
