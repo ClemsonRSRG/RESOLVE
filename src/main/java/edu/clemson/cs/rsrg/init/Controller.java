@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
+import edu.clemson.cs.rsrg.prover.CongruenceClassProver;
 import edu.clemson.cs.rsrg.statushandling.AntlrLexerErrorListener;
 import edu.clemson.cs.rsrg.statushandling.AntlrParserErrorListener;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
@@ -178,6 +179,14 @@ class Controller {
                     VCGenPipeline vcGenPipeline =
                             new VCGenPipeline(myCompileEnvironment, mySymbolTable);
                     vcGenPipeline.process(m);
+                }
+
+                // Invoke Automated Prover (if requested)
+                if (myCompileEnvironment.flags.isFlagSet(CongruenceClassProver.FLAG_PROVE) &&
+                        m.equals(new ModuleIdentifier(targetModule))) {
+                    ProverPipeline proverPipeline =
+                            new ProverPipeline(myCompileEnvironment, mySymbolTable);
+                    proverPipeline.process(m);
                 }
 
                 // Complete compilation for this module

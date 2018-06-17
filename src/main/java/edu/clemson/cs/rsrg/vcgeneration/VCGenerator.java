@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration;
 
-import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
@@ -42,6 +41,7 @@ import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.prover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;

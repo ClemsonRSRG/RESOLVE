@@ -12,16 +12,16 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.entry;
 
-import edu.clemson.cs.r2jt.misc.Utils;
-import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.rewriteprover.immutableadts.LazilyMappedImmutableList;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
+import edu.clemson.cs.rsrg.misc.Utilities.Mapping;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.prover.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.rsrg.prover.immutableadts.ImmutableList;
+import edu.clemson.cs.rsrg.prover.immutableadts.LazilyMappedImmutableList;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -244,7 +244,7 @@ public class OperationEntry extends SymbolTableEntry {
      */
     private static class InstantiationMapping
             implements
-                Utils.Mapping<ProgramParameterEntry, ProgramParameterEntry> {
+                Mapping<ProgramParameterEntry, ProgramParameterEntry> {
 
         // ===========================================================
         // Member Fields
