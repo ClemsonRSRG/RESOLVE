@@ -143,8 +143,8 @@ public class Utilities {
         CharStream inputStream = CharStreams.fromPath(file.toPath());
         File parentFile = file.getParentFile();
 
-        return new ResolveFile(new ResolveFileBasicInfo(name, moduleType,
-                parentFile.getName()), inputStream, parentFile.toPath(),
+        return new ResolveFile(new ResolveFileBasicInfo(name, parentFile
+                .getName()), moduleType, inputStream, parentFile.toPath(),
                 pkgList, file.getAbsolutePath());
     }
 

@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
@@ -49,14 +50,14 @@ public class FacilityModuleDec extends ModuleDec {
      * @param requires A {@link AssertionClause} representing the concept's
      *                 requires clause.
      * @param decs The list of {@link Dec} objects.
-     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
-     *                           flags) that indicates all the modules that this module
-     *                           declaration depends on.
+     * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
+     *                           externally realized flags that indicates
+     *                           all the modules that this module declaration depends on.
      */
     public FacilityModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             AssertionClause requires, List<Dec> decs,
-            Map<PosSymbol, Boolean> moduleDependencies) {
+            Map<ResolveFileBasicInfo, Boolean> moduleDependencies) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
         myRequires = requires;
     }
@@ -138,7 +139,7 @@ public class FacilityModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
+        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies = copyModuleDependencies();
 
         return new FacilityModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newUsesItems, myRequires.clone(), newDecs, newModuleDependencies);

@@ -41,6 +41,9 @@ public class ResolveFile {
     /** <p>Input stream that will contain all the RESOLVE source code.</p> */
     private final CharStream myInputStream;
 
+    /** <p>File's extension type.</p> */
+    private final ModuleType myModuleFileType;
+
     /** <p>Path of the Parent File. (May be {@code null}).</p> */
     private final Path myParentPath;
 
@@ -57,17 +60,20 @@ public class ResolveFile {
      * that the compiler will operate on.</p>
      *
      * @param fileBasicInfo Basic information about the file.
+     * @param moduleType File extension type.
      * @param input The source code input stream.
      * @param parentPath The parent path if it is known. Otherwise,
      *                   this can be {@code null}.
      * @param packageList The package where this source file belong.
      * @param filePath The path where this file was found.
      */
-    public ResolveFile(ResolveFileBasicInfo fileBasicInfo, CharStream input,
-            Path parentPath, List<String> packageList, String filePath) {
+    public ResolveFile(ResolveFileBasicInfo fileBasicInfo,
+            ModuleType moduleType, CharStream input, Path parentPath,
+            List<String> packageList, String filePath) {
         myInputStream = input;
         myFileBasicInfo = fileBasicInfo;
         myFilePath = filePath;
+        myModuleFileType = moduleType;
         myParentPath = parentPath;
         myPkgList = packageList;
     }
@@ -97,6 +103,8 @@ public class ResolveFile {
         if (!myFilePath.equals(that.myFilePath))
             return false;
         if (!myInputStream.equals(that.myInputStream))
+            return false;
+        if (!myModuleFileType.equals(that.myModuleFileType))
             return false;
         if (myParentPath != null ? !myParentPath.equals(that.myParentPath)
                 : that.myParentPath != null)
@@ -139,7 +147,7 @@ public class ResolveFile {
      * @return File's extension.
      */
     public final ModuleType getModuleType() {
-        return myFileBasicInfo.getModuleType();
+        return myModuleFileType;
     }
 
     /**
@@ -182,6 +190,7 @@ public class ResolveFile {
         int result = myFileBasicInfo.hashCode();
         result = 31 * result + myFilePath.hashCode();
         result = 31 * result + myInputStream.hashCode();
+        result = 31 * result + myModuleFileType.hashCode();
         result =
                 31 * result
                         + (myParentPath != null ? myParentPath.hashCode() : 0);
@@ -196,7 +205,8 @@ public class ResolveFile {
      */
     @Override
     public final String toString() {
-        return myFileBasicInfo.toString();
+        return myFileBasicInfo.toString() + "."
+                + myModuleFileType.getExtension();
     }
 
 }

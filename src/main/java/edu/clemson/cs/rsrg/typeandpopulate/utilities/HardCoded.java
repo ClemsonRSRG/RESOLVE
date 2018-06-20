@@ -34,8 +34,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.antlr.v4.runtime.UnbufferedCharStream;
 
@@ -67,7 +67,7 @@ public class HardCoded {
             // this and see if it can be moved to a physical file.
             Location classTheoryLoc =
                     new Location(new ResolveFile(new ResolveFileBasicInfo(
-                            "Cls_Theory", ModuleType.THEORY, ""),
+                            "Cls_Theory", ""), ModuleType.THEORY,
                             new UnbufferedCharStream(new StringReader("")),
                             null, new ArrayList<String>(), ""), 0, 0);
             ModuleDec module =
@@ -75,7 +75,7 @@ public class HardCoded {
                             classTheoryLoc.clone(), "Cls_Theory"),
                             new ArrayList<ModuleParameterDec>(),
                             new ArrayList<UsesItem>(), new ArrayList<Dec>(),
-                            new HashMap<PosSymbol, Boolean>());
+                            new LinkedHashMap<ResolveFileBasicInfo, Boolean>());
             ScopeBuilder s = b.startModuleScope(module);
 
             // Since adding a binding require something of ResolveConceptualElement,
@@ -208,7 +208,7 @@ public class HardCoded {
             // we associate everything with a VarExp.
             Location globalSpaceLoc =
                     new Location(new ResolveFile(new ResolveFileBasicInfo(
-                            "Global", ModuleType.THEORY, ""),
+                            "Global", ""), ModuleType.THEORY,
                             new UnbufferedCharStream(new StringReader("")),
                             null, new ArrayList<String>(), ""), 0, 0);
             VarExp v =

@@ -49,6 +49,7 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -136,7 +137,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private int myNewElementCounter;
 
     /** <p>All the different modules that the current file depend on.</p> */
-    private final Map<PosSymbol, Boolean> myModuleDependencies;
+    private final Map<ResolveFileBasicInfo, Boolean> myModuleDependencies;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -651,9 +652,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         // Add concept as a module dependency
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(), false);
         if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+            addNewModuleDependency(ctx.profile.getText(), ctx.concept.getText(), false);
         }
 
         ConceptRealizModuleDec realization =
@@ -754,7 +755,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                         : new ArrayList<ParseTree>(), myNodes);
 
         // Add concept as a module dependency
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(),
+                false);
 
         EnhancementModuleDec enhancement =
                 new EnhancementModuleDec(createLocation(ctx),
@@ -863,10 +865,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         myNodes);
 
         // Add concept and enhancement as module dependencies
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
-        addNewModuleDependency(createPosSymbol(ctx.enhancement), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(),
+                false);
+        addNewModuleDependency(ctx.enhancement.getText(),
+                ctx.concept.getText(), false);
         if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+            addNewModuleDependency(ctx.profile.getText(),
+                    ctx.concept.getText(), false);
         }
 
         EnhancementRealizModuleDec realization =
@@ -969,7 +974,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 : new ArrayList<ParseTree>(), myNodes);
 
         // Add concept as a module dependency
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(),
+                false);
 
         PerformanceConceptModuleDec performance =
                 new PerformanceConceptModuleDec(createLocation(ctx),
@@ -1073,9 +1079,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 : new ArrayList<ParseTree>(), myNodes);
 
         // Add concept/concept profile/enhancement as module dependencies
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
-        addNewModuleDependency(createPosSymbol(ctx.conceptProfile), false);
-        addNewModuleDependency(createPosSymbol(ctx.enhancement), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(),
+                false);
+        addNewModuleDependency(ctx.conceptProfile.getText(), ctx.concept
+                .getText(), false);
+        addNewModuleDependency(ctx.enhancement.getText(),
+                ctx.concept.getText(), false);
 
         PerformanceEnhancementModuleDec performance =
                 new PerformanceEnhancementModuleDec(createLocation(ctx),
@@ -1117,7 +1126,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
         // Add the module we are importing as module dependency
-        addNewModuleDependency(createPosSymbol(ctx.getStart()), false);
+        addNewModuleDependency(ctx.getStart().getText(), "", false);
 
         myNodes.put(ctx, new UsesItem(createPosSymbol(ctx.getStart())));
     }
@@ -2580,33 +2589,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <br>
-     * <p>This method adds the instantiating {@code concept}, {@code concept realization}
-     * and {@code concept profile} as dependencies for the current module.</p>
-     *
-     * @param ctx Facility declaration node in ANTLR4 AST.
-     */
-    @Override
-    public void enterFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
-        // Externally realized flag
-        boolean externallyRealized = false;
-        if (ctx.externally != null) {
-            externallyRealized = true;
-        }
-
-        // Add the facility's concept/concept realization/concept profiles as module dependencies
-        // YS: We add the module dependencies here because we want the concept/concept realization
-        //     modules to be imported before the enhancement/enhancement realizations. Those are
-        //     imported by "exitConceptEnhancementDecl" and "exitEnhancementPairDecl".
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
-        addNewModuleDependency(createPosSymbol(ctx.impl), externallyRealized);
-        if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * <br>
      * <p>This method generates a new representation for a facility
      * declaration.</p>
      *
@@ -2652,6 +2634,26 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             profileName = createPosSymbol(ctx.profile);
         }
 
+        // Add all the modules in the facility declaration as module dependencies
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(), false);
+        addNewModuleDependency(ctx.impl.getText(), ctx.concept.getText(), externallyRealized);
+        if (ctx.profile != null) {
+            addNewModuleDependency(ctx.profile.getText(), ctx.concept.getText(), false);
+        }
+
+        for (EnhancementSpecItem specItem : enhancements) {
+            addNewModuleDependency(specItem.getName().getName(), ctx.concept.getText(), false);
+        }
+
+        for (EnhancementSpecRealizItem specRealizItem : enhancementBodies) {
+            // Add the facility's enhancement/enhancement realization/enhancement profiles as module dependencies
+            addNewModuleDependency(specRealizItem.getEnhancementName().getName(), ctx.concept.getText(), false);
+            addNewModuleDependency(specRealizItem.getEnhancementRealizName().getName(), ctx.concept.getText(), false);
+            if (ctx.profile != null) {
+                addNewModuleDependency(ctx.profile.getText(), ctx.concept.getText(), false);
+            }
+        }
+
         myNodes.put(ctx, new FacilityDec(createPosSymbol(ctx.name),
                 createPosSymbol(ctx.concept), conceptArgs,
                 enhancements,
@@ -2680,9 +2682,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 enhancementArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
             }
         }
-
-        // Add the concept enhancement as a module dependency
-        addNewModuleDependency(createPosSymbol(ctx.spec), false);
 
         myNodes.put(ctx, new EnhancementSpecItem(createPosSymbol(ctx.spec), enhancementArgs));
     }
@@ -2720,13 +2719,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             for (ResolveParser.ModuleArgumentContext context : enhancementRealizArgContext) {
                 enhancementRealizArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
             }
-        }
-
-        // Add the facility's enhancement/enhancement realization/enhancement profiles as module dependencies
-        addNewModuleDependency(createPosSymbol(ctx.spec), false);
-        addNewModuleDependency(createPosSymbol(ctx.impl), false);
-        if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
         }
 
         myNodes.put(ctx, new EnhancementSpecRealizItem(createPosSymbol(ctx.spec), enhancementArgs,
@@ -4894,14 +4886,17 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>An helper method that adds a new module dependency if
      * it doesn't exist already.</p>
      *
-     * @param name Name of the module.
+     * @param filename Name of the module.
+     * @param parentDirectoryName Parent directory name.
      * @param isExternallyRealiz Boolean that indicates whether or not
      *                           this is a Non-RESOLVE file.
      */
-    private void addNewModuleDependency(PosSymbol name,
-            boolean isExternallyRealiz) {
-        if (!myModuleDependencies.containsKey(name)) {
-            myModuleDependencies.put(name, isExternallyRealiz);
+    private void addNewModuleDependency(String filename,
+            String parentDirectoryName, boolean isExternallyRealiz) {
+        ResolveFileBasicInfo fileBasicInfo =
+                new ResolveFileBasicInfo(filename, parentDirectoryName);
+        if (!myModuleDependencies.containsKey(fileBasicInfo)) {
+            myModuleDependencies.put(fileBasicInfo, isExternallyRealiz);
         }
     }
 
@@ -4952,8 +4947,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         moduleArgumentItems.add(new ModuleArgumentItem(upperBound));
 
         // Add Static_Array_Template as module dependency
-        addNewModuleDependency(new PosSymbol(l.clone(), "Static_Array_Template"), false);
-        addNewModuleDependency(new PosSymbol(l.clone(), "Std_Array_Realiz"), true);
+        addNewModuleDependency("Static_Array_Template", "Static_Array_Template", false);
+        addNewModuleDependency("Std_Array_Realiz", "Static_Array_Template", true);
 
         return new FacilityDec(new PosSymbol(l.clone(), newTy.getName().getName()),
                 new PosSymbol(l.clone(), "Static_Array_Template"),
@@ -5202,8 +5197,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             PosSymbol nameAsPosSymbol = new PosSymbol(loc.clone(), name);
             autoImportUsesItems.add(new UsesItem(nameAsPosSymbol));
 
-            // Clone the name so we don't have aliasing.
-            addNewModuleDependency(nameAsPosSymbol.clone(), false);
+            // Add this as a module dependency
+            addNewModuleDependency(name, "", false);
         }
 
         return autoImportUsesItems;

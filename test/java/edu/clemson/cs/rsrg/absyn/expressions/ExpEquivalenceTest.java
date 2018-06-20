@@ -83,7 +83,7 @@ public class ExpEquivalenceTest {
         try {
             FAKE_LOCATION_1 =
                     new Location(new ResolveFile(new ResolveFileBasicInfo(
-                            "ExpEquivalenceTest", ModuleType.THEORY, ""),
+                            "ExpEquivalenceTest", ""), ModuleType.THEORY,
                             new UnbufferedCharStream(new StringReader("")),
                             null, new ArrayList<String>(), ""), 0, 0);
 
@@ -93,7 +93,7 @@ public class ExpEquivalenceTest {
 
             FAKE_LOCATION_2 =
                     new Location(new ResolveFile(new ResolveFileBasicInfo(
-                            "ExpEquivalenceTest", ModuleType.THEORY, ""),
+                            "ExpEquivalenceTest", ""), ModuleType.THEORY,
                             new UnbufferedCharStream(new StringReader("")),
                             null, new ArrayList<String>(), ""), 1, 0);
 

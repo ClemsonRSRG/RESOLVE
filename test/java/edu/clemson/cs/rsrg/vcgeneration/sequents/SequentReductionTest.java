@@ -68,7 +68,7 @@ public class SequentReductionTest {
         try {
             FAKE_LOCATION =
                     new Location(new ResolveFile(new ResolveFileBasicInfo(
-                            "SequentReductionTest", ModuleType.THEORY, ""),
+                            "SequentReductionTest", ""), ModuleType.THEORY,
                             new UnbufferedCharStream(new StringReader("")),
                             null, new ArrayList<String>(), ""), 0, 0);
 

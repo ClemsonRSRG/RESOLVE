@@ -28,9 +28,6 @@ public class ResolveFileBasicInfo {
     /** <p>File's name.</p> */
     private final String myModuleFileName;
 
-    /** <p>File's extension type.</p> */
-    private final ModuleType myModuleFileType;
-
     /** <p>File's "parent" directory name.</p> */
     private final String myModuleParentDirName;
 
@@ -44,14 +41,11 @@ public class ResolveFileBasicInfo {
      * about the "file".</p>
      *
      * @param name Filename.
-     * @param moduleType File extension type.
      * @param parentDirName The parent directory name if it is known.
      *                      Otherwise, this can be {@code ""}.
      */
-    public ResolveFileBasicInfo(String name, ModuleType moduleType,
-            String parentDirName) {
+    public ResolveFileBasicInfo(String name, String parentDirName) {
         myModuleFileName = name;
-        myModuleFileType = moduleType;
         myModuleParentDirName = parentDirName;
     }
 
@@ -77,8 +71,6 @@ public class ResolveFileBasicInfo {
 
         if (!myModuleFileName.equals(that.myModuleFileName))
             return false;
-        if (!myModuleFileType.equals(that.myModuleFileType))
-            return false;
         return myModuleParentDirName.equals(that.myModuleParentDirName);
     }
 
@@ -89,16 +81,6 @@ public class ResolveFileBasicInfo {
      */
     public final String getName() {
         return myModuleFileName;
-    }
-
-    /**
-     * <p>This retrieves the internal representation of
-     * the extension.</p>
-     *
-     * @return File's extension.
-     */
-    public final ModuleType getModuleType() {
-        return myModuleFileType;
     }
 
     /**
@@ -118,7 +100,6 @@ public class ResolveFileBasicInfo {
     @Override
     public final int hashCode() {
         int result = myModuleFileName.hashCode();
-        result = 31 * result + myModuleFileType.hashCode();
         result = 31 * result + myModuleParentDirName.hashCode();
         return result;
     }
@@ -130,7 +111,7 @@ public class ResolveFileBasicInfo {
      */
     @Override
     public final String toString() {
-        return myModuleFileName + "." + myModuleFileType.getExtension();
+        return myModuleFileName;
     }
 
 }
