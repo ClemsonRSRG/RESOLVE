@@ -20,6 +20,7 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -81,20 +82,20 @@ public class ExpEquivalenceTest {
     {
         try {
             FAKE_LOCATION_1 =
-                    new Location(new ResolveFile("ExpEquivalenceTest",
-                            ModuleType.THEORY, new UnbufferedCharStream(
-                                    new StringReader("")), null,
-                            new ArrayList<String>(), ""), 0, 0);
+                    new Location(new ResolveFile(new ResolveFileBasicInfo(
+                            "ExpEquivalenceTest", ModuleType.THEORY, ""),
+                            new UnbufferedCharStream(new StringReader("")),
+                            null, new ArrayList<String>(), ""), 0, 0);
 
             FAKE_LOCATION_DETAIL_MODEL_1 =
                     new LocationDetailModel(FAKE_LOCATION_1.clone(),
                             FAKE_LOCATION_1.clone(), "Fake Location 1");
 
             FAKE_LOCATION_2 =
-                    new Location(new ResolveFile("ExpEquivalenceTest",
-                            ModuleType.THEORY, new UnbufferedCharStream(
-                                    new StringReader("")), null,
-                            new ArrayList<String>(), ""), 1, 0);
+                    new Location(new ResolveFile(new ResolveFileBasicInfo(
+                            "ExpEquivalenceTest", ModuleType.THEORY, ""),
+                            new UnbufferedCharStream(new StringReader("")),
+                            null, new ArrayList<String>(), ""), 1, 0);
 
             FAKE_LOCATION_DETAIL_MODEL_2 =
                     new LocationDetailModel(FAKE_LOCATION_2.clone(),

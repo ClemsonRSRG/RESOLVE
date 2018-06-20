@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry.Quantification;
@@ -65,11 +66,10 @@ public class HardCoded {
             // being hashed out, we hard code these. At some point someone should revisit
             // this and see if it can be moved to a physical file.
             Location classTheoryLoc =
-                    new Location(new ResolveFile("Cls_Theory",
-                            ModuleType.THEORY, new UnbufferedCharStream(
-                            new StringReader("")), null,
-                            new ArrayList<String>(), ""),
-                            0, 0);
+                    new Location(new ResolveFile(new ResolveFileBasicInfo(
+                            "Cls_Theory", ModuleType.THEORY, ""),
+                            new UnbufferedCharStream(new StringReader("")),
+                            null, new ArrayList<String>(), ""), 0, 0);
             ModuleDec module =
                     new PrecisModuleDec(classTheoryLoc.clone(), new PosSymbol(
                             classTheoryLoc.clone(), "Cls_Theory"),
@@ -207,7 +207,8 @@ public class HardCoded {
             // Since adding a binding require something of ResolveConceptualElement,
             // we associate everything with a VarExp.
             Location globalSpaceLoc =
-                    new Location(new ResolveFile("Global", ModuleType.THEORY,
+                    new Location(new ResolveFile(new ResolveFileBasicInfo(
+                            "Global", ModuleType.THEORY, ""),
                             new UnbufferedCharStream(new StringReader("")),
                             null, new ArrayList<String>(), ""), 0, 0);
             VarExp v =
