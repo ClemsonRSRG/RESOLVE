@@ -171,11 +171,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myIsProcessingModuleArgument = false;
         myModuleLevelDecs = null;
         myArrayFacilityDecContainerStack = new Stack<>();
-        myArrayNameTyToInnerTyMap = new HashMap<>();
+        myArrayNameTyToInnerTyMap = new LinkedHashMap<>();
         myCopyTRList = new ArrayList<>();
         myCopySSRList = new ArrayList<>();
         myNewElementCounter = 0;
-        myModuleDependencies = new HashMap<>();
+        myModuleDependencies = new LinkedHashMap<>();
     }
 
     // ===========================================================
@@ -2580,6 +2580,33 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <br>
+     * <p>This method adds the instantiating {@code concept}, {@code concept realization}
+     * and {@code concept profile} as dependencies for the current module.</p>
+     *
+     * @param ctx Facility declaration node in ANTLR4 AST.
+     */
+    @Override
+    public void enterFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
+        // Externally realized flag
+        boolean externallyRealized = false;
+        if (ctx.externally != null) {
+            externallyRealized = true;
+        }
+
+        // Add the facility's concept/concept realization/concept profiles as module dependencies
+        // YS: We add the module dependencies here because we want the concept/concept realization
+        //     modules to be imported before the enhancement/enhancement realizations. Those are
+        //     imported by "exitConceptEnhancementDecl" and "exitEnhancementPairDecl".
+        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(createPosSymbol(ctx.impl), externallyRealized);
+        if (ctx.profile != null) {
+            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * <br>
      * <p>This method generates a new representation for a facility
      * declaration.</p>
      *
@@ -2623,13 +2650,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         PosSymbol profileName = null;
         if (ctx.profile != null) {
             profileName = createPosSymbol(ctx.profile);
-        }
-
-        // Add the facility's concept/concept realization/concept profiles as module dependencies
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
-        addNewModuleDependency(createPosSymbol(ctx.impl), externallyRealized);
-        if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
         }
 
         myNodes.put(ctx, new FacilityDec(createPosSymbol(ctx.name),
