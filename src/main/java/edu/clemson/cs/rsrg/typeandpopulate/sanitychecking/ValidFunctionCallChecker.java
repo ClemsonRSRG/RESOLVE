@@ -127,51 +127,58 @@ public class ValidFunctionCallChecker {
             }
         }
 
-        // YS: Loop through our current procedure's parameters
+        // YS: Loop through our current procedure's parameters.
         // If we see a preserves mode parameter, make sure it is only
         // being passed to an operation that also preserves that parameter.
-        for (ProgramParameterEntry procParam : myProcedureParameters) {
-            if (procParam.getParameterMode().equals(ParameterMode.PRESERVES)) {
-                paramIt = myCorrespondingOperation.getParameters().iterator();
-                argIt = myCallingFunctionExp.getArguments().iterator();
+        // If we are not in a procedure, such as in the case of an facility
+        // declaration, we don't do the following check.
+        if (myProcedureParameters != null) {
+            for (ProgramParameterEntry procParam : myProcedureParameters) {
+                if (procParam.getParameterMode()
+                        .equals(ParameterMode.PRESERVES)) {
+                    paramIt =
+                            myCorrespondingOperation.getParameters().iterator();
+                    argIt = myCallingFunctionExp.getArguments().iterator();
 
-                while (argIt.hasNext()) {
-                    ProgramParameterEntry param = paramIt.next();
-                    ProgramExp argExp = argIt.next();
+                    while (argIt.hasNext()) {
+                        ProgramParameterEntry param = paramIt.next();
+                        ProgramExp argExp = argIt.next();
 
-                    if (argExp instanceof ProgramVariableExp) {
-                        if (argExp instanceof ProgramVariableNameExp) {
-                            ProgramVariableNameExp argExpAsProgVarNameExp =
-                                    (ProgramVariableNameExp) argExp;
-                            if (argExpAsProgVarNameExp.getName().getName()
-                                    .equals(procParam.getName())
-                                    && !param.getParameterMode().equals(
-                                            ParameterMode.PRESERVES)) {
-                                throw new SourceErrorException(
-                                        "Expression: "
-                                                + argExp
-                                                + " has PRESERVES mode and cannot be passed to an operation with "
-                                                + param.getParameterMode()
-                                                + " mode.", myLocation);
+                        if (argExp instanceof ProgramVariableExp) {
+                            if (argExp instanceof ProgramVariableNameExp) {
+                                ProgramVariableNameExp argExpAsProgVarNameExp =
+                                        (ProgramVariableNameExp) argExp;
+                                if (argExpAsProgVarNameExp.getName().getName()
+                                        .equals(procParam.getName())
+                                        && !param.getParameterMode().equals(
+                                                ParameterMode.PRESERVES)) {
+                                    throw new SourceErrorException(
+                                            "Expression: "
+                                                    + argExp
+                                                    + " has PRESERVES mode and cannot be passed to an operation with "
+                                                    + param.getParameterMode()
+                                                    + " mode.", myLocation);
+                                }
                             }
-                        }
-                        else if (argExp instanceof ProgramVariableDotExp) {
-                            ProgramVariableDotExp argExpAsProgVarDotExp =
-                                    (ProgramVariableDotExp) argExp;
-                            ProgramVariableExp firstExp =
-                                    argExpAsProgVarDotExp.getSegments().get(0);
-                            if (firstExp instanceof ProgramVariableNameExp
-                                    && ((ProgramVariableNameExp) firstExp)
-                                            .getName().getName().equals(
-                                                    procParam.getName())
-                                    && !param.getParameterMode().equals(
-                                            ParameterMode.PRESERVES)) {
-                                throw new SourceErrorException(
-                                        "Expression: "
-                                                + argExp
-                                                + " has PRESERVES mode and cannot be passed to an operation with "
-                                                + param.getParameterMode()
-                                                + " mode.", myLocation);
+                            else if (argExp instanceof ProgramVariableDotExp) {
+                                ProgramVariableDotExp argExpAsProgVarDotExp =
+                                        (ProgramVariableDotExp) argExp;
+                                ProgramVariableExp firstExp =
+                                        argExpAsProgVarDotExp.getSegments()
+                                                .get(0);
+                                if (firstExp instanceof ProgramVariableNameExp
+                                        && ((ProgramVariableNameExp) firstExp)
+                                                .getName().getName().equals(
+                                                        procParam.getName())
+                                        && !param.getParameterMode().equals(
+                                                ParameterMode.PRESERVES)) {
+                                    throw new SourceErrorException(
+                                            "Expression: "
+                                                    + argExp
+                                                    + " has PRESERVES mode and cannot be passed to an operation with "
+                                                    + param.getParameterMode()
+                                                    + " mode.", myLocation);
+                                }
                             }
                         }
                     }
