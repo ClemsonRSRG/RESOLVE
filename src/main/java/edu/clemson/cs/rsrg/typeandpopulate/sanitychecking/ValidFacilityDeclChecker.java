@@ -14,9 +14,10 @@ package edu.clemson.cs.rsrg.typeandpopulate.sanitychecking;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
@@ -27,6 +28,9 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
@@ -89,30 +93,17 @@ public class ValidFacilityDeclChecker {
         // Check concept arguments
         ModuleDec conceptModuleDec =
                 getModuleDec(myFacilityDec.getConceptName());
-        boolean isInvalidDeclaration =
-                invalidDeclaration(conceptModuleDec.getParameterDecs(),
-                        myFacilityDec.getConceptParams());
-        if (isInvalidDeclaration) {
-            throw new SourceErrorException("Invalid concept declaration.",
-                    myFacilityDec.getConceptName().getLocation());
-        }
+        moduleParameterSanityCheck(conceptModuleDec.getName().getLocation(),
+                myFacilityDec.getConceptName().getLocation(), conceptModuleDec
+                        .getParameterDecs(), myFacilityDec.getConceptParams());
 
         // Check concept realization arguments (if it is not externally realized)
         if (!myFacilityDec.getExternallyRealizedFlag()) {
             ModuleDec conceptRealizModuleDec =
                     getModuleDec(myFacilityDec.getConceptRealizName());
-            isInvalidDeclaration =
-                    invalidDeclaration(conceptRealizModuleDec
-                            .getParameterDecs(), myFacilityDec
-                            .getConceptRealizParams());
-            if (isInvalidDeclaration) {
-                throw new SourceErrorException(
-                        "Invalid concept realization declaration.",
-                        myFacilityDec.getConceptRealizName().getLocation());
-            }
-
-            // Sanity check any operations as parameters
-            opAsParameterSanityCheck(conceptRealizModuleDec.getParameterDecs(),
+            moduleParameterSanityCheck(conceptRealizModuleDec.getName()
+                    .getLocation(), myFacilityDec.getConceptRealizName()
+                    .getLocation(), conceptRealizModuleDec.getParameterDecs(),
                     myFacilityDec.getConceptRealizParams());
         }
 
@@ -121,14 +112,10 @@ public class ValidFacilityDeclChecker {
                 myFacilityDec.getEnhancements();
         for (EnhancementSpecItem specItem : enhancementSpecItems) {
             ModuleDec enhancementModuleDec = getModuleDec(specItem.getName());
-            isInvalidDeclaration =
-                    invalidDeclaration(enhancementModuleDec.getParameterDecs(),
-                            specItem.getParams());
-            if (isInvalidDeclaration) {
-                throw new SourceErrorException(
-                        "Invalid enhancement declaration.", specItem.getName()
-                                .getLocation());
-            }
+            moduleParameterSanityCheck(enhancementModuleDec.getName()
+                    .getLocation(), specItem.getName().getLocation(),
+                    enhancementModuleDec.getParameterDecs(), specItem
+                            .getParams());
         }
 
         // Check all enhancement/enhancement realization pairs
@@ -137,29 +124,16 @@ public class ValidFacilityDeclChecker {
         for (EnhancementSpecRealizItem specRealizItem : enhancementSpecRealizItems) {
             ModuleDec enhancementModuleDec =
                     getModuleDec(specRealizItem.getEnhancementName());
-            isInvalidDeclaration =
-                    invalidDeclaration(enhancementModuleDec.getParameterDecs(),
-                            specRealizItem.getEnhancementParams());
-            if (isInvalidDeclaration) {
-                throw new SourceErrorException(
-                        "Invalid enhancement declaration.", specRealizItem
-                                .getEnhancementName().getLocation());
-            }
+            moduleParameterSanityCheck(enhancementModuleDec.getName()
+                    .getLocation(), specRealizItem.getEnhancementName()
+                    .getLocation(), enhancementModuleDec.getParameterDecs(),
+                    specRealizItem.getEnhancementParams());
 
             ModuleDec enhancementRealizModuleDec =
                     getModuleDec(specRealizItem.getEnhancementRealizName());
-            isInvalidDeclaration =
-                    invalidDeclaration(enhancementRealizModuleDec
-                            .getParameterDecs(), specRealizItem
-                            .getEnhancementRealizParams());
-            if (isInvalidDeclaration) {
-                throw new SourceErrorException(
-                        "Invalid enhancement realization declaration.",
-                        specRealizItem.getEnhancementRealizName().getLocation());
-            }
-
-            // Sanity check any operations as parameters
-            opAsParameterSanityCheck(enhancementRealizModuleDec
+            moduleParameterSanityCheck(enhancementRealizModuleDec.getName()
+                    .getLocation(), specRealizItem.getEnhancementRealizName()
+                    .getLocation(), enhancementRealizModuleDec
                     .getParameterDecs(), specRealizItem
                     .getEnhancementRealizParams());
         }
@@ -197,20 +171,85 @@ public class ValidFacilityDeclChecker {
     }
 
     /**
+     * <p>An helper method for sanity checking for any math definitions as parameters.</p>
+     *
+     * @param actualMathDefNameExp Name of the mathematical definition being passed as module argument in
+     *                             the facility declaration.
+     *
+     * @throws SourceErrorException The actual mathematical definition cannot be passed as argument
+     * for the formal type parameter.
+     */
+    private void mathDefinitionAsParameterSanityCheck(
+            ProgramVariableNameExp actualMathDefNameExp) {
+        // Query and check the program type
+        Location loc = actualMathDefNameExp.getLocation();
+        try {
+            SymbolTableEntry entry =
+                    myCurrentScope
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            actualMathDefNameExp.getQualifier(),
+                                            actualMathDefNameExp.getName(),
+                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true));
+
+            // Make sure it is a math definition
+            if (!(entry.getDefiningElement() instanceof MathDefinitionDec)) {
+                throw new SourceErrorException("'"
+                        + actualMathDefNameExp.toString()
+                        + "' isn't a mathematical definition].",
+                        actualMathDefNameExp.getLocation());
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            String message;
+
+            if (actualMathDefNameExp.getQualifier() == null) {
+                message =
+                        "No such symbol: "
+                                + actualMathDefNameExp.getName().getName();
+            }
+            else {
+                message =
+                        "No such symbol in module: "
+                                + actualMathDefNameExp.getQualifier().getName()
+                                + "::"
+                                + actualMathDefNameExp.getName().getName();
+            }
+            throw new SourceErrorException(message, loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+    }
+
+    /**
      * <p>An helper method for comparing each of the module parameter declaration and module
      * argument pairs and see if it is a valid instantiation.</p>
      *
+     * @param moduleParametersLoc The location where for the module parameter declarations.
+     * @param moduleArgumentItemsLoc The location where we encountered the list of
+     *                               module argument items.
      * @param moduleParameterDecs List of module parameter declarations.
      * @param moduleArgumentItems List of corresponding module argument items.
-     *
-     * @return {@code true} if it is an invalid declaration, {@code false} otherwise.
      */
-    private boolean invalidDeclaration(
+    private void moduleParameterSanityCheck(Location moduleParametersLoc,
+            Location moduleArgumentItemsLoc,
             List<ModuleParameterDec> moduleParameterDecs,
             List<ModuleArgumentItem> moduleArgumentItems) {
         // Not sure why we haven't caught this yet, but it shouldn't happen.
         if (moduleParameterDecs.size() != moduleArgumentItems.size()) {
-            return true;
+            throw new SourceErrorException(
+                    "Invalid facility declaration. "
+                            + "Number of arguments does not match the number of module parameters."
+                            + "\n\nExpecting: " + moduleParameterDecs.size()
+                            + " [" + moduleParametersLoc + "]\n" + "Found: "
+                            + moduleArgumentItems.size(),
+                    moduleArgumentItemsLoc);
         }
 
         // Make sure each pair is valid
@@ -218,8 +257,8 @@ public class ValidFacilityDeclChecker {
                 moduleParameterDecs.iterator();
         Iterator<ModuleArgumentItem> moduleArgumentItemIterator =
                 moduleArgumentItems.iterator();
-        boolean foundDifferentTypes = false;
-        while (moduleArgumentItemIterator.hasNext() && !foundDifferentTypes) {
+        while (moduleParameterDecIterator.hasNext()
+                && moduleArgumentItemIterator.hasNext()) {
             ModuleArgumentItem moduleArgumentItem =
                     moduleArgumentItemIterator.next();
             ModuleParameterDec moduleParameterDec =
@@ -229,134 +268,207 @@ public class ValidFacilityDeclChecker {
             // ProgramExp inside the moduleArgumentItem
             Dec wrappedDec = moduleParameterDec.getWrappedDec();
             ProgramExp exp = moduleArgumentItem.getArgumentExp();
-            if (exp instanceof ProgramLiteralExp) {
-                if (!(wrappedDec instanceof ConstantParamDec)) {
-                    foundDifferentTypes = true;
-                }
-            }
-            else if (exp instanceof ProgramFunctionExp) {
-                if (!(wrappedDec instanceof OperationDec)) {
-                    foundDifferentTypes = true;
-                }
-            }
-        }
 
-        return foundDifferentTypes;
+            // Case #1: Passing operations as arguments
+            if (wrappedDec instanceof OperationDec) {
+                if (exp instanceof ProgramVariableNameExp) {
+                    opAsParameterSanityCheck((OperationDec) wrappedDec,
+                            (ProgramVariableNameExp) exp);
+                }
+                else {
+                    throw new SourceErrorException(
+                            "Invalid facility declaration. "
+                                    + "\n\nExpecting: Operation Declaration"
+                                    + " [" + wrappedDec.getLocation() + "]\n"
+                                    + "Found: "
+                                    + exp.getClass().getSimpleName(), exp
+                                    .getLocation());
+                }
+            }
+            // Case #2: Instantiating a concept type
+            else if (wrappedDec instanceof ConceptTypeParamDec) {
+                if (exp instanceof ProgramVariableNameExp) {
+                    typeAsParameterSanityCheck((ProgramVariableNameExp) exp);
+                }
+                else {
+                    throw new SourceErrorException(
+                            "Invalid facility declaration. "
+                                    + "\n\nExpecting: A program type" + " ["
+                                    + wrappedDec.getLocation() + "]\n"
+                                    + "Found: "
+                                    + exp.getClass().getSimpleName(), exp
+                                    .getLocation());
+                }
+            }
+            // Case #3: Passing a mathematical definition
+            else if (wrappedDec instanceof MathDefinitionDec) {
+                if (exp instanceof ProgramVariableNameExp) {
+                    mathDefinitionAsParameterSanityCheck((ProgramVariableNameExp) exp);
+                }
+                else {
+                    throw new SourceErrorException(
+                            "Invalid facility declaration. "
+                                    + "\n\nExpecting: A mathematical definition name"
+                                    + " [" + wrappedDec.getLocation() + "]\n"
+                                    + "Found: "
+                                    + exp.getClass().getSimpleName(), exp
+                                    .getLocation());
+                }
+            }
+            // TODO: Sanity checks for the ConstantParamDec and RealizationParamDec if Needed
+        }
     }
 
     /**
      * <p>An helper method for sanity checking for any operations as parameters.</p>
      *
-     * @param moduleParameterDecs List of module parameter declarations.
-     * @param moduleArgumentItems List of corresponding module argument items.
+     * @param wrappedDecAsOperationDec Formal operation declaration as module parameter.
+     * @param actualOpNameExp Name of the operation being passed as module argument in
+     *                        the facility declaration.
      *
      * @throws SourceErrorException The actual operation cannot be passed as argument
      * for the formal operation parameter.
      */
     private void opAsParameterSanityCheck(
-            List<ModuleParameterDec> moduleParameterDecs,
-            List<ModuleArgumentItem> moduleArgumentItems) {
-        Iterator<ModuleParameterDec> moduleParameterDecIterator =
-                moduleParameterDecs.iterator();
-        Iterator<ModuleArgumentItem> moduleArgumentItemIterator =
-                moduleArgumentItems.iterator();
-        while (moduleArgumentItemIterator.hasNext()
-                && moduleParameterDecIterator.hasNext()) {
-            ModuleArgumentItem moduleArgumentItem =
-                    moduleArgumentItemIterator.next();
-            ModuleParameterDec moduleParameterDec =
-                    moduleParameterDecIterator.next();
-            Location loc = moduleArgumentItem.getLocation();
+            OperationDec wrappedDecAsOperationDec,
+            ProgramVariableNameExp actualOpNameExp) {
+        // Query and check the operation
+        Location loc = actualOpNameExp.getLocation();
+        try {
+            OperationEntry op =
+                    myCurrentScope
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            actualOpNameExp.getQualifier(),
+                                            actualOpNameExp.getName(),
+                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toOperationEntry(loc);
+            OperationDec actualOpDec = (OperationDec) op.getDefiningElement();
 
-            // Wrapped declaration inside the moduleParameterDec
-            Dec wrappedDec = moduleParameterDec.getWrappedDec();
-            if (wrappedDec instanceof OperationDec) {
-                // Query and check the operation
-                OperationDec wrappedDecAsOperationDec =
-                        (OperationDec) wrappedDec;
-                ProgramVariableNameExp actualOpNameExp =
-                        (ProgramVariableNameExp) moduleArgumentItem
-                                .getArgumentExp();
-                try {
-                    OperationEntry op =
-                            myCurrentScope
-                                    .getInnermostActiveScope()
-                                    .queryForOne(
-                                            new NameQuery(
-                                                    actualOpNameExp
-                                                            .getQualifier(),
-                                                    actualOpNameExp.getName(),
-                                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                                    MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                                                    true))
-                                    .toOperationEntry(loc);
-                    OperationDec actualOpDec =
-                            (OperationDec) op.getDefiningElement();
+            // Check #1: Make sure the parameter sizes match
+            List<ParameterVarDec> formalParams =
+                    wrappedDecAsOperationDec.getParameters();
+            List<ParameterVarDec> actualParams = actualOpDec.getParameters();
+            if (formalParams.size() != actualParams.size()) {
+                throw new SourceErrorException(
+                        "Number of parameters does not match."
+                                + "\n\nExpecting: " + formalParams.size()
+                                + " [" + wrappedDecAsOperationDec.getLocation()
+                                + "]\n" + "Found: " + actualParams.size(), loc);
+            }
 
-                    // Check #1: Make sure the parameter sizes match
-                    List<ParameterVarDec> formalParams =
-                            wrappedDecAsOperationDec.getParameters();
-                    List<ParameterVarDec> actualParams =
-                            actualOpDec.getParameters();
-                    if (formalParams.size() != actualParams.size()) {
-                        throw new SourceErrorException(
-                                "Actual operation parameter count "
-                                        + "does not correspond to the formal operation parameter count."
-                                        + "\n\tExpected count: "
-                                        + formalParams.size()
-                                        + "\n\tFound count: "
-                                        + actualParams.size(), loc);
-                    }
+            // Check #2: Make sure the actual operation parameters all have
+            // valid parameter modes to implement the formal parameters.
+            Iterator<ParameterVarDec> formalIt = formalParams.iterator();
+            Iterator<ParameterVarDec> actualIt = actualParams.iterator();
+            ParameterVarDec currFormalParam, currActualParam;
+            while (formalIt.hasNext()) {
+                currFormalParam = formalIt.next();
+                currActualParam = actualIt.next();
 
-                    // Check #2: Make sure the actual operation parameters all have
-                    // valid parameter modes to implement the formal parameters.
-                    Iterator<ParameterVarDec> formalIt =
-                            formalParams.iterator();
-                    Iterator<ParameterVarDec> actualIt =
-                            actualParams.iterator();
-                    ParameterVarDec currFormalParam, currActualParam;
-                    while (formalIt.hasNext()) {
-                        currFormalParam = formalIt.next();
-                        currActualParam = actualIt.next();
-
-                        if (!currFormalParam.getMode().canBeImplementedWith(
-                                currActualParam.getMode())) {
-                            throw new SourceErrorException(
-                                    "Operation parameter modes are not the same."
-                                            + "\n\tExpecting: "
-                                            + currFormalParam.getMode().name()
-                                            + " " + currFormalParam.getName()
-                                            + "\n\tFound: "
-                                            + currActualParam.getMode().name()
-                                            + " " + currActualParam.getName(),
-                                    loc);
-                        }
-                    }
-                }
-                catch (NoSuchSymbolException nsse) {
-                    String message;
-
-                    if (actualOpNameExp.getQualifier() == null) {
-                        message =
-                                "No such symbol: "
-                                        + actualOpNameExp.getName().getName();
-                    }
-                    else {
-                        message =
-                                "No such symbol in module: "
-                                        + actualOpNameExp.getQualifier()
-                                                .getName() + "::"
-                                        + actualOpNameExp.getName().getName();
-                    }
-                    throw new SourceErrorException(message, loc);
-                }
-                catch (DuplicateSymbolException dse) {
-                    //This should be caught earlier, when the duplicate operation is
-                    //created
-                    throw new RuntimeException(dse);
+                if (!currFormalParam.getMode().canBeImplementedWith(
+                        currActualParam.getMode())) {
+                    throw new SourceErrorException(
+                            "Invalid operation parameter modes."
+                                    + "\nExpecting: "
+                                    + currFormalParam.getMode().name() + " ["
+                                    + currFormalParam.getLocation() + "]\n"
+                                    + "Found: "
+                                    + currActualParam.getMode().name(),
+                            currActualParam.getLocation());
                 }
             }
         }
+        catch (NoSuchSymbolException nsse) {
+            String message;
+
+            if (actualOpNameExp.getQualifier() == null) {
+                message =
+                        "No such symbol: "
+                                + actualOpNameExp.getName().getName();
+            }
+            else {
+                message =
+                        "No such symbol in module: "
+                                + actualOpNameExp.getQualifier().getName()
+                                + "::" + actualOpNameExp.getName().getName();
+            }
+            throw new SourceErrorException(message, loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
     }
 
+    /**
+     * <p>An helper method for sanity checking for any program types as parameters.</p>
+     *
+     * @param actualTypeNameExp Name of the program type being passed as module argument in
+     *                          the facility declaration.
+     *
+     * @throws SourceErrorException The actual program type cannot be passed as argument
+     * for the formal type parameter.
+     */
+    private void typeAsParameterSanityCheck(
+            ProgramVariableNameExp actualTypeNameExp) {
+        // Query and check the program type
+        Location loc = actualTypeNameExp.getLocation();
+        try {
+            boolean knownToBeAProgramType = false;
+            SymbolTableEntry entry =
+                    myCurrentScope
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            actualTypeNameExp.getQualifier(),
+                                            actualTypeNameExp.getName(),
+                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true));
+
+            // Case #1: ProgramParameterEntry with a passing mode of TYPE
+            if (entry instanceof ProgramParameterEntry
+                    && ((ProgramParameterEntry) entry).getParameterMode()
+                            .equals(ProgramParameterEntry.ParameterMode.TYPE)) {
+                knownToBeAProgramType = true;
+            }
+            // Case #2: ProgramTypeEntry
+            else if (entry instanceof ProgramTypeEntry) {
+                knownToBeAProgramType = true;
+            }
+
+            // Throw an error if the passed in argument is not known to be a program type
+            if (!knownToBeAProgramType) {
+                throw new SourceErrorException("'"
+                        + actualTypeNameExp.toString()
+                        + "' isn't a program type.", actualTypeNameExp
+                        .getLocation());
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            String message;
+
+            if (actualTypeNameExp.getQualifier() == null) {
+                message =
+                        "No such symbol: "
+                                + actualTypeNameExp.getName().getName();
+            }
+            else {
+                message =
+                        "No such symbol in module: "
+                                + actualTypeNameExp.getQualifier().getName()
+                                + "::" + actualTypeNameExp.getName().getName();
+            }
+            throw new SourceErrorException(message, loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+    }
 }

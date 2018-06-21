@@ -16,9 +16,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.init.pipeline.*;
 import edu.clemson.cs.rsrg.misc.Utilities;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
@@ -230,14 +230,13 @@ class Controller {
      * supplied files and add them to the compile environment for
      * future use.</p>
      *
-     * @param importItem A filename that we have labeled as externally import
+     * @param importName A filename that we have labeled as externally import
      *
      * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
-    private void addFileAsExternalImport(PosSymbol importItem) {
+    private void addFileAsExternalImport(String importName) {
         try {
-            FileLocator l =
-                    new FileLocator(importItem.getName(), NON_NATIVE_EXT);
+            FileLocator l = new FileLocator(importName, NON_NATIVE_EXT);
             File workspaceDir = myCompileEnvironment.getWorkspaceDir();
             Files.walkFileTree(workspaceDir.toPath(), l);
 
@@ -245,7 +244,7 @@ class Controller {
             List<File> foundFiles = l.getFiles();
             if (foundFiles.size() == 1) {
                 ModuleIdentifier externalImport =
-                        new ModuleIdentifier(importItem.getName());
+                        new ModuleIdentifier(importName);
 
                 // Add this as an external realiz file if it is not already declared to be one.
                 if (!myCompileEnvironment.isExternalRealizFile(externalImport)) {
@@ -256,14 +255,14 @@ class Controller {
                     if (myCompileEnvironment.flags
                             .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                         myStatusHandler.info(null, "Skipping External Import: "
-                                + importItem.getName());
+                                + importName);
                     }
                 }
             }
             else if (foundFiles.size() > 1) {
                 throw new ImportException(
                         "Found more than one external import with the name "
-                                + importItem.getName() + ";");
+                                + importName + ";");
             }
         }
         catch (IOException ioe) {
@@ -355,8 +354,9 @@ class Controller {
             DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
             ModuleDec root, Path parentPath) {
         ModuleIdentifier rootId = new ModuleIdentifier(root);
-        Map<PosSymbol, Boolean> allImports = root.getModuleDependencies();
-        for (PosSymbol importRequest : allImports.keySet()) {
+        Map<ResolveFileBasicInfo, Boolean> allImports =
+                root.getModuleDependencies();
+        for (ResolveFileBasicInfo importRequest : allImports.keySet()) {
             // Don't try to import the built-in Cls_Theory
             if (!importRequest.getName().equals("Cls_Theory")) {
                 // Check to see if this import has been labeled as externally realized
@@ -375,8 +375,7 @@ class Controller {
                         }
 
                         ResolveFile file =
-                                findResolveFile(importRequest.getName(),
-                                        parentPath);
+                                findResolveFile(importRequest, parentPath);
                         ModuleDec module = createModuleAST(file);
                         if (module == null) {
                             // Import error
@@ -416,7 +415,7 @@ class Controller {
                     Graphs.addEdgeWithVertices(g, rootId, id);
                 }
                 else {
-                    addFileAsExternalImport(importRequest);
+                    addFileAsExternalImport(importRequest.getName());
                 }
             }
         }
@@ -426,7 +425,7 @@ class Controller {
      * <p>This method attempts to locate a file with the
      * specified name.</p>
      *
-     * @param baseName The name of the file including the extension.
+     * @param fileBasicInfo The name of the file including any known parent directory.
      * @param parentPath The parent path if it is known. Otherwise,
      *                   this can be {@code null}.
      *
@@ -434,12 +433,13 @@ class Controller {
      *
      * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
-    private ResolveFile findResolveFile(String baseName, Path parentPath) {
+    private ResolveFile findResolveFile(ResolveFileBasicInfo fileBasicInfo,
+            Path parentPath) {
         // First check to see if this is a user created
         // file from the WebIDE/WebAPI.
         ResolveFile file;
-        if (myCompileEnvironment.isMetaFile(baseName)) {
-            file = myCompileEnvironment.getUserFileFromMap(baseName);
+        if (myCompileEnvironment.isMetaFile(fileBasicInfo)) {
+            file = myCompileEnvironment.getUserFileFromMap(fileBasicInfo);
         }
         // If not, use the file locator to locate our file
         else {
@@ -450,9 +450,24 @@ class Controller {
                 if (parentPath != null) {
                     try {
                         FileLocator l =
-                                new FileLocator(baseName, ModuleType
-                                        .getAllExtensions());
-                        Files.walkFileTree(parentPath, l);
+                                new FileLocator(fileBasicInfo.getName(),
+                                        ModuleType.getAllExtensions());
+
+                        // If our file's basic information contains a parent directory
+                        // that matches a file we have already compiled, use that path
+                        // instead of the parent path passed in.
+                        if (myCompileEnvironment
+                                .containsID(new ModuleIdentifier(fileBasicInfo
+                                        .getParentDirName()))) {
+                            Files.walkFileTree(myCompileEnvironment.getFile(
+                                    new ModuleIdentifier(fileBasicInfo
+                                            .getParentDirName()))
+                                    .getParentPath(), l);
+                        }
+                        else {
+                            Files.walkFileTree(parentPath, l);
+                        }
+
                         actualFile = l.getFile();
                     }
                     catch (IOException ioe2) {
@@ -464,7 +479,7 @@ class Controller {
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 if (actualFile == null) {
                     FileLocator l =
-                            new FileLocator(baseName, ModuleType
+                            new FileLocator(fileBasicInfo.getName(), ModuleType
                                     .getAllExtensions());
                     Files.walkFileTree(workspaceDir.toPath(), l);
                     actualFile = l.getFile();
