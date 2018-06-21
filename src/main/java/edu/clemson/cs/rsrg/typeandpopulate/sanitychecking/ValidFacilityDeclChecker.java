@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.typeandpopulate.sanitychecking;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConceptTypeParamDec;
@@ -27,10 +28,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.DuplicateSymbolException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
-import edu.clemson.cs.rsrg.typeandpopulate.query.NameAndEntryTypeQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -169,6 +171,63 @@ public class ValidFacilityDeclChecker {
     }
 
     /**
+     * <p>An helper method for sanity checking for any math definitions as parameters.</p>
+     *
+     * @param actualMathDefNameExp Name of the mathematical definition being passed as module argument in
+     *                             the facility declaration.
+     *
+     * @throws SourceErrorException The actual mathematical definition cannot be passed as argument
+     * for the formal type parameter.
+     */
+    private void mathDefinitionAsParameterSanityCheck(
+            ProgramVariableNameExp actualMathDefNameExp) {
+        // Query and check the program type
+        Location loc = actualMathDefNameExp.getLocation();
+        try {
+            SymbolTableEntry entry =
+                    myCurrentScope
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            actualMathDefNameExp.getQualifier(),
+                                            actualMathDefNameExp.getName(),
+                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true));
+
+            // Make sure it is a math definition
+            if (!(entry.getDefiningElement() instanceof MathDefinitionDec)) {
+                throw new SourceErrorException("'"
+                        + actualMathDefNameExp.toString()
+                        + "' isn't a mathematical definition].",
+                        actualMathDefNameExp.getLocation());
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            String message;
+
+            if (actualMathDefNameExp.getQualifier() == null) {
+                message =
+                        "No such symbol: "
+                                + actualMathDefNameExp.getName().getName();
+            }
+            else {
+                message =
+                        "No such symbol in module: "
+                                + actualMathDefNameExp.getQualifier().getName()
+                                + "::"
+                                + actualMathDefNameExp.getName().getName();
+            }
+            throw new SourceErrorException(message, loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+    }
+
+    /**
      * <p>An helper method for comparing each of the module parameter declaration and module
      * argument pairs and see if it is a valid instantiation.</p>
      *
@@ -241,8 +300,22 @@ public class ValidFacilityDeclChecker {
                                     .getLocation());
                 }
             }
-            // TODO: Case #3: Passing a mathematical definition
-            // TODO: Sanity checks for the ConstantParamDec and RealizationParamDec
+            // Case #3: Passing a mathematical definition
+            else if (wrappedDec instanceof MathDefinitionDec) {
+                if (exp instanceof ProgramVariableNameExp) {
+                    mathDefinitionAsParameterSanityCheck((ProgramVariableNameExp) exp);
+                }
+                else {
+                    throw new SourceErrorException(
+                            "Invalid facility declaration. "
+                                    + "\n\nExpecting: A mathematical definition name"
+                                    + " [" + wrappedDec.getLocation() + "]\n"
+                                    + "Found: "
+                                    + exp.getClass().getSimpleName(), exp
+                                    .getLocation());
+                }
+            }
+            // TODO: Sanity checks for the ConstantParamDec and RealizationParamDec if Needed
         }
     }
 
@@ -340,18 +413,41 @@ public class ValidFacilityDeclChecker {
      * @throws SourceErrorException The actual program type cannot be passed as argument
      * for the formal type parameter.
      */
-    private void typeAsParameterSanityCheck(ProgramVariableNameExp actualTypeNameExp) {
+    private void typeAsParameterSanityCheck(
+            ProgramVariableNameExp actualTypeNameExp) {
         // Query and check the program type
         Location loc = actualTypeNameExp.getLocation();
         try {
-            myCurrentScope.getInnermostActiveScope()
-                    .queryForOne(new NameAndEntryTypeQuery<>(
-                            actualTypeNameExp.getQualifier(),
-                            actualTypeNameExp.getName(),
-                            ProgramTypeEntry.class,
-                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                            true));
+            boolean knownToBeAProgramType = false;
+            SymbolTableEntry entry =
+                    myCurrentScope
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            actualTypeNameExp.getQualifier(),
+                                            actualTypeNameExp.getName(),
+                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true));
+
+            // Case #1: ProgramParameterEntry with a passing mode of TYPE
+            if (entry instanceof ProgramParameterEntry
+                    && ((ProgramParameterEntry) entry).getParameterMode()
+                            .equals(ProgramParameterEntry.ParameterMode.TYPE)) {
+                knownToBeAProgramType = true;
+            }
+            // Case #2: ProgramTypeEntry
+            else if (entry instanceof ProgramTypeEntry) {
+                knownToBeAProgramType = true;
+            }
+
+            // Throw an error if the passed in argument is not known to be a program type
+            if (!knownToBeAProgramType) {
+                throw new SourceErrorException("'"
+                        + actualTypeNameExp.toString()
+                        + "' isn't a program type.", actualTypeNameExp
+                        .getLocation());
+            }
         }
         catch (NoSuchSymbolException nsse) {
             String message;
