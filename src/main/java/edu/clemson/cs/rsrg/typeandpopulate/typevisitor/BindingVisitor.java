@@ -117,7 +117,7 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
                 myTypeGraph.isSubtype(t1DeclaredType, t2DeclaredType);
 
         if (!myBindings.containsKey(t2.getName()) && myMatchSoFarFlag) {
-            myBindings.put(t2.getName(), t1DeclaredType);
+            myBindings.put(t2.getName(), t1);
         }
 
         //No need to keep searching if we've already found we don't bind

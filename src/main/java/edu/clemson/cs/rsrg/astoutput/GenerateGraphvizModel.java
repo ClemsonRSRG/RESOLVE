@@ -278,17 +278,17 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
-    // Realization Init/Final Items
+    // Initialization/Finalization Items
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link FacilityTypeInitFinalItem} nodes, create a new node and
+     * <p>For all {@link FacilityInitFinalItem} nodes, create a new node and
      * add the item type.</p>
      *
-     * @param e Current {@link FacilityTypeInitFinalItem} we are visiting.
+     * @param e Current {@link FacilityInitFinalItem} we are visiting.
      */
     @Override
-    public void postFacilityTypeInitFinalItem(FacilityTypeInitFinalItem e) {
+    public void postFacilityInitFinalItem(FacilityInitFinalItem e) {
         // Create the new node
         ST node =
                 createNode(myElementToNodeNumMap.get(e), e.getClass()
@@ -301,13 +301,13 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link TypeInitFinalItem} nodes, create a new node and
+     * <p>For all {@link RealizInitFinalItem} nodes, create a new node and
      * add the item type.</p>
      *
-     * @param e Current {@link TypeInitFinalItem} we are visiting.
+     * @param e Current {@link RealizInitFinalItem} we are visiting.
      */
     @Override
-    public void postTypeInitFinalItem(TypeInitFinalItem e) {
+    public void postRealizInitFinalItem(RealizInitFinalItem e) {
         // Create the new node
         ST node =
                 createNode(myElementToNodeNumMap.get(e), e.getClass()

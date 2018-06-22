@@ -70,8 +70,14 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     /**
      * <p>Creates a RESOLVE token from a source pair.</p>
      *
+     * @param source Token source.
      * @param type Token type.
      * @param text Token text.
+     * @param channel Channel that this token originated from.
+     * @param start Token start location.
+     * @param stop Token stop location.
+     * @param line Token's line number
+     * @param charPositionInLine Token's position in line.
      *
      * @return A token object.
      */
@@ -85,6 +91,15 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
         t.setCharPositionInLine(charPositionInLine);
 
         return t;
+    }
+
+    /**
+     * <p>This returns the {@code file} we are associated with.</p>
+     *
+     * @return A {@link ResolveFile}.
+     */
+    public final ResolveFile getFile() {
+        return myFile;
     }
 
 }

@@ -14,8 +14,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-
 import java.util.Map;
 
 /**
@@ -114,28 +112,6 @@ public class DoubleExp extends LiteralExp {
         temp = Double.doubleToLongBits(myDouble);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link DoubleExp} from applying the remember rule.
-     */
-    @Override
-    public final DoubleExp remember() {
-        return (DoubleExp) this.clone();
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.misc.iterators;
+package edu.clemson.cs.rsrg.prover.iterators;
 
 import edu.clemson.cs.rsrg.misc.Utilities.Mapping;
 import java.util.ConcurrentModificationException;

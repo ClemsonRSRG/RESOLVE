@@ -154,7 +154,7 @@ public class IfConditionItem extends ResolveConceptualElement {
      *
      * @return The list of {@link Statement}s.
      */
-    private final List<Statement> copyStatements() {
+    private List<Statement> copyStatements() {
         List<Statement> copyStatements = new ArrayList<>();
         for (Statement s : myStatements) {
             copyStatements.add(s.clone());

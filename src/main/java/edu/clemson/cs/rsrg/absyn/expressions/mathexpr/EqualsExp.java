@@ -15,9 +15,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -151,57 +148,6 @@ public class EqualsExp extends InfixExp {
         int result = super.hashCode();
         result = 31 * result + myOperator.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link EqualsExp} from applying the remember rule.
-     */
-    @Override
-    public final EqualsExp remember() {
-        Exp newLeft = ((MathExp) myLeftHandSide).remember();
-        Exp newRight = ((MathExp) myRightHandSide).remember();
-
-        PosSymbol newOpQualifier = null;
-        if (myQualifier != null) {
-            newOpQualifier = myQualifier.clone();
-        }
-
-        return new EqualsExp(cloneLocation(), newLeft, newOpQualifier,
-                myOperator, newRight);
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        Exp simplified;
-        if (myLeftHandSide.equivalent(myRightHandSide)) {
-            simplified =
-                    MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
-        }
-        else {
-            simplified = this.clone();
-        }
-
-        return (MathExp) simplified;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final List<InfixExp> split(MathExp assumpts, boolean single) {
-        List<InfixExp> lst = new ArrayList<>();
-        lst.add(this);
-
-        return lst;
     }
 
     // ===========================================================

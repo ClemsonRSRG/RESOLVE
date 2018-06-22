@@ -14,8 +14,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
-import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -193,43 +191,6 @@ public class DotExp extends MathExp {
         return result;
     }
 
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link DotExp} from applying the remember rule.
-     */
-    @Override
-    public final DotExp remember() {
-        List<Exp> newSegmentExps = new ArrayList<>();
-        for (Exp e : mySegmentExps) {
-            Exp copyExp;
-            if (e instanceof MathExp){
-                copyExp = ((MathExp) e).remember();
-            }
-            else {
-                throw new MiscErrorException("We encountered an expression of the type " +
-                        e.getClass().getName(),
-                        new InvalidClassException(""));
-            }
-
-            newSegmentExps.add(copyExp);
-        }
-
-        return new DotExp(cloneLocation(), newSegmentExps);
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
@@ -248,8 +209,23 @@ public class DotExp extends MathExp {
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         List<Exp> newSegments = new ArrayList<>();
+
+        // YS: Need additional logic to deal with receptacles
+        boolean foundReceptacleNotation = false;
         for (Exp e : mySegmentExps) {
+            if (e instanceof VarExp) {
+                VarExp eAsVarExp = (VarExp) e;
+                if (eAsVarExp.getName().getName().equals("recp") ||
+                        eAsVarExp.getName().getName().equals("Receptacles")) {
+                    foundReceptacleNotation = true;
+                }
+            }
             newSegments.add(substitute(e, substitutions));
+        }
+
+        // If we found a receptacle notation, then ignore all substitutions done
+        if (foundReceptacleNotation) {
+            newSegments = copyExps();
         }
 
         return new DotExp(cloneLocation(), newSegments);

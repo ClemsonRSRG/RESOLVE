@@ -12,12 +12,19 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -42,10 +49,16 @@ public abstract class AbstractProofRuleApplication
     protected final AssertiveCodeBlock myCurrentAssertiveCodeBlock;
 
     /**
-     * <p>A map that stores all the details associated with
-     * a particular {@link Location}.</p>
+     * <p>The {@link VerificationContext} where all the information for the
+     * current {@code Assertive Code Block} is located.</p>
      */
-    protected final Map<Location, String> myLocationDetails;
+    protected final VerificationContext myCurrentVerificationContext;
+
+    /**
+     * <p>A map that stores string template models for generated
+     * {@link AssertiveCodeBlock AssertiveCodeBlocks}.</p>
+     */
+    protected final Map<AssertiveCodeBlock, ST> myNewAssertiveCodeBlockModels;
 
     /**
      * <p>A double ended queue that contains all the assertive code blocks
@@ -71,13 +84,17 @@ public abstract class AbstractProofRuleApplication
      *
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    protected AbstractProofRuleApplication(AssertiveCodeBlock block, STGroup stGroup, ST blockModel) {
+    protected AbstractProofRuleApplication(AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
         myResultingAssertiveCodeBlocks = new LinkedList<>();
         myCurrentAssertiveCodeBlock = block;
-        myLocationDetails = new HashMap<>();
+        myCurrentVerificationContext = context;
+        myNewAssertiveCodeBlockModels = new HashMap<>();
         mySTGroup = stGroup;
         myBlockModel = blockModel;
     }
@@ -112,15 +129,122 @@ public abstract class AbstractProofRuleApplication
     }
 
     /**
-     * <p>This method returns a map containing details about
-     * a {@link Location} object that was generated during the proof
-     * application process.</p>
+     * <p>This method returns the a map containing the new string template
+     * block models associated with any {@link AssertiveCodeBlock AssertiveCodeBlock(s)}
+     * that resulted from applying the {@code Proof Rule}.</p>
      *
-     * @return A map from {@link Location} to location detail strings.
+     * @return A map from {@link AssertiveCodeBlock AssertiveCodeBlock(s)} to
+     * {@link ST} block models.
      */
     @Override
-    public final Map<Location, String> getNewLocationString() {
-        return myLocationDetails;
+    public final Map<AssertiveCodeBlock, ST> getNewAssertiveCodeBlockModels() {
+        return myNewAssertiveCodeBlockModels;
     }
 
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method for creating the modified {@code ensures} clause
+     * that modifies the shared variables appropriately.</p>
+     *
+     * <p>Note that this helper method also does all the appropriate substitutions to
+     * the {@code VCs} in the assertive code block.</p>
+     *
+     * @param loc Location where we are creating a replacement for.
+     * @param originalExp The original expression.
+     * @param facQualifier A facility qualifier (if any).
+     * @param affectsClause The {@code affects} clause associated with the ensures clause.
+     *
+     * @return The modified {@code ensures} clause expression.
+     */
+    protected final Exp createEnsuresExpWithModifiedSharedVars(Location loc, Exp originalExp,
+            PosSymbol facQualifier, AffectsClause affectsClause) {
+        // Create a replacement maps
+        // 1) substitutions: Contains all the replacements for the originalExp
+        // 2) substitutionsForSeq: Contains all the replacements for the VC's sequents.
+        Map<Exp, Exp> substitutions = new LinkedHashMap<>();
+        Map<Exp, Exp> substitutionsForSeq = new LinkedHashMap<>();
+
+        // Create replacements for any affected variables (if needed)
+        if (affectsClause != null) {
+            for (Exp affectedExp : affectsClause.getAffectedExps()) {
+                // Replace any #originalAffectsExp with the facility qualified modifiedAffectsExp
+                VarExp originalAffectsExp = (VarExp) affectedExp;
+                VarExp modifiedAffectsExp =
+                        Utilities.createVarExp(loc.clone(), facQualifier, originalAffectsExp.getName(),
+                                affectedExp.getMathType(), affectedExp.getMathTypeValue());
+                substitutions.put(new OldExp(originalAffectsExp.getLocation(), originalAffectsExp),
+                        modifiedAffectsExp);
+
+                // Replace any originalAffectsExp with NQV(modifiedAffectsExp)
+                VCVarExp vcVarExp = Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, modifiedAffectsExp);
+                myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
+                substitutions.put(originalAffectsExp, vcVarExp);
+
+                // Add modifiedAffectsExp with NQV(modifiedAffectsExp) as a substitution for VC's sequents
+                substitutionsForSeq.put(modifiedAffectsExp.clone(), vcVarExp.clone());
+            }
+
+            // Retrieve the list of VCs and use the sequent
+            // substitution map to do replacements.
+            List<VerificationCondition> newVCs =
+                    createReplacementVCs(myCurrentAssertiveCodeBlock.getVCs(), substitutionsForSeq);
+
+            // Store the new list of vcs
+            myCurrentAssertiveCodeBlock.setVCs(newVCs);
+        }
+
+        return originalExp.substitute(substitutions);
+    }
+
+    /**
+     * <p>An helper method that performs the substitution on all the
+     * {@link Exp} in each {@link VerificationCondition}.</p>
+     *
+     * @param vcs The original list of {@link VerificationCondition}.
+     * @param substitutions A map of substitutions.
+     *
+     * @return A modified list of {@link VerificationCondition}.
+     */
+    protected final List<VerificationCondition> createReplacementVCs(
+            List<VerificationCondition> vcs, Map<Exp, Exp> substitutions) {
+        List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
+        for (VerificationCondition vc : vcs) {
+            newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
+                    createReplacementSequent(vc.getSequent(), substitutions),
+                    vc.getHasImpactingReductionFlag(), vc.getLocationDetailModel()));
+        }
+
+        return newVCs;
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method that performs the substitution on all the
+     * {@link Exp} in the {@link Sequent}.</p>
+     *
+     * @param s The original {@link Sequent}.
+     * @param substitutions A map of substitutions.
+     *
+     * @return A modified {@link Sequent}.
+     */
+    private Sequent createReplacementSequent(Sequent s, Map<Exp, Exp> substitutions) {
+        List<Exp> newAntecedents = new ArrayList<>();
+        List<Exp> newConsequents = new ArrayList<>();
+
+        for (Exp antencedent : s.getAntecedents()) {
+            newAntecedents.add(antencedent.substitute(substitutions));
+        }
+
+        for (Exp consequent : s.getConcequents()) {
+            newConsequents.add(consequent.substitute(substitutions));
+        }
+
+        return new Sequent(s.getLocation(), newAntecedents, newConsequents);
+    }
 }

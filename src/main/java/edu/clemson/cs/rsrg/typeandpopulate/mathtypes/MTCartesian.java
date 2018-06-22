@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.typeandpopulate.mathtypes;
 
+import edu.clemson.cs.rsrg.typeandpopulate.exception.TypeMismatchException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
 import java.util.*;
@@ -86,9 +87,9 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         super(g);
 
         if (elementCount < 2) {
-            //We assert this isn't possible, but who knows?
-            throw new IllegalArgumentException(
-                    "Unexpected cartesian product size.");
+            // - YS: Should have been caught while building the AST
+            // We assert this isn't possible, but who knows?
+            throw new TypeMismatchException("Unexpected cartesian product size.");
         }
 
         int workingSize = 0;

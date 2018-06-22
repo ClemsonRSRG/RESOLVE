@@ -169,18 +169,6 @@ public class OldExp extends MathExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link Exp} from applying the remember rule.
-     */
-    @Override
-    public final Exp remember() {
-        return myOrigExp.clone();
-    }
-
-    /**
      * <p>This method sets the mathematical type associated
      * with this object.</p>
      *
@@ -202,16 +190,6 @@ public class OldExp extends MathExp {
     public final void setMathTypeValue(MTType mathTypeValue) {
         super.setMathTypeValue(mathTypeValue);
         myOrigExp.setMathTypeValue(mathTypeValue);
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link Exp} from applying the simplification step.
-     */
-    @Override
-    public final Exp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

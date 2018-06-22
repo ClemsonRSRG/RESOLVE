@@ -260,35 +260,6 @@ public class QuantExp extends MathExp {
         return result;
     }
 
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link QuantExp} from applying the remember rule.
-     */
-    @Override
-    public final Exp remember() {
-        Exp newWhere = null;
-        if (myWhereExp != null) {
-            newWhere = ((MathExp) myWhereExp).remember();
-        }
-        Exp newBody = ((MathExp) myBodyExp).remember();
-
-        return new QuantExp(cloneLocation(), myQuantification, copyVars(),
-                newWhere, newBody);
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

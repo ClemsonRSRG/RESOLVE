@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.absyn.expressions;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
@@ -34,6 +35,18 @@ public abstract class Exp extends ResolveConceptualElement {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>An object that contains additional information on where this
+     * expression came from. This should be added by the {@code VCGenerator}
+     * when applying the various different {@code proof rules}.</p>
+     *
+     * <p>Note: We were trying to hard to make things immutable. There are
+     * things that simply can't be immutable until we are done creating objects.
+     * This is probably the best compromise given the design decision of the
+     * {@code Exp} hierarchy.</p>
+     */
+    private LocationDetailModel myLocationDetailModel = null;
 
     /** <p>The object's mathematical type.</p> */
     protected MTType myMathType = null;
@@ -71,6 +84,11 @@ public abstract class Exp extends ResolveConceptualElement {
         Exp result = this.copy();
         result.setMathType(myMathType);
         result.setMathTypeValue(myMathTypeValue);
+
+        // Copy any location detail models
+        if (myLocationDetailModel != null) {
+            result.setLocationDetailModel(myLocationDetailModel.clone());
+        }
 
         return result;
     }
@@ -138,12 +156,23 @@ public abstract class Exp extends ResolveConceptualElement {
 
         Exp exp = (Exp) o;
 
+        // YS: Note that this check should be in here for completeness,
+        //     but so many things have been built without checking for
+        //     location equality. At some point someone should add this
+        //     back in and make sure everything still works as intended!
+        /*if (myLoc != null ? !myLoc.equals(exp.myLoc) : exp.myLoc != null)
+            return false;
+         */
+
+        if (myLocationDetailModel != null ? !myLocationDetailModel
+                .equals(exp.myLocationDetailModel)
+                : exp.myLocationDetailModel != null)
+            return false;
         if (myMathType != null ? !myMathType.equals(exp.myMathType)
                 : exp.myMathType != null)
             return false;
         return myMathTypeValue != null ? myMathTypeValue
                 .equals(exp.myMathTypeValue) : exp.myMathTypeValue == null;
-
     }
 
     /**
@@ -178,9 +207,19 @@ public abstract class Exp extends ResolveConceptualElement {
      * 		   {@link Exp}s are {@code null}; or both are not {@code null} and are
      *         equivalent.
      */
-    public final static boolean equivalent(Exp e1, Exp e2) {
+    public static boolean equivalent(Exp e1, Exp e2) {
         return !((e1 == null ^ e2 == null))
                 && ((e1 == null && e2 == null) || e1.equivalent(e2));
+    }
+
+    /**
+     * <p>This method gets the location details associated
+     * with this object.</p>
+     *
+     * @return A {@link LocationDetailModel} object.
+     */
+    public final LocationDetailModel getLocationDetailModel() {
+        return myLocationDetailModel;
     }
 
     /**
@@ -216,7 +255,10 @@ public abstract class Exp extends ResolveConceptualElement {
      */
     @Override
     public int hashCode() {
-        int result = myMathType != null ? myMathType.hashCode() : 0;
+        int result =
+                myLocationDetailModel != null ? myLocationDetailModel
+                        .hashCode() : 0;
+        result = 31 * result + (myMathType != null ? myMathType.hashCode() : 0);
         result =
                 31
                         * result
@@ -247,6 +289,17 @@ public abstract class Exp extends ResolveConceptualElement {
         return !((s1 == null) ^ (s2 == null))
                 && ((s1 == null && s2 == null) || (stringEquivalent(s1
                         .getName(), s2.getName())));
+    }
+
+    /**
+     * <p>This method sets the location details associated
+     * with this object.</p>
+     *
+     * @param locationDetailModel A {@link LocationDetailModel} object.
+     */
+    public final void setLocationDetailModel(
+            LocationDetailModel locationDetailModel) {
+        myLocationDetailModel = locationDetailModel;
     }
 
     /**
@@ -330,6 +383,13 @@ public abstract class Exp extends ResolveConceptualElement {
                 retval = substituteChildren(substitutions);
                 retval.setMathType(myMathType);
                 retval.setMathTypeValue(myMathTypeValue);
+
+                // Copy the location detail model if it is not null
+                if (myLocationDetailModel != null) {
+                    retval
+                            .setLocationDetailModel(myLocationDetailModel
+                                    .clone());
+                }
             }
         }
         else {

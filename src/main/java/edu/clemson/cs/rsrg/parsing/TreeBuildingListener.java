@@ -28,7 +28,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ConstantParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.RealizationParamDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.AbstractSharedStateRealizationDec;
-import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.FacilitySharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.*;
@@ -50,9 +49,13 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.parsing.sanitychecking.ValidFunctionOpDeclChecker;
+import edu.clemson.cs.rsrg.parsing.sanitychecking.ValidSharedStateChecker;
+import edu.clemson.cs.rsrg.parsing.sanitychecking.ValidTypeFamilyChecker;
 import edu.clemson.cs.rsrg.parsing.utilities.SyntacticSugarConverter;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
@@ -119,8 +122,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
     /**
      * <p>This is a deep copy of all the shared state representations created during the
-     * tree building process. Note that the list contains either all
-     * {@link SharedStateRealizationDec}s or all {@link FacilitySharedStateRealizationDec}s.</p>
+     * tree building process. Note that the list contains all
+     * {@link SharedStateRealizationDec}s.</p>
      */
     private final List<AbstractSharedStateRealizationDec> myCopySSRList;
 
@@ -134,7 +137,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private int myNewElementCounter;
 
     /** <p>All the different modules that the current file depend on.</p> */
-    private final Map<PosSymbol, Boolean> myModuleDependencies;
+    private final Map<ResolveFileBasicInfo, Boolean> myModuleDependencies;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -169,11 +172,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myIsProcessingModuleArgument = false;
         myModuleLevelDecs = null;
         myArrayFacilityDecContainerStack = new Stack<>();
-        myArrayNameTyToInnerTyMap = new HashMap<>();
+        myArrayNameTyToInnerTyMap = new LinkedHashMap<>();
         myCopyTRList = new ArrayList<>();
         myCopySSRList = new ArrayList<>();
         myNewElementCounter = 0;
-        myModuleDependencies = new HashMap<>();
+        myModuleDependencies = new LinkedHashMap<>();
     }
 
     // ===========================================================
@@ -338,15 +341,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             List<ResolveParser.FacilityItemContext> itemContexts = ctx.facilityItems().facilityItem();
             for (ResolveParser.FacilityItemContext item : itemContexts) {
                 // Add any new array facility declarations that was generated
-                // by this facility shared state representation.
-                if (item.facilitySharedStateRepresentationDecl() != null) {
-                    if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.facilitySharedStateRepresentationDecl())) {
-                        decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.facilitySharedStateRepresentationDecl()));
-                    }
-                }
-                // Add any new array facility declarations that was generated
                 // by this facility type representation.
-                else if (item.facilityTypeRepresentationDecl() != null){
+                if (item.facilityTypeRepresentationDecl() != null){
                     if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.facilityTypeRepresentationDecl())) {
                         decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.facilityTypeRepresentationDecl()));
                     }
@@ -493,6 +489,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         createPosSymbol(ctx.name), new IllegalArgumentException());
             }
 
+            // YS: Right now we only allow 1 shared state declaration.
+            //     Throw an error if we found more than 1.
+            int numSharedStateDecs = 0;
+            for (Dec dec : decls) {
+                if (dec instanceof SharedStateDec) {
+                    numSharedStateDecs++;
+                }
+            }
+
+            if (numSharedStateDecs > 1) {
+                throw new SourceErrorException(
+                        "A sharing concept can only have one shared variable block declared!",
+                        createPosSymbol(ctx.name), new IllegalArgumentException());
+            }
+
             isSharingConcept = true;
         }
         else {
@@ -608,6 +619,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         List<Dec> decls = new ArrayList<>();
         if (ctx.conceptImplItems() != null) {
             List<ResolveParser.ConceptImplItemContext> itemContexts = ctx.conceptImplItems().conceptImplItem();
+            int numSharedStateRealizDecs = 0;
             for (ResolveParser.ConceptImplItemContext item : itemContexts) {
                 // Add any new array facility declarations that was generated
                 // by this shared state representation.
@@ -615,6 +627,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                     if (myModuleLevelDecs.newFacilityDecsMap.containsKey(item.sharedStateRepresentationDecl())) {
                         decls.addAll(myModuleLevelDecs.newFacilityDecsMap.remove(item.sharedStateRepresentationDecl()));
                     }
+
+                    numSharedStateRealizDecs++;
                 }
                 // Add any new array facility declarations that was generated
                 // by this type representation.
@@ -627,12 +641,20 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 // Add the item to the declaration list
                 decls.add((Dec) myNodes.removeFrom(item));
             }
+
+            // YS: Right now we only allow 1 shared state realization.
+            //     Throw an error if we found more than 1.
+            if (numSharedStateRealizDecs > 1) {
+                throw new SourceErrorException(
+                        "Found more than one shared variable realization block!",
+                        createPosSymbol(ctx.name), new IllegalArgumentException());
+            }
         }
 
         // Add concept as a module dependency
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(), false);
         if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+            addNewModuleDependency(ctx.profile.getText(), ctx.concept.getText(), false);
         }
 
         ConceptRealizModuleDec realization =
@@ -733,7 +755,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                         : new ArrayList<ParseTree>(), myNodes);
 
         // Add concept as a module dependency
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(),
+                false);
 
         EnhancementModuleDec enhancement =
                 new EnhancementModuleDec(createLocation(ctx),
@@ -842,10 +865,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         myNodes);
 
         // Add concept and enhancement as module dependencies
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
-        addNewModuleDependency(createPosSymbol(ctx.enhancement), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(),
+                false);
+        addNewModuleDependency(ctx.enhancement.getText(),
+                ctx.concept.getText(), false);
         if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+            addNewModuleDependency(ctx.profile.getText(),
+                    ctx.concept.getText(), false);
         }
 
         EnhancementRealizModuleDec realization =
@@ -948,7 +974,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 : new ArrayList<ParseTree>(), myNodes);
 
         // Add concept as a module dependency
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(),
+                false);
 
         PerformanceConceptModuleDec performance =
                 new PerformanceConceptModuleDec(createLocation(ctx),
@@ -1052,9 +1079,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                 : new ArrayList<ParseTree>(), myNodes);
 
         // Add concept/concept profile/enhancement as module dependencies
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
-        addNewModuleDependency(createPosSymbol(ctx.conceptProfile), false);
-        addNewModuleDependency(createPosSymbol(ctx.enhancement), false);
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(),
+                false);
+        addNewModuleDependency(ctx.conceptProfile.getText(), ctx.concept
+                .getText(), false);
+        addNewModuleDependency(ctx.enhancement.getText(),
+                ctx.concept.getText(), false);
 
         PerformanceEnhancementModuleDec performance =
                 new PerformanceEnhancementModuleDec(createLocation(ctx),
@@ -1096,7 +1126,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
         // Add the module we are importing as module dependency
-        addNewModuleDependency(createPosSymbol(ctx.getStart()), false);
+        addNewModuleDependency(ctx.getStart().getText(), "", false);
 
         myNodes.put(ctx, new UsesItem(createPosSymbol(ctx.getStart())));
     }
@@ -1364,6 +1394,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
         }
 
+        // Note: Sanity check that we have at least 2 elements inside this record.
+        //       The reason being it's math type (MTCartesian) doesn't make sense
+        //       when it is a single element. - YS
+        if (fields.size() < 2) {
+            throw new SourceErrorException(
+                    "A record type must have 2 or more fields.",
+                    createLocation(ctx), new IllegalArgumentException());
+        }
+
         myNodes.put(ctx, new RecordTy(createLocation(ctx), fields));
     }
 
@@ -1428,10 +1467,19 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        myNodes
-                .put(ctx, new TypeFamilyDec(createPosSymbol(ctx.name), mathTy,
+        // Build the type family declaration
+        TypeFamilyDec typeFamilyDec =
+                new TypeFamilyDec(createPosSymbol(ctx.name), mathTy,
                         createPosSymbol(ctx.exemplar), mathDefVariableDecs,
-                        constraint, initItem, finalItem));
+                        constraint, initItem, finalItem);
+
+        // Sanity checks to make sure the type family declaration has
+        // valid initialization and finalization ensures clauses.
+        ValidTypeFamilyChecker validTypeFamilyChecker =
+                new ValidTypeFamilyChecker(typeFamilyDec);
+        validTypeFamilyChecker.hasValidAssertionClauses();
+
+        myNodes.put(ctx, typeFamilyDec);
     }
 
     /**
@@ -1510,30 +1558,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.CORRESPONDENCE);
         }
 
-        TypeInitFinalItem initItem;
+        RealizInitFinalItem initItem;
         if (ctx.representationInit() != null) {
             initItem =
-                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                    (RealizInitFinalItem) myNodes.removeFrom(ctx
                             .representationInit());
         }
         else {
             initItem =
-                    new TypeInitFinalItem(createLocation(ctx),
-                            TypeInitFinalItem.ItemType.INITIALIZATION, null,
+                    new RealizInitFinalItem(createLocation(ctx),
+                            RealizInitFinalItem.ItemType.INITIALIZATION, null,
                             new ArrayList<FacilityDec>(),
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        TypeInitFinalItem finalItem;
+        RealizInitFinalItem finalItem;
         if (ctx.representationFinal() != null) {
             finalItem =
-                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                    (RealizInitFinalItem) myNodes.removeFrom(ctx
                             .representationFinal());
         }
         else {
             finalItem =
-                    new TypeInitFinalItem(createLocation(ctx),
-                            TypeInitFinalItem.ItemType.FINALIZATION, null,
+                    new RealizInitFinalItem(createLocation(ctx),
+                            RealizInitFinalItem.ItemType.FINALIZATION, null,
                             new ArrayList<FacilityDec>(),
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
@@ -1610,16 +1658,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.CONVENTION);
         }
 
-        FacilityTypeInitFinalItem initItem;
+        FacilityInitFinalItem initItem;
         if (ctx.facilityRepresentationInit() != null) {
             initItem =
-                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
+                    (FacilityInitFinalItem) myNodes.removeFrom(ctx
                             .facilityRepresentationInit());
         }
         else {
             initItem =
-                    new FacilityTypeInitFinalItem(createLocation(ctx),
-                            FacilityTypeInitFinalItem.ItemType.INITIALIZATION,
+                    new FacilityInitFinalItem(createLocation(ctx),
+                            FacilityInitFinalItem.ItemType.INITIALIZATION,
                             null, createTrueAssertionClause(
                                     createLocation(ctx),
                                     AssertionClause.ClauseType.REQUIRES),
@@ -1629,18 +1677,17 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
-        FacilityTypeInitFinalItem finalItem;
+        FacilityInitFinalItem finalItem;
         if (ctx.facilityRepresentationFinal() != null) {
             finalItem =
-                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
+                    (FacilityInitFinalItem) myNodes.removeFrom(ctx
                             .facilityRepresentationFinal());
         }
         else {
             finalItem =
-                    new FacilityTypeInitFinalItem(createLocation(ctx),
-                            FacilityTypeInitFinalItem.ItemType.FINALIZATION,
-                            null, createTrueAssertionClause(
-                                    createLocation(ctx),
+                    new FacilityInitFinalItem(createLocation(ctx),
+                            FacilityInitFinalItem.ItemType.FINALIZATION, null,
+                            createTrueAssertionClause(createLocation(ctx),
                                     AssertionClause.ClauseType.REQUIRES),
                             createTrueAssertionClause(createLocation(ctx),
                                     AssertionClause.ClauseType.ENSURES),
@@ -1749,22 +1796,18 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                                     AssertionClause.ClauseType.ENSURES));
         }
 
-        SpecInitFinalItem finalItem;
-        if (ctx.specModelFinal() != null) {
-            finalItem =
-                    (SpecInitFinalItem) myNodes
-                            .removeFrom(ctx.specModelFinal());
-        }
-        else {
-            finalItem =
-                    new SpecInitFinalItem(createLocation(ctx),
-                            SpecInitFinalItem.ItemType.FINALIZATION, null,
-                            createTrueAssertionClause(createLocation(ctx),
-                                    AssertionClause.ClauseType.ENSURES));
-        }
+        // Build the shared state declaration
+        SharedStateDec sharedStateDec =
+                new SharedStateDec(createPosSymbol(ctx.start), abstractStateVars,
+                        constraint, initItem);
 
-        myNodes.put(ctx, new SharedStateDec(createPosSymbol(ctx.start), abstractStateVars,
-                constraint, initItem, finalItem));
+        // Sanity checks to make sure the shared state has
+        // valid initialization ensures clause.
+        ValidSharedStateChecker validSharedStateChecker =
+                new ValidSharedStateChecker(sharedStateDec);
+        validSharedStateChecker.hasValidAssertionClauses();
+
+        myNodes.put(ctx, sharedStateDec);
     }
 
     /**
@@ -1776,7 +1819,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx Shared state realization declaration node in ANTLR4 AST.
      */
     @Override
-    public void enterSharedStateDecl(ResolveParser.SharedStateDeclContext ctx) {
+    public void enterSharedStateRepresentationDecl(
+            ResolveParser.SharedStateRepresentationDeclContext ctx) {
         // Create a new container
         myArrayFacilityDecContainerStack
                 .push(new ArrayFacilityDecContainer(ctx));
@@ -1831,137 +1875,24 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.CORRESPONDENCE);
         }
 
-        TypeInitFinalItem initItem;
+        RealizInitFinalItem initItem;
         if (ctx.representationInit() != null) {
             initItem =
-                    (TypeInitFinalItem) myNodes.removeFrom(ctx
+                    (RealizInitFinalItem) myNodes.removeFrom(ctx
                             .representationInit());
         }
         else {
             initItem =
-                    new TypeInitFinalItem(createLocation(ctx),
-                            TypeInitFinalItem.ItemType.INITIALIZATION, null,
-                            new ArrayList<FacilityDec>(),
-                            new ArrayList<VarDec>(), new ArrayList<Statement>());
-        }
-
-        TypeInitFinalItem finalItem;
-        if (ctx.representationFinal() != null) {
-            finalItem =
-                    (TypeInitFinalItem) myNodes.removeFrom(ctx
-                            .representationFinal());
-        }
-        else {
-            finalItem =
-                    new TypeInitFinalItem(createLocation(ctx),
-                            TypeInitFinalItem.ItemType.FINALIZATION, null,
+                    new RealizInitFinalItem(createLocation(ctx),
+                            RealizInitFinalItem.ItemType.INITIALIZATION, null,
                             new ArrayList<FacilityDec>(),
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
         SharedStateRealizationDec realizationDec =
                 new SharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
-                        convention, correspondence, initItem, finalItem);
+                        convention, correspondence, initItem);
         myCopySSRList.add((SharedStateRealizationDec) realizationDec.clone());
-
-        myNodes.put(ctx, realizationDec);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <br>
-     * <p>We create a new object to store all the new array facilities
-     * that can be created by the syntactic sugar conversions.</p>
-     *
-     * @param ctx Facility shared state realization declaration node in ANTLR4 AST.
-     */
-    @Override
-    public void enterFacilitySharedStateRepresentationDecl(
-            ResolveParser.FacilitySharedStateRepresentationDeclContext ctx) {
-        // Create a new container
-        myArrayFacilityDecContainerStack
-                .push(new ArrayFacilityDecContainer(ctx));
-    }
-
-    /**
-     * {@inheritDoc}
-     * <br>
-     * <p>This method generates a representation of a facility shared state realization
-     * declaration.</p>
-     *
-     * @param ctx Facility shared state realization declaration node in ANTLR4 AST.
-     */
-    @Override
-    public void exitFacilitySharedStateRepresentationDecl(
-            ResolveParser.FacilitySharedStateRepresentationDeclContext ctx) {
-        List<VarDec> sharedStateVars = new ArrayList<>();
-        List<ResolveParser.VariableDeclContext> variableDeclContexts = ctx.variableDecl();
-        for (ResolveParser.VariableDeclContext variableDeclContext : variableDeclContexts) {
-            for (TerminalNode ident : variableDeclContext.variableDeclGroup().IDENTIFIER()) {
-                sharedStateVars.add((VarDec) myNodes.removeFrom(ident));
-            }
-        }
-
-        // Obtain any array facility declarations and
-        // store it into our module level members
-        ArrayFacilityDecContainer innerMostContainer =
-                myArrayFacilityDecContainerStack.pop();
-        myModuleLevelDecs.newFacilityDecsMap.put(ctx, innerMostContainer.newFacilityDecs);
-
-        AssertionClause convention;
-        if (ctx.conventionClause() != null) {
-            convention =
-                    (AssertionClause) myNodes
-                            .removeFrom(ctx.conventionClause());
-        }
-        else {
-            convention =
-                    createTrueAssertionClause(createLocation(ctx),
-                            AssertionClause.ClauseType.CONVENTION);
-        }
-
-        FacilityTypeInitFinalItem initItem;
-        if (ctx.facilityRepresentationInit() != null) {
-            initItem =
-                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
-                            .facilityRepresentationInit());
-        }
-        else {
-            initItem =
-                    new FacilityTypeInitFinalItem(createLocation(ctx),
-                            FacilityTypeInitFinalItem.ItemType.INITIALIZATION,
-                            null, createTrueAssertionClause(
-                            createLocation(ctx),
-                            AssertionClause.ClauseType.REQUIRES),
-                            createTrueAssertionClause(createLocation(ctx),
-                                    AssertionClause.ClauseType.ENSURES),
-                            new ArrayList<FacilityDec>(),
-                            new ArrayList<VarDec>(), new ArrayList<Statement>());
-        }
-
-        FacilityTypeInitFinalItem finalItem;
-        if (ctx.facilityRepresentationFinal() != null) {
-            finalItem =
-                    (FacilityTypeInitFinalItem) myNodes.removeFrom(ctx
-                            .facilityRepresentationFinal());
-        }
-        else {
-            finalItem =
-                    new FacilityTypeInitFinalItem(createLocation(ctx),
-                            FacilityTypeInitFinalItem.ItemType.FINALIZATION,
-                            null, createTrueAssertionClause(
-                            createLocation(ctx),
-                            AssertionClause.ClauseType.REQUIRES),
-                            createTrueAssertionClause(createLocation(ctx),
-                                    AssertionClause.ClauseType.ENSURES),
-                            new ArrayList<FacilityDec>(),
-                            new ArrayList<VarDec>(), new ArrayList<Statement>());
-        }
-
-        FacilitySharedStateRealizationDec realizationDec =
-                new FacilitySharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
-                        convention, initItem, finalItem);
-        myCopySSRList.add((FacilitySharedStateRealizationDec) realizationDec.clone());
 
         myNodes.put(ctx, realizationDec);
     }
@@ -2086,8 +2017,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
         }
 
-        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
-                TypeInitFinalItem.ItemType.INITIALIZATION, affects,
+        myNodes.put(ctx, createRealizInitFinalItem(createLocation(ctx),
+                RealizInitFinalItem.ItemType.INITIALIZATION, affects,
                 getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
                         .variableDecl()), Utilities.collect(Statement.class,
                         ctx.stmt(), myNodes)));
@@ -2125,8 +2056,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             affects = (AffectsClause) myNodes.removeFrom(ctx.affectsClause());
         }
 
-        myNodes.put(ctx, createTypeInitFinalItem(createLocation(ctx),
-                TypeInitFinalItem.ItemType.FINALIZATION, affects,
+        myNodes.put(ctx, createRealizInitFinalItem(createLocation(ctx),
+                RealizInitFinalItem.ItemType.FINALIZATION, affects,
                 getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
                         .variableDecl()), Utilities.collect(Statement.class,
                         ctx.stmt(), myNodes)));
@@ -2187,7 +2118,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         myNodes.put(ctx, createFacilityTypeInitFinalItem(createLocation(ctx),
-                FacilityTypeInitFinalItem.ItemType.INITIALIZATION, affects,
+                FacilityInitFinalItem.ItemType.INITIALIZATION, affects,
                 requires, ensures, getFacilityDecls(ctx.facilityDecl()),
                 getVarDecls(ctx.variableDecl()), Utilities.collect(
                         Statement.class, ctx.stmt(), myNodes)));
@@ -2248,10 +2179,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         myNodes.put(ctx, createFacilityTypeInitFinalItem(createLocation(ctx),
-                FacilityTypeInitFinalItem.ItemType.FINALIZATION, affects,
-                requires, ensures, getFacilityDecls(ctx.facilityDecl()),
-                getVarDecls(ctx.variableDecl()), Utilities.collect(
-                        Statement.class, ctx.stmt(), myNodes)));
+                FacilityInitFinalItem.ItemType.FINALIZATION, affects, requires,
+                ensures, getFacilityDecls(ctx.facilityDecl()), getVarDecls(ctx
+                        .variableDecl()), Utilities.collect(Statement.class,
+                        ctx.stmt(), myNodes)));
     }
 
     /**
@@ -2602,8 +2533,20 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             AssertionClause.ClauseType.ENSURES);
         }
 
-        myNodes.put(ctx, new OperationDec(createPosSymbol(ctx.name), varDecs,
-                returnTy, affectsClause, requires, ensures));
+        // Build the operation declaration
+        OperationDec dec =
+                new OperationDec(createPosSymbol(ctx.name), varDecs, returnTy,
+                        affectsClause, requires, ensures);
+
+        // If this is a function operation declaration, then we need to make sure
+        // it is a valid declaration.
+        if (dec.getReturnTy() != null) {
+            ValidFunctionOpDeclChecker declChecker =
+                    new ValidFunctionOpDeclChecker(dec);
+            declChecker.checkFunctionOpDecl();
+        }
+
+        myNodes.put(ctx, dec);
     }
 
     /**
@@ -2691,11 +2634,24 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             profileName = createPosSymbol(ctx.profile);
         }
 
-        // Add the facility's concept/concept realization/concept profiles as module dependencies
-        addNewModuleDependency(createPosSymbol(ctx.concept), false);
-        addNewModuleDependency(createPosSymbol(ctx.impl), externallyRealized);
+        // Add all the modules in the facility declaration as module dependencies
+        addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(), false);
+        addNewModuleDependency(ctx.impl.getText(), ctx.concept.getText(), externallyRealized);
         if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
+            addNewModuleDependency(ctx.profile.getText(), ctx.concept.getText(), false);
+        }
+
+        for (EnhancementSpecItem specItem : enhancements) {
+            addNewModuleDependency(specItem.getName().getName(), ctx.concept.getText(), false);
+        }
+
+        for (EnhancementSpecRealizItem specRealizItem : enhancementBodies) {
+            // Add the facility's enhancement/enhancement realization/enhancement profiles as module dependencies
+            addNewModuleDependency(specRealizItem.getEnhancementName().getName(), ctx.concept.getText(), false);
+            addNewModuleDependency(specRealizItem.getEnhancementRealizName().getName(), ctx.concept.getText(), false);
+            if (ctx.profile != null) {
+                addNewModuleDependency(ctx.profile.getText(), ctx.concept.getText(), false);
+            }
         }
 
         myNodes.put(ctx, new FacilityDec(createPosSymbol(ctx.name),
@@ -2726,9 +2682,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 enhancementArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
             }
         }
-
-        // Add the concept enhancement as a module dependency
-        addNewModuleDependency(createPosSymbol(ctx.spec), false);
 
         myNodes.put(ctx, new EnhancementSpecItem(createPosSymbol(ctx.spec), enhancementArgs));
     }
@@ -2766,13 +2719,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             for (ResolveParser.ModuleArgumentContext context : enhancementRealizArgContext) {
                 enhancementRealizArgs.add((ModuleArgumentItem) myNodes.removeFrom(context));
             }
-        }
-
-        // Add the facility's enhancement/enhancement realization/enhancement profiles as module dependencies
-        addNewModuleDependency(createPosSymbol(ctx.spec), false);
-        addNewModuleDependency(createPosSymbol(ctx.impl), false);
-        if (ctx.profile != null) {
-            addNewModuleDependency(createPosSymbol(ctx.profile), false);
         }
 
         myNodes.put(ctx, new EnhancementSpecRealizItem(createPosSymbol(ctx.spec), enhancementArgs,
@@ -3402,7 +3348,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitStandardPrefixSignature(
             ResolveParser.StandardPrefixSignatureContext ctx) {
         Token nameToken;
-        if (ctx.getStart() == ctx.prefixOp()) {
+        if (ctx.prefixOp() != null) {
             nameToken = ctx.prefixOp().getStart();
         }
         else {
@@ -3537,8 +3483,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitCorrespondenceClause(
             ResolveParser.CorrespondenceClauseContext ctx) {
-        myNodes.put(ctx, createAssertionClause(createLocation(ctx),
-                AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp()));
+        if (ctx.mathVarNameExp().isEmpty()) {
+            myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                    AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp()));
+        }
+        else {
+            myNodes.put(ctx, createAssertionClause(createLocation(ctx),
+                    AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp(),
+                    ctx.mathVarNameExp()));
+        }
     }
 
     /**
@@ -4933,14 +4886,17 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>An helper method that adds a new module dependency if
      * it doesn't exist already.</p>
      *
-     * @param name Name of the module.
+     * @param filename Name of the module.
+     * @param parentDirectoryName Parent directory name.
      * @param isExternallyRealiz Boolean that indicates whether or not
      *                           this is a Non-RESOLVE file.
      */
-    private void addNewModuleDependency(PosSymbol name,
-            boolean isExternallyRealiz) {
-        if (!myModuleDependencies.containsKey(name)) {
-            myModuleDependencies.put(name, isExternallyRealiz);
+    private void addNewModuleDependency(String filename,
+            String parentDirectoryName, boolean isExternallyRealiz) {
+        ResolveFileBasicInfo fileBasicInfo =
+                new ResolveFileBasicInfo(filename, parentDirectoryName);
+        if (!myModuleDependencies.containsKey(fileBasicInfo)) {
+            myModuleDependencies.put(fileBasicInfo, isExternallyRealiz);
         }
     }
 
@@ -4991,8 +4947,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         moduleArgumentItems.add(new ModuleArgumentItem(upperBound));
 
         // Add Static_Array_Template as module dependency
-        addNewModuleDependency(new PosSymbol(l.clone(), "Static_Array_Template"), false);
-        addNewModuleDependency(new PosSymbol(l.clone(), "Std_Array_Realiz"), true);
+        addNewModuleDependency("Static_Array_Template", "Static_Array_Template", false);
+        addNewModuleDependency("Std_Array_Realiz", "Static_Array_Template", true);
 
         return new FacilityDec(new PosSymbol(l.clone(), newTy.getName().getName()),
                 new PosSymbol(l.clone(), "Static_Array_Template"),
@@ -5014,17 +4970,44 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private AssertionClause createAssertionClause(Location l,
             AssertionClause.ClauseType clauseType,
             List<ResolveParser.MathExpContext> mathExps) {
+        return createAssertionClause(l, clauseType, mathExps,
+                new ArrayList<ResolveParser.MathVarNameExpContext>());
+    }
+
+    /**
+     * <p>Create an {@link AssertionClause} for the current parser rule
+     * we are visiting.</p>
+     *
+     * @param l Location for the clause.
+     * @param clauseType The type of clause.
+     * @param mathExps List of mathematical expressions in the clause.
+     * @param involvesMathVarExps List of mathematical variable expressions
+     *                            involved (or affecting) this clause.
+     *
+     * @return An {@link AssertionClause} for the rule.
+     */
+    private AssertionClause createAssertionClause(Location l,
+            AssertionClause.ClauseType clauseType,
+            List<ResolveParser.MathExpContext> mathExps,
+            List<ResolveParser.MathVarNameExpContext> involvesMathVarExps) {
         Exp whichEntailsExp = null;
         if (mathExps.size() > 1) {
             whichEntailsExp = (Exp) myNodes.removeFrom(mathExps.get(1));
         }
         Exp assertionExp = (Exp) myNodes.removeFrom(mathExps.get(0));
 
-        return new AssertionClause(l, clauseType, assertionExp, whichEntailsExp);
+        // Obtain the list of involved shared variable expressions
+        List<Exp> involvedSharedVars = new ArrayList<>();
+        for (ResolveParser.MathVarNameExpContext context : involvesMathVarExps) {
+            involvedSharedVars.add((Exp) myNodes.removeFrom(context));
+        }
+
+        return new AssertionClause(l, clauseType, assertionExp,
+                whichEntailsExp, involvedSharedVars);
     }
 
     /**
-     * <p>Create an {@link FacilityTypeInitFinalItem}
+     * <p>Create an {@link FacilityInitFinalItem}
      * for the current parser rule we are visiting.</p>
      *
      * @param l Location for the item.
@@ -5036,17 +5019,17 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param varDecs List of {@link VarDec}s for this item.
      * @param statements List of {@link Statement}s for this item.
      *
-     * @return A {@link FacilityTypeInitFinalItem} for the rule.
+     * @return A {@link FacilityInitFinalItem} for the rule.
      */
-    private FacilityTypeInitFinalItem createFacilityTypeInitFinalItem(
-            Location l, FacilityTypeInitFinalItem.ItemType itemType,
-            AffectsClause affects, AssertionClause requires,
-            AssertionClause ensures, List<FacilityDec> facilityDecs,
-            List<VarDec> varDecs, List<Statement> statements) {
+    private FacilityInitFinalItem createFacilityTypeInitFinalItem(Location l,
+            FacilityInitFinalItem.ItemType itemType, AffectsClause affects,
+            AssertionClause requires, AssertionClause ensures,
+            List<FacilityDec> facilityDecs, List<VarDec> varDecs,
+            List<Statement> statements) {
         // Create the finalization item that we are going to perform
         // the syntactic sugar conversions on.
-        FacilityTypeInitFinalItem beforeConversionFinalItem =
-                new FacilityTypeInitFinalItem(l.clone(), itemType, affects,
+        FacilityInitFinalItem beforeConversionFinalItem =
+                new FacilityInitFinalItem(l.clone(), itemType, affects,
                         requires, ensures, facilityDecs, varDecs, statements);
 
         // Attempt to resolve all the syntactic sugar conversions
@@ -5056,8 +5039,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         TreeWalker.visit(converter, beforeConversionFinalItem);
 
         // Obtain the new TypeInitFinalItem generated by the converter
-        FacilityTypeInitFinalItem afterConversionFinalItem =
-                (FacilityTypeInitFinalItem) converter.getProcessedElement();
+        FacilityInitFinalItem afterConversionFinalItem =
+                (FacilityInitFinalItem) converter.getProcessedElement();
         myNewElementCounter = converter.getNewElementCounter();
 
         return afterConversionFinalItem;
@@ -5163,7 +5146,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     /**
-     * <p>Create an {@link TypeInitFinalItem}
+     * <p>Create an {@link RealizInitFinalItem}
      * for the current parser rule we are visiting.</p>
      *
      * @param l Location for the item.
@@ -5173,16 +5156,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param varDecs List of {@link VarDec}s for this item.
      * @param statements List of {@link Statement}s for this item.
      *
-     * @return A {@link TypeInitFinalItem} for the rule.
+     * @return A {@link RealizInitFinalItem} for the rule.
      */
-    private TypeInitFinalItem createTypeInitFinalItem(Location l,
-            TypeInitFinalItem.ItemType itemType, AffectsClause affects,
+    private RealizInitFinalItem createRealizInitFinalItem(Location l,
+            RealizInitFinalItem.ItemType itemType, AffectsClause affects,
             List<FacilityDec> facilityDecs, List<VarDec> varDecs,
             List<Statement> statements) {
         // Create the finalization item that we are going to perform
         // the syntactic sugar conversions on.
-        TypeInitFinalItem beforeConversionFinalItem =
-                new TypeInitFinalItem(l.clone(), itemType, affects,
+        RealizInitFinalItem beforeConversionFinalItem =
+                new RealizInitFinalItem(l.clone(), itemType, affects,
                         facilityDecs, varDecs, statements);
 
         // Attempt to resolve all the syntactic sugar conversions
@@ -5192,8 +5175,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         TreeWalker.visit(converter, beforeConversionFinalItem);
 
         // Obtain the new TypeInitFinalItem generated by the converter
-        TypeInitFinalItem afterConversionFinalItem =
-                (TypeInitFinalItem) converter.getProcessedElement();
+        RealizInitFinalItem afterConversionFinalItem =
+                (RealizInitFinalItem) converter.getProcessedElement();
         myNewElementCounter = converter.getNewElementCounter();
 
         return afterConversionFinalItem;
@@ -5214,8 +5197,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             PosSymbol nameAsPosSymbol = new PosSymbol(loc.clone(), name);
             autoImportUsesItems.add(new UsesItem(nameAsPosSymbol));
 
-            // Clone the name so we don't have aliasing.
-            addNewModuleDependency(nameAsPosSymbol.clone(), false);
+            // Add this as a module dependency
+            addNewModuleDependency(name, "", false);
         }
 
         return autoImportUsesItems;

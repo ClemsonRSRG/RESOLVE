@@ -187,7 +187,7 @@ public class TypeAssertionExp extends MathExp {
      */
     @Override
     public final List<Exp> getSubExpressions() {
-        return new ArrayList(Collections.singletonList(myExp));
+        return new ArrayList<>(Collections.singletonList(myExp));
     }
 
     /**
@@ -199,28 +199,6 @@ public class TypeAssertionExp extends MathExp {
         result = 31 * result + myExp.hashCode();
         result = 31 * result + myAssertedTy.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link TypeAssertionExp} from applying the remember rule.
-     */
-    @Override
-    public final TypeAssertionExp remember() {
-        return (TypeAssertionExp) this.clone();
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

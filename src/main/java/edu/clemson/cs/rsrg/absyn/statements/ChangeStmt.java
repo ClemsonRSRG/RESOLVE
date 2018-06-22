@@ -17,7 +17,6 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -114,8 +113,12 @@ public class ChangeStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
+        // YS: Collections.copy complains about source does not fit in dest,
+        // so we manually copy everything.
         List<Exp> newChangingVars = new ArrayList<>(myChangingVars.size());
-        Collections.copy(newChangingVars, myChangingVars);
+        for (Exp changesExp : myChangingVars) {
+            newChangingVars.add(changesExp.clone());
+        }
 
         return new ChangeStmt(cloneLocation(), newChangingVars);
     }

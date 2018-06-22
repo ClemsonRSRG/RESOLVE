@@ -226,8 +226,8 @@ public class IterativeExp extends MathExp {
                     myVar.getName().equals(eAsIterativeExp.myVar.getName())
                             && myVar.getTy().equals(
                                     eAsIterativeExp.myVar.getTy());
-            retval &= myWhereExp.equivalent(eAsIterativeExp.myWhereExp);
-            retval &= myBodyExp.equivalent(eAsIterativeExp.myBodyExp);
+            retval &= equivalent(myWhereExp, eAsIterativeExp.myWhereExp);
+            retval &= equivalent(myBodyExp, eAsIterativeExp.myBodyExp);
         }
 
         return retval;
@@ -292,32 +292,6 @@ public class IterativeExp extends MathExp {
         result = 31 * result + (myWhereExp != null ? myWhereExp.hashCode() : 0);
         result = 31 * result + myBodyExp.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link IterativeExp} from applying the remember rule.
-     */
-    @Override
-    public final IterativeExp remember() {
-        Exp newWhere = ((MathExp) myWhereExp).remember();
-        Exp newBody = ((MathExp) myBodyExp).remember();
-
-        return new IterativeExp(cloneLocation(), myOperator, (MathVarDec) myVar
-                .clone(), newWhere, newBody);
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

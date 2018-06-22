@@ -23,6 +23,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry.Quantification;
@@ -33,8 +34,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.antlr.v4.runtime.UnbufferedCharStream;
 
@@ -65,17 +66,16 @@ public class HardCoded {
             // being hashed out, we hard code these. At some point someone should revisit
             // this and see if it can be moved to a physical file.
             Location classTheoryLoc =
-                    new Location(new ResolveFile("Cls_Theory",
-                            ModuleType.THEORY, new UnbufferedCharStream(
-                            new StringReader("")),
-                            new ArrayList<String>(), ""),
-                            0, 0);
+                    new Location(new ResolveFile(new ResolveFileBasicInfo(
+                            "Cls_Theory", ""), ModuleType.THEORY,
+                            new UnbufferedCharStream(new StringReader("")),
+                            null, new ArrayList<String>(), ""), 0, 0);
             ModuleDec module =
                     new PrecisModuleDec(classTheoryLoc.clone(), new PosSymbol(
                             classTheoryLoc.clone(), "Cls_Theory"),
                             new ArrayList<ModuleParameterDec>(),
                             new ArrayList<UsesItem>(), new ArrayList<Dec>(),
-                            new HashMap<PosSymbol, Boolean>());
+                            new LinkedHashMap<ResolveFileBasicInfo, Boolean>());
             ScopeBuilder s = b.startModuleScope(module);
 
             // Since adding a binding require something of ResolveConceptualElement,
@@ -207,9 +207,10 @@ public class HardCoded {
             // Since adding a binding require something of ResolveConceptualElement,
             // we associate everything with a VarExp.
             Location globalSpaceLoc =
-                    new Location(new ResolveFile("Global", ModuleType.THEORY,
+                    new Location(new ResolveFile(new ResolveFileBasicInfo(
+                            "Global", ""), ModuleType.THEORY,
                             new UnbufferedCharStream(new StringReader("")),
-                            new ArrayList<String>(), ""), 0, 0);
+                            null, new ArrayList<String>(), ""), 0, 0);
             VarExp v =
                     new VarExp(globalSpaceLoc, null, new PosSymbol(
                             globalSpaceLoc, "Global"));
@@ -274,8 +275,8 @@ public class HardCoded {
                 break;
             case "Val_in":
                 result =
-                        new MTFunction(g, new MTPowersetApplication(g, lastExp
-                                .getMathTypeValue()), g.RECEPTACLES);
+                        new MTFunction(g, lastExp.getMathTypeValue(),
+                                g.RECEPTACLES);
                 break;
             }
         }

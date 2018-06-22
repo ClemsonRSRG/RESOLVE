@@ -189,35 +189,6 @@ public class BetweenExp extends MathExp {
         return result;
     }
 
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link BetweenExp} from applying the remember rule.
-     */
-    @Override
-    public final BetweenExp remember() {
-        List<Exp> itemsCopy = new ArrayList<>();
-        if (myJoiningExps != null) {
-            for (Exp item : myJoiningExps) {
-                itemsCopy.add(((MathExp) item).remember().clone());
-            }
-        }
-
-        return new BetweenExp(cloneLocation(), itemsCopy);
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

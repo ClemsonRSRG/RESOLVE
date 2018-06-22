@@ -62,12 +62,15 @@ public class LeftNotRule extends AbstractReductionRuleApplication
         if (myOriginalExp instanceof PrefixExp) {
             PrefixExp originalExpAsPrefixExp = (PrefixExp) myOriginalExp;
             List<Exp> newAntecedents = new ArrayList<>();
-            List<Exp> newConsequents = new ArrayList<>(myOriginalSequent.getConcequents());
+            List<Exp> newConsequents = copyExpList(myOriginalSequent.getConcequents(), null);
             for (Exp exp : myOriginalSequent.getAntecedents()) {
                 if (exp.equals(originalExpAsPrefixExp)) {
                     // Add the expression inside the "not" to the consequent.
                     if (originalExpAsPrefixExp.getOperatorAsString().equals("not")) {
-                        newConsequents.add(originalExpAsPrefixExp.getArgument());
+                        // YS: We probably already have a location detail. If not, this should
+                        //     really be an alternative goal we are trying to prove, so it is
+                        //     OK(?) if it doesn't have an location detail.
+                        newConsequents.add(copyExp(originalExpAsPrefixExp.getArgument(), null));
                     }
                     // This must be an error!
                     else {
@@ -76,7 +79,7 @@ public class LeftNotRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newAntecedents.add(exp);
+                    newAntecedents.add(exp.clone());
                 }
             }
 
@@ -84,6 +87,9 @@ public class LeftNotRule extends AbstractReductionRuleApplication
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
                     newAntecedents, newConsequents);
             myResultingSequents.add(resultingSequent);
+
+            // Indicate that this is an impacting reduction
+            myIsImpactingReductionFlag = true;
         }
         // This must be an error!
         else {

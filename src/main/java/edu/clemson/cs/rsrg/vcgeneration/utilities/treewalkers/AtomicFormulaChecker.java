@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 
 /**
@@ -68,6 +68,30 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
         // using two InfixExps: "min_int <= i and i <= max_int". The "and"
         // operator makes it not atomic.
         myIsAtomicFormulaFlag = false;
+    }
+
+    /**
+     * <p>This method redefines how an {@link EqualsExp} should be walked.</p>
+     *
+     * @param exp An equality/inequality expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkEqualsExp(EqualsExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preEqualsExp(exp);
+
+        // No need to walk any of our children. This is definitely atomic.
+
+        postEqualsExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
     }
 
     /**
@@ -161,8 +185,8 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     public final void preProgramExp(ProgramExp exp) {
         // This is an error! We should have converted all ProgramExp to their
         // MathExp counterparts.
-        throw new MiscErrorException("Found: " + exp + " in a Sequent!",
-                new RuntimeException());
+        throw new SourceErrorException("[VCGenerator] Found: " + exp
+                + " in a Sequent!", exp.getLocation());
     }
 
     // ===========================================================

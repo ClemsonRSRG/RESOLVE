@@ -14,10 +14,12 @@ package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.init.output.OutputListener;
 import edu.clemson.cs.rsrg.misc.Utilities;
+import edu.clemson.cs.rsrg.prover.CongruenceClassProver;
 import edu.clemson.cs.rsrg.statushandling.SystemStdHandler;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
@@ -56,7 +58,7 @@ public class ResolveCompiler {
     /**
      * <p>This indicates the current compiler version.</p>
      */
-    private final String myCompilerVersion = "Spring 2017";
+    private final String myCompilerVersion = "Fall 2017";
 
     /**
      * <p>This stores all the file names specified in the argument
@@ -230,25 +232,28 @@ public class ResolveCompiler {
      * <p>This invokes the RESOLVE compiler. Usually this method
      * is called by running the compiler from the WebAPI/WebIDE.</p>
      *
-     * @param fileMap A map containing all the user modified files.
+     * @param compilingFiles A map containing all the "meta" files we are going to compile.
+     * @param userFilesMap A map containing all "meta" files that are provided by the user.
      * @param statusHandler A status handler to display debug or error messages.
      * @param listener An output listener object.
      */
-    public void invokeCompiler(Map<String, ResolveFile> fileMap,
+    public void invokeCompiler(Map<String, ResolveFile> compilingFiles,
+            Map<ResolveFileBasicInfo, ResolveFile> userFilesMap,
             StatusHandler statusHandler, OutputListener listener) {
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment =
                 handleCompileArgs(statusHandler);
 
         // Store the file map
-        compileEnvironment.setFileMap(fileMap);
+        compileEnvironment.setFileMap(userFilesMap);
 
         // Store the new listener object
         compileEnvironment.addOutputListener(listener);
 
         // Compile files/directories listed in the argument list
         try {
-            compileArbitraryFiles(myArgumentFileList, compileEnvironment);
+            compileArbitraryFiles(myArgumentFileList, compilingFiles,
+                    compileEnvironment);
         }
         catch (CompilerException e) {
             // YS - The status handler object might have changed.
@@ -270,6 +275,7 @@ public class ResolveCompiler {
      * argument list. If the "meta" file is not supplied, attempt to
      * search for it as a physical file.</p>
      *
+     * @param compilingFiles A map containing all the user "meta" files we are going to compile.
      * @param fileArgList List of strings representing the name of the file.
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
@@ -277,15 +283,14 @@ public class ResolveCompiler {
      * @throws CompilerException This catches all sorts of exceptions thrown by
      * the compiler.
      */
-    private void compileArbitraryFiles(List<String> fileArgList,
+    private void compileArbitraryFiles(List<String> fileArgList, Map<String, ResolveFile> compilingFiles,
             CompileEnvironment compileEnvironment) throws CompilerException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // First check if this is a "meta" file
-            if (compileEnvironment.isMetaFile(fileString)) {
+            if (compilingFiles.containsKey(fileString)) {
                 // Invoke the compiler on this file
-                compileMainFile(compileEnvironment
-                        .getUserFileFromMap(fileString), compileEnvironment);
+                compileMainFile(compilingFiles.get(fileString), compileEnvironment);
             }
             // If not, it must be a physical file. Use the compileRealFile method.
             else {
@@ -328,7 +333,17 @@ public class ResolveCompiler {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // Convert to a file object
-            File file = Utilities.getAbsoluteFile(fileString);
+            // 1) Find the file using any specified workspace directory.
+            // 2) Find the file in the current directory.
+            File file;
+            if (compileEnvironment.flags.isFlagSet(FLAG_WORKSPACE_DIR)) {
+                file =
+                        Utilities.getAbsoluteFile(compileEnvironment
+                                .getWorkspaceDir(), fileString);
+            }
+            else {
+                file = Utilities.getAbsoluteFile(fileString);
+            }
 
             // Error if we can't locate the file
             if (!file.isFile()) {
@@ -417,13 +432,18 @@ public class ResolveCompiler {
             }
         }
         catch (FlagDependencyException fde) {
-            // YS - The status handler object might have changed.
-            statusHandler = compileEnvironment.getStatusHandler();
-            statusHandler.error(null, fde.getMessage());
-            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
-                statusHandler.printStackTrace(fde);
+            // YS - Check to see if we have a status handler.
+            if (compileEnvironment != null && compileEnvironment.getStatusHandler() != null) {
+                statusHandler = compileEnvironment.getStatusHandler();
+                statusHandler.error(null, fde.getMessage());
+                if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
+                    statusHandler.printStackTrace(fde);
+                }
+                statusHandler.stopLogging();
             }
-            statusHandler.stopLogging();
+            else {
+                System.err.println(fde.getMessage());
+            }
         }
         catch (IOException | NullPointerException e) {
             e.printStackTrace();
@@ -466,6 +486,7 @@ public class ResolveCompiler {
             JavaTranslator.setUpFlags();
             Populator.setUpFlags();
             VCGenerator.setUpFlags();
+            CongruenceClassProver.setUpFlags();
             FlagDependencies.seal();
         }
     }

@@ -62,16 +62,18 @@ public class LeftImpliesRule extends AbstractReductionRuleApplication
         if (myOriginalExp instanceof InfixExp) {
             InfixExp originalExpAsInfixExp = (InfixExp) myOriginalExp;
             List<Exp> newAntecedents1 = new ArrayList<>();
-            List<Exp> newConsequents1 = new ArrayList<>(myOriginalSequent.getConcequents());
+            List<Exp> newConsequents1 = copyExpList(myOriginalSequent.getConcequents(), null);
             List<Exp> newAntecedents2 = new ArrayList<>();
-            List<Exp> newConsequents2 = new ArrayList<>(myOriginalSequent.getConcequents());
+            List<Exp> newConsequents2 = copyExpList(myOriginalSequent.getConcequents(), null);
             for (Exp exp : myOriginalSequent.getAntecedents()) {
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Place the left expression as a new consequent in the second sequent
                     // and place the right expression as a new antecedent in the first sequent.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("implies")) {
-                        newAntecedents1.add(originalExpAsInfixExp.getRight());
-                        newConsequents2.add(originalExpAsInfixExp.getLeft());
+                        newAntecedents1.add(copyExp(originalExpAsInfixExp.getRight(),
+                                myOriginalExp.getLocationDetailModel()));
+                        newConsequents2.add(copyExp(originalExpAsInfixExp.getLeft(),
+                                myOriginalExp.getLocationDetailModel()));
                     }
                     // This must be an error!
                     else {
@@ -80,8 +82,8 @@ public class LeftImpliesRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newAntecedents1.add(exp);
-                    newAntecedents2.add(exp);
+                    newAntecedents1.add(exp.clone());
+                    newAntecedents2.add(exp.clone());
                 }
             }
 
@@ -94,6 +96,9 @@ public class LeftImpliesRule extends AbstractReductionRuleApplication
             Sequent resultingSequent2 = new Sequent(myOriginalSequent.getLocation(),
                     newAntecedents2, newConsequents2);
             myResultingSequents.add(resultingSequent2);
+
+            // Indicate that this is an impacting reduction
+            myIsImpactingReductionFlag = true;
         }
         // This must be an error!
         else {

@@ -16,7 +16,6 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
-import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -156,7 +155,7 @@ public class TupleExp extends MathExp {
      */
     @Override
     public final boolean equivalent(Exp e) {
-        boolean result = (e instanceof DotExp);
+        boolean result = (e instanceof TupleExp);
 
         if (result) {
             TupleExp eAsTupleExp = (TupleExp) e;
@@ -271,43 +270,6 @@ public class TupleExp extends MathExp {
         }
 
         return soFar;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link TupleExp} from applying the remember rule.
-     */
-    @Override
-    public final TupleExp remember() {
-        List<Exp> newFieldExps = new ArrayList<>();
-        for (Exp e : myFields) {
-            Exp copyExp;
-            if (e instanceof MathExp){
-                copyExp = ((MathExp) e).remember();
-            }
-            else {
-                throw new MiscErrorException("We encountered an expression of the type " +
-                        e.getClass().getName(),
-                        new InvalidClassException(""));
-            }
-
-            newFieldExps.add(copyExp);
-        }
-
-        return new TupleExp(cloneLocation(), newFieldExps);
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

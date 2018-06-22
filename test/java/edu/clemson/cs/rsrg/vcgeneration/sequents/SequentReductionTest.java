@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.SystemStdHandler;
@@ -66,10 +67,10 @@ public class SequentReductionTest {
     {
         try {
             FAKE_LOCATION =
-                    new Location(new ResolveFile("SequentReductionTest",
-                            ModuleType.THEORY, new UnbufferedCharStream(
-                                    new StringReader("")),
-                            new ArrayList<String>(), ""), 0, 0);
+                    new Location(new ResolveFile(new ResolveFileBasicInfo(
+                            "SequentReductionTest", ""), ModuleType.THEORY,
+                            new UnbufferedCharStream(new StringReader("")),
+                            null, new ArrayList<String>(), ""), 0, 0);
 
             // Create a fake typegraph
             // YS: We need to create a ResolveCompiler instance to instantiate

@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init.file;
 
+import java.nio.file.Path;
 import java.util.List;
 import org.antlr.v4.runtime.CharStream;
 
@@ -31,17 +32,20 @@ public class ResolveFile {
     // Member Fields
     // ===========================================================
 
-    /** <p>Location for the created jar (Archiver).</p> */
-    private final String myCreatedJarPath;
+    /** <p>This contains all the basic information about this "file".</p> */
+    private final ResolveFileBasicInfo myFileBasicInfo;
+
+    /** <p>Path where is this file is located in our workspace.</p> */
+    private final String myFilePath;
 
     /** <p>Input stream that will contain all the RESOLVE source code.</p> */
     private final CharStream myInputStream;
 
-    /** <p>File's name.</p> */
-    private final String myModuleFileName;
-
     /** <p>File's extension type.</p> */
     private final ModuleType myModuleFileType;
+
+    /** <p>Path of the Parent File. (May be {@code null}).</p> */
+    private final Path myParentPath;
 
     /** <p>RESOLVE's package structure (Translator/Archiver).</p> */
     private final List<String> myPkgList;
@@ -55,18 +59,22 @@ public class ResolveFile {
      * from the original source object and creates a "file" object
      * that the compiler will operate on.</p>
      *
-     * @param name Filename.
+     * @param fileBasicInfo Basic information about the file.
      * @param moduleType File extension type.
      * @param input The source code input stream.
+     * @param parentPath The parent path if it is known. Otherwise,
+     *                   this can be {@code null}.
      * @param packageList The package where this source file belong.
-     * @param jarPath The path where we want the jar to be generated.
+     * @param filePath The path where this file was found.
      */
-    public ResolveFile(String name, ModuleType moduleType, CharStream input,
-            List<String> packageList, String jarPath) {
+    public ResolveFile(ResolveFileBasicInfo fileBasicInfo,
+            ModuleType moduleType, CharStream input, Path parentPath,
+            List<String> packageList, String filePath) {
         myInputStream = input;
-        myCreatedJarPath = jarPath;
-        myModuleFileName = name;
+        myFileBasicInfo = fileBasicInfo;
+        myFilePath = filePath;
         myModuleFileType = moduleType;
+        myParentPath = parentPath;
         myPkgList = packageList;
     }
 
@@ -90,26 +98,28 @@ public class ResolveFile {
 
         ResolveFile that = (ResolveFile) o;
 
-        if (!myCreatedJarPath.equals(that.myCreatedJarPath))
+        if (!myFileBasicInfo.equals(that.myFileBasicInfo))
+            return false;
+        if (!myFilePath.equals(that.myFilePath))
             return false;
         if (!myInputStream.equals(that.myInputStream))
             return false;
-        if (!myModuleFileName.equals(that.myModuleFileName))
-            return false;
         if (!myModuleFileType.equals(that.myModuleFileType))
             return false;
-
+        if (myParentPath != null ? !myParentPath.equals(that.myParentPath)
+                : that.myParentPath != null)
+            return false;
         return myPkgList.equals(that.myPkgList);
     }
 
     /**
-     * <p>If the option to create an executable jar is given,
-     * this is the place where the file will be created.</p>
+     * <p>This returns a path where this {@link ResolveFile} would
+     * be located in our workspace.</p>
      *
      * @return A path in our current system.
      */
-    public final String getCreatedJarPath() {
-        return myCreatedJarPath;
+    public final String getFilePath() {
+        return myFilePath;
     }
 
     /**
@@ -127,7 +137,7 @@ public class ResolveFile {
      * @return Filename
      */
     public final String getName() {
-        return myModuleFileName;
+        return myFileBasicInfo.getName();
     }
 
     /**
@@ -138,6 +148,25 @@ public class ResolveFile {
      */
     public final ModuleType getModuleType() {
         return myModuleFileType;
+    }
+
+    /**
+     * <p>This name of the parent directory.</p>
+     *
+     * @return File's parent directory name.
+     */
+    public final String getParentDirName() {
+        return myFileBasicInfo.getParentDirName();
+    }
+
+    /**
+     * <p>This returns the parent path associated with this
+     * {@link ResolveFile}.</p>
+     *
+     * @return The parent file's path.
+     */
+    public final Path getParentPath() {
+        return myParentPath;
     }
 
     /**
@@ -158,12 +187,14 @@ public class ResolveFile {
      */
     @Override
     public final int hashCode() {
-        int result = myCreatedJarPath.hashCode();
+        int result = myFileBasicInfo.hashCode();
+        result = 31 * result + myFilePath.hashCode();
         result = 31 * result + myInputStream.hashCode();
-        result = 31 * result + myModuleFileName.hashCode();
         result = 31 * result + myModuleFileType.hashCode();
+        result =
+                31 * result
+                        + (myParentPath != null ? myParentPath.hashCode() : 0);
         result = 31 * result + myPkgList.hashCode();
-
         return result;
     }
 
@@ -174,7 +205,8 @@ public class ResolveFile {
      */
     @Override
     public final String toString() {
-        return myModuleFileName + "." + myModuleFileType.getExtension();
+        return myFileBasicInfo.toString() + "."
+                + myModuleFileType.getExtension();
     }
 
 }

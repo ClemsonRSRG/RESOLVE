@@ -14,8 +14,6 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-
 import java.util.Map;
 
 /**
@@ -112,28 +110,6 @@ public class StringExp extends LiteralExp {
         int result = super.hashCode();
         result = 31 * result + myString.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link StringExp} from applying the remember rule.
-     */
-    @Override
-    public final StringExp remember() {
-        return (StringExp) this.clone();
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

@@ -19,6 +19,8 @@ import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTFamily;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import java.util.Iterator;
 import java.util.List;
 
@@ -98,61 +100,85 @@ public class ValidFunctionCallChecker {
                 if (!(argExp instanceof ProgramCharExp
                         || argExp instanceof ProgramFunctionExp
                         || argExp instanceof ProgramIntegerExp || argExp instanceof ProgramStringExp)) {
-                    throw new SourceErrorException(
-                            "An EVALUATES mode can only accept program"
-                                    + " character/function/integer/string expressions.\n"
-                                    + "Found a program expression: " + argExp
-                                    + " with type: " + argExp.getProgramType(),
-                            myLocation);
+                    // YS: We are making a small optimization to variables of standard types
+                    // (Boolean, Char_Str, Character, and Integer) and not requiring them
+                    // to be functions.
+                    PTType argPTType = argExp.getProgramType();
+                    boolean isValid = false;
+                    if (argPTType instanceof PTFamily) {
+                        String typeName = ((PTFamily) argPTType).getName();
+                        if (typeName.equals("Boolean")
+                                || typeName.equals("Char_Str")
+                                || typeName.equals("Character")
+                                || typeName.equals("Integer")) {
+                            isValid = true;
+                        }
+                    }
+
+                    if (!isValid) {
+                        throw new SourceErrorException(
+                                "An EVALUATES mode can only accept program"
+                                        + " character/function/integer/string expressions.\n"
+                                        + "Found a program expression: "
+                                        + argExp + " with type: "
+                                        + argExp.getProgramType(), myLocation);
+                    }
                 }
             }
         }
 
-        // YS: Loop through our current procedure's parameters
+        // YS: Loop through our current procedure's parameters.
         // If we see a preserves mode parameter, make sure it is only
         // being passed to an operation that also preserves that parameter.
-        for (ProgramParameterEntry procParam : myProcedureParameters) {
-            if (procParam.getParameterMode().equals(ParameterMode.PRESERVES)) {
-                paramIt = myCorrespondingOperation.getParameters().iterator();
-                argIt = myCallingFunctionExp.getArguments().iterator();
+        // If we are not in a procedure, such as in the case of an facility
+        // declaration, we don't do the following check.
+        if (myProcedureParameters != null) {
+            for (ProgramParameterEntry procParam : myProcedureParameters) {
+                if (procParam.getParameterMode()
+                        .equals(ParameterMode.PRESERVES)) {
+                    paramIt =
+                            myCorrespondingOperation.getParameters().iterator();
+                    argIt = myCallingFunctionExp.getArguments().iterator();
 
-                while (argIt.hasNext()) {
-                    ProgramParameterEntry param = paramIt.next();
-                    ProgramExp argExp = argIt.next();
+                    while (argIt.hasNext()) {
+                        ProgramParameterEntry param = paramIt.next();
+                        ProgramExp argExp = argIt.next();
 
-                    if (argExp instanceof ProgramVariableExp) {
-                        if (argExp instanceof ProgramVariableNameExp) {
-                            ProgramVariableNameExp argExpAsProgVarNameExp =
-                                    (ProgramVariableNameExp) argExp;
-                            if (argExpAsProgVarNameExp.getName().getName()
-                                    .equals(procParam.getName())
-                                    && !param.getParameterMode().equals(
-                                            ParameterMode.PRESERVES)) {
-                                throw new SourceErrorException(
-                                        "Expression: "
-                                                + argExp
-                                                + " has PRESERVES mode and cannot be passed to an operation with "
-                                                + param.getParameterMode()
-                                                + " mode.", myLocation);
+                        if (argExp instanceof ProgramVariableExp) {
+                            if (argExp instanceof ProgramVariableNameExp) {
+                                ProgramVariableNameExp argExpAsProgVarNameExp =
+                                        (ProgramVariableNameExp) argExp;
+                                if (argExpAsProgVarNameExp.getName().getName()
+                                        .equals(procParam.getName())
+                                        && !param.getParameterMode().equals(
+                                                ParameterMode.PRESERVES)) {
+                                    throw new SourceErrorException(
+                                            "Expression: "
+                                                    + argExp
+                                                    + " has PRESERVES mode and cannot be passed to an operation with "
+                                                    + param.getParameterMode()
+                                                    + " mode.", myLocation);
+                                }
                             }
-                        }
-                        else if (argExp instanceof ProgramVariableDotExp) {
-                            ProgramVariableDotExp argExpAsProgVarDotExp =
-                                    (ProgramVariableDotExp) argExp;
-                            ProgramVariableExp firstExp =
-                                    argExpAsProgVarDotExp.getSegments().get(0);
-                            if (firstExp instanceof ProgramVariableNameExp
-                                    && ((ProgramVariableNameExp) firstExp)
-                                            .getName().getName().equals(
-                                                    procParam.getName())
-                                    && !param.getParameterMode().equals(
-                                            ParameterMode.PRESERVES)) {
-                                throw new SourceErrorException(
-                                        "Expression: "
-                                                + argExp
-                                                + " has PRESERVES mode and cannot be passed to an operation with "
-                                                + param.getParameterMode()
-                                                + " mode.", myLocation);
+                            else if (argExp instanceof ProgramVariableDotExp) {
+                                ProgramVariableDotExp argExpAsProgVarDotExp =
+                                        (ProgramVariableDotExp) argExp;
+                                ProgramVariableExp firstExp =
+                                        argExpAsProgVarDotExp.getSegments()
+                                                .get(0);
+                                if (firstExp instanceof ProgramVariableNameExp
+                                        && ((ProgramVariableNameExp) firstExp)
+                                                .getName().getName().equals(
+                                                        procParam.getName())
+                                        && !param.getParameterMode().equals(
+                                                ParameterMode.PRESERVES)) {
+                                    throw new SourceErrorException(
+                                            "Expression: "
+                                                    + argExp
+                                                    + " has PRESERVES mode and cannot be passed to an operation with "
+                                                    + param.getParameterMode()
+                                                    + " mode.", myLocation);
+                                }
                             }
                         }
                     }

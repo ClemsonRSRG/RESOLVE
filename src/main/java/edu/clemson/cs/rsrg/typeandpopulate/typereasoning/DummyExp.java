@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.typeandpopulate.typereasoning;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
@@ -112,28 +111,6 @@ public class DummyExp extends MathExp {
     @Override
     public final List<Exp> getSubExpressions() {
         return new ArrayList<>();
-    }
-
-    /**
-     * <p>This method is not supported, so any caller of this method will
-     * get a {@link UnsupportedOperationException} wrapped inside a
-     * {@link MiscErrorException}.</p>
-     */
-    @Override
-    public final VarExp remember() {
-        throw new MiscErrorException("Cannot apply remember to a DummyExp.",
-                new UnsupportedOperationException());
-    }
-
-    /**
-     * <p>This method is not supported, so any caller of this method will
-     * get a {@link UnsupportedOperationException} wrapped inside a
-     * {@link MiscErrorException}.</p>
-     */
-    @Override
-    public final MathExp simplify() {
-        throw new MiscErrorException("Cannot simplify a DummyExp.",
-                new UnsupportedOperationException());
     }
 
     // ===========================================================

@@ -83,16 +83,21 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     /**
      * <p>Returns a single file matching the supplied pattern.</p>
      *
-     * @throws NoSuchFileException If a file matching pattern could
-     *         not be found.
+     * @throws FileSystemException If a file matching pattern could
+     * not be found or if we found more than one file.
      *
      * @return The matching file.
      */
-    public final File getFile() throws NoSuchFileException {
+    public final File getFile() throws FileSystemException {
         if (myMatches.size() == 0) {
             throw new NoSuchFileException("File matching name '" + myPattern
                     + "' could not be found");
         }
+        else if (myMatches.size() > 1) {
+            throw new FileSystemException("Found more than one file matching the name '"
+                    + myPattern + "'.");
+        }
+
         return myMatches.get(0);
     }
 

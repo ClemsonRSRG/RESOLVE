@@ -68,17 +68,21 @@ public class LeftAndRule extends AbstractReductionRuleApplication
                 // by the "and" operator. So we simply replace the original
                 // expression with the inner expressions as new antecedents.
                 if (exp.equals(originalExpAsBetweenExp)) {
-                    newAntecedents.addAll(originalExpAsBetweenExp.getJoiningExps());
+                    newAntecedents.addAll(copyExpList(originalExpAsBetweenExp.getJoiningExps(),
+                            myOriginalExp.getLocationDetailModel()));
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newAntecedents.add(exp);
+                    newAntecedents.add(exp.clone());
                 }
             }
 
             // Construct a new sequent
+            // YS: Don't pass a location detail model
+            //     so we don't accidentally change a goal's
+            //     location detail model
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents, myOriginalSequent.getConcequents());
+                    newAntecedents, copyExpList(myOriginalSequent.getConcequents(), null));
             myResultingSequents.add(resultingSequent);
         }
         else if (myOriginalExp instanceof InfixExp) {
@@ -89,8 +93,10 @@ public class LeftAndRule extends AbstractReductionRuleApplication
                     // Replace the original "and" expression with its associated
                     // left and right expressions.
                     if (originalExpAsInfixExp.getOperatorAsString().equals("and")) {
-                        newAntecedents.add(originalExpAsInfixExp.getLeft());
-                        newAntecedents.add(originalExpAsInfixExp.getRight());
+                        newAntecedents.add(copyExp(originalExpAsInfixExp.getLeft(),
+                                myOriginalExp.getLocationDetailModel()));
+                        newAntecedents.add(copyExp(originalExpAsInfixExp.getRight(),
+                                myOriginalExp.getLocationDetailModel()));
                     }
                     // This must be an error!
                     else {
@@ -99,13 +105,16 @@ public class LeftAndRule extends AbstractReductionRuleApplication
                 }
                 // Don't do anything to the other expressions.
                 else {
-                    newAntecedents.add(exp);
+                    newAntecedents.add(exp.clone());
                 }
             }
 
             // Construct a new sequent
+            // YS: Don't pass a location detail model
+            //     so we don't accidentally change a goal's
+            //     location detail model
             Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents, myOriginalSequent.getConcequents());
+                    newAntecedents, copyExpList(myOriginalSequent.getConcequents(), null));
             myResultingSequents.add(resultingSequent);
         }
         // This must be an error!

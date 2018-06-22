@@ -1,5 +1,5 @@
 /*
- * KnownTypeVariableDeclRule.java
+ * SharedStateCorrRule.java
  * ---------------------------------
  * Copyright (c) 2017
  * RESOLVE Software Research Group
@@ -10,27 +10,24 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.other;
 
-import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
-import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for a variable declaration
- * rule with a known program type.</p>
+ * <p>This class contains the logic for establishing the {@code Shared Variable}'s
+ * {@code Correspondence} is well defined.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
+public class SharedStateCorrRule extends AbstractProofRuleApplication
         implements
             ProofRuleApplication {
 
@@ -38,36 +35,30 @@ public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The variable's {@code initialization ensures} clause.</p> */
-    private final AssertionClause myInitEnsuresClause;
-
-    /** <p>The variable declaration we are applying the rule to.</p> */
-    private final VarDec myVarDec;
+    /** <p>The {@code shared state} realization we are applying the rule to.</p> */
+    private final SharedStateRealizationDec mySharedStateRealizDec;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates a new application for a variable declaration
-     * rule with a known program type.</p>
+     * <p>This creates a new application for a well defined
+     * {@code Correspondence} rule for a {@link SharedStateRealizationDec}.</p>
      *
-     * @param varDec The variable declaration we are applying the
-     *               rule to.
-     * @param initEnsuresClause The initialization ensures clause
-     *                          for the variable we are trying to apply
-     *                          the rule to.
+     * @param dec A shared state realization.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public KnownTypeVariableDeclRule(VarDec varDec,
-            AssertionClause initEnsuresClause, AssertiveCodeBlock block,
+    public SharedStateCorrRule(SharedStateRealizationDec dec,
+            AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
-        super(block, stGroup, blockModel);
-        myInitEnsuresClause = initEnsuresClause;
-        myVarDec = varDec;
+        super(block, context, stGroup, blockModel);
+        mySharedStateRealizDec = dec;
     }
 
     // ===========================================================
@@ -79,24 +70,16 @@ public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Create an assume statement with the initialization ensures clause.
-        Exp assumeExp =
-                Utilities.formConjunct(myInitEnsuresClause.getLocation(), null,
-                        myInitEnsuresClause);
-        AssumeStmt initAssumeStmt =
-                new AssumeStmt(myInitEnsuresClause.getLocation(), assumeExp,
-                        false);
-        myCurrentAssertiveCodeBlock.addStatement(initAssumeStmt);
+        // Assume CPC and RPC and DC and RDC and SS_RC and SS_Cor_Exp
 
-        // Add this as a free variable
-        myCurrentAssertiveCodeBlock.addFreeVar(Utilities.createVarExp(myVarDec
-                .getLocation(), null, myVarDec.getName(), myVarDec
-                .getMathType(), null));
+        // Confirm the shared variable's constraint
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
         stepModel.add("proofRuleName", getRuleDescription()).add(
                 "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+
+        // Add the different details to the various different output models
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
@@ -108,7 +91,7 @@ public class KnownTypeVariableDeclRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Variable Declaration Rule (Known Program Type)";
+        return "Well Defined Correspondence Rule (Shared State)";
     }
 
 }

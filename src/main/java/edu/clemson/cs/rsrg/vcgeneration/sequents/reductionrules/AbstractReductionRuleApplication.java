@@ -13,7 +13,8 @@
 package edu.clemson.cs.rsrg.vcgeneration.sequents.reductionrules;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,13 @@ public abstract class AbstractReductionRuleApplication
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>An impacting reduction means that either {@code myOriginalExp}
+     * is a negation {@code exp} or {@code myOriginalExp} created a new
+     * associated {@link Sequent}.</p>
+     */
+    protected boolean myIsImpactingReductionFlag;
 
     /** <p>The original expression to be reduced</p> */
     protected final Exp myOriginalExp;
@@ -55,9 +63,27 @@ public abstract class AbstractReductionRuleApplication
      * @param originalExp The {@link Exp} to be reduced.
      */
     protected AbstractReductionRuleApplication(Sequent originalSequent, Exp originalExp) {
+        myIsImpactingReductionFlag = false;
         myOriginalExp = originalExp;
         myOriginalSequent = originalSequent;
         myResultingSequents = new ArrayList<>();
+    }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * <p>This method indicates whether or not this {@link ReductionRuleApplication}
+     * encountered a {@code not(<exp>)} or if it created a new associated
+     * {@link Sequent}.</p>
+     *
+     * @return {@code true} if we have applied some kind of impacting
+     * logical reduction to the original {@link Sequent}, {@code false} otherwise.
+     */
+    @Override
+    public final boolean isIsImpactingReductionFlag() {
+        return myIsImpactingReductionFlag;
     }
 
     // ===========================================================
@@ -65,13 +91,77 @@ public abstract class AbstractReductionRuleApplication
     // ===========================================================
 
     /**
-     * <p>This is an helper method that throws an unexpected expression
+     * <p>An helper method that deep copies an {@link Exp}.</p>
+     *
+     * @param originalExp The expression to copy.
+     * @param parentLocationDetail Location detail for the parent expression.
+     *
+     * @return A deep copy of {@code originalExp}.
+     */
+    protected final Exp copyExp(Exp originalExp,
+            LocationDetailModel parentLocationDetail) {
+        Exp expCopy = originalExp.clone();
+
+        // Check to see if we have a location detail model
+        // If we have one, the clone method must have made a
+        // a copy already.
+        if (expCopy.getLocationDetailModel() == null) {
+            // Attempt to copy our parent's model.
+            // YS: At this point, someone should have
+            //     some sort of location detail model.
+            //     If not, the VC generator didn't generate
+            //     the expression properly.
+            if (parentLocationDetail != null) {
+                expCopy.setLocationDetailModel(parentLocationDetail.clone());
+            }
+        }
+
+        return expCopy;
+    }
+
+    /**
+     * <p>An helper method that deep copies a list of {@link Exp Exps}.</p>
+     *
+     * @param originalExpList A list of {@link Exp Exps}.
+     * @param parentLocationDetail Location detail for the parent expression.
+     *
+     * @return A deep copy of {@code originalExpList}.
+     */
+    protected final List<Exp> copyExpList(List<Exp> originalExpList, LocationDetailModel parentLocationDetail) {
+        List<Exp> copyExpList = new ArrayList<>(originalExpList.size());
+
+        for (Exp exp : originalExpList) {
+            Exp expCopy = exp.clone();
+
+            // Check to see if we have a location detail model
+            // If we have one, the clone method must have made a
+            // a copy already.
+            if (expCopy.getLocationDetailModel() == null) {
+                // Attempt to copy our parent's model.
+                // YS: At this point, someone should have
+                //     some sort of location detail model.
+                //     If not, the VC generator didn't generate
+                //     the expression properly.
+                if (parentLocationDetail != null) {
+                    expCopy.setLocationDetailModel(parentLocationDetail.clone());
+                }
+            }
+
+            copyExpList.add(expCopy);
+        }
+
+        return copyExpList;
+    }
+
+    /**
+     * <p>An helper method that throws an unexpected expression
      * error message.</p>
      */
     protected final void unexpectedExp() {
-        throw new MiscErrorException("Found: " + myOriginalExp + " of type: "
-                + myOriginalExp.getClass().getSimpleName() + " while applying "
-                + getRuleDescription(), new IllegalStateException());
+        throw new SourceErrorException("[VCGenerator] Found: " + myOriginalExp
+                + " of type: " + myOriginalExp.getClass().getSimpleName()
+                + " while applying " + getRuleDescription(), myOriginalExp
+                .getLocation());
     }
 
 }

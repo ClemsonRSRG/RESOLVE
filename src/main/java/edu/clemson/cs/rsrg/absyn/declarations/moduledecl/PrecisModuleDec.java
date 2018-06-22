@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.absyn.declarations.moduledecl;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
@@ -39,13 +40,14 @@ public class PrecisModuleDec extends ModuleDec {
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
-     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
-     *                           flags) that indicates all the modules that this module
-     *                           declaration depends on.
+     * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
+     *                           externally realized flags that indicates
+     *                           all the modules that this module declaration depends on.
      */
     public PrecisModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            List<Dec> decs, Map<PosSymbol, Boolean> moduleDependencies) {
+            List<Dec> decs,
+            Map<ResolveFileBasicInfo, Boolean> moduleDependencies) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
     }
 
@@ -87,7 +89,7 @@ public class PrecisModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
+        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies = copyModuleDependencies();
 
         return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newUsesItems, newDecs, newModuleDependencies);

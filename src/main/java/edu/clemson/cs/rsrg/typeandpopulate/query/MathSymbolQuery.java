@@ -56,9 +56,9 @@ public class MathSymbolQuery
      */
     public MathSymbolQuery(PosSymbol qualifier, String name, Location nameLoc) {
         super(new SimpleSymbolQuery(new PossiblyQualifiedPath(qualifier,
-                ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_IGNORE,
-                true), new NameSearcher(name, true)), new MapToMathSymbol(
-                nameLoc));
+                ImportStrategy.IMPORT_NAMED,
+                FacilityStrategy.FACILITY_INSTANTIATE, true), new NameSearcher(
+                name, true)), new MapToMathSymbol(nameLoc));
     }
 
     // ===========================================================

@@ -271,6 +271,10 @@ INTRODUCES
     :   'introduces'
     ;
 
+INVOLVES
+    :   'involves'
+    ;
+
 IS
     :   'is'
     ;

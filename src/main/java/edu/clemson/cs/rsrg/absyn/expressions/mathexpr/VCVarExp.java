@@ -95,7 +95,7 @@ public class VCVarExp extends MathExp {
     public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
         if (myOrigExp != null) {
-            if (IsOldExp) {
+            if (!IsOldExp) {
                 found = myOrigExp.containsVar(varName, false);
             }
         }
@@ -164,28 +164,6 @@ public class VCVarExp extends MathExp {
         return result;
     }
 
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link VCVarExp} from applying the remember rule.
-     */
-    @Override
-    public final VCVarExp remember() {
-        return (VCVarExp) this.clone();
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
@@ -203,8 +181,7 @@ public class VCVarExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new VCVarExp(cloneLocation(), substitute(myOrigExp,
-                substitutions));
+        return new VCVarExp(cloneLocation(), myOrigExp.clone());
     }
 
 }

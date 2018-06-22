@@ -16,15 +16,17 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.init.pipeline.*;
 import edu.clemson.cs.rsrg.misc.Utilities;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
+import edu.clemson.cs.rsrg.prover.CongruenceClassProver;
+import edu.clemson.cs.rsrg.statushandling.AntlrLexerErrorListener;
+import edu.clemson.cs.rsrg.statushandling.AntlrParserErrorListener;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
-import edu.clemson.cs.rsrg.statushandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.statushandling.exception.*;
 import edu.clemson.cs.rsrg.translation.AbstractTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -33,6 +35,7 @@ import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
@@ -59,6 +62,16 @@ class Controller {
     // ===========================================================
 
     /**
+     * <p>This is the lexer error listener for all ANTLR4 related objects.</p>
+     */
+    private final AntlrLexerErrorListener myAntlrLexerErrorListener;
+
+    /**
+     * <p>This is the parser error listener for all ANTLR4 related objects.</p>
+     */
+    private final AntlrParserErrorListener myAntlrParserErrorListener;
+
+    /**
      * <p>The current job's compilation environment
      * that stores all necessary objects and flags.</p>
      */
@@ -68,11 +81,6 @@ class Controller {
      * <p>This is the status handler for the RESOLVE compiler.</p>
      */
     private final StatusHandler myStatusHandler;
-
-    /**
-     * <p>This is the error listener for all ANTLR4 related objects.</p>
-     */
-    private final AntlrErrorListener myAntlrErrorListener;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -105,7 +113,10 @@ class Controller {
     Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
         myStatusHandler = compileEnvironment.getStatusHandler();
-        myAntlrErrorListener = new AntlrErrorListener(myStatusHandler);
+        myAntlrLexerErrorListener =
+                new AntlrLexerErrorListener(myStatusHandler);
+        myAntlrParserErrorListener =
+                new AntlrParserErrorListener(myStatusHandler);
         mySymbolTable =
                 (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
@@ -138,7 +149,7 @@ class Controller {
                     new DefaultDirectedGraph<>(
                             DefaultEdge.class);
             g.addVertex(new ModuleIdentifier(targetModule));
-            findDependencies(g, targetModule);
+            findDependencies(g, targetModule, file.getParentPath());
 
             // Perform different compilation tasks to each file
             for (ModuleIdentifier m : getCompileOrder(g)) {
@@ -177,6 +188,14 @@ class Controller {
                     VCGenPipeline vcGenPipeline =
                             new VCGenPipeline(myCompileEnvironment, mySymbolTable);
                     vcGenPipeline.process(m);
+                }
+
+                // Invoke Automated Prover (if requested)
+                if (myCompileEnvironment.flags.isFlagSet(CongruenceClassProver.FLAG_PROVE) &&
+                        m.equals(new ModuleIdentifier(targetModule))) {
+                    ProverPipeline proverPipeline =
+                            new ProverPipeline(myCompileEnvironment, mySymbolTable);
+                    proverPipeline.process(m);
                 }
 
                 // Complete compilation for this module
@@ -220,14 +239,13 @@ class Controller {
      * supplied files and add them to the compile environment for
      * future use.</p>
      *
-     * @param importItem A filename that we have labeled as externally import
+     * @param importName A filename that we have labeled as externally import
      *
      * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
-    private void addFileAsExternalImport(PosSymbol importItem) {
+    private void addFileAsExternalImport(String importName) {
         try {
-            FileLocator l =
-                    new FileLocator(importItem.getName(), NON_NATIVE_EXT);
+            FileLocator l = new FileLocator(importName, NON_NATIVE_EXT);
             File workspaceDir = myCompileEnvironment.getWorkspaceDir();
             Files.walkFileTree(workspaceDir.toPath(), l);
 
@@ -235,7 +253,7 @@ class Controller {
             List<File> foundFiles = l.getFiles();
             if (foundFiles.size() == 1) {
                 ModuleIdentifier externalImport =
-                        new ModuleIdentifier(importItem.getName());
+                        new ModuleIdentifier(importName);
 
                 // Add this as an external realiz file if it is not already declared to be one.
                 if (!myCompileEnvironment.isExternalRealizFile(externalImport)) {
@@ -246,14 +264,14 @@ class Controller {
                     if (myCompileEnvironment.flags
                             .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                         myStatusHandler.info(null, "Skipping External Import: "
-                                + importItem.getName());
+                                + importName);
                     }
                 }
             }
             else if (foundFiles.size() > 1) {
                 throw new ImportException(
                         "Found more than one external import with the name "
-                                + importItem.getName() + ";");
+                                + importName + ";");
             }
         }
         catch (IOException ioe) {
@@ -282,13 +300,15 @@ class Controller {
         // Create a RESOLVE language lexer
         ResolveLexer lexer = new ResolveLexer(input);
         ResolveTokenFactory factory = new ResolveTokenFactory(file);
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(myAntlrLexerErrorListener);
         lexer.setTokenFactory(factory);
 
         // Create a RESOLVE language parser
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokens);
         parser.removeErrorListeners();
-        parser.addErrorListener(myAntlrErrorListener);
+        parser.addErrorListener(myAntlrParserErrorListener);
         parser.setTokenFactory(factory);
 
         // Two-Stage Parsing
@@ -331,6 +351,8 @@ class Controller {
      *
      * @param g The compilation's file dependency graph.
      * @param root Current compiling module.
+     * @param parentPath The parent path if it is known. Otherwise,
+     *                   this can be {@code null}.
      *
      * @throws CircularDependencyException Some of the source files form a
      * circular dependency.
@@ -339,22 +361,20 @@ class Controller {
      */
     private void findDependencies(
             DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
-            ModuleDec root) {
-        Map<PosSymbol, Boolean> allImports = root.getModuleDependencies();
-        for (PosSymbol importRequest : allImports.keySet()) {
+            ModuleDec root, Path parentPath) {
+        ModuleIdentifier rootId = new ModuleIdentifier(root);
+        Map<ResolveFileBasicInfo, Boolean> allImports =
+                root.getModuleDependencies();
+        for (ResolveFileBasicInfo importRequest : allImports.keySet()) {
             // Don't try to import the built-in Cls_Theory
             if (!importRequest.getName().equals("Cls_Theory")) {
                 // Check to see if this import has been labeled as externally realized
                 // or not. If yes, we add it as an external import and move on.
                 // If no, we add it as a new dependency that must be imported.
                 if (!allImports.get(importRequest)) {
-                    ResolveFile file = findResolveFile(importRequest.getName());
+                    // Only need to deal with imports we haven't seen yet.
                     ModuleIdentifier id =
                             new ModuleIdentifier(importRequest.getName());
-                    ModuleIdentifier rootId = new ModuleIdentifier(root);
-                    ModuleDec module;
-
-                    // Search for the file in our processed modules
                     if (!myCompileEnvironment.containsID(id)) {
                         // Print out debugging message
                         if (myCompileEnvironment.flags
@@ -363,28 +383,40 @@ class Controller {
                                     + id.toString());
                         }
 
-                        module = createModuleAST(file);
-                        myCompileEnvironment.constructRecord(file, module);
-
-                        // Now check this new module for dependencies
-                        findDependencies(g, module);
+                        ResolveFile file =
+                                findResolveFile(importRequest, parentPath);
+                        ModuleDec module = createModuleAST(file);
+                        if (module == null) {
+                            // Import error
+                            throw new ImportException("Invalid import: "
+                                    + importRequest.toString()
+                                    + "; Cannot import module of " + "type: "
+                                    + file.getModuleType().getExtension());
+                        }
+                        else {
+                            // Construct a record and check this new module for dependencies
+                            myCompileEnvironment.constructRecord(file, module);
+                            findDependencies(g, module, file.getParentPath());
+                        }
                     }
                     else {
-                        module = myCompileEnvironment.getModuleAST(id);
-                    }
-
-                    // Import error
-                    if (module == null) {
-                        throw new ImportException("Invalid import "
-                                + importRequest.toString()
-                                + "; Cannot import module of " + "type: "
-                                + file.getModuleType().getExtension());
+                        ModuleDec module =
+                                myCompileEnvironment.getModuleAST(id);
+                        if (module == null) {
+                            // Import error
+                            throw new ImportException(
+                                    "Import error: "
+                                            + importRequest.toString()
+                                            + "; Module does not exist in our current compile environment.");
+                        }
                     }
 
                     // Check for circular dependency
                     if (pathExists(g, id, rootId)) {
                         throw new CircularDependencyException(
-                                "Circular dependency detected.");
+                                "Circular dependency detected: "
+                                        + importRequest.getName() + "<->"
+                                        + root.getName());
                     }
 
                     // Add new edge to our graph indicating the relationship between
@@ -392,7 +424,7 @@ class Controller {
                     Graphs.addEdgeWithVertices(g, rootId, id);
                 }
                 else {
-                    addFileAsExternalImport(importRequest);
+                    addFileAsExternalImport(importRequest.getName());
                 }
             }
         }
@@ -402,30 +434,71 @@ class Controller {
      * <p>This method attempts to locate a file with the
      * specified name.</p>
      *
-     * @param baseName The name of the file including the extension
+     * @param fileBasicInfo The name of the file including any known parent directory.
+     * @param parentPath The parent path if it is known. Otherwise,
+     *                   this can be {@code null}.
      *
-     * @return A <code>ResolveFile</code> object that is used by the compiler.
+     * @return A {@link ResolveFile} object that is used by the compiler.
      *
      * @throws MiscErrorException We caught some kind of {@link IOException}.
      */
-    private ResolveFile findResolveFile(String baseName) {
+    private ResolveFile findResolveFile(ResolveFileBasicInfo fileBasicInfo,
+            Path parentPath) {
         // First check to see if this is a user created
         // file from the WebIDE/WebAPI.
         ResolveFile file;
-        if (myCompileEnvironment.isMetaFile(baseName)) {
-            file = myCompileEnvironment.getUserFileFromMap(baseName);
+        if (myCompileEnvironment.isMetaFile(fileBasicInfo)) {
+            file = myCompileEnvironment.getUserFileFromMap(fileBasicInfo);
         }
         // If not, use the file locator to locate our file
         else {
             try {
-                FileLocator l =
-                        new FileLocator(baseName, ModuleType.getAllExtensions());
+                // There might be files with the same name all throughout the workspace,
+                // so ideally we want to start from the innermost path possible.
+                File actualFile = null;
+                if (parentPath != null) {
+                    try {
+                        FileLocator l =
+                                new FileLocator(fileBasicInfo.getName(),
+                                        ModuleType.getAllExtensions());
+
+                        // If our file's basic information contains a parent directory
+                        // that matches a file we have already compiled, use that path
+                        // instead of the parent path passed in.
+                        if (myCompileEnvironment
+                                .containsID(new ModuleIdentifier(fileBasicInfo
+                                        .getParentDirName()))) {
+                            Files.walkFileTree(myCompileEnvironment.getFile(
+                                    new ModuleIdentifier(fileBasicInfo
+                                            .getParentDirName()))
+                                    .getParentPath(), l);
+                        }
+                        else {
+                            Files.walkFileTree(parentPath, l);
+                        }
+
+                        actualFile = l.getFile();
+                    }
+                    catch (IOException ioe2) {
+                        // Don't do anything. We simply didn't find it using the parent path.
+                    }
+                }
+
+                // If we couldn't find it, try searching the entire workspace.
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
-                Files.walkFileTree(workspaceDir.toPath(), l);
+                if (actualFile == null) {
+                    FileLocator l =
+                            new FileLocator(fileBasicInfo.getName(), ModuleType
+                                    .getAllExtensions());
+                    Files.walkFileTree(workspaceDir.toPath(), l);
+                    actualFile = l.getFile();
+                }
+
+                // Convert to ResolveFile
                 ModuleType extType =
-                        Utilities.getModuleType(l.getFile().getName());
+                        Utilities.getModuleType(actualFile.getName());
                 file =
-                        Utilities.convertToResolveFile(l.getFile(), extType,
+                        Utilities.convertToResolveFile(actualFile, extType,
                                 workspaceDir.getAbsolutePath());
             }
             catch (IOException ioe) {

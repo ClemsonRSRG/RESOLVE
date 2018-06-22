@@ -145,11 +145,19 @@ public class AltItemExp extends MathExp {
 
             result = eAsAltItemExp.myAssignmentExp.equivalent(myAssignmentExp);
 
-            if (myTestingExp != null && eAsAltItemExp.myTestingExp != null) {
-                result &= eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
+            if (myTestingExp != null) {
+                if (eAsAltItemExp.myTestingExp != null) {
+                    result &=
+                            eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
+                }
+                else {
+                    return false;
+                }
             }
             else {
-                result = false;
+                if (eAsAltItemExp.myTestingExp != null) {
+                    result = false;
+                }
             }
         }
 
@@ -204,35 +212,6 @@ public class AltItemExp extends MathExp {
                         + (myAssignmentExp != null ? myAssignmentExp.hashCode()
                                 : 0);
         return result;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link AltItemExp} from applying the remember rule.
-     */
-    @Override
-    public final AltItemExp remember() {
-        Exp testingExp = myTestingExp;
-        if (testingExp != null) {
-            testingExp = ((MathExp) testingExp).remember();
-        }
-
-        Exp assignmentExp = ((MathExp) myAssignmentExp).remember();
-
-        return new AltItemExp(cloneLocation(), testingExp, assignmentExp);
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public final MathExp simplify() {
-        return this.clone();
     }
 
     // ===========================================================

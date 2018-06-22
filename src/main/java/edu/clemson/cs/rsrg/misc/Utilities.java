@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.misc;
 
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -140,21 +141,37 @@ public class Utilities {
         List<String> pkgList =
                 Utilities.getPackageList(file.getAbsolutePath(), workspacePath);
         CharStream inputStream = CharStreams.fromPath(file.toPath());
+        File parentFile = file.getParentFile();
 
-        return new ResolveFile(name, moduleType, inputStream, pkgList, file
-                .getAbsolutePath());
+        return new ResolveFile(new ResolveFileBasicInfo(name, parentFile
+                .getName()), moduleType, inputStream, parentFile.toPath(),
+                pkgList, file.getAbsolutePath());
     }
 
     /**
-     * <p>Converts the specified pathname to a <code>File</code>
-     * representing the absolute path to the pathname.</p>
+     * <p>Converts the specified pathname to a {@link File}
+     * representing the absolute path to the file.</p>
      *
      * @param pathname The file path.
      *
-     * @return The <code>File</code> specified by the path.
+     * @return The {@link File} specified by the path.
      */
     public static File getAbsoluteFile(String pathname) {
         return new File(pathname).getAbsoluteFile();
+    }
+
+    /**
+     * <p>Uses the workspace directory and converts the specified file pathname
+     * to a {@link File} representing the absolute path to the file.</p>
+     *
+     * @param workspacePathFile A {@link File} that points to our current
+     *                          working directory.
+     * @param pathname The file path.
+     *
+     * @return The {@link File} specified by the path.
+     */
+    public static File getAbsoluteFile(File workspacePathFile, String pathname) {
+        return new File(workspacePathFile, pathname).getAbsoluteFile();
     }
 
     /**
