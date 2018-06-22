@@ -25,6 +25,8 @@ import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.translation.targets.CTranslator;
+import edu.clemson.cs.rsrg.translation.targets.JavaTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
@@ -477,12 +479,11 @@ public class ResolveCompiler {
         if (!FlagDependencies.isSealed()) {
             setUpFlags();
             /*Prover.setUpFlags();
-            JavaTranslator.setUpFlags();
-            CTranslator.setUpFlags();
             Archiver.setUpFlags();
-            VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
             CongruenceClassProver.setUpFlags();*/
+            CTranslator.setUpFlags();
+            JavaTranslator.setUpFlags();
             Populator.setUpFlags();
             VCGenerator.setUpFlags();
             CongruenceClassProver.setUpFlags();
