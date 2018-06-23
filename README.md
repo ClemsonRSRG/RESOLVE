@@ -2,7 +2,7 @@ What is RESOLVE?
 ==============
 [![Build Status](https://travis-ci.org/ClemsonRSRG/RESOLVE.svg?branch=master)](https://travis-ci.org/ClemsonRSRG/RESOLVE) 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/ClemsonRSRG/RESOLVE/master/LICENSE.txt)
-<img align="right" src="public/images/resolve_logo.png" width="200"/>
+<img align="right" src="src/resources/images/resolve_logo.png" width="200"/>
 
 RESOLVE (REusable SOftware Language with VErification) is a specification and
 programming language designed for verifying correctness of object oriented
