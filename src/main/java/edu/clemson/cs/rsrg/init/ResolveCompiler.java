@@ -1,7 +1,7 @@
 /*
  * ResolveCompiler.java
  * ---------------------------------
- * Copyright (c) 2017
+ * Copyright (c) 2018
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -58,7 +58,7 @@ public class ResolveCompiler {
     /**
      * <p>This indicates the current compiler version.</p>
      */
-    private final String myCompilerVersion = "Fall 2017";
+    private final String myCompilerVersion = "Summer 2018";
 
     /**
      * <p>This stores all the file names specified in the argument

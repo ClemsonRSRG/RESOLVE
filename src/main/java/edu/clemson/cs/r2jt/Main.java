@@ -1,7 +1,7 @@
 /*
  * Main.java
  * ---------------------------------
- * Copyright (c) 2017
+ * Copyright (c) 2018
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -41,7 +41,7 @@ import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
  */
 public class Main {
 
-    private static final String VERSION = "Spring 2017";
+    private static final String VERSION = "Summer 2018";
 
     public static final String FLAG_SECTION_GENERAL = "General";
 
