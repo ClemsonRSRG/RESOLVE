@@ -1,7 +1,7 @@
 /*
  * ResolveCompiler.java
  * ---------------------------------
- * Copyright (c) 2017
+ * Copyright (c) 2018
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.init.output.OutputListener;
@@ -24,6 +25,8 @@ import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 import edu.clemson.cs.rsrg.statushandling.exception.FlagDependencyException;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.translation.targets.CTranslator;
+import edu.clemson.cs.rsrg.translation.targets.JavaTranslator;
 import edu.clemson.cs.rsrg.typeandpopulate.Populator;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
@@ -55,7 +58,7 @@ public class ResolveCompiler {
     /**
      * <p>This indicates the current compiler version.</p>
      */
-    private final String myCompilerVersion = "Fall 2017";
+    private final String myCompilerVersion = "Summer 2018";
 
     /**
      * <p>This stores all the file names specified in the argument
@@ -229,25 +232,28 @@ public class ResolveCompiler {
      * <p>This invokes the RESOLVE compiler. Usually this method
      * is called by running the compiler from the WebAPI/WebIDE.</p>
      *
-     * @param fileMap A map containing all the user modified files.
+     * @param compilingFiles A map containing all the "meta" files we are going to compile.
+     * @param userFilesMap A map containing all "meta" files that are provided by the user.
      * @param statusHandler A status handler to display debug or error messages.
      * @param listener An output listener object.
      */
-    public void invokeCompiler(Map<String, ResolveFile> fileMap,
+    public void invokeCompiler(Map<String, ResolveFile> compilingFiles,
+            Map<ResolveFileBasicInfo, ResolveFile> userFilesMap,
             StatusHandler statusHandler, OutputListener listener) {
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment =
                 handleCompileArgs(statusHandler);
 
         // Store the file map
-        compileEnvironment.setFileMap(fileMap);
+        compileEnvironment.setFileMap(userFilesMap);
 
         // Store the new listener object
         compileEnvironment.addOutputListener(listener);
 
         // Compile files/directories listed in the argument list
         try {
-            compileArbitraryFiles(myArgumentFileList, compileEnvironment);
+            compileArbitraryFiles(myArgumentFileList, compilingFiles,
+                    compileEnvironment);
         }
         catch (CompilerException e) {
             // YS - The status handler object might have changed.
@@ -269,6 +275,7 @@ public class ResolveCompiler {
      * argument list. If the "meta" file is not supplied, attempt to
      * search for it as a physical file.</p>
      *
+     * @param compilingFiles A map containing all the user "meta" files we are going to compile.
      * @param fileArgList List of strings representing the name of the file.
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
@@ -276,15 +283,14 @@ public class ResolveCompiler {
      * @throws CompilerException This catches all sorts of exceptions thrown by
      * the compiler.
      */
-    private void compileArbitraryFiles(List<String> fileArgList,
+    private void compileArbitraryFiles(List<String> fileArgList, Map<String, ResolveFile> compilingFiles,
             CompileEnvironment compileEnvironment) throws CompilerException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // First check if this is a "meta" file
-            if (compileEnvironment.isMetaFile(fileString)) {
+            if (compilingFiles.containsKey(fileString)) {
                 // Invoke the compiler on this file
-                compileMainFile(compileEnvironment
-                        .getUserFileFromMap(fileString), compileEnvironment);
+                compileMainFile(compilingFiles.get(fileString), compileEnvironment);
             }
             // If not, it must be a physical file. Use the compileRealFile method.
             else {
@@ -473,12 +479,11 @@ public class ResolveCompiler {
         if (!FlagDependencies.isSealed()) {
             setUpFlags();
             /*Prover.setUpFlags();
-            JavaTranslator.setUpFlags();
-            CTranslator.setUpFlags();
             Archiver.setUpFlags();
-            VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
             CongruenceClassProver.setUpFlags();*/
+            CTranslator.setUpFlags();
+            JavaTranslator.setUpFlags();
             Populator.setUpFlags();
             VCGenerator.setUpFlags();
             CongruenceClassProver.setUpFlags();

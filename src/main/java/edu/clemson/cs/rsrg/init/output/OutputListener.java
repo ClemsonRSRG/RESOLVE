@@ -1,7 +1,7 @@
 /*
  * OutputListener.java
  * ---------------------------------
- * Copyright (c) 2017
+ * Copyright (c) 2018
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,6 +16,8 @@ import edu.clemson.cs.rsrg.astoutput.GenerateGraphvizModel;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.prover.output.Metrics;
 import edu.clemson.cs.rsrg.prover.output.PerVCProverModel;
+import edu.clemson.cs.rsrg.translation.targets.CTranslator;
+import edu.clemson.cs.rsrg.translation.targets.JavaTranslator;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import java.util.List;
@@ -40,8 +42,19 @@ public interface OutputListener {
     void astGraphvizModelResult(String outputFileName, String graphvizModel);
 
     /**
-     * <p>This method outputs the provided the java translation results
-     * from the {@code JavaTranslator}.</p>
+     * <p>This method outputs the provided the {@code C} translation results
+     * from the {@link CTranslator}.</p>
+     *
+     * @param inputFileName Name of the {@link ResolveFile} we are generating {@code C} translations.
+     * @param outputFileName A name for the output file.
+     * @param cTranslation The translated {@code C} source code.
+     */
+    void cTranslationResult(String inputFileName, String outputFileName,
+            String cTranslation);
+
+    /**
+     * <p>This method outputs the provided the {@code Java} translation results
+     * from the {@link JavaTranslator}.</p>
      *
      * @param inputFileName Name of the {@link ResolveFile} we are generating {@code Java} translations.
      * @param outputFileName A name for the output file.

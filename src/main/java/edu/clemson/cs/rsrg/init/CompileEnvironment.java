@@ -1,7 +1,7 @@
 /*
  * CompileEnvironment.java
  * ---------------------------------
- * Copyright (c) 2017
+ * Copyright (c) 2018
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.init.output.FileOutputListener;
 import edu.clemson.cs.rsrg.init.output.OutputListener;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
@@ -52,7 +53,7 @@ public class CompileEnvironment {
     /**
      * <p>This contains the absolute path to the RESOLVE workspace directory.</p>
      */
-    private File myCompileDir = null;
+    private File myCompileDir;
 
     /**
      * <p>This contains all modules we have currently seen. This includes both complete
@@ -97,7 +98,7 @@ public class CompileEnvironment {
     /**
      * <p>This stores all user created files from the WebIDE/WebAPI.</p>
      */
-    private Map<String, ResolveFile> myUserFileMap;
+    private Map<ResolveFileBasicInfo, ResolveFile> myUserFileMap;
 
     // ===========================================================
     // Objects
@@ -131,11 +132,11 @@ public class CompileEnvironment {
                 IOException {
         flags = new FlagManager(args);
         myCompilingModules =
-                new HashMap<>();
-        myExternalRealizFiles = new HashMap<>();
+                new LinkedHashMap<>();
+        myExternalRealizFiles = new LinkedHashMap<>();
         myIncompleteModules = new LinkedList<>();
         myOutputListeners = new LinkedList<>();
-        myUserFileMap = new HashMap<>();
+        myUserFileMap = new LinkedHashMap<>();
 
         // Check for custom workspace path
         String path = null;
@@ -320,12 +321,13 @@ public class CompileEnvironment {
      * object. Notice that the pre-condition for this method is that
      * the key exist in the map.</p>
      *
-     * @param key Name of the file.
+     * @param fileBasicInfo The name of the file including any known parent directory.
      *
      * @return The {@link ResolveFile} object for the specified key.
      */
-    public final ResolveFile getUserFileFromMap(String key) {
-        return myUserFileMap.get(key);
+    public final ResolveFile getUserFileFromMap(
+            ResolveFileBasicInfo fileBasicInfo) {
+        return myUserFileMap.get(fileBasicInfo);
     }
 
     /**
@@ -366,13 +368,13 @@ public class CompileEnvironment {
      * <p>This checks to see if the file is a user created file from the
      * WebIDE/WebAPI.</p>
      *
-     * @param key Name of the file.
+     * @param fileBasicInfo The name of the file including any known parent directory.
      *
      * @return {@code true} if it is a user created file from the WebIDE/WebAPI,
      * {@code false} otherwise.
      */
-    public final boolean isMetaFile(String key) {
-        return myUserFileMap.containsKey(key);
+    public final boolean isMetaFile(ResolveFileBasicInfo fileBasicInfo) {
+        return myUserFileMap.containsKey(fileBasicInfo);
     }
 
     /**
@@ -381,7 +383,7 @@ public class CompileEnvironment {
      *
      * @param fMap The map of user created files.
      */
-    public final void setFileMap(Map<String, ResolveFile> fMap) {
+    public final void setFileMap(Map<ResolveFileBasicInfo, ResolveFile> fMap) {
         myUserFileMap = fMap;
     }
 

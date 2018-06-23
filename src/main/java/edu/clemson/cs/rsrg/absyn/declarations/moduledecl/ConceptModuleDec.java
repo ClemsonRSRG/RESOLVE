@@ -1,7 +1,7 @@
 /*
  * ConceptModuleDec.java
  * ---------------------------------
- * Copyright (c) 2017
+ * Copyright (c) 2018
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
@@ -64,15 +65,15 @@ public class ConceptModuleDec extends ModuleDec {
      *                    level constraints.
      * @param decs The list of {@link Dec} objects.
      * @param isSharingConcept Indicates whether or not this is a sharing concept.
-     * @param moduleDependencies A map of {@link PosSymbol} (with externally realized
-     *                           flags) that indicates all the modules that this module
-     *                           declaration depends on.
+     * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
+     *                           externally realized flags that indicates
+     *                           all the modules that this module declaration depends on.
      */
     public ConceptModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             AssertionClause requires, List<AssertionClause> constraints,
             List<Dec> decs, boolean isSharingConcept,
-            Map<PosSymbol, Boolean> moduleDependencies) {
+            Map<ResolveFileBasicInfo, Boolean> moduleDependencies) {
         super(l, name, parameterDecs, usesItems, decs, moduleDependencies);
         myConstraints = constraints;
         myRequires = requires;
@@ -193,7 +194,7 @@ public class ConceptModuleDec extends ModuleDec {
         Collections.copy(newDecs, myDecs);
         List<AssertionClause> newConstraints = new ArrayList<>(myConstraints.size());
         Collections.copy(newConstraints, myConstraints);
-        Map<PosSymbol, Boolean> newModuleDependencies = copyModuleDependencies();
+        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies = copyModuleDependencies();
 
         return new ConceptModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
                 newUsesItems, myRequires.clone(), newConstraints, newDecs,

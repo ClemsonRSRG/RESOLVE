@@ -1,7 +1,7 @@
 /*
  * Utilities.java
  * ---------------------------------
- * Copyright (c) 2017
+ * Copyright (c) 2018
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.misc;
 
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -140,9 +141,11 @@ public class Utilities {
         List<String> pkgList =
                 Utilities.getPackageList(file.getAbsolutePath(), workspacePath);
         CharStream inputStream = CharStreams.fromPath(file.toPath());
+        File parentFile = file.getParentFile();
 
-        return new ResolveFile(name, moduleType, inputStream, file
-                .getParentFile().toPath(), pkgList, file.getAbsolutePath());
+        return new ResolveFile(new ResolveFileBasicInfo(name, parentFile
+                .getName()), moduleType, inputStream, parentFile.toPath(),
+                pkgList, file.getAbsolutePath());
     }
 
     /**
@@ -202,6 +205,9 @@ public class Utilities {
         List<String> pkgList = new LinkedList<>();
         Collections.addAll(pkgList, relativePath.split(Pattern
                 .quote(File.separator)));
+
+        // Remove filename from our package structure.
+        pkgList.remove(pkgList.size() - 1);
 
         return pkgList;
     }

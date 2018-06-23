@@ -1,10 +1,11 @@
 What is RESOLVE?
 ==============
-[![Build Status](https://travis-ci.org/ClemsonRSRG/RESOLVE.svg?branch=master)](https://travis-ci.org/ClemsonRSRG/RESOLVE) [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/ClemsonRSRG/RESOLVE/master/LICENSE.txt)
-<img align="right" src="src/resources/images/resolve_logo.png"/>
+[![Build Status](https://travis-ci.org/ClemsonRSRG/RESOLVE.svg?branch=master)](https://travis-ci.org/ClemsonRSRG/RESOLVE) 
+[![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/ClemsonRSRG/RESOLVE/master/LICENSE.txt)
+<img align="right" src="src/resources/images/resolve_logo.png" width="200"/>
 
-RESOLVE (REusable SOftware Language with VErification) is a programming and
-specification language designed for verifying correctness of object oriented
+RESOLVE (REusable SOftware Language with VErification) is a specification and
+programming language designed for verifying correctness of object oriented
 programs.
 
 The RESOLVE language is designed from the ground up to facilitate *mathematical
@@ -20,6 +21,7 @@ generation to proving are performed in-house, while RESOLVE programs are
 translated to Java and run on the JVM.
 
 ## Authors and major contributors
+
 The creation and continual evolution of the RESOLVE language is owed to an
 ongoing joint effort between Clemson University, The Ohio State University, and
 countless educators and researchers from a variety of [other](https://www.cs.clemson.edu/resolve/about.html) 
