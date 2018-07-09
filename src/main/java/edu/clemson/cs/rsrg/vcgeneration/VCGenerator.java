@@ -60,6 +60,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.TypeRepresentationCorrRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.WhichEntailsRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
@@ -882,6 +883,37 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postTypeFamilyDec(TypeFamilyDec dec) {
         myCurrentVerificationContext.storeConceptTypeFamilyDec(dec);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a {@code Concept Realization}.
+     */
+    @Override
+    public final void preTypeRepresentationDec(TypeRepresentationDec dec) {
+        // Create a new assertive code block
+        AssertiveCodeBlock block =
+                new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
+
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(block);
+
+        // Create a new model for this assertive code block
+        ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        blockModel.add("blockName", dec.getName());
+
+        // Apply well defined correspondence rule for concept type realizations
+        TypeRepresentationCorrRule declRule =
+                new TypeRepresentationCorrRule(dec, block,
+                        myCurrentVerificationContext, mySTGroup, blockModel);
+        declRule.applyRule();
+
+        // Store this block model.
+        myAssertiveCodeBlockModels.put(block, declRule.getBlockModel());
+
+        // Add this as a new incomplete assertive code block
+        myIncompleteAssertiveCodeBlocks.add(block);
     }
 
     // -----------------------------------------------------------

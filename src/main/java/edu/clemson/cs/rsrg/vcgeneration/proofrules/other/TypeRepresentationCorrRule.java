@@ -1,5 +1,5 @@
 /*
- * SharedStateCorrRule.java
+ * TypeRepresentationCorrRule.java
  * ---------------------------------
  * Copyright (c) 2018
  * RESOLVE Software Research Group
@@ -12,7 +12,8 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.other;
 
-import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -21,13 +22,13 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for establishing the {@code Shared Variable}'s
+ * <p>This class contains the logic for establishing the {@code Type Representation}'s
  * {@code correspondence} is well defined.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class SharedStateCorrRule extends AbstractProofRuleApplication
+public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
         implements
             ProofRuleApplication {
 
@@ -35,8 +36,8 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@code shared state} realization we are applying the rule to.</p> */
-    private final SharedStateRealizationDec mySharedStateRealizDec;
+    /** <p>The {@code type} representation we are applying the rule to.</p> */
+    private final TypeRepresentationDec myTypeRepresentationDec;
 
     // ===========================================================
     // Constructors
@@ -44,9 +45,9 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
 
     /**
      * <p>This creates a new application for a well defined
-     * {@code correspondence} rule for a {@link SharedStateRealizationDec}.</p>
+     * {@code correspondence} rule for a {@link TypeRepresentationDec}.</p>
      *
-     * @param dec A shared state realization.
+     * @param dec A concept type realization.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -54,11 +55,11 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public SharedStateCorrRule(SharedStateRealizationDec dec,
+    public TypeRepresentationCorrRule(TypeRepresentationDec dec,
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
-        mySharedStateRealizDec = dec;
+        myTypeRepresentationDec = dec;
     }
 
     // ===========================================================
@@ -70,11 +71,19 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Assume CPC and RPC and DC and RDC and SS_RC
+        // Create the top most level assume statement and
+        // add it to the assertive code block as the first statement
+        // ( Assume CPC and RPC and DC and RDC and SS_RC and RC )
+        /*AssumeStmt topLevelAssumeStmt =
+                new AssumeStmt(myTypeRepresentationDec.getLocation().clone(),
+                        myCurrentVerificationContext
+                                .createTopLevelAssumeExpFromContext(myTypeRepresentationDec
+                                        .getLocation(), true, false), false);
+        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);*/
 
-        // Assume SS_Cor_Exp
+        // Assume Cor_Exp
 
-        // Confirm the shared variable's constraint
+        // Confirm the type's constraint
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
@@ -93,7 +102,7 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Well Defined Correspondence Rule (Shared State)";
+        return "Well Defined Correspondence Rule (Concept Type Realization)";
     }
 
 }
