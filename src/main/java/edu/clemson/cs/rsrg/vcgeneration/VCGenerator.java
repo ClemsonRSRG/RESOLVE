@@ -909,7 +909,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         myCurrentVerificationContext, mySTGroup, blockModel);
         declRule.applyRule();
 
-        // Store this block model.
+        // Update the current assertive code blocks and its associated block model.
+        block = declRule.getAssertiveCodeBlocks().getFirst();
         myAssertiveCodeBlockModels.put(block, declRule.getBlockModel());
 
         // Add this as a new incomplete assertive code block
@@ -1016,7 +1017,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myCurrentVerificationContext, mySTGroup, blockModel);
             entailsRule.applyRule();
 
-            // Store this block model.
+            // Update the current assertive code blocks and its associated block model.
+            block = entailsRule.getAssertiveCodeBlocks().getFirst();
             myAssertiveCodeBlockModels.put(block, entailsRule.getBlockModel());
 
             // Add this as a new incomplete assertive code block
