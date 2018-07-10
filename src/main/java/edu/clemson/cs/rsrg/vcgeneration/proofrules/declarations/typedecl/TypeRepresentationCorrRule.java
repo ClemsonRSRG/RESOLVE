@@ -25,7 +25,6 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
-import java.util.Iterator;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -123,41 +122,23 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
                         corrExp, false);
         myCurrentAssertiveCodeBlock.addStatement(correspondenceAssumeStmt);
 
-        // Obtain the type family we are implementing
-        TypeFamilyDec typeFamilyDec = null;
-        Iterator<TypeFamilyDec> conceptTypeIt =
-                myCurrentVerificationContext.getConceptDeclaredTypes()
-                        .iterator();
-        while (conceptTypeIt.hasNext() && typeFamilyDec == null) {
-            TypeFamilyDec nextDec = conceptTypeIt.next();
-            if (nextDec.getName().equals(myTypeRepresentationDec.getName())) {
-                typeFamilyDec = nextDec;
-            }
-        }
-
-        // Make sure we found one.
-        if (typeFamilyDec != null) {
-            // Confirm the type's constraint
-            // ( Confirm TC; )
-            Exp typeConstraintExp =
-                    typeFamilyDec.getConstraint().getAssertionExp().clone();
-            typeConstraintExp.setLocationDetailModel(new LocationDetailModel(
-                    typeFamilyDec.getLocation().clone(),
-                    myTypeRepresentationDec.getLocation().clone(),
-                    "Well Defined Correspondence for "
-                            + myTypeRepresentationDec.getName()));
-            ConfirmStmt finalConfirmStmt =
-                    new ConfirmStmt(myTypeRepresentationDec.getLocation()
-                            .clone(), typeConstraintExp, VarExp
-                            .isLiteralTrue(typeConstraintExp));
-            myCurrentAssertiveCodeBlock.addStatement(finalConfirmStmt);
-        }
-        else {
-            // Shouldn't be possible but just in case it ever happens
-            // by accident.
-            Utilities.noSuchSymbol(null, myTypeRepresentationDec.getName()
-                    .getName(), myTypeRepresentationDec.getLocation());
-        }
+        // Confirm the type's constraint
+        // ( Confirm TC; )
+        TypeFamilyDec typeFamilyDec =
+                Utilities.getAssociatedTypeFamilyDec(myTypeRepresentationDec,
+                        myCurrentVerificationContext);
+        Exp typeConstraintExp =
+                typeFamilyDec.getConstraint().getAssertionExp().clone();
+        typeConstraintExp.setLocationDetailModel(new LocationDetailModel(
+                typeFamilyDec.getLocation().clone(), myTypeRepresentationDec
+                        .getLocation().clone(),
+                "Well Defined Correspondence for "
+                        + myTypeRepresentationDec.getName()));
+        ConfirmStmt finalConfirmStmt =
+                new ConfirmStmt(myTypeRepresentationDec.getLocation().clone(),
+                        typeConstraintExp, VarExp
+                                .isLiteralTrue(typeConstraintExp));
+        myCurrentAssertiveCodeBlock.addStatement(finalConfirmStmt);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");

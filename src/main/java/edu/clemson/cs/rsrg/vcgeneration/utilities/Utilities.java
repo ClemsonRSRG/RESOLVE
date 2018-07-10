@@ -18,6 +18,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
@@ -479,6 +480,39 @@ public class Utilities {
         }
 
         return retExp;
+    }
+
+    /**
+     * <p>An helper method for locating the associated {@code Type Family} from
+     * a {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec An {@link TypeRepresentationDec}.
+     * @param context The current {@link VerificationContext}.
+     *
+     * @return A {@link TypeFamilyDec}.
+     */
+    public static TypeFamilyDec getAssociatedTypeFamilyDec(
+            TypeRepresentationDec dec, VerificationContext context) {
+        // Obtain the type family we are implementing
+        TypeFamilyDec typeFamilyDec = null;
+        Iterator<TypeFamilyDec> conceptTypeIt =
+                context.getConceptDeclaredTypes().iterator();
+        while (conceptTypeIt.hasNext() && typeFamilyDec == null) {
+            TypeFamilyDec nextDec = conceptTypeIt.next();
+            if (nextDec.getName().equals(dec.getName())) {
+                typeFamilyDec = nextDec;
+            }
+        }
+
+        // Make sure we found one.
+        if (typeFamilyDec == null) {
+            // Shouldn't be possible but just in case it ever happens
+            // by accident.
+            Utilities.noSuchSymbol(null, dec.getName().getName(), dec
+                    .getLocation());
+        }
+
+        return typeFamilyDec;
     }
 
     /**

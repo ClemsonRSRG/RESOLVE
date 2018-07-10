@@ -926,6 +926,13 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postTypeRepresentationDec(TypeRepresentationDec dec) {
+        // TODO: Need to re-define the walk to handle declarations inside init and final blocks!
+
+        // Query for the type entry in the symbol table
+        SymbolTableEntry symbolTableEntry =
+                Utilities.searchProgramType(dec.getLocation(), null, dec
+                        .getName(), myCurrentModuleScope);
+
         // Create a new assertive code block for handling type initialization
         AssertiveCodeBlock initBlock =
                 new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
@@ -939,8 +946,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Apply initialization rule for concept type realizations
         TypeRepresentationInitRule initDeclRule =
-                new TypeRepresentationInitRule(dec, initBlock,
-                        myCurrentVerificationContext, mySTGroup, initBlockModel);
+                new TypeRepresentationInitRule(dec, symbolTableEntry,
+                        initBlock, myCurrentVerificationContext, mySTGroup,
+                        initBlockModel);
         initDeclRule.applyRule();
 
         // Update the current assertive code blocks and its associated block model.
@@ -966,8 +974,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Apply finalization rule for concept type realizations
         TypeRepresentationFinalRule finalDeclRule =
-                new TypeRepresentationFinalRule(dec, finalBlock,
-                        myCurrentVerificationContext, mySTGroup,
+                new TypeRepresentationFinalRule(dec, symbolTableEntry,
+                        finalBlock, myCurrentVerificationContext, mySTGroup,
                         finalBlockModel);
         finalDeclRule.applyRule();
 
