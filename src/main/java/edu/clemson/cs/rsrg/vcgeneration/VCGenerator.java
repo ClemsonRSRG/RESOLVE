@@ -58,11 +58,13 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.TypeRepresentationCorrRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.facilitydecl.FacilityDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.operationdecl.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationCorrRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationFinalRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationInitRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.WhichEntailsRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statements.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
@@ -915,6 +917,67 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add this as a new incomplete assertive code block
         myIncompleteAssertiveCodeBlocks.add(block);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a {@code Concept Realization}.
+     */
+    @Override
+    public final void postTypeRepresentationDec(TypeRepresentationDec dec) {
+        // Create a new assertive code block for handling type initialization
+        AssertiveCodeBlock initBlock =
+                new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
+
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(initBlock);
+
+        // Create a new model for this assertive code block
+        ST initBlockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        initBlockModel.add("blockName", dec.getName());
+
+        // Apply initialization rule for concept type realizations
+        TypeRepresentationInitRule initDeclRule =
+                new TypeRepresentationInitRule(dec, initBlock,
+                        myCurrentVerificationContext, mySTGroup, initBlockModel);
+        initDeclRule.applyRule();
+
+        // Update the current assertive code blocks and its associated block model.
+        initBlock = initDeclRule.getAssertiveCodeBlocks().getFirst();
+        myAssertiveCodeBlockModels.put(initBlock, initDeclRule.getBlockModel());
+
+        // Add this as a new incomplete assertive code block
+        myIncompleteAssertiveCodeBlocks.add(initBlock);
+
+        // ---------------------------------------------------------------------- //
+
+        // Create a new assertive code block for handling type finalization
+        AssertiveCodeBlock finalBlock =
+                new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
+
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(finalBlock);
+
+        // Create a new model for this assertive code block
+        ST finalBlockModel =
+                mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        finalBlockModel.add("blockName", dec.getName());
+
+        // Apply finalization rule for concept type realizations
+        TypeRepresentationFinalRule finalDeclRule =
+                new TypeRepresentationFinalRule(dec, finalBlock,
+                        myCurrentVerificationContext, mySTGroup,
+                        finalBlockModel);
+        finalDeclRule.applyRule();
+
+        // Update the current assertive code blocks and its associated block model.
+        finalBlock = finalDeclRule.getAssertiveCodeBlocks().getFirst();
+        myAssertiveCodeBlockModels.put(finalBlock, finalDeclRule
+                .getBlockModel());
+
+        // Add this as a new incomplete assertive code block
+        myIncompleteAssertiveCodeBlocks.add(finalBlock);
     }
 
     // -----------------------------------------------------------

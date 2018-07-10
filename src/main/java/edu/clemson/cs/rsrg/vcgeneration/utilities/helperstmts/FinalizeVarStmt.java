@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.operationdecl.ProcedureDeclRule;
 
 /**
  * <p>This is the class that builds a special kind of statement

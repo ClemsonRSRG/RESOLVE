@@ -1,5 +1,5 @@
 /*
- * VCConfirmStmtRule.java
+ * ChangeStmtRule.java
  * ---------------------------------
  * Copyright (c) 2018
  * RESOLVE Software Research Group
@@ -10,27 +10,29 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.statements;
 
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
+import edu.clemson.cs.rsrg.absyn.statements.ChangeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
-import java.util.List;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for replacing the {@link VerificationCondition} in
- * the current {@link AssertiveCodeBlock} with those stored inside a
- * {@link VCConfirmStmt}.</p>
+ * <p>This class contains the logic for applying the {@code change}
+ * rule.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class VCConfirmStmtRule extends AbstractProofRuleApplication
+public class ChangeStmtRule extends AbstractProofRuleApplication
         implements
             ProofRuleApplication {
 
@@ -38,19 +40,19 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@link VCConfirmStmt} we are applying the rule to.</p> */
-    private final VCConfirmStmt myVCConfirmStmt;
+    /** <p>The {@link ChangeStmt} we are applying the rule to.</p> */
+    private final ChangeStmt myChangeStmt;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates an application rule that deals with
-     * {@link VCConfirmStmt}.</p>
+     * <p>This creates a new application of the {@code change}
+     * rule.</p>
      *
-     * @param vcConfirmStmt The {@link VCConfirmStmt} we are applying
-     *                      the rule to.
+     * @param changeStmt The {@link ChangeStmt} we are applying
+     *                   the rule to.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -58,11 +60,10 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public VCConfirmStmtRule(VCConfirmStmt vcConfirmStmt,
-            AssertiveCodeBlock block, VerificationContext context,
-            STGroup stGroup, ST blockModel) {
+    public ChangeStmtRule(ChangeStmt changeStmt, AssertiveCodeBlock block,
+            VerificationContext context, STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
-        myVCConfirmStmt = vcConfirmStmt;
+        myChangeStmt = changeStmt;
     }
 
     // ===========================================================
@@ -74,14 +75,20 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Combine the verification conditions with those stored inside the VCConfirmStmt.
-        // Note: We really shouldn't have any VerificationCondition inside the current
-        // assertive code block. The while statement that generated the VCConfirmStmt
-        // should have made sure of that. However, it doesn't hurt to combine them rather
-        // than simply replacing it directly. - YS
+        // Create a map from each variable to a new NQV
+        List<Exp> changeVars = myChangeStmt.getChangingVars();
+        Map<Exp, Exp> replacementMap = new LinkedHashMap<>(changeVars.size());
+        for (Exp exp : changeVars) {
+            VCVarExp vcVarExp =
+                    Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp.clone());
+            myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
+            replacementMap.put(exp.clone(), vcVarExp);
+        }
+
+        // Loop through each verification condition and replace the variable
+        // expression wherever possible.
         List<VerificationCondition> newVCs =
-                myCurrentAssertiveCodeBlock.getVCs();
-        newVCs.addAll(myVCConfirmStmt.getVCs());
+                createReplacementVCs(myCurrentAssertiveCodeBlock.getVCs(), replacementMap);
 
         // Store the new list of vcs
         myCurrentAssertiveCodeBlock.setVCs(newVCs);
@@ -101,7 +108,7 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "VCConfirm Rule";
+        return "Change Rule";
     }
 
 }

@@ -19,7 +19,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.AssumeStmtRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statements.AssumeStmtRule;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

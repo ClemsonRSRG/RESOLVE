@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.WhileStmtRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statements.WhileStmtRule;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.Collections;
 import java.util.Iterator;
