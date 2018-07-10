@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
@@ -23,8 +24,9 @@ import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.AbstractBlockDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
@@ -39,7 +41,7 @@ import org.stringtemplate.v4.STGroup;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class TypeRepresentationInitRule extends AbstractProofRuleApplication
+public class TypeRepresentationInitRule extends AbstractBlockDeclRule
         implements
             ProofRuleApplication {
 
@@ -66,6 +68,7 @@ public class TypeRepresentationInitRule extends AbstractProofRuleApplication
      *
      * @param dec A concept type realization.
      * @param symbolTableEntry The program type entry associated with {@code dec}.
+     * @param symbolTableBuilder The current symbol table.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -74,11 +77,26 @@ public class TypeRepresentationInitRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public TypeRepresentationInitRule(TypeRepresentationDec dec,
-            SymbolTableEntry symbolTableEntry, AssertiveCodeBlock block,
-            VerificationContext context, STGroup stGroup, ST blockModel) {
-        super(block, context, stGroup, blockModel);
+            SymbolTableEntry symbolTableEntry,
+            MathSymbolTableBuilder symbolTableBuilder,
+            AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
+        super(block, dec.getName().getName(), symbolTableBuilder, context,
+                stGroup, blockModel);
         myTypeRepresentationDec = dec;
         myVarTypeEntry = symbolTableEntry;
+
+        // Build a set of shared variables being affected
+        // by the current initialization block
+        AffectsClause affectsClause =
+                myTypeRepresentationDec.getTypeInitItem().getAffectedVars();
+        if (affectsClause != null) {
+            for (Exp exp : affectsClause.getAffectedExps()) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps, exp)) {
+                    myAffectedExps.add(exp.clone());
+                }
+            }
+        }
     }
 
     // ===========================================================

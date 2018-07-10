@@ -1,0 +1,271 @@
+/*
+ * AbstractBlockDeclRule.java
+ * ---------------------------------
+ * Copyright (c) 2018
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations;
+
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import java.util.*;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+
+/**
+ * <p>This is the abstract base class for all the {@code declaration}'s
+ * that contains a block of inner {@code declarations} and/or
+ * {@code statements}.</p>
+ *
+ * @author Yu-Shan Sun
+ * @version 1.0
+ */
+public abstract class AbstractBlockDeclRule
+        extends
+            AbstractProofRuleApplication implements ProofRuleApplication {
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>All the shared variables affected by the current {@code block}.</p> */
+    protected final Set<Exp> myAffectedExps;
+
+    /** <p>This is the name for the current block we are applying the rule to.</p> */
+    private final String myDeclName;
+
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    protected final TypeGraph myTypeGraph;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>An helper constructor stores all declaration related items for
+     * a class that inherits from {@code AbstractBlockDeclRule}.</p>
+     *
+     * @param block The assertive code block that the subclasses are
+     *              applying the rule to.
+     * @param declName Name associated with the declaration.
+     * @param symbolTableBuilder The current symbol table.
+     * @param context The verification context that contains all
+     *                the information we have collected so far.
+     * @param stGroup The string template group we will be using.
+     * @param blockModel The model associated with {@code block}.
+     */
+    protected AbstractBlockDeclRule(AssertiveCodeBlock block, String declName,
+            MathSymbolTableBuilder symbolTableBuilder, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
+        super(block, context, stGroup, blockModel);
+        myAffectedExps = new LinkedHashSet<>();
+        myDeclName = declName;
+        myTypeGraph = symbolTableBuilder.getTypeGraph();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>This method adds the appropriate substitutions
+     * for the different versions of {@code varExp}.</p>
+     *
+     * @param varExp A variable expression.
+     * @param oldVarExp The incoming version of {@code varExp}.
+     * @param concVarExp The conceptual version of {@code varExp}.
+     * @param substitutionMap The substitution map where these expressions
+     *                        are needed.
+     *
+     * @return An updated map.
+     */
+    protected final Map<Exp, Exp> addConceptualVariables(VarExp varExp,
+            OldExp oldVarExp, DotExp concVarExp, Map<Exp, Exp> substitutionMap) {
+        // Create an incoming version of the conceptual variable
+        OldExp oldConcVarExp =
+                new OldExp(concVarExp.getLocation().clone(), concVarExp.clone());
+        oldConcVarExp.setMathType(concVarExp.getMathType());
+
+        // Add these to our substitution map
+        substitutionMap.put(varExp, concVarExp);
+        substitutionMap.put(oldVarExp, oldConcVarExp);
+
+        return substitutionMap;
+    }
+
+    /**
+     * <p>This method creates a {@code restores ensures} clause for any {@code shared variables}
+     * not being affected by the current declaration.</p>
+     *
+     * @param declLoc The current declaration's location.
+     * @param exp The expression where we are going add the new {@code ensures}
+     *            expressions to.
+     *
+     * @return A modified {@code ensures} clause with the new
+     * {@code restores} expression.
+     */
+    protected final Exp createFacilitySharedVarRestoresEnsuresExp(
+            Location declLoc, Exp exp) {
+        // Loop through all instantiated facility's and generate a "restores" ensures clause
+        // for non-affected shared variables/math definition variables.
+        Exp retExp = exp;
+        for (InstantiatedFacilityDecl facilityDecl : myCurrentVerificationContext
+                .getProcessedInstFacilityDecls()) {
+            for (SharedStateDec stateDec : facilityDecl
+                    .getConceptSharedStates()) {
+                for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                    // Convert the math variables to variable expressions
+                    VarExp stateVarExp =
+                            Utilities.createVarExp(declLoc.clone(),
+                                    facilityDecl.getInstantiatedFacilityName(),
+                                    mathVarDec.getName(), mathVarDec
+                                            .getMathType(), null);
+                    OldExp oldStateVarExp =
+                            new OldExp(declLoc.clone(), stateVarExp);
+                    oldStateVarExp.setMathType(stateVarExp.getMathType());
+
+                    // Add a "restores" mode to any shared variables not being affected
+                    if (!Utilities.containsEquivalentExp(myAffectedExps,
+                            stateVarExp)) {
+                        retExp =
+                                createRestoresExpForSharedVars(declLoc,
+                                        stateVarExp, oldStateVarExp, retExp);
+                    }
+                }
+            }
+
+            for (TypeFamilyDec typeFamilyDec : facilityDecl
+                    .getConceptDeclaredTypes()) {
+                for (MathDefVariableDec mathDefVariableDec : typeFamilyDec
+                        .getDefinitionVarList()) {
+                    // Convert the math definition variables to variable expressions
+                    MathVarDec mathVarDec = mathDefVariableDec.getVariable();
+                    VarExp defVarExp =
+                            Utilities.createVarExp(declLoc.clone(),
+                                    facilityDecl.getInstantiatedFacilityName(),
+                                    mathVarDec.getName(), mathVarDec
+                                            .getMathType(), null);
+                    OldExp oldDefVarExp =
+                            new OldExp(declLoc.clone(), defVarExp);
+                    oldDefVarExp.setMathType(defVarExp.getMathType());
+
+                    // Add a "restores" mode to any definition variables not being affected
+                    if (!Utilities.containsEquivalentExp(myAffectedExps,
+                            defVarExp)) {
+                        retExp =
+                                createRestoresExpForDefVars(declLoc, defVarExp,
+                                        oldDefVarExp, retExp);
+                    }
+                }
+            }
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>This method creates a new {@code ensures} expression
+     * that includes a {@code restores} mode clause for the given
+     * math definition variable.</p>
+     *
+     * @param declLoc The current declaration's location.
+     * @param defVarExp A math definition variable as a {@link VarExp}.
+     * @param oldDefVarExp The incoming value of {@code defVarExp}.
+     * @param ensuresExp The current ensures clause we are building.
+     *
+     * @return A modified {@code ensures} clause with the new
+     * {@code restores} expression.
+     */
+    protected final Exp createRestoresExpForDefVars(Location declLoc,
+            VarExp defVarExp, OldExp oldDefVarExp, Exp ensuresExp) {
+        // Construct an expression using the expression and it's
+        // old expression equivalent.
+        Exp restoresConditionExp =
+                new EqualsExp(declLoc.clone(), defVarExp.clone(), null,
+                        EqualsExp.Operator.EQUAL, oldDefVarExp.clone());
+        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
+        restoresConditionExp
+                .setLocationDetailModel(new LocationDetailModel(
+                        declLoc.clone(),
+                        declLoc.clone(),
+                        "Ensures Clause of "
+                                + myDeclName
+                                + " (Condition from Non-Affected Definition Variable)"));
+
+        // Form a conjunct if needed.
+        Exp retExp;
+        if (VarExp.isLiteralTrue(ensuresExp)) {
+            retExp = restoresConditionExp;
+        }
+        else {
+            retExp =
+                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
+                            restoresConditionExp);
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>This method creates a new {@code ensures} expression
+     * that includes a {@code restores} mode clause for the given
+     * global state variable.</p>
+     *
+     * @param declLoc The current declaration's location.
+     * @param stateVarExp A global state variable as a {@link VarExp}.
+     * @param oldStateVarExp The incoming value of {@code stateVarExp}.
+     * @param ensuresExp The current ensures clause we are building.
+     *
+     * @return A modified {@code ensures} clause with the new
+     * {@code restores} expression.
+     */
+    protected final Exp createRestoresExpForSharedVars(Location declLoc,
+            VarExp stateVarExp, OldExp oldStateVarExp, Exp ensuresExp) {
+        // Construct an expression using the expression and it's
+        // old expression equivalent.
+        Exp restoresConditionExp =
+                new EqualsExp(declLoc.clone(), stateVarExp.clone(), null,
+                        EqualsExp.Operator.EQUAL, oldStateVarExp.clone());
+        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
+        restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
+                declLoc.clone(), declLoc.clone(), "Ensures Clause of "
+                        + myDeclName
+                        + " (Condition from Non-Affected Shared Variable)"));
+
+        // Form a conjunct if needed.
+        Exp retExp;
+        if (VarExp.isLiteralTrue(ensuresExp)) {
+            retExp = restoresConditionExp;
+        }
+        else {
+            retExp =
+                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
+                            restoresConditionExp);
+        }
+
+        return retExp;
+    }
+}

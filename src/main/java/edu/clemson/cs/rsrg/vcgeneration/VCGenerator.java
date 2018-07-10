@@ -947,8 +947,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply initialization rule for concept type realizations
         TypeRepresentationInitRule initDeclRule =
                 new TypeRepresentationInitRule(dec, symbolTableEntry,
-                        initBlock, myCurrentVerificationContext, mySTGroup,
-                        initBlockModel);
+                        myBuilder, initBlock, myCurrentVerificationContext,
+                        mySTGroup, initBlockModel);
         initDeclRule.applyRule();
 
         // Update the current assertive code blocks and its associated block model.
@@ -975,8 +975,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply finalization rule for concept type realizations
         TypeRepresentationFinalRule finalDeclRule =
                 new TypeRepresentationFinalRule(dec, symbolTableEntry,
-                        finalBlock, myCurrentVerificationContext, mySTGroup,
-                        finalBlockModel);
+                        myBuilder, finalBlock, myCurrentVerificationContext,
+                        mySTGroup, finalBlockModel);
         finalDeclRule.applyRule();
 
         // Update the current assertive code blocks and its associated block model.

@@ -40,13 +40,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
-import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.AbstractBlockDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import java.util.*;
 import org.stringtemplate.v4.ST;
@@ -59,19 +57,13 @@ import org.stringtemplate.v4.STGroup;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class ProcedureDeclRule extends AbstractProofRuleApplication
+public class ProcedureDeclRule extends AbstractBlockDeclRule
         implements
             ProofRuleApplication {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
-
-    /**
-     * <p>All the shared variables affected by the associated
-     * {@link OperationEntry} and the current {@link ProcedureDec}.</p>
-     */
-    private final Set<Exp> myAffectedExps;
 
     /**
      * <p>The module scope for the file we are generating
@@ -101,12 +93,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
      */
     private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
 
-    /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
-     */
-    private final TypeGraph myTypeGraph;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -133,21 +119,21 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
-        super(block, context, stGroup, blockModel);
-        myAffectedExps = new LinkedHashSet<>();
+        super(block, block.getCorrespondingOperation().getName(),
+                symbolTableBuilder, context, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
         myCurrentProcedureDecreasingExp =
                 myCurrentAssertiveCodeBlock
                         .getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry =
                 myCurrentAssertiveCodeBlock.getCorrespondingOperation();
-        myTypeGraph = symbolTableBuilder.getTypeGraph();
         myProcedureDec = procedureDec;
         myVariableTypeEntries = procVarTypeEntries;
 
         // Build a set of shared variables being affected
         // from the OperationEntry.
-        AffectsClause operationAffectsClause = myCurrentProcedureOperationEntry.getAffectsClause();
+        AffectsClause operationAffectsClause =
+                myCurrentProcedureOperationEntry.getAffectsClause();
         if (operationAffectsClause != null) {
             for (Exp exp : operationAffectsClause.getAffectedExps()) {
                 if (!Utilities.containsEquivalentExp(myAffectedExps, exp)) {
@@ -317,32 +303,6 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
     // ===========================================================
     // Private Methods
     // ===========================================================
-
-    /**
-     * <p>An helper method for adding the appropriate substitutions
-     * for the different versions of {@code varExp}.</p>
-     *
-     * @param varExp A variable expression.
-     * @param oldVarExp The incoming version of {@code varExp}.
-     * @param concVarExp The conceptual version of {@code varExp}.
-     * @param substitutionMap The substitution map where these expressions
-     *                        are needed.
-     *
-     * @return An updated map.
-     */
-    private Map<Exp, Exp> addConceptualVariables(VarExp varExp,
-            OldExp oldVarExp, DotExp concVarExp, Map<Exp, Exp> substitutionMap) {
-        // Create an incoming version of the conceptual variable
-        OldExp oldConcVarExp =
-                new OldExp(concVarExp.getLocation().clone(), concVarExp.clone());
-        oldConcVarExp.setMathType(concVarExp.getMathType());
-
-        // Add these to our substitution map
-        substitutionMap.put(varExp, concVarExp);
-        substitutionMap.put(oldVarExp, oldConcVarExp);
-
-        return substitutionMap;
-    }
 
     /**
      * <p>An helper method that uses the {@code Shared Variable} and any parameter type
@@ -798,129 +758,9 @@ public class ProcedureDeclRule extends AbstractProofRuleApplication
 
         // Loop through all instantiated facility's and generate a "restores" ensures clause
         // for non-affected shared variables/math definition variables.
-        for (InstantiatedFacilityDecl facilityDecl :
-                myCurrentVerificationContext.getProcessedInstFacilityDecls()) {
-            for (SharedStateDec stateDec : facilityDecl.getConceptSharedStates()) {
-                for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
-                    // Convert the math variables to variable expressions
-                    VarExp stateVarExp =
-                            Utilities.createVarExp(procedureLoc.clone(),
-                                    facilityDecl.getInstantiatedFacilityName(),
-                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
-                    OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
-                    oldStateVarExp.setMathType(stateVarExp.getMathType());
-
-                    // Add a "restores" mode to any shared variables not being affected
-                    if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
-                        retExp = createRestoresExpForSharedVars(procedureLoc,
-                                stateVarExp, oldStateVarExp, retExp);
-                    }
-                }
-            }
-
-            for (TypeFamilyDec typeFamilyDec : facilityDecl.getConceptDeclaredTypes()) {
-                for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
-                    // Convert the math definition variables to variable expressions
-                    MathVarDec mathVarDec = mathDefVariableDec.getVariable();
-                    VarExp defVarExp =
-                            Utilities.createVarExp(procedureLoc.clone(),
-                                    facilityDecl.getInstantiatedFacilityName(),
-                                    mathVarDec.getName(), mathVarDec.getMathType(), null);
-                    OldExp oldDefVarExp = new OldExp(procedureLoc.clone(), defVarExp);
-                    oldDefVarExp.setMathType(defVarExp.getMathType());
-
-                    // Add a "restores" mode to any definition variables not being affected
-                    if (!Utilities.containsEquivalentExp(myAffectedExps, defVarExp)) {
-                        retExp = createRestoresExpForDefVars(procedureLoc,
-                                defVarExp, oldDefVarExp, retExp);
-                    }
-                }
-            }
-        }
+        retExp = createFacilitySharedVarRestoresEnsuresExp(procedureLoc, retExp);
 
         // Apply any substitution and return the modified expression
         return retExp.substitute(substitutionParamToConc);
-    }
-
-    /**
-     * <p>An helper method that creates a new {@code ensures} expression
-     * that includes a {@code restores} mode clause for the given
-     * math definition variable.</p>
-     *
-     * @param procedureLoc The current procedure's location.
-     * @param defVarExp A math definition variable as a {@link VarExp}.
-     * @param oldDefVarExp The incoming value of {@code defVarExp}.
-     * @param ensuresExp The current ensures clause we are building.
-     *
-     * @return A modified {@code ensures} clause with the new
-     * {@code restores} expression.
-     */
-    private Exp createRestoresExpForDefVars(Location procedureLoc,
-            VarExp defVarExp, OldExp oldDefVarExp, Exp ensuresExp) {
-        // Construct an expression using the expression and it's
-        // old expression equivalent.
-        Exp restoresConditionExp =
-                new EqualsExp(procedureLoc.clone(), defVarExp.clone(), null,
-                        Operator.EQUAL, oldDefVarExp.clone());
-        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
-        restoresConditionExp
-                .setLocationDetailModel(new LocationDetailModel(procedureLoc
-                        .clone(), procedureLoc.clone(), "Ensures Clause of "
-                        + myCurrentProcedureOperationEntry.getName()
-                        + " (Condition from Non-Affected Definition Variable)"));
-
-        // Form a conjunct if needed.
-        Exp retExp;
-        if (VarExp.isLiteralTrue(ensuresExp)) {
-            retExp = restoresConditionExp;
-        }
-        else {
-            retExp =
-                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
-                            restoresConditionExp);
-        }
-
-        return retExp;
-    }
-
-    /**
-     * <p>An helper method that creates a new {@code ensures} expression
-     * that includes a {@code restores} mode clause for the given
-     * global state variable.</p>
-     *
-     * @param procedureLoc The current procedure's location.
-     * @param stateVarExp A global state variable as a {@link VarExp}.
-     * @param oldStateVarExp The incoming value of {@code stateVarExp}.
-     * @param ensuresExp The current ensures clause we are building.
-     *
-     * @return A modified {@code ensures} clause with the new
-     * {@code restores} expression.
-     */
-    private Exp createRestoresExpForSharedVars(Location procedureLoc,
-            VarExp stateVarExp, OldExp oldStateVarExp, Exp ensuresExp) {
-        // Construct an expression using the expression and it's
-        // old expression equivalent.
-        Exp restoresConditionExp =
-                new EqualsExp(procedureLoc.clone(), stateVarExp.clone(), null,
-                        Operator.EQUAL, oldStateVarExp.clone());
-        restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
-        restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
-                procedureLoc.clone(), procedureLoc.clone(),
-                "Ensures Clause of "
-                        + myCurrentProcedureOperationEntry.getName()
-                        + " (Condition from Non-Affected Shared Variable)"));
-
-        // Form a conjunct if needed.
-        Exp retExp;
-        if (VarExp.isLiteralTrue(ensuresExp)) {
-            retExp = restoresConditionExp;
-        }
-        else {
-            retExp =
-                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
-                            restoresConditionExp);
-        }
-
-        return retExp;
     }
 }
