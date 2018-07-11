@@ -38,7 +38,7 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.AbstractBlockDec
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
-import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -65,10 +65,10 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
     private final TypeRepresentationDec myTypeRepresentationDec;
 
     /**
-     * <p>The symbol table entry representing program type associated
-     * with the variable we are trying to initialize.</p>
+     * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
+     * program type entry.</p>
      */
-    private final SymbolTableEntry myVarTypeEntry;
+    private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
 
     // ===========================================================
     // Constructors
@@ -79,7 +79,7 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
      * rule for a {@link TypeRepresentationDec}.</p>
      *
      * @param dec A concept type realization.
-     * @param symbolTableEntry The program type entry associated with {@code dec}.
+     * @param blockVarTypeEntries This block's local variable declarations
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
@@ -90,14 +90,14 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
      * @param blockModel The model associated with {@code block}.
      */
     public TypeRepresentationInitRule(TypeRepresentationDec dec,
-            SymbolTableEntry symbolTableEntry,
+            Map<VarDec, SymbolTableEntry> blockVarTypeEntries,
             MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
         super(block, dec.getName().getName(), symbolTableBuilder, moduleScope,
                 context, stGroup, blockModel);
         myTypeRepresentationDec = dec;
-        myVarTypeEntry = symbolTableEntry;
+        myVariableTypeEntries = blockVarTypeEntries;
 
         // Build a set of shared variables being affected
         // by the current initialization block
@@ -130,28 +130,22 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
                 Utilities.getAssociatedTypeFamilyDec(myTypeRepresentationDec,
                         myCurrentVerificationContext);
 
-        // Create the top most level assume statement and
-        // add it to the assertive code block as the first statement
-        Exp topLevelAssumeExp =
-                myCurrentVerificationContext
-                        .createTopLevelAssumeExpFromContext(initItem
-                                .getLocation().clone(), true, false);
-
-        // ( Assume CPC and RPC and DC and RDC and SS_RC; )
-        AssumeStmt topLevelAssumeStmt =
-                new AssumeStmt(initItem.getLocation().clone(),
-                        topLevelAssumeExp, false);
-        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
-
-        // YS: Simply create the proper variable initialization statement that
-        //     allow us to deal with generating question mark variables
-        //     and duration logic when we backtrack through the code.
-        myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(
-                new VarDec(typeFamilyDec.getExemplar(), myTypeRepresentationDec
-                        .getRepresentation()), myVarTypeEntry, false));
-
         // Add all the statements
         myCurrentAssertiveCodeBlock.addStatements(initItem.getStatements());
+
+        // YS: Simply create a finalization statement for each variable that
+        //     allow us to deal with generating question mark variables
+        //     and duration logic when we backtrack through the code.
+        List<VarDec> varDecs = initItem.getVariables();
+        for (VarDec dec : varDecs) {
+            // Only need to finalize non-generic type variables.
+            if (myVariableTypeEntries.containsKey(dec)) {
+                myCurrentAssertiveCodeBlock.addStatement(new FinalizeVarStmt(
+                        dec, myVariableTypeEntries.remove(dec)));
+            }
+
+            // TODO: Add the finalization duration ensures (if any)
+        }
 
         // Confirm the shared variable's and our type convention
         // ( Confirm SS_RC and RC; )

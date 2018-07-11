@@ -19,7 +19,6 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
-import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
@@ -99,8 +98,7 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
      *
      * @param procedureDec The {@link ProcedureDec} we are applying
      *                     the rule to.
-     * @param procVarTypeEntries The local variable declaration's
-     *                           program type entries.
+     * @param procVarTypeEntries This block's local variable declarations.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are

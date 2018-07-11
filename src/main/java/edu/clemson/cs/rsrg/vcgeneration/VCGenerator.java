@@ -12,7 +12,9 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration;
 
+import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
@@ -32,8 +34,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.items.programitems.AbstractInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.RealizInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt.StatementType;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -61,6 +66,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.facilitydecl.FacilityDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.operationdecl.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.sharedstatedecl.SharedStateRepresentationInitRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationCorrRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationFinalRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationInitRule;
@@ -122,6 +128,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      * between different math types.</p>
      */
     private final TypeGraph myTypeGraph;
+
+    // -----------------------------------------------------------
+    // Initialization and Finalization-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>An outer declaration that has {@link RealizInitFinalItem RealizInitFinalItems}
+     * that needs to be processed.</p>
+     */
+    private Dec myRealizInitFinalOuterDec;
 
     // -----------------------------------------------------------
     // Operation Declaration-Related
@@ -231,6 +247,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCompileEnvironment = compileEnvironment;
         myFinalAssertiveCodeBlocks = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
+        myRealizInitFinalOuterDec = null;
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
         myVariableTypeEntries = new LinkedHashMap<>();
@@ -852,6 +869,16 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Code that gets executed before visiting a {@link SharedStateRealizationDec}.</p>
+     *
+     * @param dec A shared state realization in a {@code Concept Realization}.
+     */
+    @Override
+    public final void preSharedStateRealizationDec(SharedStateRealizationDec dec) {
+        myRealizInitFinalOuterDec = dec;
+    }
+
+    /**
      * <p>Code that gets executed after visiting a {@link SharedStateRealizationDec}.</p>
      *
      * @param dec A shared state realization in a {@code Concept Realization}.
@@ -895,29 +922,48 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void preTypeRepresentationDec(TypeRepresentationDec dec) {
-        // Create a new assertive code block
-        AssertiveCodeBlock block =
-                new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
+        myRealizInitFinalOuterDec = dec;
+    }
 
-        // Add shared variables in scope to the free variable's list
-        addSharedVarsToFreeVariableList(block);
+    /**
+     * <p>Code that gets executed in between visiting items inside {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a {@code Concept Realization}.
+     * @param prevChild The previous child item visited.
+     * @param nextChild The next child item to be visited.
+     */
+    @Override
+    public final void midTypeRepresentationDec(TypeRepresentationDec dec,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        // Apply the well defined correspondence rule after we finish walking it!
+        if (prevChild instanceof AssertionClause
+                && ((AssertionClause) prevChild).getClauseType().equals(
+                        AssertionClause.ClauseType.CORRESPONDENCE)) {
+            // Create a new assertive code block
+            AssertiveCodeBlock block =
+                    new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
 
-        // Create a new model for this assertive code block
-        ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
-        blockModel.add("blockName", dec.getName());
+            // Add shared variables in scope to the free variable's list
+            addSharedVarsToFreeVariableList(block);
 
-        // Apply well defined correspondence rule for concept type realizations
-        TypeRepresentationCorrRule declRule =
-                new TypeRepresentationCorrRule(dec, block,
-                        myCurrentVerificationContext, mySTGroup, blockModel);
-        declRule.applyRule();
+            // Create a new model for this assertive code block
+            ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+            blockModel.add("blockName", dec.getName());
 
-        // Update the current assertive code blocks and its associated block model.
-        block = declRule.getAssertiveCodeBlocks().getFirst();
-        myAssertiveCodeBlockModels.put(block, declRule.getBlockModel());
+            // Apply well defined correspondence rule for concept type realizations
+            TypeRepresentationCorrRule declRule =
+                    new TypeRepresentationCorrRule(dec, block,
+                            myCurrentVerificationContext, mySTGroup, blockModel);
+            declRule.applyRule();
 
-        // Add this as a new incomplete assertive code block
-        myIncompleteAssertiveCodeBlocks.add(block);
+            // Update the current assertive code blocks and its associated block model.
+            block = declRule.getAssertiveCodeBlocks().getFirst();
+            myAssertiveCodeBlockModels.put(block, declRule.getBlockModel());
+
+            // Add this as a new incomplete assertive code block
+            myIncompleteAssertiveCodeBlocks.add(block);
+        }
     }
 
     /**
@@ -927,69 +973,174 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     @Override
     public final void postTypeRepresentationDec(TypeRepresentationDec dec) {
-        // TODO: Need to re-define the walk to handle declarations inside init and final blocks!
+        myRealizInitFinalOuterDec = null;
+    }
 
-        // Query for the type representation entry in the symbol table.
-        SymbolTableEntry symbolTableEntry =
-                Utilities.searchProgramType(dec.getLocation(), null, dec
-                        .getName(), myCurrentModuleScope);
+    // -----------------------------------------------------------
+    // Initialization and Finalization-Related
+    // -----------------------------------------------------------
 
-        // Create a new assertive code block for handling type initialization
-        AssertiveCodeBlock initBlock =
-                new AssertiveCodeBlock(dec.getName(), dec.getTypeInitItem(),
-                        myTypeGraph);
-
-        // Add shared variables in scope to the free variable's list
-        addSharedVarsToFreeVariableList(initBlock);
-
-        // Create a new model for this assertive code block
-        ST initBlockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
-        initBlockModel.add("blockName", "Initialization of " + dec.getName());
-
-        // Apply initialization rule for concept type realizations
-        TypeRepresentationInitRule initDeclRule =
-                new TypeRepresentationInitRule(dec, symbolTableEntry,
-                        myBuilder, myCurrentModuleScope, initBlock,
-                        myCurrentVerificationContext, mySTGroup, initBlockModel);
-        initDeclRule.applyRule();
-
-        // Update the current assertive code blocks and its associated block model.
-        initBlock = initDeclRule.getAssertiveCodeBlocks().getFirst();
-        myAssertiveCodeBlockModels.put(initBlock, initDeclRule.getBlockModel());
-
-        // Add this as a new incomplete assertive code block
-        myIncompleteAssertiveCodeBlocks.add(initBlock);
-
-        // ---------------------------------------------------------------------- //
-
-        // Create a new assertive code block for handling type finalization
-        AssertiveCodeBlock finalBlock =
-                new AssertiveCodeBlock(dec.getName(), dec.getTypeFinalItem(),
-                        myTypeGraph);
+    /**
+     * <p>Code that gets executed before visiting a {@link RealizInitFinalItem}.</p>
+     *
+     * @param item A realization for an initialization or finalization block.
+     */
+    @Override
+    public final void preRealizInitFinalItem(RealizInitFinalItem item) {
+        // Create a new assertive code block
+        myCurrentAssertiveCodeBlock =
+                new AssertiveCodeBlock(myRealizInitFinalOuterDec.getName(),
+                        item, myTypeGraph);
 
         // Add shared variables in scope to the free variable's list
-        addSharedVarsToFreeVariableList(finalBlock);
+        addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
+
+        // Create the top most level assume statement and
+        // add it to the assertive code block as the first statement
+        // YS: Only add the shared variable's convention if we are in a type
+        //     realization dec.
+        boolean addSharedVarConvention =
+                myRealizInitFinalOuterDec instanceof TypeRepresentationDec;
+        Exp topLevelAssumeExp =
+                myCurrentVerificationContext
+                        .createTopLevelAssumeExpFromContext(item.getLocation()
+                                .clone(), addSharedVarConvention, false);
+
+        // ( Assume CPC and RPC and DC and RDC [and SS_RC]; )
+        AssumeStmt topLevelAssumeStmt =
+                new AssumeStmt(item.getLocation().clone(), topLevelAssumeExp,
+                        false);
+        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+        // Create Remember statement if this is a finalization block
+        if (item.getItemType().equals(
+                AbstractInitFinalItem.ItemType.FINALIZATION)) {
+            MemoryStmt rememberStmt =
+                    new MemoryStmt(item.getLocation().clone(),
+                            StatementType.REMEMBER);
+            myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+        }
+
+        // For type representation's initialization block, we will need to declare and
+        // initialize a variable with the exemplar as its name and the representation type
+        // as its programming type.
+        if (myRealizInitFinalOuterDec instanceof TypeRepresentationDec
+                && item.getItemType().equals(
+                        AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+            // Obtain the associated type family declaration
+            TypeRepresentationDec typeRepresentationDec =
+                    (TypeRepresentationDec) myRealizInitFinalOuterDec;
+            TypeFamilyDec typeFamilyDec =
+                    Utilities.getAssociatedTypeFamilyDec(typeRepresentationDec,
+                            myCurrentVerificationContext);
+
+            // Query for the type representation entry in the symbol table.
+            SymbolTableEntry symbolTableEntry =
+                    Utilities.searchProgramType(typeRepresentationDec
+                            .getLocation(), null, typeRepresentationDec
+                            .getName(), myCurrentModuleScope);
+
+            // YS: Simply create the proper variable initialization statement that
+            //     allow us to deal with generating question mark variables
+            //     and duration logic when we backtrack through the code.
+            myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(
+                    new VarDec(typeFamilyDec.getExemplar(),
+                            typeRepresentationDec.getRepresentation()),
+                    symbolTableEntry, false));
+
+            // TODO: NY - Add any variable initialization duration clauses
+        }
+
+        // Create the proper name for the block
+        String blockName;
+        if (item.getItemType().equals(
+                AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+            blockName = "Initialization of ";
+        }
+        else {
+            blockName = "Finalization of ";
+        }
 
         // Create a new model for this assertive code block
-        ST finalBlockModel =
-                mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
-        finalBlockModel.add("blockName", "Finalization of " + dec.getName());
+        ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        blockModel.add("blockName", blockName
+                + myRealizInitFinalOuterDec.getName());
+        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+        stepModel.add("proofRuleName",
+                blockName + myRealizInitFinalOuterDec.getName() + " (Setup)")
+                .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        blockModel.add("vcGenSteps", stepModel.render());
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, blockModel);
+    }
 
-        // Apply finalization rule for concept type realizations
-        TypeRepresentationFinalRule finalDeclRule =
-                new TypeRepresentationFinalRule(dec, symbolTableEntry,
-                        myBuilder, myCurrentModuleScope, finalBlock,
-                        myCurrentVerificationContext, mySTGroup,
-                        finalBlockModel);
-        finalDeclRule.applyRule();
+    /**
+     * <p>Code that gets executed after visiting a {@link RealizInitFinalItem}.</p>
+     *
+     * @param item A realization for an initialization or finalization block.
+     */
+    @Override
+    public final void postRealizInitFinalItem(RealizInitFinalItem item) {
+        // Generate the proper item block declaration rule.
+        ProofRuleApplication ruleApplication;
+        if (myRealizInitFinalOuterDec instanceof TypeRepresentationDec) {
+            TypeRepresentationDec typeRepresentationDec =
+                    (TypeRepresentationDec) myRealizInitFinalOuterDec;
 
-        // Update the current assertive code blocks and its associated block model.
-        finalBlock = finalDeclRule.getAssertiveCodeBlocks().getFirst();
-        myAssertiveCodeBlockModels.put(finalBlock, finalDeclRule
-                .getBlockModel());
+            // Generate a new type initialization rule application.
+            if (item.getItemType().equals(
+                    AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+                ruleApplication =
+                        new TypeRepresentationInitRule(typeRepresentationDec,
+                                myVariableTypeEntries, myBuilder,
+                                myCurrentModuleScope,
+                                myCurrentAssertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                myAssertiveCodeBlockModels
+                                        .remove(myCurrentAssertiveCodeBlock));
+            }
+            // Generate a new type finalization rule application.
+            else {
+                // TODO: Implement this rule!
+                ruleApplication =
+                        new TypeRepresentationFinalRule(typeRepresentationDec,
+                                myVariableTypeEntries, myBuilder,
+                                myCurrentModuleScope,
+                                myCurrentAssertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                myAssertiveCodeBlockModels
+                                        .remove(myCurrentAssertiveCodeBlock));
+            }
+        }
+        else {
+            SharedStateRealizationDec sharedStateRealizationDec =
+                    (SharedStateRealizationDec) myRealizInitFinalOuterDec;
+
+            // Generate a new shared variable initialization rule application.
+            // TODO: Implement this rule!
+            ruleApplication =
+                    new SharedStateRepresentationInitRule(
+                            sharedStateRealizationDec, myVariableTypeEntries,
+                            myBuilder, myCurrentModuleScope,
+                            myCurrentAssertiveCodeBlock,
+                            myCurrentVerificationContext, mySTGroup,
+                            myAssertiveCodeBlockModels
+                                    .remove(myCurrentAssertiveCodeBlock));
+        }
+
+        // Apply the proof rule
+        ruleApplication.applyRule();
+
+        // Update the current assertive code block and its associated block model.
+        myCurrentAssertiveCodeBlock =
+                ruleApplication.getAssertiveCodeBlocks().getFirst();
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
+                ruleApplication.getBlockModel());
 
         // Add this as a new incomplete assertive code block
-        myIncompleteAssertiveCodeBlocks.add(finalBlock);
+        myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
+
+        myVariableTypeEntries.clear();
+        myCurrentAssertiveCodeBlock = null;
     }
 
     // -----------------------------------------------------------
@@ -1060,6 +1211,34 @@ public class VCGenerator extends TreeWalkerVisitor {
             // by accident.
             Utilities.tyNotHandled(dec.getTy(), dec.getLocation());
         }
+    }
+
+    // -----------------------------------------------------------
+    // Raw Type-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This method redefines how a {@link RecordTy} should be walked.</p>
+     *
+     * @param ty A raw record type.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkRecordTy(RecordTy ty) {
+        preAny(ty);
+        preTy(ty);
+        preRecordTy(ty);
+
+        // YS: Don't walk any variable declarations inside the record.
+        //     Logic for dealing with those variables are handled by
+        //     RealizInitFinalItem.
+
+        postRecordTy(ty);
+        postTy(ty);
+        postAny(ty);
+
+        return true;
     }
 
     // -----------------------------------------------------------
