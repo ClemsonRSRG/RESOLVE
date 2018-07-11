@@ -936,14 +936,15 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Create a new assertive code block for handling type initialization
         AssertiveCodeBlock initBlock =
-                new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
+                new AssertiveCodeBlock(dec.getName(), dec.getTypeInitItem(),
+                        myTypeGraph);
 
         // Add shared variables in scope to the free variable's list
         addSharedVarsToFreeVariableList(initBlock);
 
         // Create a new model for this assertive code block
         ST initBlockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
-        initBlockModel.add("blockName", dec.getName());
+        initBlockModel.add("blockName", "Initialization of " + dec.getName());
 
         // Apply initialization rule for concept type realizations
         TypeRepresentationInitRule initDeclRule =
@@ -963,7 +964,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Create a new assertive code block for handling type finalization
         AssertiveCodeBlock finalBlock =
-                new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
+                new AssertiveCodeBlock(dec.getName(), dec.getTypeFinalItem(),
+                        myTypeGraph);
 
         // Add shared variables in scope to the free variable's list
         addSharedVarsToFreeVariableList(finalBlock);
@@ -971,7 +973,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Create a new model for this assertive code block
         ST finalBlockModel =
                 mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
-        finalBlockModel.add("blockName", dec.getName());
+        finalBlockModel.add("blockName", "Finalization of " + dec.getName());
 
         // Apply finalization rule for concept type realizations
         TypeRepresentationFinalRule finalDeclRule =
@@ -1393,8 +1395,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new variable declaration/initialization rule application.
                 ruleApplication =
                         new InitializeVarStmtRule(
-                                (InitializeVarStmt) statement,
-                                assertiveCodeBlock,
+                                (InitializeVarStmt) statement, myBuilder,
+                                myCurrentModuleScope, assertiveCodeBlock,
                                 myCurrentVerificationContext, mySTGroup,
                                 blockModel);
             }

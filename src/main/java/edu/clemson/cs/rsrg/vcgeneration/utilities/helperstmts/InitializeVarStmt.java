@@ -78,7 +78,9 @@ public class InitializeVarStmt extends Statement {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
         sb.append("_Initialize(");
-        sb.append(myVarDec.asString(0, innerIndentInc));
+        sb.append(myVarDec.getName().asString(0, innerIndentInc));
+        sb.append(" : ");
+        sb.append(myVarTypeEntry.getName());
         sb.append(");");
 
         return sb.toString();
