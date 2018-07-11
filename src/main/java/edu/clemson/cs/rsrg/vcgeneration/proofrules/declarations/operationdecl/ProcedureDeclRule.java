@@ -66,12 +66,6 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
     // ===========================================================
 
     /**
-     * <p>The module scope for the file we are generating
-     * {@code VCs} for.</p>
-     */
-    private final ModuleScope myCurrentModuleScope;
-
-    /**
      * <p>If we are in a {@code Procedure} and it is an recursive
      * operation implementation, then this stores the decreasing clause
      * expression.</p>
@@ -120,8 +114,7 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
         super(block, block.getCorrespondingOperation().getName(),
-                symbolTableBuilder, context, stGroup, blockModel);
-        myCurrentModuleScope = moduleScope;
+                symbolTableBuilder, moduleScope, context, stGroup, blockModel);
         myCurrentProcedureDecreasingExp =
                 myCurrentAssertiveCodeBlock
                         .getCorrespondingOperationDecreasingExp();

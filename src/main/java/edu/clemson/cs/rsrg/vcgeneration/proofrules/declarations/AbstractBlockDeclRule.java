@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
@@ -51,6 +52,12 @@ public abstract class AbstractBlockDeclRule
     /** <p>All the shared variables affected by the current {@code block}.</p> */
     protected final Set<Exp> myAffectedExps;
 
+    /**
+     * <p>The module scope for the file we are generating
+     * {@code VCs} for.</p>
+     */
+    protected final ModuleScope myCurrentModuleScope;
+
     /** <p>This is the name for the current block we are applying the rule to.</p> */
     private final String myDeclName;
 
@@ -72,16 +79,18 @@ public abstract class AbstractBlockDeclRule
      *              applying the rule to.
      * @param declName Name associated with the declaration.
      * @param symbolTableBuilder The current symbol table.
+     * @param moduleScope The current module scope we are visiting.
      * @param context The verification context that contains all
      *                the information we have collected so far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     protected AbstractBlockDeclRule(AssertiveCodeBlock block, String declName,
-            MathSymbolTableBuilder symbolTableBuilder, VerificationContext context,
-            STGroup stGroup, ST blockModel) {
+            MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
+            VerificationContext context, STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
         myAffectedExps = new LinkedHashSet<>();
+        myCurrentModuleScope = moduleScope;
         myDeclName = declName;
         myTypeGraph = symbolTableBuilder.getTypeGraph();
     }

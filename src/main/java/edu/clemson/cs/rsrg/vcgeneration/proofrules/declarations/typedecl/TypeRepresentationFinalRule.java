@@ -17,6 +17,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.AbstractBlockDeclRule;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -60,6 +61,7 @@ public class TypeRepresentationFinalRule extends AbstractBlockDeclRule
      * @param dec A concept type realization.
      * @param symbolTableEntry The program type entry associated with {@code dec}.
      * @param symbolTableBuilder The current symbol table.
+     * @param moduleScope The current module scope we are visiting.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -69,11 +71,11 @@ public class TypeRepresentationFinalRule extends AbstractBlockDeclRule
      */
     public TypeRepresentationFinalRule(TypeRepresentationDec dec,
             SymbolTableEntry symbolTableEntry,
-            MathSymbolTableBuilder symbolTableBuilder,
+            MathSymbolTableBuilder symbolTableBuilder, ModuleScope moduleScope,
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
-        super(block, dec.getName().getName(), symbolTableBuilder, context,
-                stGroup, blockModel);
+        super(block, dec.getName().getName(), symbolTableBuilder, moduleScope,
+                context, stGroup, blockModel);
         myTypeRepresentationDec = dec;
         myVarTypeEntry = symbolTableEntry;
 
