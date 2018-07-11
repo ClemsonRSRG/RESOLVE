@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ConceptRealizModuleDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
@@ -37,6 +38,7 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTCartesian;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
+import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTFacilityRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
@@ -329,7 +331,6 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                                 nameTy.getName(), myCurrentModuleScope);
 
                 // Only process this if it is TypeRepresentationDec
-                // (Might need to add more logic if it is not).
                 if (ste.getDefiningElement() instanceof TypeRepresentationDec) {
                     AssertionClause conventionClause =
                             Utilities.getTypeConventionClause(
@@ -364,6 +365,15 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                                                 conventionDetailModel);
                     }
                 }
+                else {
+                    // Not sure why it wouldn't be a TypeRepresentationDec
+                    Utilities.notAType(ste, parameterVarDec.getLocation());
+                }
+            }
+            else if (nameTy.getProgramType() instanceof PTFacilityRepresentation) {
+                // Add the conventions of parameters that have representation types.
+                // TODO: Figure out where the exemplar for local types is located.
+                throw new RuntimeException(); // Remove this once we figure out how to add the convention.
             }
         }
 
@@ -435,6 +445,15 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                                         correspondenceDetailModel);
                     }
                 }
+                else {
+                    // Not sure why it wouldn't be a TypeRepresentationDec
+                    Utilities.notAType(ste, parameterVarDec.getLocation());
+                }
+            }
+            else if (nameTy.getProgramType() instanceof PTFacilityRepresentation) {
+                // Add the conventions of parameters that have representation types.
+                // TODO: Figure out where the exemplar for local types is located.
+                throw new RuntimeException(); // Remove this once we figure out how to add the convention.
             }
         }
 
@@ -498,6 +517,7 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
             if (ste instanceof ProgramTypeEntry) {
                 typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
             } else {
+                // TODO: Figure out how to handle local program types.
                 typeEntry =
                         ste.toTypeRepresentationEntry(nameTy.getLocation())
                                 .getDefiningTypeEntry();

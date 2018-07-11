@@ -21,6 +21,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
@@ -928,7 +929,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     public final void postTypeRepresentationDec(TypeRepresentationDec dec) {
         // TODO: Need to re-define the walk to handle declarations inside init and final blocks!
 
-        // Query for the type entry in the symbol table
+        // Query for the type representation entry in the symbol table.
         SymbolTableEntry symbolTableEntry =
                 Utilities.searchProgramType(dec.getLocation(), null, dec
                         .getName(), myCurrentModuleScope);
@@ -1014,6 +1015,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
             }
             else {
+                // YS: This also includes any local type representations with
+                //     no corresponding type family (FacilityTypeRepresentationEntry)
                 typeEntry =
                         ste.toTypeRepresentationEntry(nameTy.getLocation())
                                 .getDefiningTypeEntry();
@@ -1021,9 +1024,10 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Check to see if the variable's type is known or it is generic.
             boolean isGenericVar = true;
-            if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
-                // The program type has an associated TypeFamilyDec,
-                // therefore it is not generic.
+            if ((typeEntry.getDefiningElement() instanceof TypeFamilyDec)
+                    || (typeEntry.getDefiningElement() instanceof FacilityTypeRepresentationDec)) {
+                // The program type has an associated TypeFamilyDec or it is a local
+                // program type, therefore it is not generic.
                 isGenericVar = false;
 
                 // Store the symbol table entry for this variable for
@@ -1167,54 +1171,42 @@ public class VCGenerator extends TreeWalkerVisitor {
                     typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
                 }
                 else {
+                    // YS: This also includes any local type representations with
+                    //     no corresponding type family (FacilityTypeRepresentationEntry)
                     typeEntry =
                             ste.toTypeRepresentationEntry(nameTy.getLocation())
                                     .getDefiningTypeEntry();
                 }
 
-                // Obtain the original dec from the AST
-                TypeFamilyDec typeFamilyDec =
-                        (TypeFamilyDec) typeEntry.getDefiningElement();
+                // YS: Local program types do not have a constraint clauses,
+                //     therefore we skip the following logic.
+                if (!(typeEntry.getDefiningElement() instanceof FacilityTypeRepresentationDec)) {
+                    // Obtain the original dec from the AST
+                    TypeFamilyDec typeFamilyDec =
+                            (TypeFamilyDec) typeEntry.getDefiningElement();
 
-                // Other than the replaces mode, constraints for the
-                // other parameter modes needs to be added
-                // to the requires clause as conjuncts.
-                if (parameterMode != ProgramParameterEntry.ParameterMode.REPLACES) {
-                    if (!VarExp.isLiteralTrue(typeFamilyDec.getConstraint()
-                            .getAssertionExp())) {
-                        AssertionClause constraintClause =
-                                typeFamilyDec.getConstraint();
-                        AssertionClause modifiedConstraintClause =
-                                Utilities.getTypeConstraintClause(
-                                        constraintClause, loc, null,
-                                        parameterVarDec.getName(),
-                                        typeFamilyDec.getExemplar(), typeEntry
-                                                .getModelType(), null);
+                    // Other than the replaces mode, constraints for the
+                    // other parameter modes needs to be added
+                    // to the requires clause as conjuncts.
+                    if (parameterMode != ProgramParameterEntry.ParameterMode.REPLACES) {
+                        if (!VarExp.isLiteralTrue(typeFamilyDec.getConstraint()
+                                .getAssertionExp())) {
+                            AssertionClause constraintClause =
+                                    typeFamilyDec.getConstraint();
+                            AssertionClause modifiedConstraintClause =
+                                    Utilities.getTypeConstraintClause(
+                                            constraintClause, loc, null,
+                                            parameterVarDec.getName(),
+                                            typeFamilyDec.getExemplar(),
+                                            typeEntry.getModelType(), null);
 
-                        // Replace any facility formal with actual
-                        Exp constraintExp =
-                                modifiedConstraintClause.getAssertionExp();
-                        constraintExp =
-                                Utilities
-                                        .replaceFacilityFormalWithActual(
-                                                constraintExp,
-                                                Collections
-                                                        .singletonList(parameterVarDec),
-                                                scope.getDefiningElement()
-                                                        .getName(),
-                                                myCurrentVerificationContext);
-
-                        // Apply any pre-defined substitutions
-                        constraintExp =
-                                constraintExp.substitute(substitutionsMap);
-
-                        Exp whichEntailsExp =
-                                modifiedConstraintClause.getWhichEntailsExp();
-                        if (whichEntailsExp != null) {
-                            whichEntailsExp =
+                            // Replace any facility formal with actual
+                            Exp constraintExp =
+                                    modifiedConstraintClause.getAssertionExp();
+                            constraintExp =
                                     Utilities
                                             .replaceFacilityFormalWithActual(
-                                                    whichEntailsExp,
+                                                    constraintExp,
                                                     Collections
                                                             .singletonList(parameterVarDec),
                                                     scope.getDefiningElement()
@@ -1222,32 +1214,58 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                     myCurrentVerificationContext);
 
                             // Apply any pre-defined substitutions
-                            whichEntailsExp =
-                                    whichEntailsExp
-                                            .substitute(substitutionsMap);
+                            constraintExp =
+                                    constraintExp.substitute(substitutionsMap);
+
+                            Exp whichEntailsExp =
+                                    modifiedConstraintClause
+                                            .getWhichEntailsExp();
+                            if (whichEntailsExp != null) {
+                                whichEntailsExp =
+                                        Utilities
+                                                .replaceFacilityFormalWithActual(
+                                                        whichEntailsExp,
+                                                        Collections
+                                                                .singletonList(parameterVarDec),
+                                                        scope
+                                                                .getDefiningElement()
+                                                                .getName(),
+                                                        myCurrentVerificationContext);
+
+                                // Apply any pre-defined substitutions
+                                whichEntailsExp =
+                                        whichEntailsExp
+                                                .substitute(substitutionsMap);
+                            }
+
+                            modifiedConstraintClause =
+                                    new AssertionClause(
+                                            modifiedConstraintClause
+                                                    .getLocation().clone(),
+                                            modifiedConstraintClause
+                                                    .getClauseType(),
+                                            constraintExp, whichEntailsExp);
+
+                            // Form a conjunct with the modified constraint clause and add
+                            // the location detail associated with it.
+                            Location constraintLoc =
+                                    modifiedConstraintClause.getAssertionExp()
+                                            .getLocation();
+                            retExp =
+                                    Utilities
+                                            .formConjunct(
+                                                    loc,
+                                                    retExp,
+                                                    modifiedConstraintClause,
+                                                    new LocationDetailModel(
+                                                            constraintLoc
+                                                                    .clone(),
+                                                            constraintLoc
+                                                                    .clone(),
+                                                            "Constraint Clause of "
+                                                                    + parameterVarDec
+                                                                            .getName()));
                         }
-
-                        modifiedConstraintClause =
-                                new AssertionClause(modifiedConstraintClause
-                                        .getLocation().clone(),
-                                        modifiedConstraintClause
-                                                .getClauseType(),
-                                        constraintExp, whichEntailsExp);
-
-                        // Form a conjunct with the modified constraint clause and add
-                        // the location detail associated with it.
-                        Location constraintLoc =
-                                modifiedConstraintClause.getAssertionExp()
-                                        .getLocation();
-                        retExp =
-                                Utilities.formConjunct(loc, retExp,
-                                        modifiedConstraintClause,
-                                        new LocationDetailModel(constraintLoc
-                                                .clone(),
-                                                constraintLoc.clone(),
-                                                "Constraint Clause of "
-                                                        + parameterVarDec
-                                                                .getName()));
                     }
                 }
             }
@@ -1651,6 +1669,14 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // Add this to our substitution map
                 substitutionParamToConc.put(parameterExp, concVarExp);
+            }
+            // YS: For local program types, all we need is their conventions
+            //     with no substitutions. This is done regardless
+            //     of the module and operation scope.
+            else if (ste.getDefiningElement() instanceof FacilityTypeRepresentationDec) {
+                // Add the conventions of parameters that have representation types.
+                // TODO: Figure out where the exemplar for local types is located.
+                throw new RuntimeException(); // Remove this once we figure out how to add the convention.
             }
         }
 

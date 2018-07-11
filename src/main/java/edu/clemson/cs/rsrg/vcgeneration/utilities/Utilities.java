@@ -1466,26 +1466,22 @@ public class Utilities {
             noSuchSymbol(qualifier, name.getName(), loc);
         }
         else if (entries.size() == 1) {
-            retEntry = entries.get(0).toProgramTypeEntry(loc);
+            // Return the appropriate program type
+            SymbolTableEntry ste = entries.get(0);
+            if (ste instanceof FacilityTypeRepresentationEntry) {
+                retEntry = ste.toFacilityTypeRepresentationEntry(loc);
+            }
+            else if (ste instanceof TypeRepresentationEntry) {
+                retEntry = ste.toTypeRepresentationEntry(loc);
+            }
+            else {
+                retEntry = ste.toProgramTypeEntry(loc);
+            }
         }
         else {
-            // When we have more than one, it means that we have a
-            // type representation. In that case, we just need the
-            // type representation.
-            for (int i = 0; i < entries.size() && retEntry == null; i++) {
-                SymbolTableEntry ste = entries.get(i);
-                if (ste instanceof TypeRepresentationEntry) {
-                    retEntry = ste.toTypeRepresentationEntry(loc);
-                }
-            }
-
-            // Throw duplicate symbol error if we don't have a type
-            // representation
-            if (retEntry == null) {
-                //This should be caught earlier, when the duplicate type is
-                //created
-                throw new RuntimeException();
-            }
+            //This should be caught earlier, when the duplicate type is
+            //created
+            throw new RuntimeException();
         }
 
         return retEntry;

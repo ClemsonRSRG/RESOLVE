@@ -398,6 +398,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
             }
             else {
+                // TODO: Figure out how to handle local program types.
                 typeEntry =
                         ste.toTypeRepresentationEntry(nameTy.getLocation())
                                 .getDefiningTypeEntry();

@@ -47,9 +47,9 @@ public class FacilityTypeRepresentationEntry extends TypeRepresentationEntry {
             AssertionClause convention) {
         super(name, definingElement, sourceModule, null, representation,
                 convention, new AssertionClause(definingElement.getLocation()
-                        .clone(), AssertionClause.ClauseType.CORRESPONDENCE,
-                        VarExp.getTrueVarExp(definingElement.getLocation()
-                                .clone(), representation.getTypeGraph())));
+                        .clone(), AssertionClause.ClauseType.CONVENTION, VarExp
+                        .getTrueVarExp(definingElement.getLocation().clone(),
+                                representation.getTypeGraph())));
     }
 
     // ===========================================================
