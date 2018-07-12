@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.statements;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;

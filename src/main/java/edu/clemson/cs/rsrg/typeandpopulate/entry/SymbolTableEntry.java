@@ -212,7 +212,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public FacilityEntry toFacilityEntry(Location l) {
-        throw new SourceErrorException("Expecting a facility. Found "
+        throw new SourceErrorException("Expecting a facility.\n" + "Found "
                 + getEntryTypeDescription(), l);
     }
 
@@ -228,8 +228,8 @@ public abstract class SymbolTableEntry {
     public FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
             Location l) {
         throw new SourceErrorException("Expecting a facility type "
-                + "representation.  Found " + getEntryTypeDescription() + ".",
-                l);
+                + "representation.\n" + "Found " + getEntryTypeDescription()
+                + ".", l);
     }
 
     /**
@@ -242,7 +242,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public MathSymbolEntry toMathSymbolEntry(Location l) {
-        throw new SourceErrorException("Expecting a math symbol.  Found "
+        throw new SourceErrorException("Expecting a math symbol.\n" + "Found "
                 + getEntryTypeDescription() + ".", l);
     }
 
@@ -256,7 +256,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public OperationEntry toOperationEntry(Location l) {
-        throw new SourceErrorException("Expecting an operation.  Found "
+        throw new SourceErrorException("Expecting an operation.\n" + "Found "
                 + getEntryTypeDescription(), l);
     }
 
@@ -270,8 +270,8 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public OperationProfileEntry toOperationProfileEntry(Location l) {
-        throw new SourceErrorException("Expecting a operation profile.  Found "
-                + getEntryTypeDescription(), l);
+        throw new SourceErrorException("Expecting a operation profile.\n"
+                + "Found " + getEntryTypeDescription(), l);
     }
 
     /**
@@ -284,7 +284,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public ProcedureEntry toProcedureEntry(Location l) {
-        throw new SourceErrorException("Expecting a procedure.  Found "
+        throw new SourceErrorException("Expecting a procedure.\n" + "Found "
                 + getEntryTypeDescription(), l);
     }
 
@@ -298,7 +298,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public ProgramParameterEntry toProgramParameterEntry(Location l) {
-        throw new SourceErrorException("Expecting a program parameter.  "
+        throw new SourceErrorException("Expecting a program parameter.\n"
                 + "Found " + getEntryTypeDescription(), l);
     }
 
@@ -312,7 +312,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public ProgramTypeEntry toProgramTypeEntry(Location l) {
-        throw new SourceErrorException("Expecting a program type.  Found "
+        throw new SourceErrorException("Expecting a program type.\n" + "Found "
                 + getEntryTypeDescription() + ".", l);
     }
 
@@ -326,7 +326,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public ProgramVariableEntry toProgramVariableEntry(Location l) {
-        throw new SourceErrorException("Expecting a program variable.  "
+        throw new SourceErrorException("Expecting a program variable.\n"
                 + "Found " + getEntryTypeDescription(), l);
     }
 
@@ -340,7 +340,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public ShortFacilityEntry toShortFacilityEntry(Location l) {
-        throw new SourceErrorException("Expecting a short facility module.  "
+        throw new SourceErrorException("Expecting a short facility module.\n"
                 + "Found " + getEntryTypeDescription(), l);
     }
 
@@ -354,7 +354,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public TheoremEntry toTheoremEntry(Location l) {
-        throw new SourceErrorException("Expecting a theorem.  " + "Found "
+        throw new SourceErrorException("Expecting a theorem.\n" + "Found "
                 + getEntryTypeDescription(), l);
     }
 
@@ -368,7 +368,7 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public TypeFamilyEntry toTypeFamilyEntry(Location l) {
-        throw new SourceErrorException("Expecting a program type family.  "
+        throw new SourceErrorException("Expecting a program type family.\n"
                 + "Found " + getEntryTypeDescription(), l);
     }
 
@@ -382,9 +382,9 @@ public abstract class SymbolTableEntry {
      * it throws a {@link SourceErrorException}.
      */
     public TypeRepresentationEntry toTypeRepresentationEntry(Location l) {
-        throw new SourceErrorException("Expecting a program type "
-                + "representation.  Found " + getEntryTypeDescription() + ".",
-                l);
+        throw new SourceErrorException(
+                "Expecting a program type representation.\n" + "Found "
+                        + getEntryTypeDescription(), l);
     }
 
 }

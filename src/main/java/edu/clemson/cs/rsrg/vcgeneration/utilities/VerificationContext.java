@@ -804,17 +804,7 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
                             Utilities.searchProgramType(pNameTy.getLocation(),
                                     pNameTy.getQualifier(), pNameTy.getName(),
                                     myCurrentModuleScope);
-
-                    if (ste instanceof ProgramTypeEntry) {
-                        typeEntry =
-                                ste.toProgramTypeEntry(pNameTy.getLocation());
-                    }
-                    else {
-                        typeEntry =
-                                ste.toTypeRepresentationEntry(
-                                        pNameTy.getLocation())
-                                        .getDefiningTypeEntry();
-                    }
+                    typeEntry = ste.toProgramTypeEntry(pNameTy.getLocation());
 
                     // Make sure we don't have a generic type
                     if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {

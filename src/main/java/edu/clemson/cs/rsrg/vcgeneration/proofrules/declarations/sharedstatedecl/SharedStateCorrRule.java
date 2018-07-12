@@ -1,5 +1,5 @@
 /*
- * PresumeStmtRule.java
+ * SharedStateCorrRule.java
  * ---------------------------------
  * Copyright (c) 2018
  * RESOLVE Software Research Group
@@ -10,11 +10,9 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.sharedstatedecl;
 
-import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
-import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
-import edu.clemson.cs.rsrg.absyn.statements.PresumeStmt;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
@@ -23,13 +21,13 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for applying the {@code presume}
- * rule.</p>
+ * <p>This class contains the logic for establishing the {@code Shared Variable}'s
+ * {@code correspondence} is well defined.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class PresumeStmtRule extends AbstractProofRuleApplication
+public class SharedStateCorrRule extends AbstractProofRuleApplication
         implements
             ProofRuleApplication {
 
@@ -37,19 +35,18 @@ public class PresumeStmtRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@link PresumeStmt} we are applying the rule to.</p> */
-    private final PresumeStmt myPresumeStmt;
+    /** <p>The {@code shared state} realization we are applying the rule to.</p> */
+    private final SharedStateRealizationDec mySharedStateRealizDec;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates a new application of the {@code presume}
-     * rule.</p>
+     * <p>This creates a new application for a well defined
+     * {@code correspondence} rule for a {@link SharedStateRealizationDec}.</p>
      *
-     * @param presumeStmt The {@link PresumeStmt} we are applying
-     *                 the rule to.
+     * @param dec A shared state realization.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -57,10 +54,11 @@ public class PresumeStmtRule extends AbstractProofRuleApplication
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public PresumeStmtRule(PresumeStmt presumeStmt, AssertiveCodeBlock block,
-            VerificationContext context, STGroup stGroup, ST blockModel) {
+    public SharedStateCorrRule(SharedStateRealizationDec dec,
+            AssertiveCodeBlock block, VerificationContext context,
+            STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
-        myPresumeStmt = presumeStmt;
+        mySharedStateRealizDec = dec;
     }
 
     // ===========================================================
@@ -72,20 +70,18 @@ public class PresumeStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Add a new confirm statement followed by an assume statement
-        // generated the presume statement to to the assertive code block.
-        // YS: We clone the location and expression to avoid aliasing.
-        myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(myPresumeStmt
-                .getLocation().clone(), myPresumeStmt.getAssertion().clone(),
-                false));
-        myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(myPresumeStmt
-                .getLocation().clone(), myPresumeStmt.getAssertion().clone(),
-                false));
+        // Assume CPC and RPC and DC and RDC and SS_RC
+
+        // Assume SS_Cor_Exp
+
+        // Confirm the shared variable's constraint
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
         stepModel.add("proofRuleName", getRuleDescription()).add(
                 "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+
+        // Add the different details to the various different output models
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
@@ -97,7 +93,7 @@ public class PresumeStmtRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Presume Rule";
+        return "Well Defined Correspondence Rule (Shared State)";
     }
 
 }

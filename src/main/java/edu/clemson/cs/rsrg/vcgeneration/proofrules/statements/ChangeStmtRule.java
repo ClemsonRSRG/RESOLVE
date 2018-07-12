@@ -1,5 +1,5 @@
 /*
- * SharedStateCorrRule.java
+ * ChangeStmtRule.java
  * ---------------------------------
  * Copyright (c) 2018
  * RESOLVE Software Research Group
@@ -10,24 +10,29 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.other;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.statements;
 
-import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
+import edu.clemson.cs.rsrg.absyn.statements.ChangeStmt;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for establishing the {@code Shared Variable}'s
- * {@code Correspondence} is well defined.</p>
+ * <p>This class contains the logic for applying the {@code change}
+ * rule.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class SharedStateCorrRule extends AbstractProofRuleApplication
+public class ChangeStmtRule extends AbstractProofRuleApplication
         implements
             ProofRuleApplication {
 
@@ -35,18 +40,19 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@code shared state} realization we are applying the rule to.</p> */
-    private final SharedStateRealizationDec mySharedStateRealizDec;
+    /** <p>The {@link ChangeStmt} we are applying the rule to.</p> */
+    private final ChangeStmt myChangeStmt;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates a new application for a well defined
-     * {@code Correspondence} rule for a {@link SharedStateRealizationDec}.</p>
+     * <p>This creates a new application of the {@code change}
+     * rule.</p>
      *
-     * @param dec A shared state realization.
+     * @param changeStmt The {@link ChangeStmt} we are applying
+     *                   the rule to.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -54,11 +60,10 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public SharedStateCorrRule(SharedStateRealizationDec dec,
-            AssertiveCodeBlock block, VerificationContext context,
-            STGroup stGroup, ST blockModel) {
+    public ChangeStmtRule(ChangeStmt changeStmt, AssertiveCodeBlock block,
+            VerificationContext context, STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
-        mySharedStateRealizDec = dec;
+        myChangeStmt = changeStmt;
     }
 
     // ===========================================================
@@ -70,16 +75,28 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Assume CPC and RPC and DC and RDC and SS_RC and SS_Cor_Exp
+        // Create a map from each variable to a new NQV
+        List<Exp> changeVars = myChangeStmt.getChangingVars();
+        Map<Exp, Exp> replacementMap = new LinkedHashMap<>(changeVars.size());
+        for (Exp exp : changeVars) {
+            VCVarExp vcVarExp =
+                    Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, exp.clone());
+            myCurrentAssertiveCodeBlock.addFreeVar(vcVarExp);
+            replacementMap.put(exp.clone(), vcVarExp);
+        }
 
-        // Confirm the shared variable's constraint
+        // Loop through each verification condition and replace the variable
+        // expression wherever possible.
+        List<VerificationCondition> newVCs =
+                createReplacementVCs(myCurrentAssertiveCodeBlock.getVCs(), replacementMap);
+
+        // Store the new list of vcs
+        myCurrentAssertiveCodeBlock.setVCs(newVCs);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
         stepModel.add("proofRuleName", getRuleDescription()).add(
                 "currentStateOfBlock", myCurrentAssertiveCodeBlock);
-
-        // Add the different details to the various different output models
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
@@ -91,7 +108,7 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Well Defined Correspondence Rule (Shared State)";
+        return "Change Rule";
     }
 
 }

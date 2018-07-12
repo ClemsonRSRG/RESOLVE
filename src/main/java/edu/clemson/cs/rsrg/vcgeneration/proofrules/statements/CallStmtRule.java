@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.statement;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.statements;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
@@ -398,6 +398,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
             }
             else {
+                // TODO: Figure out how to handle local program types.
                 typeEntry =
                         ste.toTypeRepresentationEntry(nameTy.getLocation())
                                 .getDefiningTypeEntry();
