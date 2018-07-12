@@ -60,7 +60,7 @@ public class MathFunctionNamedQuery
     public MathFunctionNamedQuery(PosSymbol qualifier, PosSymbol name) {
         myNameQuery =
                 new NameQuery(qualifier, name, ImportStrategy.IMPORT_RECURSIVE,
-                        FacilityStrategy.FACILITY_IGNORE, false);
+                        FacilityStrategy.FACILITY_INSTANTIATE, false);
     }
 
     // ===========================================================

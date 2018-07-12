@@ -3494,7 +3494,7 @@ public class Populator extends TreeWalkerVisitor {
                                 .getOperatorAsPosSymbol()));
 
         if (sameNameFunctions.isEmpty()) {
-            throw new SourceErrorException("No such function.", e.getLocation());
+            throw new SourceErrorException("No such function: " + e.getOperatorAsString(), e.getLocation());
         }
 
         MathSymbolEntry intendedEntry;
@@ -3630,11 +3630,14 @@ public class Populator extends TreeWalkerVisitor {
 
         Exp first = segments.next();
 
+        PosSymbol firstQualifier = null;
         PosSymbol firstName;
         if (first instanceof OldExp) {
+            firstQualifier = ((VarExp) ((OldExp) first).getExp()).getQualifier();
             firstName = ((VarExp) ((OldExp) first).getExp()).getName();
         }
         else if (first instanceof VarExp) {
+            firstQualifier = ((VarExp) first).getQualifier();
             firstName = ((VarExp) first).getName();
         }
         else {
@@ -3729,10 +3732,10 @@ public class Populator extends TreeWalkerVisitor {
                                 .getInnermostActiveScope()
                                 .queryForOne(
                                         new NameQuery(
-                                                null,
+                                                firstQualifier,
                                                 firstName,
                                                 ImportStrategy.IMPORT_NAMED,
-                                                FacilityStrategy.FACILITY_IGNORE,
+                                                FacilityStrategy.FACILITY_INSTANTIATE,
                                                 true)).toMathSymbolEntry(
                                 first.getLocation());
 
@@ -3747,6 +3750,7 @@ public class Populator extends TreeWalkerVisitor {
                 }
             }
             catch (NoSuchSymbolException nsse) {
+                // TODO: Figure out if the following is needed now that we don't use dots as qualifier symbol
                 //No such luck.  Maybe firstName identifies a module and the
                 //second segment (which had better be a VarExp) is the name of
                 //the value we want
