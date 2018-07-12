@@ -19,10 +19,10 @@ import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 
 /**
  * <p>This is the class that builds a special kind of statement
- * that acts as a placeholder for initialize a variable declaration. The only usage
- * of this class should be the {@link VCGenerator}. Since the user cannot
- * supply their own {@code _Initialize} statements, any instances of this
- * class will solely be created by the {@link VCGenerator}.</p>
+ * that acts as a placeholder for initialize a variable declaration.
+ * Since the user cannot supply their own {@code _Initialize} statements,
+ * any instances of this class will solely be created by the
+ * {@link VCGenerator} and/or by our various different {@code proof rules}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0

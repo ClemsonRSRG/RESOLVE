@@ -16,14 +16,13 @@ import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.operationdecl.ProcedureDeclRule;
 
 /**
  * <p>This is the class that builds a special kind of statement
- * that acts as a placeholder for finalizing a variable declaration. The only usage
- * of this class should be the {@link ProcedureDeclRule}. Since the user cannot
- * supply their own {@code _Finalize} statements, any instances of this
- * class will solely be created by the {@link VCGenerator}.</p>
+ * that acts as a placeholder for finalizing a variable declaration.
+ * Since the user cannot supply their own {@code _Finalize} statements,
+ * any instances of this class will solely be created by the
+ * {@link VCGenerator} and/or by our various different {@code proof rules}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -72,7 +71,9 @@ public class FinalizeVarStmt extends Statement {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
         sb.append("_Finalize(");
-        sb.append(myVarDec.asString(0, innerIndentInc));
+        sb.append(myVarDec.getName().asString(0, innerIndentInc));
+        sb.append(" : ");
+        sb.append(myVarTypeEntry.getName());
         sb.append(");");
 
         return sb.toString();

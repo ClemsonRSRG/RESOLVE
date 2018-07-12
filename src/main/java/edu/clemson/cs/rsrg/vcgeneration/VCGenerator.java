@@ -1100,7 +1100,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             // Generate a new type finalization rule application.
             else {
-                // TODO: Implement this rule!
                 ruleApplication =
                         new TypeRepresentationFinalRule(typeRepresentationDec,
                                 myVariableTypeEntries, myBuilder,

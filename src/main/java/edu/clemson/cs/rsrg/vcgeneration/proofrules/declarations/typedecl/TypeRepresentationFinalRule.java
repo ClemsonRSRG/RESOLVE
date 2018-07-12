@@ -13,9 +13,18 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.items.programitems.RealizInitFinalItem;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
@@ -24,6 +33,9 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.AbstractBlockDec
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -103,6 +115,91 @@ public class TypeRepresentationFinalRule extends AbstractBlockDeclRule
      */
     @Override
     public final void applyRule() {
+        // Finalization block
+        RealizInitFinalItem finalItem =
+                myTypeRepresentationDec.getTypeFinalItem();
+
+        // Add all the statements
+        myCurrentAssertiveCodeBlock.addStatements(finalItem.getStatements());
+
+        // YS: Simply create a finalization statement for each variable that
+        //     allow us to deal with generating question mark variables
+        //     and duration logic when we backtrack through the code.
+        List<VarDec> varDecs = finalItem.getVariables();
+        for (VarDec dec : varDecs) {
+            // Only need to finalize non-generic type variables.
+            if (myVariableTypeEntries.containsKey(dec)) {
+                myCurrentAssertiveCodeBlock.addStatement(new FinalizeVarStmt(
+                        dec, myVariableTypeEntries.remove(dec)));
+            }
+
+            // TODO: Add the finalization duration ensures (if any)
+        }
+
+        // Obtain the associated type family declaration
+        TypeFamilyDec typeFamilyDec =
+                Utilities.getAssociatedTypeFamilyDec(myTypeRepresentationDec,
+                        myCurrentVerificationContext);
+
+        // Query for the type representation entry in the symbol table.
+        SymbolTableEntry symbolTableEntry =
+                Utilities
+                        .searchProgramType(myTypeRepresentationDec
+                                .getLocation(), null, myTypeRepresentationDec
+                                .getName(), myCurrentModuleScope);
+
+        // Add the finalization for the exemplar-named variable
+        // YS: Simply create the proper variable finalization statement that
+        //     allow us to deal with generating question mark variables
+        //     and duration logic when we backtrack through the code.
+        myCurrentAssertiveCodeBlock.addStatement(new FinalizeVarStmt(
+                new VarDec(typeFamilyDec.getExemplar(), myTypeRepresentationDec
+                        .getRepresentation()), symbolTableEntry));
+
+        // TODO: Add the finalization duration ensures (if any)
+
+        // Confirm the shared variable's convention
+        // ( Confirm SS_RC; )
+        Exp confirmConventionExp =
+                myCurrentVerificationContext
+                        .createSharedStateRealizConventionExp(finalItem
+                                .getLocation().clone());
+        ConfirmStmt conventionConfirmStmt =
+                new ConfirmStmt(finalItem.getLocation().clone(),
+                        confirmConventionExp, VarExp
+                                .isLiteralTrue(confirmConventionExp));
+        myCurrentAssertiveCodeBlock.addStatement(conventionConfirmStmt);
+
+        // Assume the shared variable's and our type correspondence
+        // ( Assume SS_Corr_Exp; )
+        Exp assumeCorrespondenceExp =
+                myCurrentVerificationContext
+                        .createSharedStateRealizCorrespondenceExp(finalItem
+                                .getLocation().clone());
+        AssumeStmt correspondenceAssumeStmt =
+                new AssumeStmt(finalItem.getLocation().clone(),
+                        assumeCorrespondenceExp, false);
+        myCurrentAssertiveCodeBlock.addStatement(correspondenceAssumeStmt);
+
+        // Create the final confirm expression
+        Exp finalConfirmExp = createFinalConfirmExp(typeFamilyDec);
+
+        // Replace any facility declaration instantiation arguments
+        // in the ensures clause.
+        finalConfirmExp =
+                Utilities.replaceFacilityFormalWithActual(finalConfirmExp,
+                        new ArrayList<ParameterVarDec>(), myCurrentModuleScope
+                                .getDefiningElement().getName(),
+                        myCurrentVerificationContext);
+
+        // Confirm the type initialization ensures clause is satisfied.
+        // YS: Also need to make sure that all shared variables that are not affected
+        //     are being "restored".
+        ConfirmStmt finalConfirmStmt =
+                new ConfirmStmt(finalConfirmExp.getLocation().clone(),
+                        finalConfirmExp, VarExp.isLiteralTrue(finalConfirmExp));
+        myCurrentAssertiveCodeBlock.addStatement(finalConfirmStmt);
+
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
         stepModel.add("proofRuleName", getRuleDescription()).add(
@@ -123,4 +220,32 @@ public class TypeRepresentationFinalRule extends AbstractBlockDeclRule
         return "Finalization Rule (Concept Type Realization)";
     }
 
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method that uses the {@code ensures} clause from the associated
+     * {@link TypeFamilyDec} and builds the appropriate {@code ensures} clause that will be an
+     * {@link AssertiveCodeBlock AssertiveCodeBlock's} final {@code confirm} statement.</p>
+     *
+     * @param typeFamilyDec The associated type family declaration.
+     *
+     * @return The final confirm expression.
+     */
+    private Exp createFinalConfirmExp(TypeFamilyDec typeFamilyDec) {
+        // Add the type family's finalization ensures clause
+        AssertionClause ensuresClause =
+                typeFamilyDec.getFinalization().getEnsures();
+        Location finalEnsuresLoc = ensuresClause.getLocation();
+        Exp ensuresExp = ensuresClause.getAssertionExp().clone();
+        ensuresExp.setLocationDetailModel(new LocationDetailModel(ensuresExp
+                .getLocation().clone(), finalEnsuresLoc.clone(),
+                "Finalization Ensures Clause of " + typeFamilyDec.getName()));
+
+        // Add any non-affected shared variable/def var's restores ensures
+        // and return the modified expression.
+        return processNonAffectedVarsEnsures(finalEnsuresLoc, ensuresExp,
+                typeFamilyDec);
+    }
 }

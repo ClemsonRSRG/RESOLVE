@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -25,6 +26,8 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationFinalRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationInitRule;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
@@ -276,5 +279,95 @@ public abstract class AbstractBlockDeclRule
         }
 
         return retExp;
+    }
+
+    /**
+     * <p>This method processes all non-affected {@code Shared Variables} and/or
+     * {@code Def Vars} and generate the proper {@code ensures} clause.</p>
+     *
+     * <p>Note that this method should only be called by {@link TypeRepresentationInitRule}
+     * and {@link TypeRepresentationFinalRule} due to the fact that it does substitutions
+     * for conceptual variables.</p>
+     *
+     * @param ensuresLoc Location to be used for the new {@code ensures} clauses.
+     * @param ensuresExp The current ensures clause we are building.
+     * @param typeFamilyDec The current type family declaration we are processing.
+     *
+     * @return A modified {@code ensures} clause with {@code restores} mode {@code ensures}
+     * clause for each non-affected {@code Shared Variable} and/or {@code Def Vars}.
+     */
+    protected final Exp processNonAffectedVarsEnsures(Location ensuresLoc,
+            Exp ensuresExp, TypeFamilyDec typeFamilyDec) {
+        Exp retExp = ensuresExp.clone();
+
+        // Create a replacement map for substituting parameter
+        // variables with representation types.
+        Map<Exp, Exp> substitutionParamToConc = new LinkedHashMap<>();
+
+        // Loop through all shared variable declared from the
+        // associated concept.
+        List<SharedStateDec> sharedStateDecs =
+                myCurrentVerificationContext.getConceptSharedVars();
+        for (SharedStateDec stateDec : sharedStateDecs) {
+            for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                // Convert the math variables to variable expressions
+                VarExp stateVarExp =
+                        Utilities.createVarExp(ensuresLoc.clone(), null,
+                                mathVarDec.getName(), mathVarDec.getMathType(), null);
+                OldExp oldStateVarExp = new OldExp(ensuresLoc.clone(), stateVarExp);
+                oldStateVarExp.setMathType(stateVarExp.getMathType());
+
+                // Add a "restores" mode to any shared variables not being affected
+                if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
+                    retExp = createRestoresExpForSharedVars(ensuresLoc.clone(),
+                            stateVarExp, oldStateVarExp, retExp);
+                    // Our ensures clause should say something about the conceptual
+                    // shared variables so we create the appropriate conceptual versions
+                    // of the shared variables and add them to our substitution maps.
+                    DotExp concVarExp =
+                            Utilities.createConcVarExp(
+                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    substitutionParamToConc =
+                            addConceptualVariables(stateVarExp, oldStateVarExp,
+                                    concVarExp, substitutionParamToConc);
+                }
+            }
+        }
+
+        // Generate a "restores" ensures clause for non-affected definition variables in our type family
+        for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+            // Convert the math definition variables to variable expressions
+            MathVarDec mathVarDec = mathDefVariableDec.getVariable();
+            VarExp defVarExp =
+                    Utilities.createVarExp(ensuresLoc.clone(), null,
+                            mathVarDec.getName(), mathVarDec.getMathType(), null);
+            OldExp oldDefVarExp = new OldExp(ensuresLoc.clone(), defVarExp);
+            oldDefVarExp.setMathType(defVarExp.getMathType());
+
+            // Add a "restores" mode to any definition variables not being affected
+            if (!Utilities.containsEquivalentExp(myAffectedExps, defVarExp)) {
+                retExp = createRestoresExpForDefVars(ensuresLoc.clone(),
+                        defVarExp, oldDefVarExp, retExp);
+
+                // Our ensures clause should say something about the conceptual
+                // shared variables so we create the appropriate conceptual versions
+                // of the shared variables and add them to our substitution maps.
+                DotExp concVarExp =
+                        Utilities.createConcVarExp(
+                                new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                substitutionParamToConc =
+                        addConceptualVariables(defVarExp, oldDefVarExp,
+                                concVarExp, substitutionParamToConc);
+            }
+        }
+
+        // Loop through all instantiated facility's and generate a "restores" ensures clause
+        // for non-affected shared variables/math definition variables.
+        retExp = createFacilitySharedVarRestoresEnsuresExp(ensuresLoc.clone(), retExp);
+
+        // Apply any substitution and return the modified expression
+        return retExp.substitute(substitutionParamToConc);
     }
 }
