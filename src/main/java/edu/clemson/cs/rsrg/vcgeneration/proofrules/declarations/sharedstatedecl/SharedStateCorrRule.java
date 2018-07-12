@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.other;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.sharedstatedecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
