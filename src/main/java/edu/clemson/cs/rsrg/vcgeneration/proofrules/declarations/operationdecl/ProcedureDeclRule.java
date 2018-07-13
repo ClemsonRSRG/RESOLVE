@@ -721,21 +721,21 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                 if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
                     retExp = createRestoresExpForSharedVars(procedureLoc,
                             stateVarExp, oldStateVarExp, retExp);
+                }
 
-                    // If we are in a concept realization, our non-local procedure's
-                    // ensures clause should say something about the conceptual
-                    // shared variables.
-                    if (inConceptRealiz && !isLocal) {
-                        // Create the appropriate conceptual versions of the shared variables
-                        // and add them to our substitution maps.
-                        DotExp concVarExp =
-                                Utilities.createConcVarExp(
-                                        new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                        mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                        substitutionParamToConc =
-                                addConceptualVariables(stateVarExp, oldStateVarExp,
-                                        concVarExp, substitutionParamToConc);
-                    }
+                // If we are in a concept realization, our non-local procedure's
+                // ensures clause should say something about the conceptual
+                // shared variables.
+                if (inConceptRealiz && !isLocal) {
+                    // Create the appropriate conceptual versions of the shared variables
+                    // and add them to our substitution maps.
+                    DotExp concVarExp =
+                            Utilities.createConcVarExp(
+                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    substitutionParamToConc =
+                            addConceptualVariables(stateVarExp, oldStateVarExp,
+                                    concVarExp, substitutionParamToConc);
                 }
             }
         }
@@ -756,21 +756,21 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                 if (!Utilities.containsEquivalentExp(myAffectedExps, defVarExp)) {
                     retExp = createRestoresExpForDefVars(procedureLoc,
                             defVarExp, oldDefVarExp, retExp);
+                }
 
-                    // If we are in a concept realization, our non-local procedure's
-                    // ensures clause should say something about the conceptual
-                    // definition variables.
-                    if (inConceptRealiz && !isLocal) {
-                        // Create the appropriate conceptual versions of the definition variables
-                        // and add them to our substitution maps.
-                        DotExp concVarExp =
-                                Utilities.createConcVarExp(
-                                        new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                        mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                        substitutionParamToConc =
-                                addConceptualVariables(defVarExp, oldDefVarExp,
-                                        concVarExp, substitutionParamToConc);
-                    }
+                // If we are in a concept realization, our non-local procedure's
+                // ensures clause should say something about the conceptual
+                // definition variables.
+                if (inConceptRealiz && !isLocal) {
+                    // Create the appropriate conceptual versions of the definition variables
+                    // and add them to our substitution maps.
+                    DotExp concVarExp =
+                            Utilities.createConcVarExp(
+                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    substitutionParamToConc =
+                            addConceptualVariables(defVarExp, oldDefVarExp,
+                                    concVarExp, substitutionParamToConc);
                 }
             }
         }

@@ -58,6 +58,9 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
     // Member Fields
     // ===========================================================
 
+    /** <p>The {@code type family} we are associated with.</p> */
+    private final TypeFamilyDec myAssociatedTypeFamilyDec;
+
     /** <p>The {@code type} representation we are applying the rule to.</p> */
     private final TypeRepresentationDec myTypeRepresentationDec;
 
@@ -93,8 +96,23 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
             STGroup stGroup, ST blockModel) {
         super(block, dec.getName().getName(), symbolTableBuilder, moduleScope,
                 context, stGroup, blockModel);
+        myAssociatedTypeFamilyDec =
+                Utilities.getAssociatedTypeFamilyDec(dec,
+                        myCurrentVerificationContext);
         myTypeRepresentationDec = dec;
         myVariableTypeEntries = blockVarTypeEntries;
+
+        // Build a set of shared variables being affected
+        // by the type family's initialization affects clause
+        AffectsClause affectsClauseTypeFamily =
+                myAssociatedTypeFamilyDec.getInitialization().getAffectedVars();
+        if (affectsClauseTypeFamily != null) {
+            for (Exp exp : affectsClauseTypeFamily.getAffectedExps()) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps, exp)) {
+                    myAffectedExps.add(exp.clone());
+                }
+            }
+        }
 
         // Build a set of shared variables being affected
         // by the current initialization block
@@ -121,11 +139,6 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
         // Initialization block
         RealizInitFinalItem initItem =
                 myTypeRepresentationDec.getTypeInitItem();
-
-        // Obtain the associated type family declaration
-        TypeFamilyDec typeFamilyDec =
-                Utilities.getAssociatedTypeFamilyDec(myTypeRepresentationDec,
-                        myCurrentVerificationContext);
 
         // Add all the statements
         myCurrentAssertiveCodeBlock.addStatements(initItem.getStatements());
@@ -195,7 +208,7 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
         myCurrentAssertiveCodeBlock.addStatement(correspondenceAssumeStmt);
 
         // Create the final confirm expression
-        Exp finalConfirmExp = createFinalConfirmExp(typeFamilyDec);
+        Exp finalConfirmExp = createFinalConfirmExp();
 
         // Replace any facility declaration instantiation arguments
         // in the ensures clause.
@@ -242,45 +255,51 @@ public class TypeRepresentationInitRule extends AbstractBlockDeclRule
      * {@link TypeFamilyDec} and builds the appropriate {@code ensures} clause that will be an
      * {@link AssertiveCodeBlock AssertiveCodeBlock's} final {@code confirm} statement.</p>
      *
-     * @param typeFamilyDec The associated type family declaration.
-     *
      * @return The final confirm expression.
      */
-    private Exp createFinalConfirmExp(TypeFamilyDec typeFamilyDec) {
+    private Exp createFinalConfirmExp() {
         // Add the type family's initialization ensures clause
         AssertionClause ensuresClause =
-                typeFamilyDec.getInitialization().getEnsures();
+                myAssociatedTypeFamilyDec.getInitialization().getEnsures();
         Location initEnsuresLoc = ensuresClause.getLocation();
         Exp ensuresExp = ensuresClause.getAssertionExp().clone();
         ensuresExp.setLocationDetailModel(new LocationDetailModel(ensuresExp
                 .getLocation().clone(), initEnsuresLoc.clone(),
-                "Initialization Ensures Clause of " + typeFamilyDec.getName()));
+                "Initialization Ensures Clause of " + myAssociatedTypeFamilyDec.getName()));
 
         // Exemplar variable and incoming exemplar variable
         VarExp exemplarExp =
                 Utilities.createVarExp(myTypeRepresentationDec.getLocation().clone(),
-                        null, typeFamilyDec.getExemplar().clone(),
-                        typeFamilyDec.getModel().getMathTypeValue(), null);
+                        null, myAssociatedTypeFamilyDec.getExemplar().clone(),
+                        myAssociatedTypeFamilyDec.getModel().getMathTypeValue(), null);
         OldExp oldExemplarExp =
                 new OldExp(myTypeRepresentationDec.getLocation().clone(), exemplarExp.clone());
-        oldExemplarExp.setMathType(typeFamilyDec.getModel().getMathTypeValue());
+        oldExemplarExp.setMathType(myAssociatedTypeFamilyDec.getModel().getMathTypeValue());
 
         // Create a replacement map for substituting parameter
         // variables with representation types.
         Map<Exp, Exp> substitutionExemplarToConc = new LinkedHashMap<>();
         DotExp concExemplarExp =
                 Utilities.createConcVarExp(
-                        new VarDec(typeFamilyDec.getExemplar(),
+                        new VarDec(myAssociatedTypeFamilyDec.getExemplar(),
                                 myTypeRepresentationDec.getRepresentation()),
-                        typeFamilyDec.getMathType(), myTypeGraph.BOOLEAN);
+                        myAssociatedTypeFamilyDec.getMathType(), myTypeGraph.BOOLEAN);
         substitutionExemplarToConc =
                 addConceptualVariables(exemplarExp, oldExemplarExp,
                         concExemplarExp, substitutionExemplarToConc);
+
+        // Create a replacement map for substituting affected shared
+        // variables with ones that indicates they are conceptual.
+        substitutionExemplarToConc =
+                addAffectedConceptualSharedVars(myAssociatedTypeFamilyDec.getInitialization().getAffectedVars(),
+                        substitutionExemplarToConc, myTypeGraph.BOOLEAN);
+
+        // Perform substitution
         ensuresExp = ensuresExp.substitute(substitutionExemplarToConc);
 
         // Add any non-affected shared variable/def var's restores ensures
         // and return the modified expression.
         return processNonAffectedVarsEnsures(initEnsuresLoc, ensuresExp,
-                typeFamilyDec);
+                myAssociatedTypeFamilyDec);
     }
 }

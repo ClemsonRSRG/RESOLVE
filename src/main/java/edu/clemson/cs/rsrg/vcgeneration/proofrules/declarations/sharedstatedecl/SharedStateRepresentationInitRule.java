@@ -103,6 +103,19 @@ public class SharedStateRepresentationInitRule extends AbstractBlockDeclRule
         myVariableTypeEntries = blockVarTypeEntries;
 
         // Build a set of shared variables being affected
+        // by the shared variable's initialization affects clause
+        AffectsClause affectsClauseSharedState =
+                myCorrespondingSharedStateDec.getInitialization()
+                        .getAffectedVars();
+        if (affectsClauseSharedState != null) {
+            for (Exp exp : affectsClauseSharedState.getAffectedExps()) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps, exp)) {
+                    myAffectedExps.add(exp.clone());
+                }
+            }
+        }
+
+        // Build a set of shared variables being affected
         // by the current finalization block
         AffectsClause affectsClause =
                 mySharedStateRealizationDec.getInitItem().getAffectedVars();
@@ -249,6 +262,14 @@ public class SharedStateRepresentationInitRule extends AbstractBlockDeclRule
                             sharedVarDec.getMathType(), myTypeGraph.BOOLEAN);
             substitutionExemplarToConc.put(exemplarExp, concExemplarExp);
         }
+
+        // Create a replacement map for substituting affected shared
+        // variables with ones that indicates they are conceptual.
+        substitutionExemplarToConc =
+                addAffectedConceptualSharedVars(myCorrespondingSharedStateDec.getInitialization().getAffectedVars(),
+                        substitutionExemplarToConc, myTypeGraph.BOOLEAN);
+
+        // Perform substitution
         ensuresExp = ensuresExp.substitute(substitutionExemplarToConc);
 
         // Loop through all instantiated facility's and generate a "restores" ensures clause
