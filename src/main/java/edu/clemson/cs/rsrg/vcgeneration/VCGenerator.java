@@ -953,7 +953,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Apply well defined correspondence rule for concept type realizations
             TypeRepresentationCorrRule declRule =
-                    new TypeRepresentationCorrRule(dec, block,
+                    new TypeRepresentationCorrRule(dec, myBuilder, block,
                             myCurrentVerificationContext, mySTGroup, blockModel);
             declRule.applyRule();
 
@@ -997,29 +997,19 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Create the top most level assume statement and
         // add it to the assertive code block as the first statement
-        // YS: Only add the shared variable's convention if we are in a type
-        //     realization dec.
-        boolean addSharedVarConvention =
-                myRealizInitFinalOuterDec instanceof TypeRepresentationDec;
         Exp topLevelAssumeExp =
-                myCurrentVerificationContext
-                        .createTopLevelAssumeExpFromContext(item.getLocation()
-                                .clone(), addSharedVarConvention, false);
-
-        // ( Assume CPC and RPC and DC and RDC [and SS_RC]; )
+                createTopLevelAssumeExpForRealizInitFinalItem(item
+                        .getLocation());
         AssumeStmt topLevelAssumeStmt =
                 new AssumeStmt(item.getLocation().clone(), topLevelAssumeExp,
                         false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
-        // Create Remember statement if this is a finalization block
-        if (item.getItemType().equals(
-                AbstractInitFinalItem.ItemType.FINALIZATION)) {
-            MemoryStmt rememberStmt =
-                    new MemoryStmt(item.getLocation().clone(),
-                            StatementType.REMEMBER);
-            myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
-        }
+        // Create Remember statement
+        MemoryStmt rememberStmt =
+                new MemoryStmt(item.getLocation().clone(),
+                        StatementType.REMEMBER);
+        myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
 
         // For type representation's initialization block, we will need to declare and
         // initialize a variable with the exemplar as its name and the representation type
@@ -1548,6 +1538,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new variable finalization rule application.
                 ruleApplication =
                         new FinalizeVarStmtRule((FinalizeVarStmt) statement,
+                                myBuilder, myCurrentModuleScope,
                                 assertiveCodeBlock,
                                 myCurrentVerificationContext, mySTGroup,
                                 blockModel);
@@ -1667,6 +1658,63 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         myAssertiveCodeBlockModels.put(assertiveCodeBlock, blockModel);
+    }
+
+    /**
+     * <p>An helper method that uses all the {@code requires} and {@code constraint}
+     * clauses from the various different sources (see below for complete list)
+     * and builds the appropriate {@code assume} clause that goes at the
+     * beginning an {@link AssertiveCodeBlock}.</p>
+     *
+     * <p>List of different places where clauses can originate from:</p>
+     * <ul>
+     *     <li>{@code Concept}'s {@code requires} clause.</li>
+     *     <li>{@code Concept}'s module {@code constraint} clause.</li>
+     *     <li>{@code Shared Variables}' {@code constraint} clause.</li>
+     *     <li>{@code Concept Realization}'s {@code requires} clause.</li>
+     *     <li>{@code Shared Variables}' {@code convention} clause.</li>
+     *     <li>{@code Shared Variables}' {@code correspondence} clause (if we are in a
+     *     {@link TypeRepresentationDec}).</li>
+     *     <li>Any {@code which_entails} expressions that originated from any of the
+     *     clauses above.</li>
+     * </ul>
+     *
+     * <p>See the {@code Shared Variable Initialization}, {@code Type Initialization}
+     * and {@code Type Finalization} rule for more detail.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     *
+     * @return The top-level assumed expression.
+     */
+    private Exp createTopLevelAssumeExpForRealizInitFinalItem(Location loc) {
+        // YS: Only add the shared variable's convention and correspondence
+        //     if we are in a type realization dec.
+        boolean inTypeRepresentationDec =
+                myRealizInitFinalOuterDec instanceof TypeRepresentationDec;
+        Exp retExp =
+                myCurrentVerificationContext
+                        .createTopLevelAssumeExpFromContext(loc.clone(),
+                                inTypeRepresentationDec,
+                                inTypeRepresentationDec);
+
+        // YS: Only add the type correspondence if we are in a type realization dec.
+        if (inTypeRepresentationDec) {
+            TypeRepresentationDec typeRepresentationDec =
+                    (TypeRepresentationDec) myRealizInitFinalOuterDec;
+            AssertionClause typeCorrespondenceClause =
+                    typeRepresentationDec.getCorrespondence().clone();
+            retExp =
+                    Utilities.formConjunct(loc.clone(), retExp,
+                            typeCorrespondenceClause, new LocationDetailModel(
+                                    typeCorrespondenceClause.getLocation()
+                                            .clone(), loc.clone(), "Type "
+                                            + typeRepresentationDec.getName()
+                                                    .getName()
+                                            + "'s Correspondence"));
+        }
+
+        return retExp;
     }
 
     /**

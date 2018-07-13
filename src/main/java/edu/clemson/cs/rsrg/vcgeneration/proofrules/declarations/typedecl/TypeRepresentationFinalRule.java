@@ -19,6 +19,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.RealizInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
@@ -35,6 +37,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.stringtemplate.v4.ST;
@@ -171,11 +174,21 @@ public class TypeRepresentationFinalRule extends AbstractBlockDeclRule
         myCurrentAssertiveCodeBlock.addStatement(conventionConfirmStmt);
 
         // Assume the shared variable's and our type correspondence
-        // ( Assume SS_Corr_Exp; )
+        // ( Assume SS_Corr_Exp and Cor_Exp; )
         Exp assumeCorrespondenceExp =
                 myCurrentVerificationContext
                         .createSharedStateRealizCorrespondenceExp(finalItem
                                 .getLocation().clone());
+        AssertionClause typeCorrespondenceClause =
+                myTypeRepresentationDec.getCorrespondence().clone();
+        assumeCorrespondenceExp =
+                Utilities.formConjunct(finalItem.getLocation().clone(),
+                        assumeCorrespondenceExp, typeCorrespondenceClause,
+                        new LocationDetailModel(typeCorrespondenceClause
+                                .getLocation().clone(), finalItem.getLocation()
+                                .clone(), "Type "
+                                + myTypeRepresentationDec.getName().getName()
+                                + "'s Correspondence"));
         AssumeStmt correspondenceAssumeStmt =
                 new AssumeStmt(finalItem.getLocation().clone(),
                         assumeCorrespondenceExp, false);
@@ -242,6 +255,28 @@ public class TypeRepresentationFinalRule extends AbstractBlockDeclRule
         ensuresExp.setLocationDetailModel(new LocationDetailModel(ensuresExp
                 .getLocation().clone(), finalEnsuresLoc.clone(),
                 "Finalization Ensures Clause of " + typeFamilyDec.getName()));
+
+        // Exemplar variable and incoming exemplar variable
+        VarExp exemplarExp =
+                Utilities.createVarExp(myTypeRepresentationDec.getLocation().clone(),
+                        null, typeFamilyDec.getExemplar().clone(),
+                        typeFamilyDec.getModel().getMathTypeValue(), null);
+        OldExp oldExemplarExp =
+                new OldExp(myTypeRepresentationDec.getLocation().clone(), exemplarExp.clone());
+        oldExemplarExp.setMathType(typeFamilyDec.getModel().getMathTypeValue());
+
+        // Create a replacement map for substituting parameter
+        // variables with representation types.
+        Map<Exp, Exp> substitutionExemplarToConc = new LinkedHashMap<>();
+        DotExp concExemplarExp =
+                Utilities.createConcVarExp(
+                        new VarDec(typeFamilyDec.getExemplar(),
+                                myTypeRepresentationDec.getRepresentation()),
+                        typeFamilyDec.getMathType(), myTypeGraph.BOOLEAN);
+        substitutionExemplarToConc =
+                addConceptualVariables(exemplarExp, oldExemplarExp,
+                        concExemplarExp, substitutionExemplarToConc);
+        ensuresExp = ensuresExp.substitute(substitutionExemplarToConc);
 
         // Add any non-affected shared variable/def var's restores ensures
         // and return the modified expression.
