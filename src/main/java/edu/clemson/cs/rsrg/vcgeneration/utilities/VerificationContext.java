@@ -435,6 +435,30 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method returns the instantiated facility declaration corresponding
+     * to a {@link FacilityDec}.</p>
+     *
+     * @param dec A facility declaration.
+     *
+     * @return The {@link InstantiatedFacilityDecl} corresponding to {@code dec}.
+     */
+    public final InstantiatedFacilityDecl getProcessedInstFacilityDecl(
+            FacilityDec dec) {
+        InstantiatedFacilityDecl decl = null;
+        Iterator<InstantiatedFacilityDecl> it =
+                myProcessedInstFacilityDecls.iterator();
+        while (it.hasNext() && decl == null) {
+            InstantiatedFacilityDecl nextDecl = it.next();
+            if (nextDecl.getInstantiatedFacilityName().getName().equals(
+                    dec.getName().getName())) {
+                decl = nextDecl;
+            }
+        }
+
+        return decl;
+    }
+
+    /**
      * <p>This method returns a list of all instantiated {@code Facilities}.</p>
      *
      * @return A list of {@link InstantiatedFacilityDecl} containing all the information.

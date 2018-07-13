@@ -80,12 +80,12 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FacilityInitStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
-import java.util.*;
-
 import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptSharedStateExtractor;
+import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -1088,16 +1088,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                         false);
         myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
 
-        // Create Remember statement
-        MemoryStmt rememberStmt =
-                new MemoryStmt(item.getLocation().clone(),
-                        StatementType.REMEMBER);
-        myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
-
         // For type representation's initialization block, we will need to declare and
         // initialize a variable with the exemplar as its name and the representation type
         // as its programming type.
         if (myRealizInitFinalOuterDec instanceof TypeRepresentationDec) {
+            // Create Remember statement
+            MemoryStmt rememberStmt =
+                    new MemoryStmt(item.getLocation().clone(),
+                            StatementType.REMEMBER);
+            myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+
             if (item.getItemType().equals(
                     AbstractInitFinalItem.ItemType.INITIALIZATION)) {
                 // Obtain the associated type family declaration
@@ -1128,6 +1128,27 @@ public class VCGenerator extends TreeWalkerVisitor {
         else {
             if (item.getItemType().equals(
                     AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+                // YS: For each instantiated facility declaration, we generate a facility initialization
+                //     statement. This will allow us to obtain the proper facility initialization ensures
+                //     and prove our own initialization.
+                List<InstantiatedFacilityDecl> instantiatedFacilityDecls =
+                        myCurrentVerificationContext
+                                .getProcessedInstFacilityDecls();
+                for (InstantiatedFacilityDecl decl : instantiatedFacilityDecls) {
+                    // Only need to deal with local facility declarations.
+                    if (decl.isLocalFacility()) {
+                        myCurrentAssertiveCodeBlock
+                                .addStatement(new FacilityInitStmt(decl
+                                        .getInstantiatedFacilityDec()));
+                    }
+                }
+
+                // Create Remember statement
+                MemoryStmt rememberStmt =
+                        new MemoryStmt(item.getLocation().clone(),
+                                StatementType.REMEMBER);
+                myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+
                 // For each shared variable, we query for the its programming type entry
                 // in the symbol table.
                 SharedStateRealizationDec sharedStateRealizationDec =
@@ -1641,6 +1662,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                 ruleApplication =
                         new ConfirmStmtRule((ConfirmStmt) statement,
                                 assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
+            }
+            else if (statement instanceof FacilityInitStmt) {
+                // Generate a new facility initialization rule application.
+                ruleApplication =
+                        new FacilityInitStmtRule((FacilityInitStmt) statement,
+                                myBuilder, assertiveCodeBlock,
                                 myCurrentVerificationContext, mySTGroup,
                                 blockModel);
             }
