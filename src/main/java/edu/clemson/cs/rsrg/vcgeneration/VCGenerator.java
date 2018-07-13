@@ -1078,28 +1078,28 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add shared variables in scope to the free variable's list
         addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
 
-        // Create the top most level assume statement and
-        // add it to the assertive code block as the first statement
-        Exp topLevelAssumeExp =
-                createTopLevelAssumeExpForRealizInitFinalItem(item
-                        .getLocation());
-        AssumeStmt topLevelAssumeStmt =
-                new AssumeStmt(item.getLocation().clone(), topLevelAssumeExp,
-                        false);
-        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
-
         // For type representation's initialization block, we will need to declare and
         // initialize a variable with the exemplar as its name and the representation type
         // as its programming type.
         if (myRealizInitFinalOuterDec instanceof TypeRepresentationDec) {
-            // Create Remember statement
-            MemoryStmt rememberStmt =
-                    new MemoryStmt(item.getLocation().clone(),
-                            StatementType.REMEMBER);
-            myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
-
             if (item.getItemType().equals(
                     AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+                // Create the top most level assume statement and
+                // add it to the assertive code block as the first statement
+                Exp topLevelAssumeExp =
+                        createTopLevelAssumeExpForRealizInitFinalItem(item
+                                .getLocation(), false);
+                AssumeStmt topLevelAssumeStmt =
+                        new AssumeStmt(item.getLocation().clone(),
+                                topLevelAssumeExp, false);
+                myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+                // Create Remember statement
+                MemoryStmt rememberStmt =
+                        new MemoryStmt(item.getLocation().clone(),
+                                StatementType.REMEMBER);
+                myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+
                 // Obtain the associated type family declaration
                 TypeRepresentationDec typeRepresentationDec =
                         (TypeRepresentationDec) myRealizInitFinalOuterDec;
@@ -1124,8 +1124,35 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // TODO: NY - Add any variable initialization duration clauses
             }
+            else {
+                // Create the top most level assume statement and
+                // add it to the assertive code block as the first statement
+                Exp topLevelAssumeExp =
+                        createTopLevelAssumeExpForRealizInitFinalItem(item
+                                .getLocation(), true);
+                AssumeStmt topLevelAssumeStmt =
+                        new AssumeStmt(item.getLocation().clone(),
+                                topLevelAssumeExp, false);
+                myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+                // Create Remember statement
+                MemoryStmt rememberStmt =
+                        new MemoryStmt(item.getLocation().clone(),
+                                StatementType.REMEMBER);
+                myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+            }
         }
         else {
+            // Create the top most level assume statement and
+            // add it to the assertive code block as the first statement
+            Exp topLevelAssumeExp =
+                    createTopLevelAssumeExpForRealizInitFinalItem(item
+                            .getLocation(), false);
+            AssumeStmt topLevelAssumeStmt =
+                    new AssumeStmt(item.getLocation().clone(),
+                            topLevelAssumeExp, false);
+            myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
             if (item.getItemType().equals(
                     AbstractInitFinalItem.ItemType.INITIALIZATION)) {
                 // YS: For each instantiated facility declaration, we generate a facility initialization
@@ -1812,8 +1839,10 @@ public class VCGenerator extends TreeWalkerVisitor {
      *     <li>{@code Shared Variables}' {@code constraint} clause.</li>
      *     <li>{@code Concept Realization}'s {@code requires} clause.</li>
      *     <li>{@code Shared Variables}' {@code convention} clause.</li>
-     *     <li>{@code Shared Variables}' {@code correspondence} clause (if we are in a
-     *     {@link TypeRepresentationDec}).</li>
+     *     <li>{@code Shared Variables}' {@code correspondence} clause
+     *     <li>Type {@code convention} clause (if we are are in a {@link TypeRepresentationDec} and
+     *     processing type finalization block).</li>
+     *     <li>Type {@code correspondence} clause (if we are in a {@link TypeRepresentationDec}).</li>
      *     <li>Any {@code which_entails} expressions that originated from any of the
      *     clauses above.</li>
      * </ul>
@@ -1823,10 +1852,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param loc The location in the AST that we are
      *            currently visiting.
+     * @param isTypeFinalItem A flag that indicates if this is a convention.
      *
      * @return The top-level assumed expression.
      */
-    private Exp createTopLevelAssumeExpForRealizInitFinalItem(Location loc) {
+    private Exp createTopLevelAssumeExpForRealizInitFinalItem(Location loc,
+            boolean isTypeFinalItem) {
         // YS: Only add the shared variable's convention and correspondence
         //     if we are in a type realization dec.
         boolean inTypeRepresentationDec =
@@ -1841,6 +1872,21 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (inTypeRepresentationDec) {
             TypeRepresentationDec typeRepresentationDec =
                     (TypeRepresentationDec) myRealizInitFinalOuterDec;
+
+            // YS: We can assume the convention in finalization block
+            if (isTypeFinalItem) {
+                AssertionClause typeConventionClause =
+                        typeRepresentationDec.getConvention().clone();
+                retExp =
+                        Utilities.formConjunct(loc.clone(), retExp,
+                                typeConventionClause, new LocationDetailModel(
+                                        typeConventionClause.getLocation()
+                                                .clone(), loc.clone(), "Type "
+                                                + typeRepresentationDec
+                                                        .getName().getName()
+                                                + "'s Convention"));
+            }
+
             AssertionClause typeCorrespondenceClause =
                     typeRepresentationDec.getCorrespondence().clone();
             retExp =
