@@ -686,11 +686,11 @@ public class ExpEquivalenceTest {
 
         // VCVarExp
         VCVarExp vcVarExp1 =
-                new VCVarExp(FAKE_LOCATION_1.clone(), varExp1.clone());
+                new VCVarExp(FAKE_LOCATION_1.clone(), varExp1.clone(), 1);
         vcVarExp1.setLocationDetailModel(FAKE_LOCATION_DETAIL_MODEL_1.clone());
 
         VCVarExp vcVarExp2 =
-                new VCVarExp(FAKE_LOCATION_2.clone(), varExp2.clone());
+                new VCVarExp(FAKE_LOCATION_2.clone(), varExp2.clone(), 1);
         vcVarExp2.setLocationDetailModel(FAKE_LOCATION_DETAIL_MODEL_2.clone());
 
         assertionCheck(vcVarExp1, vcVarExp2);
