@@ -16,8 +16,12 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>This is the abstract base class for all the mathematical expression objects
@@ -274,6 +278,93 @@ public abstract class MathExp extends Exp {
         }
 
         return retval;
+    }
+
+    // ===========================================================
+    // Package-Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method for replacing a {@link FunctionExp}.</p>
+     *
+     * @param originalFunctionExp The original function expression.
+     * @param replacementExp The replacement expression.
+     * @param substitutions A mapping from {@link Exp}s that should be
+     *                      substituted out to the {@link Exp} that should
+     *                      replace them.
+     *
+     * @return An {@link Exp} after substituting {@code originalFunctionExp}.
+     */
+    final Exp substituteFunctionExp(FunctionExp originalFunctionExp, Exp replacementExp, Map<Exp, Exp> substitutions) {
+        // YS: Copy the components of the original inner function exp
+        Exp newCaratExp = null;
+        if (originalFunctionExp.getCaratExp() != null) {
+            newCaratExp = originalFunctionExp.getCaratExp().clone();
+        }
+
+        List<Exp> newArgs = new ArrayList<>();
+        for (Exp f : originalFunctionExp.getArguments()) {
+            newArgs.add(substitute(f, substitutions));
+        }
+
+        // Case #1: "replacementExp" is a VarExp
+        if (replacementExp instanceof VarExp) {
+            return new FunctionExp(replacementExp.getLocation().clone(),
+                    (VarExp) replacementExp.clone(), newCaratExp, newArgs);
+        }
+        // Case #2: "replacementExp" is a DotExp
+        else if (replacementExp instanceof DotExp) {
+            DotExp replacementExpAsDotExp = (DotExp) replacementExp;
+            List<Exp> segments = replacementExpAsDotExp.getSegments();
+
+            // Check to see if the last segment is a VarExp
+            Exp lastSegment = segments.get(segments.size() - 1);
+            if (lastSegment instanceof VarExp) {
+                // Copy the segments
+                List<Exp> newSegments = new ArrayList<>(segments.size());
+                for (int i = 0; i < segments.size() - 1; i++) {
+                    newSegments.add(segments.get(i).clone());
+                }
+
+                // Add the function expression with the name changed
+                newSegments.add(new FunctionExp(originalFunctionExp.getLocation().clone(),
+                        (VarExp) lastSegment.clone(), newCaratExp, newArgs));
+
+                // Return a new DotExp with the function name replaced
+                return new DotExp(replacementExpAsDotExp.getLocation().clone(), newSegments);
+            }
+            // Everything else is an error!
+            else {
+                throw new SourceErrorException("Cannot substitute: "
+                        + this.toString() + " with: "
+                        + replacementExp.toString(), replacementExp.getLocation());
+            }
+        }
+        // Case #3: "replacementExp" is an OldExp
+        else if (replacementExp instanceof OldExp) {
+            OldExp replacementExpAsOldExp= (OldExp) replacementExp;
+            Exp innerExp = replacementExpAsOldExp.getExp();
+
+            // Check to see if the inner expression is a VarExp
+            if (innerExp instanceof VarExp) {
+                // Return a new OldExp with the function name replaced
+                return new OldExp(replacementExpAsOldExp.getLocation().clone(),
+                        new FunctionExp(originalFunctionExp.getLocation().clone(),
+                                (VarExp) innerExp.clone(), newCaratExp, newArgs));
+            }
+            // Everything else is an error!
+            else {
+                throw new SourceErrorException("Cannot substitute: "
+                        + this.toString() + " with: "
+                        + replacementExp.toString(), replacementExp.getLocation());
+            }
+        }
+        // Everything else is an error!
+        else {
+            throw new SourceErrorException("Cannot substitute: "
+                    + this.toString() + " with: "
+                    + replacementExp.toString(), replacementExp.getLocation());
+        }
     }
 
     // ===========================================================
