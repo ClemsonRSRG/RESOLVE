@@ -13,7 +13,6 @@ install: true
 
 # Build Stages Order
 stages:
-  - prepare cache
   - check styles
   - junit tests
   - compiler tests
@@ -28,10 +27,6 @@ cache:
 # Travis CI website.
 jobs:
   include:
-    # This stage warms up the cache.
-    - stage: prepare cache
-      jdk: oraclejdk8
-      script: true
     # This stage makes sure that our code styles are the same.
     - stage: check styles
       jdk: oraclejdk8
