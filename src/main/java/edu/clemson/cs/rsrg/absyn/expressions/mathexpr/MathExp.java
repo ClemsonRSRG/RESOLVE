@@ -359,6 +359,56 @@ public abstract class MathExp extends Exp {
                         + replacementExp.toString(), replacementExp.getLocation());
             }
         }
+        // Case #4: "replacementExp" is a VCVarExp
+        else if (replacementExp instanceof VCVarExp) {
+            VCVarExp replacementExpAsVCVarExp= (VCVarExp) replacementExp;
+            Exp innerExp = replacementExpAsVCVarExp.getExp();
+            Exp newInnerExp;
+
+            // Case #4.1: "innerExp" is a VarExp
+            if (innerExp instanceof VarExp) {
+                newInnerExp =
+                        new FunctionExp(replacementExp.getLocation().clone(),
+                                (VarExp) innerExp.clone(), newCaratExp, newArgs);
+            }
+            // Case #4.2: "innerExp" is a DotExp
+            else if (innerExp instanceof DotExp) {
+                DotExp innerExpAsDotExp = (DotExp) innerExp;
+                List<Exp> segments = innerExpAsDotExp.getSegments();
+
+                // Check to see if the last segment is a VarExp
+                Exp lastSegment = segments.get(segments.size() - 1);
+                if (lastSegment instanceof VarExp) {
+                    // Copy the segments
+                    List<Exp> newSegments = new ArrayList<>(segments.size());
+                    for (int i = 0; i < segments.size() - 1; i++) {
+                        newSegments.add(segments.get(i).clone());
+                    }
+
+                    // Add the function expression with the name changed
+                    newSegments.add(new FunctionExp(originalFunctionExp.getLocation().clone(),
+                            (VarExp) lastSegment.clone(), newCaratExp, newArgs));
+
+                    // Return a new DotExp with the function name replaced
+                    newInnerExp = new DotExp(innerExpAsDotExp.getLocation().clone(), newSegments);
+                }
+                // Everything else is an error!
+                else {
+                    throw new SourceErrorException("Cannot substitute: "
+                            + this.toString() + " with: "
+                            + replacementExp.toString(), replacementExp.getLocation());
+                }
+            }
+            // Everything else is an error!
+            else {
+                throw new SourceErrorException("Cannot substitute: "
+                        + this.toString() + " with: "
+                        + replacementExp.toString(), replacementExp.getLocation());
+            }
+
+            return new VCVarExp(replacementExpAsVCVarExp.getLocation().clone(),
+                    newInnerExp, replacementExpAsVCVarExp.getStateNum());
+        }
         // Everything else is an error!
         else {
             throw new SourceErrorException("Cannot substitute: "
