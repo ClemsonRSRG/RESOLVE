@@ -152,7 +152,7 @@ public class InitializeVarStmtRule extends AbstractProofRuleApplication
                                 .getLocation());
 
                 // TODO: Logic for local type representation.
-                initializationEnsuresExp = null;
+                throw new RuntimeException();
             }
         }
 

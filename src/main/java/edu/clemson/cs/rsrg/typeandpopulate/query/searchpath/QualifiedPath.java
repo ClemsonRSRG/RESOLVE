@@ -171,8 +171,8 @@ public class QualifiedPath implements ScopeSearchPath {
                 result = moduleScope.getMatches(searcher, SearchContext.IMPORT);
             }
             catch (NoSuchSymbolException nsse2) {
-                throw new SourceErrorException("No such facility or a module.",
-                        myQualifier.getLocation());
+                throw new SourceErrorException("No such facility or a module: "
+                        + myQualifier.getName(), myQualifier.getLocation());
             }
         }
         catch (DuplicateSymbolException dse) {

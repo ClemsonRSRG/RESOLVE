@@ -628,6 +628,45 @@ public class CallStmtRule extends AbstractProofRuleApplication
                 // Apply any facility qualified substitutions.
                 ensuresExp = ensuresExp.substitute(sharedVarSubstitution);
             }
+            // For non-facility instantiated operations, we simply generate the proper NQV substitutions
+            else {
+                for (Exp affectedExp : clause.getAffectedExps()) {
+                    // affectedExp and #affectedExp
+                    VarExp originalAffectsExp = (VarExp) affectedExp;
+                    OldExp oldAffectedExp =
+                            new OldExp(originalAffectsExp.getLocation().clone(), originalAffectsExp.clone());
+                    oldAffectedExp.setMathType(originalAffectsExp.getMathType());
+
+                    // NQV(affectedExp)
+                    VCVarExp nqvAffectsExp =
+                            Utilities.createVCVarExp(myCurrentAssertiveCodeBlock, originalAffectsExp);
+                    myCurrentAssertiveCodeBlock.addFreeVar(nqvAffectsExp);
+
+                    // Temporary variables corresponding to the affected variable
+                    // and the incoming affected variable.
+                    // A temporary VarExp that avoids any formal with the same name as the actual.
+                    VarExp tempAffectsExp = Utilities.createVarExp(originalAffectsExp.getLocation().clone(),
+                            originalAffectsExp.getQualifier(), new PosSymbol(originalAffectsExp.getLocation().clone(),
+                                    "_" + originalAffectsExp.getName().getName()),
+                            originalAffectsExp.getMathType(), originalAffectsExp.getMathTypeValue());
+                    OldExp tempOldAffectsExp =
+                            new OldExp(originalAffectsExp.getLocation().clone(), tempAffectsExp.clone());
+                    tempOldAffectsExp.setMathType(originalAffectsExp.getMathType());
+
+                    // Substitutions for Ensures Clause:
+                    // 1) affectedExp ~> tempAffectsExp // tempAffectsExp ~> NQV(affectedExp)
+                    substitutionParamToTemp.put(affectedExp, tempAffectsExp.clone());
+                    substitutionTempToActual.put(tempAffectsExp, nqvAffectsExp);
+
+                    // 2) oldAffectedExp ~> tempOldAffectsExp // tempOldAffectsExp ~> affectedExp
+                    substitutionParamToTemp.put(oldAffectedExp, tempOldAffectsExp.clone());
+                    substitutionTempToActual.put(tempOldAffectsExp, affectedExp);
+
+                    // Substitutions for sequents in VCs
+                    // 1) affectedExp ~> NQV(affectedExp)
+                    substitutionsForSeq.put(affectedExp.clone(), nqvAffectsExp.clone());
+                }
+            }
         }
 
         // Replace from formal to temp and then from temp to actual

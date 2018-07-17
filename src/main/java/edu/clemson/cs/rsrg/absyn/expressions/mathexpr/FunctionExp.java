@@ -315,18 +315,38 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        // YS: I don't think we ever need to substitute this.
-        Exp newCaratExp = null;
-        if (myFuncNameCaratExp != null) {
-            newCaratExp = myFuncNameCaratExp.clone();
+        // Attempt to retrieve a substitution key
+        Exp substitutionKey = null;
+        Iterator<Exp> mapKeysIt = substitutions.keySet().iterator();
+        while (mapKeysIt.hasNext() && substitutionKey == null) {
+            Exp nextKey = mapKeysIt.next();
+
+            // We found a key that is equivalent to our name
+            if (nextKey.equivalent(myFuncNameExp)) {
+                substitutionKey = nextKey;
+            }
         }
 
-        List<Exp> newArgs = new ArrayList<>();
-        for (Exp f : myArguments) {
-            newArgs.add(substitute(f, substitutions));
-        }
+        // YS: If we don't have a substitution key, then simply make FunctionExp
+        if (substitutionKey == null) {
+            // YS: I don't think we ever need to substitute this.
+            Exp newCaratExp = null;
+            if (myFuncNameCaratExp != null) {
+                newCaratExp = myFuncNameCaratExp.clone();
+            }
 
-        return new FunctionExp(cloneLocation(), (VarExp) substitute(myFuncNameExp, substitutions), newCaratExp, newArgs);
+            List<Exp> newArgs = new ArrayList<>();
+            for (Exp f : myArguments) {
+                newArgs.add(substitute(f, substitutions));
+            }
+
+            return new FunctionExp(cloneLocation(),
+                    (VarExp) myFuncNameExp.clone(), newCaratExp, newArgs);
+        }
+        else {
+            return substituteFunctionExp(this,
+                    substitutions.get(substitutionKey), substitutions);
+        }
     }
 
     // ===========================================================

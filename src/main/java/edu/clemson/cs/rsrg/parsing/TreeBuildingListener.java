@@ -1889,6 +1889,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
         }
 
+        // YS: We should only have shared variable realization dec
+        if (!myCopySSRList.isEmpty()) {
+            throw new SourceErrorException(
+                    "A concept realization can only have one Shared Variables realization block.",
+                    createPosSymbol(ctx.start).getLocation(), new IllegalArgumentException());
+        }
+
         SharedStateRealizationDec realizationDec =
                 new SharedStateRealizationDec(createPosSymbol(ctx.start), sharedStateVars,
                         convention, correspondence, initItem);
@@ -4950,7 +4957,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         addNewModuleDependency("Static_Array_Template", "Static_Array_Template", false);
         addNewModuleDependency("Std_Array_Realiz", "Static_Array_Template", true);
 
-        return new FacilityDec(new PosSymbol(l.clone(), newTy.getName().getName()),
+        return new FacilityDec(new PosSymbol(l.clone(), newTy.getQualifier().getName()),
                 new PosSymbol(l.clone(), "Static_Array_Template"),
                 moduleArgumentItems, new ArrayList<EnhancementSpecItem>(),
                 new PosSymbol(l.clone(), "Std_Array_Realiz"), new ArrayList<ModuleArgumentItem>(),

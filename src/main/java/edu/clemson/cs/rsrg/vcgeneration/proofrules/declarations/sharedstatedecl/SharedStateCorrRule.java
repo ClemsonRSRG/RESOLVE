@@ -12,11 +12,26 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.sharedstatedecl;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
+import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -35,8 +50,17 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
+    /** <p>The {@code shared state} we are implementing.</p> */
+    private final SharedStateDec myCorrespondingSharedStateDec;
+
     /** <p>The {@code shared state} realization we are applying the rule to.</p> */
-    private final SharedStateRealizationDec mySharedStateRealizDec;
+    private final SharedStateRealizationDec mySharedStateRealizationDec;
+
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
 
     // ===========================================================
     // Constructors
@@ -47,6 +71,8 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      * {@code correspondence} rule for a {@link SharedStateRealizationDec}.</p>
      *
      * @param dec A shared state realization.
+     * @param correspondingSharedStateDec The corresponding shared state we are realizing.
+     * @param symbolTableBuilder The current symbol table.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -55,10 +81,14 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public SharedStateCorrRule(SharedStateRealizationDec dec,
+            SharedStateDec correspondingSharedStateDec,
+            MathSymbolTableBuilder symbolTableBuilder,
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
-        mySharedStateRealizDec = dec;
+        myCorrespondingSharedStateDec = correspondingSharedStateDec;
+        mySharedStateRealizationDec = dec;
+        myTypeGraph = symbolTableBuilder.getTypeGraph();
     }
 
     // ===========================================================
@@ -70,11 +100,66 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Assume CPC and RPC and DC and RDC and SS_RC
+        // Create the top most level assume statement and
+        // add it to the assertive code block as the first statement
+        Exp topLevelAssumeExp =
+                myCurrentVerificationContext
+                        .createTopLevelAssumeExpFromContext(
+                                mySharedStateRealizationDec.getLocation(), true,
+                                false);
 
-        // Assume SS_Cor_Exp
+        // ( Assume CPC and RPC and DC and RDC and SS_RC; )
+        AssumeStmt topLevelAssumeStmt =
+                new AssumeStmt(mySharedStateRealizationDec.getLocation().clone(),
+                        topLevelAssumeExp, false);
+        myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+        // ( Assume SS_Cor_Exp; )
+        AssertionClause stateCorrespondenceClause =
+                mySharedStateRealizationDec.getCorrespondence();
+        Exp sharedStateCorrExp =
+                Utilities.formConjunct(mySharedStateRealizationDec.getLocation().clone(), null,
+                        stateCorrespondenceClause, new LocationDetailModel(
+                                stateCorrespondenceClause.getAssertionExp()
+                                        .getLocation().clone(),
+                                stateCorrespondenceClause.getAssertionExp()
+                                        .getLocation().clone(),
+                                "Shared Variable Correspondence"));
+        AssumeStmt correspondenceAssumeStmt =
+                new AssumeStmt(mySharedStateRealizationDec.getLocation().clone(),
+                        sharedStateCorrExp, false);
+        myCurrentAssertiveCodeBlock.addStatement(correspondenceAssumeStmt);
+
+        // Create a replacement map for substituting shared
+        // variables with ones that indicates they are conceptual.
+        Map<Exp, Exp> substitutionExemplarToConc = new LinkedHashMap<>();
+        for (MathVarDec sharedVarDec : myCorrespondingSharedStateDec.getAbstractStateVars()) {
+            VarExp exemplarExp =
+                    Utilities.createVarExp(mySharedStateRealizationDec.getLocation().clone(),
+                            null, sharedVarDec.getName().clone(),
+                            sharedVarDec.getMathType(), null);
+            DotExp concExemplarExp =
+                    Utilities.createConcVarExp(
+                            new VarDec(sharedVarDec.getName(),
+                                    sharedVarDec.getTy()),
+                            sharedVarDec.getMathType(), myTypeGraph.BOOLEAN);
+            substitutionExemplarToConc.put(exemplarExp, concExemplarExp);
+        }
 
         // Confirm the shared variable's constraint
+        // ( Confirm VC; )
+        Exp sharedVariableConstraint =
+                myCorrespondingSharedStateDec.getConstraint().getAssertionExp().clone();
+        sharedVariableConstraint = sharedVariableConstraint.substitute(substitutionExemplarToConc);
+        sharedVariableConstraint.setLocationDetailModel(new LocationDetailModel(
+                myCorrespondingSharedStateDec.getLocation().clone(), mySharedStateRealizationDec
+                .getLocation().clone(),
+                "Well Defined Correspondence for Shared Variables"));
+        ConfirmStmt finalConfirmStmt =
+                new ConfirmStmt(mySharedStateRealizationDec.getLocation().clone(),
+                        sharedVariableConstraint, VarExp
+                        .isLiteralTrue(sharedVariableConstraint));
+        myCurrentAssertiveCodeBlock.addStatement(finalConfirmStmt);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");

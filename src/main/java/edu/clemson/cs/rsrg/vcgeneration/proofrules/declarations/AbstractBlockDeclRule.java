@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
@@ -21,6 +22,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -101,6 +104,46 @@ public abstract class AbstractBlockDeclRule
     // ===========================================================
     // Protected Methods
     // ===========================================================
+
+    /**
+     * <p>This method adds appropriate substitutions for affected {@code Shared Variables}.</p>
+     *
+     * @param affectsClause The affects clause we are processing.
+     * @param substitutionMap The substitution map where these expressions
+     *                        are needed.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return An updated map.
+     */
+    protected final Map<Exp, Exp> addAffectedConceptualSharedVars(AffectsClause affectsClause,
+            Map<Exp, Exp> substitutionMap, MTType booleanType) {
+        if (affectsClause != null) {
+            for (Exp exp : affectsClause.getAffectedExps()) {
+                VarExp sharedVarExp = (VarExp) exp;
+                OldExp odlSharedVarExp =
+                        new OldExp(sharedVarExp.getLocation().clone(), sharedVarExp.clone());
+                odlSharedVarExp.setMathType(sharedVarExp.getMathType());
+
+                // Create Conc.<sharedVarExp>
+                VarExp concVarExp =
+                        Utilities.createVarExp(sharedVarExp.getLocation(), null,
+                                new PosSymbol(sharedVarExp.getLocation().clone(), "Conc"),
+                                booleanType, null);
+                List<Exp> segments = new ArrayList<>();
+                segments.add(concVarExp);
+                segments.add(sharedVarExp.clone());
+
+                DotExp concSharedVarExp = new DotExp(sharedVarExp.getLocation().clone(), segments);
+                concSharedVarExp.setMathType(sharedVarExp.getMathType());
+
+                // Add this as a substitution
+                substitutionMap = addConceptualVariables(sharedVarExp, odlSharedVarExp,
+                        concSharedVarExp, substitutionMap);
+            }
+        }
+
+        return substitutionMap;
+    }
 
     /**
      * <p>This method adds the appropriate substitutions

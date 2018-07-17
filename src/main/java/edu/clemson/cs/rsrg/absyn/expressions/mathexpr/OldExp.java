@@ -15,9 +15,7 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>This is the class for all the "old" mathematical expression objects
@@ -84,12 +82,7 @@ public class OldExp extends MathExp {
      */
     @Override
     public final boolean containsExp(Exp exp) {
-        boolean found = false;
-        if (myOrigExp != null) {
-            found = myOrigExp.containsExp(exp);
-        }
-
-        return found;
+        return myOrigExp.containsExp(exp);
     }
 
     /**
@@ -98,10 +91,8 @@ public class OldExp extends MathExp {
     @Override
     public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
-        if (myOrigExp != null) {
-            if (IsOldExp) {
-                found = myOrigExp.containsVar(varName, false);
-            }
+        if (IsOldExp) {
+            found = myOrigExp.containsVar(varName, false);
         }
 
         return found;
@@ -201,12 +192,7 @@ public class OldExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        Exp newOrigExp = null;
-        if (myOrigExp != null) {
-            newOrigExp = myOrigExp.clone();
-        }
-
-        return new OldExp(cloneLocation(), newOrigExp);
+        return new OldExp(cloneLocation(), myOrigExp.clone());
     }
 
     /**
@@ -214,12 +200,81 @@ public class OldExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        Exp newOrigExp = null;
-        if (myOrigExp != null) {
-            newOrigExp = myOrigExp.clone();
+        // Attempt to retrieve a substitution key
+        Exp substitutionKey = null;
+        OldExp oldExpWithFuncNameOnly = null;
+        FunctionExp innerFunctionExp = null;
+        Iterator<Exp> mapKeysIt = substitutions.keySet().iterator();
+        while (mapKeysIt.hasNext() && substitutionKey == null) {
+            Exp nextKey = mapKeysIt.next();
+
+            // We found a key that is equivalent
+            if (nextKey.equivalent(this)) {
+                substitutionKey = nextKey;
+            }
+            // YS: It is possible that "myOrigExp" is either a FunctionExp or a
+            //     DotExp with a FunctionExp as it's last segment. In this case,
+            //     if we happen to have a replacement key that matches all the parts
+            //     up to the name, then we need to apply the substitution.
+            else {
+                if (myOrigExp instanceof DotExp) {
+                    DotExp myOrigExpAsDotExp = (DotExp) myOrigExp;
+                    List<Exp> segments = myOrigExpAsDotExp.getSegments();
+
+                    // Check to see if the last segment is a FunctionExp
+                    Exp lastSegment = segments.get(segments.size() - 1);
+                    if (lastSegment instanceof FunctionExp) {
+                        // Construct a new OldExp to compare
+                        FunctionExp lastSegmentAsFunctionExp = (FunctionExp) lastSegment;
+
+                        // Construct a new DotExp to compare
+                        List<Exp> newSegments = new ArrayList<>(segments.size());
+                        for (int i = 0; i < segments.size() - 1; i++) {
+                            newSegments.add(segments.get(i).clone());
+                        }
+                        newSegments.add(lastSegmentAsFunctionExp.getName());
+
+                        OldExp newOldExp = new OldExp(myLoc,
+                                new DotExp(myOrigExpAsDotExp.getLocation().clone(), newSegments));
+                        if (nextKey.equivalent(newOldExp)) {
+                            substitutionKey = nextKey;
+                            oldExpWithFuncNameOnly = newOldExp;
+
+                            // Store the function for future use
+                            innerFunctionExp = lastSegmentAsFunctionExp;
+                        }
+                    }
+                }
+                else if (myOrigExp instanceof FunctionExp) {
+                    // Construct a new OldExp to compare
+                    FunctionExp myOrigExpAsFunctionExp = (FunctionExp) myOrigExp;
+                    OldExp newOldExp = new OldExp(myLoc, myOrigExpAsFunctionExp.getName());
+                    if (nextKey.equivalent(newOldExp)) {
+                        substitutionKey = nextKey;
+                        oldExpWithFuncNameOnly = newOldExp;
+
+                        // Store the function for future use
+                        innerFunctionExp = myOrigExpAsFunctionExp;
+                    }
+                }
+            }
         }
 
-        return new OldExp(cloneLocation(), newOrigExp);
-    }
+        // YS: If we don't have a substitution key, then simply make a copy
+        if (substitutionKey == null) {
+            return new OldExp(cloneLocation(), myOrigExp.clone());
+        }
+        else {
+            Exp replacementExp = substitutions.get(substitutionKey);
 
+            // YS: If we only matched the function name, then we need to do something special.
+            if (oldExpWithFuncNameOnly != null) {
+                return substituteFunctionExp(innerFunctionExp, replacementExp, substitutions);
+            }
+            // YS: Else, simply return "replacementExp"
+            else {
+                return replacementExp.clone();
+            }
+        }
+    }
 }

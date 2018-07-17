@@ -74,8 +74,9 @@ public class AlternativeExp extends MathExp {
         if (myAlternatives != null) {
             for (AltItemExp exp : myAlternatives) {
                 if (exp != null) {
-                    sb.append(exp.asString(indentSize + innerIndentInc,
-                            innerIndentInc));
+                    sb.append("\n");
+                    sb.append(exp.asString(indentSize + innerIndentInc
+                            + innerIndentInc, innerIndentInc));
                 }
             }
         }

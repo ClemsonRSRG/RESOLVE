@@ -236,7 +236,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 myConceptSharedStates, myConceptDeclaredTypes,
                 myConceptFormalParamList, myConceptActualArgList,
                 myConceptRealizFormalParamList, myConceptRealizActualArgList,
-                myInstantiatedEnhSpecRealizItems);
+                myInstantiatedEnhSpecRealizItems, myIsLocalFacilityDec);
     }
 
     /**

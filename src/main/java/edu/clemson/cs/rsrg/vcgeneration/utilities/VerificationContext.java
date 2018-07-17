@@ -367,7 +367,12 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
         if (addSharedConventionFlag) {
             Exp conventionExp = createSharedStateRealizConventionExp(loc);
             if (!VarExp.isLiteralTrue(conventionExp)) {
-                retExp = MathExp.formConjunct(loc, retExp, conventionExp);
+                if (retExp == null) {
+                    retExp = conventionExp;
+                }
+                else {
+                    retExp = MathExp.formConjunct(loc, retExp, conventionExp);
+                }
             }
         }
 
@@ -375,7 +380,12 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
         if (addSharedCorrespondenceFlag) {
             Exp correspondenceExp = createSharedStateRealizCorrespondenceExp(loc);
             if (!VarExp.isLiteralTrue(correspondenceExp)) {
-                retExp = MathExp.formConjunct(loc, retExp, correspondenceExp);
+                if (retExp == null) {
+                    retExp = correspondenceExp;
+                }
+                else {
+                    retExp = MathExp.formConjunct(loc, retExp, correspondenceExp);
+                }
             }
         }
 
@@ -422,6 +432,30 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
      */
     public final List<AbstractTypeRepresentationDec> getLocalTypeRepresentationDecs() {
         return myLocalTypeRepresentationDecs;
+    }
+
+    /**
+     * <p>This method returns the instantiated facility declaration corresponding
+     * to a {@link FacilityDec}.</p>
+     *
+     * @param dec A facility declaration.
+     *
+     * @return The {@link InstantiatedFacilityDecl} corresponding to {@code dec}.
+     */
+    public final InstantiatedFacilityDecl getProcessedInstFacilityDecl(
+            FacilityDec dec) {
+        InstantiatedFacilityDecl decl = null;
+        Iterator<InstantiatedFacilityDecl> it =
+                myProcessedInstFacilityDecls.iterator();
+        while (it.hasNext() && decl == null) {
+            InstantiatedFacilityDecl nextDecl = it.next();
+            if (nextDecl.getInstantiatedFacilityName().getName().equals(
+                    dec.getName().getName())) {
+                decl = nextDecl;
+            }
+        }
+
+        return decl;
     }
 
     /**

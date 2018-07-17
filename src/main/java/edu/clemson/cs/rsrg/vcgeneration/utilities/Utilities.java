@@ -385,9 +385,11 @@ public class Utilities {
      */
     public static VCVarExp createVCVarExp(AssertiveCodeBlock currentBlock,
             Exp varExp) {
-        VCVarExp exp = new VCVarExp(varExp.getLocation(), varExp);
-        if (currentBlock.containsFreeVar(exp)) {
-            exp = createVCVarExp(currentBlock, exp);
+        int newStateNum = 1;
+        VCVarExp exp = new VCVarExp(varExp.getLocation(), varExp, newStateNum);
+        while (currentBlock.containsFreeVar(exp)) {
+            newStateNum += 1;
+            exp = new VCVarExp(varExp.getLocation(), varExp, newStateNum);
         }
 
         return exp;

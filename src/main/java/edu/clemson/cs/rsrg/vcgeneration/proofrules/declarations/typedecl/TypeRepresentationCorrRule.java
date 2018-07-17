@@ -15,16 +15,22 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.absyn.statements.ConfirmStmt;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
@@ -46,6 +52,12 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
     /** <p>The {@code type} representation we are applying the rule to.</p> */
     private final TypeRepresentationDec myTypeRepresentationDec;
 
+    /**
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -55,6 +67,7 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
      * {@code correspondence} rule for a {@link TypeRepresentationDec}.</p>
      *
      * @param dec A concept type realization.
+     * @param symbolTableBuilder The current symbol table.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -63,9 +76,11 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
      * @param blockModel The model associated with {@code block}.
      */
     public TypeRepresentationCorrRule(TypeRepresentationDec dec,
+            MathSymbolTableBuilder symbolTableBuilder,
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
+        myTypeGraph = symbolTableBuilder.getTypeGraph();
         myTypeRepresentationDec = dec;
     }
 
@@ -122,13 +137,28 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
                         corrExp, false);
         myCurrentAssertiveCodeBlock.addStatement(correspondenceAssumeStmt);
 
-        // Confirm the type's constraint
-        // ( Confirm TC; )
+        // Create a replacement map for substituting exemplar
+        // variable with one that indicates it is conceptual.
         TypeFamilyDec typeFamilyDec =
                 Utilities.getAssociatedTypeFamilyDec(myTypeRepresentationDec,
                         myCurrentVerificationContext);
+        VarExp exemplarExp =
+                Utilities.createVarExp(myTypeRepresentationDec.getLocation().clone(),
+                        null, typeFamilyDec.getExemplar().clone(),
+                        typeFamilyDec.getModel().getMathTypeValue(), null);
+        DotExp concExemplarExp =
+                Utilities.createConcVarExp(
+                        new VarDec(typeFamilyDec.getExemplar(),
+                                myTypeRepresentationDec.getRepresentation()),
+                        typeFamilyDec.getMathType(), myTypeGraph.BOOLEAN);
+        Map<Exp, Exp> substitutionExemplarToConc = new LinkedHashMap<>();
+        substitutionExemplarToConc.put(exemplarExp, concExemplarExp);
+
+        // Confirm the type's constraint
+        // ( Confirm TC; )
         Exp typeConstraintExp =
                 typeFamilyDec.getConstraint().getAssertionExp().clone();
+        typeConstraintExp = typeConstraintExp.substitute(substitutionExemplarToConc);
         typeConstraintExp.setLocationDetailModel(new LocationDetailModel(
                 typeFamilyDec.getLocation().clone(), myTypeRepresentationDec
                         .getLocation().clone(),

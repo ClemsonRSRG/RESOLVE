@@ -1150,12 +1150,13 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * instantiating type.
      */
     private NameTy findArrayType(ProgramVariableExp exp) {
+        ProgramVariableExp expCopy = (ProgramVariableExp) exp.clone();
         NameTy contentTy;
-        if (exp instanceof ProgramVariableDotExp) {
+        if (expCopy instanceof ProgramVariableDotExp) {
             // At this point, we should have a ProgramVariableDotExp
             // with all ProgramVariableNameExps as segments.
             List<ProgramVariableExp> segments =
-                    ((ProgramVariableDotExp) exp).getSegments();
+                    ((ProgramVariableDotExp) expCopy).getSegments();
             ProgramVariableNameExp firstExp =
                     (ProgramVariableNameExp) segments.remove(0);
             String firstVarName = firstExp.getName().getName();
@@ -1172,7 +1173,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             if (varDec == null) {
                 throw new MiscErrorException(
                         "Cannot locate the content type for the array: "
-                                + exp.toString(), new IllegalStateException());
+                                + expCopy.toString(),
+                        new IllegalStateException());
             }
             else {
                 // Each of the remaining ProgramVariableNameExp's in the segment
@@ -1191,9 +1193,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                 contentTy = (NameTy) recordTy.clone();
             }
         }
-        else if (exp instanceof ProgramVariableNameExp) {
+        else if (expCopy instanceof ProgramVariableNameExp) {
             String arrayVarName =
-                    ((ProgramVariableNameExp) exp).getName().getName();
+                    ((ProgramVariableNameExp) expCopy).getName().getName();
 
             // Search parameter variables
             AbstractVarDec varDec = searchParameterVarDecs(arrayVarName);
@@ -1212,7 +1214,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             if (varDec == null) {
                 throw new MiscErrorException(
                         "Cannot locate the content type for the array: "
-                                + exp.toString(), new NullPointerException());
+                                + expCopy.toString(),
+                        new NullPointerException());
             }
             else {
                 contentTy = (NameTy) varDec.getTy().clone();
@@ -1221,7 +1224,7 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         else {
             throw new MiscErrorException(
                     "Cannot locate the content type for the array: "
-                            + exp.toString(), new NullPointerException());
+                            + expCopy.toString(), new NullPointerException());
         }
 
         return contentTy;
