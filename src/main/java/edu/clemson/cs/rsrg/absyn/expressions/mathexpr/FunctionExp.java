@@ -306,8 +306,19 @@ public class FunctionExp extends AbstractFunctionExp {
             newCaratExp = myFuncNameCaratExp.clone();
         }
 
-        return new FunctionExp(cloneLocation(), (VarExp) myFuncNameExp.clone(),
-                newCaratExp, copyExps());
+        FunctionExp newFunctionExp =
+                new FunctionExp(cloneLocation(),
+                        (VarExp) myFuncNameExp.clone(), newCaratExp, copyExps());
+
+        // Copy any qualifiers
+        if (myQualifier != null) {
+            newFunctionExp.setQualifier(myQualifier.clone());
+        }
+
+        // Copy the function quantification
+        newFunctionExp.setQuantification(myQuantification);
+
+        return newFunctionExp;
     }
 
     /**
@@ -340,8 +351,19 @@ public class FunctionExp extends AbstractFunctionExp {
                 newArgs.add(substitute(f, substitutions));
             }
 
-            return new FunctionExp(cloneLocation(),
-                    (VarExp) myFuncNameExp.clone(), newCaratExp, newArgs);
+            FunctionExp newFunctionExp =
+                    new FunctionExp(cloneLocation(), (VarExp) myFuncNameExp.clone(),
+                            newCaratExp, newArgs);
+
+            // Copy any qualifiers
+            if (myQualifier != null) {
+                newFunctionExp.setQualifier(myQualifier.clone());
+            }
+
+            // Copy the function quantification
+            newFunctionExp.setQuantification(myQuantification);
+
+            return newFunctionExp;
         }
         else {
             return substituteFunctionExp(this,

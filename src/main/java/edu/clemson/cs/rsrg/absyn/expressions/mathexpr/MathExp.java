@@ -309,8 +309,19 @@ public abstract class MathExp extends Exp {
 
         // Case #1: "replacementExp" is a VarExp
         if (replacementExp instanceof VarExp) {
-            return new FunctionExp(replacementExp.getLocation().clone(),
-                    (VarExp) replacementExp.clone(), newCaratExp, newArgs);
+            FunctionExp newFunctionExp =
+                    new FunctionExp(replacementExp.getLocation().clone(),
+                            (VarExp) replacementExp.clone(), newCaratExp, newArgs);
+
+            // Copy any qualifiers
+            if (originalFunctionExp.getQualifier() != null) {
+                newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+            }
+
+            // Copy the function quantification
+            newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+
+            return newFunctionExp;
         }
         // Case #2: "replacementExp" is a DotExp
         else if (replacementExp instanceof DotExp) {
@@ -326,9 +337,21 @@ public abstract class MathExp extends Exp {
                     newSegments.add(segments.get(i).clone());
                 }
 
+                // Create the replacement function
+                FunctionExp newFunctionExp =
+                        new FunctionExp(originalFunctionExp.getLocation().clone(),
+                                (VarExp) lastSegment.clone(), newCaratExp, newArgs);
+
+                // Copy any qualifiers
+                if (originalFunctionExp.getQualifier() != null) {
+                    newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                }
+
+                // Copy the function quantification
+                newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+
                 // Add the function expression with the name changed
-                newSegments.add(new FunctionExp(originalFunctionExp.getLocation().clone(),
-                        (VarExp) lastSegment.clone(), newCaratExp, newArgs));
+                newSegments.add(newFunctionExp);
 
                 // Return a new DotExp with the function name replaced
                 return new DotExp(replacementExpAsDotExp.getLocation().clone(), newSegments);
@@ -347,10 +370,21 @@ public abstract class MathExp extends Exp {
 
             // Check to see if the inner expression is a VarExp
             if (innerExp instanceof VarExp) {
-                // Return a new OldExp with the function name replaced
-                return new OldExp(replacementExpAsOldExp.getLocation().clone(),
+                // Create the replacement function
+                FunctionExp newFunctionExp =
                         new FunctionExp(originalFunctionExp.getLocation().clone(),
-                                (VarExp) innerExp.clone(), newCaratExp, newArgs));
+                                (VarExp) innerExp.clone(), newCaratExp, newArgs);
+
+                // Copy any qualifiers
+                if (originalFunctionExp.getQualifier() != null) {
+                    newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                }
+
+                // Copy the function quantification
+                newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+
+                // Return a new OldExp with the function name replaced
+                return new OldExp(replacementExpAsOldExp.getLocation().clone(), newFunctionExp);
             }
             // Everything else is an error!
             else {
@@ -367,9 +401,20 @@ public abstract class MathExp extends Exp {
 
             // Case #4.1: "innerExp" is a VarExp
             if (innerExp instanceof VarExp) {
-                newInnerExp =
+                FunctionExp newFunctionExp =
                         new FunctionExp(replacementExp.getLocation().clone(),
                                 (VarExp) innerExp.clone(), newCaratExp, newArgs);
+
+                // Copy any qualifiers
+                if (originalFunctionExp.getQualifier() != null) {
+                    newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                }
+
+                // Copy the function quantification
+                newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+
+                // Set this as our new inner expression.
+                newInnerExp = newFunctionExp;
             }
             // Case #4.2: "innerExp" is a DotExp
             else if (innerExp instanceof DotExp) {
@@ -385,9 +430,21 @@ public abstract class MathExp extends Exp {
                         newSegments.add(segments.get(i).clone());
                     }
 
+                    // Create the replacement function
+                    FunctionExp newFunctionExp =
+                            new FunctionExp(originalFunctionExp.getLocation().clone(),
+                                    (VarExp) lastSegment.clone(), newCaratExp, newArgs);
+
+                    // Copy any qualifiers
+                    if (originalFunctionExp.getQualifier() != null) {
+                        newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                    }
+
+                    // Copy the function quantification
+                    newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+
                     // Add the function expression with the name changed
-                    newSegments.add(new FunctionExp(originalFunctionExp.getLocation().clone(),
-                            (VarExp) lastSegment.clone(), newCaratExp, newArgs));
+                    newSegments.add(newFunctionExp);
 
                     // Return a new DotExp with the function name replaced
                     newInnerExp = new DotExp(innerExpAsDotExp.getLocation().clone(), newSegments);
