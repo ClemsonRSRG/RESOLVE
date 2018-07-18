@@ -30,8 +30,10 @@ import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.FormalActualLists;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FacilityInitStmt;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.stringtemplate.v4.ST;
@@ -112,7 +114,8 @@ public class FacilityInitStmtRule extends AbstractProofRuleApplication
         for (SharedStateDec dec : instantiatedFacilityDecl
                 .getConceptSharedStates()) {
             Exp decInitEnsures =
-                    getSharedVariableInitEnsures(facilityName, dec);
+                    getSharedVariableInitEnsures(facilityName, dec,
+                            instantiatedFacilityDecl);
             if (VarExp.isLiteralTrue(initializationEnsuresExp)) {
                 initializationEnsuresExp = decInitEnsures;
             }
@@ -162,10 +165,12 @@ public class FacilityInitStmtRule extends AbstractProofRuleApplication
      *
      * @param facilityName Name of the facility we are processing.
      * @param stateDec A shared variables block.
+     * @param instantiatedFacilityDecl The instantiating facility declaration.
      *
      * @return An initialization ensures clause.
      */
-    private Exp getSharedVariableInitEnsures(PosSymbol facilityName, SharedStateDec stateDec) {
+    private Exp getSharedVariableInitEnsures(PosSymbol facilityName, SharedStateDec stateDec,
+            InstantiatedFacilityDecl instantiatedFacilityDecl) {
         // Extract the initialization ensures clause from the type.
         Exp initializationEnsuresExp;
         AssertionClause initEnsuresClause =
@@ -192,6 +197,14 @@ public class FacilityInitStmtRule extends AbstractProofRuleApplication
             VarExp qualifiedVarExp = Utilities.createVarExp(facilityName.getLocation().clone(), facilityName,
                     mathVarDec.getName(), mathVarDec.getMathType(), null);
             substitutionMap.put(stateVarExp, qualifiedVarExp);
+        }
+
+        // Substitute any formal concept arguments with its actual
+        FormalActualLists conceptParamArgs = instantiatedFacilityDecl.getConceptParamArgLists();
+        Iterator<VarExp> formalArgsIt = conceptParamArgs.getFormalParamList().iterator();
+        Iterator<Exp> actualArgsIt = conceptParamArgs.getActualArgList().iterator();
+        while (formalArgsIt.hasNext() && actualArgsIt.hasNext()) {
+            substitutionMap.put(formalArgsIt.next(), actualArgsIt.next());
         }
 
         return initializationEnsuresExp.substitute(substitutionMap);

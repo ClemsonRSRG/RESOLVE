@@ -435,6 +435,16 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
     }
 
     /**
+     * <p>This method returns the name of the module that created
+     * this context.</p>
+     *
+     * @return The name in {@link PosSymbol} format.
+     */
+    public final PosSymbol getModuleName() {
+        return myName;
+    }
+
+    /**
      * <p>This method returns the instantiated facility declaration corresponding
      * to a {@link FacilityDec}.</p>
      *

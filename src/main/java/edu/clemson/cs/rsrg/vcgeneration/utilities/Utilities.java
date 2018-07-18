@@ -781,7 +781,7 @@ public class Utilities {
      * {@code finalization ensures} clause.
      */
     public static AssertionClause getTypeFinalEnsuresClause(AssertionClause originalFinalEnsuresClause, Location loc,
-        PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
+            PosSymbol qualifier, PosSymbol name, PosSymbol exemplarName, MTType type, MTType typeValue) {
         // Create an incoming variable expression from the declared variable
         VarExp varDecExp = Utilities.createVarExp(loc, qualifier, name, type, typeValue);
 
