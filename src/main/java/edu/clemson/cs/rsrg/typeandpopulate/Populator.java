@@ -1871,6 +1871,32 @@ public class Populator extends TreeWalkerVisitor {
         else {
             myTypeFamilyEntry =
                     es.get(0).toTypeFamilyEntry(r.getLocation());
+
+            // Sanity check: Make sure that when we have an independent or dependent
+            // correspondence, the concept is declared to be a shared concept.
+            AssertionClause correspondence = r.getCorrespondence();
+            AssertionClause.ClauseType clauseType = r.getCorrespondence().getClauseType();
+            if (clauseType.equals(AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE) ||
+                    clauseType.equals(AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE)) {
+                ModuleIdentifier id = myTypeFamilyEntry.getSourceModuleIdentifier();
+                ConceptModuleDec concept =
+                        (ConceptModuleDec) myBuilder.getModuleScope(id)
+                                .getDefiningElement();
+                if (!concept.isSharingConcept()) {
+                    String message;
+                    if (clauseType.equals(AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE)) {
+                        message = "n " + correspondence.getClauseType().toString();
+                    }
+                    else {
+                        message = " " + correspondence.getClauseType().toString();
+                    }
+
+                    throw new SourceErrorException("Concept: "
+                                    + concept.getName().getName()
+                                    + " must be declared to be a sharing concept in order to use a"
+                                    + message, correspondence.getLocation());
+                }
+            }
         }
     }
 

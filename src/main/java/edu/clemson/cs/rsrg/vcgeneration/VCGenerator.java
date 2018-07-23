@@ -1006,6 +1006,17 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void preTypeRepresentationDec(TypeRepresentationDec dec) {
         myRealizInitFinalOuterDec = dec;
+
+        // TODO - YS: Remove this once we include proof rules for handling dependent correspondence.
+        AssertionClause correspondence = dec.getCorrespondence();
+        AssertionClause.ClauseType clauseType =
+                dec.getCorrespondence().getClauseType();
+        if (clauseType
+                .equals(AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE)) {
+            throw new SourceErrorException(
+                    "[VCGenerator] Dependent correspondences are currently not supported.",
+                    correspondence.getLocation());
+        }
     }
 
     /**

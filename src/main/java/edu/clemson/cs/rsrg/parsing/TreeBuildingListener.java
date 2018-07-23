@@ -1868,6 +1868,24 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             correspondence =
                     (AssertionClause) myNodes.removeFrom(ctx
                             .correspondenceClause());
+
+            // Sanity check: Make sure that we don't have an independent or
+            // dependent correspondence.
+            AssertionClause.ClauseType clauseType = correspondence.getClauseType();
+            if (clauseType.equals(AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE) ||
+                    clauseType.equals(AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE)) {
+                String message;
+                if (clauseType.equals(AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE)) {
+                    message = "n " + correspondence.getClauseType().toString();
+                }
+                else {
+                    message = " " + correspondence.getClauseType().toString();
+                }
+
+                throw new SourceErrorException(
+                        "A Shared Variable realization cannot have a" + message,
+                        correspondence.getLocation(), new IllegalArgumentException());
+            }
         }
         else {
             correspondence =
@@ -3490,14 +3508,35 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitCorrespondenceClause(
             ResolveParser.CorrespondenceClauseContext ctx) {
+        AssertionClause.ClauseType clauseType;
+
+        // Case #1: This is either a shared variable's realization correspondence
+        //          or a non-sharing type correspondence.
+        if (ctx.type == null) {
+            clauseType = AssertionClause.ClauseType.CORRESPONDENCE;
+        }
+        else {
+            // Case #2: This is a type correspondence with some kind of sharing,
+            //          but it is independent of other objects of the same type.
+            if (ctx.type.getType() == ResolveLexer.INDEPENDENT) {
+                clauseType =
+                        AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE;
+            }
+            // Case #3: This is type correspondence with some kind of sharing
+            //          and it is dependent on other objects of the same type.
+            else {
+                clauseType =
+                        AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE;
+            }
+        }
+
         if (ctx.mathVarNameExp().isEmpty()) {
             myNodes.put(ctx, createAssertionClause(createLocation(ctx),
-                    AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp()));
+                    clauseType, ctx.mathExp()));
         }
         else {
             myNodes.put(ctx, createAssertionClause(createLocation(ctx),
-                    AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp(),
-                    ctx.mathVarNameExp()));
+                    clauseType, ctx.mathExp(), ctx.mathVarNameExp()));
         }
     }
 

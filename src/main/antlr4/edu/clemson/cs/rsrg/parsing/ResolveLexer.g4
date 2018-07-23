@@ -125,6 +125,10 @@ DEFINITION
     |   'Def'
     ;
 
+DEPENDENT
+    :   'dependent'
+    ;
+
 DIV
     :   'div'
     ;
@@ -241,6 +245,10 @@ IMPLIES
 
 IN
     :   'is_in'
+    ;
+
+INDEPENDENT
+    :   'independent'
     ;
 
 INDUCTIVE
