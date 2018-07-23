@@ -700,7 +700,7 @@ decreasingClause
     ;
 
 correspondenceClause
-    :   CORR
+    :   (type=(INDEPENDENT | DEPENDENT))? CORR
         (INVOLVES mathVarNameExp (COMMA mathVarNameExp)* SEMICOLON)?
         mathExp (WHICH_ENTAILS mathExp)? SEMICOLON
     ;
