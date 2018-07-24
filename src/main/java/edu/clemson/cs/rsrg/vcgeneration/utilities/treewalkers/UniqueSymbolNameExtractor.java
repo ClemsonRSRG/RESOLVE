@@ -310,6 +310,29 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This method redefines how a {@link RecpExp} should be walked.</p>
+     *
+     * @param exp A type receptacles expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkRecpExp(RecpExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+
+        // YS: Don't need to walk the inner expression.
+        myExpNames.add(exp.asString(0, 0));
+
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
      * <p>This method redefines how a {@link SetCollectionExp} should be walked.</p>
      *
      * @param exp A set collection expression.
@@ -378,6 +401,29 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
         myExpNames.addAll(tempSet);
 
         postSetExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
+     * <p>This method redefines how a {@link TypeReceptaclesExp} should be walked.</p>
+     *
+     * @param exp A type receptacles expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkTypeReceptaclesExp(TypeReceptaclesExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+
+        // YS: Don't need to walk the inner expression.
+        myExpNames.add(exp.asString(0, 0));
+
         postMathExp(exp);
         postExp(exp);
         postAny(exp);

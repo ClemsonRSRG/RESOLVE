@@ -15,10 +15,10 @@ package edu.clemson.cs.rsrg.vcgeneration.proofrules.statements;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.statements.AssumeStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
@@ -33,6 +33,7 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.FormalActualLists;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FacilityInitStmt;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -129,6 +130,41 @@ public class FacilityInitStmtRule extends AbstractProofRuleApplication
             }
         }
 
+        // Add any definition variables and <Type>.Receptacles = {}
+        for (TypeFamilyDec typeFamilyDec : instantiatedFacilityDecl
+                .getConceptDeclaredTypes()) {
+            // Extract the definition variables (if any)
+            Exp defVarExp =
+                    generateDefVarExps(facilityName, typeFamilyDec,
+                            instantiatedFacilityDecl);
+            if (VarExp.isLiteralTrue(initializationEnsuresExp)) {
+                initializationEnsuresExp = defVarExp;
+            }
+            else {
+                if (!VarExp.isLiteralTrue(defVarExp)) {
+                    initializationEnsuresExp =
+                            MathExp.formConjunct(myFacilityInitStmt
+                                    .getLocation().clone(),
+                                    initializationEnsuresExp, defVarExp);
+                }
+            }
+
+            // Create an equality expression indicating the type's receptacles
+            // is the empty set.
+            EqualsExp typeRecepEqualsExp =
+                    createTypeReceptaclesEmptySetExp(facilityName,
+                            typeFamilyDec);
+            if (VarExp.isLiteralTrue(initializationEnsuresExp)) {
+                initializationEnsuresExp = typeRecepEqualsExp;
+            }
+            else {
+                initializationEnsuresExp =
+                        MathExp.formConjunct(myFacilityInitStmt.getLocation()
+                                .clone(), initializationEnsuresExp,
+                                typeRecepEqualsExp);
+            }
+        }
+
         // Assume that initialization has happened.
         if (!VarExp.isLiteralTrue(initializationEnsuresExp)) {
             AssumeStmt initAssumeStmt =
@@ -158,6 +194,49 @@ public class FacilityInitStmtRule extends AbstractProofRuleApplication
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>An helper method for creating an expression that indicate the type's
+     * receptacles is equal to the empty set.</p>
+     *
+     * @param facilityName Name of the facility we are processing.
+     * @param typeFamilyDec A type family declaration.
+     *
+     * @return An expression that indicates that the instantiated type's
+     * {@code Receptacles} is equal to the empty set.
+     */
+    private EqualsExp createTypeReceptaclesEmptySetExp(PosSymbol facilityName,
+            TypeFamilyDec typeFamilyDec) {
+        // Create a new TypeReceptaclesExp
+        TypeReceptaclesExp typeReceptaclesExp =
+                new TypeReceptaclesExp(typeFamilyDec.getLocation().clone(),
+                        Utilities.createVarExp(myFacilityInitStmt.getLocation()
+                                .clone(), facilityName, typeFamilyDec.getName()
+                                .clone(), typeFamilyDec.getModel()
+                                .getMathType(), typeFamilyDec.getModel()
+                                .getMathTypeValue()));
+        typeReceptaclesExp.setMathType(myTypeGraph.RECEPTACLES);
+
+        // Create a new empty set expression
+        SetCollectionExp emptySetExp =
+                new SetCollectionExp(myFacilityInitStmt.getLocation().clone(),
+                        new HashSet<MathExp>());
+        emptySetExp.setMathType(myTypeGraph.SSET);
+        emptySetExp.setMathTypeValue(myTypeGraph.EMPTY_SET);
+
+        // Create the new equality expression
+        EqualsExp equalsExp =
+                new EqualsExp(myFacilityInitStmt.getLocation().clone(),
+                        typeReceptaclesExp, null, EqualsExp.Operator.EQUAL,
+                        emptySetExp);
+        equalsExp.setMathType(myTypeGraph.BOOLEAN);
+        equalsExp.setLocationDetailModel(new LocationDetailModel(
+                myFacilityInitStmt.getLocation().clone(), myFacilityInitStmt
+                        .getLocation().clone(), "Receptacles of type: "
+                        + typeFamilyDec.getName().getName()));
+
+        return equalsExp;
+    }
 
     /**
      * <p>An helper method for extracting the {@code initialization ensures} clause

@@ -13,17 +13,22 @@
 package edu.clemson.cs.rsrg.vcgeneration.proofrules;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
+import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VCVarExp;
-import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.FormalActualLists;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -218,6 +223,88 @@ public abstract class AbstractProofRuleApplication
         }
 
         return newVCs;
+    }
+
+    /**
+     * <p>An helper method for generating a conjunction of {@code Def Var} with their definitions.</p>
+     *
+     * @param facilityName Name of the facility we are processing.
+     * @param typeFamilyDec A type family declaration.
+     * @param instantiatedFacilityDecl The instantiating facility declaration.
+     *
+     * @return If there are {@code Def Vars}, it returns a conjuncted expression containing
+     * the {@code Def Vars} with their definitions. Otherwise, it returns an expression representing
+     * {@code true}.
+     */
+    protected final Exp generateDefVarExps(PosSymbol facilityName,
+            TypeFamilyDec typeFamilyDec, InstantiatedFacilityDecl instantiatedFacilityDecl) {
+        Exp retExp =
+                VarExp.getTrueVarExp(typeFamilyDec.getLocation(),
+                        myCurrentAssertiveCodeBlock.getTypeGraph());
+
+        for (MathDefVariableDec defVariableDec : typeFamilyDec
+                .getDefinitionVarList()) {
+            if (defVariableDec.getDefinitionAsExp() != null) {
+                VarExp defVarAsVarExp =
+                        Utilities.createVarExp(defVariableDec.getLocation()
+                                .clone(), facilityName, defVariableDec
+                                .getName(), defVariableDec.getMathType(), null);
+                EqualsExp definitionExp =
+                        new EqualsExp(defVariableDec.getLocation().clone(),
+                                defVarAsVarExp, null, EqualsExp.Operator.EQUAL,
+                                defVariableDec.getDefinitionAsExp().clone());
+                definitionExp.setMathType(myCurrentAssertiveCodeBlock
+                        .getTypeGraph().BOOLEAN);
+                definitionExp.setLocationDetailModel(new LocationDetailModel(
+                        definitionExp.getLocation().clone(), definitionExp
+                                .getLocation().clone(), "Def Var: "
+                                + defVariableDec.getVariable().getName()
+                                        .getName()));
+
+                if (VarExp.isLiteralTrue(retExp)) {
+                    retExp = definitionExp;
+                }
+                else {
+                    retExp =
+                            MathExp.formConjunct(retExp.getLocation().clone(),
+                                    retExp, definitionExp);
+                }
+            }
+        }
+
+        // Create a replacement map
+        Map<Exp, Exp> substitutionMap = new LinkedHashMap<>();
+
+        // Substitute any <type>.Receptacles and <type>.Val_in with ones
+        // containing the proper facility qualifier.
+        VarExp typeAsVarExp =
+                Utilities.createVarExp(typeFamilyDec.getLocation().clone(), null, typeFamilyDec.getName(),
+                        typeFamilyDec.getModel().getMathType(), typeFamilyDec.getModel().getMathTypeValue());
+        VarExp qualifiedTypeAsVarExp = (VarExp) typeAsVarExp.clone();
+        qualifiedTypeAsVarExp.setQualifier(facilityName);
+        substitutionMap.put(typeAsVarExp, qualifiedTypeAsVarExp);
+
+        // Substituting shared variables with ones containing the proper facility qualifier.
+        for (SharedStateDec stateDec : instantiatedFacilityDecl.getConceptSharedStates()) {
+            for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
+                VarExp stateVarExp =
+                        Utilities.createVarExp(facilityName.getLocation().clone(), null,
+                                mathVarDec.getName(), mathVarDec.getMathType(), null);
+                VarExp qualifiedVarExp = Utilities.createVarExp(facilityName.getLocation().clone(), facilityName,
+                        mathVarDec.getName(), mathVarDec.getMathType(), null);
+                substitutionMap.put(stateVarExp, qualifiedVarExp);
+            }
+        }
+
+        // Substitute any formal concept arguments with its actual
+        FormalActualLists conceptParamArgs = instantiatedFacilityDecl.getConceptParamArgLists();
+        Iterator<VarExp> formalArgsIt = conceptParamArgs.getFormalParamList().iterator();
+        Iterator<Exp> actualArgsIt = conceptParamArgs.getActualArgList().iterator();
+        while (formalArgsIt.hasNext() && actualArgsIt.hasNext()) {
+            substitutionMap.put(formalArgsIt.next(), actualArgsIt.next());
+        }
+
+        return retExp.substitute(substitutionMap);
     }
 
     // ===========================================================
