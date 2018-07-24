@@ -253,14 +253,13 @@ public class HardCoded {
      *
      * @param g The current type graph.
      * @param lastExp The last typed {@link Exp} in a {@link DotExp}.
-     * @param currentExp The current {@link Exp} we are trying to type.
      * @param currentExpName Name of {@code currentExp}.
      *
      * @return A {@link MTType} if it is one of the special meta segments,
      * <code>null</code> otherwise.
      */
     public static MTType getMetaFieldType(TypeGraph g, Exp lastExp,
-            Exp currentExp, String currentExpName) {
+            String currentExpName) {
         MTType result = null;
 
         if (lastExp.getMathTypeValue() != null) {
@@ -268,10 +267,6 @@ public class HardCoded {
             case "Is_Initial":
                 result =
                         new MTFunction(g, g.BOOLEAN, lastExp.getMathTypeValue());
-                break;
-            case "Receptacles":
-                currentExp.setMathTypeValue(g.RECEPTACLES);
-                result = g.SSET;
                 break;
             case "Val_in":
                 result =

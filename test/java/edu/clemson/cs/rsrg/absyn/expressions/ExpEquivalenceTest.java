@@ -547,6 +547,46 @@ public class ExpEquivalenceTest {
     }
 
     /**
+     * <p>This tests {@link RecpExp#equals(Object)}},
+     * {@link RecpExp#equivalent(Exp)}, {@link TypeReceptaclesExp#equals(Object)} and
+     * {@link TypeReceptaclesExp#equivalent(Exp)}}.</p>
+     */
+    @Test
+    public final void testReceptaclesExpressions() {
+        // RecpExp
+        RecpExp recpExp1 =
+                new RecpExp(FAKE_LOCATION_1.clone(), new VarExp(FAKE_LOCATION_1
+                        .clone(), null, new PosSymbol(FAKE_LOCATION_1.clone(),
+                        "S")));
+        recpExp1.setLocationDetailModel(FAKE_LOCATION_DETAIL_MODEL_1.clone());
+
+        RecpExp recpExp2 =
+                new RecpExp(FAKE_LOCATION_2.clone(), new VarExp(FAKE_LOCATION_1
+                        .clone(), null, new PosSymbol(FAKE_LOCATION_2.clone(),
+                        "S")));
+        recpExp2.setLocationDetailModel(FAKE_LOCATION_DETAIL_MODEL_2.clone());
+
+        assertionCheck(recpExp1, recpExp2);
+
+        // TypeReceptaclesExp
+        TypeReceptaclesExp typeReceptaclesExp1 =
+                new TypeReceptaclesExp(FAKE_LOCATION_1.clone(), new VarExp(
+                        FAKE_LOCATION_1.clone(), null, new PosSymbol(
+                                FAKE_LOCATION_1.clone(), "Integer")));
+        typeReceptaclesExp1.setLocationDetailModel(FAKE_LOCATION_DETAIL_MODEL_1
+                .clone());
+
+        TypeReceptaclesExp typeReceptaclesExp2 =
+                new TypeReceptaclesExp(FAKE_LOCATION_2.clone(), new VarExp(
+                        FAKE_LOCATION_2.clone(), null, new PosSymbol(
+                                FAKE_LOCATION_2.clone(), "Integer")));
+        typeReceptaclesExp2.setLocationDetailModel(FAKE_LOCATION_DETAIL_MODEL_2
+                .clone());
+
+        assertionCheck(typeReceptaclesExp1, typeReceptaclesExp2);
+    }
+
+    /**
      * <p>This tests {@link SetCollectionExp#equals(Object)}} and
      * {@link SetCollectionExp#equivalent(Exp)}.</p>
      */
@@ -683,6 +723,8 @@ public class ExpEquivalenceTest {
                 new VarExp(FAKE_LOCATION_2.clone(), null, new PosSymbol(
                         FAKE_LOCATION_2.clone(), "C"));
         varExp2.setLocationDetailModel(FAKE_LOCATION_DETAIL_MODEL_2.clone());
+
+        assertionCheck(varExp1, varExp2);
 
         // VCVarExp
         VCVarExp vcVarExp1 =

@@ -847,7 +847,9 @@ mathLiteralExp
     ;
 
 mathDotExp
-    :   mathFunctionApplicationExp (DOT mathCleanFunctionExp)+
+    :   mathRecpExp
+    |   mathTypeReceptaclesExp
+    |   mathFunctionApplicationExp (DOT mathCleanFunctionExp)+
     |   mathFunctionApplicationExp
     ;
 
@@ -860,6 +862,7 @@ mathCleanFunctionExp
     :   (qualifier=IDENTIFIER QUALIFIER)?
         name=IDENTIFIER (CARAT mathNestedExp)?
         LPAREN mathExp (COMMA mathExp)* RPAREN                  #mathFunctionExp
+    |   mathTypeReceptaclesExp                                  #mathTypeRecpExp
     |   mathVarNameExp                                          #mathVarExp
     |   OP (qualifier=IDENTIFIER QUALIFIER)?
         (infixOp | op=NOT | op=ABS | op=COMPLEMENT)             #mathOpNameExp
@@ -894,6 +897,15 @@ mathLambdaExp
 
 mathTaggedCartProdTypeExp
     :   CARTPROD (mathVariableDeclGroup SEMICOLON)+ END
+    ;
+
+mathRecpExp
+    :   RECP DOT mathVarNameExp
+    |   RECP DOT mathDotExp
+    ;
+
+mathTypeReceptaclesExp
+    :   mathVarNameExp DOT RECEPTACLES
     ;
 
 mathNestedExp

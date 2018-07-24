@@ -2254,8 +2254,7 @@ public class Populator extends TreeWalkerVisitor {
             }
             catch (ClassCastException cce) {
                 curType =
-                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
-                                nextSegment, segmentName);
+                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment, segmentName);
 
                 if (curType == null) {
                     throw new SourceErrorException("Value not a tuple.",
@@ -2270,8 +2269,7 @@ public class Populator extends TreeWalkerVisitor {
             }
             catch (NoSuchElementException nsee) {
                 curType =
-                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
-                                nextSegment, segmentName);
+                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment, segmentName);
 
                 if (curType == null) {
                     throw new SourceErrorException("No such factor.", lastGood);
@@ -2531,6 +2529,16 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Code that gets executed after visiting a {@link RecpExp}.</p>
+     *
+     * @param exp A recp expression.
+     */
+    @Override
+    public final void postRecpExp(RecpExp exp) {
+        exp.setMathType(myTypeGraph.RECEPTACLES);
+    }
+
+    /**
      * <p>Code that gets executed after visiting a {@link SetExp}.</p>
      *
      * @param exp A set expression.
@@ -2759,6 +2767,16 @@ public class Populator extends TreeWalkerVisitor {
         postTypeAssertionExp(exp);
 
         return true;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeReceptaclesExp}.</p>
+     *
+     * @param exp A type receptacles expression.
+     */
+    @Override
+    public final void postTypeReceptaclesExp(TypeReceptaclesExp exp) {
+        exp.setMathType(myTypeGraph.RECEPTACLES);
     }
 
     /**
@@ -3707,47 +3725,6 @@ public class Populator extends TreeWalkerVisitor {
             // for completeness.
             first.setMathType(myTypeGraph.BOOLEAN);
             lastGood.data = second;
-        }
-        else if (firstName.getName().equals("recp")) {
-            // YS: OK, this is a receptacle, so our second segment must be
-            // a Receptacle
-            VarExp second = (VarExp) segments.next();
-
-            // We better not have any more segments
-            // YS: Make sure we don't have more segments to process after a
-            // MetaFieldType. In other words, this is illegal: Entry.Is_Initial(x).Foo
-            if (segments.hasNext()) {
-                throw new SourceErrorException("Illegal dotted expression following: "
-                        + second.getName().getName(), second.getLocation());
-            }
-
-            try {
-                result =
-                        myBuilder
-                                .getInnermostActiveScope()
-                                .queryForOne(
-                                        new NameQuery(
-                                                null,
-                                                second.getName(),
-                                                ImportStrategy.IMPORT_NAMED,
-                                                FacilityStrategy.FACILITY_IGNORE,
-                                                true)).toMathSymbolEntry(
-                                second.getLocation());
-
-                // The recp segment doesn't have a sensible type, but we'll set one
-                // for completeness.
-                first.setMathType(myTypeGraph.BOOLEAN);
-                second.setMathType(myTypeGraph.RECEPTACLES);
-                lastGood.data = second;
-            }
-            catch (NoSuchSymbolException nsse2) {
-                noSuchSymbol(null, second.getName());
-                throw new RuntimeException(); //This will never fire
-            }
-            catch (DuplicateSymbolException dse) {
-                duplicateSymbol(second.getName());
-                throw new RuntimeException(); //This will never fire
-            }
         }
         else {
             //Next, we'll see if there's a locally-accessible symbol with this
