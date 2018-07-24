@@ -2776,7 +2776,8 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postTypeReceptaclesExp(TypeReceptaclesExp exp) {
-        exp.setMathType(myTypeGraph.RECEPTACLES);
+        exp.setMathType(myTypeGraph.SSET);
+        exp.setMathTypeValue(myTypeGraph.RECEPTACLES);
     }
 
     /**
