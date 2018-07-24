@@ -1551,6 +1551,20 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             correspondence =
                     (AssertionClause) myNodes.removeFrom(ctx
                             .correspondenceClause());
+
+            // Sanity check: Make sure that if the correspondence involves any global variables,
+            // it is declared either as independent or dependent.
+            AssertionClause.ClauseType clauseType =
+                    correspondence.getClauseType();
+            if (correspondence.getInvolvedSharedVars().size() > 0
+                    && clauseType
+                            .equals(AssertionClause.ClauseType.CORRESPONDENCE)) {
+                throw new SourceErrorException(
+                        "A type realization's correspondence must be declared as independent "
+                                + "or dependent when it involves shared variables.",
+                        correspondence.getLocation(),
+                        new IllegalArgumentException());
+            }
         }
         else {
             correspondence =
