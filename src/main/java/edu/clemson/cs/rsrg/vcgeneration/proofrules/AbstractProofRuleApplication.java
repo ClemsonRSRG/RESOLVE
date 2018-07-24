@@ -242,16 +242,24 @@ public abstract class AbstractProofRuleApplication
                 VarExp.getTrueVarExp(typeFamilyDec.getLocation(),
                         myCurrentAssertiveCodeBlock.getTypeGraph());
 
+        // Create a replacement map
+        Map<Exp, Exp> substitutionMap = new LinkedHashMap<>();
+
         for (MathDefVariableDec defVariableDec : typeFamilyDec
                 .getDefinitionVarList()) {
+            // Convert the definition variable into VarExps
+            VarExp defVarAsVarExp =
+                    Utilities.createVarExp(defVariableDec.getLocation()
+                            .clone(), null, defVariableDec
+                            .getName(), defVariableDec.getMathType(), null);
+            VarExp qualifiedDefVarAsVarExp = (VarExp) defVarAsVarExp.clone();
+            qualifiedDefVarAsVarExp.setQualifier(facilityName);
+
+            // Generate a proper EqualsExp with the definition
             if (defVariableDec.getDefinitionAsExp() != null) {
-                VarExp defVarAsVarExp =
-                        Utilities.createVarExp(defVariableDec.getLocation()
-                                .clone(), facilityName, defVariableDec
-                                .getName(), defVariableDec.getMathType(), null);
                 EqualsExp definitionExp =
                         new EqualsExp(defVariableDec.getLocation().clone(),
-                                defVarAsVarExp, null, EqualsExp.Operator.EQUAL,
+                                qualifiedDefVarAsVarExp, null, EqualsExp.Operator.EQUAL,
                                 defVariableDec.getDefinitionAsExp().clone());
                 definitionExp.setMathType(myCurrentAssertiveCodeBlock
                         .getTypeGraph().BOOLEAN);
@@ -270,10 +278,11 @@ public abstract class AbstractProofRuleApplication
                                     retExp, definitionExp);
                 }
             }
-        }
 
-        // Create a replacement map
-        Map<Exp, Exp> substitutionMap = new LinkedHashMap<>();
+            // Substitute any definition variables with ones
+            // containing the proper facility qualifier
+            substitutionMap.put(defVarAsVarExp, qualifiedDefVarAsVarExp);
+        }
 
         // Substitute any <type>.Receptacles and <type>.Val_in with ones
         // containing the proper facility qualifier.
