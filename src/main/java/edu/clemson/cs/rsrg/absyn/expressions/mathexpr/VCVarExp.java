@@ -18,6 +18,7 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -244,7 +245,30 @@ public class VCVarExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new VCVarExp(cloneLocation(), myOrigExp.clone(), myStateNum);
+        Map<Exp, Exp> modifiedSubstitutions = new LinkedHashMap<>(substitutions.size());
+        for (Exp keyExp : substitutions.keySet()) {
+            // YS: Remove the substitution that directly matches our inner expression.
+            //     We don't want to replace that since it is not a direct match.
+            if (!keyExp.equivalent((myOrigExp))) {
+                // YS: Special handling for FunctionExp.
+                if (myOrigExp instanceof FunctionExp) {
+                    FunctionExp myOrigExpAsFunctionExp = (FunctionExp) myOrigExp;
+
+                    VarExp functionNameExp = (VarExp) myOrigExpAsFunctionExp.getName().clone();
+                    functionNameExp.setQualifier(myOrigExpAsFunctionExp.getQualifier());
+
+                    // Only add if it doesn't match the function name
+                    if (!keyExp.equivalent(functionNameExp)) {
+                        modifiedSubstitutions.put(keyExp.clone(), substitutions.get(keyExp).clone());
+                    }
+                }
+                else {
+                    modifiedSubstitutions.put(keyExp.clone(), substitutions.get(keyExp).clone());
+                }
+            }
+        }
+
+        return new VCVarExp(cloneLocation(), myOrigExp.substitute(modifiedSubstitutions), myStateNum);
     }
 
     // ===========================================================
@@ -266,8 +290,8 @@ public class VCVarExp extends MathExp {
                 new PosSymbol(functionNameExp.getLocation().clone(),
                         functionNameExp.getName().getName() + primes);
         PosSymbol newQualifier = null;
-        if (functionNameExp.getQualifier() != null) {
-            newQualifier = functionNameExp.getQualifier().clone();
+        if (exp.getQualifier() != null) {
+            newQualifier = exp.getQualifier().clone();
         }
 
         VarExp newFunctionNameExp =

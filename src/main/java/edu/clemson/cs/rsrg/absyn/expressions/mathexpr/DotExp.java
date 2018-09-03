@@ -286,7 +286,9 @@ public class DotExp extends MathExp {
                     return substituteFunctionExp(innerFunctionExp, replacementExp, substitutions);
                 }
                 // YS: Make a copy of "replacementExp" if it is a VCVarExp
-                else if (replacementExp instanceof VCVarExp) {
+                //     and it matches the whole expression.
+                else if (replacementExp instanceof VCVarExp &&
+                        (lastGoodIndex + 1 == mySegmentExps.size())) {
                     return replacementExp.clone();
                 }
                 // YS: Else create a new DotExp with the proper replacements.
@@ -307,6 +309,10 @@ public class DotExp extends MathExp {
                     }
                     // Case #3: "replacementExp" is an OldExp
                     else if (replacementExp instanceof OldExp) {
+                        newSegments.add(replacementExp.clone());
+                    }
+                    // Case #4: "replacementExp" is a VCVarExp
+                    else if (replacementExp instanceof VCVarExp) {
                         newSegments.add(replacementExp.clone());
                     }
                     // Everything else is an error!
