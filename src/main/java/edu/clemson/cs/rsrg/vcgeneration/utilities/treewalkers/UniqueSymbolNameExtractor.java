@@ -466,6 +466,30 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
         preExp(exp);
         preMathExp(exp);
 
+        // YS: Need special handle FunctionExp
+        if (exp.getExp() instanceof FunctionExp) {
+            FunctionExp innerFunctionExp = (FunctionExp) exp.getExp();
+
+            // YS: Add the function name with the correct number of primes
+            VarExp functionNameExp = innerFunctionExp.getName();
+
+            // Build the name
+            StringBuilder sb = new StringBuilder();
+            if (innerFunctionExp.getQualifier() != null) {
+                sb.append(innerFunctionExp.getQualifier().getName());
+                sb.append("::");
+            }
+            sb.append(functionNameExp.getName().getName());
+
+            // Append the number of primes
+            for (int i = 0; i < exp.getStateNum(); i++) {
+                sb.append("'");
+            }
+
+            // Add the possibility qualified name.
+            myExpNames.add(sb.toString());
+        }
+
         // YS: A VCVarExp is something like: a' or a'''.
         // We don't want all the variations so rather than walking
         // the inner expression, we simply use the asString
