@@ -12,8 +12,10 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers;
 
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefVariableDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
@@ -190,6 +192,22 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
 
                             // Add it to our substitution map
                             substitutionFacSharedVars.put(varDecAsVarExp, qualifiedVarExp);
+                        }
+                    }
+
+                    // Replace any definition variables
+                    for (TypeFamilyDec typeFamilyDec : decl.getConceptDeclaredTypes()) {
+                        for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+                            // Construct the qualified and not qualified version of mathDefVariableDec
+                            VarExp defVarAsVarExp =
+                                    Utilities.createVarExp(exp.getLocation().clone(),
+                                            null, mathDefVariableDec.getName(),
+                                            mathDefVariableDec.getMathType(), null);
+                            VarExp qualifiedDefVarExp = (VarExp) defVarAsVarExp.clone();
+                            qualifiedDefVarExp.setQualifier(qualifier);
+
+                            // Add it to our substitution map
+                            substitutionFacSharedVars.put(defVarAsVarExp, qualifiedDefVarExp);
                         }
                     }
                 }
@@ -550,6 +568,13 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
                     // and not a "remove". We still need this for when
                     // we process the processing function call's ensures clause.
                     replExp = myEnsuresClauseMap.get(exp);
+
+                    // YS: Special handling for EqualsExp.
+                    //     Our replExp should just be the right hand side.
+                    if (replExp instanceof EqualsExp) {
+                        EqualsExp replExpAsEqualsExp = (EqualsExp) replExp;
+                        replExp = replExpAsEqualsExp.getRight().clone();
+                    }
                 }
                 else {
                     // Something went wrong with the walking mechanism.

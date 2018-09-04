@@ -336,6 +336,23 @@ public class FunctionExp extends AbstractFunctionExp {
             if (nextKey.equivalent(myFuncNameExp)) {
                 substitutionKey = nextKey;
             }
+            // YS: If nextKey is a VarExp, it might contain a
+            // qualifier and equivalent won't return true.
+            // Here is some special handling
+            else if (nextKey instanceof VarExp) {
+                VarExp nextKeyAsVarExp = (VarExp) nextKey;
+
+                // We first check to see if the qualifiers match.
+                // If they don't match, we don't need to do anything else.
+                if (nextKeyAsVarExp.getQualifier() != null &&
+                        nextKeyAsVarExp.getQualifier().equals(myQualifier)) {
+                    // Check if the var expression matches our name
+                    if (nextKeyAsVarExp.getName().equals(myFuncNameExp.getName())) {
+                        // We found a key that is equivalent to our name
+                        substitutionKey = nextKey;
+                    }
+                }
+            }
         }
 
         // YS: If we don't have a substitution key, then simply make FunctionExp

@@ -61,7 +61,6 @@ public class FacilityInitStmt extends Statement {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("_");
         sb.append("_Facility_Init(");
         sb.append(myInstantiatedFacilityDec.getName().asString(0,
                 innerIndentInc));

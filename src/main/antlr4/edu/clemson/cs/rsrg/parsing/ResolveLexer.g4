@@ -414,8 +414,16 @@ REALIZED
     :   'realized'
     ;
 
+RECEPTACLES
+    :   'Receptacles'
+    ;
+
 RECORD
     :   'Record'
+    ;
+
+RECP
+    :   'recp'
     ;
 
 RECURSIVE

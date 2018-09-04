@@ -222,21 +222,9 @@ public class DotExp extends MathExp {
             Exp substitutionKey = null;
             FunctionExp innerFunctionExp = null;
             int lastGoodIndex = -1;
-            boolean foundReceptacleNotation = false;
             boolean matchedFunctionName = false;
-            for (int i = 0; i < mySegmentExps.size() && !foundReceptacleNotation && !matchedFunctionName; i++) {
+            for (int i = 0; i < mySegmentExps.size() && !matchedFunctionName; i++) {
                 Exp e = mySegmentExps.get(i);
-
-                // YS: Check to see if it contains some kind of receptacles notation,
-                //     If it does, then don't do any substitutions. We don't know what
-                //     those should look like right now...
-                if (e instanceof VarExp) {
-                    VarExp eAsVarExp = (VarExp) e;
-                    if (eAsVarExp.getName().getName().equals("recp") ||
-                            eAsVarExp.getName().getName().equals("Receptacles")) {
-                        foundReceptacleNotation = true;
-                    }
-                }
 
                 // YS: We form a new DotExp up to ith position and compare it to see
                 //     if there is a key that matches this new expression. If yes,
@@ -284,63 +272,62 @@ public class DotExp extends MathExp {
                 }
             }
 
-            // YS: If we found a receptacles notation, then don't apply any substitutions.
-            if (foundReceptacleNotation) {
+            // YS: If we don't have a substitution key, then simply make a copy
+            if (substitutionKey == null) {
                 newSegments = copyExps();
 
                 return new DotExp(cloneLocation(), newSegments);
-            } else {
-                // YS: If we don't have a substitution key, then simply make a copy
-                if (substitutionKey == null) {
-                    newSegments = copyExps();
+            }
+            else {
+                Exp replacementExp = substitutions.get(substitutionKey);
+
+                // YS: If we only matched the function name, then we need to do something special.
+                if (innerFunctionExp != null) {
+                    return substituteFunctionExp(innerFunctionExp, replacementExp, substitutions);
+                }
+                // YS: Make a copy of "replacementExp" if it is a VCVarExp
+                //     and it matches the whole expression.
+                else if (replacementExp instanceof VCVarExp &&
+                        (lastGoodIndex + 1 == mySegmentExps.size())) {
+                    return replacementExp.clone();
+                }
+                // YS: Else create a new DotExp with the proper replacements.
+                else {
+                    // Case #1: "replacementExp" is a VarExp
+                    if (replacementExp instanceof VarExp) {
+                        newSegments.add(replacementExp.clone());
+                    }
+                    // Case #2: "replacementExp" is a DotExp
+                    else if (replacementExp instanceof DotExp) {
+                        DotExp replacementExpAsDotExp = (DotExp) replacementExp;
+                        List<Exp> segments = replacementExpAsDotExp.getSegments();
+
+                        // Copy the segments
+                        for (Exp segment : segments) {
+                            newSegments.add(segment.clone());
+                        }
+                    }
+                    // Case #3: "replacementExp" is an OldExp
+                    else if (replacementExp instanceof OldExp) {
+                        newSegments.add(replacementExp.clone());
+                    }
+                    // Case #4: "replacementExp" is a VCVarExp
+                    else if (replacementExp instanceof VCVarExp) {
+                        newSegments.add(replacementExp.clone());
+                    }
+                    // Everything else is an error!
+                    else {
+                        throw new SourceErrorException("Cannot substitute: "
+                                + this.toString() + " with: "
+                                + replacementExp.toString(), replacementExp.getLocation());
+                    }
+
+                    // Copy the rest of the segments if any
+                    for (int i = lastGoodIndex + 1; i < mySegmentExps.size(); i++) {
+                        newSegments.add(mySegmentExps.get(i).clone());
+                    }
 
                     return new DotExp(cloneLocation(), newSegments);
-                }
-                else {
-                    Exp replacementExp = substitutions.get(substitutionKey);
-
-                    // YS: If we only matched the function name, then we need to do something special.
-                    if (innerFunctionExp != null) {
-                        return substituteFunctionExp(innerFunctionExp, replacementExp, substitutions);
-                    }
-                    // YS: Make a copy of "replacementExp" if it is a VCVarExp
-                    else if (replacementExp instanceof VCVarExp) {
-                        return replacementExp.clone();
-                    }
-                    // YS: Else create a new DotExp with the proper replacements.
-                    else {
-                        // Case #1: "replacementExp" is a VarExp
-                        if (replacementExp instanceof VarExp) {
-                            newSegments.add(replacementExp.clone());
-                        }
-                        // Case #2: "replacementExp" is a DotExp
-                        else if (replacementExp instanceof DotExp) {
-                            DotExp replacementExpAsDotExp = (DotExp) replacementExp;
-                            List<Exp> segments = replacementExpAsDotExp.getSegments();
-
-                            // Copy the segments
-                            for (Exp segment : segments) {
-                                newSegments.add(segment.clone());
-                            }
-                        }
-                        // Case #3: "replacementExp" is an OldExp
-                        else if (replacementExp instanceof OldExp) {
-                            newSegments.add(replacementExp.clone());
-                        }
-                        // Everything else is an error!
-                        else {
-                            throw new SourceErrorException("Cannot substitute: "
-                                    + this.toString() + " with: "
-                                    + replacementExp.toString(), replacementExp.getLocation());
-                        }
-
-                        // Copy the rest of the segments if any
-                        for (int i = lastGoodIndex + 1; i < mySegmentExps.size(); i++) {
-                            newSegments.add(mySegmentExps.get(i).clone());
-                        }
-
-                        return new DotExp(cloneLocation(), newSegments);
-                    }
                 }
             }
         }
