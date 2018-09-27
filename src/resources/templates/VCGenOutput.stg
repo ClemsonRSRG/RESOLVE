@@ -26,7 +26,7 @@ VC <vcNum>
  */
 outputSequent(consequents, antecedents) ::= <<
 
-Goal(s):
+Goal:
 
 <consequents : {consequent | <consequent>}; separator = " or \n">
 
