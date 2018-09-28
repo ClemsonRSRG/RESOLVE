@@ -19,7 +19,7 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.AssumeStmtRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statements.AssumeStmtRule;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -310,6 +310,29 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This method redefines how a {@link RecpExp} should be walked.</p>
+     *
+     * @param exp A type receptacles expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkRecpExp(RecpExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+
+        // YS: Don't need to walk the inner expression.
+        myExpNames.add(exp.asString(0, 0));
+
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
      * <p>This method redefines how a {@link SetCollectionExp} should be walked.</p>
      *
      * @param exp A set collection expression.
@@ -386,6 +409,29 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This method redefines how a {@link TypeReceptaclesExp} should be walked.</p>
+     *
+     * @param exp A type receptacles expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkTypeReceptaclesExp(TypeReceptaclesExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+
+        // YS: Don't need to walk the inner expression.
+        myExpNames.add(exp.asString(0, 0));
+
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
      * <p>Code that gets executed before visiting a {@link VarExp}.</p>
      *
      * @param exp A variable expression.
@@ -419,6 +465,30 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
         preAny(exp);
         preExp(exp);
         preMathExp(exp);
+
+        // YS: Need special handle FunctionExp
+        if (exp.getExp() instanceof FunctionExp) {
+            FunctionExp innerFunctionExp = (FunctionExp) exp.getExp();
+
+            // YS: Add the function name with the correct number of primes
+            VarExp functionNameExp = innerFunctionExp.getName();
+
+            // Build the name
+            StringBuilder sb = new StringBuilder();
+            if (innerFunctionExp.getQualifier() != null) {
+                sb.append(innerFunctionExp.getQualifier().getName());
+                sb.append("::");
+            }
+            sb.append(functionNameExp.getName().getName());
+
+            // Append the number of primes
+            for (int i = 0; i < exp.getStateNum(); i++) {
+                sb.append("'");
+            }
+
+            // Add the possibility qualified name.
+            myExpNames.add(sb.toString());
+        }
 
         // YS: A VCVarExp is something like: a' or a'''.
         // We don't want all the variations so rather than walking

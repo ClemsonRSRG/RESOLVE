@@ -125,6 +125,10 @@ DEFINITION
     |   'Def'
     ;
 
+DEPENDENT
+    :   'dependent'
+    ;
+
 DIV
     :   'div'
     ;
@@ -241,6 +245,10 @@ IMPLIES
 
 IN
     :   'is_in'
+    ;
+
+INDEPENDENT
+    :   'independent'
     ;
 
 INDUCTIVE
@@ -406,8 +414,16 @@ REALIZED
     :   'realized'
     ;
 
+RECEPTACLES
+    :   'Receptacles'
+    ;
+
 RECORD
     :   'Record'
+    ;
+
+RECP
+    :   'recp'
     ;
 
 RECURSIVE

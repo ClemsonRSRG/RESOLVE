@@ -64,6 +64,9 @@ public class InstantiatedFacilityDecl {
     /** <p>The instantiated {@code Facility}.</p> */
     private final FacilityDec myInstantiatedFacilityDec;
 
+    /** <p>A flag that indicates if this is a local facility declaration or not.</p> */
+    private final boolean myIsLocalFacilityDec;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -80,13 +83,15 @@ public class InstantiatedFacilityDecl {
      * @param crFormalParamList The formal parameters from the {@code Concept Realization}.
      * @param crActualArgList The processed arguments used to instantiate the {@code Concept Realization}.
      * @param enhSpecRealizItems A list of {@link InstantiatedEnhSpecRealizItem InstantiatedEnhSpecRealizItems}.
+     * @param isLocalFacDec A flag that indicates if this is a local {@link FacilityDec}.
      */
     public InstantiatedFacilityDecl(FacilityDec dec,
             List<SharedStateDec> conceptSharedStates,
             List<TypeFamilyDec> conceptDeclaredTypes,
             List<VarExp> cFormalParamList, List<Exp> cActualArgList,
             List<VarExp> crFormalParamList, List<Exp> crActualArgList,
-            List<InstantiatedEnhSpecRealizItem> enhSpecRealizItems) {
+            List<InstantiatedEnhSpecRealizItem> enhSpecRealizItems,
+            boolean isLocalFacDec) {
         myInstantiatedFacilityDec = dec;
         myConceptDeclaredTypes = conceptDeclaredTypes;
         myConceptParamArgs =
@@ -95,6 +100,7 @@ public class InstantiatedFacilityDecl {
                 new FormalActualLists(crFormalParamList, crActualArgList);
         myConceptSharedStates = conceptSharedStates;
         myInstantiatedEnhSpecRealizItems = enhSpecRealizItems;
+        myIsLocalFacilityDec = isLocalFacDec;
     }
 
     // ===========================================================
@@ -115,20 +121,22 @@ public class InstantiatedFacilityDecl {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        InstantiatedFacilityDecl that = (InstantiatedFacilityDecl) o;
+        InstantiatedFacilityDecl decl = (InstantiatedFacilityDecl) o;
 
-        if (!myConceptDeclaredTypes.equals(that.myConceptDeclaredTypes))
+        if (myIsLocalFacilityDec != decl.myIsLocalFacilityDec)
             return false;
-        if (!myConceptParamArgs.equals(that.myConceptParamArgs))
+        if (!myConceptDeclaredTypes.equals(decl.myConceptDeclaredTypes))
             return false;
-        if (!myConceptRealizParamArgs.equals(that.myConceptRealizParamArgs))
+        if (!myConceptParamArgs.equals(decl.myConceptParamArgs))
             return false;
-        if (!myConceptSharedStates.equals(that.myConceptSharedStates))
+        if (!myConceptRealizParamArgs.equals(decl.myConceptRealizParamArgs))
+            return false;
+        if (!myConceptSharedStates.equals(decl.myConceptSharedStates))
             return false;
         if (!myInstantiatedEnhSpecRealizItems
-                .equals(that.myInstantiatedEnhSpecRealizItems))
+                .equals(decl.myInstantiatedEnhSpecRealizItems))
             return false;
-        return myInstantiatedFacilityDec.equals(that.myInstantiatedFacilityDec);
+        return myInstantiatedFacilityDec.equals(decl.myInstantiatedFacilityDec);
     }
 
     /**
@@ -217,7 +225,17 @@ public class InstantiatedFacilityDecl {
         result = 31 * result + myConceptSharedStates.hashCode();
         result = 31 * result + myInstantiatedEnhSpecRealizItems.hashCode();
         result = 31 * result + myInstantiatedFacilityDec.hashCode();
+        result = 31 * result + (myIsLocalFacilityDec ? 1 : 0);
         return result;
+    }
+
+    /**
+     * <p>This method checks to see if this is a local {@code Facility} declaration.</p>
+     *
+     * @return {@code true} if it is, {@code false} otherwise.
+     */
+    public final boolean isLocalFacility() {
+        return myIsLocalFacilityDec;
     }
 
 }

@@ -12,7 +12,9 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration;
 
+import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
@@ -21,6 +23,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateDec;
 import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.AbstractTypeRepresentationDec;
+import edu.clemson.cs.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
@@ -31,8 +34,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.DotExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.cs.rsrg.absyn.items.programitems.AbstractInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.RealizInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.rawtypes.NameTy;
+import edu.clemson.cs.rsrg.absyn.rawtypes.RecordTy;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.absyn.statements.MemoryStmt.StatementType;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -43,6 +49,7 @@ import edu.clemson.cs.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.prover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
+import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.*;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoSuchSymbolException;
@@ -58,19 +65,26 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.FacilityDeclRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.facilitydecl.FacilityDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.operationdecl.ProcedureDeclRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.sharedstatedecl.SharedStateCorrRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.sharedstatedecl.SharedStateRepresentationInitRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationCorrRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationFinalRule;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.typedecl.TypeRepresentationInitRule;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.other.WhichEntailsRule;
-import edu.clemson.cs.rsrg.vcgeneration.proofrules.statement.*;
+import edu.clemson.cs.rsrg.vcgeneration.proofrules.statements.*;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.Utilities;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.formaltoactual.InstantiatedFacilityDecl;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FacilityInitStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.FinalizeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.InitializeVarStmt;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.treewalkers.ConceptSharedStateExtractor;
 import java.util.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -118,6 +132,22 @@ public class VCGenerator extends TreeWalkerVisitor {
      * between different math types.</p>
      */
     private final TypeGraph myTypeGraph;
+
+    // -----------------------------------------------------------
+    // Initialization and Finalization-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>While walking a {@link SharedStateRealizationDec}, this will be set to
+     * its corresponding shared state declaration in the concept.</p>
+     */
+    private SharedStateDec myCorrespondingSharedStateDec;
+
+    /**
+     * <p>An outer declaration that has {@link RealizInitFinalItem RealizInitFinalItems}
+     * that needs to be processed.</p>
+     */
+    private Dec myRealizInitFinalOuterDec;
 
     // -----------------------------------------------------------
     // Operation Declaration-Related
@@ -225,8 +255,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertiveCodeBlockModels = new LinkedHashMap<>();
         myBuilder = builder;
         myCompileEnvironment = compileEnvironment;
+        myCorrespondingSharedStateDec = null;
         myFinalAssertiveCodeBlocks = new LinkedList<>();
         myIncompleteAssertiveCodeBlocks = new LinkedList<>();
+        myRealizInitFinalOuterDec = null;
         mySTGroup = new STGroupFile("templates/VCGenVerboseOutput.stg");
         myTypeGraph = myBuilder.getTypeGraph();
         myVariableTypeEntries = new LinkedHashMap<>();
@@ -374,7 +406,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Store the named VCs and increase the block number
             block.setVCs(namedVCs);
-            blockCount++;
+
+            // YS: Only increment the block count if the current block has VCs to prove
+            if (!namedVCs.isEmpty()) {
+                blockCount++;
+            }
         }
     }
 
@@ -848,6 +884,84 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Code that gets executed before visiting a {@link SharedStateRealizationDec}.</p>
+     *
+     * @param dec A shared state realization in a {@code Concept Realization}.
+     */
+    @Override
+    public final void preSharedStateRealizationDec(SharedStateRealizationDec dec) {
+        // Obtain the concept module for this concept realization
+        ConceptRealizModuleDec conceptRealizModuleDec =
+                (ConceptRealizModuleDec) myCurrentModuleScope
+                        .getDefiningElement();
+        try {
+            // Obtain the concept module for this concept realization
+            ConceptModuleDec conceptModuleDec =
+                    (ConceptModuleDec) myBuilder.getModuleScope(
+                            new ModuleIdentifier(conceptRealizModuleDec
+                                    .getConceptName().getName()))
+                            .getDefiningElement();
+
+            // Locate the corresponding shared state
+            ConceptSharedStateExtractor sharedStateExtractor =
+                    new ConceptSharedStateExtractor();
+            TreeWalker.visit(sharedStateExtractor, conceptModuleDec);
+
+            // Store the corresponding shared state declaration
+            myCorrespondingSharedStateDec =
+                    sharedStateExtractor.getSharedStateDecs().get(0);
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(conceptRealizModuleDec.getConceptName()
+                    .getLocation());
+        }
+
+        myRealizInitFinalOuterDec = dec;
+    }
+
+    /**
+     * <p>Code that gets executed in between visiting items inside {@link SharedStateRealizationDec}.</p>
+     *
+     * @param dec A shared state realization in a {@code Concept Realization}.
+     * @param prevChild The previous child item visited.
+     * @param nextChild The next child item to be visited.
+     */
+    @Override
+    public final void midSharedStateRealizationDec(
+            SharedStateRealizationDec dec, ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        // Apply the well defined correspondence rule after we finish walking it!
+        if (prevChild instanceof AssertionClause
+                && ((AssertionClause) prevChild).getClauseType().equals(
+                        AssertionClause.ClauseType.CORRESPONDENCE)) {
+            // Create a new assertive code block
+            AssertiveCodeBlock block =
+                    new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
+
+            // Add shared variables in scope to the free variable's list
+            addSharedVarsToFreeVariableList(block);
+
+            // Create a new model for this assertive code block
+            ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+            blockModel.add("blockName", dec.getName());
+
+            // Apply well defined correspondence rule for concept shared variable realizations
+            SharedStateCorrRule declRule =
+                    new SharedStateCorrRule(dec, myCorrespondingSharedStateDec,
+                            myBuilder, block, myCurrentVerificationContext,
+                            mySTGroup, blockModel);
+            declRule.applyRule();
+
+            // Update the current assertive code blocks and its associated block model.
+            block = declRule.getAssertiveCodeBlocks().getFirst();
+            myAssertiveCodeBlockModels.put(block, declRule.getBlockModel());
+
+            // Add this as a new incomplete assertive code block
+            myIncompleteAssertiveCodeBlocks.add(block);
+        }
+    }
+
+    /**
      * <p>Code that gets executed after visiting a {@link SharedStateRealizationDec}.</p>
      *
      * @param dec A shared state realization in a {@code Concept Realization}.
@@ -855,8 +969,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public final void postSharedStateRealizationDec(
             SharedStateRealizationDec dec) {
-        // TODO: Need to figure out how we are going to find the corresponding shared state
         myCurrentVerificationContext.storeLocalSharedRealizationDec(dec);
+        myRealizInitFinalOuterDec = null;
     }
 
     // -----------------------------------------------------------
@@ -884,6 +998,309 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentVerificationContext.storeConceptTypeFamilyDec(dec);
     }
 
+    /**
+     * <p>Code that gets executed before visiting a {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a {@code Concept Realization}.
+     */
+    @Override
+    public final void preTypeRepresentationDec(TypeRepresentationDec dec) {
+        myRealizInitFinalOuterDec = dec;
+
+        // TODO - YS: Remove this once we include proof rules for handling dependent correspondence.
+        AssertionClause correspondence = dec.getCorrespondence();
+        AssertionClause.ClauseType clauseType =
+                dec.getCorrespondence().getClauseType();
+        if (clauseType
+                .equals(AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE)) {
+            throw new SourceErrorException(
+                    "[VCGenerator] Dependent correspondences are currently not supported.",
+                    correspondence.getLocation());
+        }
+    }
+
+    /**
+     * <p>Code that gets executed in between visiting items inside {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a {@code Concept Realization}.
+     * @param prevChild The previous child item visited.
+     * @param nextChild The next child item to be visited.
+     */
+    @Override
+    public final void midTypeRepresentationDec(TypeRepresentationDec dec,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        // Apply the well defined correspondence rule after we finish walking it!
+        if (prevChild instanceof AssertionClause
+                && ((AssertionClause) prevChild).getClauseType().equals(
+                        AssertionClause.ClauseType.CORRESPONDENCE)) {
+            // Create a new assertive code block
+            AssertiveCodeBlock block =
+                    new AssertiveCodeBlock(dec.getName(), dec, myTypeGraph);
+
+            // Add shared variables in scope to the free variable's list
+            addSharedVarsToFreeVariableList(block);
+
+            // Create a new model for this assertive code block
+            ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+            blockModel.add("blockName", dec.getName());
+
+            // Apply well defined correspondence rule for concept type realizations
+            TypeRepresentationCorrRule declRule =
+                    new TypeRepresentationCorrRule(dec, myBuilder, block,
+                            myCurrentVerificationContext, mySTGroup, blockModel);
+            declRule.applyRule();
+
+            // Update the current assertive code blocks and its associated block model.
+            block = declRule.getAssertiveCodeBlocks().getFirst();
+            myAssertiveCodeBlockModels.put(block, declRule.getBlockModel());
+
+            // Add this as a new incomplete assertive code block
+            myIncompleteAssertiveCodeBlocks.add(block);
+        }
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link TypeRepresentationDec}.</p>
+     *
+     * @param dec A type representation declared in a {@code Concept Realization}.
+     */
+    @Override
+    public final void postTypeRepresentationDec(TypeRepresentationDec dec) {
+        myRealizInitFinalOuterDec = null;
+    }
+
+    // -----------------------------------------------------------
+    // Initialization and Finalization-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link RealizInitFinalItem}.</p>
+     *
+     * @param item A realization for an initialization or finalization block.
+     */
+    @Override
+    public final void preRealizInitFinalItem(RealizInitFinalItem item) {
+        // Create a new assertive code block
+        myCurrentAssertiveCodeBlock =
+                new AssertiveCodeBlock(myRealizInitFinalOuterDec.getName(),
+                        item, myTypeGraph);
+
+        // Add shared variables in scope to the free variable's list
+        addSharedVarsToFreeVariableList(myCurrentAssertiveCodeBlock);
+
+        // For type representation's initialization block, we will need to declare and
+        // initialize a variable with the exemplar as its name and the representation type
+        // as its programming type.
+        if (myRealizInitFinalOuterDec instanceof TypeRepresentationDec) {
+            if (item.getItemType().equals(
+                    AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+                // Create the top most level assume statement and
+                // add it to the assertive code block as the first statement
+                Exp topLevelAssumeExp =
+                        createTopLevelAssumeExpForRealizInitFinalItem(item
+                                .getLocation(), false);
+                AssumeStmt topLevelAssumeStmt =
+                        new AssumeStmt(item.getLocation().clone(),
+                                topLevelAssumeExp, false);
+                myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+                // Create Remember statement
+                MemoryStmt rememberStmt =
+                        new MemoryStmt(item.getLocation().clone(),
+                                StatementType.REMEMBER);
+                myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+
+                // Obtain the associated type family declaration
+                TypeRepresentationDec typeRepresentationDec =
+                        (TypeRepresentationDec) myRealizInitFinalOuterDec;
+                TypeFamilyDec typeFamilyDec =
+                        Utilities.getAssociatedTypeFamilyDec(
+                                typeRepresentationDec,
+                                myCurrentVerificationContext);
+
+                // Query for the type representation entry in the symbol table.
+                SymbolTableEntry symbolTableEntry =
+                        Utilities.searchProgramType(typeRepresentationDec
+                                .getLocation(), null, typeRepresentationDec
+                                .getName(), myCurrentModuleScope);
+
+                // YS: Simply create the proper variable initialization statement that
+                //     allow us to deal with generating question mark variables
+                //     and duration logic when we backtrack through the code.
+                myCurrentAssertiveCodeBlock.addStatement(new InitializeVarStmt(
+                        new VarDec(typeFamilyDec.getExemplar(),
+                                typeRepresentationDec.getRepresentation()),
+                        symbolTableEntry, false));
+
+                // TODO: NY - Add any variable initialization duration clauses
+            }
+            else {
+                // Create the top most level assume statement and
+                // add it to the assertive code block as the first statement
+                Exp topLevelAssumeExp =
+                        createTopLevelAssumeExpForRealizInitFinalItem(item
+                                .getLocation(), true);
+                AssumeStmt topLevelAssumeStmt =
+                        new AssumeStmt(item.getLocation().clone(),
+                                topLevelAssumeExp, false);
+                myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+                // Create Remember statement
+                MemoryStmt rememberStmt =
+                        new MemoryStmt(item.getLocation().clone(),
+                                StatementType.REMEMBER);
+                myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+            }
+        }
+        else {
+            // Create the top most level assume statement and
+            // add it to the assertive code block as the first statement
+            Exp topLevelAssumeExp =
+                    createTopLevelAssumeExpForRealizInitFinalItem(item
+                            .getLocation(), false);
+            AssumeStmt topLevelAssumeStmt =
+                    new AssumeStmt(item.getLocation().clone(),
+                            topLevelAssumeExp, false);
+            myCurrentAssertiveCodeBlock.addStatement(topLevelAssumeStmt);
+
+            if (item.getItemType().equals(
+                    AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+                // YS: For each instantiated facility declaration, we generate a facility initialization
+                //     statement. This will allow us to obtain the proper facility initialization ensures
+                //     and prove our own initialization.
+                List<InstantiatedFacilityDecl> instantiatedFacilityDecls =
+                        myCurrentVerificationContext
+                                .getProcessedInstFacilityDecls();
+                for (InstantiatedFacilityDecl decl : instantiatedFacilityDecls) {
+                    // Only need to deal with local facility declarations.
+                    if (decl.isLocalFacility()) {
+                        myCurrentAssertiveCodeBlock
+                                .addStatement(new FacilityInitStmt(decl
+                                        .getInstantiatedFacilityDec()));
+                    }
+                }
+
+                // Create Remember statement
+                MemoryStmt rememberStmt =
+                        new MemoryStmt(item.getLocation().clone(),
+                                StatementType.REMEMBER);
+                myCurrentAssertiveCodeBlock.addStatement(rememberStmt);
+
+                // For each shared variable, we query for the its programming type entry
+                // in the symbol table.
+                SharedStateRealizationDec sharedStateRealizationDec =
+                        (SharedStateRealizationDec) myRealizInitFinalOuterDec;
+                for (VarDec varDec : sharedStateRealizationDec.getStateVars()) {
+                    NameTy nameTy = (NameTy) varDec.getTy();
+                    SymbolTableEntry symbolTableEntry =
+                            Utilities.searchProgramType(varDec.getLocation(),
+                                    null, nameTy.getName(),
+                                    myCurrentModuleScope);
+
+                    // YS: Simply create the proper variable initialization statement that
+                    //     allow us to deal with generating question mark variables
+                    //     and duration logic when we backtrack through the code.
+                    myCurrentAssertiveCodeBlock
+                            .addStatement(new InitializeVarStmt(varDec,
+                                    symbolTableEntry, false));
+
+                    // TODO: NY - Add any variable initialization duration clauses
+                }
+            }
+        }
+
+        // Create the proper name for the block
+        String blockName;
+        if (item.getItemType().equals(
+                AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+            blockName = "Initialization of ";
+        }
+        else {
+            blockName = "Finalization of ";
+        }
+
+        // Create a new model for this assertive code block
+        ST blockModel = mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
+        blockModel.add("blockName", blockName
+                + myRealizInitFinalOuterDec.getName());
+        ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
+        stepModel.add("proofRuleName",
+                blockName + myRealizInitFinalOuterDec.getName() + " (Setup)")
+                .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        blockModel.add("vcGenSteps", stepModel.render());
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock, blockModel);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link RealizInitFinalItem}.</p>
+     *
+     * @param item A realization for an initialization or finalization block.
+     */
+    @Override
+    public final void postRealizInitFinalItem(RealizInitFinalItem item) {
+        // Generate the proper item block declaration rule.
+        ProofRuleApplication ruleApplication;
+        if (myRealizInitFinalOuterDec instanceof TypeRepresentationDec) {
+            TypeRepresentationDec typeRepresentationDec =
+                    (TypeRepresentationDec) myRealizInitFinalOuterDec;
+
+            // Generate a new type initialization rule application.
+            if (item.getItemType().equals(
+                    AbstractInitFinalItem.ItemType.INITIALIZATION)) {
+                ruleApplication =
+                        new TypeRepresentationInitRule(typeRepresentationDec,
+                                myVariableTypeEntries, myBuilder,
+                                myCurrentModuleScope,
+                                myCurrentAssertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                myAssertiveCodeBlockModels
+                                        .remove(myCurrentAssertiveCodeBlock));
+            }
+            // Generate a new type finalization rule application.
+            else {
+                ruleApplication =
+                        new TypeRepresentationFinalRule(typeRepresentationDec,
+                                myVariableTypeEntries, myBuilder,
+                                myCurrentModuleScope,
+                                myCurrentAssertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                myAssertiveCodeBlockModels
+                                        .remove(myCurrentAssertiveCodeBlock));
+            }
+        }
+        else {
+            SharedStateRealizationDec sharedStateRealizationDec =
+                    (SharedStateRealizationDec) myRealizInitFinalOuterDec;
+
+            // Generate a new shared variable initialization rule application.
+            ruleApplication =
+                    new SharedStateRepresentationInitRule(
+                            sharedStateRealizationDec,
+                            myCorrespondingSharedStateDec,
+                            myVariableTypeEntries, myBuilder,
+                            myCurrentModuleScope, myCurrentAssertiveCodeBlock,
+                            myCurrentVerificationContext, mySTGroup,
+                            myAssertiveCodeBlockModels
+                                    .remove(myCurrentAssertiveCodeBlock));
+        }
+
+        // Apply the proof rule
+        ruleApplication.applyRule();
+
+        // Update the current assertive code block and its associated block model.
+        myCurrentAssertiveCodeBlock =
+                ruleApplication.getAssertiveCodeBlocks().getFirst();
+        myAssertiveCodeBlockModels.put(myCurrentAssertiveCodeBlock,
+                ruleApplication.getBlockModel());
+
+        // Add this as a new incomplete assertive code block
+        myIncompleteAssertiveCodeBlocks.add(myCurrentAssertiveCodeBlock);
+
+        myVariableTypeEntries.clear();
+        myCurrentAssertiveCodeBlock = null;
+    }
+
     // -----------------------------------------------------------
     // Variable Declaration-Related
     // -----------------------------------------------------------
@@ -909,6 +1326,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
             }
             else {
+                // YS: This also includes any local type representations with
+                //     no corresponding type family (FacilityTypeRepresentationEntry)
                 typeEntry =
                         ste.toTypeRepresentationEntry(nameTy.getLocation())
                                 .getDefiningTypeEntry();
@@ -916,9 +1335,10 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Check to see if the variable's type is known or it is generic.
             boolean isGenericVar = true;
-            if (typeEntry.getDefiningElement() instanceof TypeFamilyDec) {
-                // The program type has an associated TypeFamilyDec,
-                // therefore it is not generic.
+            if ((typeEntry.getDefiningElement() instanceof TypeFamilyDec)
+                    || (typeEntry.getDefiningElement() instanceof FacilityTypeRepresentationDec)) {
+                // The program type has an associated TypeFamilyDec or it is a local
+                // program type, therefore it is not generic.
                 isGenericVar = false;
 
                 // Store the symbol table entry for this variable for
@@ -949,6 +1369,34 @@ public class VCGenerator extends TreeWalkerVisitor {
             // by accident.
             Utilities.tyNotHandled(dec.getTy(), dec.getLocation());
         }
+    }
+
+    // -----------------------------------------------------------
+    // Raw Type-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>This method redefines how a {@link RecordTy} should be walked.</p>
+     *
+     * @param ty A raw record type.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkRecordTy(RecordTy ty) {
+        preAny(ty);
+        preTy(ty);
+        preRecordTy(ty);
+
+        // YS: Don't walk any variable declarations inside the record.
+        //     Logic for dealing with those variables are handled by
+        //     RealizInitFinalItem.
+
+        postRecordTy(ty);
+        postTy(ty);
+        postAny(ty);
+
+        return true;
     }
 
     // -----------------------------------------------------------
@@ -984,7 +1432,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myCurrentVerificationContext, mySTGroup, blockModel);
             entailsRule.applyRule();
 
-            // Store this block model.
+            // Update the current assertive code blocks and its associated block model.
+            block = entailsRule.getAssertiveCodeBlocks().getFirst();
             myAssertiveCodeBlockModels.put(block, entailsRule.getBlockModel());
 
             // Add this as a new incomplete assertive code block
@@ -1061,54 +1510,42 @@ public class VCGenerator extends TreeWalkerVisitor {
                     typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
                 }
                 else {
+                    // YS: This also includes any local type representations with
+                    //     no corresponding type family (FacilityTypeRepresentationEntry)
                     typeEntry =
                             ste.toTypeRepresentationEntry(nameTy.getLocation())
                                     .getDefiningTypeEntry();
                 }
 
-                // Obtain the original dec from the AST
-                TypeFamilyDec typeFamilyDec =
-                        (TypeFamilyDec) typeEntry.getDefiningElement();
+                // YS: Local program types do not have a constraint clauses,
+                //     therefore we skip the following logic.
+                if (!(typeEntry.getDefiningElement() instanceof FacilityTypeRepresentationDec)) {
+                    // Obtain the original dec from the AST
+                    TypeFamilyDec typeFamilyDec =
+                            (TypeFamilyDec) typeEntry.getDefiningElement();
 
-                // Other than the replaces mode, constraints for the
-                // other parameter modes needs to be added
-                // to the requires clause as conjuncts.
-                if (parameterMode != ProgramParameterEntry.ParameterMode.REPLACES) {
-                    if (!VarExp.isLiteralTrue(typeFamilyDec.getConstraint()
-                            .getAssertionExp())) {
-                        AssertionClause constraintClause =
-                                typeFamilyDec.getConstraint();
-                        AssertionClause modifiedConstraintClause =
-                                Utilities.getTypeConstraintClause(
-                                        constraintClause, loc, null,
-                                        parameterVarDec.getName(),
-                                        typeFamilyDec.getExemplar(), typeEntry
-                                                .getModelType(), null);
+                    // Other than the replaces mode, constraints for the
+                    // other parameter modes needs to be added
+                    // to the requires clause as conjuncts.
+                    if (parameterMode != ProgramParameterEntry.ParameterMode.REPLACES) {
+                        if (!VarExp.isLiteralTrue(typeFamilyDec.getConstraint()
+                                .getAssertionExp())) {
+                            AssertionClause constraintClause =
+                                    typeFamilyDec.getConstraint();
+                            AssertionClause modifiedConstraintClause =
+                                    Utilities.getTypeConstraintClause(
+                                            constraintClause, loc, null,
+                                            parameterVarDec.getName(),
+                                            typeFamilyDec.getExemplar(),
+                                            typeEntry.getModelType(), null);
 
-                        // Replace any facility formal with actual
-                        Exp constraintExp =
-                                modifiedConstraintClause.getAssertionExp();
-                        constraintExp =
-                                Utilities
-                                        .replaceFacilityFormalWithActual(
-                                                constraintExp,
-                                                Collections
-                                                        .singletonList(parameterVarDec),
-                                                scope.getDefiningElement()
-                                                        .getName(),
-                                                myCurrentVerificationContext);
-
-                        // Apply any pre-defined substitutions
-                        constraintExp =
-                                constraintExp.substitute(substitutionsMap);
-
-                        Exp whichEntailsExp =
-                                modifiedConstraintClause.getWhichEntailsExp();
-                        if (whichEntailsExp != null) {
-                            whichEntailsExp =
+                            // Replace any facility formal with actual
+                            Exp constraintExp =
+                                    modifiedConstraintClause.getAssertionExp();
+                            constraintExp =
                                     Utilities
                                             .replaceFacilityFormalWithActual(
-                                                    whichEntailsExp,
+                                                    constraintExp,
                                                     Collections
                                                             .singletonList(parameterVarDec),
                                                     scope.getDefiningElement()
@@ -1116,32 +1553,58 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                     myCurrentVerificationContext);
 
                             // Apply any pre-defined substitutions
-                            whichEntailsExp =
-                                    whichEntailsExp
-                                            .substitute(substitutionsMap);
+                            constraintExp =
+                                    constraintExp.substitute(substitutionsMap);
+
+                            Exp whichEntailsExp =
+                                    modifiedConstraintClause
+                                            .getWhichEntailsExp();
+                            if (whichEntailsExp != null) {
+                                whichEntailsExp =
+                                        Utilities
+                                                .replaceFacilityFormalWithActual(
+                                                        whichEntailsExp,
+                                                        Collections
+                                                                .singletonList(parameterVarDec),
+                                                        scope
+                                                                .getDefiningElement()
+                                                                .getName(),
+                                                        myCurrentVerificationContext);
+
+                                // Apply any pre-defined substitutions
+                                whichEntailsExp =
+                                        whichEntailsExp
+                                                .substitute(substitutionsMap);
+                            }
+
+                            modifiedConstraintClause =
+                                    new AssertionClause(
+                                            modifiedConstraintClause
+                                                    .getLocation().clone(),
+                                            modifiedConstraintClause
+                                                    .getClauseType(),
+                                            constraintExp, whichEntailsExp);
+
+                            // Form a conjunct with the modified constraint clause and add
+                            // the location detail associated with it.
+                            Location constraintLoc =
+                                    modifiedConstraintClause.getAssertionExp()
+                                            .getLocation();
+                            retExp =
+                                    Utilities
+                                            .formConjunct(
+                                                    loc,
+                                                    retExp,
+                                                    modifiedConstraintClause,
+                                                    new LocationDetailModel(
+                                                            constraintLoc
+                                                                    .clone(),
+                                                            constraintLoc
+                                                                    .clone(),
+                                                            "Constraint Clause of "
+                                                                    + parameterVarDec
+                                                                            .getName()));
                         }
-
-                        modifiedConstraintClause =
-                                new AssertionClause(modifiedConstraintClause
-                                        .getLocation().clone(),
-                                        modifiedConstraintClause
-                                                .getClauseType(),
-                                        constraintExp, whichEntailsExp);
-
-                        // Form a conjunct with the modified constraint clause and add
-                        // the location detail associated with it.
-                        Location constraintLoc =
-                                modifiedConstraintClause.getAssertionExp()
-                                        .getLocation();
-                        retExp =
-                                Utilities.formConjunct(loc, retExp,
-                                        modifiedConstraintClause,
-                                        new LocationDetailModel(constraintLoc
-                                                .clone(),
-                                                constraintLoc.clone(),
-                                                "Constraint Clause of "
-                                                        + parameterVarDec
-                                                                .getName()));
                     }
                 }
             }
@@ -1240,10 +1703,19 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 myCurrentVerificationContext, mySTGroup,
                                 blockModel);
             }
+            else if (statement instanceof FacilityInitStmt) {
+                // Generate a new facility initialization rule application.
+                ruleApplication =
+                        new FacilityInitStmtRule((FacilityInitStmt) statement,
+                                myBuilder, assertiveCodeBlock,
+                                myCurrentVerificationContext, mySTGroup,
+                                blockModel);
+            }
             else if (statement instanceof FinalizeVarStmt) {
                 // Generate a new variable finalization rule application.
                 ruleApplication =
                         new FinalizeVarStmtRule((FinalizeVarStmt) statement,
+                                myBuilder, myCurrentModuleScope,
                                 assertiveCodeBlock,
                                 myCurrentVerificationContext, mySTGroup,
                                 blockModel);
@@ -1269,8 +1741,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Generate a new variable declaration/initialization rule application.
                 ruleApplication =
                         new InitializeVarStmtRule(
-                                (InitializeVarStmt) statement,
-                                assertiveCodeBlock,
+                                (InitializeVarStmt) statement, myBuilder,
+                                myCurrentModuleScope, assertiveCodeBlock,
                                 myCurrentVerificationContext, mySTGroup,
                                 blockModel);
             }
@@ -1363,6 +1835,82 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         myAssertiveCodeBlockModels.put(assertiveCodeBlock, blockModel);
+    }
+
+    /**
+     * <p>An helper method that uses all the {@code requires} and {@code constraint}
+     * clauses from the various different sources (see below for complete list)
+     * and builds the appropriate {@code assume} clause that goes at the
+     * beginning an {@link AssertiveCodeBlock}.</p>
+     *
+     * <p>List of different places where clauses can originate from:</p>
+     * <ul>
+     *     <li>{@code Concept}'s {@code requires} clause.</li>
+     *     <li>{@code Concept}'s module {@code constraint} clause.</li>
+     *     <li>{@code Shared Variables}' {@code constraint} clause.</li>
+     *     <li>{@code Concept Realization}'s {@code requires} clause.</li>
+     *     <li>{@code Shared Variables}' {@code convention} clause.</li>
+     *     <li>{@code Shared Variables}' {@code correspondence} clause
+     *     <li>Type {@code convention} clause (if we are are in a {@link TypeRepresentationDec} and
+     *     processing type finalization block).</li>
+     *     <li>Type {@code correspondence} clause (if we are in a {@link TypeRepresentationDec}).</li>
+     *     <li>Any {@code which_entails} expressions that originated from any of the
+     *     clauses above.</li>
+     * </ul>
+     *
+     * <p>See the {@code Shared Variable Initialization}, {@code Type Initialization}
+     * and {@code Type Finalization} rule for more detail.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param isTypeFinalItem A flag that indicates if this is a convention.
+     *
+     * @return The top-level assumed expression.
+     */
+    private Exp createTopLevelAssumeExpForRealizInitFinalItem(Location loc,
+            boolean isTypeFinalItem) {
+        // YS: Only add the shared variable's convention and correspondence
+        //     if we are in a type realization dec.
+        boolean inTypeRepresentationDec =
+                myRealizInitFinalOuterDec instanceof TypeRepresentationDec;
+        Exp retExp =
+                myCurrentVerificationContext
+                        .createTopLevelAssumeExpFromContext(loc.clone(),
+                                inTypeRepresentationDec,
+                                inTypeRepresentationDec);
+
+        // YS: Only add the type correspondence if we are in a type realization dec.
+        if (inTypeRepresentationDec) {
+            TypeRepresentationDec typeRepresentationDec =
+                    (TypeRepresentationDec) myRealizInitFinalOuterDec;
+
+            // YS: We can assume the convention in finalization block
+            if (isTypeFinalItem) {
+                AssertionClause typeConventionClause =
+                        typeRepresentationDec.getConvention().clone();
+                retExp =
+                        Utilities.formConjunct(loc.clone(), retExp,
+                                typeConventionClause, new LocationDetailModel(
+                                        typeConventionClause.getLocation()
+                                                .clone(), loc.clone(), "Type "
+                                                + typeRepresentationDec
+                                                        .getName().getName()
+                                                + "'s Convention"));
+            }
+
+            AssertionClause typeCorrespondenceClause =
+                    typeRepresentationDec.getCorrespondence().clone();
+            retExp =
+                    Utilities.formConjunct(loc.clone(), retExp,
+                            typeCorrespondenceClause, new LocationDetailModel(
+                                    typeCorrespondenceClause.getLocation()
+                                            .clone(), loc.clone(), "Type "
+                                            + typeRepresentationDec.getName()
+                                                    .getName()
+                                            + "'s Correspondence"));
+        }
+
+        return retExp;
     }
 
     /**
@@ -1545,6 +2093,14 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // Add this to our substitution map
                 substitutionParamToConc.put(parameterExp, concVarExp);
+            }
+            // YS: For local program types, all we need is their conventions
+            //     with no substitutions. This is done regardless
+            //     of the module and operation scope.
+            else if (ste.getDefiningElement() instanceof FacilityTypeRepresentationDec) {
+                // Add the conventions of parameters that have representation types.
+                // TODO: Figure out where the exemplar for local types is located.
+                throw new RuntimeException(); // Remove this once we figure out how to add the convention.
             }
         }
 

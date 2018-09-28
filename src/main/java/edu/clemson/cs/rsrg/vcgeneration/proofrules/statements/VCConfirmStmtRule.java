@@ -1,5 +1,5 @@
 /*
- * SharedStateCorrRule.java
+ * VCConfirmStmtRule.java
  * ---------------------------------
  * Copyright (c) 2018
  * RESOLVE Software Research Group
@@ -10,24 +10,27 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.other;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.statements;
 
-import edu.clemson.cs.rsrg.absyn.declarations.sharedstatedecl.SharedStateRealizationDec;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.AbstractProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.proofrules.ProofRuleApplication;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.AssertiveCodeBlock;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationContext;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts.VCConfirmStmt;
+import java.util.List;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for establishing the {@code Shared Variable}'s
- * {@code Correspondence} is well defined.</p>
+ * <p>This class contains the logic for replacing the {@link VerificationCondition} in
+ * the current {@link AssertiveCodeBlock} with those stored inside a
+ * {@link VCConfirmStmt}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class SharedStateCorrRule extends AbstractProofRuleApplication
+public class VCConfirmStmtRule extends AbstractProofRuleApplication
         implements
             ProofRuleApplication {
 
@@ -35,18 +38,19 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@code shared state} realization we are applying the rule to.</p> */
-    private final SharedStateRealizationDec mySharedStateRealizDec;
+    /** <p>The {@link VCConfirmStmt} we are applying the rule to.</p> */
+    private final VCConfirmStmt myVCConfirmStmt;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates a new application for a well defined
-     * {@code Correspondence} rule for a {@link SharedStateRealizationDec}.</p>
+     * <p>This creates an application rule that deals with
+     * {@link VCConfirmStmt}.</p>
      *
-     * @param dec A shared state realization.
+     * @param vcConfirmStmt The {@link VCConfirmStmt} we are applying
+     *                      the rule to.
      * @param block The assertive code block that the subclasses are
      *              applying the rule to.
      * @param context The verification context that contains all
@@ -54,11 +58,11 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
-    public SharedStateCorrRule(SharedStateRealizationDec dec,
+    public VCConfirmStmtRule(VCConfirmStmt vcConfirmStmt,
             AssertiveCodeBlock block, VerificationContext context,
             STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
-        mySharedStateRealizDec = dec;
+        myVCConfirmStmt = vcConfirmStmt;
     }
 
     // ===========================================================
@@ -70,16 +74,22 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      */
     @Override
     public final void applyRule() {
-        // Assume CPC and RPC and DC and RDC and SS_RC and SS_Cor_Exp
+        // Combine the verification conditions with those stored inside the VCConfirmStmt.
+        // Note: We really shouldn't have any VerificationCondition inside the current
+        // assertive code block. The while statement that generated the VCConfirmStmt
+        // should have made sure of that. However, it doesn't hurt to combine them rather
+        // than simply replacing it directly. - YS
+        List<VerificationCondition> newVCs =
+                myCurrentAssertiveCodeBlock.getVCs();
+        newVCs.addAll(myVCConfirmStmt.getVCs());
 
-        // Confirm the shared variable's constraint
+        // Store the new list of vcs
+        myCurrentAssertiveCodeBlock.setVCs(newVCs);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
         stepModel.add("proofRuleName", getRuleDescription()).add(
                 "currentStateOfBlock", myCurrentAssertiveCodeBlock);
-
-        // Add the different details to the various different output models
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
@@ -91,7 +101,7 @@ public class SharedStateCorrRule extends AbstractProofRuleApplication
      */
     @Override
     public final String getRuleDescription() {
-        return "Well Defined Correspondence Rule (Shared State)";
+        return "VCConfirm Rule";
     }
 
 }

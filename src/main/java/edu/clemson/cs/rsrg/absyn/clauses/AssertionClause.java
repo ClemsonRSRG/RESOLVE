@@ -71,6 +71,14 @@ public class AssertionClause extends ResolveConceptualElement {
             }
 
         },
+        DEPENDENT_CORRESPONDENCE {
+
+            @Override
+            public String toString() {
+                return "dependent correspondence ";
+            }
+
+        },
         DURATION {
 
             @Override
@@ -92,6 +100,14 @@ public class AssertionClause extends ResolveConceptualElement {
             @Override
             public String toString() {
                 return "ensures ";
+            }
+
+        },
+        INDEPENDENT_CORRESPONDENCE {
+
+            @Override
+            public String toString() {
+                return "independent correspondence ";
             }
 
         },

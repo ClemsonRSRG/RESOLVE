@@ -1551,6 +1551,20 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             correspondence =
                     (AssertionClause) myNodes.removeFrom(ctx
                             .correspondenceClause());
+
+            // Sanity check: Make sure that if the correspondence involves any global variables,
+            // it is declared either as independent or dependent.
+            AssertionClause.ClauseType clauseType =
+                    correspondence.getClauseType();
+            if (correspondence.getInvolvedSharedVars().size() > 0
+                    && clauseType
+                            .equals(AssertionClause.ClauseType.CORRESPONDENCE)) {
+                throw new SourceErrorException(
+                        "A type realization's correspondence must be declared as independent "
+                                + "or dependent when it involves shared variables.",
+                        correspondence.getLocation(),
+                        new IllegalArgumentException());
+            }
         }
         else {
             correspondence =
@@ -1868,6 +1882,24 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             correspondence =
                     (AssertionClause) myNodes.removeFrom(ctx
                             .correspondenceClause());
+
+            // Sanity check: Make sure that we don't have an independent or
+            // dependent correspondence.
+            AssertionClause.ClauseType clauseType = correspondence.getClauseType();
+            if (clauseType.equals(AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE) ||
+                    clauseType.equals(AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE)) {
+                String message;
+                if (clauseType.equals(AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE)) {
+                    message = "n " + correspondence.getClauseType().toString();
+                }
+                else {
+                    message = " " + correspondence.getClauseType().toString();
+                }
+
+                throw new SourceErrorException(
+                        "A Shared Variable realization cannot have a" + message,
+                        correspondence.getLocation(), new IllegalArgumentException());
+            }
         }
         else {
             correspondence =
@@ -1887,6 +1919,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                             RealizInitFinalItem.ItemType.INITIALIZATION, null,
                             new ArrayList<FacilityDec>(),
                             new ArrayList<VarDec>(), new ArrayList<Statement>());
+        }
+
+        // YS: We should only have shared variable realization dec
+        if (!myCopySSRList.isEmpty()) {
+            throw new SourceErrorException(
+                    "A concept realization can only have one Shared Variables realization block.",
+                    createPosSymbol(ctx.start).getLocation(), new IllegalArgumentException());
         }
 
         SharedStateRealizationDec realizationDec =
@@ -3483,14 +3522,35 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitCorrespondenceClause(
             ResolveParser.CorrespondenceClauseContext ctx) {
+        AssertionClause.ClauseType clauseType;
+
+        // Case #1: This is either a shared variable's realization correspondence
+        //          or a non-sharing type correspondence.
+        if (ctx.type == null) {
+            clauseType = AssertionClause.ClauseType.CORRESPONDENCE;
+        }
+        else {
+            // Case #2: This is a type correspondence with some kind of sharing,
+            //          but it is independent of other objects of the same type.
+            if (ctx.type.getType() == ResolveLexer.INDEPENDENT) {
+                clauseType =
+                        AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE;
+            }
+            // Case #3: This is type correspondence with some kind of sharing
+            //          and it is dependent on other objects of the same type.
+            else {
+                clauseType =
+                        AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE;
+            }
+        }
+
         if (ctx.mathVarNameExp().isEmpty()) {
             myNodes.put(ctx, createAssertionClause(createLocation(ctx),
-                    AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp()));
+                    clauseType, ctx.mathExp()));
         }
         else {
             myNodes.put(ctx, createAssertionClause(createLocation(ctx),
-                    AssertionClause.ClauseType.CORRESPONDENCE, ctx.mathExp(),
-                    ctx.mathVarNameExp()));
+                    clauseType, ctx.mathExp(), ctx.mathVarNameExp()));
         }
     }
 
@@ -4166,21 +4226,29 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitMathDotExp(ResolveParser.MathDotExpContext ctx) {
         ResolveConceptualElement newElement;
 
-        // Create a dot expression if needed
-        List<ResolveParser.MathCleanFunctionExpContext> mathExps = ctx.mathCleanFunctionExp();
-        if (mathExps.size() > 0) {
-            // dotted expressions
-            List<Exp> dotExps = new ArrayList<>();
-
-            dotExps.add((Exp) myNodes.removeFrom(ctx.mathFunctionApplicationExp()));
-            for (ResolveParser.MathCleanFunctionExpContext context : mathExps) {
-                dotExps.add((Exp) myNodes.removeFrom(context));
-            }
-
-            newElement = new DotExp(createLocation(ctx), dotExps);
+        // Check to see if is a receptacles expression
+        if (ctx.mathRecpExp() != null) {
+            newElement = myNodes.removeFrom(ctx.mathRecpExp());
+        }
+        else if (ctx.mathTypeReceptaclesExp() != null) {
+            newElement = myNodes.removeFrom(ctx.mathTypeReceptaclesExp());
         }
         else {
-            newElement = myNodes.removeFrom(ctx.mathFunctionApplicationExp());
+            // Create a dot expression if needed
+            List<ResolveParser.MathCleanFunctionExpContext> mathExps = ctx.mathCleanFunctionExp();
+            if (mathExps.size() > 0) {
+                // dotted expressions
+                List<Exp> dotExps = new ArrayList<>();
+
+                dotExps.add((Exp) myNodes.removeFrom(ctx.mathFunctionApplicationExp()));
+                for (ResolveParser.MathCleanFunctionExpContext context : mathExps) {
+                    dotExps.add((Exp) myNodes.removeFrom(context));
+                }
+
+                newElement = new DotExp(createLocation(ctx), dotExps);
+            } else {
+                newElement = myNodes.removeFrom(ctx.mathFunctionApplicationExp());
+            }
         }
 
         myNodes.put(ctx, newElement);
@@ -4242,6 +4310,19 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         myNodes.put(ctx, new FunctionExp(createLocation(ctx),
                 functionNameExp, caratExp, functionArgs));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <br>
+     * <p>This method stores the math type receptacles expression
+     * representation generated by its child rules.</p>
+     *
+     * @param ctx Math type receptacles node in ANTLR4 AST.
+     */
+    @Override
+    public void exitMathTypeRecpExp(ResolveParser.MathTypeRecpExpContext ctx) {
+        myNodes.put(ctx, myNodes.removeFrom(ctx.mathTypeReceptaclesExp()));
     }
 
     /**
@@ -4375,6 +4456,42 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         myNodes.put(ctx, new SetCollectionExp(createLocation(ctx), mathExpsSet));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <br>
+     * <p>This method stores the math type receptacles expression representation
+     * generated by its child rules.</p>
+     *
+     * @param ctx Math recep expression node in ANTLR4 AST.
+     */
+    @Override
+    public void exitMathRecpExp(ResolveParser.MathRecpExpContext ctx) {
+        Exp innerExp;
+        if (ctx.mathDotExp() != null) {
+            innerExp = (DotExp) myNodes.removeFrom(ctx.mathDotExp());
+        }
+        else {
+            innerExp = (VarExp) myNodes.removeFrom(ctx.mathVarNameExp());
+        }
+
+        myNodes.put(ctx, new RecpExp(createLocation(ctx), innerExp));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <br>
+     * <p>This method stores the math type receptacles expression representation
+     * generated by its child rules.</p>
+     *
+     * @param ctx Math type receptacles expression node in ANTLR4 AST.
+     */
+    @Override
+    public void exitMathTypeReceptaclesExp(
+            ResolveParser.MathTypeReceptaclesExpContext ctx) {
+        myNodes.put(ctx, new TypeReceptaclesExp(createLocation(ctx),
+                (VarExp) myNodes.removeFrom(ctx.mathVarNameExp())));
     }
 
     /**
@@ -4950,7 +5067,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         addNewModuleDependency("Static_Array_Template", "Static_Array_Template", false);
         addNewModuleDependency("Std_Array_Realiz", "Static_Array_Template", true);
 
-        return new FacilityDec(new PosSymbol(l.clone(), newTy.getName().getName()),
+        return new FacilityDec(new PosSymbol(l.clone(), newTy.getQualifier().getName()),
                 new PosSymbol(l.clone(), "Static_Array_Template"),
                 moduleArgumentItems, new ArrayList<EnhancementSpecItem>(),
                 new PosSymbol(l.clone(), "Std_Array_Realiz"), new ArrayList<ModuleArgumentItem>(),

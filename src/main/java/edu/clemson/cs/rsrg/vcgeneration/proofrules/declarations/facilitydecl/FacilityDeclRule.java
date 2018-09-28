@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.proofrules.declaration;
+package edu.clemson.cs.rsrg.vcgeneration.proofrules.declarations.facilitydecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
@@ -236,7 +236,7 @@ public class FacilityDeclRule extends AbstractProofRuleApplication
                 myConceptSharedStates, myConceptDeclaredTypes,
                 myConceptFormalParamList, myConceptActualArgList,
                 myConceptRealizFormalParamList, myConceptRealizActualArgList,
-                myInstantiatedEnhSpecRealizItems);
+                myInstantiatedEnhSpecRealizItems, myIsLocalFacilityDec);
     }
 
     /**

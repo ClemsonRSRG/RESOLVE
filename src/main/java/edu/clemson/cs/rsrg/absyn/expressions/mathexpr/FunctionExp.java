@@ -306,8 +306,19 @@ public class FunctionExp extends AbstractFunctionExp {
             newCaratExp = myFuncNameCaratExp.clone();
         }
 
-        return new FunctionExp(cloneLocation(), (VarExp) myFuncNameExp.clone(),
-                newCaratExp, copyExps());
+        FunctionExp newFunctionExp =
+                new FunctionExp(cloneLocation(),
+                        (VarExp) myFuncNameExp.clone(), newCaratExp, copyExps());
+
+        // Copy any qualifiers
+        if (myQualifier != null) {
+            newFunctionExp.setQualifier(myQualifier.clone());
+        }
+
+        // Copy the function quantification
+        newFunctionExp.setQuantification(myQuantification);
+
+        return newFunctionExp;
     }
 
     /**
@@ -315,18 +326,66 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        // YS: I don't think we ever need to substitute this.
-        Exp newCaratExp = null;
-        if (myFuncNameCaratExp != null) {
-            newCaratExp = myFuncNameCaratExp.clone();
+        // Attempt to retrieve a substitution key
+        Exp substitutionKey = null;
+        Iterator<Exp> mapKeysIt = substitutions.keySet().iterator();
+        while (mapKeysIt.hasNext() && substitutionKey == null) {
+            Exp nextKey = mapKeysIt.next();
+
+            // We found a key that is equivalent to our name
+            if (nextKey.equivalent(myFuncNameExp)) {
+                substitutionKey = nextKey;
+            }
+            // YS: If nextKey is a VarExp, it might contain a
+            // qualifier and equivalent won't return true.
+            // Here is some special handling
+            else if (nextKey instanceof VarExp) {
+                VarExp nextKeyAsVarExp = (VarExp) nextKey;
+
+                // We first check to see if the qualifiers match.
+                // If they don't match, we don't need to do anything else.
+                if (nextKeyAsVarExp.getQualifier() != null &&
+                        nextKeyAsVarExp.getQualifier().equals(myQualifier)) {
+                    // Check if the var expression matches our name
+                    if (nextKeyAsVarExp.getName().equals(myFuncNameExp.getName())) {
+                        // We found a key that is equivalent to our name
+                        substitutionKey = nextKey;
+                    }
+                }
+            }
         }
 
-        List<Exp> newArgs = new ArrayList<>();
-        for (Exp f : myArguments) {
-            newArgs.add(substitute(f, substitutions));
-        }
+        // YS: If we don't have a substitution key, then simply make FunctionExp
+        if (substitutionKey == null) {
+            // YS: I don't think we ever need to substitute this.
+            Exp newCaratExp = null;
+            if (myFuncNameCaratExp != null) {
+                newCaratExp = myFuncNameCaratExp.clone();
+            }
 
-        return new FunctionExp(cloneLocation(), (VarExp) substitute(myFuncNameExp, substitutions), newCaratExp, newArgs);
+            List<Exp> newArgs = new ArrayList<>();
+            for (Exp f : myArguments) {
+                newArgs.add(substitute(f, substitutions));
+            }
+
+            FunctionExp newFunctionExp =
+                    new FunctionExp(cloneLocation(), (VarExp) myFuncNameExp.clone(),
+                            newCaratExp, newArgs);
+
+            // Copy any qualifiers
+            if (myQualifier != null) {
+                newFunctionExp.setQualifier(myQualifier.clone());
+            }
+
+            // Copy the function quantification
+            newFunctionExp.setQuantification(myQuantification);
+
+            return newFunctionExp;
+        }
+        else {
+            return substituteFunctionExp(this,
+                    substitutions.get(substitutionKey), substitutions);
+        }
     }
 
     // ===========================================================

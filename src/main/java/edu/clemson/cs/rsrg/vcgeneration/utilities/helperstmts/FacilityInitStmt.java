@@ -1,5 +1,5 @@
 /*
- * FinalizeVarStmt.java
+ * FacilityInitStmt.java
  * ---------------------------------
  * Copyright (c) 2018
  * RESOLVE Software Research Group
@@ -12,35 +12,28 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.utilities.helperstmts;
 
-import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
-import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 
 /**
  * <p>This is the class that builds a special kind of statement
- * that acts as a placeholder for finalizing a variable declaration.
- * Since the user cannot supply their own {@code _Finalize} statements,
+ * that acts as a placeholder for initialize a facility declaration.
+ * Since the user cannot supply their own {@code _Facility_Init} statements,
  * any instances of this class will solely be created by the
  * {@link VCGenerator} and/or by our various different {@code proof rules}.</p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class FinalizeVarStmt extends Statement {
+public class FacilityInitStmt extends Statement {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The variable declaration we are applying the rule to.</p> */
-    private final VarDec myVarDec;
-
-    /**
-     * <p>The symbol table entry representing program type associated
-     * with the variable we are trying to finalize.</p>
-     */
-    private final SymbolTableEntry myVarTypeEntry;
+    /** <p>The facility declaration we are applying the rule to.</p> */
+    private final FacilityDec myInstantiatedFacilityDec;
 
     // ===========================================================
     // Constructors
@@ -48,15 +41,13 @@ public class FinalizeVarStmt extends Statement {
 
     /**
      * <p>This constructs an helper statement that indicates
-     * finalization logic for a variable with known type happens here.</p>
+     * initialization logic for a facility happens here.</p>
      *
-     * @param varDec A variable declaration with known type.
-     * @param symbolTableEntry The program type entry associated with {@code varDec}.
+     * @param facilityDec A processed instantiated facility declaration.
      */
-    public FinalizeVarStmt(VarDec varDec, SymbolTableEntry symbolTableEntry) {
-        super(varDec.getLocation());
-        myVarDec = varDec;
-        myVarTypeEntry = symbolTableEntry;
+    public FacilityInitStmt(FacilityDec facilityDec) {
+        super(facilityDec.getLocation());
+        myInstantiatedFacilityDec = facilityDec;
     }
 
     // ===========================================================
@@ -70,10 +61,9 @@ public class FinalizeVarStmt extends Statement {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("_Finalize(");
-        sb.append(myVarDec.getName().asString(0, innerIndentInc));
-        sb.append(" : ");
-        sb.append(myVarTypeEntry.getName());
+        sb.append("_Facility_Init(");
+        sb.append(myInstantiatedFacilityDec.getName().asString(0,
+                innerIndentInc));
         sb.append(");");
 
         return sb.toString();
@@ -89,32 +79,18 @@ public class FinalizeVarStmt extends Statement {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        FinalizeVarStmt that = (FinalizeVarStmt) o;
+        FacilityInitStmt that = (FacilityInitStmt) o;
 
-        if (!myVarDec.equals(that.myVarDec))
-            return false;
-        return myVarTypeEntry.equals(that.myVarTypeEntry);
+        return myInstantiatedFacilityDec.equals(that.myInstantiatedFacilityDec);
     }
 
     /**
-     * <p>This method returns the program variable we are
-     * trying to finalize.</p>
+     * <p>This method returns the instantiated {@code Facility} declaration.</p>
      *
-     * @return A {@link VarDec}.
+     * @return A {@link FacilityDec}.
      */
-    public final VarDec getVarDec() {
-        return myVarDec;
-    }
-
-    /**
-     * <p>This method returns the symbol table entry associated
-     * with the program type for the variable declaration we are
-     * trying to finalize.</p>
-     *
-     * @return A {@link SymbolTableEntry}.
-     */
-    public final SymbolTableEntry getVarProgramTypeEntry() {
-        return myVarTypeEntry;
+    public final FacilityDec getInstantiatedFacilityDec() {
+        return myInstantiatedFacilityDec;
     }
 
     /**
@@ -122,9 +98,7 @@ public class FinalizeVarStmt extends Statement {
      */
     @Override
     public final int hashCode() {
-        int result = myVarDec.hashCode();
-        result = 31 * result + myVarTypeEntry.hashCode();
-        return result;
+        return myInstantiatedFacilityDec.hashCode();
     }
 
     // ===========================================================
@@ -136,6 +110,7 @@ public class FinalizeVarStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new FinalizeVarStmt((VarDec) myVarDec.clone(), myVarTypeEntry);
+        return new FacilityInitStmt((FacilityDec) myInstantiatedFacilityDec
+                .clone());
     }
 }
