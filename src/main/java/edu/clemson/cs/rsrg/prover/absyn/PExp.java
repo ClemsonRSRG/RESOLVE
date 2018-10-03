@@ -49,17 +49,17 @@ public abstract class PExp {
     /** <p>The expression's cached quantified variable symbols.</p> */
     private Set<PSymbol> myCachedQuantifiedVariables = null;
 
-    /** <p>The object's mathematical type.</p> */
+    /** <p>The expression's mathematical type.</p> */
     protected final MTType myMathType;
 
-    /** <p>The object's mathematical type value.</p> */
+    /** <p>The expression's mathematical type value.</p> */
     protected final MTType myMathTypeValue;
 
     /** <p>The expression's structure hash.</p> */
-    protected final int myStructureHash;
+    public final int structureHash;
 
     /** <p>The expression's value hash.</p> */
-    protected final int myValueHash;
+    public final int valueHash;
 
     // ===========================================================
     // Constructors
@@ -95,8 +95,9 @@ public abstract class PExp {
             MTType typeValue) {
         myMathType = type;
         myMathTypeValue = typeValue;
-        myStructureHash = structureHash;
-        myValueHash = valueHash;
+
+        this.structureHash = structureHash;
+        this.valueHash = valueHash;
     }
 
     // ===========================================================
