@@ -14,7 +14,9 @@ package edu.clemson.cs.rsrg.prover.absyn;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.prover.absyn.expressions.PSymbol;
+import edu.clemson.cs.rsrg.prover.absyn.treewalkers.PExpVisitor;
 import edu.clemson.cs.rsrg.prover.exception.BindingException;
+import edu.clemson.cs.rsrg.prover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.*;
 
@@ -105,6 +107,25 @@ public abstract class PExp {
     // ===========================================================
 
     /**
+     * <p>This method is the {@code accept()} method in a visitor pattern
+     * for invoking an instance of {@link PExpVisitor}.</p>
+     *
+     * @param v A visitor for {@link PExp PExps}.
+     */
+    public abstract void accept(PExpVisitor v);
+
+    /**
+     * <p>This method must be implemented by all inherited classes
+     * to override the default equals method implementation.</p>
+     *
+     * @param o Object to be compared.
+     *
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     */
+    @Override
+    public abstract boolean equals(Object o);
+
+    /**
      * <p>This method gets the mathematical type associated
      * with this expression.</p>
      *
@@ -123,6 +144,87 @@ public abstract class PExp {
     public final MTType getMathTypeValue() {
         return myMathTypeValue;
     }
+
+    /**
+     * <p>This method returns the list of sub-expressions.</p>
+     *
+     * @return An immutable list containing {@link PExp} expressions.
+     */
+    public abstract ImmutableList<PExp> getSubExpressions();
+
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public final int hashCode() {
+        return valueHash;
+    }
+
+    /**
+     * <p>This method checks to see if this expression is obviously
+     * equivalent to {@code true}.</p>
+     *
+     * @return {@code true} if it is obviously equivalent to mathematical
+     * {@code true} expression, {@code false} otherwise.
+     */
+    public abstract boolean isObviouslyTrue();
+
+    /**
+     * <p>This method checks to see if this expression represents
+     * a variable.</p>
+     *
+     * @return {@code true} if it is a variable expression,
+     * {@code false} otherwise.
+     */
+    public abstract boolean isVariable();
+
+    /**
+     * <p>This method returns a DEEP COPY of this expression, with all instances of
+     * {@link PExp PExps} that occur as keys in {@code substitutions}
+     * replaced with their corresponding values.</p>
+     *
+     * @param substitutions A mapping from {@link PExp PExps} that should be
+     *                      substituted out to the {@link PExp PExps} that should
+     *                      replace them.
+     *
+     * @return A new {@link PExp} that is a deep copy of the original with
+     *         the provided substitutions made.
+     */
+    public abstract PExp substitute(Map<PExp, PExp> substitutions);
+
+    /**
+     * <p>This method attempts to replace an argument at the specified
+     * index.</p>
+     *
+     * @param index Index to an argument.
+     * @param e The {@link PExp} to replace the one in our argument list.
+     *
+     * @return A new {@link PExp} with the expression at the specified index
+     * replaced with {@code e}.
+     */
+    public abstract PExp withSubExpressionReplaced(int index, PExp e);
+
+    /**
+     * <p>This method returns a new expression with the mathematical type
+     * replaced.</p>
+     *
+     * @param t A new mathematical type.
+     *
+     * @return A new {@link PExp} with {@code t} as its mathematical type.
+     */
+    public abstract PExp withTypeReplaced(MTType t);
+
+    /**
+     * <p>This method returns a new expression with the mathematical type
+     * value replaced.</p>
+     *
+     * @param t A new mathematical type value.
+     *
+     * @return A new {@link PExp} with {@code t} as its mathematical type value.
+     */
+    public abstract PExp withTypeValueReplaced(MTType t);
 
     // ===========================================================
     // Protected Methods

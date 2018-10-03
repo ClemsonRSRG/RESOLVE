@@ -16,10 +16,9 @@ import edu.clemson.cs.rsrg.prover.absyn.PExp;
 import edu.clemson.cs.rsrg.prover.absyn.treewalkers.PExpVisitor;
 import edu.clemson.cs.rsrg.prover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.rsrg.prover.immutableadts.ImmutableList;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * <p>A {@code PSymbol} represents a reference to a named element such as
@@ -420,6 +419,216 @@ public class PSymbol extends PExp {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void accept(PExpVisitor v) {
+        v.beginPExp(this);
+        v.beginPSymbol(this);
+        displayType.beginAccept(v, this);
+
+        v.beginChildren(this);
+
+        boolean first = true;
+        for (PExp arg : arguments) {
+            if (!first) {
+                displayType.fencepostAccept(v, this);
+                v.fencepostPSymbol(this);
+            }
+            first = false;
+
+            arg.accept(v);
+        }
+
+        v.endChildren(this);
+
+        displayType.endAccept(v, this);
+        v.endPSymbol(this);
+        v.endPExp(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean equals(Object o) {
+        boolean retval = (o instanceof PSymbol);
+
+        if (retval) {
+            PSymbol oAsPSymbol = (PSymbol) o;
+
+            retval =
+                    (oAsPSymbol.valueHash == valueHash)
+                            && name.equals(oAsPSymbol.name);
+
+            if (retval) {
+                Iterator<PExp> localArgs = arguments.iterator();
+                Iterator<PExp> oArgs = oAsPSymbol.arguments.iterator();
+
+                while (retval && localArgs.hasNext() && oArgs.hasNext()) {
+                    retval = localArgs.next().equals(oArgs.next());
+                }
+
+                if (retval) {
+                    retval = !(localArgs.hasNext() || oArgs.hasNext());
+                }
+            }
+        }
+
+        return retval;
+    }
+
+    /**
+     * <p>This method gets the pre-application mathematical type
+     * associated with this expression.</p>
+     *
+     * @return A {@link MTType} type object.
+     */
+    public final MTType getPreApplicationType() {
+        if (myPreApplicationType == null) {
+            List<MTType> argTypes = new LinkedList<>();
+            for (PExp arg : arguments) {
+                argTypes.add(arg.getMathType());
+            }
+
+            myPreApplicationType =
+                    new MTFunction(getMathType().getTypeGraph(), getMathType(),
+                            argTypes);
+        }
+
+        return myPreApplicationType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final ImmutableList<PExp> getSubExpressions() {
+        return arguments;
+    }
+
+    /**
+     * <p>This method checks to see if this expression represents
+     * some kind of function.</p>
+     *
+     * @return {@code true} if it is some kind of function expression,
+     * {@code false} otherwise.
+     */
+    public final boolean isFunction() {
+        // Function symbols do not always have arguments
+        return myArgumentsSize > 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean isObviouslyTrue() {
+        return (myArgumentsSize == 0 && name.equalsIgnoreCase("true"))
+                || (myArgumentsSize == 2 && name.equals("=") && arguments
+                        .get(0).equals(arguments.get(1)));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean isVariable() {
+        return !isFunction();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final PExp substitute(Map<PExp, PExp> substitutions) {
+        PExp retval = substitutions.get(this);
+
+        if (retval == null) {
+            String newLeft = leftPrint, newRight = rightPrint;
+            Quantification newQuantification = quantification;
+
+            if (arguments.size() > 0 && displayType.equals(DisplayType.PREFIX)) {
+                PExp asVar =
+                        new PSymbol(getMathType(), getMathTypeValue(), leftPrint,
+                                quantification);
+
+                PExp functionSubstitution = substitutions.get(asVar);
+
+                if (functionSubstitution != null) {
+                    newLeft = ((PSymbol) functionSubstitution).leftPrint;
+                    newRight = ((PSymbol) functionSubstitution).rightPrint;
+                    newQuantification =
+                            ((PSymbol) functionSubstitution).quantification;
+                }
+            }
+
+            boolean argumentChanged = false;
+            int argIndex = 0;
+            Iterator<PExp> argumentsIter = arguments.iterator();
+
+            PExp argument;
+            while (argumentsIter.hasNext()) {
+                argument = argumentsIter.next();
+
+                myScratchSpace[argIndex] = argument.substitute(substitutions);
+
+                argumentChanged |= (myScratchSpace[argIndex] != argument);
+                argIndex++;
+            }
+
+            if (argumentChanged) {
+                retval =
+                        new PSymbol(myMathType, myMathTypeValue, newLeft, newRight,
+                                new ArrayBackedImmutableList<>(
+                                        myScratchSpace), newQuantification,
+                                displayType);
+            }
+            else {
+                // changed this to handle case where func name changes but args don't -- mike
+                retval =
+                        new PSymbol(myMathType, myMathTypeValue, newLeft, newRight,
+                                arguments, newQuantification, displayType);
+            }
+        }
+
+        return retval;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final PSymbol withSubExpressionReplaced(int i, PExp e) {
+        if (i < 0 && i >= arguments.size()) {
+            throw new IndexOutOfBoundsException("" + i);
+        }
+
+        ImmutableList<PExp> newArguments = arguments.set(i, e);
+
+        return new PSymbol(myMathType, myMathTypeValue, leftPrint, rightPrint,
+                newArguments, quantification, displayType);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final PSymbol withTypeReplaced(MTType t) {
+        return new PSymbol(t, myMathTypeValue, leftPrint, rightPrint,
+                arguments, quantification, displayType);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final PSymbol withTypeValueReplaced(MTType t) {
+        return new PSymbol(myMathType, t, leftPrint, rightPrint, arguments,
+                quantification, displayType);
+    }
 
     // ===========================================================
     // Protected Methods
