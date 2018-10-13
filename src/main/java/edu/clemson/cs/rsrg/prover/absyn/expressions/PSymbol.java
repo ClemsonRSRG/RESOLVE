@@ -503,8 +503,8 @@ public class PSymbol extends PExp {
             //TODO : This isn't right.  The real logic should be "is the
             //       expression I represent is in the type of target", but right
             //       now "isKnownToBeIn" in TypeGraph doesn't operate on PExps
-            if (!(myMathType.isSubtypeOf(target.getMathType()) || target.getMathType()
-                    .isSubtypeOf(myMathType))) {
+            if (!(myMathType.isSubtypeOf(target.getMathType()) || target
+                    .getMathType().isSubtypeOf(myMathType))) {
                 //We can only match something we're a subset of
                 throw BINDING_EXCEPTION;
             }
@@ -712,7 +712,7 @@ public class PSymbol extends PExp {
         //      situation is resolved, literals should be hard coded here.
         return (name.equalsIgnoreCase("empty_string"))
                 || (name.equals("0") || name.equals("1") || name.equals("true") || name
-                .equals("false"));
+                        .equals("false"));
     }
 
     /**
@@ -941,7 +941,7 @@ public class PSymbol extends PExp {
     // ===========================================================
 
     /**
-     * <p>This helper method computes a structure and value hash given
+     * <p>An helper method that computes a structure and value hash given
      * the specified arguments.</p>
      *
      * @param left The expression's left hand side as a string.
