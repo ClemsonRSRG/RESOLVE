@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.prover.absyn.treewalkers;
+package edu.clemson.cs.rsrg.prover.absyn.visitors;
 
 import edu.clemson.cs.rsrg.prover.absyn.PExp;
 import edu.clemson.cs.rsrg.prover.absyn.expressions.*;
@@ -23,6 +23,10 @@ import edu.clemson.cs.rsrg.prover.absyn.expressions.*;
  * @version 2.0
  */
 public abstract class PExpVisitor {
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     /**
      * <p>This method is called before visiting a {@link PExp}.</p>
