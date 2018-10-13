@@ -13,7 +13,10 @@
 package edu.clemson.cs.rsrg.prover.absyn.expressions;
 
 import edu.clemson.cs.rsrg.prover.absyn.PExp;
-import edu.clemson.cs.rsrg.prover.absyn.treewalkers.PExpVisitor;
+import edu.clemson.cs.rsrg.prover.absyn.iterators.PExpSubexpressionIterator;
+import edu.clemson.cs.rsrg.prover.absyn.iterators.PSymbolArgumentIterator;
+import edu.clemson.cs.rsrg.prover.absyn.visitors.PExpVisitor;
+import edu.clemson.cs.rsrg.prover.exception.BindingException;
 import edu.clemson.cs.rsrg.prover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.rsrg.prover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
@@ -453,6 +456,111 @@ public class PSymbol extends PExp {
      * {@inheritDoc}
      */
     @Override
+    public final void bindTo(PExp target, Map<PExp, PExp> accumulator)
+            throws BindingException {
+
+        PSymbol sTarget;
+        try {
+            sTarget = (PSymbol) target;
+        }
+        catch (ClassCastException e) {
+            //We can only bind against other instances of PSymbol
+            throw BINDING_EXCEPTION;
+        }
+
+        //Note that at this point we're guaranteed that target is of the same
+        //type as us
+        if (quantification == Quantification.FOR_ALL) {
+            if (!typeMatches(target)) {
+                //We can only bind against something in a subset of us
+                throw BINDING_EXCEPTION;
+            }
+
+            if (myArgumentsSize == 0) {
+                accumulator.put(this, target);
+            }
+            else {
+                if (myArgumentsSize != sTarget.arguments.size()) {
+                    //If we're a function, we can only bind against another
+                    //function with the same number of arguments
+                    throw BINDING_EXCEPTION;
+                }
+
+                accumulator.put(new PSymbol(myMathType, myMathTypeValue, name),
+                        new PSymbol(sTarget.getPreApplicationType(), null,
+                                sTarget.name));
+
+                Iterator<PExp> thisArgumentsIter = arguments.iterator();
+                Iterator<PExp> targetArgumentsIter =
+                        sTarget.arguments.iterator();
+                while (thisArgumentsIter.hasNext()) {
+                    thisArgumentsIter.next().substitute(accumulator).bindTo(
+                            targetArgumentsIter.next(), accumulator);
+                }
+            }
+        }
+        else {
+            //TODO : This isn't right.  The real logic should be "is the
+            //       expression I represent is in the type of target", but right
+            //       now "isKnownToBeIn" in TypeGraph doesn't operate on PExps
+            if (!(myMathType.isSubtypeOf(target.getMathType()) || target.getMathType()
+                    .isSubtypeOf(myMathType))) {
+                //We can only match something we're a subset of
+                throw BINDING_EXCEPTION;
+            }
+
+            if (!name.equals(sTarget.name)) {
+                throw BINDING_EXCEPTION;
+            }
+
+            if (myArgumentsSize != sTarget.arguments.size()) {
+                //We aren't a "for all", so everything better be exact
+                throw BINDING_EXCEPTION;
+            }
+
+            Iterator<PExp> thisArgumentsIter = arguments.iterator();
+            Iterator<PExp> targetArgumentsIter = sTarget.arguments.iterator();
+            while (thisArgumentsIter.hasNext()) {
+                thisArgumentsIter.next().substitute(accumulator).bindTo(
+                        targetArgumentsIter.next(), accumulator);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean containsExistential() {
+        boolean retval = (quantification == Quantification.THERE_EXISTS);
+
+        Iterator<PExp> argumentIter = arguments.iterator();
+        while (!retval && argumentIter.hasNext()) {
+            retval = argumentIter.next().containsExistential();
+        }
+
+        return retval;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean containsName(String name) {
+        boolean retval = this.name.equals(name);
+
+        Iterator<PExp> argumentIterator = arguments.iterator();
+        while (!retval && argumentIterator.hasNext()) {
+            retval = argumentIterator.next().containsName(name);
+        }
+
+        return retval;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public final boolean equals(Object o) {
         boolean retval = (o instanceof PSymbol);
 
@@ -481,24 +589,71 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This method gets the pre-application mathematical type
-     * associated with this expression.</p>
+     * <p>This method attempts to flip all quantifiers to generate
+     * a new expression.</p>
      *
-     * @return A {@link MTType} type object.
+     * @return A new {@link PExp}.
      */
-    public final MTType getPreApplicationType() {
-        if (myPreApplicationType == null) {
-            List<MTType> argTypes = new LinkedList<>();
-            for (PExp arg : arguments) {
-                argTypes.add(arg.getMathType());
-            }
+    @Override
+    public final PExp flipQuantifiers() {
+        PExp retval;
 
-            myPreApplicationType =
-                    new MTFunction(getMathType().getTypeGraph(), getMathType(),
-                            argTypes);
+        boolean argumentChanged = false;
+        int argIndex = 0;
+        Iterator<PExp> argumentsIter = arguments.iterator();
+
+        PExp argument;
+        while (argumentsIter.hasNext()) {
+            argument = argumentsIter.next();
+
+            myScratchSpace[argIndex] = argument.flipQuantifiers();
+
+            argumentChanged |= (myScratchSpace[argIndex] != argument);
+            argIndex++;
         }
 
-        return myPreApplicationType;
+        if (argumentChanged) {
+            retval =
+                    new PSymbol(myMathType, myMathTypeValue, leftPrint,
+                            rightPrint, Arrays.asList(myScratchSpace),
+                            quantification.flipped(), displayType);
+        }
+        else {
+            Quantification flipped = quantification.flipped();
+
+            if (flipped == quantification) {
+                retval = this;
+            }
+            else {
+                retval =
+                        new PSymbol(myMathType, myMathTypeValue, leftPrint,
+                                rightPrint, arguments, flipped, displayType);
+            }
+        }
+
+        return retval;
+    }
+
+    /**
+     * <p>This method returns a set of symbols that are not quantified.</p>
+     *
+     * @return A set of symbol names.
+     */
+    public final Set<String> getNonQuantifiedSymbols() {
+        Set<String> result = new HashSet<>();
+
+        if (quantification == Quantification.NONE) {
+            result.add(getTopLevelOperation());
+        }
+
+        Iterator<PExp> argumentIter = arguments.iterator();
+        while (argumentIter.hasNext()) {
+            Set<String> r =
+                    ((PSymbol) argumentIter.next()).getNonQuantifiedSymbols();
+            result.addAll(r);
+        }
+
+        return result;
     }
 
     /**
@@ -507,6 +662,30 @@ public class PSymbol extends PExp {
     @Override
     public final ImmutableList<PExp> getSubExpressions() {
         return arguments;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final PExpSubexpressionIterator getSubExpressionIterator() {
+        return new PSymbolArgumentIterator(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String getTopLevelOperation() {
+        return getCanonicalName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean isEquality() {
+        return (myArgumentsSize == 2 && name.equals("="));
     }
 
     /**
@@ -525,6 +704,21 @@ public class PSymbol extends PExp {
      * {@inheritDoc}
      */
     @Override
+    public final boolean isLiteral() {
+        //XXX : All PExps originally come from Exps.  Currently there is no way
+        //      to tell if an Exp is a literal.  I.e., in an expression like
+        //      "S'' = empty_string", the left and right sides of the equality
+        //      are indistinguishable except for their names.  Until this
+        //      situation is resolved, literals should be hard coded here.
+        return (name.equalsIgnoreCase("empty_string"))
+                || (name.equals("0") || name.equals("1") || name.equals("true") || name
+                .equals("false"));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public final boolean isObviouslyTrue() {
         return (myArgumentsSize == 0 && name.equalsIgnoreCase("true"))
                 || (myArgumentsSize == 2 && name.equals("=") && arguments
@@ -537,6 +731,46 @@ public class PSymbol extends PExp {
     @Override
     public final boolean isVariable() {
         return !isFunction();
+    }
+
+    /**
+     * <p>This creates a new {@link PSymbol} by replacing the specified
+     * index with the new argument.</p>
+     *
+     * @param index The index to be replaced.
+     * @param newArgument A new argument expression.
+     *
+     * @return A new {@link PSymbol}.
+     */
+    public final PSymbol setArgument(int index, PExp newArgument) {
+        ImmutableList<PExp> newArguments = arguments.set(index, newArgument);
+
+        return new PSymbol(myMathType, myMathTypeValue, leftPrint, rightPrint,
+                newArguments, quantification, displayType);
+    }
+
+    /**
+     * <p>This creates a new {@link PSymbol} by replacing all the arguments.</p>
+     *
+     * @param newArguments A new list of arguments.
+     *
+     * @return A new {@link PSymbol}.
+     */
+    public final PSymbol setArguments(Collection<PExp> newArguments) {
+        return new PSymbol(myMathType, myMathTypeValue, leftPrint, rightPrint,
+                newArguments, quantification, displayType);
+    }
+
+    /**
+     * <p>This creates a new {@link PSymbol} by replacing its name.</p>
+     *
+     * @param newName A new name.
+     *
+     * @return A new {@link PSymbol}.
+     */
+    public final PSymbol setName(String newName) {
+        return new PSymbol(myMathType, myMathTypeValue, newName, rightPrint,
+                arguments, quantification, displayType);
     }
 
     /**
@@ -634,6 +868,74 @@ public class PSymbol extends PExp {
     // Protected Methods
     // ===========================================================
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final List<PExp> getFunctionApplicationsNoCache() {
+        List<PExp> result = new LinkedList<>();
+
+        if (myArgumentsSize > 0) {
+            result.add(this);
+        }
+
+        Iterator<PExp> argumentIter = arguments.iterator();
+        List<PExp> argumentFunctions;
+        while (argumentIter.hasNext()) {
+            argumentFunctions = argumentIter.next().getFunctionApplications();
+            result.addAll(argumentFunctions);
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final Set<PSymbol> getQuantifiedVariablesNoCache() {
+        Set<PSymbol> result = new HashSet<>();
+
+        if (quantification != Quantification.NONE) {
+            if (arguments.size() == 0) {
+                result.add(this);
+            }
+            else {
+                result.add(new PSymbol(getMathType(), null, name, quantification));
+            }
+        }
+
+        Iterator<PExp> argumentIter = arguments.iterator();
+        Set<PSymbol> argumentVariables;
+        while (argumentIter.hasNext()) {
+            argumentVariables = argumentIter.next().getQuantifiedVariables();
+            result.addAll(argumentVariables);
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final Set<String> getSymbolNamesNoCache() {
+        Set<String> result = new HashSet<>();
+
+        if (quantification == Quantification.NONE) {
+            result.add(getCanonicalName());
+        }
+
+        Iterator<PExp> argumentIter = arguments.iterator();
+        Set<String> argumentSymbols;
+        while (argumentIter.hasNext()) {
+            argumentSymbols = argumentIter.next().getSymbolNames();
+            result.addAll(argumentSymbols);
+        }
+
+        return result;
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
@@ -709,4 +1011,42 @@ public class PSymbol extends PExp {
         return retval.toString();
     }
 
+    /**
+     * <p>An helper method for retrieving this expression's canonical name.</p>
+     *
+     * @return A canonical representation of this expression.
+     */
+    private String getCanonicalName() {
+        String result;
+
+        if (displayType.equals(DisplayType.OUTFIX)) {
+            result = leftPrint + "_" + rightPrint;
+        }
+        else {
+            result = name;
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>An helper method that gets the pre-application mathematical type
+     * associated with this expression.</p>
+     *
+     * @return A {@link MTType} type object.
+     */
+    private MTType getPreApplicationType() {
+        if (myPreApplicationType == null) {
+            List<MTType> argTypes = new LinkedList<>();
+            for (PExp arg : arguments) {
+                argTypes.add(arg.getMathType());
+            }
+
+            myPreApplicationType =
+                    new MTFunction(getMathType().getTypeGraph(), getMathType(),
+                            argTypes);
+        }
+
+        return myPreApplicationType;
+    }
 }
