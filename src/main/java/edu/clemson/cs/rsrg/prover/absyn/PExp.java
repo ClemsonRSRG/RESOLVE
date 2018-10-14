@@ -12,15 +12,22 @@
  */
 package edu.clemson.cs.rsrg.prover.absyn;
 
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import edu.clemson.cs.rsrg.prover.absyn.expressions.PAlternatives;
+import edu.clemson.cs.rsrg.prover.absyn.expressions.PLambda;
 import edu.clemson.cs.rsrg.prover.absyn.expressions.PSymbol;
 import edu.clemson.cs.rsrg.prover.absyn.iterators.PExpSubexpressionIterator;
 import edu.clemson.cs.rsrg.prover.absyn.visitors.NestedPExpVisitors;
 import edu.clemson.cs.rsrg.prover.absyn.visitors.PExpTextRenderingVisitor;
 import edu.clemson.cs.rsrg.prover.absyn.visitors.PExpVisitor;
 import edu.clemson.cs.rsrg.prover.exception.BindingException;
+import edu.clemson.cs.rsrg.prover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.rsrg.prover.immutableadts.ImmutableList;
+import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.io.StringWriter;
@@ -149,6 +156,197 @@ public abstract class PExp {
      */
     public abstract void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException;
+
+    /**
+     * <p>This method converts an expression generated from the AST to
+     * the prover's immutable expression hierarchy.</p>
+     *
+     * @param g The current type graph.
+     * @param e An expression from the compiler AST.
+     *
+     * @return A {@link PExp} representation of {@code e}.
+     */
+    public static PExp buildPExp(TypeGraph g, Exp e) {
+        PExp retval;
+
+        // Apply proper quantification
+        Map<String, SymbolTableEntry.Quantification> quantifiedVariables = new LinkedHashMap<>();
+        e = applyQuantification(e, quantifiedVariables);
+
+        if (e == null) {
+            throw new IllegalArgumentException("Prover does not accept null "
+                    + "as an expression.");
+        }
+
+        if (e instanceof FunctionExp) {
+            FunctionExp eAsFunctionExp = (FunctionExp) e;
+
+            List<PExp> arguments = new LinkedList<>();
+            Iterator<Exp> eArgs = eAsFunctionExp.getArguments().iterator();
+            List<MTType> paramTypes = new ArrayList<>();
+            while (eArgs.hasNext()) {
+                PExp argExp = PExp.buildPExp(g, eArgs.next());
+                arguments.add(argExp);
+                paramTypes.add(argExp.getMathType());
+            }
+
+            if (g != null) {
+                MTFunction fullType =
+                        new MTFunction(g, e.getMathType(), paramTypes);
+                retval =
+                        new PSymbol(fullType, e.getMathTypeValue(), fullName(
+                                eAsFunctionExp.getQualifier(), eAsFunctionExp
+                                        .getName().getName().getName()), arguments,
+                                convertExpQuantification(eAsFunctionExp
+                                        .getQuantification()));
+            }
+            else {
+                retval =
+                        new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                                fullName(eAsFunctionExp.getQualifier(),
+                                        eAsFunctionExp.getName().getName().getName()),
+                                arguments,
+                                convertExpQuantification(eAsFunctionExp
+                                        .getQuantification()));
+            }
+        }
+        else if (e instanceof PrefixExp) {
+            PrefixExp eAsPrefixExp = (PrefixExp) e;
+
+            List<PExp> arguments = new LinkedList<>();
+            arguments.add(PExp.buildPExp(g, eAsPrefixExp.getArgument()));
+
+            retval =
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            eAsPrefixExp.getOperatorAsPosSymbol().getName(), arguments);
+        }
+        else if (e instanceof InfixExp) {
+            InfixExp eAsInfixExp = (InfixExp) e;
+
+            List<PExp> arguments = new LinkedList<>();
+            arguments.add(PExp.buildPExp(g, eAsInfixExp.getLeft()));
+            arguments.add(PExp.buildPExp(g, eAsInfixExp.getRight()));
+
+            retval =
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            eAsInfixExp.getOperatorAsPosSymbol().getName(), arguments,
+                            PSymbol.DisplayType.INFIX);
+        }
+        else if (e instanceof OutfixExp) {
+            OutfixExp eAsOutfixExp = (OutfixExp) e;
+
+            List<PExp> arguments = new LinkedList<>();
+            arguments.add(PExp.buildPExp(g, eAsOutfixExp.getArgument()));
+
+            retval =
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            eAsOutfixExp.getOperator().getLeftDelimiterString(), eAsOutfixExp.getOperator()
+                            .getRightDelimiterString(), arguments,
+                            PSymbol.DisplayType.OUTFIX);
+        }
+        else if (e instanceof CharExp) {
+            CharExp eAsCharExp = (CharExp) e;
+
+            String symbol = "" + eAsCharExp.getValue();
+
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol);
+        }
+        else if (e instanceof IntegerExp) {
+            IntegerExp eAsIntegerExp = (IntegerExp) e;
+
+            String symbol = "" + eAsIntegerExp.getValue();
+
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol);
+        }
+        else if (e instanceof StringExp) {
+            StringExp eAsStringExp = (StringExp) e;
+
+            retval =
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            eAsStringExp.getValue());
+        }
+        else if (e instanceof DotExp) {
+            DotExp eAsDotExp = (DotExp) e;
+            StringBuilder symbol = new StringBuilder();
+
+            List<PExp> arguments = new LinkedList<>();
+
+            boolean first = true;
+            for (Exp s : eAsDotExp.getSegments()) {
+                if (!first) {
+                    symbol.append(".");
+                }
+                else {
+                    first = false;
+                }
+
+                if (s instanceof FunctionExp) {
+                    FunctionExp sAsFE = (FunctionExp) s;
+                    symbol.append(sAsFE.getOperatorAsString());
+
+                    for (Exp param : sAsFE.getParameters()) {
+                        arguments.add(buildPExp(g, param));
+                    }
+                }
+                else {
+                    symbol.append(s);
+                }
+            }
+
+            retval =
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol.toString(),
+                            arguments);
+        }
+        else if (e instanceof VarExp) {
+            VarExp eAsVarExp = (VarExp) e;
+
+            retval =
+                    new PSymbol(eAsVarExp.getMathType(), eAsVarExp
+                            .getMathTypeValue(), fullName(eAsVarExp
+                            .getQualifier(), eAsVarExp.getName().getName()),
+                            convertExpQuantification(eAsVarExp
+                                    .getQuantification()));
+        }
+        else if (e instanceof LambdaExp) {
+            LambdaExp eAsLambdaExp = (LambdaExp) e;
+
+            List<PLambda.Parameter> parameters =
+                    new LinkedList<>();
+            for (MathVarDec p : eAsLambdaExp.getParameters()) {
+                parameters.add(new PLambda.Parameter(p.getName().getName(), p
+                        .getTy().getMathTypeValue()));
+            }
+
+            retval =
+                    new PLambda(new ArrayBackedImmutableList<>(parameters), PExp
+                            .buildPExp(g, eAsLambdaExp.getBody()));
+        }
+        else if (e instanceof AlternativeExp) {
+            AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
+
+            retval = new PAlternatives(eAsAlternativeExp);
+        }
+        else {
+            throw new RuntimeException("Expressions of type " + e.getClass()
+                    + " are not accepted by the prover." + e.getLocation());
+        }
+
+        // Fail early if we don't have a mathematical type.
+        if (retval.getMathType() == null) {
+            String varExpAdditional = "";
+            if (e instanceof VarExp) {
+                varExpAdditional =
+                        " = \"" + ((VarExp) e).getName().getName() + "\", "
+                                + ((VarExp) e).getName().getLocation();
+            }
+
+            throw new UnsupportedOperationException(
+                    "Expression has null type.\n\n" + e + " (" + e.getClass()
+                            + ")" + varExpAdditional);
+        }
+
+        return retval;
+    }
 
     /**
      * <p>This method checks to see if the current expression contains
@@ -554,6 +752,149 @@ public abstract class PExp {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>Takes an expression and distributes its quantifiers down to the
+     * variables, removing the quantifiers in the process.  (That is, in the
+     * expression <code>For all x, x = y</code>, the variable <code>x</code>
+     * in the equals expression would be marked internally as a "for all"
+     * variable and the expression <code>x = y</code> would be returned.)</p>
+     *
+     * <p>Quantified expressions with "where" clauses will be normalized to
+     * remove the where clause.  In the case of "for all" statements, the
+     * where clause will be added as the antecedent to an implication, so that
+     * <code>For all x, where Q(x), P(x)</code> will become <code>For all x,
+     * Q(x) implies P(x)</code> and <code>There exists x, where Q(x), such that
+     * P(x)</code> will become <code>There exists x such that Q(x) and P(x)
+     * </code>.</p>
+     *
+     * @param e The expression for whom quantifiers should be distributed
+     *          downward. This will largely be modified in place.
+     * @param quantifiedVariables A map of variable names that should be
+     *                            considered quantified mapped to the quantifiers
+     *                            that apply to them.
+     *
+     * @return The root of the new expression.
+     */
+    private static Exp applyQuantification(Exp e,
+            Map<String, SymbolTableEntry.Quantification> quantifiedVariables) {
+        Exp retval;
+
+        if (e instanceof QuantExp) {
+            QuantExp eAsQuantifier = (QuantExp) e;
+
+            //Normalize our eAsQuantifier so that it doesn't have a "where"
+            //clause by appropriately transferring the "where" clause into
+            //the body using logical connectives
+            if (eAsQuantifier.getWhere() != null) {
+                switch (eAsQuantifier.getQuantification()) {
+                case UNIVERSAL:
+                    eAsQuantifier =
+                            new QuantExp(eAsQuantifier.getLocation(),
+                                    eAsQuantifier.getQuantification(),
+                                    eAsQuantifier.getVars(), null, MathExp
+                                            .formImplies(eAsQuantifier
+                                                    .getLocation().clone(),
+                                                    eAsQuantifier.getWhere(),
+                                                    eAsQuantifier.getBody()));
+                    break;
+                case EXISTENTIAL:
+                    eAsQuantifier =
+                            new QuantExp(eAsQuantifier.getLocation(),
+                                    eAsQuantifier.getQuantification(),
+                                    eAsQuantifier.getVars(), null, MathExp
+                                            .formConjunct(eAsQuantifier
+                                                    .getLocation().clone(),
+                                                    eAsQuantifier.getWhere(),
+                                                    eAsQuantifier.getBody()));
+                    break;
+                default:
+                    throw new RuntimeException("Don't know how to normalize "
+                            + "this kind of quantified expression.");
+                }
+            }
+
+            List<MathVarDec> variableNames = eAsQuantifier.getVars();
+
+            for (MathVarDec v : variableNames) {
+                quantifiedVariables.put(v.getName().getName(), eAsQuantifier
+                        .getQuantification());
+            }
+
+            retval =
+                    applyQuantification(eAsQuantifier.getBody(),
+                            quantifiedVariables);
+
+            for (MathVarDec v : variableNames) {
+                quantifiedVariables.remove((v.getName().getName()));
+            }
+        }
+        else {
+            if (e instanceof VarExp) {
+                VarExp eAsVar = (VarExp) e;
+                String varName = eAsVar.getName().getName();
+
+                if (quantifiedVariables.containsKey(varName)) {
+                    eAsVar.setQuantification(quantifiedVariables.get(varName));
+                }
+            }
+            else {
+                if (e instanceof FunctionExp) {
+                    FunctionExp eAsFunctionExp = (FunctionExp) e;
+                    String functionName = eAsFunctionExp.getName().getName().getName();
+                    if (quantifiedVariables.containsKey(functionName)) {
+                        eAsFunctionExp.setQuantification(quantifiedVariables
+                                .get(functionName));
+                    }
+                }
+
+                List<Exp> subExpressions = e.getSubExpressions();
+                Exp curSubExpression;
+                Map<Exp, Exp> substitutions = new LinkedHashMap<>();
+                for (Exp subExpression : subExpressions) {
+                    curSubExpression = subExpression;
+                    substitutions.put(curSubExpression,
+                            applyQuantification(curSubExpression, quantifiedVariables));
+                }
+
+                // Apply substitutions
+                e = e.substitute(substitutions);
+            }
+
+            retval = e;
+        }
+
+        return retval;
+    }
+
+    /**
+     * <p>An helper method for converting the quantification to the one provided by
+     * {@link PSymbol}.</p>
+     *
+     * @param q A symbol table quantifier.
+     *
+     * @return A prover expression version of the quantifier.
+     */
+    private static PSymbol.Quantification convertExpQuantification(
+            SymbolTableEntry.Quantification q) {
+        PSymbol.Quantification retval;
+
+        switch (q) {
+        case EXISTENTIAL:
+            retval = PSymbol.Quantification.THERE_EXISTS;
+            break;
+        case UNIVERSAL:
+            retval = PSymbol.Quantification.FOR_ALL;
+            break;
+        case NONE:
+            retval = PSymbol.Quantification.NONE;
+            break;
+        default:
+            throw new RuntimeException("Unrecognized quantification");
+        }
+
+        return retval;
+    }
 
     /**
      * <p>An helper method for generating the full name with the qualifier.</p>
