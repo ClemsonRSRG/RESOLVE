@@ -414,6 +414,30 @@ public abstract class PExp {
     }
 
     /**
+     * <p>This method checks to see if the specified type
+     * matches the current expression's mathematical type.</p>
+     *
+     * @param other Some other mathematical type.
+     *
+     * @return {@code true} if it matches, {@code false} otherwise.
+     */
+    public final boolean typeMatches(MTType other) {
+        return other.isSubtypeOf(myMathType);
+    }
+
+    /**
+     * <p>This method checks to see if the specified expression
+     * has a type that matches the current expression's mathematical type.</p>
+     *
+     * @param other Some other {@link PExp}.
+     *
+     * @return {@code true} if it matches, {@code false} otherwise.
+     */
+    public final boolean typeMatches(PExp other) {
+        return typeMatches(other.getMathType());
+    }
+
+    /**
      * <p>This method returns a new expression by substituting the specified
      * value in all the sub-expressions.</p>
      *
@@ -526,30 +550,6 @@ public abstract class PExp {
      * @return A set of names.
      */
     protected abstract Set<String> getSymbolNamesNoCache();
-
-    /**
-     * <p>This method checks to see if the specified type
-     * matches the current expression's mathematical type.</p>
-     *
-     * @param other Some other mathematical type.
-     *
-     * @return {@code true} if it matches, {@code false} otherwise.
-     */
-    protected final boolean typeMatches(MTType other) {
-        return other.isSubtypeOf(myMathType);
-    }
-
-    /**
-     * <p>This method checks to see if the specified expression
-     * has a type that matches the current expression's mathematical type.</p>
-     *
-     * @param other Some other {@link PExp}.
-     *
-     * @return {@code true} if it matches, {@code false} otherwise.
-     */
-    protected final boolean typeMatches(PExp other) {
-        return typeMatches(other.getMathType());
-    }
 
     // ===========================================================
     // Private Methods
