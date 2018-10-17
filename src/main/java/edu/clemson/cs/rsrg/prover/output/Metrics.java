@@ -13,54 +13,94 @@
 package edu.clemson.cs.rsrg.prover.output;
 
 /**
- * <p>This class contains aggregate data about a full proof
+ * <p>The {@code Metrics} class contains aggregate data about a full proof
  * attempt.</p>
  *
  * @author Hampton Smith
+ * @author Mike Kabbani
  * @version 2.0
  */
 public class Metrics {
 
-    /*public BigInteger numProofsConsidered;
-    public BigInteger numTimesBacktracked;
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
 
-    public long ruleCount, rulesTried;
+    /** <p>Time in milliseconds spent on proving this {@code VC}.</p> */
+    private final long myProofDuration;
 
-    private long myProofDuration, myTimeout;
+    /** <p>Maximum time in milliseconds that the prover attempts to prove this {@code VC}.</p> */
+    private final long myTimeout;
 
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>This constructs an object for keeping track of the aggregate
+     * data about proving a {@code VC}.</p>
+     *
+     * @param duration Total time spend proving this {@code VC}.
+     * @param timeout The specified timeout before giving up.
+     */
     public Metrics(long duration, long timeout) {
-        clear();
         myProofDuration = duration;
         myTimeout = timeout;
     }
 
-    public BigInteger getNumProofsConsidered() {
-        return numProofsConsidered;
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * <p>This method overrides the default {@code equals} method implementation.</p>
+     *
+     * @param o Object to be compared.
+     *
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     */
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Metrics metrics = (Metrics) o;
+
+        if (myProofDuration != metrics.myProofDuration)
+            return false;
+        return myTimeout == metrics.myTimeout;
     }
 
-    public void incrementProofsConsidered() {
-        numProofsConsidered = numProofsConsidered.add(BigInteger.ONE);
-    }
-
-    public void accumulate(Metrics m) {
-        numProofsConsidered = numProofsConsidered.add(m.numProofsConsidered);
-        numTimesBacktracked = numTimesBacktracked.add(m.numTimesBacktracked);
-    }
-
-    public long getTimeout() {
+    /**
+     * <p>This method returns the timeout in milliseconds.</p>
+     *
+     * @return A number.
+     */
+    public final long getTimeout() {
         return myTimeout;
     }
 
-    public long getProofDuration() {
+    /**
+     * <p>This method returns the time spent proving this {@code VC}.</p>
+     *
+     * @return A number.
+     */
+    public final long getProofDuration() {
         return myProofDuration;
     }
 
-    public void clear() {
-        numTimesBacktracked = BigInteger.ZERO;
-        numProofsConsidered = BigInteger.ZERO;
-        ruleCount = 0;
-        rulesTried = 0;
-        myProofDuration = 0;
-        myTimeout = 0;
-    }*/
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public final int hashCode() {
+        int result = (int) (myProofDuration ^ (myProofDuration >>> 32));
+        result = 31 * result + (int) (myTimeout ^ (myTimeout >>> 32));
+        return result;
+    }
+
 }
