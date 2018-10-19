@@ -64,7 +64,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     /**
      * <p>This creates an module identifier for a module declaration.</p>
      *
-     * @param m A {link ModuleDec} object.
+     * @param m A {@link ModuleDec} object.
      */
     public ModuleIdentifier(ModuleDec m) {
         this(m.getName().getName());
@@ -73,7 +73,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     /**
      * <p>This creates an module identifier for an import module declaration.</p>
      *
-     * @param i An imported {link ModuleDec} object.
+     * @param i An imported {@link ModuleDec} object.
      */
     public ModuleIdentifier(UsesItem i) {
         this(i.getName().getName());
@@ -95,7 +95,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {link ModuleIdentifier} class.</p>
+     * for the {@link ModuleIdentifier} class.</p>
      *
      * @return A deep copy of the object.
      */
@@ -105,7 +105,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     }
 
     /**
-     * <p>This method implements the method in {link Comparable}.</p>
+     * <p>This method implements the method in {@link Comparable}.</p>
      *
      * @param o Object to be compared.
      *
@@ -119,7 +119,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {link ModuleIdentifier} class.</p>
+     * for the {@link ModuleIdentifier} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -148,7 +148,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     /**
      * <p>This method overrides the default hashCode method implementation
-     * for the {link ModuleIdentifier} class.</p>
+     * for the {@link ModuleIdentifier} class.</p>
      *
      * @return The hash code value of the object.
      */
