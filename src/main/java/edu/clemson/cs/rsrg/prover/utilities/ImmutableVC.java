@@ -12,32 +12,47 @@
  */
 package edu.clemson.cs.rsrg.prover.utilities;
 
+import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
+import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
+import java.util.*;
+
 /**
  * <p>This class represents an immutable <em>verification condition</em>,
  * which takes the form of a mathematical implication.</p>
  *
  * @author Hampton Smith
  * @author Mike Kabbani
+ * @author Yu-Shan Sun
  * @version 2.0
  */
 public class ImmutableVC {
 
-    /**
-     * <p>Name is a human-readable name for the VC used for debugging purposes.
-     * </p>
-     */
-    //private final String myName;
+    // ===========================================================
+    // Current VC Status
+    // ===========================================================
+
+    public enum STATUS {
+        FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
+    }
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>Name is a human-readable name for the VC used for debugging purposes.</p */
+    private final String myName;
 
     /**
-     * <p>myDerivedFlag is set to true to indicate that this VC is not the
-     * original version of the VC with myName--rather it was derived from a
-     * VC named myName (or derived from a VC derived from a VC named myName)</p>
+     * <p>This is the math type graph that indicates relationship
+     * between different math types.</p>
      */
-    //private final boolean myDerivedFlag;
+    private final TypeGraph myTypeGraph;
 
-    /*private Antecedent myAntecedent;
-    private Consequent myConsequent;
+    /** <p>A copy of the VC generated from {@link edu.clemson.cs.rsrg.vcgeneration.VCGenerator}.</p> */
+    private final VerificationCondition myVCCopy;
 
+    /*
     private HashMap<PLambda, String> m_liftedLamdas;
     // PLambda objects aren't hashing correctly.  would have to get into haschode/eq methods of PExp heirarchy
     private HashMap<String, PLambda> m_lamdaCodes;
@@ -46,28 +61,61 @@ public class ImmutableVC {
     public java.util.Set<PExp> m_conditions;
     private int m_lambdaTag = 0;
     private int m_qVarTag = 0;
-    private TypeGraph m_typegraph;
-    private ImmutableVC liftedCopy;
+    private ImmutableVC liftedCopy; */
 
-    public ImmutableVC(String name, Antecedent antecedent, Consequent consequent) {
-        this(name, antecedent, consequent, false);
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    public ImmutableVC(VerificationCondition vc, TypeGraph g) {
+        myName = vc.getName();
+        myTypeGraph = g;
+        myVCCopy = vc.clone();
+
+        // Convert the antecedent/consequent from the sequent VC into the
+        // format that the prover expects.
+        //processSequentVC(vc.getSequent());
+
+        /*
+        m_liftedLamdas = new HashMap<>();
+        m_liftedLambdaPredicates = new ArrayList<>();
+        m_conditions = new HashSet<>();
+        m_lamdaCodes = new HashMap<>();
+        rhsOfLamPredsToLamPreds = new HashMap<>();*/
     }
 
-    public ImmutableVC(String name, Antecedent antecedent, Consequent consequent,
-                       boolean derived) {
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
-        myName = name;
-        myAntecedent = antecedent;
-        myConsequent = consequent;
-        myDerivedFlag = derived;
-        m_liftedLamdas = new HashMap<PLambda, String>();
-        m_liftedLambdaPredicates = new ArrayList<PSymbol>();
-        m_conditions = new java.util.HashSet<PExp>();
-        m_lamdaCodes = new HashMap<String, PLambda>();
-        rhsOfLamPredsToLamPreds = new HashMap<String, PSymbol>();
-    }
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
 
-    public String getName() {
+    /*private void processSequentVC(Sequent sequent) {
+        while (pit.hasNext() && !m_conjunction.m_evaluates_to_false) {
+            PExp curr =
+                    Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
+            if (inAntecedent) {
+                m_conjunction.addExpression(curr);
+            }
+            else {
+                // Temp: replace with eliminate()
+                if (curr.getTopLevelOperation().equals("orB")) {
+                    addGoal(m_registry.getSymbolForIndex(m_conjunction
+                            .addFormula(curr.getSubExpressions().get(0))));
+                    addGoal(m_registry.getSymbolForIndex(m_conjunction
+                            .addFormula(curr.getSubExpressions().get(1))));
+                }
+                else {
+                    int intRepForExp = m_conjunction.addFormula(curr);
+                    addGoal(m_registry.getSymbolForIndex(intRepForExp));
+                }
+            }
+        }
+    }*/
+
+    /*public String getName() {
         String retval = myName;
 
         if (myDerivedFlag) {
@@ -449,11 +497,5 @@ public class ImmutableVC {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public String toSMTLIB() {
-        String rString = "";
-        Map<String, MTType> constantTypes = new HashMap<String, MTType>();
-        return rString;
     }*/
 }
