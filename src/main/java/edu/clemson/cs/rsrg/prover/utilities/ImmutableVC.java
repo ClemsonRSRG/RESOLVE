@@ -43,6 +43,9 @@ public class ImmutableVC {
     /** <p>Name is a human-readable name for the VC used for debugging purposes.</p */
     private final String myName;
 
+    /** <p>Registry for symbols that we have encountered so far.</p> */
+    private final Registry myRegistry;
+
     /**
      * <p>This is the math type graph that indicates relationship
      * between different math types.</p>
@@ -51,6 +54,9 @@ public class ImmutableVC {
 
     /** <p>A copy of the VC generated from {@link edu.clemson.cs.rsrg.vcgeneration.VCGenerator}.</p> */
     private final VerificationCondition myVCCopy;
+
+    /** <p>A {@code VC} goal as set of strings.</p> */
+    public final Set<String> VCGoalStrings;
 
     /*
     private HashMap<PLambda, String> m_liftedLamdas;
@@ -69,8 +75,10 @@ public class ImmutableVC {
 
     public ImmutableVC(VerificationCondition vc, TypeGraph g) {
         myName = vc.getName();
+        myRegistry = new Registry(g);
         myTypeGraph = g;
         myVCCopy = vc.clone();
+        VCGoalStrings = new HashSet<>();
 
         // Convert the antecedent/consequent from the sequent VC into the
         // format that the prover expects.
@@ -87,6 +95,20 @@ public class ImmutableVC {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>This method adds a new goal to prove.</p>
+     *
+     * @param a A goal represented using a string.
+     */
+    public final void addGoal(String a) {
+        String r = myRegistry.getRootSymbolForSymbol(a);
+        if (VCGoalStrings.contains(r)) {
+            return;
+        }
+
+        VCGoalStrings.add(r);
+    }
 
     // ===========================================================
     // Private Methods
