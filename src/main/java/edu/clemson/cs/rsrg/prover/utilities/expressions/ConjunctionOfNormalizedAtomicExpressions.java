@@ -34,15 +34,19 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // Member Fields
     // ===========================================================
 
+    /** <p>A mapping of normalized atomic expressions.</p> */
     private final Map<NormalizedAtomicExpression, NormalizedAtomicExpression> myExpressionSet;
 
+    /** <p>A flag that indicates if the current expression evaluates to {@code false}.</p> */
     private boolean myEvaluatesToFalseFlag;
 
     /** <p>Registry for symbols that we have encountered so far.</p> */
     private final Registry myRegistry;
 
+    /** <p>A timer that indicates how long to search for a proof.</p> */
     private long myTimeToEnd = -1;
 
+    /** <p>A mapping of integer values used to represent a set of {@link NormalizedAtomicExpression}.</p> */
     private final Map<Integer, Map<Integer, Set<NormalizedAtomicExpression>>> myUseMap;
 
     /** <p>A reference to the immutable {@code VC} we are currently processing.</p> */
@@ -53,8 +57,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // ===========================================================
 
     /**
-     * @param registry the Registry symbols contained in the conjunction will
-     *                 reference. This class will add entries to the registry if needed.
+     * <p>This constructs a conjunction of normalized atomic expressions.</p>
+     *
+     * @param vc An immutable copy of a {@code VC}.
+     * @param registry A registry of symbols encountered so far.
      */
     public ConjunctionOfNormalizedAtomicExpressions(ImmutableVC vc, Registry registry) {
         myExpressionSet = new HashMap<>(2048, .5f);
@@ -68,7 +74,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // Public Methods
     // ===========================================================
 
-    // Top level
+    /**
+     * <p>This method adds an expression to this conjunction as a new
+     * {@link NormalizedAtomicExpression}.</p>
+     *
+     * @param expression A prover expression.
+     *
+     * @return A string representation of the expression added.
+     */
     public final String addExpression(PExp expression) {
         if (myEvaluatesToFalseFlag
                 || (myTimeToEnd > 0 && System.currentTimeMillis() > myTimeToEnd)) {
@@ -106,22 +119,36 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return "";
     }
 
+    /**
+     * <p>This method adds an expression and begins to track changes.</p>
+     *
+     * @param expression A prover expression.
+     * @param timeToEnd A value that indicates when we will stop proving this expression.
+     *
+     * @return A string representation of the expression added.
+     */
     public final String addExpressionAndTrackChanges(PExp expression,
             long timeToEnd) {
         myTimeToEnd = timeToEnd;
-        myTimeToEnd = Long.MAX_VALUE;
         String rString = "";
         rString += addExpression(expression);
 
         return rString;
     }
 
-    /* experimentally handling =
-     i.e.: (|?S| = 0) = (?S = Empty_String))
-     is broken down by addExpression so (|?S| = 0) is an argument
-     should return int for true if known to be equal, otherwise return root representative.
+    /**
+     * <p>This method adds a new formula expression.</p>
+     *
+     * @param formula A prover expression representing a formula.
+     *
+     * @return A string representation of the formula added.
      */
     public final int addFormula(PExp formula) {
+        /* experimentally handling =
+           i.e.: (|?S| = 0) = (?S = Empty_String))
+           is broken down by addExpression so (|?S| = 0) is an argument
+           should return int for true if known to be equal, otherwise return root representative.
+         */
         if (formula.getTopLevelOperation().equals("=B")) {
             int lhs = addFormula(formula.getSubExpressions().get(0));
             PExp r = formula.getSubExpressions().get(1);
@@ -179,10 +206,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return addAtomicFormula(newExpr);
     }
 
+    /**
+     * <p>This method clears all stored expressions.</p>
+     */
     public final void clear() {
         myExpressionSet.clear();
     }
 
+    /**
+     * <p>This method attempts to locate the specified expression
+     * in this conjunction.</p>
+     *
+     * @param exp A prover expression.
+     *
+     * @return A prover expression resulting from the search.
+     */
     public final PExp find(PExp exp) {
         if (exp.getSubExpressions().size() == 0) {
             String s =
@@ -242,6 +280,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
     }
 
+    /**
+     * <p>This method returns matches from an expression using the override set.</p>
+     *
+     * @param expr A {@link NormalizedAtomicExpression}.
+     * @param foreignSymbolOverrideSet A set containing symbols to override.
+     *
+     * @return A set containing proper mappings.
+     */
     public final Set<Map<String, String>> getMatchesForOverrideSet(NormalizedAtomicExpression expr,
             Set<Map<String, String>> foreignSymbolOverrideSet) {
         Set<Map<String, String>> rSet = new HashSet<>();
@@ -256,6 +302,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rSet;
     }
 
+    /**
+     * <p>This method returns the set of expressions based on the
+     * symbol number.</p>
+     *
+     * @param symk A symbol number.
+     *
+     * @return A set of {@link NormalizedAtomicExpression}.
+     */
     public final Set<NormalizedAtomicExpression> getUses(int symk) {
         HashSet<NormalizedAtomicExpression> rSet =
                 new HashSet<>();
@@ -269,6 +323,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rSet;
     }
 
+    /**
+     * <p>This method returns the current number of expressions
+     * in this conjunction.</p>
+     *
+     * @return Number of expressions.
+     */
     public final int size() {
         return myExpressionSet.size();
     }
@@ -302,10 +362,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // ===========================================================
 
     /**
-     * @param atomicFormula one sided expression. (= new root) is appended and
+     * <p>An helper method for adding an atomic formula.</p>
+     *
+     * @param atomicFormula One sided expression. (= new root) is appended and
      *                      expression is inserted if no match of the side is found. Otherwise
      *                      current root is returned.
-     * @return current integer value of root symbol that represents the input.
+     *
+     * @return Current integer value of root symbol that represents the input.
      */
     private int addAtomicFormula(NormalizedAtomicExpression atomicFormula) {
         // Return root if atomic formula is present
@@ -341,6 +404,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return myRegistry.findAndCompress(rhs);
     }
 
+    /**
+     * <p>An helper method for adding an expression to the conjunction set.</p>
+     *
+     * @param nae A {@link NormalizedAtomicExpression}.
+     */
     private void addExprToSet(NormalizedAtomicExpression nae) {
         for (int i : nae.getOpIds()) {
             addMapUse(i, nae);
@@ -352,6 +420,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         myExpressionSet.put(nae, nae);
     }
 
+    /**
+     * <p>An helper method for associating a symbol number with
+     * an expression.</p>
+     *
+     * @param symk A symbol number.
+     * @param nae A {@link NormalizedAtomicExpression}.
+     */
     private void addMapUse(int symk, NormalizedAtomicExpression nae) {
         if (!myUseMap.containsKey(symk)) {
             myUseMap.put(symk,
@@ -371,6 +446,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
     }
 
+    /**
+     * <p>An helper method for applying the prover's built-in logic.</p>
+     *
+     * @param nm A {@link NormalizedAtomicExpression}.
+     * @param tank A stack of built-in operators.
+     */
     private void applyBuiltInLogic(NormalizedAtomicExpression nm,
             Stack<Integer> tank) {
         // turn off if this is not part of a VC
@@ -567,7 +648,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
     }
 
-    // adds a particular symbol to the registry
+    /**
+     * <p>An helper method for adding a particular symbol to the registry.</p>
+     *
+     * @param ps A prover symbol.
+     *
+     * @return An integer value representing {@code ps}.
+     */
     private int addPSymbol(PSymbol ps) {
         String name = ps.getTopLevelOperation();
         if (myRegistry.mySymbolToIndex.containsKey(name)) {
@@ -610,8 +697,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return myRegistry.addSymbol(name, type, usage);
     }
 
-    // need to choose literals over vars for theorem matching purposes
-    // i.e. the theorem expression should keep the literals
+    /**
+     * <p>An method that helps us choose literals over variables for theorem
+     * matching purposes.</p>
+     *
+     * <p><em>i.e.</em> The theorem expression should keep the literals.</p>
+     *
+     * @param a An integer value representing some symbol.
+     * @param b Another integer value representing some symbol.
+     *
+     * @return An integer value representing the symbol we chose to keep.
+     */
     private int chooseSymbolToKeep(int a, int b) {
         String s = myRegistry.myIndexToSymbol.get(a);
         if (s.contains("¢")) {
@@ -626,6 +722,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return a < b ? a : b;
     }
 
+    /**
+     * <p>An helper method for computing a set of bindings.</p>
+     *
+     * @param filteredSet A set of filtered {@link NormalizedAtomicExpression}.
+     * @param baseMap A map containing base symbols.
+     * @param unmappedWildcards An array containing unmapped wild card symbols.
+     * @param searchReg A registry of symbols.
+     *
+     * @return A set containing mappings for symbols.
+     */
     private Set<Map<String, String>> computeBindings(Set<NormalizedAtomicExpression> filteredSet,
             Map<String, String> baseMap, String[] unmappedWildcards, Registry searchReg) {
         Set<Map<String, String>> rSet = new HashSet<>(filteredSet.size(), .5f);
@@ -663,6 +769,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rSet;
     }
 
+    /**
+     * <p>An helper method for obtaining the bindings for an expression.</p>
+     *
+     * @param expr A {@link NormalizedAtomicExpression}.
+     * @param foreignSymbolOverride A mapping of symbols to override.
+     *
+     * @return A set containing expression binding maps.
+     */
     private Set<Map<String, String>> getBindingsForSearchExpr(
             NormalizedAtomicExpression expr,
             Map<String, String> foreignSymbolOverride) {
@@ -721,6 +835,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 foreignSymbolOverride, unMappedWildCards, expr.getRegistry());
     }
 
+    /**
+     * <p>An helper method for searching for expressions that match the specified positions.</p>
+     *
+     * @param searchKey An array of search keys represented using integer values.
+     *
+     * @return A set of {@link NormalizedAtomicExpression} matching the
+     * search key.
+     */
     private Set<NormalizedAtomicExpression> getExprsMatchingAtPosition(int[] searchKey) {
         Set<NormalizedAtomicExpression> rSet = new HashSet<>();
         for (int p = 0; p < searchKey.length; ++p) {
@@ -757,12 +879,31 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rSet;
     }
 
+    /**
+     * <p>An helper method for getting the set of expressions located at
+     * the current position./p>
+     *
+     * @param symk A symbol number.
+     * @param pos A position number.
+     *
+     * @return A set of {@link NormalizedAtomicExpression} referenced by
+     * {@code symk} and located at {@code pos}.
+     */
     private Set<NormalizedAtomicExpression> getUses(int symk, int pos) {
         return new HashSet<>(myUseMap.get(symk).get(pos));
     }
 
-    // Return list of modified predicates by their position. Only these can cause new merges.
-    // b is replaced by a
+    /**
+     * <p>An helper method that returns a list of modified predicates by their position.
+     * Only these can cause new merges.</p>
+     *
+     * <p><em>e.g.</em> {@code b} is replaced by {@code a}</p>
+     *
+     * @param a An integer value representing some symbol.
+     * @param b Another integer value representing some symbol.
+     *
+     * @return A stack containing modified predicates.
+     */
     private Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
         if (myEvaluatesToFalseFlag
                 || (myTimeToEnd > 0 && System.currentTimeMillis() > myTimeToEnd)) {
@@ -813,6 +954,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return coincidentalMergeHoldingTank;
     }
 
+    /**
+     * <p>An helper method for merging operators.</p>
+     *
+     * @param a An integer value representing some operator.
+     * @param b Another integer value representing some operator.
+     *
+     * @return A string representation of the operators being merged.
+     */
     private String mergeOperators(int a, int b) {
         int t = myRegistry.getIndexForSymbol("true");
         int f = myRegistry.getIndexForSymbol("false");
@@ -876,6 +1025,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rString.toString();
     }
 
+    /**
+     * <p>An helper method that removes an expression from this
+     * conjunction.</p>
+     *
+     * @param nae A {@link NormalizedAtomicExpression}.
+     */
     private void removeExprFromSet(NormalizedAtomicExpression nae) {
         for (int i : nae.getOpIds()) {
             removeMapUse(i, nae);
@@ -885,6 +1040,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         myExpressionSet.remove(nae);
     }
 
+    /**
+     * <p>An helper method for removing an expression from
+     * our use map.</p>
+     *
+     * @param symK A symbol number.
+     * @param nae A {@link NormalizedAtomicExpression}.
+     */
     private void removeMapUse(int symK, NormalizedAtomicExpression nae) {
         if (myUseMap.containsKey(symK)) {
             myUseMap.get(symK).remove(nae);
