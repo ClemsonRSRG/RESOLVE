@@ -12,6 +12,10 @@
  */
 package edu.clemson.cs.rsrg.prover.utilities;
 
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.prover.absyn.PExp;
+import edu.clemson.cs.rsrg.prover.utilities.expressions.ConjunctionOfNormalizedAtomicExpressions;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
@@ -40,6 +44,9 @@ public class ImmutableVC {
     // Member Fields
     // ===========================================================
 
+    /** <p></p> */
+    private final ConjunctionOfNormalizedAtomicExpressions myConjunction;
+
     /** <p>Name is a human-readable name for the VC used for debugging purposes.</p */
     private final String myName;
 
@@ -58,6 +65,16 @@ public class ImmutableVC {
     /** <p>A {@code VC} goal as set of strings.</p> */
     public final Set<String> VCGoalStrings;
 
+    // -----------------------------------------------------------
+    // N and Z
+    // -----------------------------------------------------------
+
+    /** <p>A mathematical type representing {@code N}.</p> */
+    private final MTType N;
+
+    /** <p>A mathematical type representing {@code Z}.</p> */
+    private final MTType Z;
+
     /*
     private HashMap<PLambda, String> m_liftedLamdas;
     // PLambda objects aren't hashing correctly.  would have to get into haschode/eq methods of PExp heirarchy
@@ -73,16 +90,23 @@ public class ImmutableVC {
     // Constructors
     // ===========================================================
 
-    public ImmutableVC(VerificationCondition vc, TypeGraph g) {
+    public ImmutableVC(VerificationCondition vc, TypeGraph g, MTType nType, MTType zType) {
         myName = vc.getName();
-        myRegistry = new Registry(g);
         myTypeGraph = g;
         myVCCopy = vc.clone();
         VCGoalStrings = new HashSet<>();
 
+        // N and Z
+        N = nType;
+        Z = zType;
+
+        myRegistry = new Registry(g);
+        myConjunction =
+                new ConjunctionOfNormalizedAtomicExpressions(this, myRegistry);
+
         // Convert the antecedent/consequent from the sequent VC into the
         // format that the prover expects.
-        //processSequentVC(vc.getSequent());
+        processSequentVC(vc.getSequent());
 
         /*
         m_liftedLamdas = new HashMap<>();
@@ -114,28 +138,40 @@ public class ImmutableVC {
     // Private Methods
     // ===========================================================
 
-    /*private void processSequentVC(Sequent sequent) {
-        while (pit.hasNext() && !m_conjunction.m_evaluates_to_false) {
+    /**
+     * <p>An helper method for processing the sequent in a {@code VC}.</p>
+     *
+     * @param sequent Sequent VC.
+     */
+    private void processSequentVC(Sequent sequent) {
+        Iterator<Exp> antecedentIt = sequent.getAntecedents().iterator();
+        while (antecedentIt.hasNext() && !myConjunction.evaluatesToFalse()) {
             PExp curr =
-                    Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
-            if (inAntecedent) {
-                m_conjunction.addExpression(curr);
+                    Utilities.replacePExp(PExp.buildPExp(myTypeGraph,
+                            antecedentIt.next()), myTypeGraph, Z, N);
+            myConjunction.addExpression(curr);
+
+        }
+
+        Iterator<Exp> consequentIt = sequent.getConcequents().iterator();
+        while (consequentIt.hasNext() && !myConjunction.evaluatesToFalse()) {
+            PExp curr =
+                    Utilities.replacePExp(PExp.buildPExp(myTypeGraph,
+                            consequentIt.next()), myTypeGraph, Z, N);
+
+            // Temp: replace with eliminate()
+            if (curr.getTopLevelOperation().equals("orB")) {
+                addGoal(myRegistry.getSymbolForIndex(myConjunction
+                        .addFormula(curr.getSubExpressions().get(0))));
+                addGoal(myRegistry.getSymbolForIndex(myConjunction
+                        .addFormula(curr.getSubExpressions().get(1))));
             }
             else {
-                // Temp: replace with eliminate()
-                if (curr.getTopLevelOperation().equals("orB")) {
-                    addGoal(m_registry.getSymbolForIndex(m_conjunction
-                            .addFormula(curr.getSubExpressions().get(0))));
-                    addGoal(m_registry.getSymbolForIndex(m_conjunction
-                            .addFormula(curr.getSubExpressions().get(1))));
-                }
-                else {
-                    int intRepForExp = m_conjunction.addFormula(curr);
-                    addGoal(m_registry.getSymbolForIndex(intRepForExp));
-                }
+                int intRepForExp = myConjunction.addFormula(curr);
+                addGoal(myRegistry.getSymbolForIndex(intRepForExp));
             }
         }
-    }*/
+    }
 
     /*public String getName() {
         String retval = myName;

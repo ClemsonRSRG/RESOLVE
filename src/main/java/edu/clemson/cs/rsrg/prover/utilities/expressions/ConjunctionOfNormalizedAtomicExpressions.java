@@ -214,6 +214,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
+     * <p>This method returns whether or not this {@code VC}
+     * evaluates to {@code false}.</p>
+     *
+     * @return {@code true} if the prover has determined that
+     * this {@code VC} evaluates to {@code false}, {@code false} otherwise.
+     */
+    public final boolean evaluatesToFalse() {
+        return myEvaluatesToFalseFlag;
+    }
+
+    /**
      * <p>This method attempts to locate the specified expression
      * in this conjunction.</p>
      *
