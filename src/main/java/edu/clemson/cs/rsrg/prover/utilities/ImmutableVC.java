@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.prover.utilities;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.prover.absyn.PExp;
+import edu.clemson.cs.rsrg.prover.absyn.expressions.PSymbol;
 import edu.clemson.cs.rsrg.prover.utilities.expressions.ConjunctionOfNormalizedAtomicExpressions;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -107,6 +108,9 @@ public class ImmutableVC {
         // Convert the antecedent/consequent from the sequent VC into the
         // format that the prover expects.
         processSequentVC(vc.getSequent());
+
+        // Add default theorems for proving a VC
+        seedDefaultTheorems();
 
         /*
         m_liftedLamdas = new HashMap<>();
@@ -556,4 +560,60 @@ public class ImmutableVC {
             throw new RuntimeException(e);
         }
     }*/
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>An helper method for adding default theorems for proving
+     * a {@code VC}.</p>
+     */
+    private void seedDefaultTheorems() {
+        // seed with (true = false) = false
+        List<PExp> args = new ArrayList<>();
+        PSymbol fls = new PSymbol(myTypeGraph.BOOLEAN, null, "false");
+        PSymbol tr = new PSymbol(myTypeGraph.BOOLEAN, null, "true");
+        args.add(tr);
+        args.add(fls);
+        PSymbol trEqF = new PSymbol(myTypeGraph.BOOLEAN, null, "=B", args);
+        args.clear();
+        args.add(trEqF);
+        args.add(fls);
+        PSymbol trEqFEqF = new PSymbol(myTypeGraph.BOOLEAN, null, "=B", args);
+        args.clear();
+        myConjunction.addExpression(trEqFEqF);
+
+        // seed with true and true.  Need this for search: x and y, when x and y are both true
+        args.add(tr);
+        args.add(tr);
+        PSymbol tandt = new PSymbol(myTypeGraph.BOOLEAN, null, "andB", args);
+        args.clear();
+        args.add(tandt);
+        args.add(tr);
+        PSymbol tandteqt = new PSymbol(myTypeGraph.BOOLEAN, null, "=B", args);
+        myConjunction.addExpression(tandteqt);
+        args.clear();
+
+        // seed with true and false = false
+        args.add(tr);
+        args.add(fls);
+        PSymbol tandf = new PSymbol(myTypeGraph.BOOLEAN, null, "andB", args);
+        args.clear();
+        args.add(tandf);
+        args.add(fls);
+        PSymbol tandfeqf = new PSymbol(myTypeGraph.BOOLEAN, null, "=B", args);
+        myConjunction.addExpression(tandfeqf);
+
+        // seed with false and false = false
+        args.clear();
+        args.add(fls);
+        args.add(fls);
+        PSymbol fandf = new PSymbol(myTypeGraph.BOOLEAN, null, "andB", args);
+        args.clear();
+        args.add(fandf);
+        args.add(fls);
+        PSymbol fandfeqf = new PSymbol(myTypeGraph.BOOLEAN, null, "=B", args);
+        myConjunction.addExpression(fandfeqf);
+    }
 }
