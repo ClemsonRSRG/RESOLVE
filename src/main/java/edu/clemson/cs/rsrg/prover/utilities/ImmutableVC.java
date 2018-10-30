@@ -14,8 +14,10 @@ package edu.clemson.cs.rsrg.prover.utilities;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.prover.absyn.PExp;
+import edu.clemson.cs.rsrg.prover.absyn.expressions.PLambda;
 import edu.clemson.cs.rsrg.prover.absyn.expressions.PSymbol;
 import edu.clemson.cs.rsrg.prover.utilities.expressions.ConjunctionOfNormalizedAtomicExpressions;
+import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.cs.rsrg.vcgeneration.sequents.Sequent;
@@ -76,14 +78,26 @@ public class ImmutableVC {
     /** <p>A mathematical type representing {@code Z}.</p> */
     private final MTType Z;
 
+    // -----------------------------------------------------------
+    // Used for Conversions
+    // -----------------------------------------------------------
+
+    /** <p>A map used for reverse lookup when lifting lambda expressions.</p> */
+    private final Map<String, PLambda> myLambdaCodes;
+
+    /** <p>A counter for keeping track of all lambda expressions.</p> */
+    private int myLambdaTag;
+
+    /** <p>A map used for lifting lambda expressions.</p> */
+    private final Map<PLambda, String> myLiftedLambdas;
+
+    /** <p>A list of lifted lambda predicates.</p> */
+    private final List<PSymbol> myLiftedLambdaPredicates;
+
     /*
-    private HashMap<PLambda, String> m_liftedLamdas;
     // PLambda objects aren't hashing correctly.  would have to get into haschode/eq methods of PExp heirarchy
-    private HashMap<String, PLambda> m_lamdaCodes;
-    public java.util.List<PSymbol> m_liftedLambdaPredicates;
     public HashMap<String, PSymbol> rhsOfLamPredsToLamPreds;
     public java.util.Set<PExp> m_conditions;
-    private int m_lambdaTag = 0;
     private int m_qVarTag = 0;
     private ImmutableVC liftedCopy; */
 
@@ -101,6 +115,12 @@ public class ImmutableVC {
         N = nType;
         Z = zType;
 
+        // A bunch of lists, sets and maps used for post-processing a PExp
+        myLambdaCodes = new HashMap<>();
+        myLambdaTag = 0;
+        myLiftedLambdas = new HashMap<>();
+        myLiftedLambdaPredicates = new ArrayList<>();
+
         myRegistry = new Registry(g);
         myConjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(this, myRegistry);
@@ -113,10 +133,7 @@ public class ImmutableVC {
         seedDefaultTheorems();
 
         /*
-        m_liftedLamdas = new HashMap<>();
-        m_liftedLambdaPredicates = new ArrayList<>();
         m_conditions = new HashSet<>();
-        m_lamdaCodes = new HashMap<>();
         rhsOfLamPredsToLamPreds = new HashMap<>();*/
     }
 
@@ -153,6 +170,11 @@ public class ImmutableVC {
             PExp curr =
                     Utilities.replacePExp(PExp.buildPExp(myTypeGraph,
                             antecedentIt.next()), myTypeGraph, Z, N);
+
+            // A bunch of post-processing steps written by Mike
+            // No clue what any of this does... YS
+            curr = recursiveLift(curr); // Some kind of "Lambda lifting"
+
             myConjunction.addExpression(curr);
 
         }
@@ -162,6 +184,10 @@ public class ImmutableVC {
             PExp curr =
                     Utilities.replacePExp(PExp.buildPExp(myTypeGraph,
                             consequentIt.next()), myTypeGraph, Z, N);
+
+            // A bunch of post-processing steps written by Mike.
+            // No clue what any of this does... YS
+            curr = recursiveLift(curr); // Some kind of "Lambda lifting"
 
             // Temp: replace with eliminate()
             if (curr.getTopLevelOperation().equals("orB")) {
@@ -175,6 +201,74 @@ public class ImmutableVC {
                 addGoal(myRegistry.getSymbolForIndex(intRepForExp));
             }
         }
+
+        // Some more lambda lifting logic defined by Mike.
+        // No clue what any of this does... YS
+        for (PLambda p : myLiftedLambdas.keySet()) {
+            String name = myLiftedLambdas.get(p);
+            PExp body = p.getBody();
+            PSymbol lhs =
+                    new PSymbol(p.getMathType(), p.getMathTypeValue(), name, p
+                            .getParameters());
+            List<PExp> args = new ArrayList<>();
+            args.add(lhs);
+            args.add(body);
+            myLiftedLambdaPredicates.add(new PSymbol(myTypeGraph.BOOLEAN, null,
+                    "=", args));
+        }
+    }
+
+    /**
+     * <p>An helper method for recursively lift any lambda expressions.</p>
+     *
+     * @param p A {@link PExp}
+     *
+     * @return A potentially modified {@link PExp}.
+     */
+    private PExp recursiveLift(PExp p) {
+        List<PExp> newArgList = new ArrayList<>();
+        for (PExp p_s : p.getSubExpressions()) {
+            newArgList.add(recursiveLift(p_s));
+        }
+
+        if (p instanceof PLambda) {
+            // replace lam(x).F(x) wth F
+            PLambda pl = (PLambda) p;
+            PExp body = pl.getBody();
+            if ((pl.getParameters().size() == 1 && body
+                    .getQuantifiedVariables().size() == 1)
+                    && pl.getParameters().get(0).toString().equals(
+                    body.getQuantifiedVariables().iterator().next()
+                            .toString())
+                    && body.getSubExpressions().size() == 1
+                    && body.getSubExpressions().get(0).isVariable()) {
+                PSymbol funName =
+                        new PSymbol(new MTFunction(myTypeGraph, body.getMathType(),
+                                pl.getParameters().get(0).getMathType()), null,
+                                body.getTopLevelOperation());
+                return funName;
+            }
+
+            // Normalize parameters here
+            String lname;
+            PLambda normP = ((PLambda) p).withNormalizedParameterNames();
+            String lambdaCode = normP.toString();
+            if (!myLambdaCodes.containsKey(lambdaCode)) {
+                lname = "lambda" + myLambdaTag++;
+                myLambdaCodes.put(lambdaCode, normP);
+                myLiftedLambdas.put(normP, lname);
+            }
+            else {
+                PLambda foundLamb = myLambdaCodes.get(lambdaCode);
+                lname = myLiftedLambdas.get(foundLamb);
+            }
+
+            return new PSymbol(normP.getMathType(), normP.getMathTypeValue(), lname);
+
+        }
+
+        return new PSymbol(p.getMathType(), p.getMathTypeValue(), p
+                .getTopLevelOperation(), newArgList);
     }
 
     /*public String getName() {
@@ -185,15 +279,6 @@ public class ImmutableVC {
         }
 
         return retval;
-    }
-
-    public void convertAllToPsymbols(TypeGraph g) {
-        m_typegraph = g;
-        liftLambdas();
-        convertPAlternativesToCF();
-        replaceLambdaSymbols();
-        normalizeConditions();
-        uniquelyNameQuantifiers();
     }
 
     // ensures conditions are unique
@@ -449,77 +534,6 @@ public class ImmutableVC {
         m_liftedLambdaPredicates = converted;
     }
 
-    public void liftLambdas() {
-        ArrayList<PExp> newConjuncts = new ArrayList<PExp>();
-        java.util.List<PExp> a_p = myAntecedent.getMutableCopy();
-        for (PExp p : a_p) {
-            newConjuncts.add(recursiveLift(p));
-        }
-        myAntecedent = new Antecedent(newConjuncts);
-
-        newConjuncts.clear();
-        a_p = myConsequent.getMutableCopy();
-        for (PExp p : a_p) {
-            newConjuncts.add(recursiveLift(p));
-        }
-        myConsequent = new Consequent(newConjuncts);
-
-        for (PLambda p : m_liftedLamdas.keySet()) {
-            String name = m_liftedLamdas.get(p);
-            PExp body = p.getBody();
-            PSymbol lhs =
-                    new PSymbol(p.getType(), p.getTypeValue(), name, p
-                            .getParameters());
-            ArrayList<PExp> args = new ArrayList<PExp>();
-            args.add(lhs);
-            args.add(body);
-            m_liftedLambdaPredicates.add(new PSymbol(m_typegraph.BOOLEAN, null,
-                    "=", args));
-        }
-    }
-
-    private PExp recursiveLift(PExp p) {
-        ArrayList<PExp> newArgList = new ArrayList<PExp>();
-        for (PExp p_s : p.getSubExpressions()) {
-            newArgList.add(recursiveLift(p_s));
-        }
-        if (p instanceof PLambda) {
-            // replace lam(x).F(x) wth F
-            PLambda pl = (PLambda) p;
-            PExp body = pl.getBody();
-            if ((pl.getParameters().size() == 1 && body
-                    .getQuantifiedVariables().size() == 1)
-                    && pl.getParameters().get(0).toString().equals(
-                            body.getQuantifiedVariables().iterator().next()
-                                    .toString())
-                    && body.getSubExpressions().size() == 1
-                    && body.getSubExpressions().get(0).isVariable()) {
-                PSymbol funName =
-                        new PSymbol(new MTFunction(m_typegraph, body.getType(),
-                                pl.getParameters().get(0).getType()), null,
-                                body.getTopLevelOperation());
-                return funName;
-            }
-            String lname = "";
-            // Normalize parameters here
-            PLambda normP = ((PLambda) p).withNormalizedParameterNames();
-            String lambdaCode = normP.toString();
-            if (!m_lamdaCodes.containsKey(lambdaCode)) {
-                lname = "lambda" + m_lambdaTag++;
-                m_lamdaCodes.put(lambdaCode, (PLambda) normP);
-                m_liftedLamdas.put((PLambda) normP, lname);
-            }
-            else {
-                PLambda foundLamb = m_lamdaCodes.get(lambdaCode);
-                lname = m_liftedLamdas.get(foundLamb);
-            }
-            return new PSymbol(normP.getType(), normP.getTypeValue(), lname);
-
-        }
-        return new PSymbol(p.getType(), p.getTypeValue(), p
-                .getTopLevelOperation(), newArgList);
-    }
-
     public String getSourceName() {
         return myName;
     }
@@ -560,10 +574,6 @@ public class ImmutableVC {
             throw new RuntimeException(e);
         }
     }*/
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
 
     /**
      * <p>An helper method for adding default theorems for proving
