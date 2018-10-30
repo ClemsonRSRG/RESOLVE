@@ -14,9 +14,9 @@ package edu.clemson.cs.rsrg.prover.utilities;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.prover.absyn.PExp;
-import edu.clemson.cs.rsrg.prover.absyn.expressions.PLambda;
-import edu.clemson.cs.rsrg.prover.absyn.expressions.PSymbol;
+import edu.clemson.cs.rsrg.prover.absyn.expressions.*;
 import edu.clemson.cs.rsrg.prover.utilities.expressions.ConjunctionOfNormalizedAtomicExpressions;
+import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -78,25 +78,8 @@ public class ImmutableVC {
     /** <p>A mathematical type representing {@code Z}.</p> */
     private final MTType Z;
 
-    // -----------------------------------------------------------
-    // Used for Conversions
-    // -----------------------------------------------------------
-
-    /** <p>A map used for reverse lookup when lifting lambda expressions.</p> */
-    private final Map<String, PLambda> myLambdaCodes;
-
-    /** <p>A counter for keeping track of all lambda expressions.</p> */
-    private int myLambdaTag;
-
-    /** <p>A map used for lifting lambda expressions.</p> */
-    private final Map<PLambda, String> myLiftedLambdas;
-
-    /** <p>A list of lifted lambda predicates.</p> */
-    private final List<PSymbol> myLiftedLambdaPredicates;
-
     /*
     // PLambda objects aren't hashing correctly.  would have to get into haschode/eq methods of PExp heirarchy
-    public HashMap<String, PSymbol> rhsOfLamPredsToLamPreds;
     public java.util.Set<PExp> m_conditions;
     private int m_qVarTag = 0;
     private ImmutableVC liftedCopy; */
@@ -115,12 +98,6 @@ public class ImmutableVC {
         N = nType;
         Z = zType;
 
-        // A bunch of lists, sets and maps used for post-processing a PExp
-        myLambdaCodes = new HashMap<>();
-        myLambdaTag = 0;
-        myLiftedLambdas = new HashMap<>();
-        myLiftedLambdaPredicates = new ArrayList<>();
-
         myRegistry = new Registry(g);
         myConjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(this, myRegistry);
@@ -133,8 +110,7 @@ public class ImmutableVC {
         seedDefaultTheorems();
 
         /*
-        m_conditions = new HashSet<>();
-        rhsOfLamPredsToLamPreds = new HashMap<>();*/
+        m_conditions = new HashSet<>();*/
     }
 
     // ===========================================================
@@ -179,6 +155,13 @@ public class ImmutableVC {
 
         }
 
+        // Some conversion of PAlternative conversion written by Mike
+        // No clue what it does... YS
+        List<PExp> convertedPAlternatives = convertPAlternativesToCF();
+        for (PExp pExp : convertedPAlternatives) {
+            myConjunction.addExpression(pExp);
+        }
+
         Iterator<Exp> consequentIt = sequent.getConcequents().iterator();
         while (consequentIt.hasNext() && !myConjunction.evaluatesToFalse()) {
             PExp curr =
@@ -216,59 +199,6 @@ public class ImmutableVC {
             myLiftedLambdaPredicates.add(new PSymbol(myTypeGraph.BOOLEAN, null,
                     "=", args));
         }
-    }
-
-    /**
-     * <p>An helper method for recursively lift any lambda expressions.</p>
-     *
-     * @param p A {@link PExp}
-     *
-     * @return A potentially modified {@link PExp}.
-     */
-    private PExp recursiveLift(PExp p) {
-        List<PExp> newArgList = new ArrayList<>();
-        for (PExp p_s : p.getSubExpressions()) {
-            newArgList.add(recursiveLift(p_s));
-        }
-
-        if (p instanceof PLambda) {
-            // replace lam(x).F(x) wth F
-            PLambda pl = (PLambda) p;
-            PExp body = pl.getBody();
-            if ((pl.getParameters().size() == 1 && body
-                    .getQuantifiedVariables().size() == 1)
-                    && pl.getParameters().get(0).toString().equals(
-                    body.getQuantifiedVariables().iterator().next()
-                            .toString())
-                    && body.getSubExpressions().size() == 1
-                    && body.getSubExpressions().get(0).isVariable()) {
-                PSymbol funName =
-                        new PSymbol(new MTFunction(myTypeGraph, body.getMathType(),
-                                pl.getParameters().get(0).getMathType()), null,
-                                body.getTopLevelOperation());
-                return funName;
-            }
-
-            // Normalize parameters here
-            String lname;
-            PLambda normP = ((PLambda) p).withNormalizedParameterNames();
-            String lambdaCode = normP.toString();
-            if (!myLambdaCodes.containsKey(lambdaCode)) {
-                lname = "lambda" + myLambdaTag++;
-                myLambdaCodes.put(lambdaCode, normP);
-                myLiftedLambdas.put(normP, lname);
-            }
-            else {
-                PLambda foundLamb = myLambdaCodes.get(lambdaCode);
-                lname = myLiftedLambdas.get(foundLamb);
-            }
-
-            return new PSymbol(normP.getMathType(), normP.getMathTypeValue(), lname);
-
-        }
-
-        return new PSymbol(p.getMathType(), p.getMathTypeValue(), p
-                .getTopLevelOperation(), newArgList);
     }
 
     /*public String getName() {
@@ -360,111 +290,6 @@ public class ImmutableVC {
             m_liftedLambdaPredicates = n_Preds;
         }
 
-    }
-
-    public void convertPAlternativesToCF() {
-        ArrayList<PSymbol> converted = new ArrayList<PSymbol>();
-        ArrayList<PExp> noQuantConverted = new ArrayList<PExp>();
-        for (PSymbol p : m_liftedLambdaPredicates) {
-            if (p.arguments.size() == 2
-                    && p.arguments.get(1) instanceof PAlternatives) {
-                // lhs can't be a PALT
-                PExp lhs = p.arguments.get(0);
-                PExp rhs = p.arguments.get(1);
-                ArrayList<PExp> args = new ArrayList<PExp>();
-                PAlternatives asPa = (PAlternatives) rhs;
-                if (asPa.myAlternatives.size() > 1)
-                    throw new RuntimeException("Only 1 alternative supported");
-                PAlternatives.Alternative alt = asPa.myAlternatives.get(0);
-                PExp quantVar = lhs.getQuantifiedVariables().iterator().next();
-                PExp cond = alt.condition;
-                PExp conFunc = orderPlusOne(cond, quantVar, converted);
-                PExp posChoice = alt.result;
-                PExp posChoiceFun =
-                        orderPlusOne(posChoice, quantVar, converted);
-                PExp negChoice = asPa.myOtherwiseClauseResult;
-                PExp negChoiceFun =
-                        orderPlusOne(negChoice, quantVar, converted);
-                args.add(conFunc);
-                args.add(posChoiceFun);
-                args.add(negChoiceFun);
-                // remember to type this as Z->Entity
-                PSymbol cf =
-                        new PSymbol(posChoiceFun.getType(), null, "CF", args);
-                args.clear();
-                if (rhsOfLamPredsToLamPreds.containsKey(cf.toString())) {
-
-                }
-                else {
-                    PSymbol lhsPsym =
-                            new PSymbol(m_typegraph.BOOLEAN, null, lhs
-                                    .getTopLevelOperation(),
-                                    PSymbol.Quantification.NONE);
-                    args.add(lhsPsym);
-                    args.add(cf);
-                    PSymbol cfPred =
-                            new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-                    if (cfPred.getQuantifiedVariables().size() > 0)
-                        converted.add(cfPred);
-                    else
-                        noQuantConverted.add(cfPred);
-                }
-
-            }
-            else
-                converted.add(p);
-        }
-        m_liftedLambdaPredicates = converted;
-        java.util.List<PExp> aList = myAntecedent.getMutableCopy();
-        aList.addAll(noQuantConverted);
-        myAntecedent = new Antecedent(aList);
-    }
-
-    private PExp orderPlusOne(PExp thingToHigherOrder, PExp quantVar,
-            ArrayList<PSymbol> sideList) {
-        java.util.Set<PSymbol> qVarSet =
-                thingToHigherOrder.getQuantifiedVariables();
-        if (qVarSet.size() > 1)
-            throw new RuntimeException("Only 1 quantified var. supported");
-        // no need to always make a new function
-        String funStr = "";
-        if (qVarSet.size() == 1 && qVarSet.contains(quantVar)
-                && thingToHigherOrder.getSubExpressions().size() == 1) {
-            MTFunction hoType =
-                    new MTFunction(m_typegraph, thingToHigherOrder.getType(),
-                            quantVar.getType());
-            return new PSymbol(hoType, null, thingToHigherOrder
-                    .getTopLevelOperation());
-        }
-        PSymbol funName;
-        if (rhsOfLamPredsToLamPreds.containsKey(thingToHigherOrder.toString())) {
-            String fStr =
-                    rhsOfLamPredsToLamPreds.get(thingToHigherOrder.toString())
-                            .getSubExpressions().get(0).getTopLevelOperation();
-            return new PSymbol(new MTFunction(m_typegraph, thingToHigherOrder
-                    .getType(), quantVar.getType()), null, fStr);
-        }
-        else {
-            funName =
-                    new PSymbol(new MTFunction(m_typegraph, thingToHigherOrder
-                            .getType(), quantVar.getType()), null, "lambda"
-                            + (m_lambdaTag++));
-            ArrayList<PExp> args = new ArrayList<PExp>();
-            args.add(quantVar);
-            PSymbol funAppl =
-                    new PSymbol(thingToHigherOrder.getType(), null, funName
-                            .getTopLevelOperation(), args,
-                            PSymbol.Quantification.NONE);
-            args.clear();
-            args.add(funAppl);
-            args.add(thingToHigherOrder);
-            PSymbol conQuant =
-                    new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-            sideList.add(conQuant);
-            rhsOfLamPredsToLamPreds
-                    .put(thingToHigherOrder.toString(), conQuant);
-        }
-        return funName;
     }
 
     // Assumes lambdas lifted first
@@ -625,5 +450,232 @@ public class ImmutableVC {
         args.add(fls);
         PSymbol fandfeqf = new PSymbol(myTypeGraph.BOOLEAN, null, "=B", args);
         myConjunction.addExpression(fandfeqf);
+    }
+
+    /**
+     * <p>When building an {@link ImmutableVC}, both Mike and Hampton did a bunch of
+     * conversions. This class allows us to keep the same logic, but not have a separate
+     * Java class.</p>
+     */
+    private class AuxiliaryVCRepresentation {
+
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        /** <p>A map used for reverse lookup when lifting lambda expressions.</p> */
+        private final Map<String, PLambda> myLambdaCodes;
+
+        /** <p>A counter for keeping track of all lambda expressions.</p> */
+        private int myLambdaTag;
+
+        /** <p>A map used for lifting lambda expressions.</p> */
+        private final Map<PLambda, String> myLiftedLambdas;
+
+        /** <p>A list of lifted lambda predicates.</p> */
+        private List<PSymbol> myLiftedLambdaPredicates;
+
+        /** <p>A map used for the right hand side of lambda predicates.</p> */
+        private final Map<String, PSymbol> myRhsOfLamPredsToLamPreds;
+
+        // ===========================================================
+        // Constructors
+        // ===========================================================
+
+        /**
+         * <p>This constructs an auxiliary VC representation.</p>
+         */
+        AuxiliaryVCRepresentation() {
+            // A bunch of lists, sets and maps used for post-processing a PExp
+            myLambdaCodes = new HashMap<>();
+            myLambdaTag = 0;
+            myLiftedLambdas = new HashMap<>();
+            myLiftedLambdaPredicates = new ArrayList<>();
+            myRhsOfLamPredsToLamPreds = new HashMap<>();
+        }
+
+        // ===========================================================
+        // Public Methods
+        // ===========================================================
+
+        /**
+         * <p>An helper method for converting {@link PAlternatives}.</p>
+         *
+         * @return A list of converted {@link PExp PExps}.
+         */
+        public List<PExp> convertPAlternativesToCF() {
+            List<PSymbol> converted = new ArrayList<>();
+            List<PExp> noQuantConverted = new ArrayList<>();
+            for (PSymbol p : myLiftedLambdaPredicates) {
+                if (p.arguments.size() == 2
+                        && p.arguments.get(1) instanceof PAlternatives) {
+                    // lhs can't be a PALT
+                    PExp lhs = p.arguments.get(0);
+                    PExp rhs = p.arguments.get(1);
+                    List<PExp> args = new ArrayList<>();
+                    PAlternatives asPa = (PAlternatives) rhs;
+                    if (asPa.myAlternatives.size() > 1) {
+                        throw new MiscErrorException("[Prover] Only 1 alternative supported", new RuntimeException());
+                    }
+
+                    PAlternatives.Alternative alt = asPa.myAlternatives.get(0);
+                    PExp quantVar = lhs.getQuantifiedVariables().iterator().next();
+                    PExp cond = alt.condition;
+                    PExp conFunc = orderPlusOne(cond, quantVar, converted);
+                    PExp posChoice = alt.result;
+                    PExp posChoiceFun =
+                            orderPlusOne(posChoice, quantVar, converted);
+                    PExp negChoice = asPa.myOtherwiseClauseResult;
+                    PExp negChoiceFun =
+                            orderPlusOne(negChoice, quantVar, converted);
+                    args.add(conFunc);
+                    args.add(posChoiceFun);
+                    args.add(negChoiceFun);
+
+                    // remember to type this as Z->Entity
+                    PSymbol cf =
+                            new PSymbol(posChoiceFun.getMathType(), null, "CF", args);
+                    args.clear();
+                    if (!myRhsOfLamPredsToLamPreds.containsKey(cf.toString())) {
+                        PSymbol lhsPsym =
+                                new PSymbol(myTypeGraph.BOOLEAN, null, lhs
+                                        .getTopLevelOperation(),
+                                        PSymbol.Quantification.NONE);
+                        args.add(lhsPsym);
+                        args.add(cf);
+                        PSymbol cfPred =
+                                new PSymbol(myTypeGraph.BOOLEAN, null, "=", args);
+                        if (cfPred.getQuantifiedVariables().size() > 0)
+                            converted.add(cfPred);
+                        else
+                            noQuantConverted.add(cfPred);
+                    }
+
+                }
+                else
+                    converted.add(p);
+            }
+
+            myLiftedLambdaPredicates = converted;
+
+            return noQuantConverted;
+        }
+
+        // ===========================================================
+        // Private Methods
+        // ===========================================================
+
+        /**
+         * <p>An helper method for dealing with quantified symbols.</p
+         * >
+         * @param thingToHigherOrder An expression that contains the quantified variable.
+         * @param quantVar A quantified variable
+         * @param sideList A list of prover symbols
+         *
+         * @return A new name for the quantified variable.
+         */
+        private PExp orderPlusOne(PExp thingToHigherOrder, PExp quantVar, List<PSymbol> sideList) {
+            Set<PSymbol> qVarSet =
+                    thingToHigherOrder.getQuantifiedVariables();
+            if (qVarSet.size() > 1) {
+                throw new MiscErrorException("[Prover] Only 1 quantified var. supported", new RuntimeException());
+            }
+
+            // no need to always make a new function
+            if (qVarSet.size() == 1 && qVarSet.contains(quantVar)
+                    && thingToHigherOrder.getSubExpressions().size() == 1) {
+                MTFunction hoType =
+                        new MTFunction(myTypeGraph, thingToHigherOrder.getMathType(),
+                                quantVar.getMathType());
+
+                return new PSymbol(hoType, null, thingToHigherOrder
+                        .getTopLevelOperation());
+            }
+
+            PSymbol funName;
+            if (myRhsOfLamPredsToLamPreds.containsKey(thingToHigherOrder.toString())) {
+                String fStr =
+                        myRhsOfLamPredsToLamPreds.get(thingToHigherOrder.toString())
+                                .getSubExpressions().get(0).getTopLevelOperation();
+
+                return new PSymbol(new MTFunction(myTypeGraph, thingToHigherOrder
+                        .getMathType(), quantVar.getMathType()), null, fStr);
+            }
+            else {
+                funName =
+                        new PSymbol(new MTFunction(myTypeGraph, thingToHigherOrder
+                                .getMathType(), quantVar.getMathType()), null, "lambda"
+                                + (myLambdaTag++));
+                List<PExp> args = new ArrayList<>();
+                args.add(quantVar);
+                PSymbol funAppl =
+                        new PSymbol(thingToHigherOrder.getMathType(), null, funName
+                                .getTopLevelOperation(), args,
+                                PSymbol.Quantification.NONE);
+                args.clear();
+                args.add(funAppl);
+                args.add(thingToHigherOrder);
+                PSymbol conQuant =
+                        new PSymbol(myTypeGraph.BOOLEAN, null, "=", args);
+                sideList.add(conQuant);
+                myRhsOfLamPredsToLamPreds
+                        .put(thingToHigherOrder.toString(), conQuant);
+            }
+
+            return funName;
+        }
+
+        /**
+         * <p>An helper method for recursively lift any lambda expressions.</p>
+         *
+         * @param p A {@link PExp}
+         *
+         * @return A potentially modified {@link PExp}.
+         */
+        private PExp recursiveLift(PExp p) {
+            List<PExp> newArgList = new ArrayList<>();
+            for (PExp p_s : p.getSubExpressions()) {
+                newArgList.add(recursiveLift(p_s));
+            }
+
+            if (p instanceof PLambda) {
+                // replace lam(x).F(x) wth F
+                PLambda pl = (PLambda) p;
+                PExp body = pl.getBody();
+                if ((pl.getParameters().size() == 1 && body
+                        .getQuantifiedVariables().size() == 1)
+                        && pl.getParameters().get(0).toString().equals(
+                        body.getQuantifiedVariables().iterator().next()
+                                .toString())
+                        && body.getSubExpressions().size() == 1
+                        && body.getSubExpressions().get(0).isVariable()) {
+                    PSymbol funName =
+                            new PSymbol(new MTFunction(myTypeGraph, body.getMathType(),
+                                    pl.getParameters().get(0).getMathType()), null,
+                                    body.getTopLevelOperation());
+                    return funName;
+                }
+
+                // Normalize parameters here
+                String lname;
+                PLambda normP = ((PLambda) p).withNormalizedParameterNames();
+                String lambdaCode = normP.toString();
+                if (!myLambdaCodes.containsKey(lambdaCode)) {
+                    lname = "lambda" + myLambdaTag++;
+                    myLambdaCodes.put(lambdaCode, normP);
+                    myLiftedLambdas.put(normP, lname);
+                }
+                else {
+                    PLambda foundLamb = myLambdaCodes.get(lambdaCode);
+                    lname = myLiftedLambdas.get(foundLamb);
+                }
+
+                return new PSymbol(normP.getMathType(), normP.getMathTypeValue(), lname);
+
+            }
+
+            return new PSymbol(p.getMathType(), p.getMathTypeValue(), p
+                    .getTopLevelOperation(), newArgList);
+        }
     }
 }
