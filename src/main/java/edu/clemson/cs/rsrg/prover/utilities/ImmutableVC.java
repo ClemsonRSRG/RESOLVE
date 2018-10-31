@@ -147,10 +147,6 @@ public class ImmutableVC {
                     Utilities.replacePExp(PExp.buildPExp(myTypeGraph,
                             antecedentIt.next()), myTypeGraph, Z, N);
 
-            // A bunch of post-processing steps written by Mike
-            // No clue what any of this does... YS
-            curr = recursiveLift(curr); // Some kind of "Lambda lifting"
-
             myConjunction.addExpression(curr);
 
         }
@@ -168,10 +164,6 @@ public class ImmutableVC {
                     Utilities.replacePExp(PExp.buildPExp(myTypeGraph,
                             consequentIt.next()), myTypeGraph, Z, N);
 
-            // A bunch of post-processing steps written by Mike.
-            // No clue what any of this does... YS
-            curr = recursiveLift(curr); // Some kind of "Lambda lifting"
-
             // Temp: replace with eliminate()
             if (curr.getTopLevelOperation().equals("orB")) {
                 addGoal(myRegistry.getSymbolForIndex(myConjunction
@@ -183,21 +175,6 @@ public class ImmutableVC {
                 int intRepForExp = myConjunction.addFormula(curr);
                 addGoal(myRegistry.getSymbolForIndex(intRepForExp));
             }
-        }
-
-        // Some more lambda lifting logic defined by Mike.
-        // No clue what any of this does... YS
-        for (PLambda p : myLiftedLambdas.keySet()) {
-            String name = myLiftedLambdas.get(p);
-            PExp body = p.getBody();
-            PSymbol lhs =
-                    new PSymbol(p.getMathType(), p.getMathTypeValue(), name, p
-                            .getParameters());
-            List<PExp> args = new ArrayList<>();
-            args.add(lhs);
-            args.add(body);
-            myLiftedLambdaPredicates.add(new PSymbol(myTypeGraph.BOOLEAN, null,
-                    "=", args));
         }
     }
 
@@ -463,6 +440,12 @@ public class ImmutableVC {
         // Member Fields
         // ===========================================================
 
+        /** <p>A list of antecedents.</p> */
+        private List<PExp> myAntecedents;
+
+        /** <p>A list of consequents.</p> */
+        private List<PExp> myConsequents;
+
         /** <p>A map used for reverse lookup when lifting lambda expressions.</p> */
         private final Map<String, PLambda> myLambdaCodes;
 
@@ -484,26 +467,93 @@ public class ImmutableVC {
 
         /**
          * <p>This constructs an auxiliary VC representation.</p>
+         *
+         * @param sequent Sequent VC.
          */
-        AuxiliaryVCRepresentation() {
+        AuxiliaryVCRepresentation(Sequent sequent) {
+            myAntecedents = new LinkedList<>();
+            myConsequents = new LinkedList<>();
+            convertSequentVC(sequent);
+
             // A bunch of lists, sets and maps used for post-processing a PExp
             myLambdaCodes = new HashMap<>();
             myLambdaTag = 0;
             myLiftedLambdas = new HashMap<>();
             myLiftedLambdaPredicates = new ArrayList<>();
             myRhsOfLamPredsToLamPreds = new HashMap<>();
+
+            // A bunch of conversions defined by Mike
+            // No clue what any of it does... YS
+            liftLambdas();
+            convertPAlternativesToCF();
+            replaceLambdaSymbols();
+            normalizeConditions();
+            uniquelyNameQuantifiers();
         }
 
         // ===========================================================
-        // Public Methods
+        // Private Methods
         // ===========================================================
+
+        /**
+         * <p>An helper method for processing the sequent in a {@code VC}.</p>
+         *
+         * @param sequent Sequent VC.
+         */
+        private void convertSequentVC(Sequent sequent) {
+            for (Exp exp1 : sequent.getAntecedents()) {
+                myAntecedents.add(Utilities.replacePExp(PExp.buildPExp(
+                        myTypeGraph, exp1), myTypeGraph, Z, N));
+
+            }
+
+            for (Exp exp : sequent.getConcequents()) {
+                myConsequents.add(Utilities.replacePExp(PExp.buildPExp(
+                        myTypeGraph, exp), myTypeGraph, Z, N));
+            }
+        }
+
+        /**
+         * <p>An helper method for lifting lambda expressions.</p>
+         */
+        private void liftLambdas() {
+            // Convert the antecedents expressions
+            List<PExp> newAntecedents = new ArrayList<>();
+            for (PExp p : myAntecedents) {
+                newAntecedents.add(recursiveLift(p));
+            }
+            myAntecedents = newAntecedents;
+
+            // Convert the consequent expressions
+            List<PExp> newConsequents = new ArrayList<>();
+            for (PExp p : myConsequents) {
+                newConsequents.add(recursiveLift(p));
+            }
+            myConsequents = newConsequents;
+
+            // Some more lambda lifting logic defined by Mike.
+            // No clue what any of this does... YS
+            for (PLambda p : myLiftedLambdas.keySet()) {
+                String name = myLiftedLambdas.get(p);
+                PExp body = p.getBody();
+                PSymbol lhs =
+                        new PSymbol(p.getMathType(), p.getMathTypeValue(), name, p
+                                .getParameters());
+
+                List<PExp> args = new ArrayList<>();
+                args.add(lhs);
+                args.add(body);
+                myLiftedLambdaPredicates.add(new PSymbol(myTypeGraph.BOOLEAN, null,
+                        "=", args));
+            }
+        }
 
         /**
          * <p>An helper method for converting {@link PAlternatives}.</p>
          *
          * @return A list of converted {@link PExp PExps}.
          */
-        public List<PExp> convertPAlternativesToCF() {
+        /*private List<PExp> convertPAlternativesToCF() {
             List<PSymbol> converted = new ArrayList<>();
             List<PExp> noQuantConverted = new ArrayList<>();
             for (PSymbol p : myLiftedLambdaPredicates) {
@@ -559,11 +609,7 @@ public class ImmutableVC {
             myLiftedLambdaPredicates = converted;
 
             return noQuantConverted;
-        }
-
-        // ===========================================================
-        // Private Methods
-        // ===========================================================
+        }*/
 
         /**
          * <p>An helper method for dealing with quantified symbols.</p
