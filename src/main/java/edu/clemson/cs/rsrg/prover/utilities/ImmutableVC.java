@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.prover.utilities;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.prover.absyn.PExp;
 import edu.clemson.cs.rsrg.prover.absyn.expressions.*;
+import edu.clemson.cs.rsrg.prover.immutableadts.ImmutableList;
 import edu.clemson.cs.rsrg.prover.utilities.expressions.ConjunctionOfNormalizedAtomicExpressions;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTFunction;
@@ -235,38 +236,6 @@ public class ImmutableVC {
             //m_qVarTag = 0;
         }
         m_conditions = replacement;
-    }
-
-    public void replaceLambdaSymbols() {
-        Map<PExp, PExp> substMap = new HashMap<PExp, PExp>();
-        ArrayList<PExp> newConjuncts = new ArrayList<PExp>();
-        java.util.List<PExp> a_p = myAntecedent.getMutableCopy();
-        // build map
-        for (PExp p : a_p) {
-            if (p.isEquality()) {
-                ImmutableList<PExp> args = p.getSubExpressions();
-                PExp args0 = args.get(0);
-                PExp args1 = args.get(1);
-                if (args0.isVariable() && args1.isVariable()) {
-                    if (args0.getTopLevelOperation().contains("lambda")) {
-                        substMap.put(args0, args1);
-                    }
-                    else if (args1.getTopLevelOperation().contains("lambda")) {
-                        substMap.put(args1, args0);
-                    }
-                }
-            }
-        }
-        if (!substMap.isEmpty()) {
-            myAntecedent = new Antecedent(myAntecedent.substitute(substMap));
-            myConsequent = new Consequent(myConsequent.substitute(substMap));
-            ArrayList<PSymbol> n_Preds = new ArrayList<PSymbol>();
-            for (PSymbol p : m_liftedLambdaPredicates) {
-                n_Preds.add((PSymbol) p.substitute(substMap));
-            }
-            m_liftedLambdaPredicates = n_Preds;
-        }
-
     }
 
     // Assumes lambdas lifted first
@@ -721,6 +690,55 @@ public class ImmutableVC {
 
             return new PSymbol(p.getMathType(), p.getMathTypeValue(), p
                     .getTopLevelOperation(), newArgList);
+        }
+
+        /**
+         * <p>An helper method for replacing lambda symbols.</p>
+         */
+        private void replaceLambdaSymbols() {
+            Map<PExp, PExp> substMap = new HashMap<>();
+            List<PExp> newConjuncts = new ArrayList<>();
+            // build map
+            for (PExp p : myAntecedents) {
+                if (p.isEquality()) {
+                    ImmutableList<PExp> args = p.getSubExpressions();
+                    PExp args0 = args.get(0);
+                    PExp args1 = args.get(1);
+                    if (args0.isVariable() && args1.isVariable()) {
+                        if (args0.getTopLevelOperation().contains("lambda")) {
+                            substMap.put(args0, args1);
+                        }
+                        else if (args1.getTopLevelOperation().contains("lambda")) {
+                            substMap.put(args1, args0);
+                        }
+                    }
+                }
+            }
+
+            if (!substMap.isEmpty()) {
+                // Replace antecedent expressions.
+                List<PExp> newAntecedents = new ArrayList<>();
+                for (PExp exp : myAntecedents) {
+                    newAntecedents.add(exp.substitute(substMap));
+
+                }
+                myAntecedents = newAntecedents;
+
+                // Replace consequent expressions.
+                List<PExp> newConsequents = new ArrayList<>();
+                for (PExp exp : myConsequents) {
+                    newConsequents.add(exp.substitute(substMap));
+
+                }
+                myConsequents = newConsequents;
+
+                // Replace the lifted lambda predicates map
+                List<PSymbol> n_Preds = new ArrayList<>();
+                for (PSymbol p : myLiftedLambdaPredicates) {
+                    n_Preds.add((PSymbol) p.substitute(substMap));
+                }
+                myLiftedLambdaPredicates = n_Preds;
+            }
         }
     }
 }
