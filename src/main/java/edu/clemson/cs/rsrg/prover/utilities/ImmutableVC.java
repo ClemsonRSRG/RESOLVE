@@ -496,6 +496,69 @@ public class ImmutableVC {
         // ===========================================================
 
         /**
+         * <p>An helper method for converting {@link PAlternatives}.</p>
+         */
+        private void convertPAlternativesToCF() {
+            List<PSymbol> converted = new ArrayList<>();
+            List<PExp> noQuantConverted = new ArrayList<>();
+            for (PSymbol p : myLiftedLambdaPredicates) {
+                if (p.arguments.size() == 2
+                        && p.arguments.get(1) instanceof PAlternatives) {
+                    // lhs can't be a PALT
+                    PExp lhs = p.arguments.get(0);
+                    PExp rhs = p.arguments.get(1);
+                    List<PExp> args = new ArrayList<>();
+                    PAlternatives asPa = (PAlternatives) rhs;
+                    if (asPa.myAlternatives.size() > 1) {
+                        throw new MiscErrorException("[Prover] Only 1 alternative supported", new RuntimeException());
+                    }
+
+                    PAlternatives.Alternative alt = asPa.myAlternatives.get(0);
+                    PExp quantVar = lhs.getQuantifiedVariables().iterator().next();
+                    PExp cond = alt.condition;
+                    PExp conFunc = orderPlusOne(cond, quantVar, converted);
+                    PExp posChoice = alt.result;
+                    PExp posChoiceFun =
+                            orderPlusOne(posChoice, quantVar, converted);
+                    PExp negChoice = asPa.myOtherwiseClauseResult;
+                    PExp negChoiceFun =
+                            orderPlusOne(negChoice, quantVar, converted);
+                    args.add(conFunc);
+                    args.add(posChoiceFun);
+                    args.add(negChoiceFun);
+                    // remember to type this as Z->Entity
+                    PSymbol cf =
+                            new PSymbol(posChoiceFun.getMathType(), null, "CF", args);
+                    args.clear();
+                    if (!myRhsOfLamPredsToLamPreds.containsKey(cf.toString())) {
+                        PSymbol lhsPsym =
+                                new PSymbol(myTypeGraph.BOOLEAN, null, lhs
+                                        .getTopLevelOperation(),
+                                        PSymbol.Quantification.NONE);
+                        args.add(lhsPsym);
+                        args.add(cf);
+
+                        PSymbol cfPred =
+                                new PSymbol(myTypeGraph.BOOLEAN, null, "=", args);
+                        if (cfPred.getQuantifiedVariables().size() > 0) {
+                            converted.add(cfPred);
+                        }
+                        else {
+                            noQuantConverted.add(cfPred);
+                        }
+                    }
+
+                }
+                else {
+                    converted.add(p);
+                }
+            }
+
+            myLiftedLambdaPredicates = converted;
+            myAntecedents.addAll(noQuantConverted);
+        }
+
+        /**
          * <p>An helper method for processing the sequent in a {@code VC}.</p>
          *
          * @param sequent Sequent VC.
@@ -547,69 +610,6 @@ public class ImmutableVC {
                         "=", args));
             }
         }
-
-        /**
-         * <p>An helper method for converting {@link PAlternatives}.</p>
-         *
-         * @return A list of converted {@link PExp PExps}.
-         */
-        /*private List<PExp> convertPAlternativesToCF() {
-            List<PSymbol> converted = new ArrayList<>();
-            List<PExp> noQuantConverted = new ArrayList<>();
-            for (PSymbol p : myLiftedLambdaPredicates) {
-                if (p.arguments.size() == 2
-                        && p.arguments.get(1) instanceof PAlternatives) {
-                    // lhs can't be a PALT
-                    PExp lhs = p.arguments.get(0);
-                    PExp rhs = p.arguments.get(1);
-                    List<PExp> args = new ArrayList<>();
-                    PAlternatives asPa = (PAlternatives) rhs;
-                    if (asPa.myAlternatives.size() > 1) {
-                        throw new MiscErrorException("[Prover] Only 1 alternative supported", new RuntimeException());
-                    }
-
-                    PAlternatives.Alternative alt = asPa.myAlternatives.get(0);
-                    PExp quantVar = lhs.getQuantifiedVariables().iterator().next();
-                    PExp cond = alt.condition;
-                    PExp conFunc = orderPlusOne(cond, quantVar, converted);
-                    PExp posChoice = alt.result;
-                    PExp posChoiceFun =
-                            orderPlusOne(posChoice, quantVar, converted);
-                    PExp negChoice = asPa.myOtherwiseClauseResult;
-                    PExp negChoiceFun =
-                            orderPlusOne(negChoice, quantVar, converted);
-                    args.add(conFunc);
-                    args.add(posChoiceFun);
-                    args.add(negChoiceFun);
-
-                    // remember to type this as Z->Entity
-                    PSymbol cf =
-                            new PSymbol(posChoiceFun.getMathType(), null, "CF", args);
-                    args.clear();
-                    if (!myRhsOfLamPredsToLamPreds.containsKey(cf.toString())) {
-                        PSymbol lhsPsym =
-                                new PSymbol(myTypeGraph.BOOLEAN, null, lhs
-                                        .getTopLevelOperation(),
-                                        PSymbol.Quantification.NONE);
-                        args.add(lhsPsym);
-                        args.add(cf);
-                        PSymbol cfPred =
-                                new PSymbol(myTypeGraph.BOOLEAN, null, "=", args);
-                        if (cfPred.getQuantifiedVariables().size() > 0)
-                            converted.add(cfPred);
-                        else
-                            noQuantConverted.add(cfPred);
-                    }
-
-                }
-                else
-                    converted.add(p);
-            }
-
-            myLiftedLambdaPredicates = converted;
-
-            return noQuantConverted;
-        }*/
 
         /**
          * <p>An helper method for dealing with quantified symbols.</p
@@ -695,11 +695,10 @@ public class ImmutableVC {
                                 .toString())
                         && body.getSubExpressions().size() == 1
                         && body.getSubExpressions().get(0).isVariable()) {
-                    PSymbol funName =
-                            new PSymbol(new MTFunction(myTypeGraph, body.getMathType(),
-                                    pl.getParameters().get(0).getMathType()), null,
-                                    body.getTopLevelOperation());
-                    return funName;
+
+                    return new PSymbol(new MTFunction(myTypeGraph, body.getMathType(),
+                            pl.getParameters().get(0).getMathType()), null,
+                            body.getTopLevelOperation());
                 }
 
                 // Normalize parameters here
