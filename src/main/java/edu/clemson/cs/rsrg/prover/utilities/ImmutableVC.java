@@ -81,8 +81,6 @@ public class ImmutableVC {
 
     /*
     // PLambda objects aren't hashing correctly.  would have to get into haschode/eq methods of PExp heirarchy
-    public java.util.Set<PExp> m_conditions;
-    private int m_qVarTag = 0;
     private ImmutableVC liftedCopy; */
 
     // ===========================================================
@@ -109,9 +107,6 @@ public class ImmutableVC {
 
         // Add default theorems for proving a VC
         seedDefaultTheorems();
-
-        /*
-        m_conditions = new HashSet<>();*/
     }
 
     // ===========================================================
@@ -187,33 +182,6 @@ public class ImmutableVC {
         }
 
         return retval;
-    }
-
-    // ensures conditions are unique
-    public void normalizeConditions() {
-        java.util.HashSet<PExp> replacement = new java.util.HashSet<PExp>();
-        java.util.HashSet<String> inSet = new java.util.HashSet<String>();
-        for (PExp p : m_conditions) {
-            // replace the qVars dup with normalized names
-            java.util.Set<PSymbol> qVars = p.getQuantifiedVariables();
-            HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
-            for (PSymbol pq : qVars) {
-                PSymbol repP =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), pq
-                                .getType().toString()
-                                + m_qVarTag++, pq.quantification);
-                substMap.put(pq, repP);
-            }
-            if (!substMap.isEmpty()) {
-                p = (PSymbol) p.substitute(substMap);
-            }
-            if (!inSet.contains(p.toString())) {
-                replacement.add(p);
-                inSet.add(p.toString());
-            }
-            m_qVarTag = 0;
-        }
-        m_conditions = replacement;
     }
 
     public void uniquelyNameQuantifiers() {
@@ -415,6 +383,13 @@ public class ImmutableVC {
         /** <p>A list of consequents.</p> */
         private List<PExp> myConsequents;
 
+        // -----------------------------------------------------------
+        // Conversion-Related
+        // -----------------------------------------------------------
+
+        /** <p>A set of condition expressions.</p> */
+        private Set<PExp> myConditions;
+
         /** <p>A map used for reverse lookup when lifting lambda expressions.</p> */
         private final Map<String, PLambda> myLambdaCodes;
 
@@ -426,6 +401,9 @@ public class ImmutableVC {
 
         /** <p>A list of lifted lambda predicates.</p> */
         private List<PSymbol> myLiftedLambdaPredicates;
+
+        /** <p>A counter for keeping track of all quantified variables.</p> */
+        private int myQVarTag;
 
         /** <p>A map used for the right hand side of lambda predicates.</p> */
         private final Map<String, PSymbol> myRhsOfLamPredsToLamPreds;
@@ -445,10 +423,12 @@ public class ImmutableVC {
             convertSequentVC(sequent);
 
             // A bunch of lists, sets and maps used for post-processing a PExp
+            myConditions = new HashSet<>();
             myLambdaCodes = new HashMap<>();
             myLambdaTag = 0;
             myLiftedLambdas = new HashMap<>();
             myLiftedLambdaPredicates = new ArrayList<>();
+            myQVarTag = 0;
             myRhsOfLamPredsToLamPreds = new HashMap<>();
 
             // A bunch of conversions defined by Mike
@@ -578,6 +558,42 @@ public class ImmutableVC {
                 myLiftedLambdaPredicates.add(new PSymbol(myTypeGraph.BOOLEAN, null,
                         "=", args));
             }
+        }
+
+        // ensures conditions are unique
+
+        /**
+         * <p>An helper method for normalizing condition and ensures that
+         * they are unique.</p>
+         */
+        private void normalizeConditions() {
+            Set<PExp> replacement = new HashSet<>();
+            Set<String> inSet = new HashSet<>();
+            for (PExp p : myConditions) {
+                // replace the qVars dup with normalized names
+                Set<PSymbol> qVars = p.getQuantifiedVariables();
+                Map<PExp, PExp> substMap = new HashMap<>();
+                for (PSymbol pq : qVars) {
+                    PSymbol repP =
+                            new PSymbol(pq.getMathType(), pq.getMathTypeValue(), pq
+                                    .getMathType().toString()
+                                    + myQVarTag++, pq.quantification);
+                    substMap.put(pq, repP);
+                }
+
+                if (!substMap.isEmpty()) {
+                    p = p.substitute(substMap);
+                }
+
+                if (!inSet.contains(p.toString())) {
+                    replacement.add(p);
+                    inSet.add(p.toString());
+                }
+
+                myQVarTag = 0;
+            }
+
+            myConditions = replacement;
         }
 
         /**
