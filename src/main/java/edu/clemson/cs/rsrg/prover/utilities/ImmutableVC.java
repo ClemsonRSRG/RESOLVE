@@ -184,95 +184,6 @@ public class ImmutableVC {
         return retval;
     }
 
-    public void uniquelyNameQuantifiers() {
-        java.util.HashSet<PExp> replacement = new java.util.HashSet<PExp>();
-        for (PExp p : m_conditions) {
-            // replace the qVars dup with unique names
-            java.util.Set<PSymbol> qVars = p.getQuantifiedVariables();
-            HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
-            for (PSymbol pq : qVars) {
-                PSymbol repP =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), "¢vl"
-                                + pq.getType().toString() + m_qVarTag++,
-                                pq.quantification);
-                substMap.put(pq, repP);
-            }
-            if (!substMap.isEmpty()) {
-                p = (PSymbol) p.substitute(substMap);
-            }
-            replacement.add(p);
-            //m_qVarTag = 0;
-        }
-        m_conditions = replacement;
-    }
-
-    // Assumes lambdas lifted first
-    // Assumes all remaining PAlternatives are in m_liftedLambdaPredicates
-    public void convertPAlternativesToImplications() {
-        ArrayList<PSymbol> converted = new ArrayList<PSymbol>();
-        for (PSymbol p : m_liftedLambdaPredicates) {
-            if (p.arguments.size() == 2) {
-                // lhs can't be a PALT
-                PExp lhs = p.arguments.get(0);
-                PExp rhs = p.arguments.get(1);
-                if (rhs instanceof PAlternatives) {
-                    PAlternatives asPa = (PAlternatives) rhs;
-                    ArrayList<PExp> conditions = new ArrayList<PExp>();
-                    for (PAlternatives.Alternative pa : asPa.myAlternatives) {
-                        conditions.add(pa.condition);
-                        ArrayList<PExp> args = new ArrayList<PExp>();
-                        args.add(lhs);
-                        args.add(pa.result);
-                        PSymbol ant =
-                                new PSymbol(m_typegraph.BOOLEAN, null, "=",
-                                        args);
-
-                        args.clear();
-                        args.add(pa.condition);
-                        args.add(ant);
-                        PSymbol pc =
-                                new PSymbol(m_typegraph.BOOLEAN, null,
-                                        "implies", args);
-                        converted.add(pc);
-                        m_conditions.add(pa.condition);
-                    }
-
-                    // do otherwise clause
-                    if (conditions.size() > 1) {
-                        // make conjunction
-                    }
-                    else {
-                        ArrayList<PExp> args = new ArrayList<PExp>();
-                        args.add(conditions.get(0));
-                        PExp neg =
-                                new PSymbol(m_typegraph.BOOLEAN, null, "not",
-                                        args);
-                        args.clear();
-
-                        args.add(lhs);
-                        args.add(asPa.myOtherwiseClauseResult);
-                        PExp eq =
-                                new PSymbol(m_typegraph.BOOLEAN, null, "=",
-                                        args);
-                        args.clear();
-                        args.add(neg);
-                        args.add(eq);
-                        converted.add(new PSymbol(m_typegraph.BOOLEAN, null,
-                                "implies", args));
-                        //m_conditions.add(neg);
-                    }
-
-                }
-                // No PAlt
-                else {
-                    converted.add(p);
-                }
-            }
-
-        }
-        m_liftedLambdaPredicates = converted;
-    }
-
     public String getSourceName() {
         return myName;
     }
@@ -506,6 +417,73 @@ public class ImmutableVC {
             myLiftedLambdaPredicates = converted;
             myAntecedents.addAll(noQuantConverted);
         }
+
+        // Assumes lambdas lifted first
+        // Assumes all remaining PAlternatives are in m_liftedLambdaPredicates
+        /*public void convertPAlternativesToImplications() {
+            ArrayList<PSymbol> converted = new ArrayList<PSymbol>();
+            for (PSymbol p : m_liftedLambdaPredicates) {
+                if (p.arguments.size() == 2) {
+                    // lhs can't be a PALT
+                    PExp lhs = p.arguments.get(0);
+                    PExp rhs = p.arguments.get(1);
+                    if (rhs instanceof PAlternatives) {
+                        PAlternatives asPa = (PAlternatives) rhs;
+                        ArrayList<PExp> conditions = new ArrayList<PExp>();
+                        for (PAlternatives.Alternative pa : asPa.myAlternatives) {
+                            conditions.add(pa.condition);
+                            ArrayList<PExp> args = new ArrayList<PExp>();
+                            args.add(lhs);
+                            args.add(pa.result);
+                            PSymbol ant =
+                                    new PSymbol(m_typegraph.BOOLEAN, null, "=",
+                                            args);
+
+                            args.clear();
+                            args.add(pa.condition);
+                            args.add(ant);
+                            PSymbol pc =
+                                    new PSymbol(m_typegraph.BOOLEAN, null,
+                                            "implies", args);
+                            converted.add(pc);
+                            m_conditions.add(pa.condition);
+                        }
+
+                        // do otherwise clause
+                        if (conditions.size() > 1) {
+                            // make conjunction
+                        }
+                        else {
+                            ArrayList<PExp> args = new ArrayList<PExp>();
+                            args.add(conditions.get(0));
+                            PExp neg =
+                                    new PSymbol(m_typegraph.BOOLEAN, null, "not",
+                                            args);
+                            args.clear();
+
+                            args.add(lhs);
+                            args.add(asPa.myOtherwiseClauseResult);
+                            PExp eq =
+                                    new PSymbol(m_typegraph.BOOLEAN, null, "=",
+                                            args);
+                            args.clear();
+                            args.add(neg);
+                            args.add(eq);
+                            converted.add(new PSymbol(m_typegraph.BOOLEAN, null,
+                                    "implies", args));
+                            //m_conditions.add(neg);
+                        }
+
+                    }
+                    // No PAlt
+                    else {
+                        converted.add(p);
+                    }
+                }
+
+            }
+            m_liftedLambdaPredicates = converted;
+        }*/
 
         /**
          * <p>An helper method for processing the sequent in a {@code VC}.</p>
@@ -755,6 +733,33 @@ public class ImmutableVC {
                 }
                 myLiftedLambdaPredicates = n_Preds;
             }
+        }
+
+        /**
+         * <p>An helper method for creating unique named quantifiers.</p>
+         */
+        private void uniquelyNameQuantifiers() {
+            Set<PExp> replacement = new HashSet<>();
+            for (PExp p : myConditions) {
+                // replace the qVars dup with unique names
+                Set<PSymbol> qVars = p.getQuantifiedVariables();
+                Map<PExp, PExp> substMap = new HashMap<>();
+                for (PSymbol pq : qVars) {
+                    PSymbol repP =
+                            new PSymbol(pq.getMathType(), pq.getMathTypeValue(), "¢vl"
+                                    + pq.getMathType().toString() + myQVarTag++,
+                                    pq.quantification);
+                    substMap.put(pq, repP);
+                }
+
+                if (!substMap.isEmpty()) {
+                    p = p.substitute(substMap);
+                }
+
+                replacement.add(p);
+            }
+
+            myConditions = replacement;
         }
     }
 }
