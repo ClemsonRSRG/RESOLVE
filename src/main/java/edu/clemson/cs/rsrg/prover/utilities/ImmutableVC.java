@@ -40,6 +40,9 @@ public class ImmutableVC {
     // Current VC Status
     // ===========================================================
 
+    /**
+     * <p>An enumeration for the current VC prove status.</p>
+     */
     public enum STATUS {
         FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
     }
@@ -48,7 +51,7 @@ public class ImmutableVC {
     // Member Fields
     // ===========================================================
 
-    /** <p></p> */
+    /** <p>A conjunction of post-processed expressions.</p> */
     private final ConjunctionOfNormalizedAtomicExpressions myConjunction;
 
     /** <p>Name is a human-readable name for the VC used for debugging purposes.</p */
@@ -79,14 +82,19 @@ public class ImmutableVC {
     /** <p>A mathematical type representing {@code Z}.</p> */
     private final MTType Z;
 
-    /*
-    // PLambda objects aren't hashing correctly.  would have to get into haschode/eq methods of PExp heirarchy
-    private ImmutableVC liftedCopy; */
-
     // ===========================================================
     // Constructors
     // ===========================================================
 
+    /**
+     * <p>This creates an immutable <em>verification condition</em> for
+     * the prover.</p>
+     *
+     * @param vc Sequent VC with mutable expressions.
+     * @param g The mathematical type graph.
+     * @param nType The mathematical type "N".
+     * @param zType The mathematical type "Z".
+     */
     public ImmutableVC(VerificationCondition vc, TypeGraph g, MTType nType, MTType zType) {
         myName = vc.getName();
         myTypeGraph = g;
@@ -137,28 +145,29 @@ public class ImmutableVC {
      * @param sequent Sequent VC.
      */
     private void processSequentVC(Sequent sequent) {
-        Iterator<Exp> antecedentIt = sequent.getAntecedents().iterator();
+        // Convert the antecedent/consequent from the sequent VC into the
+        // auxiliary form for further conversion and processing.
+        AuxiliaryVCRepresentation auxiliaryVCRepresentation =
+                new AuxiliaryVCRepresentation(sequent);
+
+        // Add the antecedents expressions
+        Iterator<PExp> antecedentIt =
+                auxiliaryVCRepresentation.myAntecedents.iterator();
         while (antecedentIt.hasNext() && !myConjunction.evaluatesToFalse()) {
             PExp curr =
-                    Utilities.replacePExp(PExp.buildPExp(myTypeGraph,
-                            antecedentIt.next()), myTypeGraph, Z, N);
-
+                    Utilities.replacePExp(antecedentIt.next(), myTypeGraph, Z,
+                            N);
             myConjunction.addExpression(curr);
 
         }
 
-        // Some conversion of PAlternative conversion written by Mike
-        // No clue what it does... YS
-        List<PExp> convertedPAlternatives = convertPAlternativesToCF();
-        for (PExp pExp : convertedPAlternatives) {
-            myConjunction.addExpression(pExp);
-        }
-
-        Iterator<Exp> consequentIt = sequent.getConcequents().iterator();
+        // Add the consequent expressions
+        Iterator<PExp> consequentIt =
+                auxiliaryVCRepresentation.myConsequents.iterator();
         while (consequentIt.hasNext() && !myConjunction.evaluatesToFalse()) {
             PExp curr =
-                    Utilities.replacePExp(PExp.buildPExp(myTypeGraph,
-                            consequentIt.next()), myTypeGraph, Z, N);
+                    Utilities.replacePExp(consequentIt.next(), myTypeGraph, Z,
+                            N);
 
             // Temp: replace with eliminate()
             if (curr.getTopLevelOperation().equals("orB")) {
@@ -537,8 +546,6 @@ public class ImmutableVC {
                         "=", args));
             }
         }
-
-        // ensures conditions are unique
 
         /**
          * <p>An helper method for normalizing condition and ensures that
