@@ -135,6 +135,58 @@ public class ImmutableVC {
         VCGoalStrings.add(r);
     }
 
+    /**
+     * <p>This method returns the conjunction of post-processed
+     * antecedents.</p>
+     *
+     * @return A {@link ConjunctionOfNormalizedAtomicExpressions}.
+     */
+    public final ConjunctionOfNormalizedAtomicExpressions getConjunct() {
+        return myConjunction;
+    }
+
+    /**
+     * <p>This method returns the current proving status for
+     * this VC.</p>
+     *
+     * @return A status enumeration.
+     */
+    public final STATUS isProved() {
+        if (myConjunction.evaluatesToFalse()) {
+            return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
+        }
+        else if (VCGoalStrings.contains("true")) {
+            return STATUS.PROVED;
+        }
+        else {
+            return STATUS.STILL_EVALUATING;
+        }
+    }
+
+    /**
+     * <p>This method returns this immutable VC in string format.</p>
+     *
+     * @return A string.
+     */
+    @Override
+    public final String toString() {
+        StringBuilder r =
+                new StringBuilder("\n" + "\n" + myName + "\n" + myConjunction);
+        r.append("----------------------------------\n");
+
+        // Goals
+        if (VCGoalStrings.isEmpty()) {
+            return r.toString();
+        }
+
+        for (String gS : VCGoalStrings) {
+            r.append(myRegistry.getRootSymbolForSymbol(gS)).append(" ");
+        }
+        r.append("\n");
+
+        return r.toString();
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
@@ -182,57 +234,6 @@ public class ImmutableVC {
             }
         }
     }
-
-    /*public String getName() {
-        String retval = myName;
-
-        if (myDerivedFlag) {
-            retval += " (modified)";
-        }
-
-        return retval;
-    }
-
-    public String getSourceName() {
-        return myName;
-    }
-
-    public Antecedent getAntecedent() {
-        return myAntecedent;
-    }
-
-    public Consequent getConsequent() {
-        return myConsequent;
-    }
-
-    @Override
-    public String toString() {
-
-        String retval =
-                "========== " + getName() + " ==========\n" + myAntecedent
-                        + "  -->\n" + myConsequent;
-
-        if (!m_liftedLambdaPredicates.isEmpty()) {
-            retval += "lifted lambda predicates:\n";
-            for (PExp p : m_liftedLambdaPredicates) {
-                retval += p.toString() + "\n";
-            }
-        }
-        return retval;
-    }
-
-    public void processStringRepresentation(PExpVisitor visitor, Appendable a) {
-
-        try {
-            a.append("========== " + getName() + " ==========\n");
-            myAntecedent.processStringRepresentation(visitor, a);
-            a.append("  -->\n");
-            myConsequent.processStringRepresentation(visitor, a);
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }*/
 
     /**
      * <p>An helper method for adding default theorems for proving
@@ -358,6 +359,33 @@ public class ImmutableVC {
             replaceLambdaSymbols();
             normalizeConditions();
             uniquelyNameQuantifiers();
+        }
+
+        // ===========================================================
+        // Public Methods
+        // ===========================================================
+
+        /**
+         * <p>This method returns this object in string format.</p>
+         *
+         * @return A string.
+         */
+        @Override
+        public final String toString() {
+            StringBuilder retval =
+                    new StringBuilder("========== " + myName + " ==========\n"
+                            + convertExpressionToString(myAntecedents)
+                            + "  -->\n"
+                            + convertExpressionToString(myConsequents));
+
+            if (!myLiftedLambdaPredicates.isEmpty()) {
+                retval.append("lifted lambda predicates:\n");
+                for (PExp p : myLiftedLambdaPredicates) {
+                    retval.append(p.toString()).append("\n");
+                }
+            }
+
+            return retval.toString();
         }
 
         // ===========================================================
@@ -639,6 +667,34 @@ public class ImmutableVC {
             }
 
             return funName;
+        }
+
+        /**
+         * <p>An helper method for printing list of antecedents or consequent expressions.</p>
+         *
+         * @param pExps A list of {@link PExp PExps}.
+         *
+         * @return A string.
+         */
+        private String convertExpressionToString(List<PExp> pExps) {
+            StringBuilder retval = new StringBuilder();
+
+            boolean first = true;
+            for (PExp e : pExps) {
+                if (!first) {
+                    retval.append(" and \n");
+                }
+                retval.append(e.toString());
+                first = false;
+            }
+
+            if (retval.toString() == "") {
+                retval = new StringBuilder("True");
+            }
+
+            retval.append("\n");
+
+            return retval.toString();
         }
 
         /**
