@@ -19,7 +19,9 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDe
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
-import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.*;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.LoopVerificationItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.AbstractInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
@@ -101,13 +103,18 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected final List<String> myOperationParameterNames;
 
     /**
-     * <p>This flag is <code>true</code> when walking the children of a
-     * <code>WhileStmtChanging</code> clause; <code>false</code> otherwise.</p>
+     * <p>This flag is {@code true} when walking the children of a
+     * {@code WhileStmtChanging} clause, {@code false} otherwise.</p>
      */
     // TODO : This global can be safely removed once walk methods for virtual
     //        list nodes are fixed. Talk to Blair about this.
     protected boolean myWhileStmtChangingClause = false;
-    protected boolean myWalkingInitFinalItemFlag = false;
+
+    /**
+     * <p>This flag is {@code true} when walking the children of a
+     * {@link AbstractInitFinalItem}, {@code false} otherwise.</p>
+     */
+    private boolean myWalkingInitFinalItemFlag = false;
 
     /**
      * <p>These are special files that should already exist in
@@ -331,6 +338,153 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
+    // Expression-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProgramFunctionExp}.</p>
+     *
+     * @param exp A programming function call
+     */
+    @Override
+    public final void preProgramFunctionExp(ProgramFunctionExp exp) {
+        ST paramExp;
+        String qualifier =
+                getCallQualifier(exp.getQualifier(), exp.getName(), exp
+                        .getArguments());
+        if (myOperationParameterNames.contains(exp.getName().getName())) {
+            qualifier = exp.getName().getName() + "Param";
+        }
+
+        if (qualifier != null) {
+            paramExp =
+                    mySTGroup.getInstanceOf("qualified_param_exp").add(
+                            "qualifier", qualifier).add("name",
+                            exp.getName().getName());
+        }
+        else {
+            paramExp =
+                    mySTGroup.getInstanceOf("unqualified_param_exp").add(
+                            "name", exp.getName().getName());
+        }
+
+        myActiveTemplates.push(paramExp);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProgramFunctionExp}.</p>
+     *
+     * @param exp A programming function call
+     */
+    @Override
+    public final void postProgramFunctionExp(ProgramFunctionExp exp) {
+        ST paramExp = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("arguments", paramExp);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProgramIntegerExp}.</p>
+     *
+     * @param exp A programming integer expression.
+     */
+    @Override
+    public final void preProgramIntegerExp(ProgramIntegerExp exp) {
+        ST integerExp =
+                mySTGroup.getInstanceOf("var_init").add("type",
+                        getVariableTypeTemplate(exp.getProgramType()));
+
+        integerExp.add("facility",
+                getDefiningFacilityEntry(exp.getProgramType()).getName()).add(
+                "arguments", exp.getValue());
+
+        myActiveTemplates.peek().add("arguments", integerExp);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProgramStringExp}.</p>
+     *
+     * @param exp A programming string expression.
+     */
+    @Override
+    public final void preProgramStringExp(ProgramStringExp exp) {
+        ST stringExp =
+                mySTGroup.getInstanceOf("var_init").add("type",
+                        getVariableTypeTemplate(exp.getProgramType()));
+
+        stringExp.add("facility",
+                getDefiningFacilityEntry(exp.getProgramType()).getName()).add(
+                "arguments", exp.getValue());
+
+        myActiveTemplates.peek().add("arguments", stringExp);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ProgramVariableDotExp}.</p>
+     *
+     * @param exp A programming variable dotted expression.
+     */
+    @Override
+    public final void preProgramVariableDotExp(ProgramVariableDotExp exp) {
+        PTType type = exp.getSegments().get(0).getProgramType();
+
+        ST dotExp =
+                mySTGroup.getInstanceOf("variable_dot_exp").add(
+                        "modulename",
+                        myCurrentModuleScope.getDefiningElement().getName()
+                                .getName()).add("typename", getTypeName(type));
+
+        myActiveTemplates.push(dotExp);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link ProgramVariableDotExp}.</p>
+     *
+     * @param exp A programming variable dotted expression.
+     */
+    @Override
+    public final void postProgramVariableDotExp(ProgramVariableDotExp exp) {
+        ST dotExp = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("arguments", dotExp);
+    }
+
+    /**
+     * <p>This method redefines how a {@link ProgramVariableDotExp} should be walked.</p>
+     *
+     * @param exp A programming variable dotted expression.
+     *
+     * @return {@code true} if we are in a init/final block, {@code false} otherwise.
+     */
+    @Override
+    public final boolean walkProgramVariableDotExp(ProgramVariableDotExp exp) {
+        //If we encounter a dot expression in an initialization clause,
+        //we to basically pretend that its a normal name expression. This is not
+        //ideal, but for now, our model of java code requires/expects this.
+
+        //TODO: Think about cases in which the java will actually need a
+        //variableDotExp, and the RESOLVE source that will elicit this.
+        if (myWalkingInitFinalItemFlag) {
+            preAny(exp);
+            preExp(exp);
+            preProgramExp(exp);
+            preProgramVariableExp(exp);
+
+            //For now we assume we're dealing with a name, since we need to
+            //initialize just the name.
+            preProgramVariableNameExp((ProgramVariableNameExp) exp
+                    .getSegments().get(1));
+            postProgramVariableNameExp((ProgramVariableNameExp) exp
+                    .getSegments().get(1));
+
+            postProgramVariableExp(exp);
+            postProgramExp(exp);
+            postExp(exp);
+            postAny(exp);
+        }
+
+        return myWalkingInitFinalItemFlag;
+    }
+
+    // -----------------------------------------------------------
     // Operation Declaration-Related
     // -----------------------------------------------------------
 
@@ -459,31 +613,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // Statement-Related
     // -----------------------------------------------------------
 
-    /* TODO: Refactor this!
-    @Override
-    public void preWhileStmtChanging(WhileStmt node) {
-        myWhileStmtChangingClause = true;
-    }
-
-    @Override
-    public void postWhileStmtChanging(WhileStmt node) {
-        myWhileStmtChangingClause = false;
-    }
-
-    public final void preIfStmtElseclause(IfStmt stmt) {
-        // TODO : This is probably going to need some tweaking once else-ifs
-        //        are fixed.
-
-        //IfStmtElseClauses are nested within the tree. So if we're here,
-        //add the if part to the outermost stmt block.
-        ST ifPart = myActiveTemplates.pop();
-        myActiveTemplates.peek().add("stmts", ifPart);
-
-        ST elseStmt = mySTGroup.getInstanceOf("else");
-        myActiveTemplates.push(elseStmt);
-    }
-     */
-
     /**
      * <p>Code that gets executed after visiting a {@link CallStmt}.</p>
      *
@@ -547,6 +676,26 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
+     * <p>Code that gets executed before visiting the {@code else} block in
+     * an {@link IfStmt}.</p>
+     *
+     * @param stmt An if statement.
+     */
+    @Override
+    public final void preIfStmtMyElseStatements(IfStmt stmt) {
+        // TODO : This is probably going to need some tweaking once else-ifs
+        //        are fixed.
+
+        //IfStmtElseClauses are nested within the tree. So if we're here,
+        //add the if part to the outermost stmt block.
+        ST ifPart = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", ifPart);
+
+        ST elseStmt = mySTGroup.getInstanceOf("else");
+        myActiveTemplates.push(elseStmt);
+    }
+
+    /**
      * <p>Code that gets executed after visiting a {@link SwapStmt}.</p>
      *
      * @param stmt A swap statement.
@@ -580,6 +729,32 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
+    // Loop Verification Item-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link LoopVerificationItem}.</p>
+     *
+     * @param item A loop verification item.
+     */
+    @Override
+    public final void preLoopVerificationItemMyChangingVars(
+            LoopVerificationItem item) {
+        myWhileStmtChangingClause = true;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link WhileStmt}.</p>
+     *
+     * @param item A loop verification item.
+     */
+    @Override
+    public final void postLoopVerificationItemMyChangingVars(
+            LoopVerificationItem item) {
+        myWhileStmtChangingClause = false;
+    }
+
+    // -----------------------------------------------------------
     // Variable Declaration-Related
     // -----------------------------------------------------------
 
@@ -589,7 +764,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * @param dec A parameter declaration.
      */
     @Override
-    public final void preParameterVarDec(ParameterVarDec dec) {
+    public void preParameterVarDec(ParameterVarDec dec) {
         PTType type = dec.getTy().getProgramType();
 
         ST parameter =
@@ -609,6 +784,30 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public final void preVarDec(VarDec dec) {
         addVariableTemplate(dec.getLocation(), dec.getTy().getProgramType(),
                 dec.getName().getName());
+    }
+
+    // -----------------------------------------------------------
+    // Type Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting an {@link AbstractInitFinalItem}.</p>
+     *
+     * @param item An initialization or finalization block.
+     */
+    @Override
+    public final void preAbstractInitFinalItem(AbstractInitFinalItem item) {
+        myWalkingInitFinalItemFlag = true;
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link AbstractInitFinalItem}.</p>
+     *
+     * @param item An initialization or finalization block.
+     */
+    @Override
+    public final void postAbstractInitFinalItem(AbstractInitFinalItem item) {
+        myWalkingInitFinalItemFlag = false;
     }
 
     // ===========================================================
