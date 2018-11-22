@@ -17,6 +17,8 @@ import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDec;
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.statements.*;
@@ -575,6 +577,38 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public final void postWhileStmt(WhileStmt stmt) {
         ST whileStmt = myActiveTemplates.pop();
         myActiveTemplates.peek().add("stmts", whileStmt);
+    }
+
+    // -----------------------------------------------------------
+    // Variable Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Code that gets executed before visiting a {@link ParameterVarDec}.</p>
+     *
+     * @param dec A parameter declaration.
+     */
+    @Override
+    public final void preParameterVarDec(ParameterVarDec dec) {
+        PTType type = dec.getTy().getProgramType();
+
+        ST parameter =
+                mySTGroup.getInstanceOf("parameter").add("type",
+                        getParameterTypeTemplate(type)).add("name",
+                        dec.getName().getName());
+
+        myActiveTemplates.peek().add("parameters", parameter);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link VarDec}.</p>
+     *
+     * @param dec A variable declaration.
+     */
+    @Override
+    public final void preVarDec(VarDec dec) {
+        addVariableTemplate(dec.getLocation(), dec.getTy().getProgramType(),
+                dec.getName().getName());
     }
 
     // ===========================================================
