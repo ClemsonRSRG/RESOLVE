@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.OperationProcedureDe
 import edu.clemson.cs.rsrg.absyn.declarations.operationdecl.ProcedureDec;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
+import edu.clemson.cs.rsrg.absyn.statements.*;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
@@ -450,6 +451,130 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myActiveTemplates.peek().add("functions", operation);
 
         emitDebug(dec.getLocation(), "Adding procedure: " + dec.getName());
+    }
+
+    // -----------------------------------------------------------
+    // Statement-Related
+    // -----------------------------------------------------------
+
+    /* TODO: Refactor this!
+    @Override
+    public void preWhileStmtChanging(WhileStmt node) {
+        myWhileStmtChangingClause = true;
+    }
+
+    @Override
+    public void postWhileStmtChanging(WhileStmt node) {
+        myWhileStmtChangingClause = false;
+    }
+
+    public final void preIfStmtElseclause(IfStmt stmt) {
+        // TODO : This is probably going to need some tweaking once else-ifs
+        //        are fixed.
+
+        //IfStmtElseClauses are nested within the tree. So if we're here,
+        //add the if part to the outermost stmt block.
+        ST ifPart = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", ifPart);
+
+        ST elseStmt = mySTGroup.getInstanceOf("else");
+        myActiveTemplates.push(elseStmt);
+    }
+     */
+
+    /**
+     * <p>Code that gets executed after visiting a {@link CallStmt}.</p>
+     *
+     * @param stmt A function call statement.
+     */
+    @Override
+    public final void postCallStmt(CallStmt stmt) {
+        ST callStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", callStmt);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link FuncAssignStmt}.</p>
+     *
+     * @param stmt A function assignment statement.
+     */
+    @Override
+    public final void preFuncAssignStmt(FuncAssignStmt stmt) {
+        String qualifier =
+                getDefiningFacilityEntry(stmt.getVariableExp().getProgramType())
+                        .getName();
+
+        ST assignStmt =
+                mySTGroup.getInstanceOf("qualified_call").add("name", "assign")
+                        .add("qualifier", qualifier);
+
+        myActiveTemplates.push(assignStmt);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link FuncAssignStmt}.</p>
+     *
+     * @param stmt A function assignment statement.
+     */
+    @Override
+    public final void postFuncAssignStmt(FuncAssignStmt stmt) {
+        ST assignStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", assignStmt);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting an {@link IfStmt}.</p>
+     *
+     * @param stmt An if statement.
+     */
+    @Override
+    public final void preIfStmt(IfStmt stmt) {
+        ST ifStmt = mySTGroup.getInstanceOf("if");
+        myActiveTemplates.push(ifStmt);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting an {@link IfStmt}.</p>
+     *
+     * @param stmt An if statement.
+     */
+    @Override
+    public final void postIfStmt(IfStmt stmt) {
+        ST ifStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", ifStmt);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link SwapStmt}.</p>
+     *
+     * @param stmt A swap statement.
+     */
+    @Override
+    public final void postSwapStmt(SwapStmt stmt) {
+        ST swapStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", swapStmt);
+    }
+
+    /**
+     * <p>Code that gets executed before visiting a {@link WhileStmt}.</p>
+     *
+     * @param stmt A while statement.
+     */
+    @Override
+    public final void preWhileStmt(WhileStmt stmt) {
+        ST whileStmt = mySTGroup.getInstanceOf("while");
+        myActiveTemplates.push(whileStmt);
+    }
+
+    /**
+     * <p>Code that gets executed after visiting a {@link WhileStmt}.</p>
+     *
+     * @param stmt A while statement.
+     */
+    @Override
+    public final void postWhileStmt(WhileStmt stmt) {
+        ST whileStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", whileStmt);
     }
 
     // ===========================================================
@@ -930,10 +1055,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         boolean containsSharedVar = false;
         if (dec instanceof ConceptModuleDec) {
             containsSharedVar = ((ConceptModuleDec) dec).isSharingConcept();
-        }
-        else if (dec instanceof FacilityModuleDec
-                || dec instanceof ShortFacilityModuleDec) {
-            containsSharedVar = false;
         }
         else {
             PosSymbol conceptName;
