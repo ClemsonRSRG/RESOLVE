@@ -2899,7 +2899,7 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ProgramIntegerExp}.</p>
+     * <p>Code that gets executed after visiting a {@link ProgramStringExp}.</p>
      *
      * @param exp A programming string expression.
      */
@@ -2978,7 +2978,7 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ProgramVariableDotExp}.</p>
+     * <p>Code that gets executed before visiting a {@link ProgramVariableDotExp}.</p>
      *
      * @param exp A programming variable dotted expression.
      */
