@@ -2,7 +2,6 @@
 # Continuous integration settings for Travis CI
 #
 dist: trusty
-sudo: false
 branches:
   only:
     - master
