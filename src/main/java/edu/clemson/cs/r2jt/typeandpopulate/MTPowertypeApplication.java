@@ -1,7 +1,7 @@
 /*
  * MTPowertypeApplication.java
  * ---------------------------------
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University

@@ -1,7 +1,7 @@
 /*
  * NormalizedAtomicExpression.java
  * ---------------------------------
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.prover.utilities.Registry;
 import java.util.*;
 
 /**
- * <p>This class represents an normalized atomic expression.</p>
+ * <p>This class represents a normalized atomic expression.</p>
  *
  * @author Mike Khabbani
  * @version 2.0
