@@ -314,6 +314,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
+     * <p>This method returns the set of normalized atomic expressions
+     * used as keys in this conjunction.</p>
+     *
+     * @return A set of {@link NormalizedAtomicExpression}.
+     */
+    public final Set<NormalizedAtomicExpression> getNormalizedAtomicExpressionKeys() {
+        return myExpressionSet.keySet();
+    }
+
+    /**
      * <p>This method returns the set of expressions based on the
      * symbol number.</p>
      *

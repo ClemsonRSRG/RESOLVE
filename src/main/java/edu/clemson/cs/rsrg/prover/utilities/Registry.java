@@ -246,8 +246,6 @@ public class Registry {
         return index;
     }
 
-    //
-
     /**
      * <p>This method gets the set of children symbol names.</p>
      *
