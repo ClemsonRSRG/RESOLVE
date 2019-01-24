@@ -30,15 +30,32 @@ public class TheoremPrioritizer {
     // Member Fields
     // ===========================================================
 
+    /** <p>A map of non-quantified symbols</p> */
     private final Map<String, Integer> myNonQuantifiedSymbolMap;
+
+    /** <p>The current immutable VC.</p> */
     private final ImmutableVC myVC;
+
+    /** <p>A priority queue for selecting theorems.</p> */
     private final PriorityQueue<TheoremWithScore> myTheoremPriorityQueue;
+
+    /** <p>A symbol registry.</p> */
     private final Registry myVCRegistry;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
+    /**
+     * <p>This class organizes the theorems into a particular
+     * priority.</p>
+     *
+     * @param theoremList List of available theorems.
+     * @param theoremAppliedCountMap A map of how many times theorems were selected.
+     * @param vc The current vc we are processing.
+     * @param nonQuantifiedTheoremSymbols A set of non-quantified theorem symbols.
+     * @param smallEndEquations A set of small equation theorems.
+     */
     public TheoremPrioritizer(List<Theorem> theoremList, Map<String, Integer> theoremAppliedCountMap,
             ImmutableVC vc, Set<String> nonQuantifiedTheoremSymbols, Set<Theorem> smallEndEquations) {
         myTheoremPriorityQueue = new PriorityQueue<>(theoremList.size());
@@ -51,6 +68,7 @@ public class TheoremPrioritizer {
                 myNonQuantifiedSymbolMap.put(s, count++);
             }
         }
+
         for (Theorem t : theoremList) {
             // Create a theorem with a score if it does not
             // exclude the non quantified symbols.
@@ -60,8 +78,8 @@ public class TheoremPrioritizer {
                 score =
                         calculateScoreMinimum(t.getNonQuantifiedSymbols(),
                                 myVCRegistry.mySymbolToIndex.keySet().size());
-                if (theoremAppliedCountMap.containsKey(t.m_name)) {
-                    score += theoremAppliedCountMap.get(t.m_name);
+                if (theoremAppliedCountMap.containsKey(t.getName())) {
+                    score += theoremAppliedCountMap.get(t.getName());
                 }
                 if (smallEndEquations.contains(t)) {
                     score += 1;
@@ -70,6 +88,7 @@ public class TheoremPrioritizer {
                 // Update the theorem score.
                 tws.updateTheoremScore(score);
 
+                // Update the priority queue with this new theorem
                 myTheoremPriorityQueue.add(tws);
             }
         }
@@ -79,7 +98,13 @@ public class TheoremPrioritizer {
     // Public Methods
     // ===========================================================
 
-    public Theorem poll() {
+    /**
+     * <p>This method returns a new theorem if there are more
+     * that can be considered.</p>
+     *
+     * @return A {@link Theorem} object.
+     */
+    public final Theorem poll() {
         return Objects.requireNonNull(myTheoremPriorityQueue.poll())
                 .getTheorem();
     }
@@ -88,6 +113,15 @@ public class TheoremPrioritizer {
     // Private Methods
     // ===========================================================
 
+    /**
+     * <p>An helper method that computes a minimum score based
+     * on the theorem symbols.</p>
+     *
+     * @param theorem_symbols Set of symbols in the theorem.
+     * @param not_contained_penalty A penalty score (if any).
+     *
+     * @return A score.
+     */
     //  minimum of symbol scores in both vc and theorem
     private int calculateScoreMinimum(Set<String> theorem_symbols,
             int not_contained_penalty) {
@@ -114,10 +148,20 @@ public class TheoremPrioritizer {
         return (score + 1) * number_not_contained;
     }
 
+    /**
+     * <p>An helper method that returns a value
+     * based on whether or not if we found the symbol
+     * to be {@code true}.</p>
+     *
+     * @param s A string to be searched.
+     *
+     * @return 0 if it is an exact match, 1 if we found an equivalence
+     * relationship with another symbol, -1 otherwise.
+     */
     private int goalArg(String s) {
         int si = myVCRegistry.getIndexForSymbol(s);
         String sc = myVCRegistry.getRootSymbolForSymbol(s);
-        for (String g : myVC.m_goal) {
+        for (String g : myVC.VCGoalStrings) {
             if (g.equals("false")) {
                 continue;
             }
@@ -141,6 +185,15 @@ public class TheoremPrioritizer {
         return -1;
     }
 
+    /**
+     * <p>An helper method for determining if our registry
+     * contains any of the symbols required by the VC.</p>
+     *
+     * @param vcMustContainThese A set of symbols.
+     *
+     * @return {@code true} if our registry contains one of the symbols,
+     * {@code false} otherwise.
+     */
     private boolean shouldExclude(Set<String> vcMustContainThese) {
         for (String s : vcMustContainThese) {
             String c = myVCRegistry.getRootSymbolForSymbol(s);
