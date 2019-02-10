@@ -146,6 +146,15 @@ public class ImmutableVC {
     }
 
     /**
+     * <p>This method returns the current registry of symbols.</p>
+     *
+     * @return A {@link Registry}.
+     */
+    public final Registry getRegistry() {
+        return myRegistry;
+    }
+
+    /**
      * <p>This method returns the current proving status for
      * this VC.</p>
      *
@@ -286,6 +295,10 @@ public class ImmutableVC {
         PSymbol fandfeqf = new PSymbol(myTypeGraph.BOOLEAN, null, "=B", args);
         myConjunction.addExpression(fandfeqf);
     }
+
+    // ===========================================================
+    // Helper Constructs
+    // ===========================================================
 
     /**
      * <p>When building an {@link ImmutableVC}, both Mike and Hampton did a bunch of
