@@ -339,15 +339,29 @@ public class Archiver {
                 out.close();
                 stream.close();
             }
-            String msg = "";
+
+            // Output messages to the appropriate location
+            String msg;
             if (ret == 0) {
                 msg = "Jar archive successfully created";
+
+                // Only output this message if it isn't web output
+                if (!webOutput) {
+                    System.out.println(msg);
+                }
             }
             else {
-                //msg = "Jar archive unsuccessful";
-            }
-            System.out.println(msg);
+                msg = "Jar archive unsuccessful";
 
+                // Print to console (no-web-output)
+                // Add to compile report (web-output)
+                if (!webOutput) {
+                    System.err.println(msg);
+                }
+                else {
+                    myInstanceEnvironment.getCompileReport().addBugReport(msg);
+                }
+            }
         }
         catch (Exception ex) {
             ret = -1;
