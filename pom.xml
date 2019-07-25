@@ -297,9 +297,10 @@
         </testResources>
     </build>
 
+    <!-- This doesn't work. Needs to be fixed.
     <reporting>
         <plugins>
-            <!-- Plugin to generate Javadoc. -->
+            <!- Plugin to generate Javadoc. -
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -312,6 +313,6 @@
                 </configuration>
             </plugin>
         </plugins>
-    </reporting>
+    </reporting> -->
 
 </project>
