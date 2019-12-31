@@ -1,7 +1,7 @@
 #
 # Continuous integration settings for Travis CI
 #
-dist: trusty
+dist: xenial
 branches:
   only:
     - master
