@@ -1,7 +1,7 @@
 /*
  * InstantiatedSymbolTable.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -66,15 +66,16 @@ public class InstantiatedSymbolTable implements SymbolTable {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends SymbolTableEntry> Iterator<T> iterateByType(Class<T> type) {
+    public <T extends SymbolTableEntry> Iterator<T>
+            iterateByType(Class<T> type) {
         return new LazyMappingIterator<T, T>(myBaseTable.iterateByType(type),
                 (Mapping<T, T>) INSTANTIATOR);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends SymbolTableEntry> Iterator<T> iterateByType(
-            Collection<Class<T>> types) {
+    public <T extends SymbolTableEntry> Iterator<T>
+            iterateByType(Collection<Class<T>> types) {
         return new LazyMappingIterator<T, T>(myBaseTable.iterateByType(types),
                 (Mapping<T, T>) INSTANTIATOR);
     }

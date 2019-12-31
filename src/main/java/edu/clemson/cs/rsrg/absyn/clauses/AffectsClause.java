@@ -1,7 +1,7 @@
 /*
  * AffectsClause.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the affected variable expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>
+ * This is the class for all the affected variable expressions that the compiler
+ * builds from the
+ * ANTLR4 AST tree.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,7 +34,11 @@ public class AffectsClause extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of affected expressions.</p> */
+    /**
+     * <p>
+     * The list of affected expressions.
+     * </p>
+     */
     private final List<Exp> myAffectedExps;
 
     // ===========================================================
@@ -39,12 +46,14 @@ public class AffectsClause extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs an {@code affects} clause.</p>
+     * <p>
+     * This constructs an {@code affects} clause.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param affectedExps The list of expressions that are listed
-     *                     to be affected by an initialization/finalization
-     *                     item or an operation.
+     * @param affectedExps The list of expressions that are listed to be
+     *        affected by an
+     *        initialization/finalization item or an operation.
      */
     public AffectsClause(Location l, List<Exp> affectedExps) {
         super(l);
@@ -108,8 +117,9 @@ public class AffectsClause extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of expressions that are affected
-     * by this clause.</p>
+     * <p>
+     * Returns the list of expressions that are affected by this clause.
+     * </p>
      *
      * @return The list of affected {@link Exp}s.
      */

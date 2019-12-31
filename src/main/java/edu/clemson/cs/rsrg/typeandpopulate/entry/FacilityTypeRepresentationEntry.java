@@ -1,7 +1,7 @@
 /*
  * FacilityTypeRepresentationEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 /**
- * <p>This creates a symbol table entry for a program type representation
- * defined in a {@code Facility}.</p>
+ * <p>
+ * This creates a symbol table entry for a program type representation defined
+ * in a
+ * {@code Facility}.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,7 +36,10 @@ public class FacilityTypeRepresentationEntry extends TypeRepresentationEntry {
     // ===========================================================
 
     /**
-     * <p>This creates a symbol table entry for a facility type representation definition.</p>
+     * <p>
+     * This creates a symbol table entry for a facility type representation
+     * definition.
+     * </p>
      *
      * @param name Name associated with this entry.
      * @param definingElement The element that created this entry.
@@ -46,9 +52,11 @@ public class FacilityTypeRepresentationEntry extends TypeRepresentationEntry {
             ModuleIdentifier sourceModule, PTType representation,
             AssertionClause convention) {
         super(name, definingElement, sourceModule, null, representation,
-                convention, new AssertionClause(definingElement.getLocation()
-                        .clone(), AssertionClause.ClauseType.CONVENTION, VarExp
-                        .getTrueVarExp(definingElement.getLocation().clone(),
+                convention,
+                new AssertionClause(definingElement.getLocation().clone(),
+                        AssertionClause.ClauseType.CONVENTION,
+                        VarExp.getTrueVarExp(
+                                definingElement.getLocation().clone(),
                                 representation.getTypeGraph())));
     }
 
@@ -57,7 +65,9 @@ public class FacilityTypeRepresentationEntry extends TypeRepresentationEntry {
     // ===========================================================
 
     /**
-     * <p>This method returns a description associated with this entry.</p>
+     * <p>
+     * This method returns a description associated with this entry.
+     * </p>
      *
      * @return A string.
      */
@@ -67,17 +77,20 @@ public class FacilityTypeRepresentationEntry extends TypeRepresentationEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link FacilityTypeRepresentationEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link FacilityTypeRepresentationEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
      * @return A {@link FacilityTypeRepresentationEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     *         it throws a
+     *         {@link SourceErrorException}.
      */
     @Override
-    public final FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
-            Location l) {
+    public final FacilityTypeRepresentationEntry
+            toFacilityTypeRepresentationEntry(Location l) {
         return this;
     }
 

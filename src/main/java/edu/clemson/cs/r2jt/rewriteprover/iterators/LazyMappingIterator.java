@@ -1,7 +1,7 @@
 /*
  * LazyMappingIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,12 +18,16 @@ import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 import java.util.ConcurrentModificationException;
 
 /**
- * <p>A <code>LazyMappingIterator</code> wraps an <code>Iterator</code> that
- * iterates over objects of type <code>I</code> and presents an interface for
- * mapping over objects of type <code>O</code>.  A <code>Mapping</code> from
- * <code>I</code> to <code>O</code> is used to transform each object as it is
- * requested.</p>
-
+ * <p>
+ * A <code>LazyMappingIterator</code> wraps an <code>Iterator</code> that
+ * iterates over objects of
+ * type <code>I</code> and presents an interface for mapping over objects of
+ * type <code>O</code>. A
+ * <code>Mapping</code> from <code>I</code> to <code>O</code> is used to
+ * transform each object as it
+ * is requested.
+ * </p>
+ * 
  * @param <I> The type of the objects in the source iterator.
  * @param <O> The type of the final objects.
  */

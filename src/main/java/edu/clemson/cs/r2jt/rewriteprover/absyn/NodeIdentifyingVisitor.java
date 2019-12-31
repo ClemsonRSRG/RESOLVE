@@ -1,7 +1,7 @@
 /*
  * NodeIdentifyingVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,7 +36,7 @@ public class NodeIdentifyingVisitor extends PExpVisitor {
 
     public final void beginPExp(PExp p) {
 
-        myIndices.push(0); //We start at the zeroth child
+        myIndices.push(0); // We start at the zeroth child
 
         if (myRoot == null) {
             myRoot = p;
@@ -50,7 +50,7 @@ public class NodeIdentifyingVisitor extends PExpVisitor {
     private static NodeIdentifier buildID(PExp root, Deque<Integer> indices) {
         int[] idIndices = new int[indices.size() - 1];
 
-        //The ID should reflect all but the last index
+        // The ID should reflect all but the last index
         Iterator<Integer> indicesIter = indices.descendingIterator();
         for (int i = 0; i < (indices.size() - 1); i++) {
             idIndices[i] = indicesIter.next();
@@ -67,16 +67,16 @@ public class NodeIdentifyingVisitor extends PExpVisitor {
         doEndPExp(p);
 
         if (p != myRoot) {
-            //We're not visiting any more children at this level (because the
-            //level just ended!)
+            // We're not visiting any more children at this level (because the
+            // level just ended!)
             myIndices.pop();
 
-            //Increment to the next potential child index
+            // Increment to the next potential child index
             int i = myIndices.pop();
             myIndices.push(i + 1);
         }
 
-        //We just left a PExp, so get rid of its ID
+        // We just left a PExp, so get rid of its ID
         myIDs.pop();
 
         if (p == myRoot) {

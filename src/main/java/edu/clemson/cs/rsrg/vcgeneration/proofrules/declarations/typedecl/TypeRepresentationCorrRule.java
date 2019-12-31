@@ -1,7 +1,7 @@
 /*
  * TypeRepresentationCorrRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -35,8 +35,11 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for establishing the {@code Type Representation}'s
- * {@code correspondence} is well defined.</p>
+ * <p>
+ * This class contains the logic for establishing the
+ * {@code Type Representation}'s
+ * {@code correspondence} is well defined.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -49,12 +52,18 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@code type} representation we are applying the rule to.</p> */
+    /**
+     * <p>
+     * The {@code type} representation we are applying the rule to.
+     * </p>
+     */
     private final TypeRepresentationDec myTypeRepresentationDec;
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
@@ -63,22 +72,25 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application for a well defined
-     * {@code correspondence} rule for a {@link TypeRepresentationDec}.</p>
+     * <p>
+     * This creates a new application for a well defined {@code correspondence}
+     * rule for a
+     * {@link TypeRepresentationDec}.
+     * </p>
      *
      * @param dec A concept type realization.
      * @param symbolTableBuilder The current symbol table.
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
-     * @param context The verification context that contains all
-     *                the information we have collected so far.
+     * @param block The assertive code block that the subclasses are applying
+     *        the rule to.
+     * @param context The verification context that contains all the information
+     *        we have collected so
+     *        far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
     public TypeRepresentationCorrRule(TypeRepresentationDec dec,
-            MathSymbolTableBuilder symbolTableBuilder,
-            AssertiveCodeBlock block, VerificationContext context,
-            STGroup stGroup, ST blockModel) {
+            MathSymbolTableBuilder symbolTableBuilder, AssertiveCodeBlock block,
+            VerificationContext context, STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
         myTypeGraph = symbolTableBuilder.getTypeGraph();
         myTypeRepresentationDec = dec;
@@ -89,7 +101,9 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Proof Rule}.</p>
+     * <p>
+     * This method applies the {@code Proof Rule}.
+     * </p>
      */
     @Override
     public final void applyRule() {
@@ -98,19 +112,18 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
         AssertionClause typeConventionClause =
                 myTypeRepresentationDec.getConvention();
         Exp topLevelAssumeExp =
-                myCurrentVerificationContext
-                        .createTopLevelAssumeExpFromContext(
-                                myTypeRepresentationDec.getLocation(), true,
-                                false);
-        topLevelAssumeExp =
-                Utilities.formConjunct(myTypeRepresentationDec.getLocation(),
-                        topLevelAssumeExp, typeConventionClause,
-                        new LocationDetailModel(typeConventionClause
-                                .getAssertionExp().getLocation().clone(),
-                                typeConventionClause.getAssertionExp()
-                                        .getLocation().clone(), "Type: "
-                                        + myTypeRepresentationDec.getName()
-                                                .getName() + "'s Convention"));
+                myCurrentVerificationContext.createTopLevelAssumeExpFromContext(
+                        myTypeRepresentationDec.getLocation(), true, false);
+        topLevelAssumeExp = Utilities.formConjunct(
+                myTypeRepresentationDec.getLocation(), topLevelAssumeExp,
+                typeConventionClause,
+                new LocationDetailModel(
+                        typeConventionClause.getAssertionExp().getLocation()
+                                .clone(),
+                        typeConventionClause.getAssertionExp().getLocation()
+                                .clone(),
+                        "Type: " + myTypeRepresentationDec.getName().getName()
+                                + "'s Convention"));
 
         // ( Assume CPC and RPC and DC and RDC and SS_RC and RC; )
         AssumeStmt topLevelAssumeStmt =
@@ -121,36 +134,35 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
         // ( Assume Cor_Exp; )
         AssertionClause typeCorrespondenceClause =
                 myTypeRepresentationDec.getCorrespondence();
-        Exp corrExp =
-                Utilities.formConjunct(myTypeRepresentationDec.getLocation(),
-                        null, typeCorrespondenceClause,
-                        new LocationDetailModel(typeCorrespondenceClause
-                                .getLocation().clone(),
-                                typeCorrespondenceClause.getLocation().clone(),
-                                "Type: "
-                                        + myTypeRepresentationDec.getName()
-                                                .getName()
-                                        + "'s Correspondence"));
+        Exp corrExp = Utilities.formConjunct(
+                myTypeRepresentationDec.getLocation(), null,
+                typeCorrespondenceClause,
+                new LocationDetailModel(
+                        typeCorrespondenceClause.getLocation().clone(),
+                        typeCorrespondenceClause.getLocation().clone(),
+                        "Type: " + myTypeRepresentationDec.getName().getName()
+                                + "'s Correspondence"));
 
-        AssumeStmt correspondenceAssumeStmt =
-                new AssumeStmt(myTypeRepresentationDec.getLocation().clone(),
-                        corrExp, false);
+        AssumeStmt correspondenceAssumeStmt = new AssumeStmt(
+                myTypeRepresentationDec.getLocation().clone(), corrExp, false);
         myCurrentAssertiveCodeBlock.addStatement(correspondenceAssumeStmt);
 
         // Create a replacement map for substituting exemplar
         // variable with one that indicates it is conceptual.
-        TypeFamilyDec typeFamilyDec =
-                Utilities.getAssociatedTypeFamilyDec(myTypeRepresentationDec,
-                        myCurrentVerificationContext);
-        VarExp exemplarExp =
-                Utilities.createVarExp(myTypeRepresentationDec.getLocation().clone(),
-                        null, typeFamilyDec.getExemplar().clone(),
-                        typeFamilyDec.getModel().getMathTypeValue(), null);
+        TypeFamilyDec typeFamilyDec = Utilities.getAssociatedTypeFamilyDec(
+                myTypeRepresentationDec, myCurrentVerificationContext);
+        VarExp exemplarExp = Utilities.createVarExp(
+                myTypeRepresentationDec.getLocation().clone(), null,
+                typeFamilyDec.getExemplar().clone(),
+                typeFamilyDec.getModel().getMathTypeValue(), null);
         DotExp concExemplarExp =
-                Utilities.createConcVarExp(
-                        new VarDec(typeFamilyDec.getExemplar(),
-                                myTypeRepresentationDec.getRepresentation()),
-                        typeFamilyDec.getMathType(), myTypeGraph.BOOLEAN);
+                Utilities
+                        .createConcVarExp(
+                                new VarDec(typeFamilyDec.getExemplar(),
+                                        myTypeRepresentationDec
+                                                .getRepresentation()),
+                                typeFamilyDec.getMathType(),
+                                myTypeGraph.BOOLEAN);
         Map<Exp, Exp> substitutionExemplarToConc = new LinkedHashMap<>();
         substitutionExemplarToConc.put(exemplarExp, concExemplarExp);
 
@@ -158,30 +170,31 @@ public class TypeRepresentationCorrRule extends AbstractProofRuleApplication
         // ( Confirm TC; )
         Exp typeConstraintExp =
                 typeFamilyDec.getConstraint().getAssertionExp().clone();
-        typeConstraintExp = typeConstraintExp.substitute(substitutionExemplarToConc);
-        typeConstraintExp.setLocationDetailModel(new LocationDetailModel(
-                typeFamilyDec.getLocation().clone(), myTypeRepresentationDec
-                        .getLocation().clone(),
-                "Well Defined Correspondence for "
-                        + myTypeRepresentationDec.getName()));
-        ConfirmStmt finalConfirmStmt =
-                new ConfirmStmt(myTypeRepresentationDec.getLocation().clone(),
-                        typeConstraintExp, VarExp
-                                .isLiteralTrue(typeConstraintExp));
+        typeConstraintExp =
+                typeConstraintExp.substitute(substitutionExemplarToConc);
+        typeConstraintExp.setLocationDetailModel(
+                new LocationDetailModel(typeFamilyDec.getLocation().clone(),
+                        myTypeRepresentationDec.getLocation().clone(),
+                        "Well Defined Correspondence for "
+                                + myTypeRepresentationDec.getName()));
+        ConfirmStmt finalConfirmStmt = new ConfirmStmt(
+                myTypeRepresentationDec.getLocation().clone(),
+                typeConstraintExp, VarExp.isLiteralTrue(typeConstraintExp));
         myCurrentAssertiveCodeBlock.addStatement(finalConfirmStmt);
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-        stepModel.add("proofRuleName", getRuleDescription()).add(
-                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        stepModel.add("proofRuleName", getRuleDescription())
+                .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
 
         // Add the different details to the various different output models
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Proof Rule}.</p>
+     * <p>
+     * This method returns a description associated with the {@code Proof Rule}.
+     * </p>
      *
      * @return A string.
      */

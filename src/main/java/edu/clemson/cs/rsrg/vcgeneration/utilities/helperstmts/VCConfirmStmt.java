@@ -1,7 +1,7 @@
 /*
  * VCConfirmStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,11 +23,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>This is the class that builds a special kind of confirm statement
- * that temporary holds {@link VerificationCondition VCs}. The only usage
- * of this class should be the {@link WhileStmtRule}. Since the user cannot
- * supply their own {@code VC_Confirm} statements, any instances of this
- * class will solely be created by the {@link VCGenerator}.</p>
+ * <p>
+ * This is the class that builds a special kind of confirm statement that
+ * temporary holds
+ * {@link VerificationCondition VCs}. The only usage of this class should be the
+ * {@link WhileStmtRule}. Since the user cannot supply their own
+ * {@code VC_Confirm} statements, any
+ * instances of this class will solely be created by the {@link VCGenerator}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -39,8 +42,9 @@ public class VCConfirmStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>List of {@link VerificationCondition VCs} we are trying
-     * to prove.</p>
+     * <p>
+     * List of {@link VerificationCondition VCs} we are trying to prove.
+     * </p>
      */
     private final List<VerificationCondition> myVCs;
 
@@ -49,13 +53,16 @@ public class VCConfirmStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs an helper statement that temporary
-     * holds all the {@link VerificationCondition VCs}
-     * after applying the {@link WhileStmtRule}.</p>
+     * <p>
+     * This constructs an helper statement that temporary holds all the
+     * {@link VerificationCondition
+     * VCs} after applying the {@link WhileStmtRule}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param vcs A list of {@link VerificationCondition} to
-     *            be temporary stored in this {@link Statement}.
+     * @param vcs A list of {@link VerificationCondition} to be temporary stored
+     *        in this
+     *        {@link Statement}.
      */
     public VCConfirmStmt(Location l, List<VerificationCondition> vcs) {
         super(l);
@@ -104,8 +111,10 @@ public class VCConfirmStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the list of {@code VCs} stored inside
-     * this {@link Statement}.</p>
+     * <p>
+     * This method returns the list of {@code VCs} stored inside this
+     * {@link Statement}.
+     * </p>
      *
      * @return A list of {@link VerificationCondition VCs}.
      */

@@ -1,7 +1,7 @@
 /*
  * Utilities.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -31,11 +31,13 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 
 /**
- * <p>A variety of useful general-purpose methods.</p>
+ * <p>
+ * A variety of useful general-purpose methods.
+ * </p>
  *
  * @author H. Smith
  */
-//This class can go to straight to hell.
+// This class can go to straight to hell.
 public class Utilities {
 
     private static boolean genericBindWarningPrinted = false;
@@ -63,12 +65,12 @@ public class Utilities {
         return "" + b;
     }
 
-    public static void buildExpMapFromPosSymbolMap(
-            Map<PosSymbol, Exp> original, Map<Exp, Exp> newMap) {
+    public static void buildExpMapFromPosSymbolMap(Map<PosSymbol, Exp> original,
+            Map<Exp, Exp> newMap) {
         Set<Map.Entry<PosSymbol, Exp>> entrySet = original.entrySet();
         for (Map.Entry<PosSymbol, Exp> binding : entrySet) {
-            newMap.put(new VarExp(null, null, binding.getKey()), binding
-                    .getValue());
+            newMap.put(new VarExp(null, null, binding.getKey()),
+                    binding.getValue());
         }
     }
 
@@ -135,12 +137,16 @@ public class Utilities {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> the given expression is
-     * an equality with both sides precisely equal.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> the given expression is an
+     * equality with both
+     * sides precisely equal.
+     * </p>
      *
      * @param expression The expression to test.
      * @return <code>true</code> <strong>iff</strong> <code>e</code> is an
-     *         equality with both sides precisely equal.
+     *         equality with both sides
+     *         precisely equal.
      */
     public static boolean isSymmetricEquality(Exp expression) {
         boolean retval = false;
@@ -149,9 +155,8 @@ public class Utilities {
             EqualsExp expressionAsEquals = (EqualsExp) expression;
 
             if (expressionAsEquals.getOperator() == EqualsExp.EQUAL) {
-                retval =
-                        expressionAsEquals.getLeft().equivalent(
-                                expressionAsEquals.getRight());
+                retval = expressionAsEquals.getLeft()
+                        .equivalent(expressionAsEquals.getRight());
             }
         }
 
@@ -159,21 +164,28 @@ public class Utilities {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> the provided
-     * <code>Exp</code> repesents the Resolve boolean value "true".</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> the provided
+     * <code>Exp</code> repesents the
+     * Resolve boolean value "true".
+     * </p>
      *
      * @param e The <code>Exp</code> to check.
      * @return <code>true</code> <strong>iff</strong> <code>e</code> represents
-     *         the boolean value "true".
+     *         the boolean value
+     *         "true".
      */
     public static boolean isLiteralTrue(Exp e) {
-        return (e instanceof VarExp && ((VarExp) e).getName().getName()
-                .equalsIgnoreCase("true"));
+        return (e instanceof VarExp
+                && ((VarExp) e).getName().getName().equalsIgnoreCase("true"));
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> the provided
-     * <code>InfixExp</code> represents Resolve boolean function "and".</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> the provided
+     * <code>InfixExp</code> represents
+     * Resolve boolean function "and".
+     * </p>
      *
      * @param e The <code>InfixExp</code> to check.
      * @return <code>true</code> <strong>iff</strong> <code>e</code> represents
@@ -184,8 +196,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> the provided
-     * <code>InfixExp</code> represents Resolve boolean function "and".</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> the provided
+     * <code>InfixExp</code> represents
+     * Resolve boolean function "and".
+     * </p>
      *
      * @param e The <code>InfixExp</code> to check.
      * @return <code>true</code> <strong>iff</strong> <code>e</code> represents
@@ -222,12 +237,16 @@ public class Utilities {
     }
 
     /**
-     * <p>(TODO) See newBind</p>
+     * <p>
+     * (TODO) See newBind
+     * </p>
+     * 
      * @param m1
      * @param m2
      * @return
      */
-    private static Map<Exp, Exp> newUnifyMaps(Map<Exp, Exp> m1, Map<Exp, Exp> m2) {
+    private static Map<Exp, Exp> newUnifyMaps(Map<Exp, Exp> m1,
+            Map<Exp, Exp> m2) {
         Set<Map.Entry<Exp, Exp>> entrySet = m2.entrySet();
         Iterator<Map.Entry<Exp, Exp>> entryIter = entrySet.iterator();
 
@@ -253,7 +272,10 @@ public class Utilities {
     }
 
     /**
-     * <p>(TODO) See newBind.</p>
+     * <p>
+     * (TODO) See newBind.
+     * </p>
+     * 
      * @param m
      * @param k
      * @return
@@ -273,7 +295,8 @@ public class Utilities {
         return retval;
     }
 
-    private static Exp mapContainsPosSymbol(Map<PosSymbol, Exp> m, PosSymbol k) {
+    private static Exp mapContainsPosSymbol(Map<PosSymbol, Exp> m,
+            PosSymbol k) {
         Exp retval = null;
 
         Iterator<PosSymbol> i = m.keySet().iterator();
@@ -289,23 +312,30 @@ public class Utilities {
     }
 
     /**
-     * <p>Takes an expression and distributes its quantifiers down to the
-     * variables, removing the quantifiers in the process.  (That is, in the
-     * expression <code>For all x, x = y</code>, the variable <code>x</code>
-     * in the equals expression would be marked internaly as a "for all"
+     * <p>
+     * Takes an expression and distributes its quantifiers down to the
+     * variables, removing the
+     * quantifiers in the process. (That is, in the expression
+     * <code>For all x, x = y</code>, the
+     * variable <code>x</code> in the equals expression would be marked
+     * internaly as a "for all"
      * variable and the expression <code>x = y</code> would be returned.)
-     * <code>For all</code> quantifiers are not permitted to have a "where"
-     * clause (that is, they must be total).  If a <code>for all</code> with a
-     * "where" clause is detected, an <code>IllegalArgumentException</code>
-     * will be thrown.</p>
+     * <code>For all</code>
+     * quantifiers are not permitted to have a "where" clause (that is, they
+     * must be total). If a
+     * <code>for all</code> with a "where" clause is detected, an
+     * <code>IllegalArgumentException</code> will be thrown.
+     * </p>
      *
      * @param e The expression for whom quantifiers should be distributed
-     *          downward.  This will largely be modified in place.
+     *        downward. This will largely
+     *        be modified in place.
      *
      * @return The root of the new expression.
      *
      * @throw IllegalArgumentException If <code>e</code> contains a
-     *    <code>for all</code> expression with a "where" clause.
+     *        <code>for all</code> expression
+     *        with a "where" clause.
      */
     public static Exp applyQuantification(Exp e) {
         Map<String, Integer> quantifiedVariables =
@@ -315,27 +345,36 @@ public class Utilities {
     }
 
     /**
-     * <p>Takes an expression and distributes its quantifiers down to the
-     * variables, removing the quantifiers in the process.  (That is, in the
-     * expression <code>For all x, x = y</code>, the variable <code>x</code>
-     * in the equals expression would be marked internaly as a "for all"
-     * variable and the expression <code>x = y</code> would be returned.)</p>
+     * <p>
+     * Takes an expression and distributes its quantifiers down to the
+     * variables, removing the
+     * quantifiers in the process. (That is, in the expression
+     * <code>For all x, x = y</code>, the
+     * variable <code>x</code> in the equals expression would be marked
+     * internaly as a "for all"
+     * variable and the expression <code>x = y</code> would be returned.)
+     * </p>
      *
-     * <p>Quantified expressiong with "where" clauses will be normalized to
-     * remove the where clause.  In the case of "for all" statements, the
-     * where clause will be added as the antecedent to an implication, so that
-     * <code>For all x, where Q(x), P(x)</code> will become <code>For all x,
+     * <p>
+     * Quantified expressiong with "where" clauses will be normalized to remove
+     * the where clause. In
+     * the case of "for all" statements, the where clause will be added as the
+     * antecedent to an
+     * implication, so that <code>For all x, where Q(x), P(x)</code> will become
+     * <code>For all x,
      * Q(x) implies P(x)</code> and <code>There exists x, where Q(x), such that
      * P(x)</code> will become <code>There exists x such that Q(x) and P(x)
-     * </code>.</p>
+     * </code>.
+     * </p>
      *
      * @param e The expression for whom quantifiers should be distributed
-     *          downward.  This will largely be modified in place.
-     * @param quantifiedVariables A map of variable names that should be 
-     *          considered quantified mapped to the quantifiers that apply to
-     *          them. 
+     *        downward. This will largely
+     *        be modified in place.
+     * @param quantifiedVariables A map of variable names that should be
+     *        considered quantified mapped
+     *        to the quantifiers that apply to them.
      *
-     * @return The root of the new expression. 
+     * @return The root of the new expression.
      */
     private static Exp applyQuantification(Exp e,
             Map<String, Integer> quantifiedVariables) {
@@ -345,28 +384,24 @@ public class Utilities {
         if (e instanceof QuantExp) {
             QuantExp eAsQuantifier = (QuantExp) e;
 
-            //Normalize our eAsQuantifier so that it doesn't have a "where"
-            //clause by appropriately transferring the "where" clause into
-            //the body using logical connectives
+            // Normalize our eAsQuantifier so that it doesn't have a "where"
+            // clause by appropriately transferring the "where" clause into
+            // the body using logical connectives
             if (eAsQuantifier.getWhere() != null) {
                 switch (eAsQuantifier.getOperator()) {
                 case QuantExp.FORALL:
-                    eAsQuantifier =
-                            new QuantExp(eAsQuantifier.getLocation(),
-                                    eAsQuantifier.getOperator(), eAsQuantifier
-                                            .getVars(), null, Exp
-                                            .buildImplication(eAsQuantifier
-                                                    .getWhere(), eAsQuantifier
-                                                    .getBody()));
+                    eAsQuantifier = new QuantExp(eAsQuantifier.getLocation(),
+                            eAsQuantifier.getOperator(),
+                            eAsQuantifier.getVars(), null,
+                            Exp.buildImplication(eAsQuantifier.getWhere(),
+                                    eAsQuantifier.getBody()));
                     break;
                 case QuantExp.EXISTS:
-                    eAsQuantifier =
-                            new QuantExp(eAsQuantifier.getLocation(),
-                                    eAsQuantifier.getOperator(), eAsQuantifier
-                                            .getVars(), null, Exp
-                                            .buildConjunction(eAsQuantifier
-                                                    .getWhere(), eAsQuantifier
-                                                    .getBody()));
+                    eAsQuantifier = new QuantExp(eAsQuantifier.getLocation(),
+                            eAsQuantifier.getOperator(),
+                            eAsQuantifier.getVars(), null,
+                            Exp.buildConjunction(eAsQuantifier.getWhere(),
+                                    eAsQuantifier.getBody()));
                     break;
                 default:
                     throw new RuntimeException("Don't know how to normalize "
@@ -377,13 +412,12 @@ public class Utilities {
             List<MathVarDec> variableNames = eAsQuantifier.getVars();
 
             for (MathVarDec v : variableNames) {
-                quantifiedVariables.put(v.getName().getName(), eAsQuantifier
-                        .getOperator());
+                quantifiedVariables.put(v.getName().getName(),
+                        eAsQuantifier.getOperator());
             }
 
-            retval =
-                    applyQuantification(eAsQuantifier.getBody(),
-                            quantifiedVariables);
+            retval = applyQuantification(eAsQuantifier.getBody(),
+                    quantifiedVariables);
 
             for (MathVarDec v : variableNames) {
                 quantifiedVariables.remove((v.getName().getName()));
@@ -403,15 +437,16 @@ public class Utilities {
                     FunctionExp eAsFunctionExp = (FunctionExp) e;
                     String functionName = eAsFunctionExp.getName().getName();
                     if (quantifiedVariables.containsKey(functionName)) {
-                        eAsFunctionExp.setQuantification(quantifiedVariables
-                                .get(functionName));
+                        eAsFunctionExp.setQuantification(
+                                quantifiedVariables.get(functionName));
                     }
                 }
 
                 List<Exp> subExpressions = e.getSubExpressions();
                 int numSubExpressions = subExpressions.size();
                 Exp curSubExpression;
-                for (int curIndex = 0; curIndex < numSubExpressions; curIndex++) {
+                for (int curIndex =
+                        0; curIndex < numSubExpressions; curIndex++) {
 
                     curSubExpression = subExpressions.get(curIndex);
                     e.setSubExpression(curIndex, applyQuantification(
@@ -431,7 +466,8 @@ public class Utilities {
         return variables;
     }
 
-    public static java.util.List<String> getQuantifiedVariables(Iterable<Exp> es) {
+    public static java.util.List<String>
+            getQuantifiedVariables(Iterable<Exp> es) {
 
         java.util.List<String> variables = new LinkedList<String>();
         getQuantifiedVariables(es, variables);
@@ -471,7 +507,8 @@ public class Utilities {
         }
     }
 
-    public static <T> boolean containsAny(Set<T> container, Set<T> possibilities) {
+    public static <T> boolean containsAny(Set<T> container,
+            Set<T> possibilities) {
         boolean result = false;
 
         Iterator<T> possibilitiesIter = possibilities.iterator();

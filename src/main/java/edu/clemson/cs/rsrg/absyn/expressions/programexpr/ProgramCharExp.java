@@ -1,7 +1,7 @@
 /*
  * ProgramCharExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming character expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the programming character expression objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,11 @@ public class ProgramCharExp extends ProgramLiteralExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The character representing this programming character</p> */
+    /**
+     * <p>
+     * The character representing this programming character
+     * </p>
+     */
     private final Character myCharacter;
 
     // ===========================================================
@@ -36,7 +43,9 @@ public class ProgramCharExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming character expression.</p>
+     * <p>
+     * This constructs a programming character expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param c A {@link Character} expression.
@@ -94,7 +103,9 @@ public class ProgramCharExp extends ProgramLiteralExp {
     }
 
     /**
-     * <p>This method returns the character value.</p>
+     * <p>
+     * This method returns the character value.
+     * </p>
      *
      * @return The {@link Character} value.
      */

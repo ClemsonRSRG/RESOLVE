@@ -1,7 +1,7 @@
 /*
  * GenerateRememberRuleSubstitutionMap.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,9 +22,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>This class is an helper class that helps generate a substitution map to
- * help apply the {@code Remember} rule. This visitor logic is implemented
- * as a {@link TreeWalkerVisitor}.</p>
+ * <p>
+ * This class is an helper class that helps generate a substitution map to help
+ * apply the
+ * {@code Remember} rule. This visitor logic is implemented as a
+ * {@link TreeWalkerVisitor}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -36,14 +39,18 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This contains a mapping of the original {@link Exp} to
-     * the resulting {@link Exp} after applying the {@code Remember} rule.</p>
+     * <p>
+     * This contains a mapping of the original {@link Exp} to the resulting
+     * {@link Exp} after applying
+     * the {@code Remember} rule.
+     * </p>
      */
     private final Map<Exp, Exp> myGeneratedExpMap;
 
     /**
-     * <p>This is the original {@link Exp} that we are applying
-     * the rule to.</p>
+     * <p>
+     * This is the original {@link Exp} that we are applying the rule to.
+     * </p>
      */
     private final Exp myOriginalExp;
 
@@ -52,11 +59,14 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This creates an object that that applies the {@code Remember} rule
-     * to anything that descends from {@link MathExp}.</p>
+     * <p>
+     * This creates an object that that applies the {@code Remember} rule to
+     * anything that descends
+     * from {@link MathExp}.
+     * </p>
      *
-     * @param originalExp The expression we want to apply the
-     *                    {@code Remember} rule to.
+     * @param originalExp The expression we want to apply the {@code Remember}
+     *        rule to.
      */
     public GenerateRememberRuleSubstitutionMap(Exp originalExp) {
         myGeneratedExpMap = new HashMap<>();
@@ -72,7 +82,9 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>This method redefines how an {@link OldExp} should be walked.</p>
+     * <p>
+     * This method redefines how an {@link OldExp} should be walked.
+     * </p>
      *
      * @param exp An {@code old} expression.
      *
@@ -86,9 +98,9 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
         preOldExp(exp);
 
         // YS: We only want to get rid of the outermost
-        //     "#". If the expression happens to be "##y",
-        //     then we simply get rid of the outermost "#" and
-        //     return. Otherwise, we walk the children of OldExp
+        // "#". If the expression happens to be "##y",
+        // then we simply get rid of the outermost "#" and
+        // return. Otherwise, we walk the children of OldExp
         if (exp.getExp() instanceof OldExp) {
             myGeneratedExpMap.put(exp, exp.getExp().clone());
         }
@@ -99,8 +111,8 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
 
             // Generate a new substitution expression and add it to
             // our map.
-            myGeneratedExpMap.put(exp, exp.getExp().substitute(
-                    myGeneratedExpMap));
+            myGeneratedExpMap.put(exp,
+                    exp.getExp().substitute(myGeneratedExpMap));
         }
 
         postOldExp(exp);
@@ -112,7 +124,9 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link SetCollectionExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link SetCollectionExp} should be walked.
+     * </p>
      *
      * @param exp A set collection expression.
      *
@@ -149,7 +163,9 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ProgramExp}.
+     * </p>
      *
      * @param exp A programming expression.
      */
@@ -157,9 +173,10 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
     public final void preProgramExp(ProgramExp exp) {
         // This is an error! We should have converted all ProgramExp
         // to their math counterparts.
-        throw new SourceErrorException("[VCGenerator] Encountered ProgramExp: "
-                + exp + " in " + myOriginalExp
-                + " while applying the Remember Rule.", exp.getLocation());
+        throw new SourceErrorException(
+                "[VCGenerator] Encountered ProgramExp: " + exp + " in "
+                        + myOriginalExp + " while applying the Remember Rule.",
+                exp.getLocation());
     }
 
     // ===========================================================
@@ -167,8 +184,10 @@ public class GenerateRememberRuleSubstitutionMap extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns the substitution map generated by
-     * this tree walker visitor.</p>
+     * <p>
+     * This method returns the substitution map generated by this tree walker
+     * visitor.
+     * </p>
      *
      * @return A map containing the {@link Exp} to be substituted.
      */

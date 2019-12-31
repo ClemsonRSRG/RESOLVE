@@ -1,7 +1,7 @@
 /*
  * MutatingVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,8 @@ import java.util.Map;
 
 /**
  * TODO : MutatingVisitor tends to crash if you use it for multiple sequential
- * traversals.  Always creating a new instance of the visitor is a workaround
- * for now.
+ * traversals. Always
+ * creating a new instance of the visitor is a workaround for now.
  */
 public class MutatingVisitor extends BoundVariableVisitor {
 
@@ -44,7 +44,7 @@ public class MutatingVisitor extends BoundVariableVisitor {
             myFinalExpression = myRoot;
         }
 
-        myIndices.push(0); //We start at the zeroth child
+        myIndices.push(0); // We start at the zeroth child
         myChangesAtLevel.push(new HashMap<Integer, PExp>());
 
         mutateBeginPExp(e);
@@ -60,7 +60,7 @@ public class MutatingVisitor extends BoundVariableVisitor {
 
     public void replaceWith(PExp replacement) {
         if (myIndices.size() == 1) {
-            //We're the root
+            // We're the root
             myFinalExpression = replacement;
         }
         else {
@@ -91,14 +91,14 @@ public class MutatingVisitor extends BoundVariableVisitor {
     public final void endPExp(PExp e) {
         mutateEndPExp(e);
 
-        //We're not visiting any more children at this level (because the
-        //level just ended!)
+        // We're not visiting any more children at this level (because the
+        // level just ended!)
         myIndices.pop();
         myChangesAtLevel.pop();
 
-        //If I'm the root, there's no chance I have any siblings
+        // If I'm the root, there's no chance I have any siblings
         if (e != myRoot) {
-            //Increment to the next potential child index
+            // Increment to the next potential child index
             int i = myIndices.pop();
 
             myIndices.push(i + 1);

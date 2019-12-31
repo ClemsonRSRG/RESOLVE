@@ -1,7 +1,7 @@
 /*
  * Restore.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,9 +16,12 @@ import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import java.util.Deque;
 
 /**
- * <p>The <code>Restore</code> automator simply waits for the heartbeat before
- * undoing any proof steps that have occurred since it was created and then
- * popping itself off the stack.</p>
+ * <p>
+ * The <code>Restore</code> automator simply waits for the heartbeat before
+ * undoing any proof steps
+ * that have occurred since it was created and then popping itself off the
+ * stack.
+ * </p>
  */
 public class Restore implements Automator {
 

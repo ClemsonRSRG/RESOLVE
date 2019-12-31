@@ -1,7 +1,7 @@
 /*
  * Metrics.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,8 +13,9 @@
 package edu.clemson.cs.rsrg.prover.output;
 
 /**
- * <p>The {@code Metrics} class contains aggregate data about a full proof
- * attempt.</p>
+ * <p>
+ * The {@code Metrics} class contains aggregate data about a full proof attempt.
+ * </p>
  *
  * @author Hampton Smith
  * @author Mike Kabbani
@@ -26,10 +27,19 @@ public class Metrics {
     // Member Fields
     // ===========================================================
 
-    /** <p>Time in milliseconds spent on proving this {@code VC}.</p> */
+    /**
+     * <p>
+     * Time in milliseconds spent on proving this {@code VC}.
+     * </p>
+     */
     private final long myProofDuration;
 
-    /** <p>Maximum time in milliseconds that the prover attempts to prove this {@code VC}.</p> */
+    /**
+     * <p>
+     * Maximum time in milliseconds that the prover attempts to prove this
+     * {@code VC}.
+     * </p>
+     */
     private final long myTimeout;
 
     // ===========================================================
@@ -37,8 +47,10 @@ public class Metrics {
     // ===========================================================
 
     /**
-     * <p>This constructs an object for keeping track of the aggregate
-     * data about proving a {@code VC}.</p>
+     * <p>
+     * This constructs an object for keeping track of the aggregate data about
+     * proving a {@code VC}.
+     * </p>
      *
      * @param duration Total time spend proving this {@code VC}.
      * @param timeout The specified timeout before giving up.
@@ -53,11 +65,14 @@ public class Metrics {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default {@code equals} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code equals} method implementation.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -74,7 +89,9 @@ public class Metrics {
     }
 
     /**
-     * <p>This method returns the timeout in milliseconds.</p>
+     * <p>
+     * This method returns the timeout in milliseconds.
+     * </p>
      *
      * @return A number.
      */
@@ -83,7 +100,9 @@ public class Metrics {
     }
 
     /**
-     * <p>This method returns the time spent proving this {@code VC}.</p>
+     * <p>
+     * This method returns the time spent proving this {@code VC}.
+     * </p>
      *
      * @return A number.
      */
@@ -92,7 +111,9 @@ public class Metrics {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */

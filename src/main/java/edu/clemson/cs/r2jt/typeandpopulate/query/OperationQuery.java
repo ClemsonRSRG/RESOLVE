@@ -1,7 +1,7 @@
 /*
  * OperationQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,10 +23,14 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.PossiblyQualifiedPath;
 
 /**
- * <p>An <code>OperationQuery</code> searched for a (possibly-qualified) 
- * operation.  If a qualifier is provided, the named facility or module is 
- * searched.  Otherwise, the operation is searched for in any directly imported
- * modules and in instantiated versions of any available facilities.</p>
+ * <p>
+ * An <code>OperationQuery</code> searched for a (possibly-qualified) operation.
+ * If a qualifier is
+ * provided, the named facility or module is searched. Otherwise, the operation
+ * is searched for in
+ * any directly imported modules and in instantiated versions of any available
+ * facilities.
+ * </p>
  */
 public class OperationQuery extends BaseSymbolQuery<OperationEntry> {
 

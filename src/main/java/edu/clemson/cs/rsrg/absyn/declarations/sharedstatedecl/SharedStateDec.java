@@ -1,7 +1,7 @@
 /*
  * SharedStateDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class for all the shared state declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the shared state declaration objects that the
+ * compiler builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -33,13 +36,25 @@ public class SharedStateDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of abstract state variables for the new shared state.</p> */
+    /**
+     * <p>
+     * The list of abstract state variables for the new shared state.
+     * </p>
+     */
     private final List<MathVarDec> myAbstractStateVars;
 
-    /** <p>The constraint clause for the new shared state.</p> */
+    /**
+     * <p>
+     * The constraint clause for the new shared state.
+     * </p>
+     */
     private final AssertionClause myConstraint;
 
-    /** <p>The initialization block for the new shared state.</p> */
+    /**
+     * <p>
+     * The initialization block for the new shared state.
+     * </p>
+     */
     private final SpecInitFinalItem myStateInitItem;
 
     // ===========================================================
@@ -47,7 +62,9 @@ public class SharedStateDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs a shared state declaration.</p>
+     * <p>
+     * This constructs a shared state declaration.
+     * </p>
      *
      * @param name Name of the new shared state.
      * @param abstractStateVars List of abstract state variables.
@@ -124,7 +141,9 @@ public class SharedStateDec extends Dec {
     }
 
     /**
-     * <p>Returns the type constraint for this shared state.</p>
+     * <p>
+     * Returns the type constraint for this shared state.
+     * </p>
      *
      * @return The shared state constraint in {@link AssertionClause} format.
      */
@@ -133,17 +152,21 @@ public class SharedStateDec extends Dec {
     }
 
     /**
-     * <p>Returns the initialization block for this shared state.</p>
+     * <p>
+     * Returns the initialization block for this shared state.
+     * </p>
      *
-     * @return All relevant verification for initialization
-     * in {@link SpecInitFinalItem} format.
+     * @return All relevant verification for initialization in
+     *         {@link SpecInitFinalItem} format.
      */
     public final SpecInitFinalItem getInitialization() {
         return myStateInitItem;
     }
 
     /**
-     * <p>Returns the list of abstract state variables for this shared state.</p>
+     * <p>
+     * Returns the list of abstract state variables for this shared state.
+     * </p>
      *
      * @return List of {@link MathVarDec}s.
      */
@@ -177,6 +200,7 @@ public class SharedStateDec extends Dec {
             newAbstractStateVars.add((MathVarDec) varDec.clone());
         }
 
-        return new SharedStateDec(myName.clone(), newAbstractStateVars, myConstraint.clone(), myStateInitItem.clone());
+        return new SharedStateDec(myName.clone(), newAbstractStateVars,
+                myConstraint.clone(), myStateInitItem.clone());
     }
 }

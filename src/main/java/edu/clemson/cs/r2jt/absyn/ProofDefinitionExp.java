@@ -1,7 +1,7 @@
 /*
  * ProofDefinitionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -123,17 +123,11 @@ public class ProofDefinitionExp extends LineNumberedExp {
     public void setSubExpression(int index, Exp e) {
         throw new UnsupportedOperationException(
                 "Proof definition expression is immutable.");
-        /*switch (index) {
-        case 0:
-        	exp.setBase(e);
-        	break;
-        case 1:
-        	exp.setHypothesis(e);
-        	break;
-        case 2:
-        	exp.setDefinition(e);
-        	break;
-        }*/
+        /*
+         * switch (index) { case 0: exp.setBase(e); break; case 1:
+         * exp.setHypothesis(e); break; case 2:
+         * exp.setDefinition(e); break; }
+         */
     }
 
     public boolean shallowCompare(Exp e2) {

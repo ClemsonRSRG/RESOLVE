@@ -1,7 +1,7 @@
 /*
  * Exp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,18 +24,21 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 
-public abstract class Exp extends ResolveConceptualElement implements Cloneable {
+public abstract class Exp extends ResolveConceptualElement
+        implements
+            Cloneable {
 
     /*
-     * These variables are useful to the proof checking classes and
-     * will only be set if the -proofcheck flag in the environment is ON --
-     *  Addendum HwS: But type should ultimately be set always!  And it is now
-     *  set if you turn on -prove as well!
+     * These variables are useful to the proof checking classes and will only be
+     * set if the
+     * -proofcheck flag in the environment is ON -- Addendum HwS: But type
+     * should ultimately be set
+     * always! And it is now set if you turn on -prove as well!
      */
     protected MTType myMathType = null;
     protected MTType myMathTypeValue = null;
 
-    //private boolean isLocal = false;
+    // private boolean isLocal = false;
     private int marker = 0;
 
     public abstract void accept(ResolveConceptualVisitor v);
@@ -50,7 +53,7 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     public abstract void setSubExpression(int index, Exp e);
 
-    //    public abstract boolean  equals(Exp exp, TypeMatcher tm);
+    // public abstract boolean equals(Exp exp, TypeMatcher tm);
     public String toString(int indent, int increment) {
 
         return new String();
@@ -58,15 +61,15 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     public String toString(int indent) {
         String exp = "";
-        //return this.toString();
+        // return this.toString();
         return exp;
     }
 
     protected Exp replace(Exp old, Exp replacement) {
 
-        throw new UnsupportedOperationException("Replace not implemented for "
-                + this.getClass() + ".");
-        //return new VarExp();
+        throw new UnsupportedOperationException(
+                "Replace not implemented for " + this.getClass() + ".");
+        // return new VarExp();
     }
 
     public String toString() {
@@ -74,22 +77,31 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     }
 
     /**
-     * <p>Returns a DEEP COPY of this expression, with all instances of 
-     * <code>Exp</code>s that occur as keys in <code>substitutions</code> 
-     * replaced with their corresponding values.</p>
+     * <p>
+     * Returns a DEEP COPY of this expression, with all instances of
+     * <code>Exp</code>s that occur as
+     * keys in <code>substitutions</code> replaced with their corresponding
+     * values.
+     * </p>
      * 
-     * <p>In general, a key <code>Exp</code> "occurs" in this <code>Exp</code>
-     * if either this <code>Exp</code> or some subexpression is 
-     * <code>equivalent()</code>.  However, if the key is a <code>VarExp</code>
-     * function names are additionally matched, even though they would not
-     * ordinarily match via <code>equivalent()</code>, so function names can
-     * be substituted without affecting their arguments.</p>
-     *   
+     * <p>
+     * In general, a key <code>Exp</code> "occurs" in this <code>Exp</code> if
+     * either this
+     * <code>Exp</code> or some subexpression is <code>equivalent()</code>.
+     * However, if the key is a
+     * <code>VarExp</code> function names are additionally matched, even though
+     * they would not
+     * ordinarily match via <code>equivalent()</code>, so function names can be
+     * substituted without
+     * affecting their arguments.
+     * </p>
+     * 
      * @param substitutions A mapping from <code>Exp</code>s that should be
-     *                      substituted out to the <code>Exp</code> that should
-     *                      replace them.
+     *        substituted out to the
+     *        <code>Exp</code> that should replace them.
      * @return A new <code>Exp</code> that is a deep copy of the original with
-     *         the provided substitutions made.
+     *         the provided
+     *         substitutions made.
      */
     public final Exp substitute(java.util.Map<Exp, Exp> substitutions) {
         Exp retval;
@@ -102,22 +114,22 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
                     substitutions.entrySet();
             Iterator<java.util.Map.Entry<Exp, Exp>> entryIter =
                     entries.iterator();
-            //System.out.println("Recursing: " + this.toString(0) + " : " + this.getClass());
+            // System.out.println("Recursing: " + this.toString(0) + " : " + this.getClass());
             while (entryIter.hasNext() && !match) {
                 curEntry = entryIter.next();
-                //System.out.print(curEntry.getKey().toString(0) + " --?-> " + curEntry.getValue().toString(0));
+                // System.out.print(curEntry.getKey().toString(0) + " --?-> " +
+                // curEntry.getValue().toString(0));
                 match = curEntry.getKey().equivalent(this);
 
-                /*if (match) {
-                	System.out.println(" [Yes] ");
-                }
-                else {
-                	System.out.println(" [ No] ");
-                }*/
+                /*
+                 * if (match) { System.out.println(" [Yes] "); } else {
+                 * System.out.println(" [ No] "); }
+                 */
             }
 
             if (match) {
-                //System.out.println(curEntry.getKey().toString(0) + " --> " + curEntry.getValue().toString(0));
+                // System.out.println(curEntry.getKey().toString(0) + " --> " +
+                // curEntry.getValue().toString(0));
                 retval = curEntry.getValue();
             }
             else {
@@ -131,13 +143,13 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         return retval;
     }
 
-    //XXX : For the benefit of making the old prover work with the new type
-    //      system, we make the assumption that performing substitutions does
-    //      not change the type of the expression.  In general, this is a 
-    //      terrible assumption, but it shouldn't cause any unsoundness in the
-    //      examples we're looking at.  When the new prover is ready, this
-    //      method will become unnecessary, because substitutions will occur
-    //      on PExps rather than Exps.
+    // XXX : For the benefit of making the old prover work with the new type
+    // system, we make the assumption that performing substitutions does
+    // not change the type of the expression. In general, this is a
+    // terrible assumption, but it shouldn't cause any unsoundness in the
+    // examples we're looking at. When the new prover is ready, this
+    // method will become unnecessary, because substitutions will occur
+    // on PExps rather than Exps.
     public static final Exp substituteChildren(Exp target,
             java.util.Map<Exp, Exp> substitutions) {
 
@@ -158,15 +170,18 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         for (java.util.Map.Entry<String, Exp> substitution : substitutions
                 .entrySet()) {
 
-            finalSubstitutions.put(new VarExp(null, null, new PosSymbol(null,
-                    Symbol.symbol(substitution.getKey()))), substitution
-                    .getValue());
+            finalSubstitutions.put(
+                    new VarExp(null, null,
+                            new PosSymbol(null,
+                                    Symbol.symbol(substitution.getKey()))),
+                    substitution.getValue());
         }
 
         return substitute(finalSubstitutions);
     }
 
-    protected static Exp substitute(Exp e, java.util.Map<Exp, Exp> substitutions) {
+    protected static Exp substitute(Exp e,
+            java.util.Map<Exp, Exp> substitutions) {
         Exp retval;
 
         if (e == null) {
@@ -180,20 +195,25 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     }
 
     /**
-     * <p>Implemented by concrete subclasses of <code>Exp</code> to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted.  The concrete subclass may assume that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
+     * <p>
+     * Implemented by concrete subclasses of <code>Exp</code> to manufacture a
+     * copy of themselves
+     * where all subexpressions have been appropriately substituted. The
+     * concrete subclass may assume
+     * that <code>this</code> does not match any key in
+     * <code>substitutions</code> and thus need only
+     * concern itself with performing substitutions in its children.
+     * </p>
      * 
      * @param substitutions A mapping from <code>Exp</code>s that should be
-     *                      substituted out to the <code>Exp</code> that should
-     *                      replace them.
+     *        substituted out to the
+     *        <code>Exp</code> that should replace them.
      * @return A new <code>Exp</code> that is a deep copy of the original with
-     *         the provided substitutions made.
+     *         the provided
+     *         substitutions made.
      */
-    protected abstract Exp substituteChildren(
-            java.util.Map<Exp, Exp> substitutions);
+    protected abstract Exp
+            substituteChildren(java.util.Map<Exp, Exp> substitutions);
 
     public Exp simplify() {
         return this;
@@ -217,8 +237,8 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
                         this));
             }
             else {
-                lst.add(new InfixExp(null, assumpts,
-                        createPosSymbol("implies"), this));
+                lst.add(new InfixExp(null, assumpts, createPosSymbol("implies"),
+                        this));
             }
             return lst;
         }
@@ -235,8 +255,7 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     }
 
     /**
-     * Builds a sequence of numSpaces spaces and returns that
-     * sequence.
+     * Builds a sequence of numSpaces spaces and returns that sequence.
      */
     protected void printSpace(int numSpaces, StringBuffer buffer) {
         for (int i = 0; i < numSpaces; ++i) {
@@ -255,10 +274,10 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     }
 
     protected Exp copy() {
-        System.out.println("Shouldn't be calling Exp.copy() from type "
-                + this.getClass());
+        System.out.println(
+                "Shouldn't be calling Exp.copy() from type " + this.getClass());
         throw new RuntimeException();
-        //return null;
+        // return null;
     }
 
     public void prettyPrint() {
@@ -287,9 +306,9 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         myMathTypeValue = mathTypeValue;
     }
 
-    //    public boolean isLocal() { return isLocal; }
+    // public boolean isLocal() { return isLocal; }
 
-    //    public void setIsLocal(boolean i) { isLocal = i; }
+    // public void setIsLocal(boolean i) { isLocal = i; }
 
     public int getMarker() {
         return marker;
@@ -300,15 +319,19 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict.  This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
+     * <p>
+     * Shallow compare is too weak for many things, and equals() is too strict.
+     * This method returns
+     * <code>true</code> <strong>iff</code> this expression and the provided
+     * expression,
+     * <code>e</code>, are equivalent with respect to structure and all function
+     * and variable names.
+     * </p>
      * 
      * @param e The expression to compare this one to.
      * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     *         expression are equivalent
+     *         with respect to structure and all function and variable names.
      */
     public boolean equivalent(Exp e) {
         System.out.println(e.toString(1));
@@ -318,16 +341,19 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     }
 
     /**
-     * <p>Helper method to deal with <code>Exps</code>s that need to be 
-     * compared but might be null.  Returns true <strong>iff</strong> 
-     * <code>e1</code> and <code>e2</code> are both <code>null</code> or both 
-     * are not <code>null</code> and equivalent.</p>
+     * <p>
+     * Helper method to deal with <code>Exps</code>s that need to be compared
+     * but might be null.
+     * Returns true <strong>iff</strong> <code>e1</code> and <code>e2</code> are
+     * both
+     * <code>null</code> or both are not <code>null</code> and equivalent.
+     * </p>
      * 
      * @param e1 The first <code>Exp</code>.
      * @param e2 The second <code>Exp</code>.
-     * @return <code>true</code> <strong>iff</strong> both 
-     * 		   <code>Exps</code>s are null; or both are not null and are
-     *         equivalent.
+     * @return <code>true</code> <strong>iff</strong> both <code>Exps</code>s
+     *         are null; or both are
+     *         not null and are equivalent.
      */
     public static boolean equivalent(Exp e1, Exp e2) {
         return !((e1 == null ^ e2 == null))
@@ -335,44 +361,52 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     }
 
     /**
-     * <p>Helper method to deal with <code>PosSymbol</code>s that need to be 
-     * compared but might be null.  Returns true <strong>iff</strong> 
-     * <code>s1</code> and <code>s2</code> are both <code>null</code> or both 
-     * are not <code>null</code> and have names that are equivalent strings (see
-     * <code>stringEquivalent</code>())</p>
+     * <p>
+     * Helper method to deal with <code>PosSymbol</code>s that need to be
+     * compared but might be null.
+     * Returns true <strong>iff</strong> <code>s1</code> and <code>s2</code> are
+     * both
+     * <code>null</code> or both are not <code>null</code> and have names that
+     * are equivalent strings
+     * (see <code>stringEquivalent</code>())
+     * </p>
      * 
      * @param s1 The first <code>PosSymbol</code>.
      * @param s2 The second <code>PosSymbol</code>.
-     * @return <code>true</code> <strong>iff</strong> both 
-     * <code>PosSymbol</code>s are null; or both are not null and have names
-     * that are equivalent strigns (see <code>stringEquivalent</code>()).
+     * @return <code>true</code> <strong>iff</strong> both
+     *         <code>PosSymbol</code>s are null; or both
+     *         are not null and have names that are equivalent strigns (see
+     *         <code>stringEquivalent</code>()).
      */
     public static boolean posSymbolEquivalent(PosSymbol s1, PosSymbol s2) {
-        //The first line makes sure that either both s1 and s2 are null or
-        //neither is.  If not, we short circuit with "false".
-        //The second line short circuits and returns "true" if both are null.
-        //The third line performs the string comparison.
-        return !((s1 == null) ^ (s2 == null))
-                && ((s1 == null && s2 == null) || (stringEquivalent(s1
-                        .getName(), s2.getName())));
+        // The first line makes sure that either both s1 and s2 are null or
+        // neither is. If not, we short circuit with "false".
+        // The second line short circuits and returns "true" if both are null.
+        // The third line performs the string comparison.
+        return !((s1 == null) ^ (s2 == null)) && ((s1 == null && s2 == null)
+                || (stringEquivalent(s1.getName(), s2.getName())));
     }
 
     /**
-     * <p>Helper method to deal with strings that need to be compared but might
-     * be null.  Returns true <strong>iff</strong> <code>s1</code> and 
-     * <code>s2</code> are both <code>null</code> or both are not null and
-     * represent the same string (case sensitive).</p>
+     * <p>
+     * Helper method to deal with strings that need to be compared but might be
+     * null. Returns true
+     * <strong>iff</strong> <code>s1</code> and <code>s2</code> are both
+     * <code>null</code> or both are
+     * not null and represent the same string (case sensitive).
+     * </p>
      * 
      * @param s1 The first string.
      * @param s2 The second string.
-     * @return <code>true</code> <strong>iff</strong> both string are null;
-     * or both are not null and represent the same string.
+     * @return <code>true</code> <strong>iff</strong> both string are null; or
+     *         both are not null and
+     *         represent the same string.
      */
     public static boolean stringEquivalent(String s1, String s2) {
-        //The first line makes sure that either both s1 and s2 are null or
-        //neither is.  If not, we short circuit with "false".
-        //The second line short circuits and returns "true" if both are null.
-        //The third line performs the string comparison.
+        // The first line makes sure that either both s1 and s2 are null or
+        // neither is. If not, we short circuit with "false".
+        // The second line short circuits and returns "true" if both are null.
+        // The third line performs the string comparison.
         return !((s1 == null) ^ (s2 == null))
                 && ((s1 == null && s2 == null) || (s1.equals(s2)));
     }
@@ -413,13 +447,14 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     public static InfixExp buildImplication(Exp antecedent, Exp consequent) {
         return new InfixExp(antecedent.getLocation(), antecedent,
-                new PosSymbol(antecedent.getLocation(), Symbol
-                        .symbol("implies")), consequent);
+                new PosSymbol(antecedent.getLocation(),
+                        Symbol.symbol("implies")),
+                consequent);
     }
 
     public static InfixExp buildConjunction(Exp left, Exp right) {
-        return new InfixExp(left.getLocation(), left, new PosSymbol(left
-                .getLocation(), Symbol.symbol("and")), right);
+        return new InfixExp(left.getLocation(), left,
+                new PosSymbol(left.getLocation(), Symbol.symbol("and")), right);
     }
 
     public static VarExp getTrueVarExp(TypeGraph tg) {
@@ -433,16 +468,22 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     }
 
     /**
-     * <p>Oh, you poor bastard, you need to use <code>replace</code>.  Keep in
-     * mind that if <code>replace</code> doesn't need to make any internal
-     * replacements, it returns <code>null</code> to indicate "no change" rather
-     * than returning the unmodified object.  Other code depends on this 
-     * functionality so it can't be changed--if you return the unmodified 
-     * object, things will start to misbehave.</p>
+     * <p>
+     * Oh, you poor bastard, you need to use <code>replace</code>. Keep in mind
+     * that if
+     * <code>replace</code> doesn't need to make any internal replacements, it
+     * returns
+     * <code>null</code> to indicate "no change" rather than returning the
+     * unmodified object. Other
+     * code depends on this functionality so it can't be changed--if you return
+     * the unmodified object,
+     * things will start to misbehave.
+     * </p>
+     * 
      * @param exp
      * @param old
      * @param replacement
-     * @return 
+     * @return
      */
     public static Exp replace(Exp exp, Exp old, Exp replacement) {
         MTType originalType = exp.getMathType();
@@ -451,15 +492,16 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         Exp result = exp.replace(old, replacement);
 
         if (result != null) {
-            //If the subclass has set the internal types, we don't overwrite 
-            //them--it's theoretically possible that the replacement changed the
-            //type, but in most cases we just want to set the type to be the 
-            //same
+            // If the subclass has set the internal types, we don't overwrite
+            // them--it's theoretically possible that the replacement changed the
+            // type, but in most cases we just want to set the type to be the
+            // same
             if (originalType != null && result.getMathType() == null) {
                 result.setMathType(originalType);
             }
 
-            if (originalTypeValue != null && result.getMathTypeValue() == null) {
+            if (originalTypeValue != null
+                    && result.getMathTypeValue() == null) {
 
                 result.setMathTypeValue(originalTypeValue);
             }
@@ -493,11 +535,9 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     public boolean isLiteralTrue() {
         boolean result = (this instanceof VarExp);
 
-        result =
-                result
-                        && ((VarExp) this).getName().getName().equals("true")
-                        && this.getMathType().equals(
-                                this.getMathType().getTypeGraph().BOOLEAN);
+        result = result && ((VarExp) this).getName().getName().equals("true")
+                && this.getMathType()
+                        .equals(this.getMathType().getTypeGraph().BOOLEAN);
 
         return result;
     }
@@ -505,11 +545,9 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     public boolean isLiteralFalse() {
         boolean result = (this instanceof VarExp);
 
-        result =
-                result
-                        && ((VarExp) this).getName().getName().equals("false")
-                        && this.getMathType().equals(
-                                this.getMathType().getTypeGraph().BOOLEAN);
+        result = result && ((VarExp) this).getName().getName().equals("false")
+                && this.getMathType()
+                        .equals(this.getMathType().getTypeGraph().BOOLEAN);
 
         return result;
     }

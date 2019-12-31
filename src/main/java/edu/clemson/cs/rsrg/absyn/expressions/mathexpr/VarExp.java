@@ -1,7 +1,7 @@
 /*
  * VarExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical variable expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical variable expression objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,19 +35,34 @@ public class VarExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's qualifier</p> */
+    /**
+     * <p>
+     * The expression's qualifier
+     * </p>
+     */
     private PosSymbol myQualifier;
 
-    /** <p>The expression's name</p> */
+    /**
+     * <p>
+     * The expression's name
+     * </p>
+     */
     private final PosSymbol myName;
 
     /**
-     * <p>A boolean that indicates whether or not this {@code VarExp}
-     * is referencing a definition name from a {@code Precis}.</p>
+     * <p>
+     * A boolean that indicates whether or not this {@code VarExp} is
+     * referencing a definition name
+     * from a {@code Precis}.
+     * </p>
      */
     private boolean myIsPrecisDefinitionName;
 
-    /** <p>The object's quantification (if any).</p> */
+    /**
+     * <p>
+     * The object's quantification (if any).
+     * </p>
+     */
     private SymbolTableEntry.Quantification myQuantification;
 
     // ===========================================================
@@ -52,8 +70,10 @@ public class VarExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a variable expression with "None"
-     * as the default quantification.</p>
+     * <p>
+     * This constructs a variable expression with "None" as the default
+     * quantification.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param qualifier A {@link PosSymbol} qualifier object.
@@ -64,13 +84,15 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This constructs a variable expression with the
-     * passed in quantification.</p>
+     * <p>
+     * This constructs a variable expression with the passed in quantification.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param qualifier A {@link PosSymbol} qualifier object.
      * @param name A {@link PosSymbol} name object.
-     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier object.
+     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier
+     *        object.
      */
     public VarExp(Location l, PosSymbol qualifier, PosSymbol name,
             SymbolTableEntry.Quantification quantifier) {
@@ -78,15 +100,18 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This constructs a variable expression with the
-     * passed in quantification.</p>
+     * <p>
+     * This constructs a variable expression with the passed in quantification.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param qualifier A {@link PosSymbol} qualifier object.
      * @param name A {@link PosSymbol} name object.
-     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier object.
-     * @param isPrecisDefinitionName A boolean that indicates whether or not this {@code VarExp} is
-     *                               referencing a definition name from a {@code Precis}.
+     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier
+     *        object.
+     * @param isPrecisDefinitionName A boolean that indicates whether or not
+     *        this {@code VarExp} is
+     *        referencing a definition name from a {@code Precis}.
      */
     private VarExp(Location l, PosSymbol qualifier, PosSymbol name,
             SymbolTableEntry.Quantification quantifier,
@@ -179,16 +204,17 @@ public class VarExp extends MathExp {
         boolean retval = false;
         if (e instanceof VarExp) {
             VarExp eAsVarExp = (VarExp) e;
-            retval =
-                    (posSymbolEquivalent(myQualifier, eAsVarExp.myQualifier) && (posSymbolEquivalent(
-                            myName, eAsVarExp.myName)));
+            retval = (posSymbolEquivalent(myQualifier, eAsVarExp.myQualifier)
+                    && (posSymbolEquivalent(myName, eAsVarExp.myName)));
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns the name.</p>
+     * <p>
+     * This method returns the name.
+     * </p>
      *
      * @return The {@link PosSymbol} representation object.
      */
@@ -197,7 +223,9 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the qualifier name.</p>
+     * <p>
+     * This method returns the qualifier name.
+     * </p>
      *
      * @return The {@link PosSymbol} representation object.
      */
@@ -206,7 +234,9 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This method returns this variable expression's quantification.</p>
+     * <p>
+     * This method returns this variable expression's quantification.
+     * </p>
      *
      * @return The {@link SymbolTableEntry.Quantification} object.
      */
@@ -228,9 +258,8 @@ public class VarExp extends MathExp {
     @Override
     public final int hashCode() {
         int result = super.hashCode();
-        result =
-                31 * result
-                        + (myQualifier != null ? myQualifier.hashCode() : 0);
+        result = 31 * result
+                + (myQualifier != null ? myQualifier.hashCode() : 0);
         result = 31 * result + myName.hashCode();
         result = 31 * result + (myIsPrecisDefinitionName ? 1 : 0);
         result = 31 * result + myQuantification.hashCode();
@@ -238,25 +267,32 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This method checks to see if this variable expression refers
-     * to a definition from a {@code Precis}.</p>
+     * <p>
+     * This method checks to see if this variable expression refers to a
+     * definition from a
+     * {@code Precis}.
+     * </p>
      *
      * @return {@code true} if it is a {@code Precis} definition name,
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     public final boolean isIsPrecisDefinitionName() {
         return myIsPrecisDefinitionName;
     }
 
     /**
-     * <p>Sets the flag for whether or not this refers to a definition name.</p>
+     * <p>
+     * Sets the flag for whether or not this refers to a definition name.
+     * </p>
      */
     public final void setIsPrecisDefinitionName() {
         myIsPrecisDefinitionName = true;
     }
 
     /**
-     * <p>Sets the qualifier for this expression.</p>
+     * <p>
+     * Sets the qualifier for this expression.
+     * </p>
      *
      * @param qualifier The qualifier for this expression.
      */
@@ -265,7 +301,9 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>Sets the quantification for this expression.</p>
+     * <p>
+     * Sets the quantification for this expression.
+     * </p>
      *
      * @param q The quantification type for this expression.
      */

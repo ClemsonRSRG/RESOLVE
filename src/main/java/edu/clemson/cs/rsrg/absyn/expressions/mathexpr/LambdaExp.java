@@ -1,7 +1,7 @@
 /*
  * LambdaExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical lambda expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical lambda expression objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,10 +35,18 @@ public class LambdaExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of mathematical variables in this lambda expression.</p> */
+    /**
+     * <p>
+     * The list of mathematical variables in this lambda expression.
+     * </p>
+     */
     private final List<MathVarDec> myParameters;
 
-    /** <p>The lambda expression's body.</p> */
+    /**
+     * <p>
+     * The lambda expression's body.
+     * </p>
+     */
     private final Exp myBodyExp;
 
     // ===========================================================
@@ -43,10 +54,13 @@ public class LambdaExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a lambda expression.</p>
+     * <p>
+     * This constructs a lambda expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param params A list of {@link MathVarDec} representing the expression's variables.
+     * @param params A list of {@link MathVarDec} representing the expression's
+     *        variables.
      * @param body A {@link Exp} representing the body of the expression.
      */
     public LambdaExp(Location l, List<MathVarDec> params, Exp body) {
@@ -149,9 +163,8 @@ public class LambdaExp extends MathExp {
             Iterator<MathVarDec> eParameterIterator =
                     eAsLambdaExp.myParameters.iterator();
             while (parameterIterator.hasNext() && result) {
-                result =
-                        parameterIterator.next().equals(
-                                eParameterIterator.next());
+                result = parameterIterator.next()
+                        .equals(eParameterIterator.next());
             }
 
             if (result) {
@@ -163,7 +176,9 @@ public class LambdaExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the body expression.</p>
+     * <p>
+     * This method returns the body expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -172,7 +187,9 @@ public class LambdaExp extends MathExp {
     }
 
     /**
-     * <p>This method returns all the lambda parameter variables.</p>
+     * <p>
+     * This method returns all the lambda parameter variables.
+     * </p>
      *
      * @return A list containing all the parameter {@link MathVarDec}s.
      */
@@ -211,8 +228,8 @@ public class LambdaExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new LambdaExp(cloneLocation(), copyParameters(), myBodyExp
-                .clone());
+        return new LambdaExp(cloneLocation(), copyParameters(),
+                myBodyExp.clone());
     }
 
     /**
@@ -220,8 +237,8 @@ public class LambdaExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new LambdaExp(cloneLocation(), copyParameters(), substitute(
-                myBodyExp, substitutions));
+        return new LambdaExp(cloneLocation(), copyParameters(),
+                substitute(myBodyExp, substitutions));
     }
 
     // ===========================================================
@@ -229,8 +246,10 @@ public class LambdaExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the parameter variables.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * parameter variables.
+     * </p>
      *
      * @return A list containing {@link MathVarDec}s.
      */

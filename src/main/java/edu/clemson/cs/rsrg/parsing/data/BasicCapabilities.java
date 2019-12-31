@@ -1,7 +1,7 @@
 /*
  * BasicCapabilities.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,8 +13,10 @@
 package edu.clemson.cs.rsrg.parsing.data;
 
 /**
- * <p>An interface that all intermediate objects created by
- * the RESOLVE compiler needs to implement.</p>
+ * <p>
+ * An interface that all intermediate objects created by the RESOLVE compiler
+ * needs to implement.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -22,13 +24,14 @@ package edu.clemson.cs.rsrg.parsing.data;
 public interface BasicCapabilities {
 
     /**
-     * <p>This method creates a special indented
-     * text version of the instantiated object.</p>
+     * <p>
+     * This method creates a special indented text version of the instantiated
+     * object.
+     * </p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentInc The additional indentation increment
-     *                       for the subsequent lines.
+     * @param indentSize The base indentation to the first line of the text.
+     * @param innerIndentInc The additional indentation increment for the
+     *        subsequent lines.
      *
      * @return A formatted text string of the class.
      */

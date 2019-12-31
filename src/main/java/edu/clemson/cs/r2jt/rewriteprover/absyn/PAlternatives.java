@@ -1,7 +1,7 @@
 /*
  * PAlternatives.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -31,27 +31,27 @@ public class PAlternatives extends PExp {
     public PAlternatives(List<PExp> conditions, List<PExp> results,
             PExp otherwiseClauseResult, MTType type, MTType typeValue) {
 
-        super(
+        super(calculateStructureHash(conditions, results,
+                otherwiseClauseResult),
                 calculateStructureHash(conditions, results,
-                        otherwiseClauseResult), calculateStructureHash(
-                        conditions, results, otherwiseClauseResult), type,
-                typeValue);
+                        otherwiseClauseResult),
+                type, typeValue);
 
         myAlternatives = new LinkedList<Alternative>();
 
         sanityCheckConditions(conditions);
 
         if (conditions.size() != results.size()) {
-            throw new IllegalArgumentException("conditions.size() must equal "
-                    + "results.size().");
+            throw new IllegalArgumentException(
+                    "conditions.size() must equal " + "results.size().");
         }
 
         Iterator<PExp> conditionIter = conditions.iterator();
         Iterator<PExp> resultIter = results.iterator();
 
         while (conditionIter.hasNext()) {
-            myAlternatives.add(new Alternative(conditionIter.next(), resultIter
-                    .next()));
+            myAlternatives.add(
+                    new Alternative(conditionIter.next(), resultIter.next()));
         }
 
         myOtherwiseClauseResult = otherwiseClauseResult;
@@ -60,8 +60,9 @@ public class PAlternatives extends PExp {
     public PAlternatives(AlternativeExp alternativeExp) {
 
         this(getConditions(alternativeExp), getResults(alternativeExp),
-                getOtherwiseClauseResult(alternativeExp), alternativeExp
-                        .getMathType(), alternativeExp.getMathTypeValue());
+                getOtherwiseClauseResult(alternativeExp),
+                alternativeExp.getMathType(),
+                alternativeExp.getMathTypeValue());
     }
 
     public void accept(PExpVisitor v) {
@@ -113,7 +114,8 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    private static PExp getOtherwiseClauseResult(AlternativeExp alternativeExp) {
+    private static PExp
+            getOtherwiseClauseResult(AlternativeExp alternativeExp) {
 
         PExp workingOtherwiseClauseResult = null;
 
@@ -167,9 +169,9 @@ public class PAlternatives extends PExp {
     private static MTType getResultType(List<PExp> results,
             PExp otherwiseClauseResult) {
 
-        //TODO : This could be made more flexible--if the first alternative
-        //       is an N and the second a Z, that shouldn't be an error--the
-        //       result type is Z
+        // TODO : This could be made more flexible--if the first alternative
+        // is an N and the second a Z, that shouldn't be an error--the
+        // result type is Z
         PExp prototypeResult = null;
 
         for (PExp curResult : results) {
@@ -203,17 +205,19 @@ public class PAlternatives extends PExp {
     @Override
     public PAlternatives withTypeReplaced(MTType t) {
 
-        return new PAlternatives(RCollections.map(myAlternatives,
-                UnboxCondition.INSTANCE), RCollections.map(myAlternatives,
-                UnboxResult.INSTANCE), myOtherwiseClauseResult, t, myTypeValue);
+        return new PAlternatives(
+                RCollections.map(myAlternatives, UnboxCondition.INSTANCE),
+                RCollections.map(myAlternatives, UnboxResult.INSTANCE),
+                myOtherwiseClauseResult, t, myTypeValue);
     }
 
     @Override
     public PAlternatives withTypeValueReplaced(MTType t) {
 
-        return new PAlternatives(RCollections.map(myAlternatives,
-                UnboxCondition.INSTANCE), RCollections.map(myAlternatives,
-                UnboxResult.INSTANCE), myOtherwiseClauseResult, myType, t);
+        return new PAlternatives(
+                RCollections.map(myAlternatives, UnboxCondition.INSTANCE),
+                RCollections.map(myAlternatives, UnboxResult.INSTANCE),
+                myOtherwiseClauseResult, myType, t);
     }
 
     @Override
@@ -283,8 +287,8 @@ public class PAlternatives extends PExp {
 
     @Override
     public PExp flipQuantifiers() {
-        throw new UnsupportedOperationException("This method has not yet "
-                + "been implemented.");
+        throw new UnsupportedOperationException(
+                "This method has not yet " + "been implemented.");
     }
 
     @Override
@@ -334,9 +338,8 @@ public class PAlternatives extends PExp {
                 conditions.add(a.condition.substitute(substitutions));
                 results.add(a.result.substitute(substitutions));
             }
-            retval =
-                    new PAlternatives(conditions, results, otherwise,
-                            getType(), getTypeValue());
+            retval = new PAlternatives(conditions, results, otherwise,
+                    getType(), getTypeValue());
         }
 
         return retval;
@@ -347,9 +350,8 @@ public class PAlternatives extends PExp {
         boolean result = false;
 
         for (Alternative a : myAlternatives) {
-            result |=
-                    a.condition.containsName(name)
-                            || a.result.containsName(name);
+            result |= a.condition.containsName(name)
+                    || a.result.containsName(name);
         }
 
         return result || myOtherwiseClauseResult.containsName(name);
@@ -464,13 +466,13 @@ public class PAlternatives extends PExp {
 
         private int myCurAlternativeNum;
 
-        //These variables combine to tell you what the last thing returned was:
-        //if myReturnedOtherwiseFlag == true, the last thing returned was the
-        //otherwise clause and there's nothing left to return.  Otherwise, if
-        //myCurAlternative == null, the last thing returned was the condition
-        //of the (myCurAlternativeNum)th element.  Otherwise (if 
-        //myCurAlternative != null), the last thing returned was the result of
-        //the (myCurAlternativeNum)th element.
+        // These variables combine to tell you what the last thing returned was:
+        // if myReturnedOtherwiseFlag == true, the last thing returned was the
+        // otherwise clause and there's nothing left to return. Otherwise, if
+        // myCurAlternative == null, the last thing returned was the condition
+        // of the (myCurAlternativeNum)th element. Otherwise (if
+        // myCurAlternative != null), the last thing returned was the result of
+        // the (myCurAlternativeNum)th element.
         private final Iterator<Alternative> myAlternativesIter;
         private Alternative myCurAlternative;
         private boolean myReturnedOtherwiseFlag = false;

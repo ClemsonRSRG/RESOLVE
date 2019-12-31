@@ -1,7 +1,7 @@
 /*
  * JavaTranslator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -55,8 +55,9 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 /**
- * <p>This class translates a {@code RESOLVE} source file
- * to {@code Java}.</p>
+ * <p>
+ * This class translates a {@code RESOLVE} source file to {@code Java}.
+ * </p>
  *
  * @author Daniel Welch
  * @author Yu-Shan Sun
@@ -69,27 +70,40 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>These are string templates used to generate code for {@link FacilityDec FacilitiDec(s)}
-     * and its associated enhancements.</p>
+     * <p>
+     * These are string templates used to generate code for {@link FacilityDec
+     * FacilitiDec(s)} and its
+     * associated enhancements.
+     * </p>
      */
     private ST myBaseInstantiation, myBaseEnhancement;
 
     /**
-     * <p>A {@link ModuleParameterization} corresponding to the
-     * {@link EnhancementSpecRealizItem} being walked.</p>
+     * <p>
+     * A {@link ModuleParameterization} corresponding to the
+     * {@link EnhancementSpecRealizItem} being
+     * walked.
+     * </p>
      */
     private ModuleParameterization myCurrentEnhancement;
 
     /**
-     * <p>A mapping between the {@link ModuleArgumentItem ModuleArgumentItems}
-     * representing the actual arguments of a {@link FacilityDec} and
-     * their formal {@link ModuleParameterDec} bound counterparts.</p>
+     * <p>
+     * A mapping between the {@link ModuleArgumentItem ModuleArgumentItems}
+     * representing the actual
+     * arguments of a {@link FacilityDec} and their formal
+     * {@link ModuleParameterDec} bound
+     * counterparts.
+     * </p>
      */
     private final Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings;
 
     /**
-     * <p>This set keeps track of the names of any {@link OperationDec OperationDec(s)}
-     * that parameterized the current module.</p>
+     * <p>
+     * This set keeps track of the names of any {@link OperationDec
+     * OperationDec(s)} that
+     * parameterized the current module.
+     * </p>
      */
     private final Set<String> myParameterOperationNames;
 
@@ -97,11 +111,19 @@ public class JavaTranslator extends AbstractTranslator {
     // Flag Strings
     // ===========================================================
 
-    /** <p>Description for {@code javaTranslate} flag.</p> */
+    /**
+     * <p>
+     * Description for {@code javaTranslate} flag.
+     * </p>
+     */
     private static final String FLAG_DESC_TRANSLATE =
             "Translate RESOLVE code to Java.";
 
-    /** <p>Description for {@code javaTranslateClean} flag.</p> */
+    /**
+     * <p>
+     * Description for {@code javaTranslateClean} flag.
+     * </p>
+     */
     private static final String FLAG_DESC_TRANSLATE_CLEAN =
             "Regenerates Java code for all supporting RESOLVE files.";
 
@@ -110,22 +132,29 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>The main translator flag. Tells the compiler convert
-     * {@code RESOLVE} source code to {@code Java} source code.</p>
+     * <p>
+     * The main translator flag. Tells the compiler convert {@code RESOLVE}
+     * source code to
+     * {@code Java} source code.
+     * </p>
      */
     public static final Flag JAVA_FLAG_TRANSLATE =
             new Flag(FLAG_SECTION_NAME, "javaTranslate", FLAG_DESC_TRANSLATE);
 
     /**
-     * <p>Tells the compiler to regenerate {@code Java} code for all
-     * supporting {@code RESOLVE} source files.</p>
+     * <p>
+     * Tells the compiler to regenerate {@code Java} code for all supporting
+     * {@code RESOLVE} source
+     * files.
+     * </p>
      */
-    public static final Flag JAVA_FLAG_TRANSLATE_CLEAN =
-            new Flag(FLAG_SECTION_NAME, "javaTranslateClean",
-                    FLAG_DESC_TRANSLATE_CLEAN);
+    public static final Flag JAVA_FLAG_TRANSLATE_CLEAN = new Flag(
+            FLAG_SECTION_NAME, "javaTranslateClean", FLAG_DESC_TRANSLATE_CLEAN);
 
     /**
-     * <p>Add all the required and implied flags for the {@code JavaTranslator}.</p>
+     * <p>
+     * Add all the required and implied flags for the {@code JavaTranslator}.
+     * </p>
      */
     public static void setUpFlags() {
         // Always need to set the auxiliary flag
@@ -146,10 +175,13 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>This creates an object that overrides methods to translate
-     * a {@link ModuleDec} into a {@code Java} source file.</p>
+     * <p>
+     * This creates an object that overrides methods to translate a
+     * {@link ModuleDec} into a
+     * {@code Java} source file.
+     * </p>
      *
-     * @param builder            A scope builder for a symbol table.
+     * @param builder A scope builder for a symbol table.
      * @param compileEnvironment The current job's compilation environment
      */
     public JavaTranslator(MathSymbolTableBuilder builder,
@@ -172,7 +204,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ModuleDec}.
+     * </p>
      *
      * @param dec A module declaration.
      */
@@ -195,7 +229,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ConceptModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ConceptModuleDec}.
+     * </p>
      *
      * @param dec A concept module declaration.
      */
@@ -203,10 +239,9 @@ public class JavaTranslator extends AbstractTranslator {
     public final void preConceptModuleDec(ConceptModuleDec dec) {
         addPackageTemplate(dec);
 
-        ST concept =
-                mySTGroup.getInstanceOf("interface_class").add("name",
-                        dec.getName().getName()).add("extend",
-                        "RESOLVE_INTERFACE");
+        ST concept = mySTGroup.getInstanceOf("interface_class")
+                .add("name", dec.getName().getName())
+                .add("extend", "RESOLVE_INTERFACE");
 
         myActiveTemplates.push(concept);
     }
@@ -216,7 +251,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ConceptRealizModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ConceptRealizModuleDec}.
+     * </p>
      *
      * @param dec A concept realization module declaration.
      */
@@ -224,10 +261,9 @@ public class JavaTranslator extends AbstractTranslator {
     public final void preConceptRealizModuleDec(ConceptRealizModuleDec dec) {
         addPackageTemplate(dec);
 
-        ST conceptBody =
-                mySTGroup.getInstanceOf("concept_body_class").add("name",
-                        dec.getName().getName()).add("implement",
-                        dec.getConceptName().getName());
+        ST conceptBody = mySTGroup.getInstanceOf("concept_body_class")
+                .add("name", dec.getName().getName())
+                .add("implement", dec.getConceptName().getName());
 
         myActiveTemplates.push(conceptBody);
 
@@ -235,28 +271,29 @@ public class JavaTranslator extends AbstractTranslator {
                 getModuleFormalParameters(dec.getConceptName());
 
         for (ProgramParameterEntry p : formals) {
-            addParameterTemplate(dec.getLocation(), p.getDeclaredType(), p
-                    .getName());
+            addParameterTemplate(dec.getLocation(), p.getDeclaredType(),
+                    p.getName());
         }
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ConceptRealizModuleDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ConceptRealizModuleDec}.
+     * </p>
      *
      * @param dec A concept realization module declaration.
      */
     @Override
     public final void postConceptRealizModuleDec(ConceptRealizModuleDec dec) {
-        for (ProgramParameterEntry p : getModuleFormalParameters(dec
-                .getConceptName())) {
-            String name =
-                    (p.getDeclaredType() instanceof PTElement) ? "getType"
-                            + p.getName() : "get" + p.getName();
+        for (ProgramParameterEntry p : getModuleFormalParameters(
+                dec.getConceptName())) {
+            String name = (p.getDeclaredType() instanceof PTElement)
+                    ? "getType" + p.getName()
+                    : "get" + p.getName();
             ST result =
                     getOperationLikeTemplate(p.getDeclaredType(), name, true);
 
-            myActiveTemplates.peek().add(
-                    "functions",
+            myActiveTemplates.peek().add("functions",
                     result.add("stmts", mySTGroup.getInstanceOf("return_stmt")
                             .add("name", p.getName())));
         }
@@ -267,7 +304,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting an {@link EnhancementModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting an {@link EnhancementModuleDec}.
+     * </p>
      *
      * @param dec An enhancement module declaration.
      */
@@ -275,10 +314,9 @@ public class JavaTranslator extends AbstractTranslator {
     public final void preEnhancementModuleDec(EnhancementModuleDec dec) {
         addPackageTemplate(dec);
 
-        ST enhancement =
-                mySTGroup.getInstanceOf("interface_class").add("name",
-                        dec.getName().getName()).add("extend",
-                        dec.getConceptName().getName());
+        ST enhancement = mySTGroup.getInstanceOf("interface_class")
+                .add("name", dec.getName().getName())
+                .add("extend", dec.getConceptName().getName());
 
         myActiveTemplates.push(enhancement);
     }
@@ -288,23 +326,25 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting an {@link EnhancementRealizModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting an
+     * {@link EnhancementRealizModuleDec}.
+     * </p>
      *
      * @param dec An enhancement realization module declaration.
      */
     @Override
-    public final void preEnhancementRealizModuleDec(
-            EnhancementRealizModuleDec dec) {
+    public final void
+            preEnhancementRealizModuleDec(EnhancementRealizModuleDec dec) {
         addPackageTemplate(dec);
         addReflectionImportTemplates(dec);
 
         List<ProgramParameterEntry> formals =
                 getModuleFormalParameters(dec.getConceptName());
 
-        ST enhancementBody =
-                mySTGroup.getInstanceOf("enhancement_body_class").add("name",
-                        dec.getName().getName()).add("conceptname",
-                        dec.getConceptName().getName());
+        ST enhancementBody = mySTGroup.getInstanceOf("enhancement_body_class")
+                .add("name", dec.getName().getName())
+                .add("conceptname", dec.getConceptName().getName());
 
         enhancementBody.add("implement", dec.getEnhancementName().getName());
         enhancementBody.add("implement", dec.getConceptName().getName());
@@ -313,61 +353,67 @@ public class JavaTranslator extends AbstractTranslator {
         myActiveTemplates.push(enhancementBody);
 
         for (ProgramParameterEntry p : formals) {
-            addParameterTemplate(dec.getLocation(), p.getDeclaredType(), p
-                    .getName());
+            addParameterTemplate(dec.getLocation(), p.getDeclaredType(),
+                    p.getName());
         }
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link EnhancementRealizModuleDec}.</p>
+     * <p>
+     * Code that gets executed after visiting an
+     * {@link EnhancementRealizModuleDec}.
+     * </p>
      *
      * @param dec An enhancement realization module declaration.
      */
     @Override
-    public final void postEnhancementRealizModuleDec(
-            EnhancementRealizModuleDec dec) {
-        /* This is where we give the enhancement body all the functionality
-         * defined in the base concept. This is done via a set of functions
-         * that share the signatures of the functions defined in the base
-         * concept, but whose bodies merely call the <em>real</em> method.
+    public final void
+            postEnhancementRealizModuleDec(EnhancementRealizModuleDec dec) {
+        /*
+         * This is where we give the enhancement body all the functionality
+         * defined in the base concept.
+         * This is done via a set of functions that share the signatures of the
+         * functions defined in the
+         * base concept, but whose bodies merely call the <em>real</em> method.
          */
         try {
-            ModuleScope conceptScope =
-                    myBuilder.getModuleScope(new ModuleIdentifier(dec
-                            .getConceptName().getName()));
+            ModuleScope conceptScope = myBuilder.getModuleScope(
+                    new ModuleIdentifier(dec.getConceptName().getName()));
 
-            List<OperationEntry> conceptOperations =
-                    conceptScope.query(new EntryTypeQuery<>(
-                            OperationEntry.class,
+            List<OperationEntry> conceptOperations = conceptScope
+                    .query(new EntryTypeQuery<>(OperationEntry.class,
                             MathSymbolTable.ImportStrategy.IMPORT_NONE,
                             MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
-            List<TypeFamilyEntry> conceptTypes =
-                    conceptScope
-                            .query(new EntryTypeQuery<>(
-                                    TypeFamilyEntry.class,
-                                    MathSymbolTable.ImportStrategy.IMPORT_NONE,
-                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+            List<TypeFamilyEntry> conceptTypes = conceptScope
+                    .query(new EntryTypeQuery<>(TypeFamilyEntry.class,
+                            MathSymbolTable.ImportStrategy.IMPORT_NONE,
+                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
             for (OperationEntry o : conceptOperations) {
-                PTType returnType =
-                        (o.getReturnType() instanceof PTVoid) ? null : o
-                                .getReturnType();
+                PTType returnType = (o.getReturnType() instanceof PTVoid) ? null
+                        : o.getReturnType();
 
-                addEnhancementConceptualFunction(o.getDefiningElement().getLocation(),
-                        returnType, o.getName(), o.getParameters());
+                addEnhancementConceptualFunction(
+                        o.getDefiningElement().getLocation(), returnType,
+                        o.getName(), o.getParameters());
             }
 
-            for (ProgramParameterEntry p : getModuleFormalParameters(dec
-                    .getConceptName())) {
+            for (ProgramParameterEntry p : getModuleFormalParameters(
+                    dec.getConceptName())) {
 
-                addEnhancementConceptualFunction(p.getDefiningElement().getLocation(),
-                        p.getDeclaredType(), (p.getDeclaredType() instanceof PTElement) ? "getType"
-                        + p.getName() : "get" + p.getName(), null);
+                addEnhancementConceptualFunction(
+                        p.getDefiningElement().getLocation(),
+                        p.getDeclaredType(),
+                        (p.getDeclaredType() instanceof PTElement)
+                                ? "getType" + p.getName()
+                                : "get" + p.getName(),
+                        null);
             }
 
             for (TypeFamilyEntry e : conceptTypes) {
-                addEnhancementConceptualFunction(e.getDefiningElement().getLocation(),
+                addEnhancementConceptualFunction(
+                        e.getDefiningElement().getLocation(),
                         e.getProgramType(), "create" + e.getName(), null);
             }
         }
@@ -381,7 +427,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link FacilityModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link FacilityModuleDec}.
+     * </p>
      *
      * @param dec A facility module declaration.
      */
@@ -389,15 +437,16 @@ public class JavaTranslator extends AbstractTranslator {
     public final void preFacilityModuleDec(FacilityModuleDec dec) {
         addPackageTemplate(dec);
 
-        ST facility =
-                mySTGroup.getInstanceOf("facility_class").add("name",
-                        dec.getName().getName());
+        ST facility = mySTGroup.getInstanceOf("facility_class").add("name",
+                dec.getName().getName());
 
         myActiveTemplates.push(facility);
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link FacilityModuleDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link FacilityModuleDec}.
+     * </p>
      *
      * @param dec A facility module declaration.
      */
@@ -405,11 +454,10 @@ public class JavaTranslator extends AbstractTranslator {
     public final void postFacilityModuleDec(FacilityModuleDec dec) {
         String invocationName = null;
 
-        boolean buildingJar =
-                myCompileEnvironment.flags.isFlagSet("createJar");
+        boolean buildingJar = myCompileEnvironment.flags.isFlagSet("createJar");
 
-        List<OperationEntry> locals =
-                myCurrentModuleScope.query(new EntryTypeQuery<>(OperationEntry.class,
+        List<OperationEntry> locals = myCurrentModuleScope
+                .query(new EntryTypeQuery<>(OperationEntry.class,
                         MathSymbolTable.ImportStrategy.IMPORT_NONE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
@@ -422,7 +470,8 @@ public class JavaTranslator extends AbstractTranslator {
         if (invocationName == null && buildingJar) {
             throw new SourceErrorException(
                     "Cannot find the operation 'Main' in facility file "
-                            + dec.getName().getName(), dec.getLocation());
+                            + dec.getName().getName(),
+                    dec.getLocation());
         }
 
         myActiveTemplates.peek().add("invoker", invocationName);
@@ -433,7 +482,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ModuleParameterDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ModuleParameterDec}.
+     * </p>
      *
      * @param dec A module parameter declaration.
      */
@@ -442,14 +493,12 @@ public class JavaTranslator extends AbstractTranslator {
         if (dec.getWrappedDec() instanceof OperationDec) {
             myParameterOperationNames.add(dec.getName().getName());
 
-            ST parameter =
-                    mySTGroup.getInstanceOf("parameter").add("type",
-                            dec.getName().getName()).add("name",
-                            dec.getName().getName() + "Param");
+            ST parameter = mySTGroup.getInstanceOf("parameter")
+                    .add("type", dec.getName().getName())
+                    .add("name", dec.getName().getName() + "Param");
 
-            ST operationInterface =
-                    mySTGroup.getInstanceOf("interface_class").add("name",
-                            dec.getName().getName());
+            ST operationInterface = mySTGroup.getInstanceOf("interface_class")
+                    .add("name", dec.getName().getName());
 
             myActiveTemplates.peek().add("parameters", parameter);
             myActiveTemplates.push(operationInterface);
@@ -460,7 +509,9 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ModuleParameterDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ModuleParameterDec}.
+     * </p>
      *
      * @param dec A module parameter declaration.
      */
@@ -470,34 +521,36 @@ public class JavaTranslator extends AbstractTranslator {
             ST operationInterface = myActiveTemplates.pop();
             myActiveTemplates.peek().add("classes", operationInterface);
 
-            emitDebug(dec.getLocation(), "Adding operation parameter: "
-                    + dec.getName());
+            emitDebug(dec.getLocation(),
+                    "Adding operation parameter: " + dec.getName());
         }
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ConceptTypeParamDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ConceptTypeParamDec}.
+     * </p>
      *
      * @param param A concept type parameter declaration.
      */
     @Override
     public final void postConceptTypeParamDec(ConceptTypeParamDec param) {
         try {
-            ProgramParameterEntry ppe =
-                    myCurrentModuleScope.queryForOne(
-                            new NameAndEntryTypeQuery<>(null, param.getName(),
-                                    ProgramParameterEntry.class,
-                                    MathSymbolTable.ImportStrategy.IMPORT_NONE,
-                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true))
-                            .toProgramParameterEntry(param.getLocation());
+            ProgramParameterEntry ppe = myCurrentModuleScope
+                    .queryForOne(new NameAndEntryTypeQuery<>(null,
+                            param.getName(), ProgramParameterEntry.class,
+                            MathSymbolTable.ImportStrategy.IMPORT_NONE,
+                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
+                            true))
+                    .toProgramParameterEntry(param.getLocation());
 
-            ST getter =
-                    getOperationLikeTemplate(ppe.getDeclaredType(), "getType"
-                            + param.getName().getName(), false);
+            ST getter = getOperationLikeTemplate(ppe.getDeclaredType(),
+                    "getType" + param.getName().getName(), false);
 
             myActiveTemplates.peek().add("functions", getter);
 
-            emitDebug(param.getLocation(), "Adding concept type parameter: " + param.getName());
+            emitDebug(param.getLocation(),
+                    "Adding concept type parameter: " + param.getName());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, param.getName());
@@ -508,7 +561,9 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This method redefines how a {@link ConstantParamDec} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link ConstantParamDec} should be walked.
+     * </p>
      *
      * @param dec A constant parameter declaration.
      *
@@ -520,13 +575,14 @@ public class JavaTranslator extends AbstractTranslator {
         preDec(dec);
 
         // YS: We don't want to walker the inner ParameterVarDec,
-        //     so we are redefining the walk and adding the logic here.
+        // so we are redefining the walk and adding the logic here.
         String name = dec.getName().getName();
         PTType type = dec.getVarDec().getTy().getProgramType();
 
-        boolean translatingBody =
-                (myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec)
-                        || (myCurrentModuleScope.getDefiningElement() instanceof EnhancementRealizModuleDec);
+        boolean translatingBody = (myCurrentModuleScope
+                .getDefiningElement() instanceof ConceptRealizModuleDec)
+                || (myCurrentModuleScope
+                        .getDefiningElement() instanceof EnhancementRealizModuleDec);
 
         if (translatingBody) {
             addParameterTemplate(dec.getLocation(), type, name);
@@ -534,13 +590,13 @@ public class JavaTranslator extends AbstractTranslator {
 
         ST getter =
                 getOperationLikeTemplate(type, "get" + name, translatingBody);
-        getter.add("stmts", mySTGroup.getInstanceOf("return_stmt").add("name",
-                name));
+        getter.add("stmts",
+                mySTGroup.getInstanceOf("return_stmt").add("name", name));
 
         myActiveTemplates.peek().add("functions", getter);
 
-        emitDebug(dec.getLocation(), "Adding constant parameter: "
-                + dec.getName());
+        emitDebug(dec.getLocation(),
+                "Adding constant parameter: " + dec.getName());
 
         postDec(dec);
         postAny(dec);
@@ -553,7 +609,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramVariableNameExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ProgramVariableNameExp}.
+     * </p>
      *
      * @param exp A programming variable name expression.
      */
@@ -562,7 +620,8 @@ public class JavaTranslator extends AbstractTranslator {
         boolean nonLocal = false;
         ST nameExp = mySTGroup.getInstanceOf("name_exp");
 
-        if (myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec) {
+        if (myCurrentModuleScope
+                .getDefiningElement() instanceof ConceptRealizModuleDec) {
             ConceptRealizModuleDec thisModule =
                     ((ConceptRealizModuleDec) myCurrentModuleScope
                             .getDefiningElement());
@@ -577,10 +636,9 @@ public class JavaTranslator extends AbstractTranslator {
             }
         }
 
-        nameExp =
-                (nonLocal) ? nameExp.add("name", "get"
-                        + exp.getName().getName() + "()") : nameExp.add("name",
-                        exp.getName().getName());
+        nameExp = (nonLocal)
+                ? nameExp.add("name", "get" + exp.getName().getName() + "()")
+                : nameExp.add("name", exp.getName().getName());
 
         if (!myWhileStmtChangingClause) {
             myActiveTemplates.peek().add("arguments", nameExp);
@@ -592,14 +650,17 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link FacilityDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link FacilityDec}.
+     * </p>
      *
      * @param dec A facility declaration.
      */
     @Override
     public final void preFacilityDec(FacilityDec dec) {
         myBaseInstantiation = mySTGroup.getInstanceOf("facility_init");
-        myBaseInstantiation.add("realization", dec.getConceptRealizName().getName());
+        myBaseInstantiation.add("realization",
+                dec.getConceptRealizName().getName());
 
         myActiveTemplates.push(myBaseInstantiation);
         Scope scopeToSearch = myCurrentModuleScope;
@@ -609,18 +670,18 @@ public class JavaTranslator extends AbstractTranslator {
         // Note : I don't really like this. I'd rather use the depth of the
         // stack I think...
         // YS: Might not need the following if.
-        if (!myCurrentModuleScope.equals(myBuilder.getScope(this.getAncestor(2)))) {
+        if (!myCurrentModuleScope
+                .equals(myBuilder.getScope(this.getAncestor(2)))) {
             scopeToSearch = myBuilder.getScope(this.getAncestor(2));
         }
 
         try {
             myCurrentFacilityEntry =
-                    scopeToSearch.queryForOne(
-                            new NameAndEntryTypeQuery<>(null, dec.getName(),
-                                    FacilityEntry.class,
-                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, false))
-                            .toFacilityEntry(dec.getLocation());
+                    scopeToSearch.queryForOne(new NameAndEntryTypeQuery<>(null,
+                            dec.getName(), FacilityEntry.class,
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
+                            false)).toFacilityEntry(dec.getLocation());
 
             ModuleParameterization spec =
                     myCurrentFacilityEntry.getFacility().getSpecification();
@@ -644,7 +705,9 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link FacilityDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link FacilityDec}.
+     * </p>
      *
      * @param dec A facility declaration.
      */
@@ -658,7 +721,8 @@ public class JavaTranslator extends AbstractTranslator {
         // the templates pushed for each EnhancementSpecItem plus the base
         // instantiation.. THEN push on the formed (enhanced) rhs.
         if (myActiveTemplates.peek() != myBaseInstantiation) {
-            for (int i = 0; i < myCurrentFacilityEntry.getEnhancements().size(); i++) {
+            for (int i = 0; i < myCurrentFacilityEntry.getEnhancements()
+                    .size(); i++) {
                 myActiveTemplates.pop();
             }
 
@@ -667,38 +731,40 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         // YS: If we have one enhancement/enhancement realization pair,
-        //     we don't need to create a proxy. Simply create a new variable
-        //     with the enhancement's name and use it to instantiate that part
-        //     of the facility.
+        // we don't need to create a proxy. Simply create a new variable
+        // with the enhancement's name and use it to instantiate that part
+        // of the facility.
         if (dec.getEnhancementRealizPairs().size() == 1) {
-            facilityType =
-                    dec.getEnhancementRealizPairs().get(0).getEnhancementName()
-                            .getName();
+            facilityType = dec.getEnhancementRealizPairs().get(0)
+                    .getEnhancementName().getName();
         }
 
         // Create a new facility variable. This includes a "createProxy" call if needed.
-        ST facilityVariable =
-                mySTGroup.getInstanceOf("var_decl").add("type", facilityType)
-                        .add("name", dec.getName().getName()).add("init",
-                                myActiveTemplates.pop());
+        ST facilityVariable = mySTGroup.getInstanceOf("var_decl")
+                .add("type", facilityType).add("name", dec.getName().getName())
+                .add("init", myActiveTemplates.pop());
 
         myActiveTemplates.peek().add("variables", facilityVariable);
 
-        myDynamicImports.add(mySTGroup.getInstanceOf("include").add(
-                "directories", pathPieces).render());
+        myDynamicImports.add(mySTGroup.getInstanceOf("include")
+                .add("directories", pathPieces).render());
 
         // Debugging message
-        emitDebug(dec.getLocation(), "Translated facility declaration: "
-                + dec.getName());
+        emitDebug(dec.getLocation(),
+                "Translated facility declaration: " + dec.getName());
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link EnhancementSpecRealizItem}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link EnhancementSpecRealizItem}.
+     * </p>
      *
      * @param item An {@code enhancement} and {@code realization} item pair.
      */
     @Override
-    public final void preEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
+    public final void
+            preEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
         ST singleArg = null;
         List<Object> args = new LinkedList<>();
 
@@ -711,16 +777,15 @@ public class JavaTranslator extends AbstractTranslator {
             singleArg = ((ST) myBaseInstantiation.getAttribute("arguments"));
         }
         else if (myBaseInstantiation.getAttribute("arguments") != null) {
-            args =
-                    new LinkedList<Object>((List) myBaseInstantiation
-                            .getAttribute("arguments"));
+            args = new LinkedList<Object>(
+                    (List) myBaseInstantiation.getAttribute("arguments"));
         }
 
         for (ModuleParameterization m : enhancements) {
-            if (m.getModuleIdentifier().toString().equals(
-                    item.getEnhancementName().getName())) {
-                constructFacilityArgBindings(item.getLocation(),
-                        m, myCurrentFacilityEntry.getEnhancementRealization(m));
+            if (m.getModuleIdentifier().toString()
+                    .equals(item.getEnhancementName().getName())) {
+                constructFacilityArgBindings(item.getLocation(), m,
+                        myCurrentFacilityEntry.getEnhancementRealization(m));
                 myCurrentEnhancement = m;
             }
         }
@@ -738,13 +803,16 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link EnhancementSpecRealizItem}.</p>
+     * <p>
+     * Code that gets executed after visiting a
+     * {@link EnhancementSpecRealizItem}.
+     * </p>
      *
      * @param item An {@code enhancement} and {@code realization} item pair.
      */
     @Override
-    public final void postEnhancementSpecRealizItem(
-            EnhancementSpecRealizItem item) {
+    public final void
+            postEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
         String curName = item.getEnhancementRealizName().getName();
 
         List<ModuleParameterization> enhancements =
@@ -775,9 +843,12 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This method redefines how a {@link ModuleArgumentItem} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link ModuleArgumentItem} should be walked.
+     * </p>
      *
-     * @param item A module argument used in instantiating a {@link FacilityDec}.
+     * @param item A module argument used in instantiating a
+     *        {@link FacilityDec}.
      *
      * @return {@code true}
      */
@@ -793,11 +864,9 @@ public class JavaTranslator extends AbstractTranslator {
         if (wrappedDec instanceof OperationDec) {
             ProgramVariableNameExp operationName =
                     (ProgramVariableNameExp) argumentExp;
-            ST argItem =
-                    getOperationArgItemTemplate(
-                            (OperationDec) myFacilityBindings.get(item)
-                                    .getWrappedDec(), operationName
-                                    .getQualifier(), operationName.getName());
+            ST argItem = getOperationArgItemTemplate(
+                    (OperationDec) myFacilityBindings.get(item).getWrappedDec(),
+                    operationName.getQualifier(), operationName.getName());
 
             myActiveTemplates.peek().add("arguments", argItem);
         }
@@ -823,10 +892,10 @@ public class JavaTranslator extends AbstractTranslator {
             }
             // Case 3.3: A facility instantiated type passed as module parameter
             else {
-                ST argItem =
-                        mySTGroup.getInstanceOf("var_init").add("facility",
-                                getDefiningFacilityEntry(type).getName()).add(
-                                "type", getVariableTypeTemplate(type));
+                ST argItem = mySTGroup.getInstanceOf("var_init")
+                        .add("facility",
+                                getDefiningFacilityEntry(type).getName())
+                        .add("type", getVariableTypeTemplate(type));
 
                 myActiveTemplates.peek().add("arguments", argItem);
             }
@@ -842,7 +911,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link CallStmt}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link CallStmt}.
+     * </p>
      *
      * @param stmt An operation call statement.
      */
@@ -850,57 +921,54 @@ public class JavaTranslator extends AbstractTranslator {
     public final void preCallStmt(CallStmt stmt) {
         ST callStmt;
         ProgramFunctionExp callingFunctionExp = stmt.getFunctionExp();
-        String qualifier =
-                getCallQualifier(callingFunctionExp.getQualifier(),
-                        callingFunctionExp.getName(), callingFunctionExp
-                                .getArguments());
+        String qualifier = getCallQualifier(callingFunctionExp.getQualifier(),
+                callingFunctionExp.getName(),
+                callingFunctionExp.getArguments());
         String name = callingFunctionExp.getName().getName();
 
         // If the call references an operation passed as a parameter, we need
         // to specially qualify it.
         if (myParameterOperationNames.contains(name)) {
-            callStmt =
-                    mySTGroup.getInstanceOf("qualified_call").add("name", name)
-                            .add("qualifier", name + "Param");
+            callStmt = mySTGroup.getInstanceOf("qualified_call")
+                    .add("name", name).add("qualifier", name + "Param");
         }
         else if (qualifier != null) {
-            callStmt =
-                    mySTGroup.getInstanceOf("qualified_call").add("name", name)
-                            .add("qualifier", qualifier);
+            callStmt = mySTGroup.getInstanceOf("qualified_call")
+                    .add("name", name).add("qualifier", qualifier);
         }
         else {
-            callStmt =
-                    mySTGroup.getInstanceOf("unqualified_call").add("name",
-                            name);
+            callStmt = mySTGroup.getInstanceOf("unqualified_call").add("name",
+                    name);
         }
 
         myActiveTemplates.push(callStmt);
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link SwapStmt}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link SwapStmt}.
+     * </p>
      *
      * @param stmt A swap statement.
      */
     @Override
     public final void preSwapStmt(SwapStmt stmt) {
         ST swapStmt;
-        boolean translatingEnhancement =
-                myCurrentModuleScope.getDefiningElement() instanceof EnhancementRealizModuleDec;
+        boolean translatingEnhancement = myCurrentModuleScope
+                .getDefiningElement() instanceof EnhancementRealizModuleDec;
 
         if (stmt.getLeft().getProgramType() instanceof PTGeneric
                 || translatingEnhancement) {
-            swapStmt =
-                    mySTGroup.getInstanceOf("unqualified_call").add("name",
-                            "swap");
+            swapStmt = mySTGroup.getInstanceOf("unqualified_call").add("name",
+                    "swap");
         }
         else {
             FacilityEntry definingFacility =
                     getDefiningFacilityEntry(stmt.getLeft().getProgramType());
 
-            swapStmt =
-                    mySTGroup.getInstanceOf("qualified_call").add("qualifier",
-                            definingFacility.getName()).add("name", "swap");
+            swapStmt = mySTGroup.getInstanceOf("qualified_call")
+                    .add("qualifier", definingFacility.getName())
+                    .add("name", "swap");
         }
 
         myActiveTemplates.push(swapStmt);
@@ -911,24 +979,25 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link TypeFamilyDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link TypeFamilyDec}.
+     * </p>
      *
      * @param dec A type family declared in a {@code Concept}.
      */
     @Override
     public final void preTypeFamilyDec(TypeFamilyDec dec) {
-        ST typeDec =
-                mySTGroup.getInstanceOf("interface_class").add("name",
-                        dec.getName().getName()).add("extend", "RType").add(
-                        "public", false);
+        ST typeDec = mySTGroup.getInstanceOf("interface_class")
+                .add("name", dec.getName().getName()).add("extend", "RType")
+                .add("public", false);
 
         myActiveTemplates.peek().add("classes", typeDec);
 
         try {
-            TypeFamilyEntry typeFamilyEntry =
-                    myCurrentModuleScope.queryForOne(
+            TypeFamilyEntry typeFamilyEntry = myCurrentModuleScope
+                    .queryForOne(
                             new UnqualifiedNameQuery(dec.getName().getName()))
-                            .toTypeFamilyEntry(dec.getLocation());
+                    .toTypeFamilyEntry(dec.getLocation());
 
             ST typeDefinition =
                     getOperationLikeTemplate(typeFamilyEntry.getProgramType(),
@@ -936,8 +1005,8 @@ public class JavaTranslator extends AbstractTranslator {
 
             myActiveTemplates.peek().add("functions", typeDefinition);
 
-            emitDebug(dec.getLocation(), "Adding type family declaration: "
-                    + dec.getName());
+            emitDebug(dec.getLocation(),
+                    "Adding type family declaration: " + dec.getName());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, dec.getName());
@@ -948,56 +1017,57 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link TypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link TypeRepresentationDec}.
+     * </p>
      *
-     * @param dec A type representation declared in a {@code Concept Realization}.
+     * @param dec A type representation declared in a
+     *        {@code Concept Realization}.
      */
     @Override
     public final void preTypeRepresentationDec(TypeRepresentationDec dec) {
         List<SymbolTableEntry> types =
                 myCurrentModuleScope.query(new NameQuery(null, dec.getName()));
 
-        PTType repType =
-                types.get(0).toProgramTypeEntry(dec.getLocation())
-                        .getProgramType();
+        PTType repType = types.get(0).toProgramTypeEntry(dec.getLocation())
+                .getProgramType();
 
-        ST record =
-                mySTGroup.getInstanceOf("record_class").add("name",
-                        dec.getName().getName()).add("implement",
-                        getVariableTypeTemplate(repType));
+        ST record = mySTGroup.getInstanceOf("record_class")
+                .add("name", dec.getName().getName())
+                .add("implement", getVariableTypeTemplate(repType));
 
         myActiveTemplates.push(record);
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link TypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link TypeRepresentationDec}.
+     * </p>
      *
-     * @param dec A type representation declared in a {@code Concept Realization}.
+     * @param dec A type representation declared in a
+     *        {@code Concept Realization}.
      */
     @Override
     public final void postTypeRepresentationDec(TypeRepresentationDec dec) {
-        ST instance =
-                mySTGroup.getInstanceOf("facility_init").add("realization",
-                        dec.getName().getName());
+        ST instance = mySTGroup.getInstanceOf("facility_init")
+                .add("realization", dec.getName().getName());
 
         ST record = myActiveTemplates.pop();
         myActiveTemplates.peek().add("classes", record);
 
         // Now build the "create<TYPENAME>" method for that record.
         try {
-            ProgramTypeEntry pte =
-                    myCurrentModuleScope.queryForOne(
+            ProgramTypeEntry pte = myCurrentModuleScope
+                    .queryForOne(
                             new UnqualifiedNameQuery(dec.getName().getName()))
-                            .toProgramTypeEntry(dec.getLocation());
+                    .toProgramTypeEntry(dec.getLocation());
 
-            ST returnStmt =
-                    mySTGroup.getInstanceOf("return_stmt")
-                            .add("name", instance);
+            ST returnStmt = mySTGroup.getInstanceOf("return_stmt").add("name",
+                    instance);
 
-            ST createMethod =
-                    getOperationLikeTemplate(pte.getProgramType(),
-                            "create" + dec.getName().getName(), true).add(
-                            "stmts", returnStmt);
+            ST createMethod = getOperationLikeTemplate(pte.getProgramType(),
+                    "create" + dec.getName().getName(), true).add("stmts",
+                            returnStmt);
 
             myActiveTemplates.peek().add("functions", createMethod);
 
@@ -1013,22 +1083,27 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link FacilityTypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link FacilityTypeRepresentationDec}.
+     * </p>
      *
      * @param dec A type representation declared in a facility.
      */
     @Override
     public final void preFacilityTypeRepresentationDec(
             FacilityTypeRepresentationDec dec) {
-        ST record =
-                mySTGroup.getInstanceOf("record_class").add("name",
-                        dec.getName().getName()).add("facility", true);
+        ST record = mySTGroup.getInstanceOf("record_class")
+                .add("name", dec.getName().getName()).add("facility", true);
 
         myActiveTemplates.push(record);
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link FacilityTypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a
+     * {@link FacilityTypeRepresentationDec}.
+     * </p>
      *
      * @param dec A type representation declared in a facility.
      */
@@ -1045,7 +1120,9 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ParameterVarDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ParameterVarDec}.
+     * </p>
      *
      * @param dec A parameter declaration.
      */
@@ -1053,15 +1130,14 @@ public class JavaTranslator extends AbstractTranslator {
     public final void preParameterVarDec(ParameterVarDec dec) {
         PTType type = dec.getTy().getProgramType();
 
-        ST parameter =
-                mySTGroup.getInstanceOf("parameter").add("type",
-                        getParameterTypeTemplate(type)).add("name",
-                        dec.getName().getName());
+        ST parameter = mySTGroup.getInstanceOf("parameter")
+                .add("type", getParameterTypeTemplate(type))
+                .add("name", dec.getName().getName());
 
         myActiveTemplates.peek().add("parameters", parameter);
 
-        emitDebug(dec.getLocation(), "Adding parameter variable: "
-                + dec.getName());
+        emitDebug(dec.getLocation(),
+                "Adding parameter variable: " + dec.getName());
     }
 
     // ===========================================================
@@ -1073,8 +1149,10 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>This method returns the default function modifier specified
-     * by the target language.</p>
+     * <p>
+     * This method returns the default function modifier specified by the target
+     * language.
+     * </p>
      *
      * @return Function modifier as a string.
      */
@@ -1084,13 +1162,13 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This method returns the operation type template for
-     * the target language.</p>
+     * <p>
+     * This method returns the operation type template for the target language.
+     * </p>
      *
      * @param type A {@link PTType}.
      *
-     * @return A {@link ST} associated with the given
-     * program type.
+     * @return A {@link ST} associated with the given program type.
      */
     @Override
     protected final ST getOperationTypeTemplate(PTType type) {
@@ -1098,13 +1176,14 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This method returns the program parameter type template for
-     * the target language.</p>
+     * <p>
+     * This method returns the program parameter type template for the target
+     * language.
+     * </p>
      *
      * @param type A {@link PTType}.
      *
-     * @return A {@link ST} associated with the given
-     * program parameter type.
+     * @return A {@link ST} associated with the given program parameter type.
      */
     @Override
     protected final ST getParameterTypeTemplate(PTType type) {
@@ -1112,13 +1191,14 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This method returns the program variable type template for
-     * the target language.</p>
+     * <p>
+     * This method returns the program variable type template for the target
+     * language.
+     * </p>
      *
      * @param type A {@link PTType}.
      *
-     * @return A {@link ST} associated with the given
-     * program variable type.
+     * @return A {@link ST} associated with the given program variable type.
      */
     protected final ST getVariableTypeTemplate(PTType type) {
         ST result;
@@ -1126,54 +1206,46 @@ public class JavaTranslator extends AbstractTranslator {
 
         // Case 1: Generic types ("Entry", "Info", etc.)
         if (type instanceof PTGeneric || type instanceof PTElement) {
-            result =
-                    mySTGroup.getInstanceOf("unqualified_type").add("name",
-                            "RType");
+            result = mySTGroup.getInstanceOf("unqualified_type").add("name",
+                    "RType");
         }
         // Case 2: Program types implemented by a concept realization.
         else if (type instanceof PTRepresentation) {
-            result =
-                    mySTGroup.getInstanceOf("qualified_type").add("name",
-                            getTypeName(type));
+            result = mySTGroup.getInstanceOf("qualified_type").add("name",
+                    getTypeName(type));
 
             result.add("concept", ((ConceptRealizModuleDec) currentModule)
                     .getConceptName().getName());
         }
         // Case 3: Program types declared and implemented in a facility module.
         else if (type instanceof PTFacilityRepresentation) {
-            result =
-                    mySTGroup.getInstanceOf("unqualified_type").add("name",
-                            getTypeName(type));
+            result = mySTGroup.getInstanceOf("unqualified_type").add("name",
+                    getTypeName(type));
         }
         // Case 4: Program types declared by the concept.
         else {
             String moduleName = currentModule.getName().getName();
-            result =
-                    mySTGroup.getInstanceOf("qualified_type").add("name",
-                            getTypeName(type));
+            result = mySTGroup.getInstanceOf("qualified_type").add("name",
+                    getTypeName(type));
 
             // Case 4.1: This is an instantiated version of a concept type.
             if (getDefiningFacilityEntry(type) != null) {
-                moduleName =
-                        getDefiningFacilityEntry(type).getFacility()
-                                .getSpecification().getModuleIdentifier()
-                                .toString();
+                moduleName = getDefiningFacilityEntry(type).getFacility()
+                        .getSpecification().getModuleIdentifier().toString();
             }
             // Case 4.2: We are in an enhancement and we are using a type
-            //           declared by the concept.
-            else if (myCurrentModuleScope.getDefiningElement() instanceof EnhancementModuleDec) {
-                moduleName =
-                        ((EnhancementModuleDec) myCurrentModuleScope
-                                .getDefiningElement()).getConceptName()
-                                .getName();
+            // declared by the concept.
+            else if (myCurrentModuleScope
+                    .getDefiningElement() instanceof EnhancementModuleDec) {
+                moduleName = ((EnhancementModuleDec) myCurrentModuleScope
+                        .getDefiningElement()).getConceptName().getName();
             }
             // Case 4.3: We are in an enhancement realization and we are using a type
-            //           declared by the concept.
-            else if (myCurrentModuleScope.getDefiningElement() instanceof EnhancementRealizModuleDec) {
-                moduleName =
-                        ((EnhancementRealizModuleDec) myCurrentModuleScope
-                                .getDefiningElement()).getConceptName()
-                                .getName();
+            // declared by the concept.
+            else if (myCurrentModuleScope
+                    .getDefiningElement() instanceof EnhancementRealizModuleDec) {
+                moduleName = ((EnhancementRealizModuleDec) myCurrentModuleScope
+                        .getDefiningElement()).getConceptName().getName();
             }
 
             result.add("concept", moduleName);
@@ -1187,30 +1259,37 @@ public class JavaTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>This method is only intended to be called when translating
-     * {@link EnhancementRealizModuleDec EnhancementRealizModuleDecs}.
-     * It is used to construct and add a 'dummy method' that simply uses
-     * 'con' to call the actual method.</p>
+     * <p>
+     * This method is only intended to be called when translating
+     * {@link EnhancementRealizModuleDec
+     * EnhancementRealizModuleDecs}. It is used to construct and add a 'dummy
+     * method' that simply uses
+     * 'con' to call the actual method.
+     * </p>
      *
-     * <p>For example, given {@code type} = null,
-     * {@code name} = 'Pop', and {@code parameters} = [R, S]; is method returns :
+     * <p>
+     * For example, given {@code type} = null, {@code name} = 'Pop', and
+     * {@code parameters} = [R, S];
+     * is method returns :
+     * 
      * <pre>
-     *     public void Pop(RType R, Stack_Template.Stack S) {
-     *         con.Pop(R, S);
-     *     }
+     * 
+     * public void Pop(RType R, Stack_Template.Stack S) {
+     *     con.Pop(R, S);
+     * }
      * </pre>
      * </p>
      *
      * @param type A {@link PTType} for the function's return type.
      * @param name The name.
-     * @param parameters A list of {@link ProgramParameterEntry}
-     *                   representing the function's formal parameters.
+     * @param parameters A list of {@link ProgramParameterEntry} representing
+     *        the function's formal
+     *        parameters.
      */
     private void addEnhancementConceptualFunction(Location loc, PTType type,
             String name, ImmutableList<ProgramParameterEntry> parameters) {
-        ST singleLine =
-                mySTGroup.getInstanceOf("enhanced_stmt").add("returns", type)
-                        .add("name", name);
+        ST singleLine = mySTGroup.getInstanceOf("enhanced_stmt")
+                .add("returns", type).add("name", name);
 
         ST operation = getOperationLikeTemplate(type, name, true);
         myActiveTemplates.push(operation);
@@ -1229,79 +1308,99 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Creates and adds a formed java package template to the
-     * {@code directives} attribute of the outermost {@code module}
-     * template defined in <tt>Base.stg</tt>.</p>
+     * <p>
+     * Creates and adds a formed java package template to the {@code directives}
+     * attribute of the
+     * outermost {@code module} template defined in <tt>Base.stg</tt>.
+     * </p>
      *
      * @param dec The {@link ModuleDec} currently being translated.
      */
     private void addPackageTemplate(ModuleDec dec) {
         List<String> pkgDirectories =
                 getFile(dec.getName().getName()).getPkgList();
-        ST pkg =
-                mySTGroup.getInstanceOf("package").add("directories",
-                        pkgDirectories);
+        ST pkg = mySTGroup.getInstanceOf("package").add("directories",
+                pkgDirectories);
         myActiveTemplates.peek().add("directives", pkg);
 
-        emitDebug(dec.getLocation(), "Adding package template for module: "
-                + dec.getName());
+        emitDebug(dec.getLocation(),
+                "Adding package template for module: " + dec.getName());
     }
 
     /**
-     * <p>Creates and adds a formed java reflection package template to the
-     * {@code includes} attribute of the outermost {@code module}
-     * template defined in <tt>Base.stg</tt>.</p>
+     * <p>
+     * Creates and adds a formed java reflection package template to the
+     * {@code includes} attribute of
+     * the outermost {@code module} template defined in <tt>Base.stg</tt>.
+     * </p>
      *
-     * @param dec The {@link EnhancementRealizModuleDec} currently being translated.
+     * @param dec The {@link EnhancementRealizModuleDec} currently being
+     *        translated.
      */
     private void addReflectionImportTemplates(EnhancementRealizModuleDec dec) {
-        ST imp =
-                mySTGroup.getInstanceOf("include").add("directories",
-                        "java.lang.reflect");
+        ST imp = mySTGroup.getInstanceOf("include").add("directories",
+                "java.lang.reflect");
 
         myActiveTemplates.firstElement().add("includes", imp);
 
-        emitDebug(dec.getLocation(), "Adding reflection imports for module: "
-                + dec.getName());
+        emitDebug(dec.getLocation(),
+                "Adding reflection imports for module: " + dec.getName());
     }
 
     /**
-     * <p>Binds <em>every</em> actual parameter of a {@link FacilityDec}
-     * to its formal counterpart, as defined in a {@code concept}, {@code enhancement},
-     * or {@code realization}.</p>
+     * <p>
+     * Binds <em>every</em> actual parameter of a {@link FacilityDec} to its
+     * formal counterpart, as
+     * defined in a {@code concept}, {@code enhancement}, or
+     * {@code realization}.
+     * </p>
      *
-     * @param loc The {@link Location} where we are trying to bind the facility arguments.
+     * @param loc The {@link Location} where we are trying to bind the facility
+     *        arguments.
      * @param spec A {@link ModuleParameterization} referencing a
-     *             {@code concept} or {@code enhancement}.
-     * @param realiz A {@link ModuleParameterization} referencing a
-     *               realization ({@code concept realization} or {@code enhancement realization}).
+     *        {@code concept} or
+     *        {@code enhancement}.
+     * @param realiz A {@link ModuleParameterization} referencing a realization
+     *        ({@code concept realization} or {@code enhancement realization}).
      */
-    private void constructFacilityArgBindings(Location loc, ModuleParameterization spec, ModuleParameterization realiz) {
+    private void constructFacilityArgBindings(Location loc,
+            ModuleParameterization spec, ModuleParameterization realiz) {
         myFacilityBindings.clear();
 
         try {
-            List<ModuleArgumentItem> joinedActuals = new LinkedList<>(spec.getParameters());
+            List<ModuleArgumentItem> joinedActuals =
+                    new LinkedList<>(spec.getParameters());
 
-            ModuleDec specModule = myBuilder.getModuleScope(spec.getModuleIdentifier()).getDefiningElement();
-            ModuleDec realizModule = myBuilder.getModuleScope(realiz.getModuleIdentifier()).getDefiningElement();
+            ModuleDec specModule =
+                    myBuilder.getModuleScope(spec.getModuleIdentifier())
+                            .getDefiningElement();
+            ModuleDec realizModule =
+                    myBuilder.getModuleScope(realiz.getModuleIdentifier())
+                            .getDefiningElement();
 
-            List<ModuleParameterDec> joinedFormals = new LinkedList<>(specModule.getParameterDecs());
+            List<ModuleParameterDec> joinedFormals =
+                    new LinkedList<>(specModule.getParameterDecs());
             joinedActuals.addAll(realiz.getParameters());
             joinedFormals.addAll(realizModule.getParameterDecs());
 
             for (int i = 0; i < joinedActuals.size(); i++) {
-                myFacilityBindings.put(joinedActuals.get(i), joinedFormals.get(i));
+                myFacilityBindings.put(joinedActuals.get(i),
+                        joinedFormals.get(i));
             }
         }
         catch (NoSuchSymbolException nsse) {
-            throw new SourceErrorException("[" + getClass().getCanonicalName()
-                    + "] " + "Error while trying to bind facility arguments.", loc);
+            throw new SourceErrorException(
+                    "[" + getClass().getCanonicalName() + "] "
+                            + "Error while trying to bind facility arguments.",
+                    loc);
         }
     }
 
     /**
-     * <p>This method retrieves the proper {@link ST} template for an operation
-     * as an argument.</p>
+     * <p>
+     * This method retrieves the proper {@link ST} template for an operation as
+     * an argument.
+     * </p>
      *
      * @param operation An operation declaration.
      * @param qualifier A qualifier name.
@@ -1313,31 +1412,25 @@ public class JavaTranslator extends AbstractTranslator {
             PosSymbol qualifier, PosSymbol name) {
         // TODO : Try to refactor/rethink this method + op_arg_template. Too ugly.
         int parameterNum = 0;
-        ST result =
-                mySTGroup.getInstanceOf("operation_argument_item").add(
-                        "actualName", name.getName());
+        ST result = mySTGroup.getInstanceOf("operation_argument_item")
+                .add("actualName", name.getName());
 
         if (qualifier != null) {
             result.add("actualQualifier", qualifier.getName());
         }
 
         try {
-            OperationEntry o =
-                    myCurrentModuleScope
-                            .queryForOne(
-                                    new NameQuery(
-                                            qualifier,
-                                            name,
-                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                                            false)).toOperationEntry(
-                                    name.getLocation());
+            OperationEntry o = myCurrentModuleScope.queryForOne(new NameQuery(
+                    qualifier, name,
+                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                    MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                    false)).toOperationEntry(name.getLocation());
 
             for (ProgramParameterEntry p : o.getParameters()) {
                 ST castedType = getVariableTypeTemplate(p.getDeclaredType());
-                ST castedArg =
-                        mySTGroup.getInstanceOf("parameter").add("type",
-                                castedType).add("name", "p" + parameterNum);
+                ST castedArg = mySTGroup.getInstanceOf("parameter")
+                        .add("type", castedType)
+                        .add("name", "p" + parameterNum);
                 result.add("castedArguments", castedArg);
                 parameterNum++;
             }
@@ -1345,35 +1438,33 @@ public class JavaTranslator extends AbstractTranslator {
 
             String realization;
             if (myCurrentEnhancement != null) {
-                realization =
-                        myCurrentFacilityEntry.getEnhancementRealization(
-                                myCurrentEnhancement).getModuleIdentifier()
-                                .toString();
+                realization = myCurrentFacilityEntry
+                        .getEnhancementRealization(myCurrentEnhancement)
+                        .getModuleIdentifier().toString();
             }
             else {
-                realization =
-                        myCurrentFacilityEntry.getFacility().getRealization()
-                                .getModuleIdentifier().toString();
+                realization = myCurrentFacilityEntry.getFacility()
+                        .getRealization().getModuleIdentifier().toString();
             }
 
-            PTType returnType =
-                    (operation.getReturnTy() != null) ? operation.getReturnTy()
-                            .getProgramType() : null;
+            PTType returnType = (operation.getReturnTy() != null)
+                    ? operation.getReturnTy().getProgramType()
+                    : null;
 
-            ST interior =
-                    getOperationLikeTemplate(returnType, operation.getName()
-                            .getName(), true);
+            ST interior = getOperationLikeTemplate(returnType,
+                    operation.getName().getName(), true);
 
             myActiveTemplates.push(interior);
 
             for (ParameterVarDec p : operation.getParameters()) {
-                addParameterTemplate(p.getLocation(), p.getTy()
-                        .getProgramType(), "p" + parameterNum);
+                addParameterTemplate(p.getLocation(),
+                        p.getTy().getProgramType(), "p" + parameterNum);
                 parameterNum++;
             }
 
-            result.add("function", myActiveTemplates.pop()).add("realization",
-                    realization).add("hasReturn", returnType != null);
+            result.add("function", myActiveTemplates.pop())
+                    .add("realization", realization)
+                    .add("hasReturn", returnType != null);
         }
         catch (NoneProvidedException npe) {
             noSuchModule(name);

@@ -1,7 +1,7 @@
 /*
  * Utilities.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,9 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
 
 /**
- * Created by Mike on 2/1/2016.
- * Transformation that apply to both expressions in both VC and Theorems
+ * Created by Mike on 2/1/2016. Transformation that apply to both expressions in
+ * both VC and
+ * Theorems
  */
 public class Utilities {
 
@@ -56,9 +57,8 @@ public class Utilities {
             // x < y to x + 1 <= y
             argsTemp.add(argList.get(0));
             argsTemp.add(new PSymbol(n, null, "1"));
-            PSymbol plus1 =
-                    new PSymbol(argList.get(0).getType(), null, "+"
-                            + argList.get(0).getType().toString(), argsTemp);
+            PSymbol plus1 = new PSymbol(argList.get(0).getType(), null,
+                    "+" + argList.get(0).getType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(plus1);
             argsTemp.add(argList.get(1));
@@ -70,9 +70,8 @@ public class Utilities {
             // x > y to y + 1 <= x
             argsTemp.add(argList.get(1));
             argsTemp.add(new PSymbol(n, null, "1"));
-            PSymbol plus1 =
-                    new PSymbol(argList.get(1).getType(), null, "+"
-                            + argList.get(1).getType().toString(), argsTemp);
+            PSymbol plus1 = new PSymbol(argList.get(1).getType(), null,
+                    "+" + argList.get(1).getType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(plus1);
             argsTemp.add(argList.get(0));
@@ -82,9 +81,8 @@ public class Utilities {
                 && p.getSubExpressions().size() == 2) {
             // x - y to x + (-y)
             argsTemp.add(argList.get(1));
-            PSymbol minusY =
-                    new PSymbol(p.getType(), null,
-                            "-" + p.getType().toString(), argsTemp);
+            PSymbol minusY = new PSymbol(p.getType(), null,
+                    "-" + p.getType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(argList.get(0));
             argsTemp.add(minusY);

@@ -1,7 +1,7 @@
 /*
  * Site.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,14 +20,18 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * <p>A <code>Site</code> identifies a particular <code>PExp</code> accessible
- * from a {@link PerVCProverModel PerVCProverModel}, which may be a top level
- * local or global theorem, or consequent, or may be a sub-expression embedded
- * in a theorem or consequent.</p>
+ * <p>
+ * A <code>Site</code> identifies a particular <code>PExp</code> accessible from
+ * a
+ * {@link PerVCProverModel PerVCProverModel}, which may be a top level local or
+ * global theorem, or
+ * consequent, or may be a sub-expression embedded in a theorem or consequent.
+ * </p>
  */
 public class Site {
 
     public enum Section {
+
         ANTECEDENTS {
 
             @Override
@@ -87,7 +91,7 @@ public class Site {
         myHashCode = c.hashCode() + (57 * this.path.hashCode());
 
         if (root == null) {
-            //This looks weird but suppresses a "leaked this" warning
+            // This looks weird but suppresses a "leaked this" warning
             Site r = this;
             this.root = r;
         }
@@ -122,8 +126,8 @@ public class Site {
 
         if (result) {
             Site oAsSite = (Site) o;
-            result =
-                    (conjunct == oAsSite.conjunct) && path.equals(oAsSite.path);
+            result = (conjunct == oAsSite.conjunct)
+                    && path.equals(oAsSite.path);
         }
 
         return result;

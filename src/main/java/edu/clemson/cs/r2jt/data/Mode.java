@@ -1,7 +1,7 @@
 /*
  * Mode.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -85,34 +85,25 @@ public class Mode {
     /*
      * Implements mode compatibility
      *
-     * Concept C
-     *     Operation P(MODE_formal v: T)
-     * end C
+     * Concept C Operation P(MODE_formal v: T) end C
      *
-     * Realization B
-     *     Procedure P(MODE_actual v: T)
-     * end B
+     * Realization B Procedure P(MODE_actual v: T) end B
      *
      * The table below indicates when MODE_actual is compatible with
-     * MODE_formal?  Note that static variables are assigned modes,
-     * and constants and locals are not relevant.
+     * MODE_formal? Note that static
+     * variables are assigned modes, and constants and locals are not relevant.
      * 
      * Read the following table as:
      *
      * MODE_actual (DOWN LEFT) can implement MODE_formal(ACROSS TOP)
      *
-     * ---------------------------------------
-     *      UPD  ALT  REP  CLR  RES  PRE  EVL
-     * UPD   Y    Y    N?   N    N    N    N
-     * ALT   N?   Y    N?*  N    N    N    N
-     * REP   N?   N*   Y    N    N    N    N
-     * CLR   Y    Y    Y?   Y    N    N    N
-     * RES   Y    Y    N?*  N    Y    N    N
-     * PRE   Y    Y    N?*  N    Y    Y    N
-     * EVL   N    N    N    N    N    N    Y
-     * ---------------------------------------
+     * --------------------------------------- UPD ALT REP CLR RES PRE EVL UPD Y
+     * Y N? N N N N ALT N? Y
+     * N?* N N N N REP N? N* Y N N N N CLR Y Y Y? Y N N N RES Y Y N?* N Y N N
+     * PRE Y Y N?* N Y Y N EVL
+     * N N N N N N Y ---------------------------------------
      * 
-     *    * means was changed recently, may still need to be considered
+     * * means was changed recently, may still need to be considered
      */
     public static boolean implementsCompatible(Mode actual, Mode formal) {
         boolean result;
@@ -155,32 +146,23 @@ public class Mode {
     /*
      * Procedure call mode compatibility
      *
-     * Procedure P(MODE_actual v: T)
-     *     begin
-     *       Q(v)
-     *     end
+     * Procedure P(MODE_actual v: T) begin Q(v) end
      *
      * Procedure Q(MODE_formal v: T)
      *
      * The table below indicates when MODE_actual is compatible-with
-     * MODE_formal?  Note that static variables are given modes, and
-     * constants behave like the preserves mode.
+     * MODE_formal? Note that static
+     * variables are given modes, and constants behave like the preserves mode.
      * 
      * Read the following table as:
      *
      * MODE_actual (DOWN LEFT) can be passed to MODE_formal(ACROSS TOP)
      *
-     * ---------------------------------------
-     *      UPD  ALT  REP  CLR  RES  PRE  EVL
-     * UPD   Y    Y    Y    Y    Y    Y    N
-     * ALT   Y    Y    Y    Y    Y    Y    N   
-     * REP   Y    Y    Y    Y    Y    Y    N
-     * CLR   Y    Y    Y    Y    Y    Y    N
-     * RES   Y    Y    Y    Y    Y    Y    N
-     * PRE   N    N    N    N    N    Y    N
-     * EVL   N    N    N    N    N    N    Y
-     * LOC   Y    Y    Y    Y    Y    Y    N
-     * ---------------------------------------
+     * --------------------------------------- UPD ALT REP CLR RES PRE EVL UPD Y
+     * Y Y Y Y Y N ALT Y Y Y
+     * Y Y Y N REP Y Y Y Y Y Y N CLR Y Y Y Y Y Y N RES Y Y Y Y Y Y N PRE N N N N
+     * N Y N EVL N N N N N N
+     * Y LOC Y Y Y Y Y Y N ---------------------------------------
      */
     public static boolean callCompatible(Mode actual, Mode formal) {
         boolean result;
@@ -228,7 +210,7 @@ public class Mode {
 
     private static boolean updatesImplementsCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(UPDATES) || actual.equals(CLEARS)
+        if /**/ (actual.equals(UPDATES) || actual.equals(CLEARS)
                 || actual.equals(RESTORES) || actual.equals(PRESERVES)) {
             result = true;
         }
@@ -240,7 +222,7 @@ public class Mode {
 
     private static boolean altersImplementsCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+        if /**/ (actual.equals(UPDATES) || actual.equals(ALTERS)
                 || actual.equals(CLEARS) || actual.equals(RESTORES)
                 || actual.equals(PRESERVES)) {
             result = true;
@@ -253,7 +235,7 @@ public class Mode {
 
     private static boolean replacesImplementsCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(REPLACES) || actual.equals(CLEARS)) {
+        if /**/ (actual.equals(REPLACES) || actual.equals(CLEARS)) {
             result = true;
         }
         else {
@@ -275,7 +257,7 @@ public class Mode {
 
     private static boolean restoresImplementsCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(RESTORES) || actual.equals(PRESERVES)) {
+        if /**/ (actual.equals(RESTORES) || actual.equals(PRESERVES)) {
             result = true;
         }
         else {
@@ -312,7 +294,7 @@ public class Mode {
 
     private static boolean updatesCallCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+        if /**/ (actual.equals(UPDATES) || actual.equals(ALTERS)
                 || actual.equals(REPLACES) || actual.equals(CLEARS)
                 || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
@@ -325,7 +307,7 @@ public class Mode {
 
     private static boolean altersCallCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+        if /**/ (actual.equals(UPDATES) || actual.equals(ALTERS)
                 || actual.equals(REPLACES) || actual.equals(CLEARS)
                 || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
@@ -338,7 +320,7 @@ public class Mode {
 
     private static boolean replacesCallCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+        if /**/ (actual.equals(UPDATES) || actual.equals(ALTERS)
                 || actual.equals(REPLACES) || actual.equals(CLEARS)
                 || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
@@ -351,7 +333,7 @@ public class Mode {
 
     private static boolean clearsCallCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+        if /**/ (actual.equals(UPDATES) || actual.equals(ALTERS)
                 || actual.equals(REPLACES) || actual.equals(CLEARS)
                 || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
@@ -364,7 +346,7 @@ public class Mode {
 
     private static boolean restoresCallCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+        if /**/ (actual.equals(UPDATES) || actual.equals(ALTERS)
                 || actual.equals(REPLACES) || actual.equals(CLEARS)
                 || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
@@ -377,7 +359,7 @@ public class Mode {
 
     private static boolean preservesCallCompatible(Mode actual) {
         boolean result;
-        if /**/(actual.equals(PRESERVES) || actual.equals(LOCAL)) {
+        if /**/ (actual.equals(PRESERVES) || actual.equals(LOCAL)) {
             result = true;
         }
         else {

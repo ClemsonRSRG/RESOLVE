@@ -1,7 +1,7 @@
 /*
  * Theorem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,7 +24,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.*;
 
 /**
- * <p>This class represents an immutable <em>theorem</em>.</p>
+ * <p>
+ * This class represents an immutable <em>theorem</em>.
+ * </p>
  *
  * @author Mike Kabbani
  * @version 2.0
@@ -35,53 +37,117 @@ public class Theorem {
     // Member Fields
     // ===========================================================
 
-    /** <p>Theorem's name</p> */
+    /**
+     * <p>
+     * Theorem's name
+     * </p>
+     */
     private final String myName;
 
-    /** <p>A flag that indicates if we are checking for equality.</p> */
+    /**
+     * <p>
+     * A flag that indicates if we are checking for equality.
+     * </p>
+     */
     private final boolean myIsEqualityFlag;
 
-    /** <p>A registry for theorem expressions.</p> */
+    /**
+     * <p>
+     * A registry for theorem expressions.
+     * </p>
+     */
     private final Registry myTheoremRegistry;
 
-    /** <p>A conjunction of matched expressions.</p> */
+    /**
+     * <p>
+     * A conjunction of matched expressions.
+     * </p>
+     */
     private final ConjunctionOfNormalizedAtomicExpressions myMatchedConjExps;
 
-    /** <p>A list of expressions that needs to be matched.</p> */
+    /**
+     * <p>
+     * A list of expressions that needs to be matched.
+     * </p>
+     */
     private final List<NormalizedAtomicExpression> myMatchRequiredExps;
 
-    /** <p>A list of expressions that do not match.</p> */
+    /**
+     * <p>
+     * A list of expressions that do not match.
+     * </p>
+     */
     private final List<NormalizedAtomicExpression> myNoMatchRequiredExps;
 
-    /** <p>Theorem represented as a string.</p> */
+    /**
+     * <p>
+     * Theorem represented as a string.
+     * </p>
+     */
     private final String myTheoremAsString;
 
-    /** <p>Expression to be inserted into our registry.</p> */
+    /**
+     * <p>
+     * Expression to be inserted into our registry.
+     * </p>
+     */
     private final PExp myInsertExpr;
 
-    /** <p>Theorem expressed as a {@link PExp}.</p> */
+    /**
+     * <p>
+     * Theorem expressed as a {@link PExp}.
+     * </p>
+     */
     private final PExp myTheoremExp;
 
-    /** <p>A set of literal symbols from this theorem.</p> */
+    /**
+     * <p>
+     * A set of literal symbols from this theorem.
+     * </p>
+     */
     private Set<String> myAllLiteralsStrs;
 
-    /** <p>A flag that indicates if we allow new symbols to be applied.</p> */
+    /**
+     * <p>
+     * A flag that indicates if we allow new symbols to be applied.
+     * </p>
+     */
     private boolean myAllowedNewSymbols;
 
-    /** <p>A flag that indicates whether or not this theorem has quantifiers.</p> */
+    /**
+     * <p>
+     * A flag that indicates whether or not this theorem has quantifiers.
+     * </p>
+     */
     private final boolean myHasNoQuantifiersFlag;
 
-    /** <p>The last processed {@code VC}.</p> */
+    /**
+     * <p>
+     * The last processed {@code VC}.
+     * </p>
+     */
     private ImmutableVC myLastProcessedVC;
 
-    /** <p>A set of quantified variables to be inserted.</p> */
+    /**
+     * <p>
+     * A set of quantified variables to be inserted.
+     * </p>
+     */
     private final Set<String> myInsertQuantifiedVars;
 
     // clear these when starting new VC
-    /** <p>A collection of bounded expressions.</p> */
+    /**
+     * <p>
+     * A collection of bounded expressions.
+     * </p>
+     */
     private final List<Map<String, String>> myBindings;
 
-    /** <p>A collection of selected bounded expressions.</p> */
+    /**
+     * <p>
+     * A collection of selected bounded expressions.
+     * </p>
+     */
     private final Set<Map<String, String>> mySelectedBindings;
 
     // ===========================================================
@@ -89,21 +155,26 @@ public class Theorem {
     // ===========================================================
 
     /**
-     * <p>This creates an immutable <em>theorem</em> for
-     * the prover.</p>
+     * <p>
+     * This creates an immutable <em>theorem</em> for the prover.
+     * </p>
      *
      * @param g The mathematical type graph.
      * @param entireTheorem Complete theorem as a {@link PExp}.
      * @param mustMatch An expression that must be matched.
      * @param restOfExp An expression that don't necessary have to match.
      * @param toInsert An expression to be inserted.
-     * @param enterToMatchAndBindAsEquivalentToTrue A flag that indicates that if found a match,
-     *                                              we bind this to be {@code true}.
-     * @param allowNewSymbols A flag that indicates if we allow new symbols to be evaluated.
+     * @param enterToMatchAndBindAsEquivalentToTrue A flag that indicates that
+     *        if found a match, we
+     *        bind this to be {@code true}.
+     * @param allowNewSymbols A flag that indicates if we allow new symbols to
+     *        be evaluated.
      * @param name This theorem's name.
      */
-    public Theorem(TypeGraph g, PExp entireTheorem, PExp mustMatch, PExp restOfExp, PExp toInsert,
-            boolean enterToMatchAndBindAsEquivalentToTrue, boolean allowNewSymbols, String name) {
+    public Theorem(TypeGraph g, PExp entireTheorem, PExp mustMatch,
+            PExp restOfExp, PExp toInsert,
+            boolean enterToMatchAndBindAsEquivalentToTrue,
+            boolean allowNewSymbols, String name) {
         myName = name;
         myAllowedNewSymbols = allowNewSymbols;
         myTheoremExp = entireTheorem;
@@ -112,8 +183,8 @@ public class Theorem {
         myTheoremRegistry = new Registry(g);
         myBindings = new ArrayList<>(128);
         mySelectedBindings = new HashSet<>(128);
-        myMatchedConjExps =
-                new ConjunctionOfNormalizedAtomicExpressions(null, myTheoremRegistry);
+        myMatchedConjExps = new ConjunctionOfNormalizedAtomicExpressions(null,
+                myTheoremRegistry);
         if (mustMatch.getSubExpressions().size() > 0) {
             if (enterToMatchAndBindAsEquivalentToTrue) {
                 myMatchedConjExps.addExpression(mustMatch);
@@ -123,8 +194,8 @@ public class Theorem {
             }
         }
 
-        myMatchRequiredExps =
-                new ArrayList<>(myMatchedConjExps.getNormalizedAtomicExpressionKeys());
+        myMatchRequiredExps = new ArrayList<>(
+                myMatchedConjExps.getNormalizedAtomicExpressionKeys());
         Collections.sort(myMatchRequiredExps,
                 new NormalizedAtomicExpression.numQuantsComparator());
 
@@ -136,9 +207,9 @@ public class Theorem {
 
         if (!mustMatch.equals(restOfExp)
                 && restOfExp.getSubExpressions().size() > 1
-                && (!mustMatch.getQuantifiedVariables().containsAll(
-                        restOfExp.getQuantifiedVariables()) || mustMatch
-                        .getSubExpressions().size() == 0)) {
+                && (!mustMatch.getQuantifiedVariables()
+                        .containsAll(restOfExp.getQuantifiedVariables())
+                        || mustMatch.getSubExpressions().size() == 0)) {
             myMatchedConjExps.addFormula(restOfExp);
         }
 
@@ -148,7 +219,8 @@ public class Theorem {
             insert_quants.add(p.toString());
         }
 
-        for (NormalizedAtomicExpression n : myMatchedConjExps.getNormalizedAtomicExpressionKeys()) {
+        for (NormalizedAtomicExpression n : myMatchedConjExps
+                .getNormalizedAtomicExpressionKeys()) {
             Map<String, Integer> ops = n.getOperatorsAsStrings(false);
             Set<String> intersection = new HashSet<>(insert_quants);
             intersection.retainAll(ops.keySet());
@@ -161,7 +233,8 @@ public class Theorem {
         Collections.sort(myNoMatchRequiredExps,
                 new NormalizedAtomicExpression.numQuantsComparator());
 
-        myHasNoQuantifiersFlag = myTheoremExp.getQuantifiedVariables().isEmpty();
+        myHasNoQuantifiersFlag =
+                myTheoremExp.getQuantifiedVariables().isEmpty();
     }
 
     // ===========================================================
@@ -169,7 +242,9 @@ public class Theorem {
     // ===========================================================
 
     /**
-     * <p>This method applies this <em>theorem</em> to a {@code VC}.</p>
+     * <p>
+     * This method applies this <em>theorem</em> to a {@code VC}.
+     * </p>
      *
      * @param vc A {@code VC}.
      * @param endTime An end time.
@@ -188,9 +263,9 @@ public class Theorem {
             return 1;
         }
 
-        if (myMatchRequiredExps.size() == 0
-                || ((myAllowedNewSymbols && myTheoremExp
-                        .getQuantifiedVariables().size() == 1) && myIsEqualityFlag)) {
+        if (myMatchRequiredExps.size() == 0 || ((myAllowedNewSymbols
+                && myTheoremExp.getQuantifiedVariables().size() == 1)
+                && myIsEqualityFlag)) {
             sResults = findValidBindingsByType(vc);
         }
         else {
@@ -218,7 +293,9 @@ public class Theorem {
         Collections.sort(myBindings, new Comparator<Map<String, String>>() {
 
             /**
-             * <p>Compares <code>o1</code> and <code>o2</code>.</p>
+             * <p>
+             * Compares <code>o1</code> and <code>o2</code>.
+             * </p>
              *
              * @param o1 A map of symbols.
              * @param o2 Another map of symbols.
@@ -235,7 +312,9 @@ public class Theorem {
     }
 
     /**
-     * <p>This method returns this <em>theorem</em>'s name.</p>
+     * <p>
+     * This method returns this <em>theorem</em>'s name.
+     * </p>
      *
      * @return A string.
      */
@@ -244,7 +323,9 @@ public class Theorem {
     }
 
     /**
-     * <p>This method returns the "next" expression with a score.</p>
+     * <p>
+     * This method returns the "next" expression with a score.
+     * </p>
      *
      * @return A prover expression with a score.
      */
@@ -269,40 +350,42 @@ public class Theorem {
             if (curBinding.containsKey(thKey)) {
                 thVal = curBinding.get(thKey);
             }
-            else if (curBinding.containsKey(myTheoremRegistry
-                    .getRootSymbolForSymbol(thKey))) {
-                thVal =
-                        curBinding.get(myTheoremRegistry
-                                .getRootSymbolForSymbol(thKey));
+            else if (curBinding.containsKey(
+                    myTheoremRegistry.getRootSymbolForSymbol(thKey))) {
+                thVal = curBinding
+                        .get(myTheoremRegistry.getRootSymbolForSymbol(thKey));
             }
 
             if (thVal.equals("")) {
                 return getNext();
             }
 
-            MTType quanType =
-                    myTheoremRegistry.getTypeByIndex(myTheoremRegistry
-                            .getIndexForSymbol(thKey));
-            quantToLit.put(new PSymbol(quanType, null, thKey,
-                    PSymbol.Quantification.FOR_ALL), new PSymbol(quanType,
-                    null, thVal, PSymbol.Quantification.NONE));
+            MTType quanType = myTheoremRegistry
+                    .getTypeByIndex(myTheoremRegistry.getIndexForSymbol(thKey));
+            quantToLit.put(
+                    new PSymbol(quanType, null, thKey,
+                            PSymbol.Quantification.FOR_ALL),
+                    new PSymbol(quanType, null, thVal,
+                            PSymbol.Quantification.NONE));
         }
 
         PExp modifiedInsert = myInsertExpr.substitute(quantToLit);
         modifiedInsert = myLastProcessedVC.getConjunct().find(modifiedInsert);
         // Discard s = s
         if ((modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
-                .getSubExpressions().get(0).toString().equals(
-                        modifiedInsert.getSubExpressions().get(1).toString()))) {
+                .getSubExpressions().get(0).toString().equals(modifiedInsert
+                        .getSubExpressions().get(1).toString()))) {
             return getNext();
         }
 
-        return new PExpWithScore(modifiedInsert, curBinding, myTheoremExp
-                .toString());
+        return new PExpWithScore(modifiedInsert, curBinding,
+                myTheoremExp.toString());
     }
 
     /**
-     * <p>This method returns all non-quantified symbols.</p>
+     * <p>
+     * This method returns all non-quantified symbols.
+     * </p>
      *
      * @return A set of symbols.
      */
@@ -337,8 +420,10 @@ public class Theorem {
     }
 
     /**
-     * <p>This method checks to see if this <em>theorem</em>
-     * contains quantifiers or not.</p>
+     * <p>
+     * This method checks to see if this <em>theorem</em> contains quantifiers
+     * or not.
+     * </p>
      *
      * @return {@code true} if it does, {@code false} otherwise.
      */
@@ -347,7 +432,9 @@ public class Theorem {
     }
 
     /**
-     * <p>This method returns this <em>theorem</em> in string format.</p>
+     * <p>
+     * This method returns this <em>theorem</em> in string format.
+     * </p>
      *
      * @return A string.
      */
@@ -363,7 +450,9 @@ public class Theorem {
     // ===========================================================
 
     /**
-     * <p>An helper method that computes a score for this <em>theorem</em>.</p>
+     * <p>
+     * An helper method that computes a score for this <em>theorem</em>.
+     * </p>
      *
      * @param bmap A map of symbols to be matched.
      *
@@ -375,11 +464,13 @@ public class Theorem {
         float age = 0f;
         float sSz = bmap.keySet().size();
         for (String k : bmap.keySet()) {
-            String rS =
-                    myLastProcessedVC.getRegistry().getRootSymbolForSymbol(bmap.get(k));
+            String rS = myLastProcessedVC.getRegistry()
+                    .getRootSymbolForSymbol(bmap.get(k));
             seen.add(rS);
-            if (myLastProcessedVC.getRegistry().mySymbolToIndex.containsKey(rS)) {
-                int indexVal = myLastProcessedVC.getRegistry().getIndexForSymbol(rS);
+            if (myLastProcessedVC.getRegistry().mySymbolToIndex
+                    .containsKey(rS)) {
+                int indexVal =
+                        myLastProcessedVC.getRegistry().getIndexForSymbol(rS);
                 // Age
                 age += indexVal;
             }
@@ -397,8 +488,11 @@ public class Theorem {
     }
 
     /**
-     * <p>An helper method that finds the collection of valid bindings
-     * that can be used to prove this {@code VC}.</p>
+     * <p>
+     * An helper method that finds the collection of valid bindings that can be
+     * used to prove this
+     * {@code VC}.
+     * </p>
      *
      * @param vc A {@code VC}.
      *
@@ -435,8 +529,11 @@ public class Theorem {
     }
 
     /**
-     * <p>An helper method that finds the set of all bounded variables that matches
-     * a mathematical type used by one of the {@code VC}'s symbols.</p>
+     * <p>
+     * An helper method that finds the set of all bounded variables that matches
+     * a mathematical type
+     * used by one of the {@code VC}'s symbols.
+     * </p>
      *
      * @param vc A {@code VC}.
      *
@@ -463,10 +560,10 @@ public class Theorem {
                     if (ch.isEmpty())
                         return null;
                     for (String c : ch) {
-                        if (!myTheoremRegistry.getUsage(c).equals(
-                                Registry.Usage.FORALL)
-                                || !myTheoremRegistry.getUsage(c).equals(
-                                Registry.Usage.CREATED)) {
+                        if (!myTheoremRegistry.getUsage(c)
+                                .equals(Registry.Usage.FORALL)
+                                || !myTheoremRegistry.getUsage(c)
+                                        .equals(Registry.Usage.CREATED)) {
                             wildToActual.put(wild, c);
                             break;
                         }
@@ -488,9 +585,8 @@ public class Theorem {
         }
 
         String wild = foralls.iterator().next();
-        MTType t =
-                myTheoremRegistry.getTypeByIndex(myTheoremRegistry
-                        .getIndexForSymbol(wild));
+        MTType t = myTheoremRegistry
+                .getTypeByIndex(myTheoremRegistry.getIndexForSymbol(wild));
 
         for (String actual : vc.getRegistry().getParentsByType(t)) {
             Map<String, String> wildToActual = new HashMap<>();
@@ -504,9 +600,11 @@ public class Theorem {
     }
 
     /**
-     * <p>An helper method that obtains the initial bindings which includes any
-     * quantified variables and the created variables in the matched
-     * conjunction.</p>
+     * <p>
+     * An helper method that obtains the initial bindings which includes any
+     * quantified variables and
+     * the created variables in the matched conjunction.
+     * </p>
      *
      * @return A mapping of bounded expressions.
      */

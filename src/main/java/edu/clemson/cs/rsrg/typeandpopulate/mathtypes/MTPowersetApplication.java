@@ -1,7 +1,7 @@
 /*
  * MTPowersetApplication.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -27,10 +27,13 @@ public class MTPowersetApplication extends MTFunctionApplication {
     // ===========================================================
 
     /**
-     * <p>This constructs an application of {@code Powerset} function.</p>
+     * <p>
+     * This constructs an application of {@code Powerset} function.
+     * </p>
      *
      * @param g The current type graph.
-     * @param argument The {@link MTType} to apply the {@code Powerset} function.
+     * @param argument The {@link MTType} to apply the {@code Powerset}
+     *        function.
      */
     public MTPowersetApplication(TypeGraph g, MTType argument) {
         super(g, g.POWERSET, "Powerset", argument);
@@ -41,8 +44,11 @@ public class MTPowersetApplication extends MTFunctionApplication {
     // ===========================================================
 
     /**
-     * <p>This method is the {@code accept()} method in a visitor pattern
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method is the {@code accept()} method in a visitor pattern for
+     * invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -70,7 +76,9 @@ public class MTPowersetApplication extends MTFunctionApplication {
     }
 
     /**
-     * <p>Returns the type stored inside this type.</p>
+     * <p>
+     * Returns the type stored inside this type.
+     * </p>
      *
      * @return The {@link MTType} type object.
      */
@@ -80,42 +88,52 @@ public class MTPowersetApplication extends MTFunctionApplication {
     }
 
     /**
-     * <p>Indicates that this type is known to contain only elements <em>that
-     * are themselves</em> types. Practically, this answers the question, "can
-     * an instance of this type itself be used as a type?"</p>
+     * <p>
+     * Indicates that this type is known to contain only elements <em>that are
+     * themselves</em> types.
+     * Practically, this answers the question, "can an instance of this type
+     * itself be used as a
+     * type?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
     @Override
     public final boolean isKnownToContainOnlyMTypes() {
-        //The powerset is, by definition, a container of containers
+        // The powerset is, by definition, a container of containers
         return true;
     }
 
     /**
-     * <p>Indicates that every instance of this type is itself known to contain
-     * only elements that are types. Practically, this answers the question,
-     * "if a function returns an instance of this type, can that instance itself
-     * be said to contain only types?"</p>
+     * <p>
+     * Indicates that every instance of this type is itself known to contain
+     * only elements that are
+     * types. Practically, this answers the question, "if a function returns an
+     * instance of this type,
+     * can that instance itself be said to contain only types?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
     @Override
     public final boolean membersKnownToContainOnlyMTypes() {
-        //I'm the container of all sub-containers of my argument.  My members
-        //are containers of members from the original argument.
+        // I'm the container of all sub-containers of my argument. My members
+        // are containers of members from the original argument.
         return getArgument(0).isKnownToContainOnlyMTypes();
     }
 
     /**
-     * <p>This method attempts to replace a component type at the specified
-     * index.</p>
+     * <p>
+     * This method attempts to replace a component type at the specified index.
+     * </p>
      *
      * @param index Index to a component type.
-     * @param newType The {@link MTType} to replace the one in our component list.
+     * @param newType The {@link MTType} to replace the one in our component
+     *        list.
      *
-     * @return A new {@link MTFunctionApplication} with the type at the specified index
-     * replaced with {@code newType}.
+     * @return A new {@link MTFunctionApplication} with the type at the
+     *         specified index replaced with
+     *         {@code newType}.
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
@@ -123,9 +141,8 @@ public class MTPowersetApplication extends MTFunctionApplication {
 
         switch (index) {
         case 0:
-            result =
-                    new MTFunctionApplication(getTypeGraph(),
-                            (MTFunction) newType, getArguments());
+            result = new MTFunctionApplication(getTypeGraph(),
+                    (MTFunction) newType, getArguments());
             break;
         case 1:
             result = new MTPowersetApplication(getTypeGraph(), newType);

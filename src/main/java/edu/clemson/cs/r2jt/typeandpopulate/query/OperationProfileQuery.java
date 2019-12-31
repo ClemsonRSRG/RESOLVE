@@ -1,7 +1,7 @@
 /*
  * OperationProfileQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,11 +21,15 @@ import edu.clemson.cs.r2jt.typeandpopulate.searchers.OperationProfileSearcher;
 import java.util.List;
 
 /**
- * <p>An <code>OperationProfileQuery</code> searched for a (possibly-qualified) 
- * operation and return its associated profile. If a qualifier is provided, 
- * the named facility or module is searched.  Otherwise, the operation is 
- * searched for in any directly imported modules and in instantiated versions 
- * of any available facilities.</p>
+ * <p>
+ * An <code>OperationProfileQuery</code> searched for a (possibly-qualified)
+ * operation and return
+ * its associated profile. If a qualifier is provided, the named facility or
+ * module is searched.
+ * Otherwise, the operation is searched for in any directly imported modules and
+ * in instantiated
+ * versions of any available facilities.
+ * </p>
  *
  * @author Yu-Shan
  */

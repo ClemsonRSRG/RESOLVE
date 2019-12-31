@@ -1,7 +1,7 @@
 /*
  * MTNamed.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.Map;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>Represents a type that is simply a named reference to some bound variable.
- * For example, in BigUnion{t : MType}{t}, the second "t" is a named type.</p>
+ * <p>
+ * Represents a type that is simply a named reference to some bound variable.
+ * For example, in
+ * BigUnion{t : MType}{t}, the second "t" is a named type.
+ * </p>
  */
 public class MTNamed extends MTType {
 

@@ -1,7 +1,7 @@
 /*
  * SetCollectionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.*;
 
 /**
- * <p>This is the class for all the mathematical set (as a collection)
- * expression objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical set (as a collection) expression
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,11 @@ public class SetCollectionExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of member expressions in this set collection.</p> */
+    /**
+     * <p>
+     * The list of member expressions in this set collection.
+     * </p>
+     */
     private final Set<MathExp> myMembers;
 
     // ===========================================================
@@ -36,11 +43,13 @@ public class SetCollectionExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical set collection expression.</p>
+     * <p>
+     * This constructs a mathematical set collection expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param vars A set of {@link MathExp}s where each one is a member
-     *             in this set.
+     * @param vars A set of {@link MathExp}s where each one is a member in this
+     *        set.
      */
     public SetCollectionExp(Location l, Set<MathExp> vars) {
         super(l);
@@ -144,11 +153,12 @@ public class SetCollectionExp extends MathExp {
             SetCollectionExp eAsSetCollectionExp = (SetCollectionExp) e;
 
             if (myMembers != null && eAsSetCollectionExp.myMembers != null
-                    && myMembers.size() == eAsSetCollectionExp.myMembers.size()) {
+                    && myMembers.size() == eAsSetCollectionExp.myMembers
+                            .size()) {
                 // YS: This is a very expensive method to call. Sets don't have order
-                //     so it is possible that we have the same elements, but different order.
-                //     So for each element in our set, we will need to iterate all elements in "e"
-                //     to find a match.
+                // so it is possible that we have the same elements, but different order.
+                // So for each element in our set, we will need to iterate all elements in "e"
+                // to find a match.
                 Iterator<MathExp> thisMemberExps = myMembers.iterator();
                 while (result && thisMemberExps.hasNext()) {
                     MathExp innerExp = thisMemberExps.next();
@@ -185,8 +195,9 @@ public class SetCollectionExp extends MathExp {
     }
 
     /**
-     * <p>This method returns all the
-     * variable expressions in this set.</p>
+     * <p>
+     * This method returns all the variable expressions in this set.
+     * </p>
      *
      * @return A set containing all the {@link MathExp}s.
      */
@@ -234,8 +245,10 @@ public class SetCollectionExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the variable expressions.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * variable expressions.
+     * </p>
      *
      * @return A list containing {@link MathExp}s.
      */

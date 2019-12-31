@@ -1,7 +1,7 @@
 /*
  * PerformanceTypeDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -104,7 +104,8 @@ public class PerformanceTypeDec extends Dec {
     }
 
     /** Sets the initialization variable to the specified value. */
-    public void setPerf_Initialization(PerformanceInitItem perf_initialization) {
+    public void
+            setPerf_Initialization(PerformanceInitItem perf_initialization) {
         this.perf_initialization = perf_initialization;
     }
 
@@ -148,9 +149,8 @@ public class PerformanceTypeDec extends Dec {
         }
 
         if (perf_finalization != null) {
-            sb
-                    .append(perf_finalization.asString(indent + increment,
-                            increment));
+            sb.append(
+                    perf_finalization.asString(indent + increment, increment));
         }
 
         return sb.toString();

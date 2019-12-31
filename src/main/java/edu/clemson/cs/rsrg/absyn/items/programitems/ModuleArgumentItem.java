@@ -1,7 +1,7 @@
 /*
  * ModuleArgumentItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,9 +17,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 
 /**
- * <p>This is the class for all the facility declaration arguments
- * for Concept/Enhancement modules that the compiler builds using
- * the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the facility declaration arguments for
+ * Concept/Enhancement modules that
+ * the compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,7 +31,11 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The argument expression in this module argument.</p> */
+    /**
+     * <p>
+     * The argument expression in this module argument.
+     * </p>
+     */
     private final ProgramExp myArgumentExp;
 
     // ===========================================================
@@ -37,9 +43,12 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a module argument for facility declarations.</p>
+     * <p>
+     * This constructs a module argument for facility declarations.
+     * </p>
      *
-     * @param evalExp A {@link ProgramExp} representing the argument being passed.
+     * @param evalExp A {@link ProgramExp} representing the argument being
+     *        passed.
      */
     public ModuleArgumentItem(ProgramExp evalExp) {
         super(evalExp.getLocation());
@@ -89,8 +98,9 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the variable expression being passed to the
-     * facility declaration.</p>
+     * <p>
+     * Returns the variable expression being passed to the facility declaration.
+     * </p>
      *
      * @return A {@link ProgramExp} representation of the expression.
      */
@@ -99,7 +109,9 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the variable expression's program type.</p>
+     * <p>
+     * Returns the variable expression's program type.
+     * </p>
      *
      * @return A {@link PTType} type representation.
      */

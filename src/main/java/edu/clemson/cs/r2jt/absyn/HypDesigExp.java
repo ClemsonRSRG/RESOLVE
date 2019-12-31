@@ -1,7 +1,7 @@
 /*
  * HypDesigExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -75,8 +75,8 @@ public class HypDesigExp extends Exp {
     // ===========================================================
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new HypDesigExp(location, (MathRefExp) substitute(mathExp,
-                substitutions));
+        return new HypDesigExp(location,
+                (MathRefExp) substitute(mathExp, substitutions));
     }
 
     /** Accepts a ResolveConceptualVisitor. */

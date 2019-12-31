@@ -1,7 +1,7 @@
 /*
  * MathFunctionNamedQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,11 +25,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>A <code>MathFunctionNamedQuery</code> takes a (possibly-null) qualifier and a name
- * and searches for all {@link MathSymbolEntry} that match. If the qualifier is non-null, the
- * appropriate facility or module is searched. If it <em>is</em> null, a
- * search is performed using a recursive <code>ImportStrategy</code> and
- * ignores all <code>FacilityStrategy</code>.</p>
+ * <p>
+ * A <code>MathFunctionNamedQuery</code> takes a (possibly-null) qualifier and a
+ * name and searches
+ * for all {@link MathSymbolEntry} that match. If the qualifier is non-null, the
+ * appropriate
+ * facility or module is searched. If it <em>is</em> null, a search is performed
+ * using a recursive
+ * <code>ImportStrategy</code> and ignores all <code>FacilityStrategy</code>.
+ * </p>
  *
  * @version 2.0
  */
@@ -41,7 +45,11 @@ public class MathFunctionNamedQuery
     // Member Fields
     // ===========================================================
 
-    /** <p>The actual query that is going to perform the searching.</p> */
+    /**
+     * <p>
+     * The actual query that is going to perform the searching.
+     * </p>
+     */
     private final MultimatchSymbolQuery<SymbolTableEntry> myNameQuery;
 
     // ===========================================================
@@ -49,12 +57,16 @@ public class MathFunctionNamedQuery
     // ===========================================================
 
     /**
-     * <p>This query searches for all {@link MathSymbolEntry} that match the given name
-     * represented as a {@link PosSymbol} using a recursive import strategy, no facility strategy
-     * and no local priority.</p>
+     * <p>
+     * This query searches for all {@link MathSymbolEntry} that match the given
+     * name represented as a
+     * {@link PosSymbol} using a recursive import strategy, no facility strategy
+     * and no local
+     * priority.
+     * </p>
      *
      * @param qualifier A qualifier symbol that indicates the instantiating
-     *                  facility or module.
+     *        facility or module.
      * @param name A name symbol of the entry to be searched.
      */
     public MathFunctionNamedQuery(PosSymbol qualifier, PosSymbol name) {
@@ -68,8 +80,12 @@ public class MathFunctionNamedQuery
     // ===========================================================
 
     /**
-     * <p>Behaves just as {@link SymbolQuery#searchFromContext(Scope, ScopeRepository)},
-     * except that it cannot throw a {@link DuplicateSymbolException}.</p>
+     * <p>
+     * Behaves just as
+     * {@link SymbolQuery#searchFromContext(Scope, ScopeRepository)}, except
+     * that it
+     * cannot throw a {@link DuplicateSymbolException}.
+     * </p>
      *
      * @param source The source scope from which the search was spawned.
      * @param repo A repository of any referenced modules.
@@ -77,8 +93,10 @@ public class MathFunctionNamedQuery
      * @return A list of matches.
      */
     @Override
-    public final List<MathSymbolEntry> searchFromContext(Scope source, ScopeRepository repo) {
-        List<SymbolTableEntry> intermediateList = myNameQuery.searchFromContext(source, repo);
+    public final List<MathSymbolEntry> searchFromContext(Scope source,
+            ScopeRepository repo) {
+        List<SymbolTableEntry> intermediateList =
+                myNameQuery.searchFromContext(source, repo);
 
         List<MathSymbolEntry> finalList = new LinkedList<>();
         for (SymbolTableEntry intermediateEntry : intermediateList) {
@@ -86,7 +104,7 @@ public class MathFunctionNamedQuery
                 finalList.add(intermediateEntry.toMathSymbolEntry(null));
             }
             catch (SourceErrorException see) {
-                //This is ok, just don't add it to the final list
+                // This is ok, just don't add it to the final list
             }
         }
 

@@ -1,7 +1,7 @@
 /*
  * TypeDerivedException.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,8 +15,11 @@ package edu.clemson.cs.rsrg.prover.exception;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 
 /**
- * <p>A {@code BindingException} indicates we encountered an
- * error while attempting to derive a mathematical type.</p>
+ * <p>
+ * A {@code BindingException} indicates we encountered an error while attempting
+ * to derive a
+ * mathematical type.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,7 +32,11 @@ public class TypeDerivedException extends CompilerException {
     public static final TypeDerivedException INSTANCE =
             new TypeDerivedException();
 
-    /** <p>Serial version for Serializable objects</p> */
+    /**
+     * <p>
+     * Serial version for Serializable objects
+     * </p>
+     */
     private static final long serialVersionUID = 1L;
 
     // ==========================================================
@@ -37,8 +44,10 @@ public class TypeDerivedException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor creates a type derived exception that will
-     * be handled by the automated prover.</p>
+     * <p>
+     * This constructor creates a type derived exception that will be handled by
+     * the automated prover.
+     * </p>
      */
     private TypeDerivedException() {
         super("", (Throwable) null);

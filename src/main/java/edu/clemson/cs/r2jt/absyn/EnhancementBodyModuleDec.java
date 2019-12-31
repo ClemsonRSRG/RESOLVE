@@ -1,7 +1,7 @@
 /*
  * EnhancementBodyModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -183,7 +183,8 @@ public class EnhancementBodyModuleDec extends AbstractParameterizedModuleDec {
     }
 
     /** Sets the enhancementBodies variable to the specified value. */
-    public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
+    public void
+            setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
         this.enhancementBodies = enhancementBodies;
     }
 
@@ -254,9 +255,8 @@ public class EnhancementBodyModuleDec extends AbstractParameterizedModuleDec {
         }
 
         if (enhancementBodies != null) {
-            sb
-                    .append(enhancementBodies.asString(indent + increment,
-                            increment));
+            sb.append(
+                    enhancementBodies.asString(indent + increment, increment));
         }
 
         if (usesItems != null) {

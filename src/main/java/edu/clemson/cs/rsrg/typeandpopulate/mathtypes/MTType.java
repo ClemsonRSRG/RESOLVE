@@ -1,7 +1,7 @@
 /*
  * MTType.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.*;
 import java.util.*;
 
 /**
- * <p>This abstract class serves as the parent class of all
- * mathematical types.</p>
+ * <p>
+ * This abstract class serves as the parent class of all mathematical types.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,18 +33,32 @@ public abstract class MTType {
     // Member Fields
     // ===========================================================
 
-    /** <p>The current type graph object in use.</p> */
+    /**
+     * <p>
+     * The current type graph object in use.
+     * </p>
+     */
     protected final TypeGraph myTypeGraph;
 
-    /** <p>Known alpha equivalent types.</p> */
+    /**
+     * <p>
+     * Known alpha equivalent types.
+     * </p>
+     */
     private final Set<Object> myKnownAlphaEquivalencies = new HashSet<>();
 
-    /** <p>Known syntactic subtypes.</p> */
+    /**
+     * <p>
+     * Known syntactic subtypes.
+     * </p>
+     */
     private final Map<MTType, Map<String, MTType>> myKnownSyntacticSubtypeBindings =
             new HashMap<>();
 
     /**
-     * <p>Allows us to detect if we're getting into an equals-loop.</p>
+     * <p>
+     * Allows us to detect if we're getting into an equals-loop.
+     * </p>
      */
     private int myEqualsDepth = 0;
 
@@ -52,9 +67,11 @@ public abstract class MTType {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the type graph
-     * for any objects created from a class that inherits from
-     * {@code MTType}.</p>
+     * <p>
+     * An helper constructor that allow us to store the type graph for any
+     * objects created from a
+     * class that inherits from {@code MTType}.
+     * </p>
      *
      * @param g The current type graph.
      */
@@ -67,38 +84,47 @@ public abstract class MTType {
     // ===========================================================
 
     /**
-     * <p>This method is the {@code accept()} method in a visitor pattern
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method is the {@code accept()} method in a visitor pattern for
+     * invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
     public abstract void accept(TypeVisitor v);
 
     /**
-     * <p>This method implements the post-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the post-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
     public abstract void acceptClose(TypeVisitor v);
 
     /**
-     * <p>This method implements the pre-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the pre-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
     public abstract void acceptOpen(TypeVisitor v);
 
     /**
-     * <p>This method attempts to bind {@code o} to a map of types for the current
-     * context.</p>
+     * <p>
+     * This method attempts to bind {@code o} to a map of types for the current
+     * context.
+     * </p>
      *
      * @param o The type to bind.
      * @param context The finalized scope context.
      *
-     * @return The modified context type map if bind is successful, otherwise it throws
-     * an exception.
+     * @return The modified context type map if bind is successful, otherwise it
+     *         throws an exception.
      *
      * @throws BindingException Some error occurred during binding.
      */
@@ -115,19 +141,22 @@ public abstract class MTType {
     }
 
     /**
-     * <p>This method attempts to bind {@code o} to a map of types for the current
-     * context.</p>
+     * <p>
+     * This method attempts to bind {@code o} to a map of types for the current
+     * context.
+     * </p>
      *
      * @param o The type to bind.
      * @param context The context map of types.
      *
-     * @return The modified context type map if bind is successful, otherwise it throws
-     * an exception.
+     * @return The modified context type map if bind is successful, otherwise it
+     *         throws an exception.
      *
      * @throws BindingException Some error occurred during binding.
      */
     public final Map<String, MTType> bindTo(MTType o,
-            Map<String, MTType> context) throws BindingException {
+            Map<String, MTType> context)
+            throws BindingException {
         BindingVisitor bind = new BindingVisitor(myTypeGraph, context);
         bind.visit(this, o);
 
@@ -139,20 +168,24 @@ public abstract class MTType {
     }
 
     /**
-     * <p>This method attempts to bind {@code template} to a map of types for the current
-     * context using a template context.</p>
+     * <p>
+     * This method attempts to bind {@code template} to a map of types for the
+     * current context using a
+     * template context.
+     * </p>
      *
      * @param template The template type to bind.
      * @param thisContext The current context map of types.
      * @param templateContext The template context map of types.
      *
-     * @return The modified context type map if bind is successful, otherwise it throws
-     * an exception.
+     * @return The modified context type map if bind is successful, otherwise it
+     *         throws an exception.
      *
      * @throws BindingException Some error occurred during binding.
      */
     public final Map<String, MTType> bindTo(MTType template,
-            Map<String, MTType> thisContext, Map<String, MTType> templateContext)
+            Map<String, MTType> thisContext,
+            Map<String, MTType> templateContext)
             throws BindingException {
         BindingVisitor bind =
                 new BindingVisitor(myTypeGraph, thisContext, templateContext);
@@ -166,18 +199,24 @@ public abstract class MTType {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> <code>o</code> is an
-     * <code>MTType</code> that is <em>alpha equivalent</em> to this type.
-     * I.e., it must be exactly the same with the sole exception that
-     * quantified variables may have different names if they are otherwise
-     * identical.  So, <code>BigUnion{t : MType}{t}</code> <code>equals</code>
-     * <code>BigUnion{r : MType}{r}</code>.  However, <code>BigUnion{t : MType}{t}</code>
-     * <em>does not</em> <code>equals</code> <code>BigUnion{r : Power(MType)}{r}</code>.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> <code>o</code> is an
+     * <code>MTType</code> that is
+     * <em>alpha equivalent</em> to this type. I.e., it must be exactly the same
+     * with the sole
+     * exception that quantified variables may have different names if they are
+     * otherwise identical.
+     * So, <code>BigUnion{t : MType}{t}</code> <code>equals</code>
+     * <code>BigUnion{r : MType}{r}</code>. However,
+     * <code>BigUnion{t : MType}{t}</code> <em>does
+     * not</em> <code>equals</code> <code>BigUnion{r : Power(MType)}{r}</code>.
+     * </p>
      *
      * @param o The object to compare with this <code>MTType</code>.
      *
      * @return <code>true</code> <strong>iff</strong> this <code>MTType</code>
-     * is alpha equivalent to <code>o</code>.
+     *         is alpha equivalent to
+     *         <code>o</code>.
      */
     @Override
     public final boolean equals(Object o) {
@@ -189,16 +228,15 @@ public abstract class MTType {
             result = true;
         }
         else {
-            //We only check our cache if we're at the first level of equals
-            //comparison to avoid an infinite recursive loop
-            result =
-                    (myEqualsDepth == 1)
-                            && myKnownAlphaEquivalencies.contains(o);
+            // We only check our cache if we're at the first level of equals
+            // comparison to avoid an infinite recursive loop
+            result = (myEqualsDepth == 1)
+                    && myKnownAlphaEquivalencies.contains(o);
 
             if (!result) {
                 try {
-                    //All 'equals' logic should be put into AlphaEquivalencyChecker!
-                    //Don't override equals!
+                    // All 'equals' logic should be put into AlphaEquivalencyChecker!
+                    // Don't override equals!
                     AlphaEquivalencyChecker alphaEq =
                             myTypeGraph.threadResources.alphaChecker;
                     alphaEq.reset();
@@ -211,8 +249,8 @@ public abstract class MTType {
                     result = false;
                 }
 
-                //We only cache our answer at the first level to avoid an
-                //infinite equals loop
+                // We only cache our answer at the first level to avoid an
+                // infinite equals loop
                 if ((myEqualsDepth == 1) && result) {
                     myKnownAlphaEquivalencies.add(o);
                 }
@@ -225,23 +263,26 @@ public abstract class MTType {
     }
 
     /**
-     * <p>This method returns a list of {@code MTType}s
-     * that are part of this type.</p>
+     * <p>
+     * This method returns a list of {@code MTType}s that are part of this type.
+     * </p>
      *
      * @return A list of {@code MTType}s.
      */
     public abstract List<MTType> getComponentTypes();
 
     /**
-     * <p>This method returns a new {@link MTType} with the
-     * substitutions specified by the map.</p>
+     * <p>
+     * This method returns a new {@link MTType} with the substitutions specified
+     * by the map.
+     * </p>
      *
      * @param substitutions A map of substituting types.
      *
      * @return The modified {@link MTType}.
      */
-    public final MTType getCopyWithVariablesSubstituted(
-            Map<String, MTType> substitutions) {
+    public final MTType
+            getCopyWithVariablesSubstituted(Map<String, MTType> substitutions) {
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitutions);
         accept(renamer);
@@ -249,8 +290,9 @@ public abstract class MTType {
     }
 
     /**
-     * <p>This method returns a map fo syntactic subtype bindings
-     * for {@code o}.</p>
+     * <p>
+     * This method returns a map fo syntactic subtype bindings for {@code o}.
+     * </p>
      *
      * @param o A mathematical type.
      *
@@ -282,7 +324,9 @@ public abstract class MTType {
                     throw e;
                 }
 
-                throw new NoSolutionException("Error while attempting to establish syntactic subtype.", new IllegalStateException());
+                throw new NoSolutionException(
+                        "Error while attempting to establish syntactic subtype.",
+                        new IllegalStateException());
             }
 
             result = Collections.unmodifiableMap(checker.getBindings());
@@ -293,21 +337,25 @@ public abstract class MTType {
     }
 
     /**
-     * <p>Returns the type stored inside this type.</p>
+     * <p>
+     * Returns the type stored inside this type.
+     * </p>
      *
      * @return The {@link MTType} type object.
      */
     public MTType getType() {
-        //TODO : Each MTType should really contain it's declared type.  I.e.,
-        //       if I say "Definition X : Set", I should store that X is
-        //       of type Set someplace.  That's not currently available, so for
-        //       the moment we say that all types are of type MType, the parent
-        //       type of all types.
+        // TODO : Each MTType should really contain it's declared type. I.e.,
+        // if I say "Definition X : Set", I should store that X is
+        // of type Set someplace. That's not currently available, so for
+        // the moment we say that all types are of type MType, the parent
+        // type of all types.
         return myTypeGraph.CLS;
     }
 
     /**
-     * <p>The type graph containing all the type relationships.</p>
+     * <p>
+     * The type graph containing all the type relationships.
+     * </p>
      *
      * @return The type graph for the compiler.
      */
@@ -316,7 +364,9 @@ public abstract class MTType {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -326,7 +376,9 @@ public abstract class MTType {
     }
 
     /**
-     * <p>Indicates that this type is {@link TypeGraph#BOOLEAN}.</p>
+     * <p>
+     * Indicates that this type is {@link TypeGraph#BOOLEAN}.
+     * </p>
      *
      * @return {@code true} if it is, {@code false} otherwise.
      */
@@ -335,9 +387,13 @@ public abstract class MTType {
     }
 
     /**
-     * <p>Indicates that this type is known to contain only elements <em>that
-     * are themselves</em> types. Practically, this answers the question, "can
-     * an instance of this type itself be used as a type?"</p>
+     * <p>
+     * Indicates that this type is known to contain only elements <em>that are
+     * themselves</em> types.
+     * Practically, this answers the question, "can an instance of this type
+     * itself be used as a
+     * type?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
@@ -346,7 +402,9 @@ public abstract class MTType {
     }
 
     /**
-     * <p>Indicates that this type is known to be a subtype of {@code o}.</p>
+     * <p>
+     * Indicates that this type is known to be a subtype of {@code o}.
+     * </p>
      *
      * @param o An {@link MTType}.
      *
@@ -357,13 +415,14 @@ public abstract class MTType {
     }
 
     /**
-     * <p>Indicates that this type is known to be a syntactic
-     * subtype of {@code o}.</p>
+     * <p>
+     * Indicates that this type is known to be a syntactic subtype of {@code o}.
+     * </p>
      *
      * @param o An {@link MTType}.
      *
-     * @return {@code true} if it is a syntactic subtype,
-     * {@code false} otherwise.
+     * @return {@code true} if it is a syntactic subtype, {@code false}
+     *         otherwise.
      */
     public final boolean isSyntacticSubtypeOf(MTType o) {
 
@@ -381,10 +440,13 @@ public abstract class MTType {
     }
 
     /**
-     * <p>Indicates that every instance of this type is itself known to contain
-     * only elements that are types.  Practically, this answers the question,
-     * "if a function returns an instance of this type, can that instance itself
-     * be said to contain only types?"</p>
+     * <p>
+     * Indicates that every instance of this type is itself known to contain
+     * only elements that are
+     * types. Practically, this answers the question, "if a function returns an
+     * instance of this type,
+     * can that instance itself be said to contain only types?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
@@ -393,19 +455,23 @@ public abstract class MTType {
     }
 
     /**
-     * <p>This method attempts to replace a component type at the specified
-     * index.</p>
+     * <p>
+     * This method attempts to replace a component type at the specified index.
+     * </p>
      *
      * @param index Index to a component type.
-     * @param newType The {@code MTType} to replace the one in our component list.
+     * @param newType The {@code MTType} to replace the one in our component
+     *        list.
      *
      * @return A new {@code MTType} with the component type replaced.
      */
     public abstract MTType withComponentReplaced(int index, MTType newType);
 
     /**
-     * <p>This method attempts to replace a component type for all the entries
-     * in the map.</p>
+     * <p>
+     * This method attempts to replace a component type for all the entries in
+     * the map.
+     * </p>
      *
      * @param newTypes A map of replace the one in our component list.
      *
@@ -414,9 +480,8 @@ public abstract class MTType {
     public final MTType withComponentsReplaced(Map<Integer, MTType> newTypes) {
         MTType target = this;
         for (Map.Entry<Integer, MTType> entry : newTypes.entrySet()) {
-            target =
-                    target.withComponentReplaced(entry.getKey(), entry
-                            .getValue());
+            target = target.withComponentReplaced(entry.getKey(),
+                    entry.getValue());
         }
 
         return target;
@@ -427,13 +492,16 @@ public abstract class MTType {
     // ===========================================================
 
     /**
-     * <p>This is just a template method to <em>force</em> all concrete
-     * subclasses of <code>MTType</code> to implement <code>hashCode()</code>,
-     * as the type resolution algorithm depends on it being implemented
-     * sensibly.</p>
+     * <p>
+     * This is just a template method to <em>force</em> all concrete subclasses
+     * of <code>MTType</code>
+     * to implement <code>hashCode()</code>, as the type resolution algorithm
+     * depends on it being
+     * implemented sensibly.
+     * </p>
      *
      * @return A hashcode consistent with <code>equals()</code> and thus
-     * alpha-equivalency.
+     *         alpha-equivalency.
      */
     protected abstract int getHashCode();
 
@@ -442,7 +510,9 @@ public abstract class MTType {
     // ===========================================================
 
     /**
-     * <p>Returns the object-reference hash.</p>
+     * <p>
+     * Returns the object-reference hash.
+     * </p>
      *
      * @return A hashcode consistent with the object reference.
      */

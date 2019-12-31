@@ -1,7 +1,7 @@
 /*
  * ValidVal_inChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -32,8 +32,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.List;
 
 /**
- * <p>This is a sanity checker for making sure the {@code Val_in} function application
- * is valid.</p>
+ * <p>
+ * This is a sanity checker for making sure the {@code Val_in} function
+ * application is valid.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -45,12 +47,18 @@ public class ValidVal_inChecker {
     // ===========================================================
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
-    /** <p>The symbol table we are currently building.</p> */
+    /**
+     * <p>
+     * The symbol table we are currently building.
+     * </p>
+     */
     private final MathSymbolTableBuilder myBuilder;
 
     // ===========================================================
@@ -58,8 +66,11 @@ public class ValidVal_inChecker {
     // ===========================================================
 
     /**
-     * <p>Creates a sanity checker for checking whether or not
-     * the we have a valid {@code Val_in} function.</p>
+     * <p>
+     * Creates a sanity checker for checking whether or not the we have a valid
+     * {@code Val_in}
+     * function.
+     * </p>
      *
      * @param g The current type graph.
      * @param b The current scope repository builder.
@@ -74,13 +85,17 @@ public class ValidVal_inChecker {
     // ===========================================================
 
     /**
-     * <p>This method indicates whether or not this is a valid application
-     * of the {@code Val_in} function.</p>
+     * <p>
+     * This method indicates whether or not this is a valid application of the
+     * {@code Val_in}
+     * function.
+     * </p>
      *
-     * @param lastSegment The segment that contains the type information for
-     *                    the {@code Val_in} function.
-     * @param argExp The argument expression passed to
-     *               the {@code Val_in} function.
+     * @param lastSegment The segment that contains the type information for the
+     *        {@code Val_in}
+     *        function.
+     * @param argExp The argument expression passed to the {@code Val_in}
+     *        function.
      */
     public final void validArgument(Exp lastSegment, Exp argExp) {
         // This is the only kind allowed: Foo.Val_in(recp.f)
@@ -90,8 +105,8 @@ public class ValidVal_inChecker {
                 || ((DotExp) argExp).getSegments().size() != 2
                 || !argExp.getMathType().equals(myTypeGraph.RECEPTACLES)) {
             // This is definitely not a Receptacle
-            throw new SourceErrorException("Not a Receptacle", argExp
-                    .getLocation());
+            throw new SourceErrorException("Not a Receptacle",
+                    argExp.getLocation());
         }
         else {
             List<Exp> argExpSegments = ((DotExp) argExp).getSegments();
@@ -101,36 +116,31 @@ public class ValidVal_inChecker {
             if (!(segArg1 instanceof VarExp) || !(segArg2 instanceof VarExp)
                     || !((VarExp) segArg1).getName().getName().equals("recp")) {
                 // This is definitely not a Receptacle
-                throw new SourceErrorException("Not a Receptacle", argExp
-                        .getLocation());
+                throw new SourceErrorException("Not a Receptacle",
+                        argExp.getLocation());
             }
             else {
                 VarExp segArg2AsVarExp = (VarExp) segArg2;
 
                 try {
-                    SymbolTableEntry symbolEntry =
-                            myBuilder
-                                    .getInnermostActiveScope()
-                                    .queryForOne(
-                                            new NameQuery(
-                                                    null,
-                                                    segArg2AsVarExp.getName(),
-                                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
-                                                    true));
+                    SymbolTableEntry symbolEntry = myBuilder
+                            .getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null,
+                                    segArg2AsVarExp.getName(),
+                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
+                                    true));
 
                     // Make sure the types are the same
-                    MathSymbolEntry mathSymbolEntry =
-                            symbolEntry
-                                    .toMathSymbolEntry(segArg2.getLocation());
-                    if (!lastSegment.getMathTypeValue().equals(
-                            mathSymbolEntry.getType())) {
-                        throw new SourceErrorException(
-                                "Parameters do not "
-                                        + "match function range.\n\nExpecting a Receptacle with math type: "
-                                        + lastSegment.getMathTypeValue()
-                                        + "\nFound a Receptacle with math type: "
-                                        + mathSymbolEntry.getType(),
+                    MathSymbolEntry mathSymbolEntry = symbolEntry
+                            .toMathSymbolEntry(segArg2.getLocation());
+                    if (!lastSegment.getMathTypeValue()
+                            .equals(mathSymbolEntry.getType())) {
+                        throw new SourceErrorException("Parameters do not "
+                                + "match function range.\n\nExpecting a Receptacle with math type: "
+                                + lastSegment.getMathTypeValue()
+                                + "\nFound a Receptacle with math type: "
+                                + mathSymbolEntry.getType(),
                                 segArg2AsVarExp.getLocation());
                     }
                     else {
@@ -140,11 +150,10 @@ public class ValidVal_inChecker {
                         VarExp lastSegmentAsVarExp = (VarExp) lastSegment;
                         if (symbolEntry instanceof MathSymbolEntry) {
                             // This must be an exemplar!
-                            TypeFamilyDec dec =
-                                    (TypeFamilyDec) mathSymbolEntry
-                                            .getDefiningElement();
-                            if (!dec.getName().equals(
-                                    lastSegmentAsVarExp.getName())) {
+                            TypeFamilyDec dec = (TypeFamilyDec) mathSymbolEntry
+                                    .getDefiningElement();
+                            if (!dec.getName()
+                                    .equals(lastSegmentAsVarExp.getName())) {
                                 throw new SourceErrorException(
                                         "Parameters do not "
                                                 + "match function range.\n\nExpecting a Receptacle with program type: "
@@ -157,8 +166,8 @@ public class ValidVal_inChecker {
                         else if (symbolEntry instanceof ProgramParameterEntry) {
                             // This is a program parameter!
                             ProgramParameterEntry programParamEntry =
-                                    symbolEntry.toProgramParameterEntry(segArg2
-                                            .getLocation());
+                                    symbolEntry.toProgramParameterEntry(
+                                            segArg2.getLocation());
 
                             ParameterVarDec dec =
                                     (ParameterVarDec) programParamEntry
@@ -186,14 +195,14 @@ public class ValidVal_inChecker {
                     }
                 }
                 catch (NoSuchSymbolException nsse2) {
-                    throw new SourceErrorException("No such symbol: "
-                            + segArg2AsVarExp.getName(), segArg2AsVarExp
-                            .getLocation());
+                    throw new SourceErrorException(
+                            "No such symbol: " + segArg2AsVarExp.getName(),
+                            segArg2AsVarExp.getLocation());
                 }
                 catch (DuplicateSymbolException dse) {
-                    throw new SourceErrorException("Duplicate symbol: "
-                            + segArg2AsVarExp.getName(), segArg2AsVarExp
-                            .getLocation());
+                    throw new SourceErrorException(
+                            "Duplicate symbol: " + segArg2AsVarExp.getName(),
+                            segArg2AsVarExp.getLocation());
                 }
             }
         }

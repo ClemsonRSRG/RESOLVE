@@ -1,7 +1,7 @@
 /*
  * SuppositionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -48,8 +48,8 @@ public class SuppositionExp extends LineNumberedExp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new SuppositionExp(location, this.getLineNum(), substitute(exp,
-                substitutions), vars);
+        return new SuppositionExp(location, this.getLineNum(),
+                substitute(exp, substitutions), vars);
     }
 
     // ===========================================================

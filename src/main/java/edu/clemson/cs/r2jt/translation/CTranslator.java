@@ -1,7 +1,7 @@
 /*
  * CTranslator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -40,31 +40,39 @@ public class CTranslator extends AbstractTranslator {
             "Regenerates C code for all supporting RESOLVE files.";
 
     /**
-     * <p>The main translator flag.  Tells the compiler convert
-     * RESOLVE source code to Java source code.</p>
+     * <p>
+     * The main translator flag. Tells the compiler convert RESOLVE source code
+     * to Java source code.
+     * </p>
      */
     public static final Flag C_FLAG_TRANSLATE =
             new Flag(FLAG_SECTION_NAME, "cTranslate", FLAG_DESC_TRANSLATE);
 
     /**
-     * <p>Tells the compiler to regenerate C code for all
-     * supporting RESOLVE source files.</p>
+     * <p>
+     * Tells the compiler to regenerate C code for all supporting RESOLVE source
+     * files.
+     * </p>
      */
-    public static final Flag C_FLAG_TRANSLATE_CLEAN =
-            new Flag(FLAG_SECTION_NAME, "cTranslateClean",
-                    FLAG_DESC_TRANSLATE_CLEAN);
+    public static final Flag C_FLAG_TRANSLATE_CLEAN = new Flag(
+            FLAG_SECTION_NAME, "cTranslateClean", FLAG_DESC_TRANSLATE_CLEAN);
 
     /**
-     * <p>A list of templates corresponding to global facility instantiations.
-     * These are intended to be added to the <code>variables</code> attribute
-     * of each <code>function</code> template.</p>
+     * <p>
+     * A list of templates corresponding to global facility instantiations.
+     * These are intended to be
+     * added to the <code>variables</code> attribute of each
+     * <code>function</code> template.
+     * </p>
      */
     List<ST> myFacilityInstantiations = new LinkedList<ST>();
 
     /**
-     * <p>While we walk a <code>FacilityDec</code> and its children,
-     * this maintains a pointer to its corresponding <code>ST</code> C-struct
-     * representation.</p>
+     * <p>
+     * While we walk a <code>FacilityDec</code> and its children, this maintains
+     * a pointer to its
+     * corresponding <code>ST</code> C-struct representation.
+     * </p>
      */
     ST myCurrentStruct = null;
 
@@ -73,24 +81,22 @@ public class CTranslator extends AbstractTranslator {
         myGroup = new STGroupFile("templates/C.stg");
     }
 
-    //-------------------------------------------------------------------
-    //   Visitor methods
-    //-------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Visitor methods
+    // -------------------------------------------------------------------
 
     @Override
     public void preConceptModuleDec(ConceptModuleDec node) {
 
         addPreprocessorDirective(node.getName().getName());
 
-        ST conceptStruct =
-                myGroup.getInstanceOf("struct").add("name",
-                        node.getName().getName());
+        ST conceptStruct = myGroup.getInstanceOf("struct").add("name",
+                node.getName().getName());
 
         myActiveTemplates.push(conceptStruct);
 
-        ST realizSpecific =
-                myGroup.getInstanceOf("parameter").add("type", "void*").add(
-                        "name", "realization_specific");
+        ST realizSpecific = myGroup.getInstanceOf("parameter")
+                .add("type", "void*").add("name", "realization_specific");
 
         myActiveTemplates.peek().add("params", realizSpecific);
     }
@@ -112,14 +118,13 @@ public class CTranslator extends AbstractTranslator {
                 getModuleFormalParameters(node.getConceptName());
 
         ST realizationHeader =
-                myGroup.getInstanceOf("concept_realization_header").add(
-                        "module", name).add("concept", conceptName);
+                myGroup.getInstanceOf("concept_realization_header")
+                        .add("module", name).add("concept", conceptName);
 
         for (ProgramParameterEntry p : formals) {
-            ST parameter =
-                    myGroup.getInstanceOf("parameter").add("type",
-                            getParameterTypeTemplate(p.getDeclaredType())).add(
-                            "name", p.getName());
+            ST parameter = myGroup.getInstanceOf("parameter")
+                    .add("type", getParameterTypeTemplate(p.getDeclaredType()))
+                    .add("name", p.getName());
 
             realizationHeader.add("parameters", parameter);
         }
@@ -134,9 +139,9 @@ public class CTranslator extends AbstractTranslator {
                 ((ConceptBodyModuleDec) myScope.getDefiningElement())
                         .getConceptName().getName();
 
-        ST initAndFinal =
-                myGroup.getInstanceOf("init_and_final").add("typename",
-                        node.getName().getName()).add("concept", conceptName);
+        ST initAndFinal = myGroup.getInstanceOf("init_and_final")
+                .add("typename", node.getName().getName())
+                .add("concept", conceptName);
 
         initAndFinal.add("facilities", myFacilityInstantiations);
         myActiveTemplates.push(initAndFinal);
@@ -156,22 +161,18 @@ public class CTranslator extends AbstractTranslator {
         String realiz = node.getBodyName().getName() + "_for_" + conceptName;
 
         try {
-            myCurrentFacilityEntry =
-                    myScope.queryForOne(
-                            new NameAndEntryTypeQuery(null, node.getName(),
-                                    FacilityEntry.class,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_IGNORE, false))
-                            .toFacilityEntry(node.getLocation());
+            myCurrentFacilityEntry = myScope
+                    .queryForOne(new NameAndEntryTypeQuery(null, node.getName(),
+                            FacilityEntry.class, ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_IGNORE, false))
+                    .toFacilityEntry(node.getLocation());
 
-            myCurrentStruct =
-                    myGroup.getInstanceOf("struct").add("name",
-                            node.getName().getName());
+            myCurrentStruct = myGroup.getInstanceOf("struct").add("name",
+                    node.getName().getName());
 
-            ST field =
-                    myGroup.getInstanceOf("struct_field").add("type",
-                            conceptName).add("name", "core").add("realization",
-                            realiz);
+            ST field = myGroup.getInstanceOf("struct_field")
+                    .add("type", conceptName).add("name", "core")
+                    .add("realization", realiz);
 
             myCurrentStruct.add("variables", field);
             myActiveTemplates.push(myCurrentStruct);
@@ -188,19 +189,16 @@ public class CTranslator extends AbstractTranslator {
     @Override
     public void preEnhancementBodyItem(EnhancementBodyItem node) {
 
-        String enhancementType =
-                node.getName().getName()
-                        + "_for_"
-                        + myCurrentFacilityEntry.getFacility()
-                                .getSpecification().getModuleIdentifier()
-                                .toString();
+        String enhancementType = node.getName().getName() + "_for_"
+                + myCurrentFacilityEntry.getFacility().getSpecification()
+                        .getModuleIdentifier().toString();
         String realiz =
                 node.getBodyName().getName() + "_for_" + enhancementType;
 
-        ST field =
-                myGroup.getInstanceOf("struct_field").add("type",
-                        enhancementType).add("name", node.getName().getName())
-                        .add("realization", realiz);
+        ST field = myGroup.getInstanceOf("struct_field")
+                .add("type", enhancementType)
+                .add("name", node.getName().getName())
+                .add("realization", realiz);
 
         myCurrentStruct.add("variables", field);
         myActiveTemplates.push(field);
@@ -209,51 +207,48 @@ public class CTranslator extends AbstractTranslator {
     @Override
     public void postEnhancementBodyItem(EnhancementBodyItem node) {
 
-        //        ST coreParameter =
-        //                myGroup.getInstanceOf("qualified_identifier").add
+        // ST coreParameter =
+        // myGroup.getInstanceOf("qualified_identifier").add
         // ("qualifier",
-        //                       myCurrentFacilityEntry.getName()).add("name",
+        // myCurrentFacilityEntry.getName()).add("name",
         // "core");
 
-        //        myActiveTemplates.peek().add("arguments", coreParameter);
+        // myActiveTemplates.peek().add("arguments", coreParameter);
         myActiveTemplates.pop();
     }
 
-    /*@Override
-    public void preOperationDec(OperationDec node) {
-        String operationName = "(*" + node.getName().getName() + ")";
-        ST operation =
-                getOperationLikeTemplate((node.getReturnTy() != null) ? node
-                        .getReturnTy().getProgramTypeValue() : null,
-                        operationName, false);
+    /*
+     * @Override public void preOperationDec(OperationDec node) { String
+     * operationName = "(*" +
+     * node.getName().getName() + ")"; ST operation =
+     * getOperationLikeTemplate((node.getReturnTy() !=
+     * null) ? node .getReturnTy().getProgramTypeValue() : null, operationName,
+     * false);
+     * 
+     * myActiveTemplates.push(operation); }
+     */
 
-        myActiveTemplates.push(operation);
-    }*/
-
-    /*@Override
-    public void postOperationDec(OperationDec node) {
-        ST operation = myActiveTemplates.pop();
-
-        // TODO : Add Struct parameter to every function here...
-        //    ST conceptStruct = myGroup.getInstanceOf("unqualified_type").add
-        //            ("name", myScope)
-        if (myActiveTemplates.size() > 1) {
-            // If we're translating a concept, then our stack should be two
-            // deep since every variable ('operation') is added to a
-            // type-def'ed struct.
-            myActiveTemplates.peek().add("variables", operation);
-        }
-        else {
-            myActiveTemplates.peek().add("functions", operation);
-        }
-    }*/
+    /*
+     * @Override public void postOperationDec(OperationDec node) { ST operation
+     * =
+     * myActiveTemplates.pop();
+     * 
+     * // TODO : Add Struct parameter to every function here... // ST
+     * conceptStruct =
+     * myGroup.getInstanceOf("unqualified_type").add // ("name", myScope) if
+     * (myActiveTemplates.size()
+     * > 1) { // If we're translating a concept, then our stack should be two //
+     * deep since every
+     * variable ('operation') is added to a // type-def'ed struct.
+     * myActiveTemplates.peek().add("variables", operation); } else {
+     * myActiveTemplates.peek().add("functions", operation); } }
+     */
 
     @Override
     public void postFacilityDec(FacilityDec node) {
 
-        ST assignment =
-                myGroup.getInstanceOf("facility_assignment").add("struct",
-                        myCurrentStruct);
+        ST assignment = myGroup.getInstanceOf("facility_assignment")
+                .add("struct", myCurrentStruct);
 
         myFacilityInstantiations.add(assignment);
 
@@ -261,9 +256,9 @@ public class CTranslator extends AbstractTranslator {
         myActiveTemplates.peek().add("structures", myCurrentStruct);
     }
 
-    //-------------------------------------------------------------------
-    //   Helper methods
-    //-------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Helper methods
+    // -------------------------------------------------------------------
 
     @Override
     protected ST getVariableTypeTemplate(PTType type) {
@@ -309,12 +304,14 @@ public class CTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Inserts preprocessor directives at the top-of (and end-of) the file
-     * undergoing translation. Note that these directives only apply to
-     * <strong>C</strong> header files.</p>
+     * <p>
+     * Inserts preprocessor directives at the top-of (and end-of) the file
+     * undergoing translation.
+     * Note that these directives only apply to <strong>C</strong> header files.
+     * </p>
      *
      * @param moduleName Influences the name given to the directive. For ex:
-     *                   <tt>Integer_Template</tt>-><tt>_INTEGER_TEMPLATE_H</tt>
+     *        <tt>Integer_Template</tt>-><tt>_INTEGER_TEMPLATE_H</tt>
      */
     private void addPreprocessorDirective(String moduleName) {
 

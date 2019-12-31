@@ -1,7 +1,7 @@
 /*
  * Simplify.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,9 +25,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * <p>The <code>Simplify</code> automator turns consequents that appear as
- * givens and symmetric equalities into "true" and eliminates true conjuncts 
- * until no more work can be done.</p>
+ * <p>
+ * The <code>Simplify</code> automator turns consequents that appear as givens
+ * and symmetric
+ * equalities into "true" and eliminates true conjuncts until no more work can
+ * be done.
+ * </p>
  */
 public class Simplify implements Automator {
 
@@ -39,11 +42,11 @@ public class Simplify implements Automator {
 
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
-        //Turn local theorems in the consequent into true
+        // Turn local theorems in the consequent into true
         boolean replacedTheorem = simplifyTheorem(model);
 
         if (!replacedTheorem) {
-            //Turn symmetric equalities into true
+            // Turn symmetric equalities into true
             Iterator<Application> symmetricEqualities =
                     ReplaceSymmetricEqualityWithTrueInConsequent.INSTANCE
                             .getApplications(model);
@@ -52,7 +55,7 @@ public class Simplify implements Automator {
                 symmetricEqualities.next().apply(model);
             }
             else {
-                //Eliminate true conjuncts
+                // Eliminate true conjuncts
                 Iterator<Application> trueConjuncts =
                         EliminateTrueConjunctInConsequent.INSTANCE
                                 .getApplications(model);
@@ -68,7 +71,7 @@ public class Simplify implements Automator {
     }
 
     private boolean simplifyTheorem(PerVCProverModel model) {
-        //As an optimization we first make sure there's something to find...
+        // As an optimization we first make sure there's something to find...
         Set<PExp> localTheoremSet = model.getLocalTheoremSet();
         Iterator<Consequent> consequents = model.getConsequentList().iterator();
         boolean foundMatch = false;
@@ -80,7 +83,7 @@ public class Simplify implements Automator {
         }
 
         if (foundMatch) {
-            //Now we actually go find it
+            // Now we actually go find it
             LocalTheorem t = null;
             Iterator<LocalTheorem> theorems =
                     model.getLocalTheoremList().iterator();

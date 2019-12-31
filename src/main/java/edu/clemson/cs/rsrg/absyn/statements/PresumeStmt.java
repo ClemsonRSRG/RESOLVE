@@ -1,7 +1,7 @@
 /*
  * PresumeStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the presume statement objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the presume statement objects that the compiler
+ * builds using the ANTLR4
+ * AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -27,7 +30,11 @@ public class PresumeStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The presume assertion expression</p> */
+    /**
+     * <p>
+     * The presume assertion expression
+     * </p>
+     */
     private final Exp myAssertion;
 
     // ===========================================================
@@ -35,11 +42,13 @@ public class PresumeStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a presume statement.</p>
+     * <p>
+     * This constructs a presume statement.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param assertion A {@link Exp} representing the presume statement's
-     *                  assertion expression.
+     *        assertion expression.
      */
     public PresumeStmt(Location l, Exp assertion) {
         super(l);
@@ -81,7 +90,9 @@ public class PresumeStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the presumed assertion expression.</p>
+     * <p>
+     * This method returns the presumed assertion expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */

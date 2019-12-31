@@ -1,7 +1,7 @@
 /*
  * BaseSymbolQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,10 +21,13 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.List;
 
 /**
- * <p>The most basic implementation of {@link SymbolQuery SymbolQuery}, which
- * pairs a {@link ScopeSearchPath ScopeSearchPath} with a 
- * {@link TableSearcher TableSearcher} to define a fully parameterized strategy
- * for searching a set of scopes.</p>
+ * <p>
+ * The most basic implementation of {@link SymbolQuery SymbolQuery}, which pairs
+ * a
+ * {@link ScopeSearchPath ScopeSearchPath} with a {@link TableSearcher
+ * TableSearcher} to define a
+ * fully parameterized strategy for searching a set of scopes.
+ * </p>
  */
 public class BaseSymbolQuery<E extends SymbolTableEntry>
         implements

@@ -1,7 +1,7 @@
 /*
  * PAlternatives.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,8 +26,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.*;
 
 /**
- * <p>A {@code PAlternatives} represents an alternative in an
- * {@code if-else} expression.</p>
+ * <p>
+ * A {@code PAlternatives} represents an alternative in an {@code if-else}
+ * expression.
+ * </p>
  *
  * @author Daniel Welch
  * @version 2.0
@@ -38,10 +40,18 @@ public class PAlternatives extends PExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>A list of alternative expressions.</p> */
+    /**
+     * <p>
+     * A list of alternative expressions.
+     * </p>
+     */
     public final List<Alternative> myAlternatives;
 
-    /** <p>An expression that contains the otherwise clause.</p> */
+    /**
+     * <p>
+     * An expression that contains the otherwise clause.
+     * </p>
+     */
     public final PExp myOtherwiseClauseResult;
 
     // ===========================================================
@@ -49,8 +59,10 @@ public class PAlternatives extends PExp {
     // ===========================================================
 
     /**
-     * <p>This represents all alternative expressions in an
-     * {@code if-else} expression.</p>
+     * <p>
+     * This represents all alternative expressions in an {@code if-else}
+     * expression.
+     * </p>
      *
      * @param conditions A list of conditions for the expression.
      * @param results A list of resulting expressions.
@@ -60,38 +72,42 @@ public class PAlternatives extends PExp {
      */
     public PAlternatives(List<PExp> conditions, List<PExp> results,
             PExp otherwiseClauseResult, MTType type, MTType typeValue) {
-        super(calculateStructureHash(conditions), calculateStructureHash(results), type, typeValue);
+        super(calculateStructureHash(conditions),
+                calculateStructureHash(results), type, typeValue);
 
         myAlternatives = new LinkedList<>();
 
         sanityCheckConditions(conditions);
 
         if (conditions.size() != results.size()) {
-            throw new IllegalArgumentException("conditions.size() must equal "
-                    + "results.size().");
+            throw new IllegalArgumentException(
+                    "conditions.size() must equal " + "results.size().");
         }
 
         Iterator<PExp> conditionIter = conditions.iterator();
         Iterator<PExp> resultIter = results.iterator();
 
         while (conditionIter.hasNext()) {
-            myAlternatives.add(new Alternative(conditionIter.next(), resultIter
-                    .next()));
+            myAlternatives.add(
+                    new Alternative(conditionIter.next(), resultIter.next()));
         }
 
         myOtherwiseClauseResult = otherwiseClauseResult;
     }
 
     /**
-     * <p>This represents all alternative expressions in an
-     * {@code if-else} expression.</p>
+     * <p>
+     * This represents all alternative expressions in an {@code if-else}
+     * expression.
+     * </p>
      *
      * @param alternativeExp A raw alternative expression.
      */
     public PAlternatives(AlternativeExp alternativeExp) {
         this(getConditions(alternativeExp), getResults(alternativeExp),
-                getOtherwiseClauseResult(alternativeExp), alternativeExp
-                        .getMathType(), alternativeExp.getMathTypeValue());
+                getOtherwiseClauseResult(alternativeExp),
+                alternativeExp.getMathType(),
+                alternativeExp.getMathTypeValue());
     }
 
     // ===========================================================
@@ -188,9 +204,8 @@ public class PAlternatives extends PExp {
         boolean result = false;
 
         for (Alternative a : myAlternatives) {
-            result |=
-                    a.condition.containsName(name)
-                            || a.result.containsName(name);
+            result |= a.condition.containsName(name)
+                    || a.result.containsName(name);
         }
 
         return result || myOtherwiseClauseResult.containsName(name);
@@ -218,8 +233,8 @@ public class PAlternatives extends PExp {
      */
     @Override
     public final PExp flipQuantifiers() {
-        throw new UnsupportedOperationException("This method has not yet "
-                + "been implemented.");
+        throw new UnsupportedOperationException(
+                "This method has not yet " + "been implemented.");
     }
 
     /**
@@ -311,9 +326,8 @@ public class PAlternatives extends PExp {
                 conditions.add(a.condition.substitute(substitutions));
                 results.add(a.result.substitute(substitutions));
             }
-            retval =
-                    new PAlternatives(conditions, results, otherwise,
-                            getMathType(), getMathTypeValue());
+            retval = new PAlternatives(conditions, results, otherwise,
+                    getMathType(), getMathTypeValue());
         }
 
         return retval;
@@ -357,10 +371,10 @@ public class PAlternatives extends PExp {
      */
     @Override
     public final PAlternatives withTypeReplaced(MTType t) {
-        return new PAlternatives(RCollections.map(myAlternatives,
-                UnboxCondition.INSTANCE), RCollections.map(myAlternatives,
-                UnboxResult.INSTANCE), myOtherwiseClauseResult, t,
-                myMathTypeValue);
+        return new PAlternatives(
+                RCollections.map(myAlternatives, UnboxCondition.INSTANCE),
+                RCollections.map(myAlternatives, UnboxResult.INSTANCE),
+                myOtherwiseClauseResult, t, myMathTypeValue);
     }
 
     /**
@@ -368,9 +382,10 @@ public class PAlternatives extends PExp {
      */
     @Override
     public final PAlternatives withTypeValueReplaced(MTType t) {
-        return new PAlternatives(RCollections.map(myAlternatives,
-                UnboxCondition.INSTANCE), RCollections.map(myAlternatives,
-                UnboxResult.INSTANCE), myOtherwiseClauseResult, myMathType, t);
+        return new PAlternatives(
+                RCollections.map(myAlternatives, UnboxCondition.INSTANCE),
+                RCollections.map(myAlternatives, UnboxResult.INSTANCE),
+                myOtherwiseClauseResult, myMathType, t);
     }
 
     // ===========================================================
@@ -435,8 +450,10 @@ public class PAlternatives extends PExp {
     // ===========================================================
 
     /**
-     * <p>An helper method for calculating the structure hash
-     * from a list of {@link PExp PExps}.</p>
+     * <p>
+     * An helper method for calculating the structure hash from a list of
+     * {@link PExp PExps}.
+     * </p>
      *
      * @param conditions A list of expressions.
      *
@@ -459,8 +476,10 @@ public class PAlternatives extends PExp {
     }
 
     /**
-     * <p>An helper method for converting all testing conditions into
-     * {@link PExp PExps}.</p>
+     * <p>
+     * An helper method for converting all testing conditions into {@link PExp
+     * PExps}.
+     * </p>
      *
      * @param alternativeExp A raw alternative expression.
      *
@@ -470,7 +489,8 @@ public class PAlternatives extends PExp {
         List<PExp> result = new LinkedList<>();
         for (AltItemExp aie : alternativeExp.getAlternatives()) {
             if (aie.getTest() != null) {
-                result.add(PExp.buildPExp(aie.getMathType().getTypeGraph(), aie.getTest()));
+                result.add(PExp.buildPExp(aie.getMathType().getTypeGraph(),
+                        aie.getTest()));
             }
         }
 
@@ -478,14 +498,16 @@ public class PAlternatives extends PExp {
     }
 
     /**
-     * <p>An helper method for converting the otherwise clause into
-     * a {@link PExp}.</p>
+     * <p>
+     * An helper method for converting the otherwise clause into a {@link PExp}.
+     * </p>
      *
      * @param alternativeExp A raw alternative expression.
      *
      * @return An otherwise expression.
      */
-    private static PExp getOtherwiseClauseResult(AlternativeExp alternativeExp) {
+    private static PExp
+            getOtherwiseClauseResult(AlternativeExp alternativeExp) {
         PExp workingOtherwiseClauseResult = null;
 
         for (AltItemExp aie : alternativeExp.getAlternatives()) {
@@ -497,9 +519,8 @@ public class PAlternatives extends PExp {
             }
 
             if (aie.getTest() == null) {
-                workingOtherwiseClauseResult =
-                        PExp.buildPExp(aie.getMathType().getTypeGraph(), aie
-                                .getAssignment());
+                workingOtherwiseClauseResult = PExp.buildPExp(
+                        aie.getMathType().getTypeGraph(), aie.getAssignment());
             }
         }
 
@@ -507,8 +528,10 @@ public class PAlternatives extends PExp {
     }
 
     /**
-     * <p>An helper method for converting all resulting expressions into
-     * {@link PExp PExps}.</p>
+     * <p>
+     * An helper method for converting all resulting expressions into
+     * {@link PExp PExps}.
+     * </p>
      *
      * @param alternativeExp A raw alternative expression.
      *
@@ -518,7 +541,8 @@ public class PAlternatives extends PExp {
         List<PExp> result = new LinkedList<>();
         for (AltItemExp aie : alternativeExp.getAlternatives()) {
             if (aie.getTest() != null) {
-                result.add(PExp.buildPExp(aie.getMathType().getTypeGraph(), aie.getAssignment()));
+                result.add(PExp.buildPExp(aie.getMathType().getTypeGraph(),
+                        aie.getAssignment()));
             }
         }
 
@@ -526,8 +550,10 @@ public class PAlternatives extends PExp {
     }
 
     /**
-     * <p>An helper method for obtaining the mathematical type for
-     * the resulting expression.</p>
+     * <p>
+     * An helper method for obtaining the mathematical type for the resulting
+     * expression.
+     * </p>
      *
      * @param results A list of resulting expressions.
      * @param otherwiseClauseResult An otherwise clause.
@@ -536,9 +562,9 @@ public class PAlternatives extends PExp {
      */
     private static MTType getResultType(List<PExp> results,
             PExp otherwiseClauseResult) {
-        //TODO : This could be made more flexible--if the first alternative
-        //       is an N and the second a Z, that shouldn't be an error--the
-        //       result type is Z
+        // TODO : This could be made more flexible--if the first alternative
+        // is an N and the second a Z, that shouldn't be an error--the
+        // result type is Z
         PExp prototypeResult = null;
 
         for (PExp curResult : results) {
@@ -551,8 +577,8 @@ public class PAlternatives extends PExp {
                             + "results of different types are not accepted by "
                             + "the prover. \n\t" + prototypeResult + " has "
                             + "type " + prototypeResult.getMathType() + ".\n\t"
-                            + curResult + " has type "
-                            + curResult.getMathType() + ".");
+                            + curResult + " has type " + curResult.getMathType()
+                            + ".");
                 }
             }
         }
@@ -570,8 +596,11 @@ public class PAlternatives extends PExp {
     }
 
     /**
-     * <p>An helper method for sanity checking the condition expressions
-     * to make sure they are all {@code boolean} type.</p>
+     * <p>
+     * An helper method for sanity checking the condition expressions to make
+     * sure they are all
+     * {@code boolean} type.
+     * </p>
      *
      * @param conditions A list of conditions for the expression.
      */
@@ -591,8 +620,10 @@ public class PAlternatives extends PExp {
     // ===========================================================
 
     /**
-     * <p>An helper class for representing an alternative condition
-     * and result expressions.</p>
+     * <p>
+     * An helper class for representing an alternative condition and result
+     * expressions.
+     * </p>
      *
      * @version 2.0
      */
@@ -602,10 +633,18 @@ public class PAlternatives extends PExp {
         // Member Fields
         // ===========================================================
 
-        /** <p>A condition expression.</p> */
+        /**
+         * <p>
+         * A condition expression.
+         * </p>
+         */
         public final PExp condition;
 
-        /** <p>A result expression.</p> */
+        /**
+         * <p>
+         * A result expression.
+         * </p>
+         */
         public final PExp result;
 
         // ===========================================================
@@ -613,7 +652,9 @@ public class PAlternatives extends PExp {
         // ===========================================================
 
         /**
-         * <p>A representation of an alternative expression.</p>
+         * <p>
+         * A representation of an alternative expression.
+         * </p>
          *
          * @param condition A condition expression.
          * @param result A result expression.
@@ -626,7 +667,9 @@ public class PAlternatives extends PExp {
     }
 
     /**
-     * <p>An helper class for iterating over the alternative expression.</p>
+     * <p>
+     * An helper class for iterating over the alternative expression.
+     * </p>
      *
      * @version 2.0
      */
@@ -636,24 +679,41 @@ public class PAlternatives extends PExp {
         // Member Fields
         // ===========================================================
 
-        /** <p>A counter for keeping track the current alternative expression visited.</p> */
+        /**
+         * <p>
+         * A counter for keeping track the current alternative expression
+         * visited.
+         * </p>
+         */
         private int myCurAlternativeNum;
 
-        //These variables combine to tell you what the last thing returned was:
-        //if myReturnedOtherwiseFlag == true, the last thing returned was the
-        //otherwise clause and there's nothing left to return.  Otherwise, if
-        //myCurAlternative == null, the last thing returned was the condition
-        //of the (myCurAlternativeNum)th element.  Otherwise (if
-        //myCurAlternative != null), the last thing returned was the result of
-        //the (myCurAlternativeNum)th element.
+        // These variables combine to tell you what the last thing returned was:
+        // if myReturnedOtherwiseFlag == true, the last thing returned was the
+        // otherwise clause and there's nothing left to return. Otherwise, if
+        // myCurAlternative == null, the last thing returned was the condition
+        // of the (myCurAlternativeNum)th element. Otherwise (if
+        // myCurAlternative != null), the last thing returned was the result of
+        // the (myCurAlternativeNum)th element.
 
-        /** <p>An iterator for the list of alternatives.</p> */
+        /**
+         * <p>
+         * An iterator for the list of alternatives.
+         * </p>
+         */
         private final Iterator<Alternative> myAlternativesIter;
 
-        /** <p>The current alternative expression.</p> */
+        /**
+         * <p>
+         * The current alternative expression.
+         * </p>
+         */
         private Alternative myCurAlternative;
 
-        /** <p>A flag that indicates we have encountered the otherwise expression.</p> */
+        /**
+         * <p>
+         * A flag that indicates we have encountered the otherwise expression.
+         * </p>
+         */
         private boolean myReturnedOtherwiseFlag = false;
 
         // ===========================================================
@@ -661,7 +721,9 @@ public class PAlternatives extends PExp {
         // ===========================================================
 
         /**
-         * <p>This creates an iterator for alternative expressions.</p>
+         * <p>
+         * This creates an iterator for alternative expressions.
+         * </p>
          */
         PAlternativesIterator() {
             myAlternativesIter = myAlternatives.iterator();
@@ -672,13 +734,16 @@ public class PAlternatives extends PExp {
         // ===========================================================
 
         /**
-         * <p>This method returns {@code true} <strong>iff</strong> there are additional
-         * sub-expressions. I.e., returns {@code true} <strong>iff</strong>
-         * {@link #next()} would return an element rather than throwing an
-         * exception.</p>
+         * <p>
+         * This method returns {@code true} <strong>iff</strong> there are
+         * additional sub-expressions.
+         * I.e., returns {@code true} <strong>iff</strong> {@link #next()} would
+         * return an element
+         * rather than throwing an exception.
+         * </p>
          *
-         * @return {@code true} if the iterator has more elements,
-         * {@code false} otherwise.
+         * @return {@code true} if the iterator has more elements, {@code false}
+         *         otherwise.
          */
         @Override
         public final boolean hasNext() {
@@ -687,7 +752,8 @@ public class PAlternatives extends PExp {
         }
 
         /**
-         * <p>This method returns the next sub-expression./p>
+         * <p>
+         * This method returns the next sub-expression./p>
          *
          * @return The next element in the iteration.
          */
@@ -719,13 +785,16 @@ public class PAlternatives extends PExp {
         }
 
         /**
-         * <p>This method returns a version of the original {@link PExp} (i.e., the
-         * {@code PExp} over whose sub-expressions we are iterating) with the
-         * sub-expression most recently returned by {@link #next()} replaced with
-         * {@code newExpression}.</p>
+         * <p>
+         * This method returns a version of the original {@link PExp} (i.e., the
+         * {@code PExp} over whose
+         * sub-expressions we are iterating) with the sub-expression most
+         * recently returned by
+         * {@link #next()} replaced with {@code newExpression}.
+         * </p>
          *
-         * @param newExpression The argument to replace the most recently returned
-         *                      one with.
+         * @param newExpression The argument to replace the most recently
+         *        returned one with.
          *
          * @return The new version.
          */
@@ -755,7 +824,9 @@ public class PAlternatives extends PExp {
     }
 
     /**
-     * <p>An helper class for unboxing the condition expression.</p>
+     * <p>
+     * An helper class for unboxing the condition expression.
+     * </p>
      *
      * @version 2.0
      */
@@ -767,7 +838,11 @@ public class PAlternatives extends PExp {
         // Member Fields
         // ===========================================================
 
-        /** <p>An instance of this class.</p> */
+        /**
+         * <p>
+         * An instance of this class.
+         * </p>
+         */
         public final static UnboxCondition INSTANCE = new UnboxCondition();
 
         // ===========================================================
@@ -775,7 +850,9 @@ public class PAlternatives extends PExp {
         // ===========================================================
 
         /**
-         * <p>This creates an object for unboxing the condition expression.</p>
+         * <p>
+         * This creates an object for unboxing the condition expression.
+         * </p>
          */
         private UnboxCondition() {}
 
@@ -784,8 +861,10 @@ public class PAlternatives extends PExp {
         // ===========================================================
 
         /**
-         * <p>This returns the inner {@link PExp} representation
-         * of a condition expression in {@code a}.</p>
+         * <p>
+         * This returns the inner {@link PExp} representation of a condition
+         * expression in {@code a}.
+         * </p>
          *
          * @param a An alternative expression.
          *
@@ -798,7 +877,9 @@ public class PAlternatives extends PExp {
     }
 
     /**
-     * <p>An helper class for unboxing the result expression.</p>
+     * <p>
+     * An helper class for unboxing the result expression.
+     * </p>
      *
      * @version 2.0
      */
@@ -810,7 +891,11 @@ public class PAlternatives extends PExp {
         // Member Fields
         // ===========================================================
 
-        /** <p>An instance of this class.</p> */
+        /**
+         * <p>
+         * An instance of this class.
+         * </p>
+         */
         public final static UnboxResult INSTANCE = new UnboxResult();
 
         // ===========================================================
@@ -818,7 +903,9 @@ public class PAlternatives extends PExp {
         // ===========================================================
 
         /**
-         * <p>This creates an object for unboxing the result expression.</p>
+         * <p>
+         * This creates an object for unboxing the result expression.
+         * </p>
          */
         private UnboxResult() {}
 
@@ -827,8 +914,10 @@ public class PAlternatives extends PExp {
         // ===========================================================
 
         /**
-         * <p>This returns the inner {@link PExp} representation
-         * of a result expression in {@code a}.</p>
+         * <p>
+         * This returns the inner {@link PExp} representation of a result
+         * expression in {@code a}.
+         * </p>
          *
          * @param a An alternative expression.
          *

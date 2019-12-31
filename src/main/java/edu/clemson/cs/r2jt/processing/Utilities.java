@@ -1,7 +1,7 @@
 /*
  * Utilities.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -30,33 +30,44 @@ public class Utilities {
     // ===========================================================
 
     /**
-     * <p>List of all facility type declarations</p>
+     * <p>
+     * List of all facility type declarations
+     * </p>
      */
     private List<FacilityTypeDec> myFacilityTypeList;
 
     /**
-     * <p>List of all global variables</p>
+     * <p>
+     * List of all global variables
+     * </p>
      */
     private List<VarDec> myGlobalVarList;
 
     /**
-     * <p>Map of all local operations and their associated
-     * parameter variables.</p>
+     * <p>
+     * Map of all local operations and their associated parameter variables.
+     * </p>
      */
     private Map<String, List<ParameterVarDec>> myLocalOperMap;
 
     /**
-     * <p>List of all local variables</p>
+     * <p>
+     * List of all local variables
+     * </p>
      */
     private List<VarDec> myLocalVarList;
 
     /**
-     * <p>List of all parameter variables</p>
+     * <p>
+     * List of all parameter variables
+     * </p>
      */
     private List<VarDec> myParameterVarList;
 
     /**
-     * <p>List of all representation type declarations</p>
+     * <p>
+     * List of all representation type declarations
+     * </p>
      */
     private List<RepresentationDec> myRepresentationDecList;
 
@@ -81,7 +92,8 @@ public class Utilities {
     // Error Handling
     // -----------------------------------------------------------
 
-    public void duplicateVariableDeclaration(Location location, String varName) {
+    public void duplicateVariableDeclaration(Location location,
+            String varName) {
         String message =
                 "The Pre/Post Processor created a variable of the name "
                         + varName
@@ -95,8 +107,10 @@ public class Utilities {
     // -----------------------------------------------------------
 
     /**
-     * <p>Performs cleanup for all the lists instantiated while
-     * running the Pre/Post Processor.</p>
+     * <p>
+     * Performs cleanup for all the lists instantiated while running the
+     * Pre/Post Processor.
+     * </p>
      */
     public void finalModuleDec() {
         myGlobalVarList = null;
@@ -106,12 +120,13 @@ public class Utilities {
     }
 
     /**
-     * <p>Given the list of <code>Dec</code> for a particular
-     * <code>ModuleDec</code>, we store all relevant information
-     * for future use.</p>
+     * <p>
+     * Given the list of <code>Dec</code> for a particular
+     * <code>ModuleDec</code>, we store all
+     * relevant information for future use.
+     * </p>
      *
-     * @param decList List of all the <code>Dec</code> declared
-     *                by the Module.
+     * @param decList List of all the <code>Dec</code> declared by the Module.
      */
     public void initModuleDec(List<Dec> decList) {
         // Store any global variables, records, facilities
@@ -122,8 +137,8 @@ public class Utilities {
                 FacilityOperationDec dec = (FacilityOperationDec) current;
 
                 // Update the map with the new operation
-                myLocalOperMap
-                        .put(dec.getName().getName(), dec.getParameters());
+                myLocalOperMap.put(dec.getName().getName(),
+                        dec.getParameters());
             }
             else if (current instanceof FacilityTypeDec) {
                 // Create the list for facility type declarations if it is null
@@ -139,8 +154,8 @@ public class Utilities {
                 ProcedureDec dec = (ProcedureDec) current;
 
                 // Update the map with the new operation
-                myLocalOperMap
-                        .put(dec.getName().getName(), dec.getParameters());
+                myLocalOperMap.put(dec.getName().getName(),
+                        dec.getParameters());
             }
             else if (current instanceof RepresentationDec) {
                 // Create the list for representation type declarations if it is null
@@ -168,14 +183,15 @@ public class Utilities {
     // -----------------------------------------------------------
 
     /**
-     * <p>Adds a newly created <code>VarDec</code> to our list of
-     * local variables</p>
+     * <p>
+     * Adds a newly created <code>VarDec</code> to our list of local variables
+     * </p>
      */
     public void addNewLocalVariable(VarDec dec) {
         if (myLocalVarList.contains(dec)) {
             // Throws an exception before we have created this variable before
-            duplicateVariableDeclaration(dec.getLocation(), dec.getName()
-                    .getName());
+            duplicateVariableDeclaration(dec.getLocation(),
+                    dec.getName().getName());
         }
         else {
             myLocalVarList.add(dec);
@@ -183,8 +199,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Performs cleanup for the parameter and variable list
-     * instantiated while visiting a local operation.</p>
+     * <p>
+     * Performs cleanup for the parameter and variable list instantiated while
+     * visiting a local
+     * operation.
+     * </p>
      */
     public void finalOperationDec() {
         myLocalVarList = null;
@@ -192,7 +211,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Retrieves the list of local variables</p>
+     * <p>
+     * Retrieves the list of local variables
+     * </p>
      *
      * @return A list of <code>VarDecs</code>.
      */
@@ -201,7 +222,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Retrieves the list of local variables</p>
+     * <p>
+     * Retrieves the list of local variables
+     * </p>
      *
      * @return A list of <code>VarDecs</code>.
      */
@@ -210,13 +233,14 @@ public class Utilities {
     }
 
     /**
-     * <p>Stores the parameter and local variables for a given
-     * operation for future use.</p>
+     * <p>
+     * Stores the parameter and local variables for a given operation for future
+     * use.
+     * </p>
      *
-     * @param parameterVarDecList List of all parameter variables
-     *                            for this operation.
-     * @param varDecList List of all local variables for this
-     *                   operation.
+     * @param parameterVarDecList List of all parameter variables for this
+     *        operation.
+     * @param varDecList List of all local variables for this operation.
      */
     public void initOperationDec(List<ParameterVarDec> parameterVarDecList,
             List<VarDec> varDecList) {
@@ -234,8 +258,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Checks our map of operations to see if an operation with
-     * string name passed is a local operation.</p>
+     * <p>
+     * Checks our map of operations to see if an operation with string name
+     * passed is a local
+     * operation.
+     * </p>
      *
      * @param opName The string containing the name of the operation.
      *
@@ -246,8 +273,10 @@ public class Utilities {
     }
 
     /**
-     * <p>Returns list of parameters associated with the local
-     * operation in the operation map.</p>
+     * <p>
+     * Returns list of parameters associated with the local operation in the
+     * operation map.
+     * </p>
      *
      * @param opName <code>PosSymbol</code> of the operation
      *
@@ -258,8 +287,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Searches the first instance of the variable declaration
-     * inside records.</p>
+     * <p>
+     * Searches the first instance of the variable declaration inside records.
+     * </p>
      *
      * @param rName Name of the record.
      * @param vName Name of the variable.
@@ -303,10 +333,12 @@ public class Utilities {
     }
 
     /**
-     * <p>Searches the first instance of the variable declaration
-     * inside our local variable list, parameter variable list
-     * and global variable list. If not found, it will return
-     * null.</p>
+     * <p>
+     * Searches the first instance of the variable declaration inside our local
+     * variable list,
+     * parameter variable list and global variable list. If not found, it will
+     * return null.
+     * </p>
      *
      * @param name Name of the variable.
      *
@@ -334,8 +366,10 @@ public class Utilities {
     // ===========================================================
 
     /**
-     * <p>Given a list, it searches for a variable with the same
-     * name as the one passed in.</p>
+     * <p>
+     * Given a list, it searches for a variable with the same name as the one
+     * passed in.
+     * </p>
      *
      * @param name Name of the variable.
      * @param vList List of variable declarations we are searching.

@@ -1,7 +1,7 @@
 /*
  * ProgramVariableDotExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming dotted expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the programming dotted expression objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,7 +34,11 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's collection of inner expressions.</p> */
+    /**
+     * <p>
+     * The expression's collection of inner expressions.
+     * </p>
+     */
     private final List<ProgramVariableExp> mySegmentExps;
 
     // ===========================================================
@@ -39,13 +46,17 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming variable dotted expression to keep track
-     * of all the inner expressions.</p>
+     * <p>
+     * This constructs a programming variable dotted expression to keep track of
+     * all the inner
+     * expressions.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param segments A list of {@link Exp} object.
      */
-    public ProgramVariableDotExp(Location l, List<ProgramVariableExp> segments) {
+    public ProgramVariableDotExp(Location l,
+            List<ProgramVariableExp> segments) {
         super(l, null);
         mySegmentExps = segments;
     }
@@ -102,9 +113,8 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
             ProgramVariableDotExp eAsProgramVariableDotExp =
                     (ProgramVariableDotExp) e;
 
-            retval =
-                    posSymbolEquivalent(getQualifier(),
-                            eAsProgramVariableDotExp.getQualifier());
+            retval = posSymbolEquivalent(getQualifier(),
+                    eAsProgramVariableDotExp.getQualifier());
 
             if (mySegmentExps != null
                     && eAsProgramVariableDotExp.mySegmentExps != null) {
@@ -115,15 +125,13 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
 
                 while (retval && thisSegmentExps.hasNext()
                         && eSegmentExps.hasNext()) {
-                    retval &=
-                            thisSegmentExps.next().equivalent(
-                                    eSegmentExps.next());
+                    retval &= thisSegmentExps.next()
+                            .equivalent(eSegmentExps.next());
                 }
 
-                //Both had better have run out at the same time
-                retval &=
-                        (!thisSegmentExps.hasNext())
-                                && (!eSegmentExps.hasNext());
+                // Both had better have run out at the same time
+                retval &= (!thisSegmentExps.hasNext())
+                        && (!eSegmentExps.hasNext());
             }
         }
 
@@ -131,7 +139,9 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
     }
 
     /**
-     * <p>This method returns all the inner expressions.</p>
+     * <p>
+     * This method returns all the inner expressions.
+     * </p>
      *
      * @return A list containing all the segmented {@link ProgramVariableExp}s.
      */
@@ -192,8 +202,10 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the segment expressions.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * segment expressions.
+     * </p>
      *
      * @return A list containing {@link Exp}s.
      */

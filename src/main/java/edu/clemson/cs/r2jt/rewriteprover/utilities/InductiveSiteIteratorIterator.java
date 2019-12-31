@@ -1,7 +1,7 @@
 /*
  * InductiveSiteIteratorIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,9 +18,11 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * <p>Nope, that's not a mistype.  This class takes an iterator over top level
- * sites and decorates it to inductively visit each top-level site's subsites
- * as well.</p>
+ * <p>
+ * Nope, that's not a mistype. This class takes an iterator over top level sites
+ * and decorates it to
+ * inductively visit each top-level site's subsites as well.
+ * </p>
  */
 public class InductiveSiteIteratorIterator implements Iterator<Site> {
 

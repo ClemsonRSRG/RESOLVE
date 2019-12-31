@@ -1,7 +1,7 @@
 /*
  * TypeFamilyEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This creates a symbol table entry for a {@code Type Family}.</p>
+ * <p>
+ * This creates a symbol table entry for a {@code Type Family}.
+ * </p>
  *
  * @version 2.0
  */
@@ -35,13 +37,25 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     // Member Fields
     // ===========================================================
 
-    /** <p>Exemplar associated with this entry.</p> */
+    /**
+     * <p>
+     * Exemplar associated with this entry.
+     * </p>
+     */
     private final MathSymbolEntry myExemplar;
 
-    /** <p>The mathematical type constraint for this entry.</p> */
+    /**
+     * <p>
+     * The mathematical type constraint for this entry.
+     * </p>
+     */
     private final AssertionClause myConstraint;
 
-    /** <p>The list of mathematical definition variables for the new type family.</p> */
+    /**
+     * <p>
+     * The list of mathematical definition variables for the new type family.
+     * </p>
+     */
     private final List<MathDefVariableDec> myDefVarList;
 
     // ===========================================================
@@ -49,7 +63,9 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     // ===========================================================
 
     /**
-     * <p>This creates a symbol table entry for a type family declaration.</p>
+     * <p>
+     * This creates a symbol table entry for a type family declaration.
+     * </p>
      *
      * @param g The current type graph.
      * @param name Name associated with this entry.
@@ -59,14 +75,15 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
      * @param programType The program type assigned to this entry.
      * @param exemplarEntry The exemplar for this entry.
      * @param constraint The constraint for this entry.
-     * @param defVariableDecs The list of math definition declarations
-     *                        for this entry.
+     * @param defVariableDecs The list of math definition declarations for this
+     *        entry.
      */
     public TypeFamilyEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, MTType modelType,
             PTFamily programType, MathSymbolEntry exemplarEntry,
-            AssertionClause constraint, List<MathDefVariableDec> defVariableDecs) {
+            AssertionClause constraint,
+            List<MathDefVariableDec> defVariableDecs) {
         super(g, name, definingElement, sourceModule, modelType, programType);
 
         myExemplar = exemplarEntry;
@@ -79,8 +96,11 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     // ===========================================================
 
     /**
-     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
-     * therefore this method returns a deep copy of the constraint expression.</p>
+     * <p>
+     * Since this is used by multiple objects, we really don't want to be
+     * returning a reference,
+     * therefore this method returns a deep copy of the constraint expression.
+     * </p>
      *
      * @return A {@link AssertionClause} representation object.
      */
@@ -89,13 +109,18 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     }
 
     /**
-     * <p>Since this is used by multiple objects, we really don't want to be returning a reference,
-     * therefore this method returns a deep copy of all the definition variables.</p>
+     * <p>
+     * Since this is used by multiple objects, we really don't want to be
+     * returning a reference,
+     * therefore this method returns a deep copy of all the definition
+     * variables.
+     * </p>
      *
      * @return A list of {@link MathDefVariableDec} representation objects.
      */
     public final List<MathDefVariableDec> getDefinitionVarList() {
-        List<MathDefVariableDec> newMathDefVarDecs = new ArrayList<>(myDefVarList.size());
+        List<MathDefVariableDec> newMathDefVarDecs =
+                new ArrayList<>(myDefVarList.size());
         for (MathDefVariableDec variableDec : myDefVarList) {
             newMathDefVarDecs.add((MathDefVariableDec) variableDec.clone());
         }
@@ -104,7 +129,9 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     }
 
     /**
-     * <p>This method returns the exemplar associated with this entry.</p>
+     * <p>
+     * This method returns the exemplar associated with this entry.
+     * </p>
      *
      * @return A {@link MathSymbolEntry} representation object.
      */
@@ -113,7 +140,9 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     }
 
     /**
-     * <p>This method returns the program type associated with this entry.</p>
+     * <p>
+     * This method returns the program type associated with this entry.
+     * </p>
      *
      * @return A {@link PTFamily} representation object.
      */
@@ -123,13 +152,15 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link TypeFamilyEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link TypeFamilyEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link TypeFamilyEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link TypeFamilyEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final TypeFamilyEntry toTypeFamilyEntry(Location l) {

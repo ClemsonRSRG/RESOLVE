@@ -1,7 +1,7 @@
 /*
  * ConjunctionOfNormalizedAtomicExpressions.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,7 +34,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
-     *                 reference. This class will add entries to the registry if needed.
+     *        reference. This class
+     *        will add entries to the registry if needed.
      */
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry,
             VerificationConditionCongruenceClosureImpl vc) {
@@ -73,9 +74,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     protected PExp find(PExp exp) {
         if (exp.getSubExpressions().size() == 0) {
-            String s =
-                    m_registry.getRootSymbolForSymbol(exp
-                            .getTopLevelOperation());
+            String s = m_registry
+                    .getRootSymbolForSymbol(exp.getTopLevelOperation());
             if (s.equals("")) {
                 return exp;
             }
@@ -90,8 +90,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             PExp cur = it.next();
             PExp fcur = find(cur);
             if (fcur.getSubExpressions().size() > 0
-                    || !m_registry.m_symbolToIndex.containsKey(fcur
-                            .getTopLevelOperation()))
+                    || !m_registry.m_symbolToIndex
+                            .containsKey(fcur.getTopLevelOperation()))
                 irreducable = true;
             args.add(fcur);
         }
@@ -102,9 +102,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             ia = new int[args.size() + 1];
             ia[0] = m_registry.getIndexForSymbol(op);
             for (int i = 1; i < ia.length; ++i) {
-                ia[i] =
-                        m_registry.getIndexForSymbol(args.get(i - 1)
-                                .getTopLevelOperation());
+                ia[i] = m_registry.getIndexForSymbol(
+                        args.get(i - 1).getTopLevelOperation());
             }
             NormalizedAtomicExpression na =
                     new NormalizedAtomicExpression(getRegistry(), ia);
@@ -114,19 +113,19 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 return new PSymbol(m_registry.getTypeByIndex(r), null, rs);
             }
             else
-                return new PSymbol(exp.getType(), exp.getTypeValue(), exp
-                        .getTopLevelOperation(), args);
+                return new PSymbol(exp.getType(), exp.getTypeValue(),
+                        exp.getTopLevelOperation(), args);
         }
         else {
-            return new PSymbol(exp.getType(), exp.getTypeValue(), exp
-                    .getTopLevelOperation(), args);
+            return new PSymbol(exp.getType(), exp.getTypeValue(),
+                    exp.getTopLevelOperation(), args);
         }
     }
 
     // Top level
     protected String addExpression(PExp expression) {
-        if (m_evaluates_to_false
-                || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
+        if (m_evaluates_to_false || (m_timeToEnd > 0
+                && System.currentTimeMillis() > m_timeToEnd)) {
             return "";
         }
         String name = expression.getTopLevelOperation();
@@ -165,8 +164,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
         }
-        else if (ps.isFunction()
-                || ps.getType().getClass().getSimpleName().equals("MTFunction")) {
+        else if (ps.isFunction() || ps.getType().getClass().getSimpleName()
+                .equals("MTFunction")) {
             if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
             }
@@ -194,10 +193,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return m_registry.addSymbol(name, type, usage);
     }
 
-    /* experimentally handling =
-     i.e.: (|?S| = 0) = (?S = Empty_String))
-     is broken down by addExpression so (|?S| = 0) is an argument
-     should return int for true if known to be equal, otherwise return root representative. 
+    /*
+     * experimentally handling = i.e.: (|?S| = 0) = (?S = Empty_String)) is
+     * broken down by
+     * addExpression so (|?S| = 0) is an argument should return int for true if
+     * known to be equal,
+     * otherwise return root representative.
      */
     protected int addFormula(PExp formula) {
         if (formula.getTopLevelOperation().equals("=B")) {
@@ -207,15 +208,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             lhs = m_registry.findAndCompress(lhs);
             rhs = m_registry.findAndCompress(rhs);
             // This prevents matching of (i=i)=true, which is not built in
-            /*if (lhs == rhs) {
-                return m_registry.getIndexForSymbol("true");
-            }
-            else {*/
+            /*
+             * if (lhs == rhs) { return m_registry.getIndexForSymbol("true"); }
+             * else {
+             */
             // insert =(lhs,rhs) = someNewRoot
             int questEq = m_registry.getIndexForSymbol("=B");
-            NormalizedAtomicExpression pred =
-                    new NormalizedAtomicExpression(getRegistry(), new int[] {
-                            questEq, lhs, rhs });
+            NormalizedAtomicExpression pred = new NormalizedAtomicExpression(
+                    getRegistry(), new int[] { questEq, lhs, rhs });
             return addAtomicFormula(pred);
             // }
         }
@@ -253,8 +253,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     /**
      * @param atomicFormula one sided expression. (= new root) is appended and
-     *                      expression is inserted if no match of the side is found. Otherwise
-     *                      current root is returned.
+     *        expression is inserted
+     *        if no match of the side is found. Otherwise current root is
+     *        returned.
      * @return current integer value of root symbol that represents the input.
      */
     private int addAtomicFormula(NormalizedAtomicExpression atomicFormula) {
@@ -292,8 +293,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int f = m_registry.getIndexForSymbol("false");
 
         String rString = "";
-        if (m_evaluates_to_false
-                || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
+        if (m_evaluates_to_false || (m_timeToEnd > 0
+                && System.currentTimeMillis() > m_timeToEnd)) {
             return rString;
         }
         a = m_registry.findAndCompress(a);
@@ -305,8 +306,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         holdingTank.push(b);
 
         while (holdingTank != null && !holdingTank.empty()) {
-            if (m_evaluates_to_false
-                    || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
+            if (m_evaluates_to_false || (m_timeToEnd > 0
+                    && System.currentTimeMillis() > m_timeToEnd)) {
                 return rString;
             }
             int opB = m_registry.findAndCompress(holdingTank.pop());
@@ -324,9 +325,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 m_evaluates_to_false = true;
                 return "contradiction detected " + rString;
             }
-            rString +=
-                    m_registry.getSymbolForIndex(opA) + "/"
-                            + m_registry.getSymbolForIndex(opB) + ",";
+            rString += m_registry.getSymbolForIndex(opA) + "/"
+                    + m_registry.getSymbolForIndex(opB) + ",";
             Stack<Integer> mResult = mergeOnlyArgumentOperators(opA, opB);
             String bstring = m_registry.getSymbolForIndex(opB);
             if (m_VC != null && m_VC.m_goal.contains(bstring)) {
@@ -408,7 +408,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             return;
         int tr = m_registry.getIndexForSymbol("true");
         int fl = m_registry.getIndexForSymbol("false");
-        // =,true,false,not.  recorded first in reg. logic relation args (and, or, =) are ordered.
+        // =,true,false,not. recorded first in reg. logic relation args (and, or, =) are ordered.
 
         int arg2 = nm.readPosition(2);
         // arity 2 guard: return if all constant
@@ -478,8 +478,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 return;
             }
             // x or some goal g = some goal g
-            if (m_VC != null
-                    && m_VC.m_goal.contains(m_registry.getSymbolForIndex(rhs))) {
+            if (m_VC != null && m_VC.m_goal
+                    .contains(m_registry.getSymbolForIndex(rhs))) {
                 if (rhs == arg1) {
                     m_VC.addGoal(m_registry.getSymbolForIndex(arg2));
                 }
@@ -584,8 +584,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // Return list of modified predicates by their position. Only these can cause new merges.
     // b is replaced by a
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
-        if (m_evaluates_to_false
-                || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
+        if (m_evaluates_to_false || (m_timeToEnd > 0
+                && System.currentTimeMillis() > m_timeToEnd)) {
             return null;
         }
         if (m_useMap.get(b) == null) {
@@ -614,8 +614,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 if (m_expSet.containsKey(ne)) {
                     ne = m_expSet.get(ne);
                     int neroot = ne.readRoot();
-                    if (oldRoot != neroot
-                            && !((oldRoot == a || oldRoot == b) && (neroot == a || neroot == b))) {
+                    if (oldRoot != neroot && !((oldRoot == a || oldRoot == b)
+                            && (neroot == a || neroot == b))) {
                         // dont put a and b on stack, already doing a/b
                         coincidentalMergeHoldingTank.push(oldRoot);
                         coincidentalMergeHoldingTank.push(neroot);
@@ -631,8 +631,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return coincidentalMergeHoldingTank;
     }
 
-    protected Set<NormalizedAtomicExpression> multiKeyUseMapSearch(
-            Set<String> keys) {
+    protected Set<NormalizedAtomicExpression>
+            multiKeyUseMapSearch(Set<String> keys) {
 
         Set<NormalizedAtomicExpression> resultSet =
                 new HashSet<NormalizedAtomicExpression>();
@@ -695,26 +695,25 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     searchKeys[2] = t;
                     return computeBindings(
                             getExprsMatchingAtPosition(searchKeys),
-                            foreignSymbolOverride, unMappedWildCards, expr
-                                    .getRegistry());
+                            foreignSymbolOverride, unMappedWildCards,
+                            expr.getRegistry());
                 }
             }
             else {
                 // only one blank. 2 searches
-                rSet =
-                        computeBindings(getExprsMatchingAtPosition(searchKeys),
-                                foreignSymbolOverride, unMappedWildCards, expr
-                                        .getRegistry());
+                rSet = computeBindings(getExprsMatchingAtPosition(searchKeys),
+                        foreignSymbolOverride, unMappedWildCards,
+                        expr.getRegistry());
                 int t = searchKeys[1];
                 String s = unMappedWildCards[1];
                 searchKeys[1] = searchKeys[2];
                 unMappedWildCards[1] = unMappedWildCards[2];
                 searchKeys[2] = t;
                 unMappedWildCards[2] = s;
-                rSet.addAll(computeBindings(
-                        getExprsMatchingAtPosition(searchKeys),
-                        foreignSymbolOverride, unMappedWildCards, expr
-                                .getRegistry()));
+                rSet.addAll(
+                        computeBindings(getExprsMatchingAtPosition(searchKeys),
+                                foreignSymbolOverride, unMappedWildCards,
+                                expr.getRegistry()));
                 return rSet;
             }
         }
@@ -733,19 +732,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             Map<String, String> bmap = new HashMap<String, String>(baseMap);
             for (int i = 0; i < unmappedWildcards.length; ++i) {
                 String wc = unmappedWildcards[i];
-                String ac =
-                        (i < unmappedWildcards.length - 1 ? e.readSymbol(i)
-                                : m_registry.getSymbolForIndex(e.readRoot()));
+                String ac = (i < unmappedWildcards.length - 1 ? e.readSymbol(i)
+                        : m_registry.getSymbolForIndex(e.readRoot()));
                 if (wc.equals(""))
                     continue;
                 if (!bmap.get(wc).equals("") && !bmap.get(wc).equals(ac))
                     continue next; // this clause ensures usage of same symbol where required.
-                MTType wildType =
-                        searchReg.getTypeByIndex(searchReg
-                                .getIndexForSymbol(wc));
-                MTType localType =
-                        m_registry.getTypeByIndex(m_registry
-                                .getIndexForSymbol(ac));
+                MTType wildType = searchReg
+                        .getTypeByIndex(searchReg.getIndexForSymbol(wc));
+                MTType localType = m_registry
+                        .getTypeByIndex(m_registry.getIndexForSymbol(ac));
                 if (!m_registry.isSubtype(localType, wildType))
                     continue next;
                 bmap.put(wc, ac);
@@ -755,8 +751,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rSet;
     }
 
-    private Set<NormalizedAtomicExpression> getExprsMatchingAtPosition(
-            int[] searchKey) {
+    private Set<NormalizedAtomicExpression>
+            getExprsMatchingAtPosition(int[] searchKey) {
         HashSet<NormalizedAtomicExpression> rSet =
                 new HashSet<NormalizedAtomicExpression>();
         for (int p = 0; p < searchKey.length; ++p) {
@@ -764,7 +760,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (k < 0)
                 continue;
             if (!m_useMap.containsKey(k))
-                return rSet; // k is not used in the conjunction, but is still in Registry. Can happen with =, not, etc.
+                return rSet; // k is not used in the conjunction, but is still in Registry. Can happen with
+                             // =, not, etc.
             int x = (p < searchKey.length - 1) ? p : -1;
             if (!m_useMap.get(k).containsKey(x)) // k not used in position p anywhere
                 return rSet;
@@ -776,7 +773,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 continue;
             if (p == 0)
                 rSet.addAll(m_useMap.get(k).get(p));
-            else if (p == searchKey.length - 1)//last element which is root class
+            else if (p == searchKey.length - 1)// last element which is root class
                 rSet.retainAll(getUses(k, -1));
             else
                 rSet.retainAll(getUses(k, p));

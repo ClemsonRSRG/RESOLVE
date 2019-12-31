@@ -1,7 +1,7 @@
 /*
  * WhichEntailsRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,8 +26,9 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for the {@code Which_Entails}
- * rule.</p>
+ * <p>
+ * This class contains the logic for the {@code Which_Entails} rule.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -40,7 +41,11 @@ public class WhichEntailsRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The assertion clause where we found the {@code Which_Entails}.</p> */
+    /**
+     * <p>
+     * The assertion clause where we found the {@code Which_Entails}.
+     * </p>
+     */
     private final AssertionClause myClause;
 
     // ===========================================================
@@ -48,15 +53,18 @@ public class WhichEntailsRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application for a {@code Which_Entails}
-     * inside some {@link AssertionClause}.</p>
+     * <p>
+     * This creates a new application for a {@code Which_Entails} inside some
+     * {@link AssertionClause}.
+     * </p>
      *
-     * @param clause The assertion clause where we found
-     *               the {@code Which_Entails}.
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
-     * @param context The verification context that contains all
-     *                the information we have collected so far.
+     * @param clause The assertion clause where we found the
+     *        {@code Which_Entails}.
+     * @param block The assertive code block that the subclasses are applying
+     *        the rule to.
+     * @param context The verification context that contains all the information
+     *        we have collected so
+     *        far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
@@ -71,7 +79,9 @@ public class WhichEntailsRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Proof Rule}.</p>
+     * <p>
+     * This method applies the {@code Proof Rule}.
+     * </p>
      */
     @Override
     public final void applyRule() {
@@ -79,9 +89,10 @@ public class WhichEntailsRule extends AbstractProofRuleApplication
         // assume to be true and add the location detail associated with it.
         Exp assertionExp = myClause.getAssertionExp().clone();
         Location clauseLoc = myClause.getAssertionExp().getLocation();
-        assertionExp.setLocationDetailModel(new LocationDetailModel(clauseLoc
-                .clone(), clauseLoc.clone(), myClause.getClauseType().name()
-                + " Clause Located at " + clauseLoc.clone()));
+        assertionExp.setLocationDetailModel(
+                new LocationDetailModel(clauseLoc.clone(), clauseLoc.clone(),
+                        myClause.getClauseType().name() + " Clause Located at "
+                                + clauseLoc.clone()));
 
         // Confirm the which_entails expression and add the location detail associated with it.
         Exp whichEntailsExp = myClause.getWhichEntailsExp().clone();
@@ -91,24 +102,26 @@ public class WhichEntailsRule extends AbstractProofRuleApplication
                 "Which_Entails Expression Located at " + clauseLoc.clone()));
 
         // Apply the rule
-        myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(myClause
-                .getAssertionExp().getLocation().clone(), assertionExp, false));
-        myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(myClause
-                .getWhichEntailsExp().getLocation().clone(), whichEntailsExp,
-                false));
+        myCurrentAssertiveCodeBlock.addStatement(
+                new AssumeStmt(myClause.getAssertionExp().getLocation().clone(),
+                        assertionExp, false));
+        myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(
+                myClause.getWhichEntailsExp().getLocation().clone(),
+                whichEntailsExp, false));
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-        stepModel.add("proofRuleName", getRuleDescription()).add(
-                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        stepModel.add("proofRuleName", getRuleDescription())
+                .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
 
         // Add the different details to the various different output models
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Proof Rule}.</p>
+     * <p>
+     * This method returns a description associated with the {@code Proof Rule}.
+     * </p>
      *
      * @return A string.
      */

@@ -1,7 +1,7 @@
 /*
  * BetweenExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for a list of mathematical expression objects that
- * are joined together by the "and" operator that the compiler builds
- * using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for a list of mathematical expression objects that are
+ * joined together by the
+ * "and" operator that the compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,7 +34,11 @@ public class BetweenExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expressions that compose this expression.</p> */
+    /**
+     * <p>
+     * The expressions that compose this expression.
+     * </p>
+     */
     private final List<Exp> myJoiningExps;
 
     // ===========================================================
@@ -40,8 +46,9 @@ public class BetweenExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a between expression of the form
-     * "[x] and [y] and ...".</p>
+     * <p>
+     * This constructs a between expression of the form "[x] and [y] and ...".
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param joiningExps A list of {@link Exp} expressions.
@@ -139,7 +146,7 @@ public class BetweenExp extends MathExp {
     public final boolean equivalent(Exp e) {
         // I don't really understand what a "BetweenExp" is, so for now its
         // 'equivalent' implementation just checks to see if all subexpressions
-        // exist as a subexpression in e.  -HwS
+        // exist as a subexpression in e. -HwS
         boolean retval = (e instanceof BetweenExp);
 
         if (retval) {
@@ -162,8 +169,9 @@ public class BetweenExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the list of
-     * joining sub-expressions.</p>
+     * <p>
+     * This method returns a deep copy of the list of joining sub-expressions.
+     * </p>
      *
      * @return A list containing joining {@link Exp}s.
      */
@@ -219,8 +227,10 @@ public class BetweenExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list of between expressions.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list of between
+     * expressions.
+     * </p>
      *
      * @return A list containing {@link Exp}s.
      */

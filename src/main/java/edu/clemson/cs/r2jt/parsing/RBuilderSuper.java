@@ -1,7 +1,7 @@
 /*
  * RBuilderSuper.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,9 +36,9 @@ public class RBuilderSuper extends TreeParser {
     }
 
     /**
-     * Variables to tell us what type of module we are
-     * parsing.  Used for semantic predicates of rules or productions
-     * which are only applicable to particular modules.
+     * Variables to tell us what type of module we are parsing. Used for
+     * semantic predicates of rules
+     * or productions which are only applicable to particular modules.
      */
     protected boolean proofModule = false;
     protected boolean theoryModule = false;
@@ -51,9 +51,11 @@ public class RBuilderSuper extends TreeParser {
     protected boolean performanceEModule = false;
     protected boolean performanceCModule = false;
 
-    /* enhancementBody is a subclass of bodyModule.  It is only true
-     * in the body of an enhancement module.  It is NOT true in a
-     * "bundled implementation" module (a body that implements both a
+    /*
+     * enhancementBody is a subclass of bodyModule. It is only true in the body
+     * of an enhancement
+     * module. It is NOT true in a "bundled implementation" module (a body that
+     * implements both a
      * concept and one or more enhancements at once). (BM)
      */
 
@@ -148,8 +150,9 @@ public class RBuilderSuper extends TreeParser {
         return new PosSymbol(loc, sym);
     }
 
-    protected edu.clemson.cs.r2jt.collections.List<ParameterVarDec> getParamVarDecList(
-            Mode mode, edu.clemson.cs.r2jt.collections.List<VarDec> vars) {
+    protected edu.clemson.cs.r2jt.collections.List<ParameterVarDec>
+            getParamVarDecList(Mode mode,
+                    edu.clemson.cs.r2jt.collections.List<VarDec> vars) {
         edu.clemson.cs.r2jt.collections.List<ParameterVarDec> pVars =
                 new edu.clemson.cs.r2jt.collections.List<ParameterVarDec>(
                         "ParameterVarDec");
@@ -164,31 +167,32 @@ public class RBuilderSuper extends TreeParser {
     }
 
     protected InitItem getInitItem(Location loc, InitItem init) {
-        return new InitItem(loc, init.getStateVars(), init.getRequires(), init
-                .getEnsures(), init.getFacilities(), init.getVariables(), init
-                .getAuxVariables(), init.getStatements());
+        return new InitItem(loc, init.getStateVars(), init.getRequires(),
+                init.getEnsures(), init.getFacilities(), init.getVariables(),
+                init.getAuxVariables(), init.getStatements());
     }
 
     protected FinalItem getFinalItem(Location loc, InitItem init) {
-        return new FinalItem(loc, init.getStateVars(), init.getRequires(), init
-                .getEnsures(), init.getFacilities(), init.getVariables(), init
-                .getAuxVariables(), init.getStatements());
+        return new FinalItem(loc, init.getStateVars(), init.getRequires(),
+                init.getEnsures(), init.getFacilities(), init.getVariables(),
+                init.getAuxVariables(), init.getStatements());
     }
 
     protected PerformanceInitItem getPerformanceInitItem(Location loc,
             PerformanceInitItem init) {
-        return new PerformanceInitItem(loc, init.getStateVars(), init
-                .getRequires(), init.getEnsures(), init.getDuration(), init
-                .getMainp_disp(), init.getFacilities(), init.getVariables(),
+        return new PerformanceInitItem(loc, init.getStateVars(),
+                init.getRequires(), init.getEnsures(), init.getDuration(),
+                init.getMainp_disp(), init.getFacilities(), init.getVariables(),
                 init.getAuxVariables(), init.getStatements());
     }
 
     protected PerformanceFinalItem getPerformanceFinalItem(Location loc,
             PerformanceFinalItem Final) {
-        return new PerformanceFinalItem(loc, Final.getStateVars(), Final
-                .getRequires(), Final.getEnsures(), Final.getDuration(), Final
-                .getMainp_disp(), Final.getFacilities(), Final.getVariables(),
-                Final.getAuxVariables(), Final.getStatements());
+        return new PerformanceFinalItem(loc, Final.getStateVars(),
+                Final.getRequires(), Final.getEnsures(), Final.getDuration(),
+                Final.getMainp_disp(), Final.getFacilities(),
+                Final.getVariables(), Final.getAuxVariables(),
+                Final.getStatements());
     }
 
     protected edu.clemson.cs.r2jt.collections.List<VarDec> getVarDecList(
@@ -207,7 +211,8 @@ public class RBuilderSuper extends TreeParser {
     protected edu.clemson.cs.r2jt.collections.List<AuxVarDec> getAuxVarDecList(
             edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms, Ty ty) {
         edu.clemson.cs.r2jt.collections.List<AuxVarDec> vars =
-                new edu.clemson.cs.r2jt.collections.List<AuxVarDec>("AuxVarDec");
+                new edu.clemson.cs.r2jt.collections.List<AuxVarDec>(
+                        "AuxVarDec");
         Iterator<PosSymbol> i = psyms.iterator();
         while (i.hasNext()) {
             PosSymbol ps = i.next();
@@ -217,8 +222,10 @@ public class RBuilderSuper extends TreeParser {
         return vars;
     }
 
-    protected edu.clemson.cs.r2jt.collections.List<MathVarDec> getMathVarDecList(
-            edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms, Ty ty) {
+    protected edu.clemson.cs.r2jt.collections.List<MathVarDec>
+            getMathVarDecList(
+                    edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms,
+                    Ty ty) {
         edu.clemson.cs.r2jt.collections.List<MathVarDec> vars =
                 new edu.clemson.cs.r2jt.collections.List<MathVarDec>(
                         "MathVarDec");
@@ -280,23 +287,20 @@ public class RBuilderSuper extends TreeParser {
 
     public String getErrorMessage(RecognitionException e, String[] tokenNames) {
         System.out.println("Builder Exception:");
-        java.util.List stack =
-                (java.util.List) getRuleInvocationStack(e, this.getClass()
-                        .getName());
+        java.util.List stack = (java.util.List) getRuleInvocationStack(e,
+                this.getClass().getName());
         String msg = null;
         if (e instanceof NoViableAltException) {
             NoViableAltException nvae = (NoViableAltException) e;
-            msg =
-                    " no viable alt; token=" + e.token + " (decision="
-                            + nvae.decisionNumber + " state "
-                            + nvae.stateNumber + ")" + " decision=<<"
-                            + nvae.grammarDecisionDescription + ">>";
+            msg = " no viable alt; token=" + e.token + " (decision="
+                    + nvae.decisionNumber + " state " + nvae.stateNumber + ")"
+                    + " decision=<<" + nvae.grammarDecisionDescription + ">>";
         }
         else {
             msg = super.getErrorMessage(e, RBuilder.tokenNames);
         }
         return stack + " " + msg + "\n" + e.token;
-        //return msg;
+        // return msg;
     }
 
     public String getTokenErrorDisplay(Token t) {

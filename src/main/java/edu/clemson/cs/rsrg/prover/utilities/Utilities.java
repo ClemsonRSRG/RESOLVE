@@ -1,7 +1,7 @@
 /*
  * Utilities.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This class contains transformations that apply to both expressions in
- * both {@code VC} and {@code Theorems}.</p>
+ * <p>
+ * This class contains transformations that apply to both expressions in both
+ * {@code VC} and
+ * {@code Theorems}.
+ * </p>
  *
  * @author Mike Khabbani
  * @version 2.0
@@ -33,7 +36,9 @@ public class Utilities {
     // ===========================================================
 
     /**
-     * <p>This method creates an expression with the proper substitutions.</p>
+     * <p>
+     * This method creates an expression with the proper substitutions.
+     * </p>
      *
      * @param p A prover expression.
      * @param g The current type graph.
@@ -76,14 +81,14 @@ public class Utilities {
             // x < y to x + 1 <= y
             argsTemp.add(argList.get(0));
             argsTemp.add(new PSymbol(n, null, "1"));
-            PSymbol plus1 =
-                    new PSymbol(argList.get(0).getMathType(), null, "+"
-                            + argList.get(0).getMathType().toString(), argsTemp);
+            PSymbol plus1 = new PSymbol(argList.get(0).getMathType(), null,
+                    "+" + argList.get(0).getMathType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(plus1);
             argsTemp.add(argList.get(1));
 
-            return new PSymbol(p.getMathType(), p.getMathTypeValue(), "<=B", argsTemp);
+            return new PSymbol(p.getMathType(), p.getMathTypeValue(), "<=B",
+                    argsTemp);
         }
         else if (pTop.equals(">") && z != null && n != null
                 && argList.get(0).getMathType().isSubtypeOf(z)
@@ -91,28 +96,27 @@ public class Utilities {
             // x > y to y + 1 <= x
             argsTemp.add(argList.get(1));
             argsTemp.add(new PSymbol(n, null, "1"));
-            PSymbol plus1 =
-                    new PSymbol(argList.get(1).getMathType(), null, "+"
-                            + argList.get(1).getMathType().toString(), argsTemp);
+            PSymbol plus1 = new PSymbol(argList.get(1).getMathType(), null,
+                    "+" + argList.get(1).getMathType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(plus1);
             argsTemp.add(argList.get(0));
 
-            return new PSymbol(p.getMathType(), p.getMathTypeValue(), "<=B", argsTemp);
+            return new PSymbol(p.getMathType(), p.getMathTypeValue(), "<=B",
+                    argsTemp);
         }
         else if (z != null && pTop.equals("-")
                 && p.getSubExpressions().size() == 2) {
             // x - y to x + (-y)
             argsTemp.add(argList.get(1));
-            PSymbol minusY =
-                    new PSymbol(p.getMathType(), null,
-                            "-" + p.getMathType().toString(), argsTemp);
+            PSymbol minusY = new PSymbol(p.getMathType(), null,
+                    "-" + p.getMathType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(argList.get(0));
             argsTemp.add(minusY);
 
-            return new PSymbol(p.getMathType(), null, "+" + p.getMathType().toString(),
-                    argsTemp);
+            return new PSymbol(p.getMathType(), null,
+                    "+" + p.getMathType().toString(), argsTemp);
         }
         // New: 5/8/16. Tag operators with range type if they aren't quantified.
         else if (argList.size() > 0) {
@@ -120,8 +124,8 @@ public class Utilities {
                     .equals(PSymbol.Quantification.NONE))
                 pTop += p.getMathType().toString();
 
-            return new PSymbol(p.getMathType(), p.getMathTypeValue(), pTop, argList,
-                    ((PSymbol) p).quantification);
+            return new PSymbol(p.getMathType(), p.getMathTypeValue(), pTop,
+                    argList, ((PSymbol) p).quantification);
         }
 
         return p;

@@ -1,7 +1,7 @@
 /*
  * ConstructedTy.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,10 +15,9 @@
  * 
  * The Resolve Software Composition Workbench Project
  * 
- * Copyright (c) 1999-2005
- * Reusable Software Research Group
- * Department of Computer Science
- * Clemson University
+ * Copyright (c) 1999-2005 Reusable Software Research Group Department of
+ * Computer Science Clemson
+ * University
  */
 
 package edu.clemson.cs.r2jt.absyn;

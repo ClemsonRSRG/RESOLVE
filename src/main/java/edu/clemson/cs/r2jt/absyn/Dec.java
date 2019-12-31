@@ -1,7 +1,7 @@
 /*
  * Dec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,11 +16,13 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
-public abstract class Dec extends ResolveConceptualElement implements Cloneable {
+public abstract class Dec extends ResolveConceptualElement
+        implements
+            Cloneable {
 
     protected MTType myMathType = null;
 
-    //protected MTType myMathTypeValue = null;
+    // protected MTType myMathTypeValue = null;
 
     public abstract void accept(ResolveConceptualVisitor v);
 
@@ -51,16 +53,16 @@ public abstract class Dec extends ResolveConceptualElement implements Cloneable 
 
     public void setMathType(MTType mt) {
         if (mt == null) {
-            throw new RuntimeException("Trying to set null type on "
-                    + this.getClass());
+            throw new RuntimeException(
+                    "Trying to set null type on " + this.getClass());
         }
 
         this.myMathType = mt;
     }
-    //	public MTType getMathTypeValue() {
-    //		return myMathTypeValue;
-    //	}
-    //	public void setMathTypeValue(MTType mathTypeValue) {
-    //		this.myMathTypeValue = mathTypeValue;
-    //	}
+    // public MTType getMathTypeValue() {
+    // return myMathTypeValue;
+    // }
+    // public void setMathTypeValue(MTType mathTypeValue) {
+    // this.myMathTypeValue = mathTypeValue;
+    // }
 }

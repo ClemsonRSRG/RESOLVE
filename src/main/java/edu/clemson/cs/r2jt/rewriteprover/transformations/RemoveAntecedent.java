@@ -1,7 +1,7 @@
 /*
  * RemoveAntecedent.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -38,8 +38,9 @@ public class RemoveAntecedent implements Transformation {
 
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
-        return Collections.singletonList(
-                (Application) new RemoveAntecedentApplication()).iterator();
+        return Collections
+                .singletonList((Application) new RemoveAntecedentApplication())
+                .iterator();
     }
 
     @Override
@@ -88,8 +89,8 @@ public class RemoveAntecedent implements Transformation {
 
         @Override
         public void apply(PerVCProverModel m) {
-            m.addProofStep(new RemoveAntecedentStep(myLocalTheorem, m
-                    .getConjunctIndex(myLocalTheorem), RemoveAntecedent.this,
+            m.addProofStep(new RemoveAntecedentStep(myLocalTheorem,
+                    m.getConjunctIndex(myLocalTheorem), RemoveAntecedent.this,
                     this, null));
             m.removeLocalTheorem(myLocalTheorem);
         }

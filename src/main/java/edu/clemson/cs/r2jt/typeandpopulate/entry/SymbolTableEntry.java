@@ -1,7 +1,7 @@
 /*
  * SymbolTableEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,20 +24,23 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
 /**
- * <p>Checklist for subclassing <code>SymbolTableEntry</code>:</p>
+ * <p>
+ * Checklist for subclassing <code>SymbolTableEntry</code>:
+ * </p>
  * 
  * <ul>
- * 		<li>Create subclass.</li>
- * 		<li>Add "toXXX()" method in this parent class.</li>
- * 		<li>Override it in subclass.</li>
- *              <li>Consider if entry can be coerced to other kinds of entries,
- *                  and override those toXXXs as well. (See ProgramVariableEntry
- *                  as an example.</li>
+ * <li>Create subclass.</li>
+ * <li>Add "toXXX()" method in this parent class.</li>
+ * <li>Override it in subclass.</li>
+ * <li>Consider if entry can be coerced to other kinds of entries, and override
+ * those toXXXs as
+ * well. (See ProgramVariableEntry as an example.</li>
  * </ul>
  */
 public abstract class SymbolTableEntry {
 
     public enum Quantification {
+
         NONE {
 
             @Override
@@ -103,8 +106,8 @@ public abstract class SymbolTableEntry {
         return myDefiningElement;
     }
 
-    public FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
-            Location l) {
+    public FacilityTypeRepresentationEntry
+            toFacilityTypeRepresentationEntry(Location l) {
         throw new SourceErrorException("Expecting a facility type "
                 + "representation.  Found " + getEntryTypeDescription() + ".",
                 l);
@@ -127,8 +130,8 @@ public abstract class SymbolTableEntry {
     }
 
     public FacilityEntry toFacilityEntry(Location l) {
-        throw new SourceErrorException("Expecting a facility.  Found "
-                + getEntryTypeDescription(), l);
+        throw new SourceErrorException(
+                "Expecting a facility.  Found " + getEntryTypeDescription(), l);
     }
 
     public ProgramParameterEntry toProgramParameterEntry(Location l) {
@@ -142,8 +145,9 @@ public abstract class SymbolTableEntry {
     }
 
     public OperationEntry toOperationEntry(Location l) {
-        throw new SourceErrorException("Expecting an operation.  Found "
-                + getEntryTypeDescription(), l);
+        throw new SourceErrorException(
+                "Expecting an operation.  Found " + getEntryTypeDescription(),
+                l);
     }
 
     public OperationProfileEntry toOperationProfileEntry(Location l) {
@@ -152,8 +156,9 @@ public abstract class SymbolTableEntry {
     }
 
     public ProcedureEntry toProcedureEntry(Location l) {
-        throw new SourceErrorException("Expecting a procedure.  Found "
-                + getEntryTypeDescription(), l);
+        throw new SourceErrorException(
+                "Expecting a procedure.  Found " + getEntryTypeDescription(),
+                l);
     }
 
     public ShortFacilityEntry toShortFacilityEntry(Location l) {
@@ -167,8 +172,9 @@ public abstract class SymbolTableEntry {
     }
 
     public TheoremEntry toTheoremEntry(Location l) {
-        throw new SourceErrorException("Expecting a theorem.  " + "Found "
-                + getEntryTypeDescription(), l);
+        throw new SourceErrorException(
+                "Expecting a theorem.  " + "Found " + getEntryTypeDescription(),
+                l);
     }
 
     public abstract String getEntryTypeDescription();
@@ -177,8 +183,8 @@ public abstract class SymbolTableEntry {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility);
 
-    public static Map<String, MTType> buildMathTypeGenerics(
-            Map<String, PTType> genericInstantiations) {
+    public static Map<String, MTType>
+            buildMathTypeGenerics(Map<String, PTType> genericInstantiations) {
 
         Map<String, MTType> genericMathematicalInstantiations =
                 new HashMap<String, MTType>();

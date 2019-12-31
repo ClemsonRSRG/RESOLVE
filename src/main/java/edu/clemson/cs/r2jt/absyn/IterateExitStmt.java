@@ -1,7 +1,7 @@
 /*
  * IterateExitStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -112,7 +112,7 @@ public class IterateExitStmt extends Statement {
 
         sb.append("when (" + test.toString(0) + ")");
 
-        //	printSpace(indent, sb);
+        // printSpace(indent, sb);
         sb.append("do\n");
         Iterator<Statement> i = statements.iterator();
         while (i.hasNext()) {

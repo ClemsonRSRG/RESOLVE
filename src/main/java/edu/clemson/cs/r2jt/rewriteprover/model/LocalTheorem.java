@@ -1,7 +1,7 @@
 /*
  * LocalTheorem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,15 +26,21 @@ public class LocalTheorem extends Theorem {
             new LocalTheoremUnwrapper();
 
     /**
-     * <p>Mathematically speaking, once we successfully move all the consequents
-     * "above the line", i.e., establish them as things we know, we're done,
-     * and we don't care which things above the line were part of our original
-     * givens and which were the things we were originally trying to establish.
-     * Practically, however, in order to reconstruct the proof we need to know
-     * which antecedents started life as consequents.  This flag is set to 
-     * indicate that an established truth is one of the things we were 
-     * <em>trying</em> to establish, rather than some intermediary or original
-     * given.</p>
+     * <p>
+     * Mathematically speaking, once we successfully move all the consequents
+     * "above the line", i.e.,
+     * establish them as things we know, we're done, and we don't care which
+     * things above the line
+     * were part of our original givens and which were the things we were
+     * originally trying to
+     * establish. Practically, however, in order to reconstruct the proof we
+     * need to know which
+     * antecedents started life as consequents. This flag is set to indicate
+     * that an established truth
+     * is one of the things we were <em>trying</em> to establish, rather than
+     * some intermediary or
+     * original given.
+     * </p>
      */
     private boolean myThingWeWereTryingToProveFlag;
 

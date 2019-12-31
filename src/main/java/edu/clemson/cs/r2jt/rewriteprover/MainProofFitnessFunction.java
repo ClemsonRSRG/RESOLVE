@@ -1,7 +1,7 @@
 /*
  * MainProofFitnessFunction.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -42,9 +42,8 @@ public class MainProofFitnessFunction
     public double calculateFitness(Transformation t) {
         double result = 0;
 
-        if (t.couldAffectAntecedent()
-                || (!(t instanceof StrengthenConsequent) && t
-                        .introducesQuantifiedVariables())) {
+        if (t.couldAffectAntecedent() || (!(t instanceof StrengthenConsequent)
+                && t.introducesQuantifiedVariables())) {
             result = -1;
         }
         else if (AutomatedProver.H_DETECT_IDENTITY_EXPANSION
@@ -56,13 +55,14 @@ public class MainProofFitnessFunction
             PExp replacement = tAsSIPIC.getReplacement();
             if (pattern.getFunctionApplications().isEmpty()
                     && pattern.getQuantifiedVariables().size() == 1
-                    && replacement.getQuantifiedVariables().contains(
-                            pattern.getQuantifiedVariables().iterator().next())) {
+                    && replacement.getQuantifiedVariables().contains(pattern
+                            .getQuantifiedVariables().iterator().next())) {
                 result = -1;
             }
         }
 
-        if (result == 0 && AutomatedProver.H_BEST_FIRST_CONSEQUENT_EXPLORATION) {
+        if (result == 0
+                && AutomatedProver.H_BEST_FIRST_CONSEQUENT_EXPLORATION) {
             Set<String> introduced =
                     new HashSet<String>(t.getReplacementSymbolNames());
             introduced.removeAll(myConsequentVariableNames);
@@ -70,9 +70,9 @@ public class MainProofFitnessFunction
             double simplificationFactor =
                     unitAtan(t.functionApplicationCountDelta() * -1);
 
-            result =
-                    Math.min(Math.pow(0.5, introduced.size())
-                            * simplificationFactor, 1.0);
+            result = Math.min(
+                    Math.pow(0.5, introduced.size()) * simplificationFactor,
+                    1.0);
         }
 
         return result;

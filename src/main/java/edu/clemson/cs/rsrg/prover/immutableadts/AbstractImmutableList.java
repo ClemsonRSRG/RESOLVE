@@ -1,7 +1,7 @@
 /*
  * AbstractImmutableList.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,7 +13,9 @@
 package edu.clemson.cs.rsrg.prover.immutableadts;
 
 /**
- * <p>This is the abstract base class for all immutable list implementations.</p>
+ * <p>
+ * This is the abstract base class for all immutable list implementations.
+ * </p>
  *
  * @param <E> Type of elements stored inside this list.
  *
@@ -27,8 +29,9 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>This method returns a new immutable list after appending
-     * an element.</p>
+     * <p>
+     * This method returns a new immutable list after appending an element.
+     * </p>
      *
      * @param e An element.
      *
@@ -40,8 +43,11 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable list after appending
-     * all elements from the specified immutable list.</p>
+     * <p>
+     * This method returns a new immutable list after appending all elements
+     * from the specified
+     * immutable list.
+     * </p>
      *
      * @param l Immutable list to be appended to the end.
      *
@@ -53,8 +59,11 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable list after appending
-     * all elements from the specified iterator.</p>
+     * <p>
+     * This method returns a new immutable list after appending all elements
+     * from the specified
+     * iterator.
+     * </p>
      *
      * @param i An iterable collection.
      *
@@ -66,7 +75,9 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     }
 
     /**
-     * <p>This method returns the first element in the list.</p>
+     * <p>
+     * This method returns the first element in the list.
+     * </p>
      *
      * @return First element.
      */
@@ -76,11 +87,14 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable list after inserting the
-     * element {@code e} at the specified index.</p>
+     * <p>
+     * This method returns a new immutable list after inserting the element
+     * {@code e} at the specified
+     * index.
+     * </p>
      *
-     * @param index An index position where we want to insert
-     *              the element {@code e}.
+     * @param index An index position where we want to insert the element
+     *        {@code e}.
      * @param e A new element.
      *
      * @return An immutable list.
@@ -91,13 +105,16 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable list after inserting the
-     * list {@code e} at the specified index.</p>
+     * <p>
+     * This method returns a new immutable list after inserting the list
+     * {@code e} at the specified
+     * index.
+     * </p>
      *
-     * @param index An index position where we want to insert
-     *              the list {@code e}.
-     * @param l An immutable list that needs to be inserted
-     *          into our current immutable list.
+     * @param index An index position where we want to insert the list
+     *        {@code e}.
+     * @param l An immutable list that needs to be inserted into our current
+     *        immutable list.
      *
      * @return An immutable list.
      */
@@ -122,8 +139,10 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable list after removing the
-     * element at the specified index.</p>
+     * <p>
+     * This method returns a new immutable list after removing the element at
+     * the specified index.
+     * </p>
      *
      * @param index An index position where we want to remove.
      *
@@ -140,20 +159,22 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
             retval = head(index);
         }
         else {
-            retval =
-                    new ImmutableListConcatenation<>(head(index),
-                            tail(index + 1));
+            retval = new ImmutableListConcatenation<>(head(index),
+                    tail(index + 1));
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns a new immutable list after replacing the
-     * element {@code e} at the specified index.</p>
+     * <p>
+     * This method returns a new immutable list after replacing the element
+     * {@code e} at the specified
+     * index.
+     * </p>
      *
-     * @param index An index position where we want to replace
-     *              the element {@code e}.
+     * @param index An index position where we want to replace the element
+     *        {@code e}.
      * @param e A replacing element.
      *
      * @return An immutable list.
@@ -172,8 +193,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
             second = insertedList;
         }
         else {
-            first =
-                    new ImmutableListConcatenation<>(head(index), insertedList);
+            first = new ImmutableListConcatenation<>(head(index), insertedList);
             second = tail(index + 1);
         }
 
@@ -181,11 +201,13 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from
-     * the specified start index to the specified length (end index).</p>
+     * <p>
+     * This method returns a new immutable sub-list from the specified start
+     * index to the specified
+     * length (end index).
+     * </p>
      *
-     * @param startIndex An index position to start building
-     *                   our sub-list.
+     * @param startIndex An index position to start building our sub-list.
      * @param length Length of the sub-list.
      *
      * @return An immutable sub-list of the original list.
@@ -196,7 +218,9 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */

@@ -1,7 +1,7 @@
 /*
  * PostProcessor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,20 +36,26 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
-     * <p>Collection of all symbol tables other than my own.
-     * Mine doesn't exist because I haven't gone through the
-     * population stage yet.</p>
+     * <p>
+     * Collection of all symbol tables other than my own. Mine doesn't exist
+     * because I haven't gone
+     * through the population stage yet.
+     * </p>
      */
     private final MathSymbolTableBuilder mySymbolTable;
 
     /**
-     * <p>Type graph of mathematical expressions.</p>
+     * <p>
+     * Type graph of mathematical expressions.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
     /**
-     * <p>Utilities class that contains methods that are used
-     * in both pre and post Processors.</p>
+     * <p>
+     * Utilities class that contains methods that are used in both pre and post
+     * Processors.
+     * </p>
      */
     private Utilities myUtilities;
 
@@ -73,33 +79,27 @@ public class PostProcessor extends TreeWalkerStackVisitor {
 
     @Override
     public void preCallStmt(CallStmt stmt) {
-    /*   Commented out until we hear back from Murali
-    // Variables
-    Location loc = stmt.getLocation();
-    PosSymbol name = stmt.getName();
-    List<ProgramExp> argList = stmt.getArguments();
-    boolean localOper = myUtilities.isLocalOper(name.getName());
-
-    // Check if the called operation is a local operation
-    if (localOper) {
-        List<ParameterVarDec> parameterList =
-                myUtilities.retrieveParameterList(name.getName());
-
-        // Make sure that we have the right operation
-        if (parameterList.size() == argList.size()) {
-            // Replaces the modified argument list
-            stmt.setArguments(applyReplica(parameterList, argList));
-        }
-        else {
-            // Found an operation with the same name,
-            // but different argument size
-            wrongOperation(loc, name, parameterList.size(), argList.size());
-        }
-    }
-    else {
-        // TODO: Invoke Hampton's new symbol table to look for the
-        // external operation.
-    }      */
+        /*
+         * Commented out until we hear back from Murali // Variables Location
+         * loc = stmt.getLocation();
+         * PosSymbol name = stmt.getName(); List<ProgramExp> argList =
+         * stmt.getArguments(); boolean
+         * localOper = myUtilities.isLocalOper(name.getName());
+         * 
+         * // Check if the called operation is a local operation if (localOper)
+         * { List<ParameterVarDec>
+         * parameterList = myUtilities.retrieveParameterList(name.getName());
+         * 
+         * // Make sure that we have the right operation if
+         * (parameterList.size() == argList.size()) {
+         * // Replaces the modified argument list
+         * stmt.setArguments(applyReplica(parameterList,
+         * argList)); } else { // Found an operation with the same name, // but
+         * different argument size
+         * wrongOperation(loc, name, parameterList.size(), argList.size()); } }
+         * else { // TODO: Invoke
+         * Hampton's new symbol table to look for the // external operation. }
+         */
     }
 
     // -----------------------------------------------------------
@@ -250,13 +250,12 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     // Error Handling
     // -----------------------------------------------------------
 
-    public void wrongOperation(Location location, PosSymbol name,
-            int paramSize, int argSize) {
-        String message =
-                "Expecting an operation with the name " + name + " with "
-                        + argSize + " arguments.\n"
-                        + "Found an operation with same name, but with "
-                        + paramSize + " arguments.";
+    public void wrongOperation(Location location, PosSymbol name, int paramSize,
+            int argSize) {
+        String message = "Expecting an operation with the name " + name
+                + " with " + argSize + " arguments.\n"
+                + "Found an operation with same name, but with " + paramSize
+                + " arguments.";
         throw new SourceErrorException(message, location);
     }
 
@@ -265,13 +264,15 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
-     * <p>Applies the Replica call to any <code>VariableExp</code>
-     * where the evaluates mode is specified.</p>
+     * <p>
+     * Applies the Replica call to any <code>VariableExp</code> where the
+     * evaluates mode is specified.
+     * </p>
      *
-     * @param parameterList The list of <code>ParameterVarDec</code>,
-     *                      which contains the modes.
-     * @param argList The list of arguments being used to invoke the
-     *                current operation/procedure.
+     * @param parameterList The list of <code>ParameterVarDec</code>, which
+     *        contains the modes.
+     * @param argList The list of arguments being used to invoke the current
+     *        operation/procedure.
      *
      * @return The modified argument list
      */
@@ -304,10 +305,12 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>Creates a list of all the local and parameter variables.</p>
+     * <p>
+     * Creates a list of all the local and parameter variables.
+     * </p>
      *
-     * @param location The location for the each of the new
-     *                 variable expressions.
+     * @param location The location for the each of the new variable
+     *        expressions.
      *
      * @return A list of <code>VariableExp</code>.
      */
@@ -327,8 +330,10 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>Creates a <code>ProgramParamExp</code> for Replica with the
-     * <code>ProgramExp</code> passed in.</p>
+     * <p>
+     * Creates a <code>ProgramParamExp</code> for Replica with the
+     * <code>ProgramExp</code> passed in.
+     * </p>
      *
      * @param oldExp Expression to be replicated.
      *
@@ -340,7 +345,8 @@ public class PostProcessor extends TreeWalkerStackVisitor {
         params.add(oldExp);
 
         // Create new right hand side with the Replica operation
-        return new ProgramParamExp(oldExp.getLocation(), new PosSymbol(oldExp
-                .getLocation(), Symbol.symbol("Replica")), params, null);
+        return new ProgramParamExp(oldExp.getLocation(),
+                new PosSymbol(oldExp.getLocation(), Symbol.symbol("Replica")),
+                params, null);
     }
 }

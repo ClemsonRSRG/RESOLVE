@@ -1,7 +1,7 @@
 /*
  * ProgramVariableArrayExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,22 +20,33 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>Although the grammar allows user to type in programming array expressions,
- * in reality these are just syntactic sugar for different operation/function calls in
- * {@code Static_Array_Template}.</p>
+ * <p>
+ * Although the grammar allows user to type in programming array expressions, in
+ * reality these are
+ * just syntactic sugar for different operation/function calls in
+ * {@code Static_Array_Template}.
+ * </p>
  *
- * <p>When the {@link TreeBuildingListener} walks either to the exit function of
- * a {@code ResolveParser.ProgVarDotArrayExpContext} node or
- * a {@code ResolveParser.ProgVarArrayExpContext} node, we create an instance
- * of this class to satisfy the requirements of building something of type
- * {@link ProgramExp}.</p>
+ * <p>
+ * When the {@link TreeBuildingListener} walks either to the exit function of a
+ * {@code ResolveParser.ProgVarDotArrayExpContext} node or a
+ * {@code ResolveParser.ProgVarArrayExpContext} node, we create an instance of
+ * this class to satisfy
+ * the requirements of building something of type {@link ProgramExp}.
+ * </p>
  *
- * <p>Before a {@link ProgramExp} is added to a statement, we check to see if
- * it contains any instances of this class. For all instances of this class,
- * we convert it to the corresponding operation/function calls.</p>
+ * <p>
+ * Before a {@link ProgramExp} is added to a statement, we check to see if it
+ * contains any instances
+ * of this class. For all instances of this class, we convert it to the
+ * corresponding
+ * operation/function calls.
+ * </p>
  *
- * <p>When we are done building the RESOLVE AST, there should not be any instances
- * of this class left.</p>
+ * <p>
+ * When we are done building the RESOLVE AST, there should not be any instances
+ * of this class left.
+ * </p>
  *
  * @version 2.0
  */
@@ -45,10 +56,18 @@ public class ProgramVariableArrayExp extends ProgramVariableExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expressions's index expression.</p> */
+    /**
+     * <p>
+     * The expressions's index expression.
+     * </p>
+     */
     private final ProgramExp myProgramIndexExp;
 
-    /** <p>The expressions's array name expression.</p> */
+    /**
+     * <p>
+     * The expressions's array name expression.
+     * </p>
+     */
     private final ProgramVariableExp myProgramNameExp;
 
     // ===========================================================
@@ -56,11 +75,15 @@ public class ProgramVariableArrayExp extends ProgramVariableExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming variable array expression.</p>
+     * <p>
+     * This constructs a programming variable array expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param nameExp A {@link ProgramVariableExp} representing the expression's name expression.
-     * @param indexExp A {@link ProgramExp} representing the expression's index expression.
+     * @param nameExp A {@link ProgramVariableExp} representing the expression's
+     *        name expression.
+     * @param indexExp A {@link ProgramExp} representing the expression's index
+     *        expression.
      */
     public ProgramVariableArrayExp(Location l, ProgramVariableExp nameExp,
             ProgramExp indexExp) {
@@ -117,18 +140,19 @@ public class ProgramVariableArrayExp extends ProgramVariableExp {
             ProgramVariableArrayExp eAsProgramVariableNameExp =
                     (ProgramVariableArrayExp) e;
 
-            retval =
-                    myProgramNameExp
-                            .equivalent(eAsProgramVariableNameExp.myProgramNameExp)
-                            && myProgramIndexExp
-                                    .equivalent(eAsProgramVariableNameExp.myProgramIndexExp);
+            retval = myProgramNameExp
+                    .equivalent(eAsProgramVariableNameExp.myProgramNameExp)
+                    && myProgramIndexExp.equivalent(
+                            eAsProgramVariableNameExp.myProgramIndexExp);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns the expression's name expression.</p>
+     * <p>
+     * This method returns the expression's name expression.
+     * </p>
      *
      * @return The {@link ProgramVariableExp} representation object.
      */
@@ -137,7 +161,9 @@ public class ProgramVariableArrayExp extends ProgramVariableExp {
     }
 
     /**
-     * <p>This method returns the expression's index expression.</p>
+     * <p>
+     * This method returns the expression's index expression.
+     * </p>
      *
      * @return The {@link ProgramExp} representation object.
      */

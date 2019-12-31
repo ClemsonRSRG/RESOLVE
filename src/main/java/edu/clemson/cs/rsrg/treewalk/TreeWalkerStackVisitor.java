@@ -1,7 +1,7 @@
 /*
  * TreeWalkerStackVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,7 +23,7 @@ public abstract class TreeWalkerStackVisitor extends TreeWalkerVisitor {
     // ===========================================================
 
     private LinkedList<ResolveConceptualElement> myVisitStack =
-        new LinkedList<>();
+            new LinkedList<>();
 
     private ResolveConceptualElement myParent;
 

@@ -1,7 +1,7 @@
 /*
  * ArrayBackedImmutableList.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,7 +19,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This class implements an array-based immutable list.</p>
+ * <p>
+ * This class implements an array-based immutable list.
+ * </p>
  *
  * @param <E> Type of elements stored inside this list.
  *
@@ -32,13 +34,25 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     // Member Fields
     // ===========================================================
 
-    /** <p>Elements in this immutable list.</p> */
+    /**
+     * <p>
+     * Elements in this immutable list.
+     * </p>
+     */
     private final E[] myElements;
 
-    /** <p>Number of elements in this immutable list.</p> */
+    /**
+     * <p>
+     * Number of elements in this immutable list.
+     * </p>
+     */
     private final int myElementsLength;
 
-    /** <p>The computed hash code for this immutable list.</p> */
+    /**
+     * <p>
+     * The computed hash code for this immutable list.
+     * </p>
+     */
     private final int myHashCode;
 
     // ===========================================================
@@ -46,8 +60,10 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>This creates a new array-backed immutable list using the
-     * specified iterator.</p>
+     * <p>
+     * This creates a new array-backed immutable list using the specified
+     * iterator.
+     * </p>
      *
      * @param i An {@link Iterator}.
      */
@@ -65,8 +81,10 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This creates a new array-backed immutable list using
-     * the specified array of elements.</p>
+     * <p>
+     * This creates a new array-backed immutable list using the specified array
+     * of elements.
+     * </p>
      *
      * @param i An array of elements.
      */
@@ -77,8 +95,11 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This creates a new array-backed immutable list using
-     * the specified array of elements and length.</p>
+     * <p>
+     * This creates a new array-backed immutable list using the specified array
+     * of elements and
+     * length.
+     * </p>
      *
      * @param i An array of elements.
      * @param length Length to copy.
@@ -94,11 +115,14 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>Equals method to compare two immutable lists.</p>
+     * <p>
+     * Equals method to compare two immutable lists.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the elements are equal, {@code false} otherwise.
+     * @return {@code true} if all the elements are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -122,7 +146,9 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns the element at the specified index.</p>
+     * <p>
+     * This method returns the element at the specified index.
+     * </p>
      *
      * @param index An index position.
      *
@@ -134,7 +160,9 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -144,8 +172,10 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from the head
-     * to the specified index.</p>
+     * <p>
+     * This method returns a new immutable sub-list from the head to the
+     * specified index.
+     * </p>
      *
      * @param length Length of the sub-list.
      *
@@ -165,8 +195,9 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns the number of elements in
-     * this list.</p>
+     * <p>
+     * This method returns the number of elements in this list.
+     * </p>
      *
      * @return Number of elements.
      */
@@ -176,11 +207,11 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns an iterator for iterating
-     * over a sub-list.</p>
+     * <p>
+     * This method returns an iterator for iterating over a sub-list.
+     * </p>
      *
-     * @param start An index position to start building
-     *              our sub-list.
+     * @param start An index position to start building our sub-list.
      * @param length Length of the sub-list.
      *
      * @return An {@link Iterator}.
@@ -190,18 +221,20 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from the
-     * specified start index to the end of our list.</p>
+     * <p>
+     * This method returns a new immutable sub-list from the specified start
+     * index to the end of our
+     * list.
+     * </p>
      *
-     * @param startIndex An index position to start building
-     *                   our sub-list.
+     * @param startIndex An index position to start building our sub-list.
      *
      * @return An immutable sub-list of the original list.
      */
     @Override
     public final ImmutableList<E> tail(int startIndex) {
-        return new ImmutableListSubview<>(this, startIndex, myElementsLength
-                - startIndex);
+        return new ImmutableListSubview<>(this, startIndex,
+                myElementsLength - startIndex);
     }
 
     // ===========================================================
@@ -209,8 +242,10 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>An helper method for computing the hash code value
-     * for this immutable list.</p>
+     * <p>
+     * An helper method for computing the hash code value for this immutable
+     * list.
+     * </p>
      *
      * @return Hash code value.
      */

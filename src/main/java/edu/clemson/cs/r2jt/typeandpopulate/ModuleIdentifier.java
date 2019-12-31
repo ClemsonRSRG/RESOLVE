@@ -1,7 +1,7 @@
 /*
  * ModuleIdentifier.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,14 +18,21 @@ import edu.clemson.cs.r2jt.data.ModuleID;
 import org.antlr.v4.runtime.Token;
 
 /**
- * <p>Identifies a particular module unambiguously.</p>
+ * <p>
+ * Identifies a particular module unambiguously.
+ * </p>
  * 
- * <p><strong>Note:</strong> Currently, we only permit one level of namespace.
- * But ultimately that will probably change (because, for example, at this
- * moment if there were two "Stack_Templates", we couldn't deal with that.  A
- * java class-path-like solution seems inevitable.  For the moment however, this
- * is just a wrapper around the string name of the module to facilitate changing
- * how we deal with modules later.</p>
+ * <p>
+ * <strong>Note:</strong> Currently, we only permit one level of namespace. But
+ * ultimately that will
+ * probably change (because, for example, at this moment if there were two
+ * "Stack_Templates", we
+ * couldn't deal with that. A java class-path-like solution seems inevitable.
+ * For the moment
+ * however, this is just a wrapper around the string name of the module to
+ * facilitate changing how
+ * we deal with modules later.
+ * </p>
  */
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 

@@ -1,7 +1,7 @@
 /*
  * OutfixExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical outfix expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the mathematical outfix expression
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,11 +35,14 @@ public class OutfixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This defines the various outfix operators.</p>
+     * <p>
+     * This defines the various outfix operators.
+     * </p>
      *
      * @version 2.0
      */
     public enum Operator {
+
         ANGLE {
 
             @Override
@@ -147,14 +153,18 @@ public class OutfixExp extends AbstractFunctionExp {
         };
 
         /**
-         * <p>Returns the left delimiter as a string.</p>
+         * <p>
+         * Returns the left delimiter as a string.
+         * </p>
          *
          * @return A string.
          */
         public abstract String getLeftDelimiterString();
 
         /**
-         * <p>Returns the right delimiter as a string.</p>
+         * <p>
+         * Returns the right delimiter as a string.
+         * </p>
          *
          * @return A string.
          */
@@ -165,10 +175,18 @@ public class OutfixExp extends AbstractFunctionExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's operator.</p> */
+    /**
+     * <p>
+     * The expression's operator.
+     * </p>
+     */
     private final Operator myOperator;
 
-    /** <p>The argument expression.</p> */
+    /**
+     * <p>
+     * The argument expression.
+     * </p>
+     */
     private final Exp myArgument;
 
     // ===========================================================
@@ -176,7 +194,9 @@ public class OutfixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This constructs an equality/inequality expression.</p>
+     * <p>
+     * This constructs an equality/inequality expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param operator A {@link Operator} representing the operator.
@@ -251,16 +271,17 @@ public class OutfixExp extends AbstractFunctionExp {
 
         if (retval) {
             OutfixExp eAsOutfix = (OutfixExp) e;
-            retval =
-                    (myOperator == eAsOutfix.myOperator)
-                            && equivalent(myArgument, eAsOutfix.myArgument);
+            retval = (myOperator == eAsOutfix.myOperator)
+                    && equivalent(myArgument, eAsOutfix.myArgument);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns the argument expression.</p>
+     * <p>
+     * This method returns the argument expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -269,7 +290,9 @@ public class OutfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the operator.</p>
+     * <p>
+     * This method returns the operator.
+     * </p>
      *
      * @return A {@link Operator} object containing the operator.
      */
@@ -278,7 +301,9 @@ public class OutfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the operator name.</p>
+     * <p>
+     * This method returns a deep copy of the operator name.
+     * </p>
      *
      * @return A {@link PosSymbol} object containing the operator.
      */
@@ -288,7 +313,9 @@ public class OutfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns operator name in string format.</p>
+     * <p>
+     * This method returns operator name in string format.
+     * </p>
      *
      * @return The operator as a string.
      */
@@ -337,8 +364,8 @@ public class OutfixExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new OutfixExp(cloneLocation(), myOperator, substitute(
-                myArgument, substitutions));
+        return new OutfixExp(cloneLocation(), myOperator,
+                substitute(myArgument, substitutions));
     }
 
 }

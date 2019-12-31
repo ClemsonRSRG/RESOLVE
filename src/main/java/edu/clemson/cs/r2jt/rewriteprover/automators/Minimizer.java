@@ -1,7 +1,7 @@
 /*
  * Minimizer.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,12 +24,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
- * <p>A <code>Minimizer</code> is an {@link Automator Automator} that takes a
- * list of transformations during its initialization, restricts them to just
- * those transformations guaranteed to strictly reduce the number of theorem
- * applications in the consequent of the prover state, then repeatedly applies
- * transformations from that set until no further transformations can be 
- * applied.</p>
+ * <p>
+ * A <code>Minimizer</code> is an {@link Automator Automator} that takes a list
+ * of transformations
+ * during its initialization, restricts them to just those transformations
+ * guaranteed to strictly
+ * reduce the number of theorem applications in the consequent of the prover
+ * state, then repeatedly
+ * applies transformations from that set until no further transformations can be
+ * applied.
+ * </p>
  */
 public class Minimizer implements Automator {
 
@@ -56,14 +60,13 @@ public class Minimizer implements Automator {
         }
 
         myCurrentRound = myReducingTranformations.iterator();
-        myCurrentApplier = DUMMY_APPLIER; //This will never be applied
+        myCurrentApplier = DUMMY_APPLIER; // This will never be applied
     }
 
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
-        myProductiveRoundFlag =
-                myProductiveRoundFlag
-                        || (myCurrentApplier.getApplicationCount() > 0);
+        myProductiveRoundFlag = myProductiveRoundFlag
+                || (myCurrentApplier.getApplicationCount() > 0);
 
         if (myCurrentRound.hasNext()) {
             myCurrentApplier = new ApplyAll(myCurrentRound.next());
@@ -73,7 +76,7 @@ public class Minimizer implements Automator {
             if (myProductiveRoundFlag) {
                 myCurrentRound = myReducingTranformations.iterator();
                 myProductiveRoundFlag = false;
-                myCurrentApplier = DUMMY_APPLIER; //This will never be applied
+                myCurrentApplier = DUMMY_APPLIER; // This will never be applied
             }
             else {
                 stack.pop();

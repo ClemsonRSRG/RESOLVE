@@ -210,6 +210,7 @@
                         ${project.basedir}/rsrg-format.xml
                     </configFile>
                     <directories>
+                        <directory>${project.build.sourceDirectory}</directory>
                         <directory>${project.build.testSourceDirectory}</directory>
                     </directories>
                     <lineEnding>LF</lineEnding>

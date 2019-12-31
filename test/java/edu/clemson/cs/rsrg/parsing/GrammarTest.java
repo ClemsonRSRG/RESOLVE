@@ -1,7 +1,7 @@
 /*
  * GrammarTest.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * <p>Unit test for testing the RESOLVE compiler's lexer/parser on
- * RESOLVE files.</p>
+ * <p>
+ * Unit test for testing the RESOLVE compiler's lexer/parser on RESOLVE files.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -34,8 +35,10 @@ public class GrammarTest {
     // ===========================================================
 
     /**
-     * <p>This tests a sample concept file to see if we encounter
-     * any parsing errors.</p>
+     * <p>
+     * This tests a sample concept file to see if we encounter any parsing
+     * errors.
+     * </p>
      */
     @Test
     public final void testParsingConcept() {
@@ -43,8 +46,10 @@ public class GrammarTest {
     }
 
     /**
-     * <p>This tests a sample concept realization file to see if we encounter
-     * any parsing errors.</p>
+     * <p>
+     * This tests a sample concept realization file to see if we encounter any
+     * parsing errors.
+     * </p>
      */
     @Test
     public final void testParsingConceptRealiz() {
@@ -52,8 +57,10 @@ public class GrammarTest {
     }
 
     /**
-     * <p>This tests a sample enhancement file to see if we encounter
-     * any parsing errors.</p>
+     * <p>
+     * This tests a sample enhancement file to see if we encounter any parsing
+     * errors.
+     * </p>
      */
     @Test
     public final void testParsingEnhancement() {
@@ -61,8 +68,10 @@ public class GrammarTest {
     }
 
     /**
-     * <p>This tests a sample enhancement realization file to see if we encounter
-     * any parsing errors.</p>
+     * <p>
+     * This tests a sample enhancement realization file to see if we encounter
+     * any parsing errors.
+     * </p>
      */
     @Test
     public final void testParsingEnhancementRealiz() {
@@ -70,8 +79,10 @@ public class GrammarTest {
     }
 
     /**
-     * <p>This tests a sample facility file to see if we encounter
-     * any parsing errors.</p>
+     * <p>
+     * This tests a sample facility file to see if we encounter any parsing
+     * errors.
+     * </p>
      */
     @Test
     public final void testParsingFacility() {
@@ -79,8 +90,10 @@ public class GrammarTest {
     }
 
     /**
-     * <p>This tests a sample precis file to see if we encounter
-     * any parsing errors.</p>
+     * <p>
+     * This tests a sample precis file to see if we encounter any parsing
+     * errors.
+     * </p>
      */
     @Test
     public final void testParsingPrecis() {
@@ -92,9 +105,11 @@ public class GrammarTest {
     // ===========================================================
 
     /**
-     * <p>This invokes the {@link ResolveLexer} and {@link ResolveParser}
-     * on the specified filename and checks to see if the are any syntax
-     * errors.</p>
+     * <p>
+     * This invokes the {@link ResolveLexer} and {@link ResolveParser} on the
+     * specified filename and
+     * checks to see if the are any syntax errors.
+     * </p>
      *
      * @param filename A {@code RESOLVE} filename.
      *

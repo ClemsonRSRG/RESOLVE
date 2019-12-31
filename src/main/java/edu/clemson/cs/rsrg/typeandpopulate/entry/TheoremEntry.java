@@ -1,7 +1,7 @@
 /*
  * TheoremEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,7 +22,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
 
 /**
- * <p>This creates a symbol table entry for a mathematical theorem.</p>
+ * <p>
+ * This creates a symbol table entry for a mathematical theorem.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,10 +34,18 @@ public class TheoremEntry extends SymbolTableEntry {
     // Member Fields
     // ===========================================================
 
-    /** <p>The mathematical expression for this entry.</p> */
+    /**
+     * <p>
+     * The mathematical expression for this entry.
+     * </p>
+     */
     private final Exp myAssertionExp;
 
-    /** <p>The mathematical symbol entry associated with this entry.</p> */
+    /**
+     * <p>
+     * The mathematical symbol entry associated with this entry.
+     * </p>
+     */
     private final MathSymbolEntry myMathSymbolAlterEgo;
 
     // ===========================================================
@@ -43,7 +53,9 @@ public class TheoremEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This creates a symbol table entry for a mathematical theorem.</p>
+     * <p>
+     * This creates a symbol table entry for a mathematical theorem.
+     * </p>
      *
      * @param g The current type graph.
      * @param name Name associated with this entry.
@@ -55,10 +67,8 @@ public class TheoremEntry extends SymbolTableEntry {
         super(name, definingElement, sourceModule);
         myAssertionExp = definingElement.getAssertion();
 
-        myMathSymbolAlterEgo =
-                new MathSymbolEntry(g, name, Quantification.NONE,
-                        definingElement, g.BOOLEAN, null, null, null,
-                        sourceModule);
+        myMathSymbolAlterEgo = new MathSymbolEntry(g, name, Quantification.NONE,
+                definingElement, g.BOOLEAN, null, null, null, sourceModule);
     }
 
     // ===========================================================
@@ -66,8 +76,11 @@ public class TheoremEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     *  <p>Since this is used by multiple objects, we really don't want to be returning a reference,
-     * therefore this method returns a deep copy of the assertion expression.</p>
+     * <p>
+     * Since this is used by multiple objects, we really don't want to be
+     * returning a reference,
+     * therefore this method returns a deep copy of the assertion expression.
+     * </p>
      *
      * @return A {@link Exp} representation object.
      */
@@ -76,7 +89,9 @@ public class TheoremEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns a description associated with this entry.</p>
+     * <p>
+     * This method returns a description associated with this entry.
+     * </p>
      *
      * @return A string.
      */
@@ -86,9 +101,11 @@ public class TheoremEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method converts a generic {@link SymbolTableEntry} to an entry
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link SymbolTableEntry} to an entry that
+     * has all the generic
+     * types and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -103,13 +120,15 @@ public class TheoremEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link MathSymbolEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link MathSymbolEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link MathSymbolEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link MathSymbolEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final MathSymbolEntry toMathSymbolEntry(Location l) {
@@ -117,13 +136,15 @@ public class TheoremEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link TheoremEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link TheoremEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link TheoremEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link TheoremEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final TheoremEntry toTheoremEntry(Location l) {

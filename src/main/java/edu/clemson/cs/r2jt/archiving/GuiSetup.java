@@ -1,7 +1,7 @@
 /*
  * GuiSetup.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,9 @@ import java.util.Date;
 
 /**
  * 
- * <p>This class is used to setup the GUI for the jar file created 
- * by the compiler.</p>
+ * <p>
+ * This class is used to setup the GUI for the jar file created by the compiler.
+ * </p>
  *
  */
 public class GuiSetup {
@@ -34,11 +35,11 @@ public class GuiSetup {
     private final Rectangle outputTextAreaRec =
             new Rectangle(125, 75, 600, 400);
     private final Rectangle runButtonRec = new Rectangle(625, 5, 100, 25);
-    //private final Rectangle enterButtonRec = new Rectangle(625, 40, 100, 25);
+    // private final Rectangle enterButtonRec = new Rectangle(625, 40, 100, 25);
     private final Rectangle genMessageRec = new Rectangle(20, 500, 500, 20);
     private final Rectangle genDateRec = new Rectangle(300, 525, 200, 20);
 
-    //private final String facilityName = "User Facility";
+    // private final String facilityName = "User Facility";
     private final String consoleInMsg = "Console Input:";
     private final String consoleOutMsg = "Console Output:";
     private final String facilityLabelMsg =
@@ -95,9 +96,9 @@ public class GuiSetup {
         return runButtonRec;
     }
 
-    /*public Rectangle getEnterButtonRec() {
-    	return enterButtonRec;
-    }*/
+    /*
+     * public Rectangle getEnterButtonRec() { return enterButtonRec; }
+     */
     public Rectangle getGenMessageRec() {
         return genMessageRec;
     }
@@ -106,9 +107,9 @@ public class GuiSetup {
         return genDateRec;
     }
 
-    /*public String getFacilityName() {
-    	return facilityName;
-    }*/
+    /*
+     * public String getFacilityName() { return facilityName; }
+     */
     public String getConsoleInMsg() {
         return consoleInMsg;
     }

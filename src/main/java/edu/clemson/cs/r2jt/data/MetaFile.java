@@ -1,7 +1,7 @@
 /*
  * MetaFile.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,10 +17,11 @@ import java.io.File;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 
 /**
- * @author Chuck
- * This class is used in conjunction with the web interface as a way
- * to store all the information for user created components that is
- * needed by the compiler (since they will not be written to disk) 
+ * @author Chuck This class is used in conjunction with the web interface as a
+ *         way to store all the
+ *         information for user created components that is needed by the
+ *         compiler (since they will
+ *         not be written to disk)
  */
 
 public class MetaFile {
@@ -68,9 +69,9 @@ public class MetaFile {
         myCustomPath = customPath;
     }
 
-    /*public void setMyKind(ModuleKind myKind) {
-    	this.myKind = myKind;
-    }*/
+    /*
+     * public void setMyKind(ModuleKind myKind) { this.myKind = myKind; }
+     */
 
     public String getMyFileName() {
         return myFileName;
@@ -150,9 +151,8 @@ public class MetaFile {
                 myPkg = "Standard" + File.separator + "Static_Array_Template";
             }
             else if (myPkg.equals("Location_Linking_Template_1")) {
-                myPkg =
-                        "Standard" + File.separator
-                                + "Location_Linking_Template_1";
+                myPkg = "Standard" + File.separator
+                        + "Location_Linking_Template_1";
             }
             filePath +=
                     myPkg + File.separator + myFileName + myKind.getExtension();

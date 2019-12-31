@@ -1,7 +1,7 @@
 /*
  * VirtualListNode.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalker;
 import java.util.*;
 
 /**
- * <p>This is a virtual list node that allow us to store a list of children
- * elements that exist inside the parent element.</p>
+ * <p>
+ * This is a virtual list node that allow us to store a list of children
+ * elements that exist inside
+ * the parent element.
+ * </p>
  *
  * @author Blair Durkee
  * @author Yu-Shan Sun
@@ -31,16 +34,32 @@ public class VirtualListNode extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>List of children elements</p> */
+    /**
+     * <p>
+     * List of children elements
+     * </p>
+     */
     private final List<ResolveConceptualElement> myList;
 
-    /** <p>Class type of the children elements</p> */
+    /**
+     * <p>
+     * Class type of the children elements
+     * </p>
+     */
     private final Class<?> myListType;
 
-    /** <p>Name of the current element</p> */
+    /**
+     * <p>
+     * Name of the current element
+     * </p>
+     */
     private final String myName;
 
-    /** <p>Parent element</p> */
+    /**
+     * <p>
+     * Parent element
+     * </p>
+     */
     private final ResolveConceptualElement myParent;
 
     // ===========================================================
@@ -48,9 +67,11 @@ public class VirtualListNode extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This object is used by the {@link TreeWalker} class to create
-     * virtual list nodes for all the children objects inside the current
-     * traversing object.</p>
+     * <p>
+     * This object is used by the {@link TreeWalker} class to create virtual
+     * list nodes for all the
+     * children objects inside the current traversing object.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param parent Parent element.
@@ -82,26 +103,35 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link VirtualListNode} class.</p>
+     * <p>
+     * This method overrides the default clone method implementation for the
+     * {@link VirtualListNode}
+     * class.
+     * </p>
      *
      * @return A deep copy of the object.
      */
     @Override
     public final VirtualListNode clone() {
-        List<ResolveConceptualElement> listCopy = new ArrayList<>(myList.size());
+        List<ResolveConceptualElement> listCopy =
+                new ArrayList<>(myList.size());
         Collections.copy(listCopy, myList);
 
-        return new VirtualListNode(myLoc, myParent.clone(), myName, listCopy, myListType);
+        return new VirtualListNode(myLoc, myParent.clone(), myName, listCopy,
+                myListType);
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link VirtualListNode} class.</p>
+     * <p>
+     * This method overrides the default equals method implementation for the
+     * {@link VirtualListNode}
+     * class.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -125,14 +155,15 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This allow us to return all the children object in the class.</p>
+     * <p>
+     * This allow us to return all the children object in the class.
+     * </p>
      *
      * @return A list containing all the children.
      */
     @Override
     public final List<ResolveConceptualElement> getChildren() {
-        List<ResolveConceptualElement> children =
-                new LinkedList<>();
+        List<ResolveConceptualElement> children = new LinkedList<>();
         for (ResolveConceptualElement aMyList : myList) {
             children.add(ResolveConceptualElement.class.cast(aMyList));
         }
@@ -141,20 +172,23 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns of the location where this object
-     * originated from.</p>
+     * <p>
+     * Returns of the location where this object originated from.
+     * </p>
      *
      * @return A {@link Location} representation object.
      */
     @Override
     public final Location getLocation() {
-        throw new MiscErrorException(this.getClass()
-                + " has no location by definition.",
+        throw new MiscErrorException(
+                this.getClass() + " has no location by definition.",
                 new UnsupportedOperationException());
     }
 
     /**
-     * <p>Returns the type stored in this virtual list.</p>
+     * <p>
+     * Returns the type stored in this virtual list.
+     * </p>
      *
      * @return The associated {@link Class} type.
      */
@@ -163,8 +197,11 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the string representation of the {@link ResolveConceptualElement}
-     * that created this object.</p>
+     * <p>
+     * Returns the string representation of the {@link ResolveConceptualElement}
+     * that created this
+     * object.
+     * </p>
      *
      * @return Name as a string.
      */
@@ -173,8 +210,11 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the string representation of the {@link ResolveConceptualElement}
-     * that created this object.</p>
+     * <p>
+     * Returns the string representation of the {@link ResolveConceptualElement}
+     * that created this
+     * object.
+     * </p>
      *
      * @return Name as a string.
      */
@@ -183,8 +223,10 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method overrides the default hashCode method implementation
-     * for the {@link VirtualListNode} class.</p>
+     * <p>
+     * This method overrides the default hashCode method implementation for the
+     * {@link VirtualListNode} class.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -203,7 +245,9 @@ public class VirtualListNode extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>Applies proper camel casing to the string passed in.</p>
+     * <p>
+     * Applies proper camel casing to the string passed in.
+     * </p>
      *
      * @param s Original string.
      *

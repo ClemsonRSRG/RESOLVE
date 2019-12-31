@@ -1,7 +1,7 @@
 /*
  * PrefixExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical prefix expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the mathematical prefix expression
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,10 +34,18 @@ public class PrefixExp extends AbstractFunctionExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's operation.</p> */
+    /**
+     * <p>
+     * The expression's operation.
+     * </p>
+     */
     private final PosSymbol myOperationName;
 
-    /** <p>The argument expression.</p> */
+    /**
+     * <p>
+     * The argument expression.
+     * </p>
+     */
     private final Exp myArgument;
 
     // ===========================================================
@@ -42,7 +53,9 @@ public class PrefixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This constructs an infix expression.</p>
+     * <p>
+     * This constructs an infix expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param opQual A {@link PosSymbol} representing the operator's qualifier.
@@ -119,18 +132,18 @@ public class PrefixExp extends AbstractFunctionExp {
 
         if (retval) {
             PrefixExp eAsPrefixExp = (PrefixExp) e;
-            retval =
-                    Exp.posSymbolEquivalent(myOperationName,
-                            eAsPrefixExp.myOperationName)
-                            && Exp.equivalent(myArgument,
-                                    eAsPrefixExp.myArgument);
+            retval = Exp.posSymbolEquivalent(myOperationName,
+                    eAsPrefixExp.myOperationName)
+                    && Exp.equivalent(myArgument, eAsPrefixExp.myArgument);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns the argument expression.</p>
+     * <p>
+     * This method returns the argument expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -139,7 +152,9 @@ public class PrefixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the operator name.</p>
+     * <p>
+     * This method returns the operator name.
+     * </p>
      *
      * @return A {@link PosSymbol} object containing the operator.
      */
@@ -149,7 +164,9 @@ public class PrefixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the operator name in string format.</p>
+     * <p>
+     * This method returns the operator name in string format.
+     * </p>
      *
      * @return The operator as a string.
      */
@@ -194,8 +211,8 @@ public class PrefixExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new PrefixExp(cloneLocation(), qualifier, myOperationName
-                .clone(), myArgument.clone());
+        return new PrefixExp(cloneLocation(), qualifier,
+                myOperationName.clone(), myArgument.clone());
     }
 
     /**
@@ -208,8 +225,8 @@ public class PrefixExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new PrefixExp(cloneLocation(), qualifier, myOperationName
-                .clone(), substitute(myArgument, substitutions));
+        return new PrefixExp(cloneLocation(), qualifier,
+                myOperationName.clone(), substitute(myArgument, substitutions));
     }
 
 }

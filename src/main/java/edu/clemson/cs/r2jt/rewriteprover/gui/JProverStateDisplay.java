@@ -1,7 +1,7 @@
 /*
  * JProverStateDisplay.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -73,7 +73,9 @@ public class JProverStateDisplay extends JTextPane {
             new SiteTagger<List<MouseListener>>();
 
     /**
-     * <p>Tracks which site the mouse is moving over.</p>
+     * <p>
+     * Tracks which site the mouse is moving over.
+     * </p>
      */
     private Site myCurMouseContainer = null;
 
@@ -118,7 +120,7 @@ public class JProverStateDisplay extends JTextPane {
             mouseListeners.remove(l);
         }
         catch (NoSuchElementException nsee) {
-            //Nothing to remove
+            // Nothing to remove
         }
     }
 
@@ -195,7 +197,7 @@ public class JProverStateDisplay extends JTextPane {
                         pexpIDAttr);
             }
             catch (BadLocationException e) {
-                //Shouldn't be possible
+                // Shouldn't be possible
                 throw new RuntimeException(e);
             }
 
@@ -332,12 +334,10 @@ public class JProverStateDisplay extends JTextPane {
     private void mouseEnteredSite(Site s, MouseEvent e) {
         if (myCurMouseContainer == null || !myCurMouseContainer.equals(s)) {
             if (myCurMouseContainer != null) {
-                MouseEvent exited =
-                        new MouseEvent(this, MouseEvent.MOUSE_EXITED, e
-                                .getWhen(), e.getModifiers(), e.getX(), e
-                                .getY(), e.getXOnScreen(), e.getYOnScreen(), e
-                                .getClickCount(), e.isPopupTrigger(), e
-                                .getButton());
+                MouseEvent exited = new MouseEvent(this,
+                        MouseEvent.MOUSE_EXITED, e.getWhen(), e.getModifiers(),
+                        e.getX(), e.getY(), e.getXOnScreen(), e.getYOnScreen(),
+                        e.getClickCount(), e.isPopupTrigger(), e.getButton());
                 exited.setSource(myCurMouseContainer);
                 List<MouseListener> listeners =
                         myMouseActiveNodes.getTag(myCurMouseContainer);
@@ -347,12 +347,10 @@ public class JProverStateDisplay extends JTextPane {
             }
 
             if (s != null) {
-                MouseEvent entered =
-                        new MouseEvent(this, MouseEvent.MOUSE_ENTERED, e
-                                .getWhen(), e.getModifiers(), e.getX(), e
-                                .getY(), e.getXOnScreen(), e.getYOnScreen(), e
-                                .getClickCount(), e.isPopupTrigger(), e
-                                .getButton());
+                MouseEvent entered = new MouseEvent(this,
+                        MouseEvent.MOUSE_ENTERED, e.getWhen(), e.getModifiers(),
+                        e.getX(), e.getY(), e.getXOnScreen(), e.getYOnScreen(),
+                        e.getClickCount(), e.isPopupTrigger(), e.getButton());
                 entered.setSource(s);
                 List<MouseListener> listeners = myMouseActiveNodes.getTag(s);
                 for (MouseListener l : listeners) {
@@ -414,7 +412,7 @@ public class JProverStateDisplay extends JTextPane {
                 }
             }
             catch (NoSuchElementException nsse) {
-                //No one cares about this click
+                // No one cares about this click
             }
         }
 
@@ -432,7 +430,7 @@ public class JProverStateDisplay extends JTextPane {
                 }
             }
             catch (NoSuchElementException nsse) {
-                //No one cares about this click
+                // No one cares about this click
             }
         }
 
@@ -450,13 +448,13 @@ public class JProverStateDisplay extends JTextPane {
                 }
             }
             catch (NoSuchElementException nsse) {
-                //No one cares about this click
+                // No one cares about this click
             }
         }
 
         @Override
         public void mouseEntered(MouseEvent e) {
-        //Mouse moved should take care of this?
+            // Mouse moved should take care of this?
         }
 
         @Override

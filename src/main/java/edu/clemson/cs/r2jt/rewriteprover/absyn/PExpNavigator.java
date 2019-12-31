@@ -1,7 +1,7 @@
 /*
  * PExpNavigator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,12 +17,16 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 /**
- * <p>A <code>PExpNavigator</code> provides a mechanism for iterating over each
- * node in the tree-structure of a 
- * {@link PExp PExp} by moving a cursor from
- * node to node.  The order of this traversal is undefined.  Modified versions 
- * of the original <code>PExp</code> can be obtained based on the current cursor
- * position, i.e. by replacing the last visited node with another.</p> 
+ * <p>
+ * A <code>PExpNavigator</code> provides a mechanism for iterating over each
+ * node in the
+ * tree-structure of a {@link PExp PExp} by moving a cursor from node to node.
+ * The order of this
+ * traversal is undefined. Modified versions of the original <code>PExp</code>
+ * can be obtained based
+ * on the current cursor position, i.e. by replacing the last visited node with
+ * another.
+ * </p>
  */
 public class PExpNavigator {
 
@@ -40,11 +44,11 @@ public class PExpNavigator {
 
     public boolean hasNext() {
 
-        //TODO : This actually violates the contract for this component--a call
-        //       to hasNext() breaks the functionality of replaceLast() until
-        //       next() is called
-        while (!(myNavigationStack.isEmpty() || myNavigationStack.peek()
-                .hasNext())) {
+        // TODO : This actually violates the contract for this component--a call
+        // to hasNext() breaks the functionality of replaceLast() until
+        // next() is called
+        while (!(myNavigationStack.isEmpty()
+                || myNavigationStack.peek().hasNext())) {
 
             myNavigationStack.pop();
         }
@@ -56,8 +60,8 @@ public class PExpNavigator {
         PExp retval;
 
         if (myReturnedTopLevelFlag) {
-            while (!(myNavigationStack.isEmpty() || myNavigationStack.peek()
-                    .hasNext())) {
+            while (!(myNavigationStack.isEmpty()
+                    || myNavigationStack.peek().hasNext())) {
 
                 myNavigationStack.pop();
             }
@@ -67,8 +71,8 @@ public class PExpNavigator {
                     throw new NoSuchElementException();
                 }
                 else {
-                    //TODO : This looks like dead code to me... should be 
-                    //removed and tested.
+                    // TODO : This looks like dead code to me... should be
+                    // removed and tested.
                     retval = myOriginalExpression;
                     myReturnedTopLevelFlag = true;
                 }

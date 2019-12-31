@@ -1,7 +1,7 @@
 /*
  * EntryTypeQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.Facility
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 
 /**
- * <p>A <code>EntryTypeQuery</code> returns all type <code>T</code> symbol entries
- * using using the provided <code>ImportStrategy</code> and <code>FacilityStrategy</code>.</p>
+ * <p>
+ * A <code>EntryTypeQuery</code> returns all type <code>T</code> symbol entries
+ * using using the
+ * provided <code>ImportStrategy</code> and <code>FacilityStrategy</code>.
+ * </p>
  *
  * @param <E> The return type of the base <code>MultimatchSymbolQuery</code>.
  *
@@ -35,13 +38,17 @@ public class EntryTypeQuery<E extends SymbolTableEntry>
     // ===========================================================
 
     /**
-     * <p>This query searches for all entries of type <code>T</code>.</p>
+     * <p>
+     * This query searches for all entries of type <code>T</code>.
+     * </p>
      *
      * @param entryType The class type of the entry.
      * @param importStrategy The import strategy to use.
      * @param facilityStrategy The facility strategy to use.
      */
-    public EntryTypeQuery(Class<E> entryType, ImportStrategy importStrategy, FacilityStrategy facilityStrategy) {
-        super(new UnqualifiedPath(importStrategy, facilityStrategy, false), new EntryTypeSearcher<>(entryType));
+    public EntryTypeQuery(Class<E> entryType, ImportStrategy importStrategy,
+            FacilityStrategy facilityStrategy) {
+        super(new UnqualifiedPath(importStrategy, facilityStrategy, false),
+                new EntryTypeSearcher<>(entryType));
     }
 }

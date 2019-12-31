@@ -1,7 +1,7 @@
 /*
  * GraphicalASTOutputPipeline.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,8 +25,9 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 /**
- * <p>This is pipeline that generates graphical representations
- * of a module AST.</p>
+ * <p>
+ * This is pipeline that generates graphical representations of a module AST.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -38,8 +39,10 @@ public class GraphicalASTOutputPipeline extends AbstractPipeline {
     // ===========================================================
 
     /**
-     * <p>This generates a pipeline to generate a graphical
-     * representation of a module AST.</p>
+     * <p>
+     * This generates a pipeline to generate a graphical representation of a
+     * module AST.
+     * </p>
      *
      * @param ce The current compilation environment.
      * @param symbolTable The symbol table.
@@ -65,16 +68,16 @@ public class GraphicalASTOutputPipeline extends AbstractPipeline {
         // Generate DOT File (GV extension)
         // Add all the nodes and edges
         String moduleName = dec.getName().getName();
-        GenerateGraphvizModel twv =
-                new GenerateGraphvizModel(group, group.getInstanceOf(
-                        "outputGraphvizGVFile").add("moduleName", moduleName));
+        GenerateGraphvizModel twv = new GenerateGraphvizModel(group,
+                group.getInstanceOf("outputGraphvizGVFile").add("moduleName",
+                        moduleName));
         TreeWalker.visit(twv, dec);
 
         // Output the contents to listener objects
         for (OutputListener listener : myCompileEnvironment
                 .getOutputListeners()) {
-            listener.astGraphvizModelResult(dec.getName().getName(), twv
-                    .getCompleteModel());
+            listener.astGraphvizModelResult(dec.getName().getName(),
+                    twv.getCompleteModel());
         }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
@@ -83,8 +86,8 @@ public class GraphicalASTOutputPipeline extends AbstractPipeline {
             sb.append("Exported ModuleDec to dot file: ");
             sb.append(moduleName);
             sb.append("\n");
-            sb
-                    .append("\n---------------End Output Module AST---------------\n");
+            sb.append(
+                    "\n---------------End Output Module AST---------------\n");
 
             statusHandler.info(null, sb.toString());
         }

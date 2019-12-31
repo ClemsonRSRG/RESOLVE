@@ -1,7 +1,7 @@
 /*
  * FinalizedScope.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,20 +15,28 @@ package edu.clemson.cs.r2jt.typeandpopulate;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 
 /**
- * <p>A <code>FinalizedScope</code> is an immutable realization of 
- * <code>Scope</code>.</p>
+ * <p>
+ * A <code>FinalizedScope</code> is an immutable realization of
+ * <code>Scope</code>.
+ * </p>
  * 
- * <p>Note that <code>FinalizedScope</code> has no public constructor.  
- * <code>FinalizedScope</code>s are acquired through calls to some of the 
- * methods of {@link MathSymbolTable MathSymbolTable}.</p>
+ * <p>
+ * Note that <code>FinalizedScope</code> has no public constructor.
+ * <code>FinalizedScope</code>s are
+ * acquired through calls to some of the methods of {@link MathSymbolTable
+ * MathSymbolTable}.
+ * </p>
  */
 public class FinalizedScope extends SyntacticScope {
 
-    /* In answer to your question, despite not adding or modifying any behavior,
-     * this class exists separately from ConcreteIdentifierResolver because it
-     * adds SEMANTIC information--namely, the invariant of immutability, which
-     * can not be tied to ConcreteIdentifierResolver since ScopeBuilder must
-     * inherit from it and be mutable.
+    /*
+     * In answer to your question, despite not adding or modifying any behavior,
+     * this class exists
+     * separately from ConcreteIdentifierResolver because it adds SEMANTIC
+     * information--namely, the
+     * invariant of immutability, which can not be tied to
+     * ConcreteIdentifierResolver since
+     * ScopeBuilder must inherit from it and be mutable.
      */
 
     FinalizedScope(MathSymbolTable source,

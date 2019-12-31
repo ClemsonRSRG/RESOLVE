@@ -1,7 +1,7 @@
 /*
  * TypeFamilyDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class for all the type family declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the type family declaration objects that the
+ * compiler builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,22 +36,46 @@ public class TypeFamilyDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The type model for the new type family.</p> */
+    /**
+     * <p>
+     * The type model for the new type family.
+     * </p>
+     */
     private final Ty myTy;
 
-    /** <p>The exemplar for the new type family.</p> */
+    /**
+     * <p>
+     * The exemplar for the new type family.
+     * </p>
+     */
     private final PosSymbol myExemplar;
 
-    /** <p>The list of mathematical definition variables for the new type family.</p> */
+    /**
+     * <p>
+     * The list of mathematical definition variables for the new type family.
+     * </p>
+     */
     private final List<MathDefVariableDec> myDefVarList;
 
-    /** <p>The constraint clause for the new type family.</p> */
+    /**
+     * <p>
+     * The constraint clause for the new type family.
+     * </p>
+     */
     private final AssertionClause myConstraint;
 
-    /** <p>The initialization block for the new type family.</p> */
+    /**
+     * <p>
+     * The initialization block for the new type family.
+     * </p>
+     */
     private final SpecInitFinalItem myTypeInitItem;
 
-    /** <p>The finalization block for the new type family.</p> */
+    /**
+     * <p>
+     * The finalization block for the new type family.
+     * </p>
+     */
     private final SpecInitFinalItem myTypeFinalItem;
 
     // ===========================================================
@@ -56,7 +83,9 @@ public class TypeFamilyDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs a type family declaration.</p>
+     * <p>
+     * This constructs a type family declaration.
+     * </p>
      *
      * @param name Name of the new type family.
      * @param ty Model for the new type family.
@@ -158,7 +187,9 @@ public class TypeFamilyDec extends Dec {
     }
 
     /**
-     * <p>Returns the type constraint for this type family.</p>
+     * <p>
+     * Returns the type constraint for this type family.
+     * </p>
      *
      * @return The type constraint in {@link AssertionClause} format.
      */
@@ -167,7 +198,9 @@ public class TypeFamilyDec extends Dec {
     }
 
     /**
-     * <p>Returns the list of definition variables for this type family.</p>
+     * <p>
+     * Returns the list of definition variables for this type family.
+     * </p>
      *
      * @return A list of {@link MathDefVariableDec} representation objects.
      */
@@ -176,7 +209,9 @@ public class TypeFamilyDec extends Dec {
     }
 
     /**
-     * <p>Returns the exemplar for this type family.</p>
+     * <p>
+     * Returns the exemplar for this type family.
+     * </p>
      *
      * @return The exemplar in {@link PosSymbol} format.
      */
@@ -185,28 +220,33 @@ public class TypeFamilyDec extends Dec {
     }
 
     /**
-     * <p>Returns the finalization block for this type family.</p>
+     * <p>
+     * Returns the finalization block for this type family.
+     * </p>
      *
-     * @return All relevant verification for finalization
-     * in {@link SpecInitFinalItem} format.
+     * @return All relevant verification for finalization in
+     *         {@link SpecInitFinalItem} format.
      */
     public final SpecInitFinalItem getFinalization() {
         return myTypeFinalItem;
     }
 
     /**
-     * <p>Returns the initialization block for this type family.</p>
+     * <p>
+     * Returns the initialization block for this type family.
+     * </p>
      *
-     * @return All relevant verification for initialization
-     * in {@link SpecInitFinalItem} format.
+     * @return All relevant verification for initialization in
+     *         {@link SpecInitFinalItem} format.
      */
     public final SpecInitFinalItem getInitialization() {
         return myTypeInitItem;
     }
 
     /**
-     * <p>Returns the raw type model representation
-     * of this type family.</p>
+     * <p>
+     * Returns the raw type model representation of this type family.
+     * </p>
      *
      * @return The raw type in {@link Ty} format.
      */
@@ -238,13 +278,14 @@ public class TypeFamilyDec extends Dec {
      */
     @Override
     protected final TypeFamilyDec copy() {
-        List<MathDefVariableDec> newDefVars = new ArrayList<>(myDefVarList.size());
+        List<MathDefVariableDec> newDefVars =
+                new ArrayList<>(myDefVarList.size());
         for (MathDefVariableDec variableDec : myDefVarList) {
             newDefVars.add((MathDefVariableDec) variableDec.clone());
         }
 
-        return new TypeFamilyDec(myName.clone(), myTy.clone(), myExemplar
-                .clone(), newDefVars, myConstraint.clone(),
+        return new TypeFamilyDec(myName.clone(), myTy.clone(),
+                myExemplar.clone(), newDefVars, myConstraint.clone(),
                 myTypeInitItem.clone(), myTypeFinalItem.clone());
     }
 }

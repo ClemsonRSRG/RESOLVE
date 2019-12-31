@@ -1,7 +1,7 @@
 /*
  * TupleExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,15 +21,23 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the mathematical tuple expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical tuple expression objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
- * <p>Making {@code TupleExp} extend from {@link AbstractFunctionExp} was considered and
- * explicitly decided against during the great math-type-overhaul of 2012.
- * If we chose to admit the presence of some function that builds tuples for us,
- * how would we pass it its parameters if not via a tuple?  Thus, TupleExp is
- * a built-in notion, and not imagined as the result of the application of a
- * function.</p>
+ * <p>
+ * Making {@code TupleExp} extend from {@link AbstractFunctionExp} was
+ * considered and explicitly
+ * decided against during the great math-type-overhaul of 2012. If we chose to
+ * admit the presence of
+ * some function that builds tuples for us, how would we pass it its parameters
+ * if not via a tuple?
+ * Thus, TupleExp is a built-in notion, and not imagined as the result of the
+ * application of a
+ * function.
+ * </p>
  *
  * @version 2.0
  */
@@ -39,10 +47,18 @@ public class TupleExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's cartesian product fields</p> */
+    /**
+     * <p>
+     * The expression's cartesian product fields
+     * </p>
+     */
     private final List<Exp> myFields;
 
-    /** <p>The number of cartesian product fields</p> */
+    /**
+     * <p>
+     * The number of cartesian product fields
+     * </p>
+     */
     private final int mySize;
 
     // ===========================================================
@@ -50,8 +66,10 @@ public class TupleExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a tuple expression that contains
-     * exactly two elements per field.</p>
+     * <p>
+     * This constructs a tuple expression that contains exactly two elements per
+     * field.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param fields A list of {@link Exp} object.
@@ -59,7 +77,7 @@ public class TupleExp extends MathExp {
     public TupleExp(Location l, List<Exp> fields) {
         super(l);
 
-        //We assert this isn't possible, but who knows?
+        // We assert this isn't possible, but who knows?
         if (fields.size() != 2) {
             throw new MiscErrorException("Unexpected cartesian product size.",
                     new IllegalArgumentException());
@@ -170,7 +188,7 @@ public class TupleExp extends MathExp {
                             thisFieldExps.next().equivalent(eFieldExps.next());
                 }
 
-                //Both had better have run out at the same time
+                // Both had better have run out at the same time
                 result &= (!thisFieldExps.hasNext()) && (!eFieldExps.hasNext());
             }
         }
@@ -179,7 +197,9 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the specified field expression.</p>
+     * <p>
+     * This method returns the specified field expression.
+     * </p>
      *
      * @param index The index of the field expression.
      *
@@ -198,7 +218,7 @@ public class TupleExp extends MathExp {
         }
         else {
             if (mySize == 2) {
-                //ASSERT: !(myElements.get(0) instanceof MTCartesian)
+                // ASSERT: !(myElements.get(0) instanceof MTCartesian)
                 if (index != 0) {
                     throw new IndexOutOfBoundsException("" + index);
                 }
@@ -206,7 +226,7 @@ public class TupleExp extends MathExp {
                 result = myFields.get(0);
             }
             else {
-                //ASSERT: myElements.get(0) instanceof MTCartesian
+                // ASSERT: myElements.get(0) instanceof MTCartesian
                 result = ((TupleExp) myFields.get(0)).getField(index);
             }
         }
@@ -215,7 +235,9 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method returns all the inner field expressions.</p>
+     * <p>
+     * This method returns all the inner field expressions.
+     * </p>
      *
      * @return A list containing all the segmented {@link Exp}s.
      */
@@ -224,7 +246,9 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the number of field elements in this tuple.</p>
+     * <p>
+     * This method returns the number of field elements in this tuple.
+     * </p>
      *
      * @return The size of this {@link TupleExp}.
      */
@@ -252,21 +276,23 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method checks to see if all the field expressions
-     * inside this tuple expression are universally quantified.</p>
+     * <p>
+     * This method checks to see if all the field expressions inside this tuple
+     * expression are
+     * universally quantified.
+     * </p>
      *
      * @return {@code true} if all {@link Exp}s are universally quantified,
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     public final boolean isUniversallyQuantified() {
         boolean soFar = true;
 
         for (Exp field : myFields) {
-            soFar =
-                    soFar
-                            && ((field instanceof VarExp && ((VarExp) field)
-                                    .getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) || (field instanceof TupleExp && ((TupleExp) field)
-                                    .isUniversallyQuantified()));
+            soFar = soFar && ((field instanceof VarExp && ((VarExp) field)
+                    .getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL)
+                    || (field instanceof TupleExp
+                            && ((TupleExp) field).isUniversallyQuantified()));
         }
 
         return soFar;
@@ -288,7 +314,8 @@ public class TupleExp extends MathExp {
      * {@inheritDoc}
      */
     @Override
-    protected final Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
+    protected final Exp
+            substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         List<Exp> newFields = new ArrayList<>();
         for (Exp f : myFields) {
             newFields.add(substitute(f, substitutions));
@@ -302,8 +329,10 @@ public class TupleExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the field expressions.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * field expressions.
+     * </p>
      *
      * @return A list containing {@link Exp}s.
      */

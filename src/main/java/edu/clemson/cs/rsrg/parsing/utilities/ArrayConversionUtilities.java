@@ -1,7 +1,7 @@
 /*
  * ArrayConversionUtilities.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,12 +24,16 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>The main purpose of this class is to assist the {@link SyntacticSugarConverter}
- * in building the various different calls to operations in
- * {@code Static_Array_Template}.</p>
+ * <p>
+ * The main purpose of this class is to assist the
+ * {@link SyntacticSugarConverter} in building the
+ * various different calls to operations in {@code Static_Array_Template}.
+ * </p>
  *
- * <p>It also provides various helper methods to identify and transform
- * {@link ProgramVariableArrayExp}s.</p>
+ * <p>
+ * It also provides various helper methods to identify and transform
+ * {@link ProgramVariableArrayExp}s.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -41,8 +45,11 @@ public class ArrayConversionUtilities {
     // ===========================================================
 
     /**
-     * <p>An helper method to create a call to the {@code Assign_Entry}
-     * operation in {@code Static_Array_Template}.</p>
+     * <p>
+     * An helper method to create a call to the {@code Assign_Entry} operation
+     * in
+     * {@code Static_Array_Template}.
+     * </p>
      *
      * @param l Location for the new elements.
      * @param assignExp Expression to be assigned to.
@@ -52,8 +59,8 @@ public class ArrayConversionUtilities {
      *
      * @return A {@link ProgramFunctionExp} object.
      */
-    public static CallStmt buildAssignEntryCall(
-            Location l, ProgramExp assignExp, PosSymbol facQualifier,
+    public static CallStmt buildAssignEntryCall(Location l,
+            ProgramExp assignExp, PosSymbol facQualifier,
             ProgramVariableExp arrayNameExp, ProgramExp arrayIndexExp) {
         List<ProgramExp> args = new ArrayList<>();
         args.add(arrayNameExp.clone());
@@ -65,8 +72,11 @@ public class ArrayConversionUtilities {
     }
 
     /**
-     * <p>An helper method to create a call to the {@code Entry_Replica}
-     * operation in {@code Static_Array_Template}.</p>
+     * <p>
+     * An helper method to create a call to the {@code Entry_Replica} operation
+     * in
+     * {@code Static_Array_Template}.
+     * </p>
      *
      * @param l Location for the new elements.
      * @param facQualifier The facility name of the array.
@@ -75,9 +85,9 @@ public class ArrayConversionUtilities {
      *
      * @return A {@link ProgramFunctionExp} object.
      */
-    public static ProgramFunctionExp buildEntryReplicaCall(
-            Location l, PosSymbol facQualifier,
-            ProgramVariableExp arrayNameExp, ProgramExp arrayIndexExp) {
+    public static ProgramFunctionExp buildEntryReplicaCall(Location l,
+            PosSymbol facQualifier, ProgramVariableExp arrayNameExp,
+            ProgramExp arrayIndexExp) {
         List<ProgramExp> args = new ArrayList<>();
         args.add(arrayNameExp.clone());
         args.add(arrayIndexExp.clone());
@@ -87,8 +97,10 @@ public class ArrayConversionUtilities {
     }
 
     /**
-     * <p>An helper method to create a call to the {@code Swap_Entry}
-     * operation in {@code Static_Array_Template}.</p>
+     * <p>
+     * An helper method to create a call to the {@code Swap_Entry} operation in
+     * {@code Static_Array_Template}.
+     * </p>
      *
      * @param l Location for the new elements.
      * @param varExp Name of the variable to swap the contents of.
@@ -98,8 +110,8 @@ public class ArrayConversionUtilities {
      *
      * @return A {@link CallStmt} object.
      */
-    public static CallStmt buildSwapEntryCall(
-            Location l, ProgramVariableExp varExp, PosSymbol facQualifier,
+    public static CallStmt buildSwapEntryCall(Location l,
+            ProgramVariableExp varExp, PosSymbol facQualifier,
             ProgramVariableExp arrayNameExp, ProgramExp arrayIndexExp) {
         List<ProgramExp> args = new ArrayList<>();
         args.add(arrayNameExp.clone());
@@ -111,8 +123,11 @@ public class ArrayConversionUtilities {
     }
 
     /**
-     * <p>An helper method to create a call to the {@code Swap_Two_Entries}
-     * operation in {@code Static_Array_Template}.</p>
+     * <p>
+     * An helper method to create a call to the {@code Swap_Two_Entries}
+     * operation in
+     * {@code Static_Array_Template}.
+     * </p>
      *
      * @param l Location for the new elements.
      * @param facQualifier The facility name of the array.
@@ -122,32 +137,36 @@ public class ArrayConversionUtilities {
      *
      * @return A {@link CallStmt} object.
      */
-    public static CallStmt buildSwapTwoEntriesCall(
-            Location l, PosSymbol facQualifier, ProgramVariableExp arrayNameExp,
+    public static CallStmt buildSwapTwoEntriesCall(Location l,
+            PosSymbol facQualifier, ProgramVariableExp arrayNameExp,
             ProgramExp arrayIndexExp1, ProgramExp arrayIndexExp2) {
         List<ProgramExp> args = new ArrayList<>();
         args.add(arrayNameExp.clone());
         args.add(arrayIndexExp1.clone());
         args.add(arrayIndexExp2.clone());
 
-        return new CallStmt(l.clone(), new ProgramFunctionExp(l.clone(),
-                facQualifier, new PosSymbol(l.clone(), "Swap_Two_Entries"), args));
+        return new CallStmt(l.clone(),
+                new ProgramFunctionExp(l.clone(), facQualifier,
+                        new PosSymbol(l.clone(), "Swap_Two_Entries"), args));
     }
 
     /**
-     * <p>An helper method to build a new {@link VarDec} to store the value
-     * in the array expression resulting from calling the operations in
-     * {@code Static_Array_Template}.</p>
+     * <p>
+     * An helper method to build a new {@link VarDec} to store the value in the
+     * array expression
+     * resulting from calling the operations in {@code Static_Array_Template}.
+     * </p>
      *
-     * @param arrayNameExp The {@link ProgramVariableExp} containing the array name.
+     * @param arrayNameExp The {@link ProgramVariableExp} containing the array
+     *        name.
      * @param arrayContentType The {@link Ty} of the array's contents.
-     * @param counter An integer value that helps us create distinct
-     *                new variables.
+     * @param counter An integer value that helps us create distinct new
+     *        variables.
      *
      * @return A {@link VarDec} object.
      *
-     * @exception MiscErrorException Some error occurred while trying to
-     * build temporary array name.
+     * @exception MiscErrorException Some error occurred while trying to build
+     *            temporary array name.
      */
     public static VarDec buildTempArrayNameVarDec(
             ProgramVariableExp arrayNameExp, Ty arrayContentType, int counter) {
@@ -175,25 +194,28 @@ public class ArrayConversionUtilities {
         else {
             throw new MiscErrorException(
                     "Cannot generate a new variable declaration using: "
-                            + arrayNameExp, new IllegalStateException());
+                            + arrayNameExp,
+                    new IllegalStateException());
         }
         sb.append("_");
         sb.append(counter);
 
-        return new VarDec(new PosSymbol(arrayNameExp.getLocation().clone(), sb
-                .toString()), arrayContentType.clone());
+        return new VarDec(new PosSymbol(arrayNameExp.getLocation().clone(),
+                sb.toString()), arrayContentType.clone());
     }
 
     /**
-     * <p>An helper method that returns a new {@link ProgramExp} containing
-     * the array index expression.</p>
+     * <p>
+     * An helper method that returns a new {@link ProgramExp} containing the
+     * array index expression.
+     * </p>
      *
      * @param exp A programming expression.
      *
      * @return The array index expression.
      *
-     * @exception MiscErrorException Some error occurred while trying to
-     * extract the index value.
+     * @exception MiscErrorException Some error occurred while trying to extract
+     *            the index value.
      */
     public static ProgramExp getArrayIndexExp(ProgramExp exp) {
         ProgramExp arrayIndexExp;
@@ -207,9 +229,8 @@ public class ArrayConversionUtilities {
             ProgramExp lastElementExp = segments.get(segments.size() - 1);
 
             if (lastElementExp instanceof ProgramVariableArrayExp) {
-                arrayIndexExp =
-                        ((ProgramVariableArrayExp) lastElementExp)
-                                .getArrayIndexExp().clone();
+                arrayIndexExp = ((ProgramVariableArrayExp) lastElementExp)
+                        .getArrayIndexExp().clone();
             }
             else {
                 throw new MiscErrorException(
@@ -218,32 +239,38 @@ public class ArrayConversionUtilities {
             }
         }
         else {
-            throw new MiscErrorException("Not a programming array expression: "
-                    + exp.toString(), new IllegalStateException());
+            throw new MiscErrorException(
+                    "Not a programming array expression: " + exp.toString(),
+                    new IllegalStateException());
         }
 
         return arrayIndexExp;
     }
 
     /**
-     * <p>An helper method that returns a new {@link ProgramVariableExp} containing
-     * the array name expression.</p>
+     * <p>
+     * An helper method that returns a new {@link ProgramVariableExp} containing
+     * the array name
+     * expression.
+     * </p>
      *
      * @param exp A programming expression.
      *
      * @return The array name expression.
      *
-     * @exception MiscErrorException Some error occurred while trying to
-     * extract the name.
+     * @exception MiscErrorException Some error occurred while trying to extract
+     *            the name.
      */
     public static ProgramVariableExp getArrayNameExp(ProgramExp exp) {
         ProgramVariableExp arrayNameExp;
         if (exp instanceof ProgramVariableArrayExp) {
-            arrayNameExp = (ProgramVariableExp) ((ProgramVariableArrayExp) exp).getArrayNameExp().clone();
+            arrayNameExp = (ProgramVariableExp) ((ProgramVariableArrayExp) exp)
+                    .getArrayNameExp().clone();
         }
         else if (exp instanceof ProgramVariableDotExp) {
             List<ProgramVariableExp> newSegments = new ArrayList<>();
-            Iterator<ProgramVariableExp> segmentIt = ((ProgramVariableDotExp) exp).getSegments().iterator();
+            Iterator<ProgramVariableExp> segmentIt =
+                    ((ProgramVariableDotExp) exp).getSegments().iterator();
             while (segmentIt.hasNext()) {
                 ProgramVariableExp currentExp = segmentIt.next();
 
@@ -253,35 +280,45 @@ public class ArrayConversionUtilities {
                 }
                 else {
                     if (currentExp instanceof ProgramVariableArrayExp) {
-                        ProgramVariableArrayExp arrayExp = (ProgramVariableArrayExp) currentExp;
-                        newSegments.add((ProgramVariableExp) arrayExp.getArrayNameExp().clone());
+                        ProgramVariableArrayExp arrayExp =
+                                (ProgramVariableArrayExp) currentExp;
+                        newSegments.add((ProgramVariableExp) arrayExp
+                                .getArrayNameExp().clone());
                     }
                     else {
                         throw new MiscErrorException(
-                                "Not a programming array expression: " + exp.toString(),
+                                "Not a programming array expression: "
+                                        + exp.toString(),
                                 new IllegalStateException());
                     }
                 }
             }
 
-            arrayNameExp = new ProgramVariableDotExp(exp.getLocation().clone(), newSegments);
+            arrayNameExp = new ProgramVariableDotExp(exp.getLocation().clone(),
+                    newSegments);
         }
         else {
-            throw new MiscErrorException("Not a programming array expression: "
-                    + exp.toString(), new IllegalStateException());
+            throw new MiscErrorException(
+                    "Not a programming array expression: " + exp.toString(),
+                    new IllegalStateException());
         }
 
         return arrayNameExp;
     }
 
     /**
-     * <p>An helper method to check whether or not the {@link ProgramExp} passed
-     * in is a {@link ProgramVariableArrayExp}. This includes {@link ProgramVariableDotExp}
-     * that contain a {@link ProgramVariableArrayExp} as the last element.</p>
+     * <p>
+     * An helper method to check whether or not the {@link ProgramExp} passed in
+     * is a
+     * {@link ProgramVariableArrayExp}. This includes
+     * {@link ProgramVariableDotExp} that contain a
+     * {@link ProgramVariableArrayExp} as the last element.
+     * </p>
      *
      * @param exp The {@link ProgramExp} to be checked.
      *
-     * @return {@code true} if it is a programming array expression, {@code false} otherwise.
+     * @return {@code true} if it is a programming array expression,
+     *         {@code false} otherwise.
      */
     public static boolean isProgArrayExp(ProgramExp exp) {
         boolean retVal = false;
@@ -291,7 +328,8 @@ public class ArrayConversionUtilities {
         else if (exp instanceof ProgramVariableDotExp) {
             List<ProgramVariableExp> segments =
                     ((ProgramVariableDotExp) exp).getSegments();
-            if (segments.get(segments.size() - 1) instanceof ProgramVariableArrayExp) {
+            if (segments.get(
+                    segments.size() - 1) instanceof ProgramVariableArrayExp) {
                 retVal = true;
             }
         }

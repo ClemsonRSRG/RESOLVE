@@ -1,7 +1,7 @@
 /*
  * SystemStdHandler.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,8 +15,11 @@ package edu.clemson.cs.rsrg.statushandling;
 import java.io.PrintWriter;
 
 /**
- * <p>This class outputs all information to {@link System#out} and
- * all warning and errors to {@link System#err} file descriptors.</p>
+ * <p>
+ * This class outputs all information to {@link System#out} and all warning and
+ * errors to
+ * {@link System#err} file descriptors.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -30,9 +33,11 @@ public class SystemStdHandler extends WriterStatusHandler
     // ===========================================================
 
     /**
-     * <p>This constructor will create an output handler that displays
-     * all information and warning output to {@link System#out} and
-     * all error output to {@link System#err}.</p>
+     * <p>
+     * This constructor will create an output handler that displays all
+     * information and warning output
+     * to {@link System#out} and all error output to {@link System#err}.
+     * </p>
      */
     public SystemStdHandler() {
         super(new PrintWriter(System.out), new PrintWriter(System.err));
@@ -43,10 +48,13 @@ public class SystemStdHandler extends WriterStatusHandler
     // ===========================================================
 
     /**
-     * <p>Stop logging anymore information.
+     * <p>
+     * Stop logging anymore information.
      *
-     * (Note: Should only be called when the compile process
-     * is over or has been aborted due to an error.)</p>
+     * (Note: Should only be called when the compile process is over or has been
+     * aborted due to an
+     * error.)
+     * </p>
      */
     @Override
     public synchronized final void stopLogging() {

@@ -1,7 +1,7 @@
 /*
  * UnboundTypeAccumulator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,8 +23,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * <p>This class visits the named types to see if any of the
- * given names is universally bound.</p>
+ * <p>
+ * This class visits the named types to see if any of the given names is
+ * universally bound.
+ * </p>
  *
  * @version 2.0
  */
@@ -34,10 +36,18 @@ public class UnboundTypeAccumulator extends BoundVariableVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>The set of unbound type names.</p> */
+    /**
+     * <p>
+     * The set of unbound type names.
+     * </p>
+     */
     private final Set<String> myUnboundTypeNames = new HashSet<>();
 
-    /** <p>The searching scope.</p> */
+    /**
+     * <p>
+     * The searching scope.
+     * </p>
+     */
     private final Scope myEnvironment;
 
     // ===========================================================
@@ -45,8 +55,10 @@ public class UnboundTypeAccumulator extends BoundVariableVisitor {
     // ===========================================================
 
     /**
-     * <p>This constructs a visitor used to visit all universally
-     * bound type names in the provided scope.</p>
+     * <p>
+     * This constructs a visitor used to visit all universally bound type names
+     * in the provided scope.
+     * </p>
      *
      * @param environment The searching scope.
      */
@@ -59,9 +71,11 @@ public class UnboundTypeAccumulator extends BoundVariableVisitor {
     // ===========================================================
 
     /**
-     * <p>This method adds additional logic before we visit
-     * a {@link MTNamed} by checking to see if <code>namedType</code>
-     * is universally bound.</p>
+     * <p>
+     * This method adds additional logic before we visit a {@link MTNamed} by
+     * checking to see if
+     * <code>namedType</code> is universally bound.
+     * </p>
      *
      * @param namedType A math type.
      */
@@ -74,19 +88,17 @@ public class UnboundTypeAccumulator extends BoundVariableVisitor {
         }
         catch (NoSuchElementException e) {
             try {
-                //We cast rather than call toMathSymbolEntry() because this
-                //would represent an error in the compiler code rather than the
-                //RESOLVE source: we're looking at math things here only
+                // We cast rather than call toMathSymbolEntry() because this
+                // would represent an error in the compiler code rather than the
+                // RESOLVE source: we're looking at math things here only
                 MathSymbolEntry entry =
-                        (MathSymbolEntry) myEnvironment
-                                .queryForOne(new UnqualifiedNameQuery(
-                                        namedType.getName()));
-                universal =
-                        entry.getQuantification().equals(
-                                MathSymbolEntry.Quantification.UNIVERSAL);
+                        (MathSymbolEntry) myEnvironment.queryForOne(
+                                new UnqualifiedNameQuery(namedType.getName()));
+                universal = entry.getQuantification()
+                        .equals(MathSymbolEntry.Quantification.UNIVERSAL);
             }
             catch (NoSuchSymbolException | DuplicateSymbolException nsse) {
-                //Shouldn't be possible--we'd have dealt with it by now
+                // Shouldn't be possible--we'd have dealt with it by now
                 throw new RuntimeException(nsse);
             }
         }
@@ -97,8 +109,10 @@ public class UnboundTypeAccumulator extends BoundVariableVisitor {
     }
 
     /**
-     * <p>This method returns the final set of type names
-     * that are universally bound.</p>
+     * <p>
+     * This method returns the final set of type names that are universally
+     * bound.
+     * </p>
      *
      * @return A set of type names.
      */

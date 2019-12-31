@@ -1,7 +1,7 @@
 /*
  * EqualsPredicate.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,8 +36,8 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
     }
 
     @Override
-    public TypeRelationshipPredicate replaceUnboundVariablesInTypes(
-            Map<String, String> substitions) {
+    public TypeRelationshipPredicate
+            replaceUnboundVariablesInTypes(Map<String, String> substitions) {
 
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitions, myTypeGraph);
@@ -63,11 +63,11 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
         MTType substituted2 =
                 myType2.getCopyWithVariablesSubstituted(typeBindings);
 
-        //TODO : This was not well considered, it just made some fun stuff work
-        //       out right.  So think about if it's ok to make this a "subset
-        //       of" predicate rather than an "equals" predicate.
+        // TODO : This was not well considered, it just made some fun stuff work
+        // out right. So think about if it's ok to make this a "subset
+        // of" predicate rather than an "equals" predicate.
 
         return myTypeGraph.isSubtype(substituted1, substituted2);
-        //return substituted1.equals(substituted2);
+        // return substituted1.equals(substituted2);
     }
 }

@@ -1,7 +1,7 @@
 /*
  * AbstractTranslator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -52,65 +52,88 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected final List<String> operationParameterNames =
             new ArrayList<String>();
     /**
-     * <p>A pointer to a <code>SymbolTableEntry</code> that corresponds to
-     * the <code>FacilityDec</code> currently being walked.  If one isn't
-     * being walked, this should be <code>null</code>.</p>
+     * <p>
+     * A pointer to a <code>SymbolTableEntry</code> that corresponds to the
+     * <code>FacilityDec</code>
+     * currently being walked. If one isn't being walked, this should be
+     * <code>null</code>.
+     * </p>
      */
     protected FacilityEntry myCurrentFacilityEntry = null;
 
     /**
-     * <p>The <code>STGroup</code> that houses all templates used by a
-     * given target language.</p>
+     * <p>
+     * The <code>STGroup</code> that houses all templates used by a given target
+     * language.
+     * </p>
      */
     protected STGroup myGroup;
 
     /**
-     * <p>The top of this <code>Stack</code> maintains a reference to the
-     * template actively being built or added to, and the bottom refers to
-     * <code>shell</code> - the outermost enclosing template for all
-     * currently supported target languages.</p>
+     * <p>
+     * The top of this <code>Stack</code> maintains a reference to the template
+     * actively being built
+     * or added to, and the bottom refers to <code>shell</code> - the outermost
+     * enclosing template for
+     * all currently supported target languages.
+     * </p>
      *
-     * <p>Proper usage should generally involve: Pushing in <tt>pre</tt>,
-     * modifying top arbitrarily with <tt>pre</tt>'s children, popping in the
-     * corresponding <tt>post</tt>, then adding the popped template to the
-     * appropriate enclosing template (i.e. the new/current top).</p>
+     * <p>
+     * Proper usage should generally involve: Pushing in <tt>pre</tt>, modifying
+     * top arbitrarily with
+     * <tt>pre</tt>'s children, popping in the corresponding <tt>post</tt>, then
+     * adding the popped
+     * template to the appropriate enclosing template (i.e. the new/current
+     * top).
+     * </p>
      */
     protected Stack<ST> myActiveTemplates = new Stack<ST>();
 
     /**
-     * <p>This set keeps track of any additional <code>includes</code> or
-     * <code>imports</code> needed to run the translated file. We call
-     * it <em>dynamic</em> since only certain nodes trigger additions to this
-     * set (i.e. <code>FacilityDec</code>s).</p>
+     * <p>
+     * This set keeps track of any additional <code>includes</code> or
+     * <code>imports</code> needed to
+     * run the translated file. We call it <em>dynamic</em> since only certain
+     * nodes trigger additions
+     * to this set (i.e. <code>FacilityDec</code>s).
+     * </p>
      */
     protected Set<String> myDynamicImports = new HashSet<String>();
 
-    protected final String[] noTranslate =
-            { "Std_Boolean_Fac.fa", "Std_Char_Str_Fac.fa",
-                    "Std_Character_Fac.fa", "Std_Integer_Fac.fa",
-                    "Std_Boolean_Realiz", "Integer_Template.co",
-                    "Character_Template.co", "Char_Str_Template.co",
-                    "Seq_Input_Template.co", "Seq_Output_Template.co",
-                    "Print.co", "Std_Location_Linking_Realiz.rb" };
+    protected final String[] noTranslate = { "Std_Boolean_Fac.fa",
+            "Std_Char_Str_Fac.fa", "Std_Character_Fac.fa", "Std_Integer_Fac.fa",
+            "Std_Boolean_Realiz", "Integer_Template.co",
+            "Character_Template.co", "Char_Str_Template.co",
+            "Seq_Input_Template.co", "Seq_Output_Template.co", "Print.co",
+            "Std_Location_Linking_Realiz.rb" };
 
     /**
-     * <p>This flag is <code>true</code> when walking the children of a
-     * <code>WhileStmtChanging</code> clause; <code>false</code> otherwise.</p>
+     * <p>
+     * This flag is <code>true</code> when walking the children of a
+     * <code>WhileStmtChanging</code>
+     * clause; <code>false</code> otherwise.
+     * </p>
      */
     // TODO : This global can be safely removed once walk methods for virtual
-    //        list nodes are fixed. Talk to Blair about this.
+    // list nodes are fixed. Talk to Blair about this.
     protected boolean myWhileStmtChangingClause = false;
     protected boolean myWalkingInitFinalItemFlag = false;
     /**
-     * <p>This stores the facility qualifier when we encounter a
-     * <code>ProgramDotExp</code>. Once we are done walking the
-     * <code>ProgramDotExp</code>, its value becomes Null again.</p>
+     * <p>
+     * This stores the facility qualifier when we encounter a
+     * <code>ProgramDotExp</code>. Once we are
+     * done walking the <code>ProgramDotExp</code>, its value becomes Null
+     * again.
+     * </p>
      */
     private PosSymbol myFacilityQualifier;
 
     /**
-     * <p>While we walk the children of a FacilityOperationDec, this will be set
-     * to the FacilityOperationDec.  Otherwise it will be null.</p>
+     * <p>
+     * While we walk the children of a FacilityOperationDec, this will be set to
+     * the
+     * FacilityOperationDec. Otherwise it will be null.
+     * </p>
      */
     private FacilityOperationDec myCurrentPrivateProcedure;
 
@@ -120,9 +143,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myFacilityQualifier = null;
     }
 
-    //-------------------------------------------------------------------
-    //   Visitor methods
-    //-------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Visitor methods
+    // -------------------------------------------------------------------
 
     @Override
     public void preModuleDec(ModuleDec node) {
@@ -132,8 +155,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
             ST outermostEnclosingTemplate = myGroup.getInstanceOf("module");
 
-            outermostEnclosingTemplate.add("includes", myGroup.getInstanceOf(
-                    "include").add("directories", "RESOLVE"));
+            outermostEnclosingTemplate.add("includes", myGroup
+                    .getInstanceOf("include").add("directories", "RESOLVE"));
 
             myActiveTemplates.push(outermostEnclosingTemplate);
 
@@ -150,21 +173,18 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void preUsesItem(UsesItem node) {
         try {
-            FacilityEntry e =
-                    myScope.queryForOne(
+            FacilityEntry e = myScope
+                    .queryForOne(
                             new UnqualifiedNameQuery(node.getName().getName()))
-                            .toFacilityEntry(null);
+                    .toFacilityEntry(null);
 
-            String spec =
-                    e.getFacility().getSpecification().getModuleIdentifier()
-                            .toString();
+            String spec = e.getFacility().getSpecification()
+                    .getModuleIdentifier().toString();
 
             List<String> pathPieces = getPathList(getFile(null, spec));
 
-            myActiveTemplates.firstElement().add(
-                    "includes",
-                    myGroup.getInstanceOf("include").add("directories",
-                            pathPieces));
+            myActiveTemplates.firstElement().add("includes", myGroup
+                    .getInstanceOf("include").add("directories", pathPieces));
         }
         catch (NoSuchSymbolException nsse) {
             // TODO: Hack Hack. Figure out a way to do this properly.
@@ -215,11 +235,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     // TODO : This is probably going to need some tweaking once else-ifs
-    //        are fixed.
+    // are fixed.
     public void preIfStmtElseclause(IfStmt data) {
 
-        //IfStmtElseClauses are nested within the tree. So if we're here,
-        //add the if part to the outermost stmt block.
+        // IfStmtElseClauses are nested within the tree. So if we're here,
+        // add the if part to the outermost stmt block.
         ST ifPart = myActiveTemplates.pop();
         myActiveTemplates.peek().add("stmts", ifPart);
 
@@ -234,9 +254,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 getDefiningFacilityEntry(node.getVar().getProgramType())
                         .getName();
 
-        ST assignStmt =
-                myGroup.getInstanceOf("qualified_call").add("name", "assign")
-                        .add("qualifier", qualifier);
+        ST assignStmt = myGroup.getInstanceOf("qualified_call")
+                .add("name", "assign").add("qualifier", qualifier);
 
         myActiveTemplates.push(assignStmt);
     }
@@ -261,13 +280,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void preProgramIntegerExp(ProgramIntegerExp node) {
 
-        ST integerExp =
-                myGroup.getInstanceOf("var_init").add("type",
-                        getVariableTypeTemplate(node.getProgramType()));
+        ST integerExp = myGroup.getInstanceOf("var_init").add("type",
+                getVariableTypeTemplate(node.getProgramType()));
 
         integerExp.add("facility",
-                getDefiningFacilityEntry(node.getProgramType()).getName()).add(
-                "arguments", node.getValue());
+                getDefiningFacilityEntry(node.getProgramType()).getName())
+                .add("arguments", node.getValue());
 
         myActiveTemplates.peek().add("arguments", integerExp);
     }
@@ -294,13 +312,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     public void preProgramStringExp(ProgramStringExp node) {
 
-        ST stringExp =
-                myGroup.getInstanceOf("var_init").add("type",
-                        getVariableTypeTemplate(node.getProgramType()));
+        ST stringExp = myGroup.getInstanceOf("var_init").add("type",
+                getVariableTypeTemplate(node.getProgramType()));
 
         stringExp.add("facility",
-                getDefiningFacilityEntry(node.getProgramType()).getName()).add(
-                "arguments", node.getValue());
+                getDefiningFacilityEntry(node.getProgramType()).getName())
+                .add("arguments", node.getValue());
 
         myActiveTemplates.peek().add("arguments", stringExp);
     }
@@ -310,23 +327,20 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         ST paramExp;
 
-        String qualifier =
-                getCallQualifier(myFacilityQualifier, node.getName(), node
-                        .getArguments());
+        String qualifier = getCallQualifier(myFacilityQualifier, node.getName(),
+                node.getArguments());
         if (operationParameterNames.contains(node.getName().getName())) {
             qualifier = node.getName().getName() + "Param";
         }
 
         if (qualifier != null) {
-            paramExp =
-                    myGroup.getInstanceOf("qualified_param_exp").add(
-                            "qualifier", qualifier).add("name",
-                            node.getName().getName());
+            paramExp = myGroup.getInstanceOf("qualified_param_exp")
+                    .add("qualifier", qualifier)
+                    .add("name", node.getName().getName());
         }
         else {
-            paramExp =
-                    myGroup.getInstanceOf("unqualified_param_exp").add("name",
-                            node.getName().getName());
+            paramExp = myGroup.getInstanceOf("unqualified_param_exp")
+                    .add("name", node.getName().getName());
         }
 
         myActiveTemplates.push(paramExp);
@@ -351,20 +365,20 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public boolean walkVariableDotExp(VariableDotExp e) {
 
-        //If we encounter a dot expression in an initialization clause,
-        //we to basically pretend that its a normal name expression. This is not
-        //ideal, but for now, our model of java code requires/expects this.
+        // If we encounter a dot expression in an initialization clause,
+        // we to basically pretend that its a normal name expression. This is not
+        // ideal, but for now, our model of java code requires/expects this.
 
-        //TODO: Think about cases in which the java will actually need a
-        //variableDotExp, and the RESOLVE source that will elicit this.
+        // TODO: Think about cases in which the java will actually need a
+        // variableDotExp, and the RESOLVE source that will elicit this.
         if (myWalkingInitFinalItemFlag) {
             preAny(e);
             preExp(e);
             preProgramExp(e);
             preVariableExp(e);
 
-            //For now we assume we're dealing with a name, since we need to
-            //initialize just the name.
+            // For now we assume we're dealing with a name, since we need to
+            // initialize just the name.
             preVariableNameExp((VariableNameExp) e.getSegments().get(1));
             postVariableNameExp((VariableNameExp) e.getSegments().get(1));
 
@@ -381,10 +395,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         PTType type = node.getSegments().get(0).getProgramType();
 
-        ST dotExp =
-                myGroup.getInstanceOf("variable_dot_exp").add("modulename",
-                        myScope.getDefiningElement().getName().getName()).add(
-                        "typename", getTypeName(type));
+        ST dotExp = myGroup.getInstanceOf("variable_dot_exp")
+                .add("modulename",
+                        myScope.getDefiningElement().getName().getName())
+                .add("typename", getTypeName(type));
 
         myActiveTemplates.push(dotExp);
     }
@@ -410,10 +424,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             hasBody = true;
         }
 
-        ST operation =
-                getOperationLikeTemplate((node.getReturnTy() != null) ? node
-                        .getReturnTy().getProgramTypeValue() : null, node
-                        .getName().getName(), hasBody);
+        ST operation = getOperationLikeTemplate((node.getReturnTy() != null)
+                ? node.getReturnTy().getProgramTypeValue()
+                : null, node.getName().getName(), hasBody);
 
         myActiveTemplates.push(operation);
     }
@@ -421,16 +434,15 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void preProcedureDec(ProcedureDec node) {
 
-        ST operation =
-                getOperationLikeTemplate((node.getReturnTy() != null) ? node
-                        .getReturnTy().getProgramTypeValue() : null, node
-                        .getName().getName(), true);
+        ST operation = getOperationLikeTemplate((node.getReturnTy() != null)
+                ? node.getReturnTy().getProgramTypeValue()
+                : null, node.getName().getName(), true);
 
         myActiveTemplates.push(operation);
 
         if (node.getReturnTy() != null) {
-            addVariableTemplate(node.getReturnTy().getProgramTypeValue(), node
-                    .getName().getName());
+            addVariableTemplate(node.getReturnTy().getProgramTypeValue(),
+                    node.getName().getName());
         }
     }
 
@@ -455,9 +467,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void postProcedureDec(ProcedureDec node) {
 
         if (node.getReturnTy() != null) {
-            ST returnStmt =
-                    myGroup.getInstanceOf("return_stmt").add("name",
-                            node.getName().getName());
+            ST returnStmt = myGroup.getInstanceOf("return_stmt").add("name",
+                    node.getName().getName());
 
             myActiveTemplates.peek().add("stmts", returnStmt);
         }
@@ -470,9 +481,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void postFacilityOperationDec(FacilityOperationDec node) {
 
         if (node.getReturnTy() != null) {
-            ST returnStmt =
-                    myGroup.getInstanceOf("return_stmt").add("name",
-                            node.getName().getName());
+            ST returnStmt = myGroup.getInstanceOf("return_stmt").add("name",
+                    node.getName().getName());
 
             myActiveTemplates.peek().add("stmts", returnStmt);
         }
@@ -485,8 +495,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     @Override
     public void preVarDec(VarDec node) {
-        addVariableTemplate(node.getTy().getProgramTypeValue(), node.getName()
-                .getName());
+        addVariableTemplate(node.getTy().getProgramTypeValue(),
+                node.getName().getName());
     }
 
     @Override
@@ -494,10 +504,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         PTType type = node.getTy().getProgramTypeValue();
 
-        ST parameter =
-                myGroup.getInstanceOf("parameter").add("type",
-                        getParameterTypeTemplate(type)).add("name",
-                        node.getName().getName());
+        ST parameter = myGroup.getInstanceOf("parameter")
+                .add("type", getParameterTypeTemplate(type))
+                .add("name", node.getName().getName());
 
         myActiveTemplates.peek().add("parameters", parameter);
     }
@@ -513,9 +522,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 + "\n----------------------------------");
     }
 
-    //-------------------------------------------------------------------
-    //   Helper methods
-    //-------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Helper methods
+    // -------------------------------------------------------------------
 
     protected abstract ST getVariableTypeTemplate(PTType type);
 
@@ -526,56 +535,53 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected abstract String getFunctionModifier();
 
     /**
-     * <p>Constructs and adds a <code>parameter</code> to the currently active
-     * template.</p>
+     * <p>
+     * Constructs and adds a <code>parameter</code> to the currently active
+     * template.
+     * </p>
      *
-     * @param type A <code>PTType</code> representing the 'declared type' of
-     *             the parameter.
+     * @param type A <code>PTType</code> representing the 'declared type' of the
+     *        parameter.
      * @param name The name of the parameter.
      */
     protected void addParameterTemplate(PTType type, String name) {
-        ST parameter =
-                myGroup.getInstanceOf("parameter").add("type",
-                        getVariableTypeTemplate(type)).add("name", name);
+        ST parameter = myGroup.getInstanceOf("parameter")
+                .add("type", getVariableTypeTemplate(type)).add("name", name);
 
         myActiveTemplates.peek().add("parameters", parameter);
     }
 
     /**
-     * <p>Constructs and adds a <code>var</code> template to the currently
-     * active template.</p>
+     * <p>
+     * Constructs and adds a <code>var</code> template to the currently active
+     * template.
+     * </p>
      *
-     * @param type A <code>PTType</code> representing the type of the
-     *             variable
+     * @param type A <code>PTType</code> representing the type of the variable
      * @param name The name of the variable.
      */
     protected void addVariableTemplate(PTType type, String name) {
         ST init, variable;
 
         if (type instanceof PTGeneric) {
-            init =
-                    myGroup.getInstanceOf("rtype_init").add("typeName",
-                            getTypeName(type));
+            init = myGroup.getInstanceOf("rtype_init").add("typeName",
+                    getTypeName(type));
         }
         else if (type instanceof PTFacilityRepresentation) {
-            init =
-                    myGroup.getInstanceOf("facility_type_var_init").add("name",
-                            getTypeName(type));
+            init = myGroup.getInstanceOf("facility_type_var_init").add("name",
+                    getTypeName(type));
         }
         else if (getDefiningFacilityEntry(type) != null) {
-            init =
-                    myGroup.getInstanceOf("var_init").add("type",
-                            getVariableTypeTemplate(type)).add("facility",
-                            getDefiningFacilityEntry(type).getName());
+            init = myGroup.getInstanceOf("var_init")
+                    .add("type", getVariableTypeTemplate(type))
+                    .add("facility", getDefiningFacilityEntry(type).getName());
         }
         else {
-            init =
-                    myGroup.getInstanceOf("enhancement_var_init").add("type",
-                            getVariableTypeTemplate(type));
+            init = myGroup.getInstanceOf("enhancement_var_init").add("type",
+                    getVariableTypeTemplate(type));
         }
-        variable =
-                myGroup.getInstanceOf("var_decl").add("name", name).add("type",
-                        getVariableTypeTemplate(type)).add("init", init);
+        variable = myGroup.getInstanceOf("var_decl").add("name", name)
+                .add("type", getVariableTypeTemplate(type)).add("init", init);
 
         AbstractTranslator.emitDebug(("Adding variable: " + name
                 + " with type: " + getTypeName(type)));
@@ -584,26 +590,30 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>Returns a <code>function</code> template 'filled in' with the
-     * attributes provided.</p>
+     * <p>
+     * Returns a <code>function</code> template 'filled in' with the attributes
+     * provided.
+     * </p>
      *
-     * @param returnType A <code>PTType</code> representative of the
-     *                   function's return <code>type</code> attribute.
-     * @param name       The name attribute.
-     * @param hasBody    A boolean indicating whether or not the function being
-     *                   created should have a body or not.
+     * @param returnType A <code>PTType</code> representative of the function's
+     *        return
+     *        <code>type</code> attribute.
+     * @param name The name attribute.
+     * @param hasBody A boolean indicating whether or not the function being
+     *        created should have a
+     *        body or not.
      *
-     * @return A <code>function</code> template with the <code>type</code>
-     *         and <code>name</code> attributes formed and filled in.
+     * @return A <code>function</code> template with the <code>type</code> and
+     *         <code>name</code>
+     *         attributes formed and filled in.
      */
     protected ST getOperationLikeTemplate(PTType returnType, String name,
             boolean hasBody) {
 
         String attributeName = (hasBody) ? "function_def" : "function_decl";
 
-        ST operationLikeThingy =
-                myGroup.getInstanceOf(attributeName).add("name", name).add(
-                        "modifier", getFunctionModifier());
+        ST operationLikeThingy = myGroup.getInstanceOf(attributeName)
+                .add("name", name).add("modifier", getFunctionModifier());
 
         operationLikeThingy.add("type",
                 (returnType != null) ? getOperationTypeTemplate(returnType)
@@ -613,20 +623,22 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>Returns a list of <code>ProgramParameterEntry</code>s representing
-     * the formal parameters of module <code>moduleName</code>.</p>
+     * <p>
+     * Returns a list of <code>ProgramParameterEntry</code>s representing the
+     * formal parameters of
+     * module <code>moduleName</code>.
+     * </p>
      *
      * @param moduleName A <code>PosSymbol</code> containing the name of the
-     *                   module whose parameters
+     *        module whose parameters
      * @return A (possibly empty) list of formal parameters.
      */
-    protected List<ProgramParameterEntry> getModuleFormalParameters(
-            PosSymbol moduleName) {
+    protected List<ProgramParameterEntry>
+            getModuleFormalParameters(PosSymbol moduleName) {
         try {
-            ModuleDec spec =
-                    myBuilder.getModuleScope(
-                            new ModuleIdentifier(moduleName.getName()))
-                            .getDefiningElement();
+            ModuleDec spec = myBuilder
+                    .getModuleScope(new ModuleIdentifier(moduleName.getName()))
+                    .getDefiningElement();
 
             return myBuilder.getScope(spec).getFormalParameterEntries();
         }
@@ -637,12 +649,14 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>Returns the 'name' component of a <code>PTType</code>.
+     * <p>
+     * Returns the 'name' component of a <code>PTType</code>.
      *
      * @param type A <code>PTType</code>.
      *
      * @return <code>type</code>'s actual name rather than the more easily
-     *         accessible <code>toString</code> representation.
+     *         accessible
+     *         <code>toString</code> representation.
      */
     protected String getTypeName(PTType type) {
 
@@ -668,32 +682,34 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             result = ((PTFamily) type).getName();
         }
         else {
-            throw new UnsupportedOperationException("Translation has "
-                    + "encountered an unrecognized PTType: " + type.toString()
-                    + ". Backing out.");
+            throw new UnsupportedOperationException(
+                    "Translation has " + "encountered an unrecognized PTType: "
+                            + type.toString() + ". Backing out.");
         }
         return result;
     }
 
     /**
-     * <p>Searches for the <code>FacilityEntry</code> responsible for
-     * bringing the SymbolTableEntry referenced by <code>type</code> into the
-     * <code>ModuleScope</code> being translated.</p>
+     * <p>
+     * Searches for the <code>FacilityEntry</code> responsible for bringing the
+     * SymbolTableEntry
+     * referenced by <code>type</code> into the <code>ModuleScope</code> being
+     * translated.
+     * </p>
      *
-     * @param type  The <code>PTType</code> we want symboltable info for.
+     * @param type The <code>PTType</code> we want symboltable info for.
      *
      * @return The <code>FacilityEntry</code> that defines <code>type</code>.
      */
     protected FacilityEntry getDefiningFacilityEntry(PTType type) {
 
         FacilityEntry result = null;
-        //String searchString = getTypeName(type);
+        // String searchString = getTypeName(type);
 
         try {
-            ProgramTypeEntry te =
-                    myScope.queryForOne(
-                            new UnqualifiedNameQuery(type.toString()))
-                            .toProgramTypeEntry(null);
+            ProgramTypeEntry te = myScope
+                    .queryForOne(new UnqualifiedNameQuery(type.toString()))
+                    .toProgramTypeEntry(null);
 
             List<FacilityEntry> facilities =
                     myScope.query(new EntryTypeQuery(FacilityEntry.class,
@@ -701,9 +717,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                             MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
             for (FacilityEntry facility : facilities) {
-                if (te.getSourceModuleIdentifier().equals(
-                        facility.getFacility().getSpecification()
-                                .getModuleIdentifier())) {
+                if (te.getSourceModuleIdentifier().equals(facility.getFacility()
+                        .getSpecification().getModuleIdentifier())) {
 
                     result = facility;
                 }
@@ -732,14 +747,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 argTypes.add(arg.getProgramType());
             }
 
-            OperationEntry oe =
-                    myScope.queryForOne(
-                            new OperationQuery(null, name, argTypes))
-                            .toOperationEntry(null);
+            OperationEntry oe = myScope
+                    .queryForOne(new OperationQuery(null, name, argTypes))
+                    .toOperationEntry(null);
 
             // We're dealing with local operation, then no qualifier.
-            if (myScope.getModuleIdentifier().equals(
-                    oe.getSourceModuleIdentifier())) {
+            if (myScope.getModuleIdentifier()
+                    .equals(oe.getSourceModuleIdentifier())) {
                 return null;
             }
             // Grab FacilityEntries in scope whose specification matches
@@ -759,15 +773,14 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     break;
                 }
 
-                if (oe.getSourceModuleIdentifier().equals(
-                        f.getFacility().getSpecification()
-                                .getModuleIdentifier())) {
+                if (oe.getSourceModuleIdentifier().equals(f.getFacility()
+                        .getSpecification().getModuleIdentifier())) {
                     definingFacility = f;
                 }
 
                 for (ModuleParameterization p : f.getEnhancements()) {
-                    if (oe.getSourceModuleIdentifier().equals(
-                            p.getModuleIdentifier())) {
+                    if (oe.getSourceModuleIdentifier()
+                            .equals(p.getModuleIdentifier())) {
                         definingFacility = f;
                         comesFromEnhancement = true;
                     }
@@ -786,9 +799,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             // template -- there is likely a more elegant way.
             if (definingFacility.getEnhancements().size() >= 2
                     && comesFromEnhancement) {
-                result =
-                        "((" + oe.getSourceModuleIdentifier() + ")"
-                                + definingFacility.getName() + ")";
+                result = "((" + oe.getSourceModuleIdentifier() + ")"
+                        + definingFacility.getName() + ")";
             }
             else {
                 result = definingFacility.getName();
@@ -805,9 +817,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         return result;
     }
 
-    //-------------------------------------------------------------------
-    //   Error handling
-    //-------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Error handling
+    // -------------------------------------------------------------------
 
     public void noSuchModule(PosSymbol module) {
         throw new SourceErrorException(
@@ -818,7 +830,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         noSuchSymbol(qualifier, symbol.getName(), symbol.getLocation());
     }
 
-    public void noSuchSymbol(PosSymbol qualifier, String symbolName, Location l) {
+    public void noSuchSymbol(PosSymbol qualifier, String symbolName,
+            Location l) {
 
         String message;
 
@@ -826,22 +839,23 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             message = "Translation was unable to find symbol: " + symbolName;
         }
         else {
-            message =
-                    "No such symbol in module: " + qualifier.getName() + "."
-                            + symbolName;
+            message = "No such symbol in module: " + qualifier.getName() + "."
+                    + symbolName;
         }
 
         throw new SourceErrorException(message, l);
     }
 
-    //-------------------------------------------------------------------
-    //   Utility, output, and flag-related methods
-    //-------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Utility, output, and flag-related methods
+    // -------------------------------------------------------------------
 
     /**
-     * <p>Returns a <code>File</code> given either a <code>ModuleDec</code>
-     * <em>or</em> a string containing the name of a
-     * <code>ConceptBodyModuleDec</code>.</p>
+     * <p>
+     * Returns a <code>File</code> given either a <code>ModuleDec</code>
+     * <em>or</em> a string
+     * containing the name of a <code>ConceptBodyModuleDec</code>.
+     * </p>
      *
      * @param module A <code>ModuleDec</code>.
      * @param name The name of an existing <code>ConceptBodyModuleDec</code>.
@@ -871,22 +885,35 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>Given a <code>File</code> object, this hacky little method returns a
-     * list whose elements consist of the directory names of the input file's
-     * absolute path.</p>
+     * <p>
+     * Given a <code>File</code> object, this hacky little method returns a list
+     * whose elements
+     * consist of the directory names of the input file's absolute path.
+     * </p>
      *
-     * <p>For example, given file (with directory path) :
-     *      <pre>Resolve-Workspace/RESOLVE/Main/X.fa</pre>
+     * <p>
+     * For example, given file (with directory path) :
+     * 
+     * <pre>
+     * Resolve - Workspace / RESOLVE / Main / X.fa
+     * </pre>
      *
-     * <p>this method will return :
-     *      <pre>[RESOLVE, Main, X]</pre>
+     * <p>
+     * this method will return :
+     * 
+     * <pre>
+     * [RESOLVE, Main, X]
+     * </pre>
      *
-     * <p>Note that any directories prior to the root "RESOLVE" directory are
-     * stripped, along with <code>source</code>'s file extension.</p>
+     * <p>
+     * Note that any directories prior to the root "RESOLVE" directory are
+     * stripped, along with
+     * <code>source</code>'s file extension.
+     * </p>
      *
      * @param source The input <code>File</code>.
-     * @return A list whose elements correspond to the path directories
-     *         of <code>source</code>.
+     * @return A list whose elements correspond to the path directories of
+     *         <code>source</code>.
      */
     protected List<String> getPathList(File source) {
         String currentToken;
@@ -899,13 +926,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         while (stTok.hasMoreTokens()) {
             currentToken = stTok.nextToken();
 
-            if (currentToken.equalsIgnoreCase("RESOLVE") || rootDirectoryFound) {
+            if (currentToken.equalsIgnoreCase("RESOLVE")
+                    || rootDirectoryFound) {
                 rootDirectoryFound = true;
 
                 if (currentToken.contains(".")) {
-                    currentToken =
-                            currentToken
-                                    .substring(0, currentToken.indexOf('.'));
+                    currentToken = currentToken.substring(0,
+                            currentToken.indexOf('.'));
                 }
                 result.add(currentToken);
             }
@@ -936,9 +963,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     public void outputCode(File outputFile) {
         if (!myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
-                || myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-            outputAsFile(outputFile.getAbsolutePath(), myActiveTemplates.peek()
-                    .render());
+                || myInstanceEnvironment.flags
+                        .isFlagSet(Archiver.FLAG_ARCHIVE)) {
+            outputAsFile(outputFile.getAbsolutePath(),
+                    myActiveTemplates.peek().render());
             // System.out.println(myActiveTemplates.peek().render());
         }
         else {
@@ -968,7 +996,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 outFile.close();
             }
             catch (IOException ex) {
-                //FIX: Something should be done with this exception - ya think?
+                // FIX: Something should be done with this exception - ya think?
             }
         }
         else {

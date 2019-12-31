@@ -1,7 +1,7 @@
 /*
  * List.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -85,8 +85,8 @@ public class List<A> extends java.util.ArrayList<A>
     }
 
     /**
-     * Keeps the first occurance of an item in the list, and removes
-     * all others, preserving the order.
+     * Keeps the first occurance of an item in the list, and removes all others,
+     * preserving the order.
      */
     public void removeDuplicates() {
 
@@ -103,8 +103,8 @@ public class List<A> extends java.util.ArrayList<A>
     }
 
     /**
-     * Prints the elements of the list according to the given
-     * indentation and increment.
+     * Prints the elements of the list according to the given indentation and
+     * increment.
      */
     public String asString(int indent, int increment) {
 
@@ -151,8 +151,9 @@ public class List<A> extends java.util.ArrayList<A>
     }
 
     /**
-     * Returns a deep copy of the current list. If an element does
-     * not implement the Copyable interface, the program will abort.
+     * Returns a deep copy of the current list. If an element does not implement
+     * the Copyable
+     * interface, the program will abort.
      */
     public List<A> copy() {
         List<A> result = new List<A>();
@@ -165,18 +166,16 @@ public class List<A> extends java.util.ArrayList<A>
         return result;
     }
 
-    //JMH - this line was changed to be compatible with Java 1.4.2 with the
-    //adding_generics-2_0.ea package
-    //this may not be compatible with Java 1.5 generics when the become 
-    //available
-    //public void addAll(A[] array) {
+    // JMH - this line was changed to be compatible with Java 1.4.2 with the
+    // adding_generics-2_0.ea package
+    // this may not be compatible with Java 1.5 generics when the become
+    // available
+    // public void addAll(A[] array) {
     // avoid problems with 1.5 generics move the loop up a level - jmh
     /*
-    public void addAll(A[] array) {
-        for (int i = 0; i < array.length; i++) {
-            this.add(array[i]);
-        }
-    }
+     * public void addAll(A[] array) { for (int i = 0; i < array.length; i++) {
+     * this.add(array[i]); }
+     * }
      */
 
     // ===========================================================

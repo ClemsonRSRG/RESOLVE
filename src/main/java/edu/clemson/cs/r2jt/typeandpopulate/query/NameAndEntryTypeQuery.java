@@ -1,7 +1,7 @@
 /*
  * NameAndEntryTypeQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,13 +19,17 @@ import edu.clemson.cs.r2jt.typeandpopulate.PossiblyQualifiedPath;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 
 /**
- * <p>A <code>NameAndEntryQuery</code> takes a (possibly-null) qualifier, a 
- * name, and an entry type descended from <code>SymbolTableEntry</code>, and
- * searched for entries that match, disregarding any entries with the correct
- * name but incorrect type.  If the qualifier is non-null, the
- * appropriate facility or module is searched.  If it <em>is</em> null, a
- * search is performed using the provided <code>ImportStrategy</code> and
- * <code>FacilityStrategy</code>.</p>
+ * <p>
+ * A <code>NameAndEntryQuery</code> takes a (possibly-null) qualifier, a name,
+ * and an entry type
+ * descended from <code>SymbolTableEntry</code>, and searched for entries that
+ * match, disregarding
+ * any entries with the correct name but incorrect type. If the qualifier is
+ * non-null, the
+ * appropriate facility or module is searched. If it <em>is</em> null, a search
+ * is performed using
+ * the provided <code>ImportStrategy</code> and <code>FacilityStrategy</code>.
+ * </p>
  */
 public class NameAndEntryTypeQuery
         extends
@@ -37,8 +41,8 @@ public class NameAndEntryTypeQuery
             MathSymbolTable.FacilityStrategy facilityStrategy,
             boolean localPriority) {
         super(new PossiblyQualifiedPath(qualifier, importStrategy,
-                facilityStrategy, localPriority), new NameAndEntryTypeSearcher(
-                name, entryType, false));
+                facilityStrategy, localPriority),
+                new NameAndEntryTypeSearcher(name, entryType, false));
     }
 
     public NameAndEntryTypeQuery(PosSymbol qualifier, PosSymbol name,

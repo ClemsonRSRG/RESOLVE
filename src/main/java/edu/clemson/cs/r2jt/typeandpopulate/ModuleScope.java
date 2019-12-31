@@ -1,7 +1,7 @@
 /*
  * ModuleScope.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,38 +17,54 @@ import java.util.List;
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
 
 /**
- * <p>A <code>ModuleScope</code> refines {@link Scope Scope} to provide methods
- * specific to those scopes introduced by a RESOLVE module.</p>
+ * <p>
+ * A <code>ModuleScope</code> refines {@link Scope Scope} to provide methods
+ * specific to those
+ * scopes introduced by a RESOLVE module.
+ * </p>
  * 
- * <p>As with <code>Scope</code>, <code>ModuleScope</code> defines no mutator
- * methods, but specific concrete subclasses may be mutable.</p>
+ * <p>
+ * As with <code>Scope</code>, <code>ModuleScope</code> defines no mutator
+ * methods, but specific
+ * concrete subclasses may be mutable.
+ * </p>
  */
 public interface ModuleScope extends Scope {
 
     public ModuleDec getDefiningElement();
 
     /**
-     * <p>Returns a <code>ModuleIdentifier</code> that can be used to refer
-     * to the module who's scope is represented by this 
-     * <code>ModuleScope</code>.</p>
+     * <p>
+     * Returns a <code>ModuleIdentifier</code> that can be used to refer to the
+     * module who's scope is
+     * represented by this <code>ModuleScope</code>.
+     * </p>
      * 
      * @return The <code>ModuleIdentifier</code>.
      */
     public ModuleIdentifier getModuleIdentifier();
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</code> the module who's scope
-     * is represented by this <code>ModuleScope</code> imports the given
-     * module.  Note that, by definition, all modules import themselves.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</code> the module who's scope is
+     * represented by this
+     * <code>ModuleScope</code> imports the given module. Note that, by
+     * definition, all modules import
+     * themselves.
+     * </p>
      */
     public boolean imports(ModuleIdentifier i);
 
     /**
-     * <p>Returns a <code>List</code> of modules that the module who's scope
-     * is represented by this <code>ModuleScope</code> imports, not including
-     * itself (which all modules are defined to import).  This <code>List</code>
-     * is a copy and modifying it will not impact the behavior of this
-     * <code>ModuleScope</code>.</p>
+     * <p>
+     * Returns a <code>List</code> of modules that the module who's scope is
+     * represented by this
+     * <code>ModuleScope</code> imports, not including itself (which all modules
+     * are defined to
+     * import). This <code>List</code> is a copy and modifying it will not
+     * impact the behavior of this
+     * <code>ModuleScope</code>.
+     * </p>
      * 
      * @returns A <code>List</code> of imported modules.
      */

@@ -1,7 +1,7 @@
 /*
  * AlternativeExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical alternative expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical alternative expression objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,7 +35,11 @@ public class AlternativeExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The alternatives member.</p> */
+    /**
+     * <p>
+     * The alternatives member.
+     * </p>
+     */
     private final List<AltItemExp> myAlternatives;
 
     // ===========================================================
@@ -40,7 +47,9 @@ public class AlternativeExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs an alternative expression.</p>
+     * <p>
+     * This constructs an alternative expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param alternatives A list of {@link AltItemExp} expressions.
@@ -75,8 +84,9 @@ public class AlternativeExp extends MathExp {
             for (AltItemExp exp : myAlternatives) {
                 if (exp != null) {
                     sb.append("\n");
-                    sb.append(exp.asString(indentSize + innerIndentInc
-                            + innerIndentInc, innerIndentInc));
+                    sb.append(exp.asString(
+                            indentSize + innerIndentInc + innerIndentInc,
+                            innerIndentInc));
                 }
             }
         }
@@ -159,7 +169,7 @@ public class AlternativeExp extends MathExp {
                 result &= thisAltItems.next().equivalent(eAltItems.next());
             }
 
-            //Both had better have run out at the same time
+            // Both had better have run out at the same time
             result &= (!thisAltItems.hasNext()) && (!eAltItems.hasNext());
         }
 
@@ -167,7 +177,9 @@ public class AlternativeExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the list of alternative expressions.</p>
+     * <p>
+     * This method returns the list of alternative expressions.
+     * </p>
      *
      * @return A list containing {@link AltItemExp}s.
      */
@@ -228,8 +240,10 @@ public class AlternativeExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list of alternative expressions.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list of alternative
+     * expressions.
+     * </p>
      *
      * @return A list containing {@link AltItemExp}s.
      */

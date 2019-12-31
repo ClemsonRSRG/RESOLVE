@@ -1,7 +1,7 @@
 /*
  * AbstractFunctionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,8 +23,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the mathematical function expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the mathematical function expression
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -34,10 +37,18 @@ public abstract class AbstractFunctionExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The object's qualifier.</p> */
+    /**
+     * <p>
+     * The object's qualifier.
+     * </p>
+     */
     protected PosSymbol myQualifier;
 
-    /** <p>The object's quantification (if any).</p> */
+    /**
+     * <p>
+     * The object's quantification (if any).
+     * </p>
+     */
     protected SymbolTableEntry.Quantification myQuantification;
 
     // ===========================================================
@@ -45,9 +56,11 @@ public abstract class AbstractFunctionExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location
-     * of any objects created from a class that inherits from
-     * {@code AbstractFunctionExp}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location of any objects
+     * created from a class
+     * that inherits from {@code AbstractFunctionExp}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param qualifier A {@link PosSymbol} name object.
@@ -83,23 +96,33 @@ public abstract class AbstractFunctionExp extends MathExp {
     }
 
     /**
-     * <p>This class represents function <em>applications</em>. The type of a
-     * function application is the type of the range of the function. Often
-     * we'd like to think about the type of the <em>function itself</em>, not 
-     * the type of the result of its application.  Unfortunately our AST does 
-     * not consider that the 'function' part of a FunctionExp (as distinct from
-     * its parameters) might be a first-class citizen with a type of its own.  
-     * This method emulates retrieving the (not actually extant) first-class 
-     * function part and guessing its type.  In this case, the guess is 
-     * "conservative", in that we guess the smallest set that can't be 
-     * contradicted by the available information.  For nodes without a true,
-     * first-class function to consult (which, at the moment, is all of them), 
-     * this means that for the formal parameter types, we'll guess the types of 
-     * the actual parameters, and for the return type we'll guess 
-     * <strong>Empty_Set</strong> (since we have no information about how the 
-     * return value is used.)  This guarantees that the type we return will be
-     * a subset of the actual type of the function the RESOLVE programmer 
-     * intends (assuming she has called it correctly.)</p>
+     * <p>
+     * This class represents function <em>applications</em>. The type of a
+     * function application is the
+     * type of the range of the function. Often we'd like to think about the
+     * type of the <em>function
+     * itself</em>, not the type of the result of its application. Unfortunately
+     * our AST does not
+     * consider that the 'function' part of a FunctionExp (as distinct from its
+     * parameters) might be a
+     * first-class citizen with a type of its own. This method emulates
+     * retrieving the (not actually
+     * extant) first-class function part and guessing its type. In this case,
+     * the guess is
+     * "conservative", in that we guess the smallest set that can't be
+     * contradicted by the available
+     * information. For nodes without a true, first-class function to consult
+     * (which, at the moment,
+     * is all of them), this means that for the formal parameter types, we'll
+     * guess the types of the
+     * actual parameters, and for the return type we'll guess
+     * <strong>Empty_Set</strong> (since we
+     * have no information about how the return value is used.) This guarantees
+     * that the type we
+     * return will be a subset of the actual type of the function the RESOLVE
+     * programmer intends
+     * (assuming she has called it correctly.)
+     * </p>
      *
      * @param g The type graph.
      *
@@ -116,61 +139,63 @@ public abstract class AbstractFunctionExp extends MathExp {
         return new MTFunction(g, g.EMPTY_SET, subTypes);
     }
 
-    //TODO : This does not work correctly for nested MTCartesians/TupleExps
+    // TODO : This does not work correctly for nested MTCartesians/TupleExps
     /**
-     * <p>Syntactically, a function application may have multiple parameters.
-     * Mathematically, we must be able to refer to the single mathematical 
-     * object that represents "all the parameters."  This method returns that
-     * object.</p>
+     * <p>
+     * Syntactically, a function application may have multiple parameters.
+     * Mathematically, we must be
+     * able to refer to the single mathematical object that represents "all the
+     * parameters." This
+     * method returns that object.
+     * </p>
      */
-    /*public Exp getSoleParameter(TypeGraph g) {
-    	return buildSoleParameter(g, getLocation(), getParameters());
-    }
-    
-    public static final Exp buildSoleParameter(TypeGraph g, Location l,
-    			List<Exp> params) {
-    	
-    	Exp result;
-    	
-    	switch (params.size()) {
-    	case 0:
-    		result = g.getNothingExp();
-    		break;
-    	case 1:
-    		result = params.get(0);
-    		break;
-    	default:
-    		List<MTType> componentTypes = new LinkedList<>();
-    		TupleExp tuple = new TupleExp(l, params);
-    		for (Exp param : params) {
-    			componentTypes.add(param.getMathType());
-    		}
-    		MTType tupleType = MTFunction.buildParameterType(g, componentTypes);
-    		
-    		propogateTypes(tuple, tupleType);
-    		
-    		result = tuple;
-    	}
-    	
-    	return result;
-    }*/
+    /*
+     * public Exp getSoleParameter(TypeGraph g) { return buildSoleParameter(g,
+     * getLocation(),
+     * getParameters()); }
+     * 
+     * public static final Exp buildSoleParameter(TypeGraph g, Location l,
+     * List<Exp> params) {
+     * 
+     * Exp result;
+     * 
+     * switch (params.size()) { case 0: result = g.getNothingExp(); break; case
+     * 1: result =
+     * params.get(0); break; default: List<MTType> componentTypes = new
+     * LinkedList<>(); TupleExp tuple
+     * = new TupleExp(l, params); for (Exp param : params) {
+     * componentTypes.add(param.getMathType());
+     * } MTType tupleType = MTFunction.buildParameterType(g, componentTypes);
+     * 
+     * propogateTypes(tuple, tupleType);
+     * 
+     * result = tuple; }
+     * 
+     * return result; }
+     */
 
     /**
-     * <p>Returns the mathematical operator as a symbol.</p>
+     * <p>
+     * Returns the mathematical operator as a symbol.
+     * </p>
      *
      * @return A {@link PosSymbol} object containing the operator.
      */
     public abstract PosSymbol getOperatorAsPosSymbol();
 
     /**
-     * <p>Returns the mathematical operator as a string.</p>
+     * <p>
+     * Returns the mathematical operator as a string.
+     * </p>
      *
      * @return The operator as a string.
      */
     public abstract String getOperatorAsString();
 
     /**
-     * <p>Returns the module qualifier for this expression.</p>
+     * <p>
+     * Returns the module qualifier for this expression.
+     * </p>
      *
      * @return A {@link PosSymbol} object containing the qualifier.
      */
@@ -179,19 +204,25 @@ public abstract class AbstractFunctionExp extends MathExp {
     }
 
     /**
-     * <p>Returns the quantifier for this expression.</p>
+     * <p>
+     * Returns the quantifier for this expression.
+     * </p>
      *
      * @return An {@link SymbolTableEntry.Quantification} object representing
-     * the quantification for this expression.
+     *         the quantification for
+     *         this expression.
      */
     public final SymbolTableEntry.Quantification getQuantification() {
         return myQuantification;
     }
 
     /**
-     * <p>Returns the list of parameters in this expression.</p>
+     * <p>
+     * Returns the list of parameters in this expression.
+     * </p>
      *
-     * @return A list of {@link Exp} containing all the parameters to this function.
+     * @return A list of {@link Exp} containing all the parameters to this
+     *         function.
      */
     public final List<Exp> getParameters() {
         return this.getSubExpressions();
@@ -203,19 +234,17 @@ public abstract class AbstractFunctionExp extends MathExp {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result =
-                31 * result
-                        + (myQualifier != null ? myQualifier.hashCode() : 0);
-        result =
-                31
-                        * result
-                        + (myQuantification != null ? myQuantification
-                                .hashCode() : 0);
+        result = 31 * result
+                + (myQualifier != null ? myQualifier.hashCode() : 0);
+        result = 31 * result
+                + (myQuantification != null ? myQuantification.hashCode() : 0);
         return result;
     }
 
     /**
-     * <p>Sets the qualifier for this expression.</p>
+     * <p>
+     * Sets the qualifier for this expression.
+     * </p>
      *
      * @param qualifier The qualifier for this expression.
      */
@@ -224,15 +253,17 @@ public abstract class AbstractFunctionExp extends MathExp {
     }
 
     /**
-     * <p>Sets the quantification for this expression.</p>
+     * <p>
+     * Sets the quantification for this expression.
+     * </p>
      *
      * @param q The quantification type for this expression.
      */
     public void setQuantification(SymbolTableEntry.Quantification q) {
         if (!q.equals(SymbolTableEntry.Quantification.NONE)) {
-            throw new UnsupportedOperationException("The function "
-                    + getOperatorAsString() + " does not support "
-                    + "quantification.");
+            throw new UnsupportedOperationException(
+                    "The function " + getOperatorAsString()
+                            + " does not support " + "quantification.");
         }
     }
 
@@ -241,22 +272,25 @@ public abstract class AbstractFunctionExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This method sets {@code t} as the type for an
-     * expression and it's sub-expressions.</p>
+     * <p>
+     * This method sets {@code t} as the type for an expression and it's
+     * sub-expressions.
+     * </p>
      *
      * @param e The expression we wish to change the type.
      * @param t The new mathematical type.
      */
-    /*private static final void propogateTypes(Exp e, MTType t) {
-        e.setMathType(t);
-
-        Iterator<Exp> subExpressions = e.getSubExpressions().iterator();
-        Iterator<MTType> subTypes = t.getComponentTypes().iterator();
-
-        //Note that e and t must have the same structure
-        while (subExpressions.hasNext()) {
-            propogateTypes(subExpressions.next(), subTypes.next());
-        }
-    }*/
+    /*
+     * private static final void propogateTypes(Exp e, MTType t) {
+     * e.setMathType(t);
+     * 
+     * Iterator<Exp> subExpressions = e.getSubExpressions().iterator();
+     * Iterator<MTType> subTypes =
+     * t.getComponentTypes().iterator();
+     * 
+     * //Note that e and t must have the same structure while
+     * (subExpressions.hasNext()) {
+     * propogateTypes(subExpressions.next(), subTypes.next()); } }
+     */
 
 }

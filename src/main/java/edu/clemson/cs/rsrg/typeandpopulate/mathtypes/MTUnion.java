@@ -1,7 +1,7 @@
 /*
  * MTUnion.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
 import java.util.*;
 
 /**
- * <p>An union type that contains various other
- * {@link MTType}s.</p>
+ * <p>
+ * An union type that contains various other {@link MTType}s.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,10 +29,18 @@ public class MTUnion extends MTAbstract<MTUnion> {
     // Member Fields
     // ===========================================================
 
-    /** <p>An integer value that helps us retrieve the hashcode for this class.</p> */
+    /**
+     * <p>
+     * An integer value that helps us retrieve the hashcode for this class.
+     * </p>
+     */
     private final static int BASE_HASH = "MTUnion".hashCode();
 
-    /** <p>List of {@link MTType}s that are in this union type. </p> */
+    /**
+     * <p>
+     * List of {@link MTType}s that are in this union type.
+     * </p>
+     */
     private List<MTType> myMembers = new LinkedList<>();
 
     // ===========================================================
@@ -39,7 +48,9 @@ public class MTUnion extends MTAbstract<MTUnion> {
     // ===========================================================
 
     /**
-     * <p>This constructs an union type with no members initially.</p>
+     * <p>
+     * This constructs an union type with no members initially.
+     * </p>
      *
      * @param g The current type graph.
      */
@@ -48,8 +59,10 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>This constructs an union type with the {@link MTType}s
-     * as members of this type.</p>
+     * <p>
+     * This constructs an union type with the {@link MTType}s as members of this
+     * type.
+     * </p>
      *
      * @param g The current type graph.
      * @param members The {@link MTType}s that are in this union type.
@@ -59,8 +72,10 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>This constructs an union type with the list of {@link MTType}s
-     * as members of this type.</p>
+     * <p>
+     * This constructs an union type with the list of {@link MTType}s as members
+     * of this type.
+     * </p>
      *
      * @param g The current type graph.
      * @param members The list of {@link MTType}s that are in this union type.
@@ -75,8 +90,11 @@ public class MTUnion extends MTAbstract<MTUnion> {
     // ===========================================================
 
     /**
-     * <p>This method is the {@code accept()} method in a visitor pattern
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method is the {@code accept()} method in a visitor pattern for
+     * invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -96,8 +114,10 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>This method implements the post-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the post-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -109,8 +129,10 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>This method implements the pre-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the pre-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -122,7 +144,9 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>Add a new {@link MTType} to this union type.</p>
+     * <p>
+     * Add a new {@link MTType} to this union type.
+     * </p>
      *
      * @param t A {@link MTType} object.
      */
@@ -131,21 +155,23 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>Checks to see if {@code member} is part of this union
-     * type.</p>
+     * <p>
+     * Checks to see if {@code member} is part of this union type.
+     * </p>
      *
      * @param member A {@link MTType} object.
      *
      * @return {@code true} if {@code member} is in this union type,
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     public final boolean containsMember(MTType member) {
         return myMembers.contains(member);
     }
 
     /**
-     * <p>This method returns a list of {@link MTType}s
-     * that are part of this type.</p>
+     * <p>
+     * This method returns a list of {@link MTType}s that are part of this type.
+     * </p>
      *
      * @return The list of {@link MTType}s in this union type.
      */
@@ -155,9 +181,13 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>Indicates that this type is known to contain only elements <em>that
-     * are themselves</em> types. Practically, this answers the question, "can
-     * an instance of this type itself be used as a type?"</p>
+     * <p>
+     * Indicates that this type is known to contain only elements <em>that are
+     * themselves</em> types.
+     * Practically, this answers the question, "can an instance of this type
+     * itself be used as a
+     * type?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
@@ -174,10 +204,13 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>Indicates that every instance of this type is itself known to contain
-     * only elements that are types. Practically, this answers the question,
-     * "if a function returns an instance of this type, can that instance itself
-     * be said to contain only types?"</p>
+     * <p>
+     * Indicates that every instance of this type is itself known to contain
+     * only elements that are
+     * types. Practically, this answers the question, "if a function returns an
+     * instance of this type,
+     * can that instance itself be said to contain only types?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
@@ -194,7 +227,9 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */
@@ -215,14 +250,17 @@ public class MTUnion extends MTAbstract<MTUnion> {
     }
 
     /**
-     * <p>This method attempts to replace a component type at the specified
-     * index.</p>
+     * <p>
+     * This method attempts to replace a component type at the specified index.
+     * </p>
      *
      * @param index Index to a component type.
-     * @param newType The {@link MTType} to replace the one in our component list.
+     * @param newType The {@link MTType} to replace the one in our component
+     *        list.
      *
      * @return A new {@link MTUnion} with the type at the specified index
-     * replaced with {@code newType}.
+     *         replaced with
+     *         {@code newType}.
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
@@ -237,13 +275,16 @@ public class MTUnion extends MTAbstract<MTUnion> {
     // ===========================================================
 
     /**
-     * <p>This is just a template method to <em>force</em> all concrete
-     * subclasses of {@link MTType} to implement <code>hashCode()</code>,
-     * as the type resolution algorithm depends on it being implemented
-     * sensibly.</p>
+     * <p>
+     * This is just a template method to <em>force</em> all concrete subclasses
+     * of {@link MTType} to
+     * implement <code>hashCode()</code>, as the type resolution algorithm
+     * depends on it being
+     * implemented sensibly.
+     * </p>
      *
      * @return A hashcode consistent with <code>equals()</code> and thus
-     * alpha-equivalency.
+     *         alpha-equivalency.
      */
     @Override
     protected final int getHashCode() {

@@ -1,7 +1,7 @@
 /*
  * EnhancementSpecRealizItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,9 +19,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the facility declaration arguments
- * for Enhancement and its associated Realization extension modules
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the facility declaration arguments for Enhancement
+ * and its associated
+ * Realization extension modules that the compiler builds using the ANTLR4 AST
+ * nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,19 +34,39 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>Name of this imported module.</p> */
+    /**
+     * <p>
+     * Name of this imported module.
+     * </p>
+     */
     private final PosSymbol myEnhancementName;
 
-    /** <p>List of parameters arguments for this enhancement extension.</p> */
+    /**
+     * <p>
+     * List of parameters arguments for this enhancement extension.
+     * </p>
+     */
     private final List<ModuleArgumentItem> myEnhancementParams;
 
-    /** <p>Profile name for this imported module.</p> */
+    /**
+     * <p>
+     * Profile name for this imported module.
+     * </p>
+     */
     private final PosSymbol myProfileName;
 
-    /** <p>Name of the implementation module.</p> */
+    /**
+     * <p>
+     * Name of the implementation module.
+     * </p>
+     */
     private final PosSymbol myEnhancementRealizName;
 
-    /** <p>List of parameters arguments for the enhancement implementation.</p> */
+    /**
+     * <p>
+     * List of parameters arguments for the enhancement implementation.
+     * </p>
+     */
     private final List<ModuleArgumentItem> myEnhancementRealizParams;
 
     // ===========================================================
@@ -51,14 +74,20 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a enhancement and realization extension argument
-     * for facility declarations.</p>
+     * <p>
+     * This constructs a enhancement and realization extension argument for
+     * facility declarations.
+     * </p>
      *
      * @param name Name of the extended enhancement module.
-     * @param params The parameter arguments that are passed to instantiate this enhancement.
+     * @param params The parameter arguments that are passed to instantiate this
+     *        enhancement.
      * @param bodyName Name of the enhancement implementation module.
-     * @param bodyParams The parameter arguments that are passed to instantiate the enhancement implementation.
-     * @param profileName Performance profile name for the extended enhancement module.
+     * @param bodyParams The parameter arguments that are passed to instantiate
+     *        the enhancement
+     *        implementation.
+     * @param profileName Performance profile name for the extended enhancement
+     *        module.
      */
     public EnhancementSpecRealizItem(PosSymbol name,
             List<ModuleArgumentItem> params, PosSymbol bodyName,
@@ -137,7 +166,9 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the symbol representation of the enhancement extension.</p>
+     * <p>
+     * Returns the symbol representation of the enhancement extension.
+     * </p>
      *
      * @return A {@link PosSymbol} representation of the enhancement name.
      */
@@ -146,8 +177,9 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of arguments for this enhancement
-     * extension.</p>
+     * <p>
+     * Returns the list of arguments for this enhancement extension.
+     * </p>
      *
      * @return A list of {@link ModuleArgumentItem} representation objects.
      */
@@ -156,17 +188,23 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the symbol representation of the associated realization extension.</p>
+     * <p>
+     * Returns the symbol representation of the associated realization
+     * extension.
+     * </p>
      *
-     * @return A {@link PosSymbol} representation of the enhancement realization name.
+     * @return A {@link PosSymbol} representation of the enhancement realization
+     *         name.
      */
     public final PosSymbol getEnhancementRealizName() {
         return myEnhancementRealizName;
     }
 
     /**
-     * <p>Returns the list of arguments of arguments for the associated realization
-     * extension.</p>
+     * <p>
+     * Returns the list of arguments of arguments for the associated realization
+     * extension.
+     * </p>
      *
      * @return A list of {@link ModuleArgumentItem} representation objects.
      */
@@ -175,9 +213,12 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the symbol representation for the performance profile name.</p>
+     * <p>
+     * Returns the symbol representation for the performance profile name.
+     * </p>
      *
-     * @return A {@link PosSymbol} representation of the performance profile name.
+     * @return A {@link PosSymbol} representation of the performance profile
+     *         name.
      */
     public final PosSymbol getProfileName() {
         return myProfileName;
@@ -190,10 +231,8 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     public final int hashCode() {
         int result = myEnhancementName.hashCode();
         result = 31 * result + myEnhancementParams.hashCode();
-        result =
-                31
-                        * result
-                        + (myProfileName != null ? myProfileName.hashCode() : 0);
+        result = 31 * result
+                + (myProfileName != null ? myProfileName.hashCode() : 0);
         result = 31 * result + myEnhancementRealizName.hashCode();
         result = 31 * result + myEnhancementRealizParams.hashCode();
         return result;
@@ -204,8 +243,11 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the enhancement parameter arguments.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * enhancement parameter
+     * arguments.
+     * </p>
      *
      * @return A list containing {@link ModuleArgumentItem}s.
      */
@@ -219,8 +261,11 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the enhancement realization parameter arguments.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * enhancement
+     * realization parameter arguments.
+     * </p>
      *
      * @return A list containing {@link ModuleArgumentItem}s.
      */
@@ -234,7 +279,9 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>An helper method to generate a string for the argument list.</p>
+     * <p>
+     * An helper method to generate a string for the argument list.
+     * </p>
      *
      * @param argumentItems A list containing {@link ModuleArgumentItem}s.
      *

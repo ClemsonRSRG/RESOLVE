@@ -1,7 +1,7 @@
 /*
  * TypeGraph.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -39,16 +39,22 @@ import edu.clemson.cs.r2jt.typeandpopulate.Populator;
 import java.util.*;
 
 /**
- * Represents a directed graph of types, where edges between types
- * indicate a possible coercion that the type checker can perform.
+ * Represents a directed graph of types, where edges between types indicate a
+ * possible coercion that
+ * the type checker can perform.
  */
 public class TypeGraph {
 
     /**
-     * <p>A set of non-thread-safe resources to be used during general type
-     * reasoning. This really doesn't belong here, but anything that's reasoning
-     * about types should already have access to a type graph, and only one type
-     * graph is created per thread, so this is a convenient place to put it.</p>
+     * <p>
+     * A set of non-thread-safe resources to be used during general type
+     * reasoning. This really
+     * doesn't belong here, but anything that's reasoning about types should
+     * already have access to a
+     * type graph, and only one type graph is created per thread, so this is a
+     * convenient place to put
+     * it.
+     * </p>
      */
     public final PerThreadReasoningResources threadResources =
             new PerThreadReasoningResources();
@@ -89,9 +95,8 @@ public class TypeGraph {
             new MTFunction(this, UNION_APPLICATION, CLS, CLS, CLS);
     public final MTFunction INTERSECT =
             new MTFunction(this, INTERSECT_APPLICATION, CLS, CLS, CLS);
-    public final MTFunction FUNCTION =
-            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS,
-                    CLS);
+    public final MTFunction FUNCTION = new MTFunction(this,
+            FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS, CLS);
     public final MTFunction CROSS =
             new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
 
@@ -111,8 +116,8 @@ public class TypeGraph {
         this.myTypeNodes = new HashMap<MTType, TypeNode>();
     }
 
-    private Map<MTType, Map<String, MTType>> getSyntacticSubtypesWithRelationships(
-            MTType query) {
+    private Map<MTType, Map<String, MTType>>
+            getSyntacticSubtypesWithRelationships(MTType query) {
 
         Map<MTType, Map<String, MTType>> result =
                 new HashMap<MTType, Map<String, MTType>>();
@@ -133,7 +138,8 @@ public class TypeGraph {
     /**
      * <p>
      * Returns <code>true</code> <strong>iff</strong> every value in
-     * <code>subtype</code> must necessarily be in <code>supertype</code>.
+     * <code>subtype</code> must
+     * necessarily be in <code>supertype</code>.
      * </p>
      * 
      * @param subtype A type to test if it is subsumed by <code>supertype</code>
@@ -141,8 +147,8 @@ public class TypeGraph {
      * @param supertype A type to test if it subsumes <code>subtype</code>.
      * 
      * @return Returns <code>true</code> <strong>iff</strong> every value in
-     *         <code>subtype</code> must necessarily be in
-     *         <code>supertype</code>.
+     *         <code>subtype</code> must
+     *         necessarily be in <code>supertype</code>.
      */
     public boolean isSubtype(MTType subtype, MTType supertype) {
         boolean result;
@@ -151,24 +157,22 @@ public class TypeGraph {
                 new EstablishedRelationship(subtype, supertype);
 
         try {
-            result =
-                    supertype == ENTITY || supertype == CLS
-                            || myEstablishedSubtypes.contains(r)
-                            || subtype.equals(supertype)
-                            || subtype.isSyntacticSubtypeOf(supertype);
+            result = supertype == ENTITY || supertype == CLS
+                    || myEstablishedSubtypes.contains(r)
+                    || subtype.equals(supertype)
+                    || subtype.isSyntacticSubtypeOf(supertype);
         }
         catch (NoSuchElementException nsee) {
-            //Syntactic subtype checker freaks out (rightly) if there are
-            //free variables in the expression, but the next check will deal
-            //correctly with them.
+            // Syntactic subtype checker freaks out (rightly) if there are
+            // free variables in the expression, but the next check will deal
+            // correctly with them.
             result = false;
         }
 
         if (!result) {
             try {
-                Exp conditions =
-                        getValidTypeConditions(subtype,
-                                new MTPowertypeApplication(this, supertype));
+                Exp conditions = getValidTypeConditions(subtype,
+                        new MTPowertypeApplication(this, supertype));
                 result = conditions.isLiteralTrue();
             }
             catch (TypeMismatchException e) {
@@ -186,13 +190,15 @@ public class TypeGraph {
     /**
      * <p>
      * Returns <code>true</code> <strong>iff</strong> <code>value</code> is
-     * known to definitely be a member of <code>expected</code>.
+     * known to definitely be a
+     * member of <code>expected</code>.
      * </p>
      * 
      * <p>
      * I.e., this is the same as asking if
-     * <code>getValidTypeConditions(value, expected)</code> 1) doesn't throw an
-     * exception and 2) returns a value for which <code>isLiteralTrue()</code>
+     * <code>getValidTypeConditions(value, expected)</code> 1)
+     * doesn't throw an exception and 2) returns a value for which
+     * <code>isLiteralTrue()</code>
      * returns <code>true</code>.
      * </p>
      * 
@@ -201,7 +207,8 @@ public class TypeGraph {
      *        membership.
      * 
      * @return <code>true</code> <strong>iff</strong> <code>value</code> is
-     *         definitely in <code>expected</code>.
+     *         definitely in
+     *         <code>expected</code>.
      */
     public boolean isKnownToBeIn(Exp value, MTType expected) {
 
@@ -221,14 +228,16 @@ public class TypeGraph {
     /**
      * <p>
      * Returns <code>true</code> <strong>iff</strong> <code>value</code>, which
-     * is known to identify a <strong>MType</strong>, is known to definitely be
-     * a member of <code>expected</code>.
+     * is known to identify a
+     * <strong>MType</strong>, is known to definitely be a member of
+     * <code>expected</code>.
      * </p>
      * 
      * <p>
      * I.e., this is the same as asking if
-     * <code>getValidTypeConditions(value, expected)</code> 1) doesn't throw an
-     * exception and 2) returns a value for which <code>isLiteralTrue()</code>
+     * <code>getValidTypeConditions(value, expected)</code> 1)
+     * doesn't throw an exception and 2) returns a value for which
+     * <code>isLiteralTrue()</code>
      * returns <code>true</code>.
      * </p>
      * 
@@ -237,7 +246,8 @@ public class TypeGraph {
      *        membership.
      * 
      * @return <code>true</code> <strong>iff</strong> <code>value</code> is
-     *         definitely in <code>expected</code>.
+     *         definitely in
+     *         <code>expected</code>.
      */
     public boolean isKnownToBeIn(MTType value, MTType expected) {
         boolean result;
@@ -245,13 +255,11 @@ public class TypeGraph {
         EstablishedRelationship r =
                 new EstablishedRelationship(value, expected);
 
-        //If the type of the given value is a subtype of the expected type, then
-        //its value must necessarily be in the expected type.  Note we can't
-        //reason about the type of CLS, so we exclude it
-        result =
-                myEstablishedElements.contains(r) || (value != CLS)
-                        && (value != ENTITY)
-                        && isSubtype(value.getType(), expected);
+        // If the type of the given value is a subtype of the expected type, then
+        // its value must necessarily be in the expected type. Note we can't
+        // reason about the type of CLS, so we exclude it
+        result = myEstablishedElements.contains(r) || (value != CLS)
+                && (value != ENTITY) && isSubtype(value.getType(), expected);
 
         if (!result) {
             try {
@@ -273,22 +281,27 @@ public class TypeGraph {
     /**
      * <p>
      * Returns the conditions under which <code>value</code> could be
-     * demonstrated to be a member of <code>expected</code>, given that
-     * <code>value</code> is known to be in <strong>MType</strong>.
+     * demonstrated to be a member of
+     * <code>expected</code>, given that <code>value</code> is known to be in
+     * <strong>MType</strong>.
      * </p>
      * 
      * <p>
      * The result is a series of disjuncts expressing possible situations under
-     * which the <code>value</code> would be known to be in
-     * <code>expected</code>. One or more of these disjuncts may be
-     * <code>false</code>, but if one or more would have been <code>true</code>,
-     * this method will simplify the result to simply <code>true</code>.
+     * which the
+     * <code>value</code> would be known to be in <code>expected</code>. One or
+     * more of these
+     * disjuncts may be <code>false</code>, but if one or more would have been
+     * <code>true</code>, this
+     * method will simplify the result to simply <code>true</code>.
      * </p>
      * 
      * <p>
      * If there is no known set of circumstances under which <code>value</code>
-     * could be demonstrated a member of <code>expected</code> (i.e., if the
-     * return value would simply be <code>false</code>), this method throws a
+     * could be demonstrated
+     * a member of <code>expected</code> (i.e., if the return value would simply
+     * be
+     * <code>false</code>), this method throws a
      * <code>TypeMismatchException</code>.
      * </p>
      * 
@@ -297,59 +310,59 @@ public class TypeGraph {
      *        membership.
      * 
      * @return The conditions under which <code>value</code> could be
-     *         demonstrated to be in <code>expected</code>.
+     *         demonstrated to be in
+     *         <code>expected</code>.
      * 
      * @throws TypeMismatchException If there are no known conditions under
-     *         which <code>value</code> could be demonstrated to be in
-     *         <code>expected</code>.
+     *         which <code>value</code>
+     *         could be demonstrated to be in <code>expected</code>.
      */
     private Exp getValidTypeConditions(MTType value, MTType expected)
             throws TypeMismatchException {
-        //See note in the getValidTypeConditionsTo() in TypeRelationship,
-        //re: Lovecraftian nightmare-scape
+        // See note in the getValidTypeConditionsTo() in TypeRelationship,
+        // re: Lovecraftian nightmare-scape
 
         Exp result = getFalseVarExp();
 
         if (expected == CLS) {
-            //Every MTType is in MType except for Entity and MType, itself
+            // Every MTType is in MType except for Entity and MType, itself
             result = getTrueVarExp();
         }
         else if (expected instanceof MTPowertypeApplication) {
             if (value.equals(EMPTY_SET)) {
-                //The empty set is in all powertypes
+                // The empty set is in all powertypes
                 result = getTrueVarExp();
             }
             else {
-                //If "expected" happens to be Power(t) for some t, we can 
-                //"demote" value to an INSTANCE of itself (provided it is not
-                //the empty set), and expected to just t
+                // If "expected" happens to be Power(t) for some t, we can
+                // "demote" value to an INSTANCE of itself (provided it is not
+                // the empty set), and expected to just t
                 MTPowertypeApplication expectedAsPowertypeApplication =
                         (MTPowertypeApplication) expected;
 
                 DummyExp memberOfValue = new DummyExp(value);
 
-                if (isKnownToBeIn(memberOfValue, expectedAsPowertypeApplication
-                        .getArgument(0))) {
+                if (isKnownToBeIn(memberOfValue,
+                        expectedAsPowertypeApplication.getArgument(0))) {
 
                     result = getTrueVarExp();
                 }
             }
         }
 
-        //If we've already established it statically, no need for further work
+        // If we've already established it statically, no need for further work
         if (!result.isLiteralTrue()) {
-            //If we haven't...
+            // If we haven't...
 
-            //At this stage, we've done everything safe and sensible that we can 
-            //do if the value we're looking at exists outside Entity
+            // At this stage, we've done everything safe and sensible that we can
+            // do if the value we're looking at exists outside Entity
             if (value == CLS || value == ENTITY) {
                 throw TypeMismatchException.INSTANCE;
             }
 
             try {
-                Exp intermediateResult =
-                        getValidTypeConditions(value, value.getType(),
-                                expected, MTTYPE_VALUE_PATH);
+                Exp intermediateResult = getValidTypeConditions(value,
+                        value.getType(), expected, MTTYPE_VALUE_PATH);
 
                 if (intermediateResult.isLiteralTrue()) {
                     result = intermediateResult;
@@ -371,21 +384,26 @@ public class TypeGraph {
     /**
      * <p>
      * Returns the conditions under which <code>value</code> could be
-     * demonstrated to be a member of <code>expected</code>.
+     * demonstrated to be a member of
+     * <code>expected</code>.
      * </p>
      * 
      * <p>
      * The result is a series of disjuncts expressing possible situations under
-     * which the <code>value</code> would be known to be in
-     * <code>expected</code>. One or more of these disjuncts may be
-     * <code>false</code>, but if one or more would have been <code>true</code>,
-     * this method will simplify the result to simply <code>true</code>.
+     * which the
+     * <code>value</code> would be known to be in <code>expected</code>. One or
+     * more of these
+     * disjuncts may be <code>false</code>, but if one or more would have been
+     * <code>true</code>, this
+     * method will simplify the result to simply <code>true</code>.
      * </p>
      * 
      * <p>
      * If there is no known set of circumstances under which <code>value</code>
-     * could be demonstrated a member of <code>expected</code> (i.e., if the
-     * return value would simply be <code>false</code>), this method throws a
+     * could be demonstrated
+     * a member of <code>expected</code> (i.e., if the return value would simply
+     * be
+     * <code>false</code>), this method throws a
      * <code>TypeMismatchException</code>.
      * </p>
      * 
@@ -394,11 +412,12 @@ public class TypeGraph {
      *        membership.
      * 
      * @return The conditions under which <code>value</code> could be
-     *         demonstrated to be in <code>expected</code>.
+     *         demonstrated to be in
+     *         <code>expected</code>.
      * 
      * @throws TypeMismatchException If there are no known conditions under
-     *         which <code>value</code> could be demonstrated to be in
-     *         <code>expected</code>.
+     *         which <code>value</code>
+     *         could be demonstrated to be in <code>expected</code>.
      */
     public Exp getValidTypeConditions(Exp value, MTType expected)
             throws TypeMismatchException {
@@ -408,22 +427,21 @@ public class TypeGraph {
         MTType valueTypeValue = value.getMathTypeValue();
         if (expected == ENTITY && valueTypeValue != CLS
                 && valueTypeValue != ENTITY) {
-            //Every RESOLVE value is in Entity.  The only things we could get
-            //passed that are "special" and not "RESOLVE values" are MType and
-            //Entity itself
+            // Every RESOLVE value is in Entity. The only things we could get
+            // passed that are "special" and not "RESOLVE values" are MType and
+            // Entity itself
             result = getTrueVarExp();
         }
         else if (valueTypeValue == CLS || valueTypeValue == ENTITY) {
-            //MType and Entity aren't in anything
+            // MType and Entity aren't in anything
             throw TypeMismatchException.INSTANCE;
         }
         else if (valueTypeValue == null) {
-            result =
-                    getValidTypeConditions(value, value.getMathType(),
-                            expected, EXP_VALUE_PATH);
+            result = getValidTypeConditions(value, value.getMathType(),
+                    expected, EXP_VALUE_PATH);
         }
         else {
-            //We're looking at an expression that defines a type
+            // We're looking at an expression that defines a type
             result = getValidTypeConditions(valueTypeValue, expected);
         }
 
@@ -433,40 +451,49 @@ public class TypeGraph {
     /**
      * <p>
      * Returns the conditions under which <code>foundValue</code>, which is of
-     * type <code>foundType</code>, could be demonstrated to be a member of
-     * <code>expected</code>. Individual paths are tested using the given
-     * <code>pathStrategy</code> (which lets us forget about what the java type
-     * of <code>foundValue</code> is&mdash;only that it's a type
+     * type
+     * <code>foundType</code>, could be demonstrated to be a member of
+     * <code>expected</code>.
+     * Individual paths are tested using the given <code>pathStrategy</code>
+     * (which lets us forget
+     * about what the java type of <code>foundValue</code> is&mdash;only that
+     * it's a type
      * <code>pathStrategy</code> can handle.)
      * </p>
      * 
      * <p>
      * The result is a series of disjuncts expressing possible situations under
-     * which the <code>value</code> would be known to be in
-     * <code>expected</code>. One or more of these disjuncts may be
-     * <code>false</code>, but if one or more would have been <code>true</code>,
-     * this method will simplify the result to simply <code>true</code>.
+     * which the
+     * <code>value</code> would be known to be in <code>expected</code>. One or
+     * more of these
+     * disjuncts may be <code>false</code>, but if one or more would have been
+     * <code>true</code>, this
+     * method will simplify the result to simply <code>true</code>.
      * </p>
      * 
      * <p>
      * If there is no known set of circumstances under which <code>value</code>
-     * could be demonstrated a member of <code>expected</code> (i.e., if the
-     * return value would simply be <code>false</code>), this method throws a
+     * could be demonstrated
+     * a member of <code>expected</code> (i.e., if the return value would simply
+     * be
+     * <code>false</code>), this method throws a
      * <code>TypeMismatchException</code>.
      * </p>
      * 
      * @param foundValue The <code>RESOLVE</code> value to test for membership.
      * @param foundType The mathematical type of the <code>RESOLVE</code> value
-     *        to test for membership.
+     *        to test for
+     *        membership.
      * @param expected A <code>RESOLVE</code> type against which to test
      *        membership.
      * 
      * @return The conditions under which <code>value</code> could be
-     *         demonstrated to be in <code>expected</code>.
+     *         demonstrated to be in
+     *         <code>expected</code>.
      * 
      * @throws TypeMismatchException If there are no known conditions under
-     *         which <code>value</code> could be demonstrated to be in
-     *         <code>expected</code>.
+     *         which <code>value</code>
+     *         could be demonstrated to be in <code>expected</code>.
      */
     private <V> Exp getValidTypeConditions(V foundValue, MTType foundType,
             MTType expected, NodePairPathStrategy<V> pathStrategy)
@@ -492,7 +519,7 @@ public class TypeGraph {
 
         boolean foundPath = false;
 
-        //If foundType equals expected, we're done 
+        // If foundType equals expected, we're done
         boolean foundTrivialPath = foundType.equals(expected);
 
         while (!foundTrivialPath && foundEntries.hasNext()) {
@@ -505,9 +532,8 @@ public class TypeGraph {
                 expectedEntry = expectedEntries.next();
 
                 try {
-                    newCondition =
-                            getPathConditions(foundValue, foundEntry,
-                                    expectedEntry, pathStrategy);
+                    newCondition = getPathConditions(foundValue, foundEntry,
+                            expectedEntry, pathStrategy);
 
                     foundPath = foundPath | !newCondition.isLiteralFalse();
 
@@ -532,31 +558,38 @@ public class TypeGraph {
     /**
      * <p>
      * Returns the conditions required to establish that <code>foundValue</code>
-     * is a member of the type represented by <code>expectedEntry</code> along
-     * the path from <code>foundEntry</code> to <code>expectedEntry</code>. If
-     * no such conditions exist (i.e., if the conditions would be
+     * is a member of the
+     * type represented by <code>expectedEntry</code> along the path from
+     * <code>foundEntry</code> to
+     * <code>expectedEntry</code>. If no such conditions exist (i.e., if the
+     * conditions would be
      * <code>false</code>), throws a <code>TypeMismatchException</code>.
      * </p>
      * 
      * @param foundValue The value we'd like to establish is in the type
-     *        represented by <code>expectedEntry</code>.
+     *        represented by
+     *        <code>expectedEntry</code>.
      * @param foundEntry A node in the type graph of which
-     *        <code>foundValue</code> is a syntactic subtype.
+     *        <code>foundValue</code> is a syntactic
+     *        subtype.
      * @param expectedEntry A node in the type graph of which representing a
-     *        type in which we would like to establish <code>foundValue</code>
-     *        resides.
+     *        type in which we would
+     *        like to establish <code>foundValue</code> resides.
      * @param pathStrategy The strategy for following the path between
-     *        <code>foundEntry</code> and <code>expectedEntry</code>.
+     *        <code>foundEntry</code> and
+     *        <code>expectedEntry</code>.
      * 
      * @return The conditions under which the path can be followed.
      * 
      * @throws TypeMismatchException If the conditions under which the path can
-     *         be followed would be <code>false</code>.
+     *         be followed would be
+     *         <code>false</code>.
      */
     private <V> Exp getPathConditions(V foundValue,
             Map.Entry<MTType, Map<String, MTType>> foundEntry,
             Map.Entry<MTType, Map<String, MTType>> expectedEntry,
-            NodePairPathStrategy<V> pathStrategy) throws TypeMismatchException {
+            NodePairPathStrategy<V> pathStrategy)
+            throws TypeMismatchException {
 
         Map<String, MTType> combinedBindings = new HashMap<String, MTType>();
 
@@ -565,10 +598,9 @@ public class TypeGraph {
         combinedBindings
                 .putAll(updateMapLabels(expectedEntry.getValue(), "_d"));
 
-        Exp newCondition =
-                pathStrategy.getValidTypeConditionsBetween(foundValue,
-                        foundEntry.getKey(), expectedEntry.getKey(),
-                        combinedBindings);
+        Exp newCondition = pathStrategy.getValidTypeConditionsBetween(
+                foundValue, foundEntry.getKey(), expectedEntry.getKey(),
+                combinedBindings);
 
         return newCondition;
     }
@@ -576,82 +608,88 @@ public class TypeGraph {
     /**
      * <p>
      * Establishes that values binding to <code>bindingExpression</code> under
-     * the given environment may be considered to be of type
-     * <code>destination</code> assuming the proof obligations set forth in
-     * <code>bindingCondition</code> are satisfied.
+     * the given environment
+     * may be considered to be of type <code>destination</code> assuming the
+     * proof obligations set
+     * forth in <code>bindingCondition</code> are satisfied.
      * </p>
      * 
      * <p>
      * <code>bindingExpression</code> must have a mathematical type set on it.
-     * I.e., it must be the case that
-     * <code>bindingExpression.getMathType() != null</code>.
+     * I.e., it must be the
+     * case that <code>bindingExpression.getMathType() != null</code>.
      * </p>
      * 
      * <p>
      * Any <code>VarExp</code>s, <code>AbstractFunctionExp</code>s, and
-     * <code>MTNamed</code> that appear in <code>bindingExpression</code>, its
-     * associated mathematical type, or <code>destination</code> must be bound
-     * under the given environment.
+     * <code>MTNamed</code> that
+     * appear in <code>bindingExpression</code>, its associated mathematical
+     * type, or
+     * <code>destination</code> must be bound under the given environment.
      * </p>
      * 
      * <p>
      * Conversely, any universally bound variables in the given environment must
-     * appear in one of <code>bindingExpression</code>, its associated
-     * mathematical type, or <code>destination</code>. This gives the typing
-     * system a chance to provide concrete values to these "open" slots.
+     * appear in one of
+     * <code>bindingExpression</code>, its associated mathematical type, or
+     * <code>destination</code>.
+     * This gives the typing system a chance to provide concrete values to these
+     * "open" slots.
      * </p>
      * 
      * @param bindingExpression A snippet of syntax tree describing the
-     *        structure of values covered by this new relationship.
+     *        structure of values covered by
+     *        this new relationship.
      * @param destination The mathematical type that this new relationship
-     *        establishes values binding to <code>bindingExpression</code>
-     *        inhabit.
+     *        establishes values binding
+     *        to <code>bindingExpression</code> inhabit.
      * @param bindingCondition Proof obligations that must be raised to
-     *        establish that a given value binding to
-     *        <code>bindingExpression</code> inhabits <code>destination</code>.
+     *        establish that a given value
+     *        binding to <code>bindingExpression</code> inhabits
+     *        <code>destination</code>.
      * @param environment The environment under which
-     *        <code>bindingExpression</code>, <code>destination</code>, and
-     *        <code>bindingCondition</code> should be evaluated.
+     *        <code>bindingExpression</code>,
+     *        <code>destination</code>, and <code>bindingCondition</code> should
+     *        be evaluated.
      */
     public void addRelationship(Exp bindingExpression, MTType destination,
             Exp bindingCondition, Scope environment) {
 
-        //Sanitize and sanity check our inputs somewhat
+        // Sanitize and sanity check our inputs somewhat
         if (destination == null) {
-            throw new IllegalArgumentException("Destination type may not be "
-                    + "null.");
+            throw new IllegalArgumentException(
+                    "Destination type may not be " + "null.");
         }
 
         MTType source = bindingExpression.getMathType();
         if (source == null) {
-            throw new IllegalArgumentException("bindingExpression has no "
-                    + "type.");
+            throw new IllegalArgumentException(
+                    "bindingExpression has no " + "type.");
         }
 
         if (bindingCondition == null) {
             bindingCondition = getTrueVarExp();
         }
 
-        //Canonicalize the input types
+        // Canonicalize the input types
         CanonicalizationResult sourceCanonicalResult =
                 canonicalize(source, environment, "s");
         CanonicalizationResult destinationCanonicalResult =
                 canonicalize(destination, environment, "d");
 
-        Set<String> universalVariableNames =
-                getUniversallyQuantifiedVariables(source, destination,
-                        environment, sourceCanonicalResult,
-                        destinationCanonicalResult);
+        Set<String> universalVariableNames = getUniversallyQuantifiedVariables(
+                source, destination, environment, sourceCanonicalResult,
+                destinationCanonicalResult);
 
         Map<String, List<String>> sourceEnvironmentalToCanonical =
                 invertMap(sourceCanonicalResult.canonicalToEnvironmental);
         Map<String, List<String>> destinationEnvironmentalToCanonical =
                 invertMap(destinationCanonicalResult.canonicalToEnvironmental);
 
-        //Get a mapping from environmental variables to "exemplar" variables--
-        //a single representative name that either the source or destination
-        //will bind for us.  There may be many choices, but they're all 
-        //equivalent for our purposes
+        // Get a mapping from environmental variables to "exemplar" variables--
+        // a single representative name that either the source or destination
+        // will bind for us. There may be many choices, but they're all
+        // equivalent for our purposes
         Map<String, String> environmentalToExemplar =
                 getEnvironmentalToExemplar(universalVariableNames,
                         sourceEnvironmentalToCanonical,
@@ -663,42 +701,40 @@ public class TypeGraph {
                         universalVariableNames, sourceEnvironmentalToCanonical,
                         destinationEnvironmentalToCanonical);
 
-        //We can't use the binding expression as-is.  It must be updated to
-        //reflect canonical variable names
+        // We can't use the binding expression as-is. It must be updated to
+        // reflect canonical variable names
         Map<Exp, Exp> replacements = new HashMap<Exp, Exp>();
         for (Map.Entry<String, String> entry : environmentalToExemplar
                 .entrySet()) {
 
-            replacements.put(new VarExp(null, null, new PosSymbol(null, Symbol
-                    .symbol(entry.getKey()))), new VarExp(null, null,
-                    new PosSymbol(null, Symbol.symbol(entry.getValue()))));
+            replacements.put(
+                    new VarExp(null, null,
+                            new PosSymbol(null, Symbol.symbol(entry.getKey()))),
+                    new VarExp(null, null, new PosSymbol(null,
+                            Symbol.symbol(entry.getValue()))));
         }
-        bindingExpression =
-                safeVariableNameUpdate(bindingExpression, replacements,
-                        environmentalToExemplar);
+        bindingExpression = safeVariableNameUpdate(bindingExpression,
+                replacements, environmentalToExemplar);
 
-        //Ditto for the binding condition
-        bindingCondition =
-                safeVariableNameUpdate(bindingCondition, replacements,
-                        environmentalToExemplar);
+        // Ditto for the binding condition
+        bindingCondition = safeVariableNameUpdate(bindingCondition,
+                replacements, environmentalToExemplar);
 
-        //At last!  We can add the relationship into the graph
-        TypeRelationship relationship =
-                new TypeRelationship(this,
-                        destinationCanonicalResult.canonicalType,
-                        bindingCondition, bindingExpression, finalPredicates);
+        // At last! We can add the relationship into the graph
+        TypeRelationship relationship = new TypeRelationship(this,
+                destinationCanonicalResult.canonicalType, bindingCondition,
+                bindingExpression, finalPredicates);
         TypeNode sourceNode = getTypeNode(sourceCanonicalResult.canonicalType);
         sourceNode.addRelationship(relationship);
 
-        //We'd like to force the presence of the destination node
+        // We'd like to force the presence of the destination node
         getTypeNode(destinationCanonicalResult.canonicalType);
 
         Populator.emitDebug("Added relationship to type node ["
                 + sourceCanonicalResult.canonicalType + "]: " + relationship);
     }
 
-    private Exp safeVariableNameUpdate(Exp original,
-            Map<Exp, Exp> replacements,
+    private Exp safeVariableNameUpdate(Exp original, Map<Exp, Exp> replacements,
             Map<String, String> environmentalToExemplar) {
 
         MTType originalTypeValue = original.getMathTypeValue();
@@ -717,12 +753,11 @@ public class TypeGraph {
                     + "type value of the object.");
         }
 
-        original =
-                getCopyWithVariableNamesChanged(original,
-                        environmentalToExemplar);
+        original = getCopyWithVariableNamesChanged(original,
+                environmentalToExemplar);
 
-        //Straight math type is taken care of inside the above call, since the 
-        //math type is needed there, so no need to check it again here
+        // Straight math type is taken care of inside the above call, since the
+        // math type is needed there, so no need to check it again here
 
         if (originalTypeValue != null && original.getMathTypeValue() == null) {
             throw new RuntimeException("copy() method for class "
@@ -741,26 +776,28 @@ public class TypeGraph {
             Map<String, List<String>> sourceEnvironmentalToCanonical,
             Map<String, List<String>> destinationEnvironmentalToCanonical) {
 
-        //To begin with, the final predicates should include the predicates
-        //from each canonicalization, with top-level environmental variables
-        //finalized to their exemplar variable
+        // To begin with, the final predicates should include the predicates
+        // from each canonicalization, with top-level environmental variables
+        // finalized to their exemplar variable
         List<TypeRelationshipPredicate> finalPredicates =
                 new LinkedList<TypeRelationshipPredicate>();
         finalPredicates.addAll(replaceInPredicates(
                 sourceCanonicalResult.predicates, environmentalToExemplar));
-        finalPredicates
-                .addAll(replaceInPredicates(
-                        destinationCanonicalResult.predicates,
+        finalPredicates.addAll(
+                replaceInPredicates(destinationCanonicalResult.predicates,
                         environmentalToExemplar));
 
-        //Finally, it's possible that the same original variable existed in each
-        //of the source and destination.  We lost this info during 
-        //canonicalization so we re-establish it with predicates
+        // Finally, it's possible that the same original variable existed in each
+        // of the source and destination. We lost this info during
+        // canonicalization so we re-establish it with predicates
         for (String envVar : universalVariableNames) {
             if (sourceEnvironmentalToCanonical.containsKey(envVar)
-                    && destinationEnvironmentalToCanonical.containsKey(envVar)) {
-                finalPredicates.add(new EqualsPredicate(this, new MTNamed(this,
-                        sourceEnvironmentalToCanonical.get(envVar).get(0)),
+                    && destinationEnvironmentalToCanonical
+                            .containsKey(envVar)) {
+                finalPredicates.add(new EqualsPredicate(this,
+                        new MTNamed(this,
+                                sourceEnvironmentalToCanonical.get(envVar)
+                                        .get(0)),
                         new MTNamed(this, destinationEnvironmentalToCanonical
                                 .get(envVar).get(0))));
             }
@@ -782,8 +819,8 @@ public class TypeGraph {
                         sourceEnvironmentalToCanonical.get(envVar).get(0));
             }
             else {
-                //It must be in destination because we checked above that one
-                //or the other makes use of this thing
+                // It must be in destination because we checked above that one
+                // or the other makes use of this thing
                 environmentalToExemplar.put(envVar,
                         destinationEnvironmentalToCanonical.get(envVar).get(0));
             }
@@ -813,12 +850,11 @@ public class TypeGraph {
                 nextBatch.clear();
 
                 for (String newUnboundType : newUnboundTypes) {
-                    //If it wasn't a MathSymbolEntry, the type checker would 
-                    //already have bombed
+                    // If it wasn't a MathSymbolEntry, the type checker would
+                    // already have bombed
                     MathSymbolEntry entry =
-                            (MathSymbolEntry) environment
-                                    .queryForOne(new UnqualifiedNameQuery(
-                                            newUnboundType));
+                            (MathSymbolEntry) environment.queryForOne(
+                                    new UnqualifiedNameQuery(newUnboundType));
 
                     MTType type = entry.getType();
                     uta = new UnboundTypeAccumulator(environment);
@@ -831,22 +867,22 @@ public class TypeGraph {
             }
         }
         catch (NoSuchSymbolException nsse) {
-            //This shouldn't be possible, the type checker would already have
-            //bombed
+            // This shouldn't be possible, the type checker would already have
+            // bombed
             throw new RuntimeException(nsse);
         }
         catch (DuplicateSymbolException dse) {
-            //This shouldn't be possible, the type checker would already have
-            //bombed
+            // This shouldn't be possible, the type checker would already have
+            // bombed
             throw new RuntimeException(dse);
         }
 
-        //Make sure all those variables get bound
+        // Make sure all those variables get bound
         Set<String> remaining = new HashSet<String>(unboundTypeClosure);
-        remaining.removeAll(sourceCanonicalResult.canonicalToEnvironmental
-                .values());
-        remaining.removeAll(destinationCanonicalResult.canonicalToEnvironmental
-                .values());
+        remaining.removeAll(
+                sourceCanonicalResult.canonicalToEnvironmental.values());
+        remaining.removeAll(
+                destinationCanonicalResult.canonicalToEnvironmental.values());
         if (!remaining.isEmpty()) {
             throw new IllegalArgumentException("The following universal "
                     + "type variables will not be bound: " + remaining);
@@ -877,15 +913,14 @@ public class TypeGraph {
                     + "type of the object.");
         }
 
-        result.setMathType(getCopyWithVariableNamesChanged(
-                result.getMathType(), substitutions));
+        result.setMathType(getCopyWithVariableNamesChanged(result.getMathType(),
+                substitutions));
 
         List<Exp> children = result.getSubExpressions();
         int childCount = children.size();
         for (int childIndex = 0; childIndex < childCount; childIndex++) {
-            result.setSubExpression(childIndex,
-                    getCopyWithVariableNamesChanged(children.get(childIndex),
-                            substitutions));
+            result.setSubExpression(childIndex, getCopyWithVariableNamesChanged(
+                    children.get(childIndex), substitutions));
         }
 
         return result;
@@ -918,9 +953,9 @@ public class TypeGraph {
         List<Exp> children = result.getSubExpressions();
         int childCount = children.size();
         for (int childIndex = 0; childIndex < childCount; childIndex++) {
-            result.setSubExpression(childIndex, TypeGraph
-                    .getCopyWithVariablesSubstituted(children.get(childIndex),
-                            substitutions));
+            result.setSubExpression(childIndex,
+                    TypeGraph.getCopyWithVariablesSubstituted(
+                            children.get(childIndex), substitutions));
         }
 
         return result;
@@ -994,8 +1029,8 @@ public class TypeGraph {
         t.accept(canonicalizer);
 
         return new CanonicalizationResult(canonicalizer.getFinalExpression(),
-                canonicalizer.getTypePredicates(), canonicalizer
-                        .getCanonicalToEnvironmentOriginalMapping());
+                canonicalizer.getTypePredicates(),
+                canonicalizer.getCanonicalToEnvironmentOriginalMapping());
     }
 
     public VarExp getNothingExp() {
@@ -1092,7 +1127,8 @@ public class TypeGraph {
 
         public Exp getValidTypeConditionsBetween(V sourceValue,
                 MTType sourceType, MTType expectedType,
-                Map<String, MTType> bindings) throws TypeMismatchException;
+                Map<String, MTType> bindings)
+                throws TypeMismatchException;
     }
 
     private class ExpValuePathStrategy implements NodePairPathStrategy<Exp> {
@@ -1100,7 +1136,8 @@ public class TypeGraph {
         @Override
         public Exp getValidTypeConditionsBetween(Exp sourceValue,
                 MTType sourceType, MTType expectedType,
-                Map<String, MTType> bindings) throws TypeMismatchException {
+                Map<String, MTType> bindings)
+                throws TypeMismatchException {
 
             return myTypeNodes.get(sourceType).getValidTypeConditionsTo(
                     sourceValue, expectedType, bindings);
@@ -1114,7 +1151,8 @@ public class TypeGraph {
         @Override
         public Exp getValidTypeConditionsBetween(MTType sourceValue,
                 MTType sourceType, MTType expectedType,
-                Map<String, MTType> bindings) throws TypeMismatchException {
+                Map<String, MTType> bindings)
+                throws TypeMismatchException {
 
             return myTypeNodes.get(sourceType).getValidTypeConditionsTo(
                     sourceValue, expectedType, bindings);
@@ -1172,8 +1210,7 @@ public class TypeGraph {
         @Override
         public MTType buildFunctionApplication(TypeGraph g, MTFunction f,
                 String calledAsName, List<MTType> arguments) {
-            return new MTCartesian(g,
-                    new MTCartesian.Element(arguments.get(0)),
+            return new MTCartesian(g, new MTCartesian.Element(arguments.get(0)),
                     new MTCartesian.Element(arguments.get(1)));
         }
     }
@@ -1198,9 +1235,8 @@ public class TypeGraph {
 
             if (result) {
                 EstablishedRelationship oAsER = (EstablishedRelationship) o;
-                result =
-                        myType1.equals(oAsER.myType1)
-                                && myType2.equals(oAsER.myType2);
+                result = myType1.equals(oAsER.myType1)
+                        && myType2.equals(oAsER.myType2);
             }
 
             return result;

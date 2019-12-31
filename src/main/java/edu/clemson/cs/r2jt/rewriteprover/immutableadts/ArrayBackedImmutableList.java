@@ -1,7 +1,7 @@
 /*
  * ArrayBackedImmutableList.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -85,8 +85,8 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
 
     @Override
     public ImmutableList<E> tail(int startIndex) {
-        return new ImmutableListSubview<E>(this, startIndex, myElementsLength
-                - startIndex);
+        return new ImmutableListSubview<E>(this, startIndex,
+                myElementsLength - startIndex);
     }
 
     @Override

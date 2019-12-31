@@ -1,7 +1,7 @@
 /*
  * VCGenPipeline.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,8 +23,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 
 /**
- * <p>This is pipeline that generates verification conditions (VCs)
- * using the RESOLVE AST and symbol table.</p>
+ * <p>
+ * This is pipeline that generates verification conditions (VCs) using the
+ * RESOLVE AST and symbol
+ * table.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -36,7 +39,9 @@ public class VCGenPipeline extends AbstractPipeline {
     // ===========================================================
 
     /**
-     * <p>This generates a pipeline to generate VCs.</p>
+     * <p>
+     * This generates a pipeline to generate VCs.
+     * </p>
      *
      * @param ce The current compilation environment.
      * @param symbolTable The symbol table.
@@ -74,10 +79,11 @@ public class VCGenPipeline extends AbstractPipeline {
         // Output the contents to listener objects
         for (OutputListener listener : myCompileEnvironment
                 .getOutputListeners()) {
-            listener.vcGeneratorResult(myCompileEnvironment.getFile(
-                    currentTarget).toString(), moduleDec.getName().getName(),
-                    vcGenerator.getFinalAssertiveCodeBlocks(), vcGenerator
-                            .getVerboseModeOutput());
+            listener.vcGeneratorResult(
+                    myCompileEnvironment.getFile(currentTarget).toString(),
+                    moduleDec.getName().getName(),
+                    vcGenerator.getFinalAssertiveCodeBlocks(),
+                    vcGenerator.getVerboseModeOutput());
         }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {

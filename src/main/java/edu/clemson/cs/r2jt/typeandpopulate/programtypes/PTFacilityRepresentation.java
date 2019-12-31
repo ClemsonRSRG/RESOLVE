@@ -1,7 +1,7 @@
 /*
  * PTFacilityRepresentation.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -29,8 +29,11 @@ public class PTFacilityRepresentation extends PTType {
     private final PTType myBaseType;
 
     /**
-     * <p>Since facility representation types do not have a corresponding
-     * <code>PTFamily</code>, we just store the name they go by here.</p>
+     * <p>
+     * Since facility representation types do not have a corresponding
+     * <code>PTFamily</code>, we just
+     * store the name they go by here.
+     * </p>
      */
     private final String myTypeName;
 
@@ -56,12 +59,11 @@ public class PTFacilityRepresentation extends PTType {
     }
 
     @Override
-    public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
+    public PTType instantiateGenerics(Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        throw new UnsupportedOperationException(this.getClass() + " cannot "
-                + "be instantiated.");
+        throw new UnsupportedOperationException(
+                this.getClass() + " cannot " + "be instantiated.");
     }
 
     @Override

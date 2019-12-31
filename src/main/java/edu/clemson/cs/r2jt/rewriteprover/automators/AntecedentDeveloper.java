@@ -1,7 +1,7 @@
 /*
  * AntecedentDeveloper.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -74,8 +74,10 @@ public class AntecedentDeveloper implements Automator {
     }
 
     /**
-     * <p>Retrieves all applications of all theorems to the current antecedent
-     * and applies all of them.</p>
+     * <p>
+     * Retrieves all applications of all theorems to the current antecedent and
+     * applies all of them.
+     * </p>
      */
     private class AntecedentDeveloperRound implements Automator {
 
@@ -86,12 +88,12 @@ public class AntecedentDeveloper implements Automator {
 
         public AntecedentDeveloperRound(PerVCProverModel model) {
             List<Application> applications = new LinkedList<Application>();
-            //We need to iterate over all possible applications, but each
-            //application will add a new antecedent to the model, which we 
-            //don't want to consider in this pass.  Since no application is 
-            //going to change or remove a current antecedent, and we know 
-            //that we're going to apply them all, we slurp them all up now 
-            //to be applied later one at a time.
+            // We need to iterate over all possible applications, but each
+            // application will add a new antecedent to the model, which we
+            // don't want to consider in this pass. Since no application is
+            // going to change or remove a current antecedent, and we know
+            // that we're going to apply them all, we slurp them all up now
+            // to be applied later one at a time.
             Iterator<Application> tApplications;
 
             // YS: For some reason Hampton decided that it would be a problem
@@ -135,14 +137,13 @@ public class AntecedentDeveloper implements Automator {
                     myDevelopmentCount++;
                 }
                 if (!FlagManager.getInstance().isFlagSet("nodebug")) {
-                    System.out
-                            .println("AntecedentDeveloperRound - adding development - "
+                    System.out.println(
+                            "AntecedentDeveloperRound - adding development - "
                                     + myDevelopmentCount);
                 }
 
-                myProbationaryApplication =
-                        new ProbationaryApplication(myApplications.next(),
-                                myDevelopmentPredicate);
+                myProbationaryApplication = new ProbationaryApplication(
+                        myApplications.next(), myDevelopmentPredicate);
                 stack.push(myProbationaryApplication);
             }
             else {

@@ -1,7 +1,7 @@
 /*
  * StructureExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,15 +18,19 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 
 /**
- * <p>A <code>StructureExp</code> is simply a marker that you can build into
- * a <code>ResolveConceptualElement</code> so that walkers can get the heads up
- * about something.  For example, two structure expressions exist called
- * PROGRAM_WORLD_START and PROGRAM_WORLD_END.  Since the tree-walker walks the
- * fields of a node in order, one could create a field containing 
+ * <p>
+ * A <code>StructureExp</code> is simply a marker that you can build into a
+ * <code>ResolveConceptualElement</code> so that walkers can get the heads up
+ * about something. For
+ * example, two structure expressions exist called PROGRAM_WORLD_START and
+ * PROGRAM_WORLD_END. Since
+ * the tree-walker walks the fields of a node in order, one could create a field
+ * containing
  * PROGRAM_WORLD_START before any legitimate fields that should be considered
- * programmatic (rather than mathematical) and PROGRAM_WORLD_END afterward.
- * Walkers will then get a <code>pre/postStructureExp</code> call before walking
- * the legitimate fields.</p>
+ * programmatic (rather
+ * than mathematical) and PROGRAM_WORLD_END afterward. Walkers will then get a
+ * <code>pre/postStructureExp</code> call before walking the legitimate fields.
+ * </p>
  */
 public class StructureExp extends Exp {
 
@@ -39,7 +43,7 @@ public class StructureExp extends Exp {
 
     @Override
     public void accept(ResolveConceptualVisitor v) {
-    // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
 
     }
 
@@ -69,7 +73,7 @@ public class StructureExp extends Exp {
 
     @Override
     public void setSubExpression(int index, Exp e) {
-    // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
 
     }
 

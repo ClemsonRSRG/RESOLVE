@@ -1,7 +1,7 @@
 /*
  * ProgramFunctionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming function call expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the programming function call expression objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,10 +35,18 @@ public class ProgramFunctionExp extends ProgramExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's qualifier</p> */
+    /**
+     * <p>
+     * The expression's qualifier
+     * </p>
+     */
     private PosSymbol myQualifier;
 
-    /** <p>The function/operation name</p> */
+    /**
+     * <p>
+     * The function/operation name
+     * </p>
+     */
     private final PosSymbol myOperationName;
 
     /** The arguments member. */
@@ -46,7 +57,9 @@ public class ProgramFunctionExp extends ProgramExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming function call expression.</p>
+     * <p>
+     * This constructs a programming function call expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param qual A {@link PosSymbol} representing the expression's qualifier.
@@ -169,11 +182,10 @@ public class ProgramFunctionExp extends ProgramExp {
         if (result) {
             ProgramFunctionExp eAsProgramFunctionExp = (ProgramFunctionExp) e;
 
-            result =
-                    posSymbolEquivalent(myQualifier,
-                            eAsProgramFunctionExp.myQualifier)
-                            && posSymbolEquivalent(myOperationName,
-                                    eAsProgramFunctionExp.myOperationName);
+            result = posSymbolEquivalent(myQualifier,
+                    eAsProgramFunctionExp.myQualifier)
+                    && posSymbolEquivalent(myOperationName,
+                            eAsProgramFunctionExp.myOperationName);
 
             if (myExpressionArgs != null
                     && eAsProgramFunctionExp.myExpressionArgs != null) {
@@ -184,7 +196,7 @@ public class ProgramFunctionExp extends ProgramExp {
                     result &= thisExpArgs.next().equivalent(eExpArgs.next());
                 }
 
-                //Both had better have run out at the same time
+                // Both had better have run out at the same time
                 result &= (!thisExpArgs.hasNext()) && (!eExpArgs.hasNext());
             }
         }
@@ -193,7 +205,9 @@ public class ProgramFunctionExp extends ProgramExp {
     }
 
     /**
-     * <p>This method returns all the argument expressions.</p>
+     * <p>
+     * This method returns all the argument expressions.
+     * </p>
      *
      * @return A list containing all the argument {@link Exp}s.
      */
@@ -202,7 +216,9 @@ public class ProgramFunctionExp extends ProgramExp {
     }
 
     /**
-     * <p>This method returns the operation name.</p>
+     * <p>
+     * This method returns the operation name.
+     * </p>
      *
      * @return The {@link PosSymbol} representation object.
      */
@@ -211,7 +227,9 @@ public class ProgramFunctionExp extends ProgramExp {
     }
 
     /**
-     * <p>This method returns the qualifier name.</p>
+     * <p>
+     * This method returns the qualifier name.
+     * </p>
      *
      * @return The {@link PosSymbol} representation object.
      */
@@ -238,16 +256,17 @@ public class ProgramFunctionExp extends ProgramExp {
     @Override
     public final int hashCode() {
         int result = super.hashCode();
-        result =
-                31 * result
-                        + (myQualifier != null ? myQualifier.hashCode() : 0);
+        result = 31 * result
+                + (myQualifier != null ? myQualifier.hashCode() : 0);
         result = 31 * result + myOperationName.hashCode();
         result = 31 * result + myExpressionArgs.hashCode();
         return result;
     }
 
     /**
-     * <p>Sets the qualifier for this expression.</p>
+     * <p>
+     * Sets the qualifier for this expression.
+     * </p>
      *
      * @param qualifier The qualifier for this expression.
      */
@@ -288,7 +307,8 @@ public class ProgramFunctionExp extends ProgramExp {
             newExpressionArgs.add((ProgramExp) substitute(e, substitutions));
         }
 
-        return new ProgramFunctionExp(cloneLocation(), newQualifier, myOperationName.clone(), newExpressionArgs);
+        return new ProgramFunctionExp(cloneLocation(), newQualifier,
+                myOperationName.clone(), newExpressionArgs);
     }
 
     // ===========================================================
@@ -296,8 +316,10 @@ public class ProgramFunctionExp extends ProgramExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the argument expressions.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * argument expressions.
+     * </p>
      *
      * @return A list containing {@link Exp}s.
      */

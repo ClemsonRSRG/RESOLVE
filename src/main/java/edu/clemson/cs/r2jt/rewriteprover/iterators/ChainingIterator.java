@@ -1,7 +1,7 @@
 /*
  * ChainingIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,7 +24,7 @@ public class ChainingIterator<T> implements Iterator<T> {
 
     public ChainingIterator(Iterator<T> start, Iterator<T> end) {
 
-        //TODO : This can be removed to increase performance
+        // TODO : This can be removed to increase performance
         if (start == null || end == null) {
             throw new IllegalArgumentException();
         }

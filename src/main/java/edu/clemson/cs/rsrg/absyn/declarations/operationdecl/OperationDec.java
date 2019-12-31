@@ -1,7 +1,7 @@
 /*
  * OperationDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,8 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the operation declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the operation declaration objects that the compiler
+ * builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -35,19 +38,39 @@ public class OperationDec extends Dec implements ModuleParameter {
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of parameter variable declarations</p> */
+    /**
+     * <p>
+     * The list of parameter variable declarations
+     * </p>
+     */
     private final List<ParameterVarDec> myParameters;
 
-    /** <p>The type model for the return value.</p> */
+    /**
+     * <p>
+     * The type model for the return value.
+     * </p>
+     */
     private final Ty myReturnTy;
 
-    /** <p>The affects clause.</p> */
+    /**
+     * <p>
+     * The affects clause.
+     * </p>
+     */
     private final AffectsClause myAffects;
 
-    /** <p>The requires expression</p> */
+    /**
+     * <p>
+     * The requires expression
+     * </p>
+     */
     private final AssertionClause myRequires;
 
-    /** <p>The ensures expression</p> */
+    /**
+     * <p>
+     * The ensures expression
+     * </p>
+     */
     private final AssertionClause myEnsures;
 
     // ===========================================================
@@ -55,20 +78,22 @@ public class OperationDec extends Dec implements ModuleParameter {
     // ===========================================================
 
     /**
-     * <p>This constructs an operation declaration.</p>
+     * <p>
+     * This constructs an operation declaration.
+     * </p>
      *
-     * @param name A {@link PosSymbol} representing the operation's
-     *             name.
-     * @param parameters A list of {@link ParameterVarDec} representing the operation's
-     *                   parameter variables.
-     * @param returnTy A {@link Ty} representing the operation's
-     *                 return value type.
+     * @param name A {@link PosSymbol} representing the operation's name.
+     * @param parameters A list of {@link ParameterVarDec} representing the
+     *        operation's parameter
+     *        variables.
+     * @param returnTy A {@link Ty} representing the operation's return value
+     *        type.
      * @param affects A {@link AffectsClause} representing the operation's
-     *                affects clause.
+     *        affects clause.
      * @param requires A {@link AssertionClause} representing the operation's
-     *                 requires clause.
+     *        requires clause.
      * @param ensures A {@link AssertionClause} representing the operation's
-     *                ensures clause.
+     *        ensures clause.
      */
     public OperationDec(PosSymbol name, List<ParameterVarDec> parameters,
             Ty returnTy, AffectsClause affects, AssertionClause requires,
@@ -162,8 +187,9 @@ public class OperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the affects clause
-     * for this operation declaration.</p>
+     * <p>
+     * This method returns the affects clause for this operation declaration.
+     * </p>
      *
      * @return The {@link AffectsClause} representation object.
      */
@@ -172,8 +198,9 @@ public class OperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the ensures clause
-     * for this operation declaration.</p>
+     * <p>
+     * This method returns the ensures clause for this operation declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -182,8 +209,10 @@ public class OperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the parameter variable declarations
-     * for this operation declaration.</p>
+     * <p>
+     * This method returns the parameter variable declarations for this
+     * operation declaration.
+     * </p>
      *
      * @return A list of {@link ParameterVarDec} representation objects.
      */
@@ -192,8 +221,9 @@ public class OperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the requires clause
-     * for this operation declaration.</p>
+     * <p>
+     * This method returns the requires clause for this operation declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -202,8 +232,9 @@ public class OperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the raw return type
-     * for this operation declaration.</p>
+     * <p>
+     * This method returns the raw return type for this operation declaration.
+     * </p>
      *
      * @return The {@link Ty} representation object.
      */
@@ -249,6 +280,7 @@ public class OperationDec extends Dec implements ModuleParameter {
             newReturnTy = myReturnTy.clone();
         }
 
-        return new OperationDec(myName.clone(), newParameters, newReturnTy, newAffects, myRequires.clone(), myEnsures.clone());
+        return new OperationDec(myName.clone(), newParameters, newReturnTy,
+                newAffects, myRequires.clone(), myEnsures.clone());
     }
 }

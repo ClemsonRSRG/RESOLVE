@@ -1,7 +1,7 @@
 /*
  * CompileEnvironment.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,14 +36,16 @@ import edu.clemson.cs.r2jt.misc.FlagManager;
 /**
  * <p>
  * Unlike <code>Environment</code> which uses lots of static variables that make
- * instantiating the compiler a mess under concurrency, a
- * <code>CompileEnvironment</code> is intended to serve the same purpose but be
- * designed to be instantiated.
+ * instantiating the
+ * compiler a mess under concurrency, a <code>CompileEnvironment</code> is
+ * intended to serve the
+ * same purpose but be designed to be instantiated.
  * </p>
  * 
  * <p>
  * Features of <code>Environment</code> should be moved to this class and
- * eventually <code>Environment</code> should be removed in favor of
+ * eventually
+ * <code>Environment</code> should be removed in favor of
  * <code>CompileEnvironment</code>.
  * </p>
  */
@@ -53,9 +55,11 @@ public class CompileEnvironment {
 
     /*
      * #########################################################################
-     * All of the guts from the old Environment class have now been moved into
-     * this one. Environment is no longer static and keeps a reference
-     * to this one, and simple has dummy methods that refer to stuff here.
+     * All of the guts from
+     * the old Environment class have now been moved into this one. Environment
+     * is no longer static
+     * and keeps a reference to this one, and simple has dummy methods that
+     * refer to stuff here.
      */
 
     private ErrorHandler err;
@@ -96,15 +100,18 @@ public class CompileEnvironment {
     /**
      * Array of the names of the Std Facilities to be automatically included by
      * ImportScanner/Populator. Simply add additional Std_Facs to the array; if
-     * the Fac is named Std_XXX_Fac, just add "XXX" to the array.
-     * This array should never be altered while running
+     * the Fac is named
+     * Std_XXX_Fac, just add "XXX" to the array. This array should never be
+     * altered while running
      * 
-     * Order matters.  Files that match strings later in the array will import
-     * ones earlier in the array.  So Integer_Theory will have Boolean_Theory to
-     * work with, but Boolean_Theory will not have Integer_Theory.
+     * Order matters. Files that match strings later in the array will import
+     * ones earlier in the
+     * array. So Integer_Theory will have Boolean_Theory to work with, but
+     * Boolean_Theory will not
+     * have Integer_Theory.
      * 
-     * NOTE: This assumes that all files are formatted:
-     * Std_XXX_Fac, XXX_Template, XXX_Theory
+     * NOTE: This assumes that all files are formatted: Std_XXX_Fac,
+     * XXX_Template, XXX_Theory
      */
     private final String[] stdUses =
             { "Boolean", "Integer", "Character", "Char_Str" };
@@ -121,7 +128,7 @@ public class CompileEnvironment {
     public CompileEnvironment(String[] args) throws FlagDependencyException {
 
         flags = new FlagManager(args);
-        //myOldEnvironment = env;
+        // myOldEnvironment = env;
     }
 
     public void setErrorHandler(ErrorHandler err) {
@@ -217,8 +224,9 @@ public class CompileEnvironment {
     }
 
     /**
-     * <p>Checks to see if the web interface flag is set
-     * or not.</p>
+     * <p>
+     * Checks to see if the web interface flag is set or not.
+     * </p>
      *
      * @return Results from the operation check
      */
@@ -247,7 +255,8 @@ public class CompileEnvironment {
     }
 
     /**
-     * Returns the Lists of <code>List</code> of <code>UsesItem</code> which are the Std_Fac's,<br>
+     * Returns the Lists of <code>List</code> of <code>UsesItem</code> which are
+     * the Std_Fac's,<br>
      * dependencies and creates an empty List of Lists if it is empty
      */
     public List<List<UsesItem>> getStdUsesDepends() {
@@ -263,15 +272,18 @@ public class CompileEnvironment {
 
     /**
      * Sets the <code>stdUsesDepends</code> lists to the provided updated list
-     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code> which will be assigned to the global <code>stdUsesDepends</code>
+     * 
+     * @param list The <code>List</code> of <code>List</code> of
+     *        <code>UsesItem</code> which will be
+     *        assigned to the global <code>stdUsesDepends</code>
      */
     public void setStdUsesDepends(List<List<UsesItem>> list) {
         stdUsesDepends = list;
     }
 
-    /*public static void newInstance() {
-    	Environment.newInstance();
-    }*/
+    /*
+     * public static void newInstance() { Environment.newInstance(); }
+     */
 
     public void clearStopFlags() {
         showBuild = false;
@@ -281,9 +293,10 @@ public class CompileEnvironment {
         PVCs = false;
     }
 
-    /*public static Environment getInstance() {
-    	return Environment.getInstance();
-    }*/
+    /*
+     * public static Environment getInstance() { return
+     * Environment.getInstance(); }
+     */
 
     /** Sets the main directory to the specified directory. */
     public void setMainDir(File mainDir) {
@@ -368,7 +381,8 @@ public class CompileEnvironment {
 
     /**
      * Indicates that imported module tables should be displayed if the main
-     * symbol table is displayed.
+     * symbol table is
+     * displayed.
      */
     public void setShowImportsFlag() {
         showImports = true;
@@ -460,15 +474,18 @@ public class CompileEnvironment {
 
     /**
      * Returns true if the specified file is present in the compilation
-     * environment but could not be successfully parsed.
+     * environment but could not be
+     * successfully parsed.
      */
-    /*public boolean containsUnparsable(File file) {
-    	return myOldEnvironment.containsUnparsable(file);
-    }*/
+    /*
+     * public boolean containsUnparsable(File file) { return
+     * myOldEnvironment.containsUnparsable(file); }
+     */
 
     /**
      * Returns true if the specified file is present in the compilation
-     * environment, has an associated id and a valid module dec.
+     * environment, has an associated
+     * id and a valid module dec.
      */
     public boolean contains(File file) {
         return fmap.containsKey(file);
@@ -476,7 +493,8 @@ public class CompileEnvironment {
 
     /**
      * Returns true if the specified module is present in the compilation
-     * environment, has an associated file and a valid module dec.
+     * environment, has an
+     * associated file and a valid module dec.
      */
     public boolean contains(ModuleID id) {
         return map.containsKey(id);
@@ -497,21 +515,23 @@ public class CompileEnvironment {
 
     /**
      * Returns true if compilation on the specified file has begun, has not
-     * aborted, and has not completed.
+     * aborted, and has not
+     * completed.
      */
     public boolean compileIncomplete(File file) {
         if (!fmap.containsKey(file)) {
             return false;
         }
         else {
-            return (!map.get(fmap.get(file)).isComplete() && !map.get(
-                    fmap.get(file)).containsErrors());
+            return (!map.get(fmap.get(file)).isComplete()
+                    && !map.get(fmap.get(file)).containsErrors());
         }
     }
 
     /**
      * Returns true if a compile had been attempted on the specified file and
-     * was aborted due to errors.
+     * was aborted due to
+     * errors.
      */
     public boolean compileAborted(File file) {
         if (unparsables.contains(file)) {
@@ -562,9 +582,10 @@ public class CompileEnvironment {
 
     /**
      * Constructs a record containing the module id, the file, and the module
-     * dec, and places it in the module environment. Also places the module into
-     * a stack that indicates compilation has begun on this module but has not
-     * completed.
+     * dec, and places it in
+     * the module environment. Also places the module into a stack that
+     * indicates compilation has
+     * begun on this module but has not completed.
      */
     public void constructRecord(ModuleID id, File file, ModuleDec dec) {
         ModuleRecord record = new ModuleRecord(id, file);
@@ -576,14 +597,16 @@ public class CompileEnvironment {
         stack.push(id);
 
         if (!debugOff) {
-            err.message("Construct record: " + id.toString()); //DEBUG
+            err.message("Construct record: " + id.toString()); // DEBUG
         }
     }
 
     /**
      * Associates a list of visible theories with the specified module. This
-     * method may only be called once during the life of a module. The visible
-     * theories must be accessible to a module before population begins.
+     * method may only be called
+     * once during the life of a module. The visible theories must be accessible
+     * to a module before
+     * population begins.
      */
     public void setTheories(ModuleID id, List<ModuleID> theories) {
         ModuleRecord record = map.get(id);
@@ -599,19 +622,20 @@ public class CompileEnvironment {
         }
         else {
             unparsables.add(file);
-            err.message("Add unparsable: " + file.getName()); //DEBUG
+            err.message("Add unparsable: " + file.getName()); // DEBUG
         }
     }
 
     /**
      * Aborts compilation of a module which parsed without errors, and pops this
-     * module from the compilation stack.
+     * module from the
+     * compilation stack.
      */
     public void abortCompile(ModuleID id) {
         map.get(id).setErrorFlag();
         ModuleID id2 = stack.pop();
         assert id == id2 : "id != id2";
-        err.message("Abort compile: " + id.toString()); //DEBUG
+        err.message("Abort compile: " + id.toString()); // DEBUG
     }
 
     /**
@@ -633,7 +657,7 @@ public class CompileEnvironment {
         while (i.hasNext()) {
             ModuleID id = i.next();
             ModuleRecord record = map.get(id);
-            //sb.append(getResolveName(record.getFile()) + " ");
+            // sb.append(getResolveName(record.getFile()) + " ");
             sb.append(id.toString());
             if (record.isComplete()) {
                 sb.append(" is complete");
@@ -670,9 +694,11 @@ public class CompileEnvironment {
 
     /**
      * Returns a string of the modules in the compile stack, beginning with the
-     * the specified module and ending with the module at the top of the stack.
-     * The modules have arrows between them to indicate dependencies. This
-     * method is used when reporting a circular module dependency error.
+     * the specified module
+     * and ending with the module at the top of the stack. The modules have
+     * arrows between them to
+     * indicate dependencies. This method is used when reporting a circular
+     * module dependency error.
      */
     public String printStackPath(ModuleID id) {
         StringBuffer sb = new StringBuffer();

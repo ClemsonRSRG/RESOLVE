@@ -1,7 +1,7 @@
 /*
  * Main.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -45,28 +45,26 @@ public class Main {
 
     public static final String FLAG_SECTION_GENERAL = "General";
 
-    public static final Flag FLAG_HELP =
-            new Flag(FLAG_SECTION_GENERAL, "help",
-                    "Displays this help information.");
+    public static final Flag FLAG_HELP = new Flag(FLAG_SECTION_GENERAL, "help",
+            "Displays this help information.");
 
-    public static final Flag FLAG_EXTENDED_HELP =
-            new Flag("General", "xhelp",
-                    "Displays all flags, including development flags and many others "
-                            + "not relevant to most users.");
+    public static final Flag FLAG_EXTENDED_HELP = new Flag("General", "xhelp",
+            "Displays all flags, including development flags and many others "
+                    + "not relevant to most users.");
 
-    public static final Flag FLAG_NO_STANDARD_IMPORT =
-            new Flag("General", "nostdimport",
-                    "Prevents the compiler from importing standard uses modules.");
+    public static final Flag FLAG_NO_STANDARD_IMPORT = new Flag("General",
+            "nostdimport",
+            "Prevents the compiler from importing standard uses modules.");
 
-    //private static boolean      bodies      = false;
+    // private static boolean bodies = false;
     private static boolean compileDirs = false;
     private static String mainDirName = "Main";
 
-    //private static Environment env;
+    // private static Environment env;
 
     public static void main(String[] args) {
-        //Environment.newInstance();
-        //env = Environment.getInstance();
+        // Environment.newInstance();
+        // env = Environment.getInstance();
 
         setUpFlagDependencies();
 
@@ -76,9 +74,9 @@ public class Main {
             args = compileEnvironment.getRemainingArgs();
             ErrorHandler err = new ErrorHandler(compileEnvironment);
             compileEnvironment.setErrorHandler(err);
-            //compileEnvironment.setUserFileMap(getFakeHashMap());
-            //Environment env = new Environment(compileEnvironment);
-            //env.setErrorHandler(err);
+            // compileEnvironment.setUserFileMap(getFakeHashMap());
+            // Environment env = new Environment(compileEnvironment);
+            // env.setErrorHandler(err);
             String preferredMainDirectory = null;
 
             List<File> files = new List<File>();
@@ -158,8 +156,8 @@ public class Main {
             }
         }
         catch (FlagDependencyException fde) {
-            System.out.println("RESOLVE Compiler/Verifier - " + VERSION
-                    + " Version.");
+            System.out.println(
+                    "RESOLVE Compiler/Verifier - " + VERSION + " Version.");
             System.out.println("  Use -help flag for options.");
             System.err.println(fde.getMessage());
         }
@@ -171,14 +169,15 @@ public class Main {
     }
 
     /*
-     * Added this so we could make the CompileReport non static, and pass
-     * it in from the ResolveCompiler class (for use in the web interface)
+     * Added this so we could make the CompileReport non static, and pass it in
+     * from the
+     * ResolveCompiler class (for use in the web interface)
      */
     public static void runMain(String[] args, CompileReport rep,
             MetaFile inputFile, HashMap<String, MetaFile> userFileMap,
             ProverListener listener) {
-        //Environment.newInstance();
-        //env = Environment.getInstance();
+        // Environment.newInstance();
+        // env = Environment.getInstance();
 
         setUpFlagDependencies();
         String fileName = inputFile.getMyFileName();
@@ -194,8 +193,8 @@ public class Main {
             args = compileEnvironment.getRemainingArgs();
             ErrorHandler err = new ErrorHandler(compileEnvironment);
             compileEnvironment.setErrorHandler(err);
-            //Environment env = new Environment(compileEnvironment);
-            //env.setErrorHandler(err);
+            // Environment env = new Environment(compileEnvironment);
+            // env.setErrorHandler(err);
 
             String preferredMainDirectory = null;
 
@@ -272,8 +271,8 @@ public class Main {
             }
         }
         catch (FlagDependencyException fde) {
-            System.out.println("RESOLVE Compiler/Verifier - " + VERSION
-                    + " Version.");
+            System.out.println(
+                    "RESOLVE Compiler/Verifier - " + VERSION + " Version.");
             System.out.println("  Use -help flag for options.");
             System.err.println(fde.getMessage());
         }
@@ -284,15 +283,14 @@ public class Main {
      */
     private static void setupEnv(String preferredMainDirectory,
             CompileEnvironment env) {
-        /*if (bodies) {
-            env.setCompileBodiesFlag();
-        }*/
+        /*
+         * if (bodies) { env.setCompileBodiesFlag(); }
+         */
         env.setMainDir(getMainDir(preferredMainDirectory));
     }
 
     /**
-     * Iterates over the files in the list and compiles them one
-     * at a time.
+     * Iterates over the files in the list and compiles them one at a time.
      */
     private static void compileFiles(List<File> files,
             CompileEnvironment instanceEnvironment, MetaFile inputFile) {
@@ -337,7 +335,7 @@ public class Main {
         List<File> files = new List<File>();
 
         // JMH avoid problems with 1.5 generics files.addAll(fileArray);
-        //        files.addAll(fileArray);
+        // files.addAll(fileArray);
         for (int i = 0; i < fileArray.length; i++) {
             files.add(fileArray[i]);
         }
@@ -353,7 +351,7 @@ public class Main {
         control.compileTargetFile(file, symbolTable);
 
         if (instanceEnvironment.showBuild()) {
-            //           LOG.debug("showBuild flag set, printing module dec.");
+            // LOG.debug("showBuild flag set, printing module dec.");
             printModuleDec(file, instanceEnvironment);
         }
         else if (instanceEnvironment.showEnv()) {
@@ -361,7 +359,7 @@ public class Main {
         }
         else if (instanceEnvironment.showTable()
                 || instanceEnvironment.showBind()) {
-            //printSymbolTable(file, instanceEnvironment);
+            // printSymbolTable(file, instanceEnvironment);
         }
     }
 
@@ -372,14 +370,13 @@ public class Main {
         Controller control = new Controller(instanceEnvironment);
         control.compileTargetSource(inputFile, symbolTable);
 
-        /*if (env.showBuild()) {
-        //           LOG.debug("showBuild flag set, printing module dec.");
-            printModuleDec(file);
-        } else if (env.showEnv()) {
-            printEnvironment(file);
-        } else if (env.showTable() || env.showBind()) {
-            printSymbolTable(file);
-        }*/
+        /*
+         * if (env.showBuild()) { //
+         * LOG.debug("showBuild flag set, printing module dec.");
+         * printModuleDec(file); } else if (env.showEnv()) {
+         * printEnvironment(file); } else if
+         * (env.showTable() || env.showBind()) { printSymbolTable(file); }
+         */
     }
 
     private static void printModuleDec(File file, CompileEnvironment env) {
@@ -401,9 +398,9 @@ public class Main {
             mainDir = new File(preferredMainDirectory);
 
             if (!mainDir.exists()) {
-                System.err.println("Warning: Directory '"
-                        + preferredMainDirectory
-                        + "' not found, using current " + "directory.");
+                System.err
+                        .println("Warning: Directory '" + preferredMainDirectory
+                                + "' not found, using current " + "directory.");
 
                 mainDir = getAbsoluteFile("");
             }
@@ -434,8 +431,9 @@ public class Main {
     }
 
     /**
-     * Converts the specified pathname to a <code>File</code> representing
-     * the absolute path to the pathname.
+     * Converts the specified pathname to a <code>File</code> representing the
+     * absolute path to the
+     * pathname.
      */
     private static File getAbsoluteFile(String pathname) {
         return new File(pathname).getAbsoluteFile();
@@ -458,37 +456,39 @@ public class Main {
     }
 
     private static void printOptions(CompileEnvironment e) {
-        System.out
-                .println("  +bodies        Compile imported realization modules.");
-        System.out
-                .println("  -showBuild     Show the ModuleDec of the target file.");
+        System.out.println(
+                "  +bodies        Compile imported realization modules.");
+        System.out.println(
+                "  -showBuild     Show the ModuleDec of the target file.");
         System.out
                 .println("  -showEnv       Show the compilation environment.");
-        System.out
-                .println("  -showTable     Show the symbol table before binding.");
-        System.out
-                .println("  -showBind      Show the symbol table after binding.");
-        System.out
-                .println("  -showIndirect  Show the bindings associated with indirect types.");
+        System.out.println(
+                "  -showTable     Show the symbol table before binding.");
+        System.out.println(
+                "  -showBind      Show the symbol table after binding.");
+        System.out.println(
+                "  -showIndirect  Show the bindings associated with indirect types.");
         System.out.println("  -assertions    Print Only Final Assertions");
         System.out.println("  -R             Recurse through directories.");
         System.out.println("  -D <dir>       Use <dir> as the main directory.");
         System.out.println("  -translate     Translate to Java code.");
         System.out.println("  -PVCs           Generate verification "
                 + "conditions for performance.");
-        System.out.println("  -VCs           Generate verification "
-                + "conditions.");
+        System.out.println(
+                "  -VCs           Generate verification " + "conditions.");
         System.out.println("  -isabelle      Used with -VCs to generate "
                 + "VCs for Isabelle.");
 
-        System.out.println(FlagDependencies.getListingString(e.flags
-                .isFlagSet(FLAG_EXTENDED_HELP)));
+        System.out.println(FlagDependencies
+                .getListingString(e.flags.isFlagSet(FLAG_EXTENDED_HELP)));
     }
 
     /**
-     * <p>This method sets up dependencies between compiler flags.  If you are
-     * integrating your module into the compiler flag management system, this is
-     * where to do it.</p>
+     * <p>
+     * This method sets up dependencies between compiler flags. If you are
+     * integrating your module
+     * into the compiler flag management system, this is where to do it.
+     * </p>
      */
     private synchronized static void setUpFlagDependencies() {
 
@@ -502,7 +502,7 @@ public class Main {
             ResolveCompiler.setUpFlags();
             VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
-            //Your module here!
+            // Your module here!
             CongruenceClassProver.setUpFlags();
             FlagDependencies.seal();
         }
@@ -521,16 +521,11 @@ public class Main {
         String source =
                 "Realization Std_Unbounded_List_Realiz for Unbounded_List_Template;\n"
                         + "Type List is represented by Record\n"
-                        + "Contents: Array 1..Max_Depth of Entry;\n"
-                        + "end;\n"
-                        + "convention\n"
-                        + "true;\n"
-                        +
+                        + "Contents: Array 1..Max_Depth of Entry;\n" + "end;\n"
+                        + "convention\n" + "true;\n" +
 
-                        "true;\n"
-                        + "Procedure Advance( upd P: List );\n"
-                        + "end;\n"
-                        + "Procedure Reset( upd P: List );\n"
+                        "true;\n" + "Procedure Advance( upd P: List );\n"
+                        + "end;\n" + "Procedure Reset( upd P: List );\n"
                         + "end;\n"
                         + "Procedure Is_Rem_Empty( rest P: List ): Boolean;\n"
                         + "end;\n"
@@ -552,14 +547,13 @@ public class Main {
         fileName = "Do_Nothing_Realiz";
         assocConcept = "Stack_Template";
         pkg = "Stack";
-        source =
-                "Realization Do_Nothing_Realiz for Do_Nothing_Capability of Stack_Template;\n"
-                        + "uses Std_Boolean_Fac;\n"
-                        + "Procedure Do_Nothing(restores S: Stack);\n"
-                        + "Var Next_Entry: Entry;\n" +
+        source = "Realization Do_Nothing_Realiz for Do_Nothing_Capability of Stack_Template;\n"
+                + "uses Std_Boolean_Fac;\n"
+                + "Procedure Do_Nothing(restores S: Stack);\n"
+                + "Var Next_Entry: Entry;\n" +
 
-                        "Pop(Next_Entry, S);\n" + "Push(Next_Entry, S);\n"
-                        + "end Do_Nothing;\n" + "end Do_Nothing_Realiz;\n";
+                "Pop(Next_Entry, S);\n" + "Push(Next_Entry, S);\n"
+                + "end Do_Nothing;\n" + "end Do_Nothing_Realiz;\n";
         kind = ModuleKind.ENHANCEMENT_BODY;
         mf = new MetaFile(fileName, assocConcept, pkg, source, kind);
         aMap.put(key, mf);
@@ -567,21 +561,20 @@ public class Main {
         fileName = "a_a0123456";
         assocConcept = "";
         pkg = "User/Web_User";
-        source =
-                "Facility a_a0123456;\n"
-                        + "uses Std_Boolean_Fac, Std_Character_Fac, Std_Integer_Fac, Std_Char_Str_Fac;\n"
-                        + "Facility Stack_Fac is Stack_Template(Integer, 4)\n"
-                        + "realized by Array_Realiz\n"
-                        + "enhanced by Reading_Capability\n"
-                        + "realized by Obvious_Reading_Realiz(Std_Integer_Fac.Read)\n"
-                        + "enhanced by Writing_Capability\n"
-                        + "realized by Obvious_Writing_Realiz (Std_Integer_Fac.Write);\n"
-                        +
+        source = "Facility a_a0123456;\n"
+                + "uses Std_Boolean_Fac, Std_Character_Fac, Std_Integer_Fac, Std_Char_Str_Fac;\n"
+                + "Facility Stack_Fac is Stack_Template(Integer, 4)\n"
+                + "realized by Array_Realiz\n"
+                + "enhanced by Reading_Capability\n"
+                + "realized by Obvious_Reading_Realiz(Std_Integer_Fac.Read)\n"
+                + "enhanced by Writing_Capability\n"
+                + "realized by Obvious_Writing_Realiz (Std_Integer_Fac.Write);\n"
+                +
 
-                        "Operation Main();\n" + "Procedure\n"
-                        + "Var S: Stack_Fac.Stack;\n" + "Read(S);\n"
-                        + "Write_Line(\"REVERSED ORDER\");\n" + "Write(S);\n"
-                        + "end Main;\n" + "end a_a0123456;\n";
+                "Operation Main();\n" + "Procedure\n"
+                + "Var S: Stack_Fac.Stack;\n" + "Read(S);\n"
+                + "Write_Line(\"REVERSED ORDER\");\n" + "Write(S);\n"
+                + "end Main;\n" + "end a_a0123456;\n";
         kind = ModuleKind.FACILITY;
         mf = new MetaFile(fileName, assocConcept, pkg, source, kind);
         aMap.put(key, mf);

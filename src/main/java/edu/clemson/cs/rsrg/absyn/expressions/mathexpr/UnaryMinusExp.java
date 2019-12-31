@@ -1,7 +1,7 @@
 /*
  * UnaryMinusExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical unary minus expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical unary minus expression objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,7 +33,11 @@ public class UnaryMinusExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The mathematical expression that is being applied "unary minus".</p> */
+    /**
+     * <p>
+     * The mathematical expression that is being applied "unary minus".
+     * </p>
+     */
     private final Exp myInnerArgumentExp;
 
     // ===========================================================
@@ -38,7 +45,9 @@ public class UnaryMinusExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a unary minus expression.</p>
+     * <p>
+     * This constructs a unary minus expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param exp An {@link Exp} that represents the actual expression.
@@ -119,16 +128,17 @@ public class UnaryMinusExp extends MathExp {
         boolean retval = (e instanceof UnaryMinusExp);
         if (retval) {
             UnaryMinusExp eAsUnaryMinusExp = (UnaryMinusExp) e;
-            retval =
-                    myInnerArgumentExp
-                            .equivalent(eAsUnaryMinusExp.myInnerArgumentExp);
+            retval = myInnerArgumentExp
+                    .equivalent(eAsUnaryMinusExp.myInnerArgumentExp);
         }
 
         return retval;
     }
 
     /**
-     * <p>Returns the expression's inner argument expression.</p>
+     * <p>
+     * Returns the expression's inner argument expression.
+     * </p>
      *
      * @return The assignment {@link Exp} object.
      */
@@ -174,8 +184,8 @@ public class UnaryMinusExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new UnaryMinusExp(cloneLocation(), substitute(
-                myInnerArgumentExp, substitutions));
+        return new UnaryMinusExp(cloneLocation(),
+                substitute(myInnerArgumentExp, substitutions));
     }
 
 }

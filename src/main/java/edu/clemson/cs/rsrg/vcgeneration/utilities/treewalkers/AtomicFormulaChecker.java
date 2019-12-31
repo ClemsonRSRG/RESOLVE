@@ -1,7 +1,7 @@
 /*
  * AtomicFormulaChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 
 /**
- * <p>This class determines if an {@link Exp} is an atomic formula or not.
- * This visitor logic is implemented as a {@link TreeWalkerVisitor}.</p>
+ * <p>
+ * This class determines if an {@link Exp} is an atomic formula or not. This
+ * visitor logic is
+ * implemented as a {@link TreeWalkerVisitor}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -32,8 +35,10 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This flag will indicate if the {@link Exp} we are walking
-     * is atomic or not.</p>
+     * <p>
+     * This flag will indicate if the {@link Exp} we are walking is atomic or
+     * not.
+     * </p>
      */
     private boolean myIsAtomicFormulaFlag;
 
@@ -42,8 +47,10 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This creates an object that checks to see if an {@link Exp}
-     * is an atomic formula.</p>
+     * <p>
+     * This creates an object that checks to see if an {@link Exp} is an atomic
+     * formula.
+     * </p>
      */
     public AtomicFormulaChecker() {
         myIsAtomicFormulaFlag = true;
@@ -58,7 +65,9 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link BetweenExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link BetweenExp}.
+     * </p>
      *
      * @param exp A conjunct expression.
      */
@@ -71,7 +80,9 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how an {@link EqualsExp} should be walked.</p>
+     * <p>
+     * This method redefines how an {@link EqualsExp} should be walked.
+     * </p>
      *
      * @param exp An equality/inequality expression.
      *
@@ -95,7 +106,9 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link FunctionExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link FunctionExp} should be walked.
+     * </p>
      *
      * @param exp A function expression.
      *
@@ -119,7 +132,9 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting an {@link InfixExp}.</p>
+     * <p>
+     * Code that gets executed before visiting an {@link InfixExp}.
+     * </p>
      *
      * @param exp An infix expression.
      */
@@ -137,7 +152,9 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link LambdaExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link LambdaExp} should be walked.
+     * </p>
      *
      * @param exp A lambda expression.
      *
@@ -161,7 +178,9 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link PrefixExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link PrefixExp}.
+     * </p>
      *
      * @param exp A prefix expression.
      */
@@ -177,7 +196,9 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ProgramExp}.
+     * </p>
      *
      * @param exp A programming expression.
      */
@@ -185,8 +206,9 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     public final void preProgramExp(ProgramExp exp) {
         // This is an error! We should have converted all ProgramExp to their
         // MathExp counterparts.
-        throw new SourceErrorException("[VCGenerator] Found: " + exp
-                + " in a Sequent!", exp.getLocation());
+        throw new SourceErrorException(
+                "[VCGenerator] Found: " + exp + " in a Sequent!",
+                exp.getLocation());
     }
 
     // ===========================================================
@@ -194,11 +216,14 @@ public class AtomicFormulaChecker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns a flag that indicates whether or not
-     * this is an atomic formula or not.</p>
+     * <p>
+     * This method returns a flag that indicates whether or not this is an
+     * atomic formula or not.
+     * </p>
      *
-     * @return {@code true} if the {@link Exp} that was walked contains
-     * only atomic formulas, {@code false} otherwise.
+     * @return {@code true} if the {@link Exp} that was walked contains only
+     *         atomic formulas,
+     *         {@code false} otherwise.
      */
     public final boolean getIsAtomicFormula() {
         return myIsAtomicFormulaFlag;

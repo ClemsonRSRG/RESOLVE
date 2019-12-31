@@ -1,7 +1,7 @@
 /*
  * PTInstantiated.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,29 +19,42 @@ import java.util.Map;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>A <code>PTInstantiated</code> represents a <code>PTFamily</code> that has
- * been instantiated via a facility.</p>
+ * <p>
+ * A <code>PTInstantiated</code> represents a <code>PTFamily</code> that has
+ * been instantiated via a
+ * facility.
+ * </p>
  * 
- * <p>Note that, while an instantiated type must have all parameters "filled 
- * in", it's possible that some have been filled in with constant parameters
- * or type parameters from the facility's source module.</p>
+ * <p>
+ * Note that, while an instantiated type must have all parameters "filled in",
+ * it's possible that
+ * some have been filled in with constant parameters or type parameters from the
+ * facility's source
+ * module.
+ * </p>
  */
 public class PTInstantiated extends PTType {
 
     /**
-     * <p>A pointer to the entry in the symbol table corresponding to the 
-     * facility that instantiated this type.</p>
+     * <p>
+     * A pointer to the entry in the symbol table corresponding to the facility
+     * that instantiated this
+     * type.
+     * </p>
      */
     private final FacilityEntry mySourceFacility;
 
     /**
-     * <p>The name of the original type family.</p>
+     * <p>
+     * The name of the original type family.
+     * </p>
      */
     private final String myName;
 
     /**
-     * <p>The mathematical model corresponding to this instantiated program
-     * type.</p>
+     * <p>
+     * The mathematical model corresponding to this instantiated program type.
+     * </p>
      */
     private final MTType myModel;
 
@@ -68,11 +81,10 @@ public class PTInstantiated extends PTType {
     }
 
     @Override
-    public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
+    public PTType instantiateGenerics(Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        //I'm already instantiated!
+        // I'm already instantiated!
         return this;
     }
 
@@ -84,10 +96,9 @@ public class PTInstantiated extends PTType {
         if (result) {
             PTInstantiated oAsPTInstantiated = (PTInstantiated) o;
 
-            result =
-                    (mySourceFacility.equals(oAsPTInstantiated
-                            .getInstantiatingFacility()))
-                            && myName.equals(oAsPTInstantiated.getFamilyName());
+            result = (mySourceFacility
+                    .equals(oAsPTInstantiated.getInstantiatingFacility()))
+                    && myName.equals(oAsPTInstantiated.getFamilyName());
         }
 
         return result;

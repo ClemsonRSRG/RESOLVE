@@ -1,7 +1,7 @@
 /*
  * BugReport.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,9 @@ import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 
 /**
- * This class is responsible for formatting a message to the user
- * when a request for a bug report is desired.  
+ * This class is responsible for formatting a message to the user when a request
+ * for a bug report is
+ * desired.
  *
  * @author Steven Atkinson
  */
@@ -54,9 +55,8 @@ public class BugReport {
     // ===========================================================
 
     public BugReport(String report) {
-        this.report =
-                report + "\n\n" + contactPerson + emailAddress
-                        + institutionAddress1 + institutionAddress2 + version;
+        this.report = report + "\n\n" + contactPerson + emailAddress
+                + institutionAddress1 + institutionAddress2 + version;
     }
 
     // ===========================================================
@@ -76,7 +76,7 @@ public class BugReport {
         sb.append("Unexpected exception: " + ex + "\n");
         String trace = getStackTraceString(ex);
         sb.append(trace);
-        //ex.printStackTrace();
+        // ex.printStackTrace();
         BugReport report = new BugReport(ex.toString());
         sb.append(report.getReport());
         if (env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)) {
@@ -89,12 +89,12 @@ public class BugReport {
     }
 
     private static String getStackTraceString(Throwable e) {
-        /*StringBuilder sb = new StringBuilder();
-        for(StackTraceElement element : e.getStackTrace()){
-        	sb.append(element.toString());
-        	sb.append("\n");
-        }
-        return sb.toString();*/
+        /*
+         * StringBuilder sb = new StringBuilder(); for(StackTraceElement element
+         * : e.getStackTrace()){
+         * sb.append(element.toString()); sb.append("\n"); } return
+         * sb.toString();
+         */
         Writer writer = new StringWriter();
         PrintWriter pw = new PrintWriter(writer);
         e.printStackTrace(pw);

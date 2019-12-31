@@ -1,7 +1,7 @@
 /*
  * ValidFunctionCallChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,8 +25,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is a sanity checker for making sure the parameters being passed
- * to a {@link ProgramFunctionExp} are valid.</p>
+ * <p>
+ * This is a sanity checker for making sure the parameters being passed to a
+ * {@link ProgramFunctionExp} are valid.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -37,16 +39,32 @@ public class ValidFunctionCallChecker {
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@link ProgramFunctionExp} to be checked.</p> */
+    /**
+     * <p>
+     * The {@link ProgramFunctionExp} to be checked.
+     * </p>
+     */
     private final ProgramFunctionExp myCallingFunctionExp;
 
-    /** <p>The operation corresponding to {@code myCallingFunctionExp}.</p> */
+    /**
+     * <p>
+     * The operation corresponding to {@code myCallingFunctionExp}.
+     * </p>
+     */
     private final OperationEntry myCorrespondingOperation;
 
-    /** <p>The location that generated this checker.</p> */
+    /**
+     * <p>
+     * The location that generated this checker.
+     * </p>
+     */
     private final Location myLocation;
 
-    /** <p>The current procedure's parameter entries.</p> */
+    /**
+     * <p>
+     * The current procedure's parameter entries.
+     * </p>
+     */
     private final List<ProgramParameterEntry> myProcedureParameters;
 
     // ===========================================================
@@ -54,14 +72,17 @@ public class ValidFunctionCallChecker {
     // ===========================================================
 
     /**
-     * <p>Creates a sanity checker for checking to see if the parameters being
-     * passed to a {@link ProgramFunctionExp} are valid.</p>
+     * <p>
+     * Creates a sanity checker for checking to see if the parameters being
+     * passed to a
+     * {@link ProgramFunctionExp} are valid.
+     * </p>
      *
      * @param functionExp The program function expression to be checked.
      * @param correspondingOp The operation entry corresponding to
-     *                        {@code functionExp}.
-     * @param parameterEntries The current list of parameter entries from
-     *                         the procedure declaration.
+     *        {@code functionExp}.
+     * @param parameterEntries The current list of parameter entries from the
+     *        procedure declaration.
      */
     public ValidFunctionCallChecker(ProgramFunctionExp functionExp,
             OperationEntry correspondingOp,
@@ -77,11 +98,15 @@ public class ValidFunctionCallChecker {
     // ===========================================================
 
     /**
-     * <p>Checks to see if the {@link Exp Exps} being passed to this
-     * {@link ProgramFunctionExp} are valid.</p>
+     * <p>
+     * Checks to see if the {@link Exp Exps} being passed to this
+     * {@link ProgramFunctionExp} are
+     * valid.
+     * </p>
      *
-     * @throws SourceErrorException This is thrown when we encounter an expression
-     * that violates the specified parameter mode.
+     * @throws SourceErrorException This is thrown when we encounter an
+     *         expression that violates the
+     *         specified parameter mode.
      */
     public final void areValidExpArgs() {
         Iterator<ProgramParameterEntry> paramIt =
@@ -99,7 +124,8 @@ public class ValidFunctionCallChecker {
             if (param.getParameterMode().equals(ParameterMode.EVALUATES)) {
                 if (!(argExp instanceof ProgramCharExp
                         || argExp instanceof ProgramFunctionExp
-                        || argExp instanceof ProgramIntegerExp || argExp instanceof ProgramStringExp)) {
+                        || argExp instanceof ProgramIntegerExp
+                        || argExp instanceof ProgramStringExp)) {
                     // YS: We are making a small optimization to variables of standard types
                     // (Boolean, Char_Str, Character, and Integer) and not requiring them
                     // to be functions.
@@ -121,7 +147,8 @@ public class ValidFunctionCallChecker {
                                         + " character/function/integer/string expressions.\n"
                                         + "Found a program expression: "
                                         + argExp + " with type: "
-                                        + argExp.getProgramType(), myLocation);
+                                        + argExp.getProgramType(),
+                                myLocation);
                     }
                 }
             }
@@ -153,11 +180,11 @@ public class ValidFunctionCallChecker {
                                         && !param.getParameterMode().equals(
                                                 ParameterMode.PRESERVES)) {
                                     throw new SourceErrorException(
-                                            "Expression: "
-                                                    + argExp
+                                            "Expression: " + argExp
                                                     + " has PRESERVES mode and cannot be passed to an operation with "
                                                     + param.getParameterMode()
-                                                    + " mode.", myLocation);
+                                                    + " mode.",
+                                            myLocation);
                                 }
                             }
                             else if (argExp instanceof ProgramVariableDotExp) {
@@ -168,16 +195,16 @@ public class ValidFunctionCallChecker {
                                                 .get(0);
                                 if (firstExp instanceof ProgramVariableNameExp
                                         && ((ProgramVariableNameExp) firstExp)
-                                                .getName().getName().equals(
-                                                        procParam.getName())
+                                                .getName().getName()
+                                                .equals(procParam.getName())
                                         && !param.getParameterMode().equals(
                                                 ParameterMode.PRESERVES)) {
                                     throw new SourceErrorException(
-                                            "Expression: "
-                                                    + argExp
+                                            "Expression: " + argExp
                                                     + " has PRESERVES mode and cannot be passed to an operation with "
                                                     + param.getParameterMode()
-                                                    + " mode.", myLocation);
+                                                    + " mode.",
+                                            myLocation);
                                 }
                             }
                         }

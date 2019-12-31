@@ -1,7 +1,7 @@
 /*
  * IfExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical if-else expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical if-else expression objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,13 +33,25 @@ public class IfExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The testing expression.</p> */
+    /**
+     * <p>
+     * The testing expression.
+     * </p>
+     */
     private final Exp myTestingExp;
 
-    /** <p>The then expression.</p> */
+    /**
+     * <p>
+     * The then expression.
+     * </p>
+     */
     private final Exp myThenExp;
 
-    /** <p>The else expression.</p> */
+    /**
+     * <p>
+     * The else expression.
+     * </p>
+     */
     private final Exp myElseExp;
 
     // ===========================================================
@@ -44,7 +59,9 @@ public class IfExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs an if-else expression.</p>
+     * <p>
+     * This constructs an if-else expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param test An {@link Exp} testing expression.
@@ -163,7 +180,9 @@ public class IfExp extends MathExp {
     }
 
     /**
-     * <p>Returns this expression's else clause expression.</p>
+     * <p>
+     * Returns this expression's else clause expression.
+     * </p>
      *
      * @return The assignment {@link Exp} object.
      */
@@ -185,7 +204,9 @@ public class IfExp extends MathExp {
     }
 
     /**
-     * <p>Returns this expression's testing expression.</p>
+     * <p>
+     * Returns this expression's testing expression.
+     * </p>
      *
      * @return The testing {@link Exp} object.
      */
@@ -194,7 +215,9 @@ public class IfExp extends MathExp {
     }
 
     /**
-     * <p>Returns this expression's then clause expression.</p>
+     * <p>
+     * Returns this expression's then clause expression.
+     * </p>
      *
      * @return The assignment {@link Exp} object.
      */
@@ -228,8 +251,8 @@ public class IfExp extends MathExp {
             newElseExp = myElseExp.clone();
         }
 
-        return new IfExp(cloneLocation(), myTestingExp.clone(), myThenExp
-                .clone(), newElseExp);
+        return new IfExp(cloneLocation(), myTestingExp.clone(),
+                myThenExp.clone(), newElseExp);
     }
 
     /**
@@ -242,8 +265,8 @@ public class IfExp extends MathExp {
             newElseExp = substitute(myElseExp, substitutions);
         }
 
-        return new IfExp(cloneLocation(), substitute(myTestingExp,
-                substitutions), substitute(myThenExp, substitutions),
-                newElseExp);
+        return new IfExp(cloneLocation(),
+                substitute(myTestingExp, substitutions),
+                substitute(myThenExp, substitutions), newElseExp);
     }
 }

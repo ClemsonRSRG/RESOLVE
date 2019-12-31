@@ -1,7 +1,7 @@
 /*
  * UnqualifiedNameQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,9 +19,13 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.Facility
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 
 /**
- * <p>An <code>UnqualifiedNameQuery</code> takes a name and searches for entries that match
- * the given name. This query does not take in a qualifier, therefore a search is performed
- * using the provided <code>ImportStrategy</code> and <code>FacilityStrategy</code>.</p>
+ * <p>
+ * An <code>UnqualifiedNameQuery</code> takes a name and searches for entries
+ * that match the given
+ * name. This query does not take in a qualifier, therefore a search is
+ * performed using the provided
+ * <code>ImportStrategy</code> and <code>FacilityStrategy</code>.
+ * </p>
  *
  * @version 2.0
  */
@@ -34,15 +38,17 @@ public class UnqualifiedNameQuery
     // ===========================================================
 
     /**
-     * <p>This query searches for a name that is not qualified.</p>
+     * <p>
+     * This query searches for a name that is not qualified.
+     * </p>
      *
      * @param searchString Name of the entry to be searched.
      * @param importStrategy The import strategy to use.
      * @param facilityStrategy The facility strategy to use.
-     * @param stopAfterFirst Boolean flag that indicates if we stop
-     *                       after we find the first or not.
-     * @param localPriority Boolean flag that indicates whether or not
-     *                      local items have priority.
+     * @param stopAfterFirst Boolean flag that indicates if we stop after we
+     *        find the first or not.
+     * @param localPriority Boolean flag that indicates whether or not local
+     *        items have priority.
      */
     public UnqualifiedNameQuery(String searchString,
             ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
@@ -52,7 +58,9 @@ public class UnqualifiedNameQuery
     }
 
     /**
-     * <p>This query searches for a name that is not qualified.</p>
+     * <p>
+     * This query searches for a name that is not qualified.
+     * </p>
      *
      * @param searchString Name of the entry to be searched.
      */

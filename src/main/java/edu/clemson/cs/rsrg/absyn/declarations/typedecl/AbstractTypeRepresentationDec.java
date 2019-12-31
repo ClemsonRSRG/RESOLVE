@@ -1,7 +1,7 @@
 /*
  * AbstractTypeRepresentationDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,9 +20,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 
 /**
- * <p>This is the abstract base class for both the type representation and
- * facility type representation objects that the compiler builds
- * using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for both the type representation and facility
+ * type representation
+ * objects that the compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 1.0
  */
@@ -32,10 +34,18 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The raw type for the new type.</p> */
+    /**
+     * <p>
+     * The raw type for the new type.
+     * </p>
+     */
     protected final Ty myTy;
 
-    /** <p>The convention clause for the new type.</p> */
+    /**
+     * <p>
+     * The convention clause for the new type.
+     * </p>
+     */
     protected final AssertionClause myConvention;
 
     // ===========================================================
@@ -43,9 +53,12 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the name,
-     * raw type and convention for any objects created from a class
-     * that inherits from {@code AbstractTypeRepresentationDec}.</p>
+     * <p>
+     * An helper constructor that allow us to store the name, raw type and
+     * convention for any objects
+     * created from a class that inherits from
+     * {@code AbstractTypeRepresentationDec}.
+     * </p>
      *
      * @param name Name of the new type.
      * @param ty Raw type used to implement this new type.
@@ -82,7 +95,9 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     }
 
     /**
-     * <p>Returns the convention for this type representation.</p>
+     * <p>
+     * Returns the convention for this type representation.
+     * </p>
      *
      * @return The type convention in {@link AssertionClause} format.
      */
@@ -91,8 +106,9 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     }
 
     /**
-     * <p>Returns the raw type model representation
-     * used to implement this type.</p>
+     * <p>
+     * Returns the raw type model representation used to implement this type.
+     * </p>
      *
      * @return The raw type in {@link Ty} format.
      */
@@ -116,25 +132,29 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>Implemented by concrete subclasses of {@link AbstractTypeRepresentationDec}
-     * to manufacture a copy of themselves.</p>
+     * <p>
+     * Implemented by concrete subclasses of
+     * {@link AbstractTypeRepresentationDec} to manufacture a
+     * copy of themselves.
+     * </p>
      *
-     * @return A new {@link AbstractTypeRepresentationDec} that is a
-     * deep copy of the original.
+     * @return A new {@link AbstractTypeRepresentationDec} that is a deep copy
+     *         of the original.
      */
     protected AbstractTypeRepresentationDec copy() {
-        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
-                + this.getClass(), new CloneNotSupportedException());
+        throw new MiscErrorException(
+                "Shouldn't be calling copy()!  Type: " + this.getClass(),
+                new CloneNotSupportedException());
     }
 
     /**
-     * <p>A helper method to form the string with type
-     * the module's uses items.</p>
+     * <p>
+     * A helper method to form the string with type the module's uses items.
+     * </p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentInc The additional indentation increment
-     *                       for the subsequent lines.
+     * @param indentSize The base indentation to the first line of the text.
+     * @param innerIndentInc The additional indentation increment for the
+     *        subsequent lines.
      *
      * @return A formatted text string.
      */
@@ -143,8 +163,8 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
         StringBuffer sb = new StringBuffer();
         if (myTy instanceof RecordTy) {
             sb.append(" is represented by Record\n");
-            sb.append(myTy
-                    .asString(indentSize + innerIndentInc, innerIndentInc));
+            sb.append(
+                    myTy.asString(indentSize + innerIndentInc, innerIndentInc));
         }
         else {
             sb.append(" = ");

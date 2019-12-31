@@ -1,7 +1,7 @@
 /*
  * ResolveCompiler.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -44,45 +44,52 @@ public class ResolveCompiler {
             "exports the AST for the target file as a .dot file that can be viewed in Graphviz";
 
     /**
-     * <p>The main web interface flag.  Tells the compiler to modify
-     * some of the output to be more user-friendly for the web.</p>
+     * <p>
+     * The main web interface flag. Tells the compiler to modify some of the
+     * output to be more
+     * user-friendly for the web.
+     * </p>
      */
-    public static final Flag FLAG_WEB =
-            new Flag(FLAG_SECTION_NAME, "webinterface", FLAG_DESC_WEB,
-                    Flag.Type.HIDDEN);
+    public static final Flag FLAG_WEB = new Flag(FLAG_SECTION_NAME,
+            "webinterface", FLAG_DESC_WEB, Flag.Type.HIDDEN);
 
     /**
-     * <p>Tells the compiler to send error messages to std_out instead
-     * of std_err.</p>
+     * <p>
+     * Tells the compiler to send error messages to std_out instead of std_err.
+     * </p>
      */
     public static final Flag FLAG_ERRORS_ON_STD_OUT =
             new Flag(FLAG_SECTION_NAME, "errorsOnStdOut",
                     FLAG_DESC_ERRORS_ON_STD_OUT, Flag.Type.HIDDEN);
 
     /**
-     * <p>Tells the compiler to remove debugging messages from the compiler
-     * output.</p>
+     * <p>
+     * Tells the compiler to remove debugging messages from the compiler output.
+     * </p>
      */
     public static final Flag FLAG_NO_DEBUG =
             new Flag(FLAG_SECTION_NAME, "nodebug", FLAG_DESC_NO_DEBUG);
 
     /**
-     * <p>Tells the compiler to remove debugging messages from the compiler
-     * output.</p>
+     * <p>
+     * Tells the compiler to remove debugging messages from the compiler output.
+     * </p>
      */
     public static final Flag FLAG_XML_OUT =
             new Flag(FLAG_SECTION_NAME, "XMLout", FLAG_DESC_XML_OUT);
 
     /**
-     * <p>The main web interface flag.  Tells the compiler to modify
-     * some of the output to be more user-friendly for the web.</p>
+     * <p>
+     * The main web interface flag. Tells the compiler to modify some of the
+     * output to be more
+     * user-friendly for the web.
+     * </p>
      */
-    public static final Flag FLAG_EXPORT_AST =
-            new Flag(FLAG_SECTION_NAME, "exportAST", FLAG_DESC_EXPORT_AST,
-                    Flag.Type.HIDDEN);
+    public static final Flag FLAG_EXPORT_AST = new Flag(FLAG_SECTION_NAME,
+            "exportAST", FLAG_DESC_EXPORT_AST, Flag.Type.HIDDEN);
 
-    //private String myTargetSource = null;
-    //private String myTargetFileName = null;
+    // private String myTargetSource = null;
+    // private String myTargetFileName = null;
     private HashMap<String, MetaFile> myUserFileMap;
     private CompileReport myCompileReport;
     private MetaFile myInputFile;
@@ -93,47 +100,48 @@ public class ResolveCompiler {
         myCompileReport.setFacilityName(customFacilityName);
         myInputFile = inputFile;
         myUserFileMap = userFileMap;
-        //myTargetFileName = fileName;
-        //System.out.println(fileName);
-        //Main.main(args);
+        // myTargetFileName = fileName;
+        // System.out.println(fileName);
+        // Main.main(args);
     }
 
     public ResolveCompiler(String[] args, MetaFile inputFile,
             HashMap<String, MetaFile> userFileMap) {
         myCompileReport = new CompileReport();
         myCompileReport.setFacilityName(inputFile.getMyFileName());
-        //myTargetFileName = fileArray[0];
-        //myTargetSource = fileArray[3];
+        // myTargetFileName = fileArray[0];
+        // myTargetSource = fileArray[3];
         myInputFile = inputFile;
         myUserFileMap = userFileMap;
-        //System.out.println(fileName);
-        //Main.main(args);
+        // System.out.println(fileName);
+        // Main.main(args);
     }
 
     public ResolveCompiler(String[] args) {
         myCompileReport = new CompileReport();
-        //myCompileReport.setFacilityName(inputFile.getMyFileName());
-        //myTargetFileName = fileArray[0];
-        //myTargetSource = fileArray[3];
+        // myCompileReport.setFacilityName(inputFile.getMyFileName());
+        // myTargetFileName = fileArray[0];
+        // myTargetSource = fileArray[3];
         myUserFileMap = new HashMap<String, MetaFile>();
-        //System.out.println(fileName);
-        //Main.main(args);
+        // System.out.println(fileName);
+        // Main.main(args);
     }
 
-    public ResolveCompiler(String[] args, HashMap<String, MetaFile> userFileMap) {
+    public ResolveCompiler(String[] args,
+            HashMap<String, MetaFile> userFileMap) {
         myCompileReport = new CompileReport();
-        //myCompileReport.setFacilityName(inputFile.getMyFileName());
-        //myTargetFileName = fileArray[0];
-        //myTargetSource = fileArray[3];
-        //myUserFileMap = userFileMap;
+        // myCompileReport.setFacilityName(inputFile.getMyFileName());
+        // myTargetFileName = fileArray[0];
+        // myTargetSource = fileArray[3];
+        // myUserFileMap = userFileMap;
         myUserFileMap = new HashMap<String, MetaFile>();
-        //System.out.println(fileName);
-        //Main.main(args);
+        // System.out.println(fileName);
+        // Main.main(args);
     }
 
     public void createMeta(String fileName, String assocConcept, String pkg,
             String fileSource, String modKind) {
-        //String fileName, String assocConcept, String pkg, String fileSource, ModuleKind kind
+        // String fileName, String assocConcept, String pkg, String fileSource, ModuleKind kind
         ModuleKind kind = null;
         if (modKind.equals("CONCEPT"))
             kind = ModuleKind.CONCEPT;
@@ -163,15 +171,18 @@ public class ResolveCompiler {
                 listener);
     }
 
-    /*public void wsCompile(String[] args, WebSocketWriter writer){
-            myWsWriter = writer;
-            //myCompileReport.setWsWriter(writer);
-    	Main.runMain(args, myCompileReport, myInputFile, myUserFileMap);
-    }*/
+    /*
+     * public void wsCompile(String[] args, WebSocketWriter writer){ myWsWriter
+     * = writer;
+     * //myCompileReport.setWsWriter(writer); Main.runMain(args,
+     * myCompileReport, myInputFile,
+     * myUserFileMap); }
+     */
 
-    /*public void setFacilityName(String facName){
-    	myReport.setFacilityName(facName);
-    }*/
+    /*
+     * public void setFacilityName(String facName){
+     * myReport.setFacilityName(facName); }
+     */
 
     public CompileReport getReport() {
         return myCompileReport;
@@ -182,20 +193,20 @@ public class ResolveCompiler {
     }
 
     public boolean proved() {
-        //boolean proved = Prover.allProved;
+        // boolean proved = Prover.allProved;
         boolean proved = myCompileReport.proveSuccess();
-        //Prover.allProved = false;
+        // Prover.allProved = false;
         return proved;
     }
 
     public boolean archived() {
-        //CompileReport myReport = CompileReport.getInstance();
+        // CompileReport myReport = CompileReport.getInstance();
         boolean archived = myCompileReport.jarSuccess();
         return archived;
     }
 
     public boolean hasError() {
-        //CompileReport myReport = CompileReport.getInstance();
+        // CompileReport myReport = CompileReport.getInstance();
         boolean error = myCompileReport.hasError();
         return error;
     }

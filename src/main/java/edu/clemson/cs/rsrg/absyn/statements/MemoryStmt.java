@@ -1,7 +1,7 @@
 /*
  * MemoryStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,9 +15,11 @@ package edu.clemson.cs.rsrg.absyn.statements;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the {@code Remember/Forget} statements
- * that the compiler builds from the ANTLR4 AST tree or
- * generated during the VC Generation step.</p>
+ * <p>
+ * This is the class for all the {@code Remember/Forget} statements that the
+ * compiler builds from
+ * the ANTLR4 AST tree or generated during the VC Generation step.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +30,9 @@ public class MemoryStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This defines the different kinds of memory statements.</p>
+     * <p>
+     * This defines the different kinds of memory statements.
+     * </p>
      *
      * @version 2.0
      */
@@ -55,7 +59,11 @@ public class MemoryStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>This indicates if this is a remember or a forget</p> */
+    /**
+     * <p>
+     * This indicates if this is a remember or a forget
+     * </p>
+     */
     private final StatementType myType;
 
     // ===========================================================
@@ -63,11 +71,13 @@ public class MemoryStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a memory statement.</p>
+     * <p>
+     * This constructs a memory statement.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param type This enum indicates whether this is a remember
-     *                  or a forget statement.
+     * @param type This enum indicates whether this is a remember or a forget
+     *        statement.
      */
     public MemoryStmt(Location l, StatementType type) {
         super(l);
@@ -108,7 +118,9 @@ public class MemoryStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the statement type.</p>
+     * <p>
+     * This method returns the statement type.
+     * </p>
      *
      * @return A {@link StatementType} representation object.
      */

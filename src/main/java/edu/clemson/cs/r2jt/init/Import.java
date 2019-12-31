@@ -1,7 +1,7 @@
 /*
  * Import.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,24 +16,32 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.ModuleID;
 
 /**
- * <p>An <code>Import</code> defines a module that needs to be imported because
- * it is referenced from another module that we are trying to compile.</p>
+ * <p>
+ * An <code>Import</code> defines a module that needs to be imported because it
+ * is referenced from
+ * another module that we are trying to compile.
+ * </p>
  * 
- * <p><code>Import</code>s can be <em>related</em> or <em>unrelated</em>.
+ * <p>
+ * <code>Import</code>s can be <em>related</em> or <em>unrelated</em>.
  * <ul>
- * <li>Related imports are imports based on a common concept module with the file
- * we're trying to compile.  For instance, if we include Enhancement.en because
- * the file we're compiling realizes it, this is a related file--they both 
- * center around the same base concept that Enhancement.en enhances.</li>
+ * <li>Related imports are imports based on a common concept module with the
+ * file we're trying to
+ * compile. For instance, if we include Enhancement.en because the file we're
+ * compiling realizes it,
+ * this is a related file--they both center around the same base concept that
+ * Enhancement.en
+ * enhances.</li>
  * <li>Unrelated imports are based on modules that may not derive from the same
- * concept.  These mostly appear in "uses" clauses.</li>
+ * concept. These
+ * mostly appear in "uses" clauses.</li>
  * </ul>
  * </p>
  */
 public class Import {
 
     // ==========================================================
-    // Variables 
+    // Variables
     // ==========================================================
 
     private Location loc;

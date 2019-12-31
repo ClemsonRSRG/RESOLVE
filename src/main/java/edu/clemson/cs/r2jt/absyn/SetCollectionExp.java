@@ -1,7 +1,7 @@
 /*
  * SetCollectionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,13 +22,16 @@ public class SetCollectionExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>The file location.</p>
+     * <p>
+     * The file location.
+     * </p>
      */
     private Location myLocation;
 
     /**
-     * <p>The list of variable expressions
-     * in this set collection.</p>
+     * <p>
+     * The list of variable expressions in this set collection.
+     * </p>
      */
     private List<VarExp> myVars;
 
@@ -54,7 +57,9 @@ public class SetCollectionExp extends Exp {
     // -----------------------------------------------------------
 
     /**
-     * <p>Returns the value of the location variable.</p>
+     * <p>
+     * Returns the value of the location variable.
+     * </p>
      *
      * @return <code>Location</code>
      */
@@ -63,7 +68,9 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Returns the list of the variables.</p>
+     * <p>
+     * Returns the list of the variables.
+     * </p>
      *
      * @return <code>VarExp</code> list.
      */
@@ -76,7 +83,9 @@ public class SetCollectionExp extends Exp {
     // -----------------------------------------------------------
 
     /**
-     * <p>Sets the location variable to the specified value.</p>
+     * <p>
+     * Sets the location variable to the specified value.
+     * </p>
      *
      * @param location New location for this expression.
      */
@@ -85,7 +94,9 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Sets the list of variables to the specified value.</p>
+     * <p>
+     * Sets the list of variables to the specified value.
+     * </p>
      *
      * @param vars New list of variable expressions.
      */
@@ -103,7 +114,9 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Returns a formatted text string of this class.</p>
+     * <p>
+     * Returns a formatted text string of this class.
+     * </p>
      *
      * @param indent Amount of spaces to indent.
      * @param increment Amount of spaces to increment.
@@ -129,16 +142,16 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Returns true if the variable is found in any sub
-     * expression of this one.</p>
+     * <p>
+     * Returns true if the variable is found in any sub expression of this one.
+     * </p>
      *
      * @param varName Name of the variable
-     * @param IsOldExp True/False depending if this is an
-     *                 expression with a "#" symbol in front
-     *                 indicating that it is an old expression.
+     * @param IsOldExp True/False depending if this is an expression with a "#"
+     *        symbol in front
+     *        indicating that it is an old expression.
      *
-     * @return True if it contains this variable,
-     *         false otherwise.
+     * @return True if it contains this variable, false otherwise.
      */
     public boolean containsVar(String varName, boolean IsOldExp) {
         for (VarExp v : myVars) {
@@ -152,7 +165,9 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Creates a deep copy of the set collection.</p>
+     * <p>
+     * Creates a deep copy of the set collection.
+     * </p>
      *
      * @return A copy of the original set collection.
      */
@@ -166,7 +181,9 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Test if two expressions are the same.</p>
+     * <p>
+     * Test if two expressions are the same.
+     * </p>
      *
      * @param exp Expression to check
      *
@@ -194,9 +211,11 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Converts all variable expressions inside
-     * the set collection to expressions and returns them
-     * in a new list.</p>
+     * <p>
+     * Converts all variable expressions inside the set collection to
+     * expressions and returns them in
+     * a new list.
+     * </p>
      *
      * @return List containing all expressions.
      */
@@ -209,8 +228,9 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>This prints the expression to the console
-     * in a human readable format.</p>
+     * <p>
+     * This prints the expression to the console in a human readable format.
+     * </p>
      */
     public void prettyPrint() {
         System.out.print("{ ");
@@ -228,8 +248,9 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Replaces the expression at the indicated
-     * index.</p>
+     * <p>
+     * Replaces the expression at the indicated index.
+     * </p>
      *
      * @param index Position in our list.
      * @param e New expression to be replaced.
@@ -241,7 +262,9 @@ public class SetCollectionExp extends Exp {
     }
 
     /**
-     * <p>Returns a debugging string of this class.</p>
+     * <p>
+     * Returns a debugging string of this class.
+     * </p>
      *
      * @return A string used for debugging purposes
      */

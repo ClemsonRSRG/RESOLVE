@@ -1,7 +1,7 @@
 /*
  * MathSymbolTableBuilder.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -27,15 +27,21 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
- * <p>A <code>MathSymbolTableBuilder</code> is a factory for producing immutable
- * {@link MathSymbolTable MathSymbolTables}. It's behavior directly mirrors
- * <code>MathSymbolTable</code>, so that it can be used as a working symbol
- * table while it is built.</p>
+ * <p>
+ * A <code>MathSymbolTableBuilder</code> is a factory for producing immutable
+ * {@link MathSymbolTable
+ * MathSymbolTables}. It's behavior directly mirrors
+ * <code>MathSymbolTable</code>, so that it can be
+ * used as a working symbol table while it is built.
+ * </p>
  *
- * <p>Once the building process is complete, {@link #seal()} should
- * be called to return a <code>MathSymbolTable</code> that is equivalent to
- * the working symbol table represented by this
- * <code>MathSymbolTableBuilder</code>.</p>
+ * <p>
+ * Once the building process is complete, {@link #seal()} should be called to
+ * return a
+ * <code>MathSymbolTable</code> that is equivalent to the working symbol table
+ * represented by this
+ * <code>MathSymbolTableBuilder</code>.
+ * </p>
  *
  * @version 2.0
  */
@@ -45,25 +51,48 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     // Member Fields
     // ===========================================================
 
-    /** <p>A scope for built-in objects.</p> */
+    /**
+     * <p>
+     * A scope for built-in objects.
+     * </p>
+     */
     private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
 
-    /** <p>A list of current open scopes.</p> */
-    private final Deque<ScopeBuilder> myLexicalScopeStack =
-            new LinkedList<>();
+    /**
+     * <p>
+     * A list of current open scopes.
+     * </p>
+     */
+    private final Deque<ScopeBuilder> myLexicalScopeStack = new LinkedList<>();
 
-    /** <p>A map of non-module scope builders.</p> */
+    /**
+     * <p>
+     * A map of non-module scope builders.
+     * </p>
+     */
     private final Map<ResolveConceptualElement, ScopeBuilder> myScopes =
             new HashMap<>();
 
-    /** <p>A map of module scope builders.</p> */
+    /**
+     * <p>
+     * A map of module scope builders.
+     * </p>
+     */
     private final Map<ModuleIdentifier, ModuleScopeBuilder> myModuleScopes =
             new HashMap<>();
 
-    /** <p>The current module scope.</p> */
+    /**
+     * <p>
+     * The current module scope.
+     * </p>
+     */
     private ModuleScopeBuilder myCurModuleScope = null;
 
-    /** <p>The current type graph.</p> */
+    /**
+     * <p>
+     * The current type graph.
+     * </p>
+     */
     private final TypeGraph myTypeGraph;
 
     // ===========================================================
@@ -71,28 +100,30 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     // ===========================================================
 
     /**
-     * <p>This creates a new, empty <code>MathSymbolTableBuilder</code> with no
-     * open scopes.</p>
+     * <p>
+     * This creates a new, empty <code>MathSymbolTableBuilder</code> with no
+     * open scopes.
+     * </p>
      *
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
+     * @param compileEnvironment The current job's compilation environment that
+     *        stores all necessary
+     *        objects and flags.
      */
     public MathSymbolTableBuilder(CompileEnvironment compileEnvironment) {
         myTypeGraph = new TypeGraph(compileEnvironment);
 
-        //The only things in global scope are built-in things
-        ScopeBuilder globalScope =
-                new ScopeBuilder(this, myTypeGraph, null, DUMMY_RESOLVER,
-                        ModuleIdentifier.GLOBAL);
+        // The only things in global scope are built-in things
+        ScopeBuilder globalScope = new ScopeBuilder(this, myTypeGraph, null,
+                DUMMY_RESOLVER, ModuleIdentifier.GLOBAL);
 
         HardCoded.addBuiltInSymbols(myTypeGraph, globalScope);
 
         myLexicalScopeStack.push(globalScope);
 
-        //Some IDEs (rightly) complain about leaking a "this" pointer inside the
-        //constructor, but we know what we're doing--this is the last thing in
-        //the constructor and thus the object is fully initialized.  The weird
-        //intermediate variable suppresses the warning
+        // Some IDEs (rightly) complain about leaking a "this" pointer inside the
+        // constructor, but we know what we're doing--this is the last thing in
+        // the constructor and thus the object is fully initialized. The weird
+        // intermediate variable suppresses the warning
         MathSymbolTableBuilder thisObject = this;
         HardCoded.addBuiltInRelationships(myTypeGraph, thisObject);
     }
@@ -102,12 +133,16 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     // ===========================================================
 
     /**
-     * <p>Closes the most recently opened, unclosed working scope, including
-     * those opened with {@link #startModuleScope(ModuleDec)}.</p>
+     * <p>
+     * Closes the most recently opened, unclosed working scope, including those
+     * opened with
+     * {@link #startModuleScope(ModuleDec)}.
+     * </p>
      *
-     * @return The new innermost active scope after the former one was closed
-     * by this call. If the scope that was closed was the module scope,
-     * returns <code>null</code>.
+     * @return The new innermost active scope after the former one was closed by
+     *         this call. If the
+     *         scope that was closed was the module scope, returns
+     *         <code>null</code>.
      */
     public final ScopeBuilder endScope() {
         checkScopeOpen();
@@ -127,7 +162,9 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>Returns the most recently opened, unclosed working scope.</p>
+     * <p>
+     * Returns the most recently opened, unclosed working scope.
+     * </p>
      *
      * @return The most recently opened, unclosed working scope.
      *
@@ -139,15 +176,17 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>Returns the {@link ModuleScope} associated with the given
-     * {@link ModuleIdentifier}.</p>
+     * <p>
+     * Returns the {@link ModuleScope} associated with the given
+     * {@link ModuleIdentifier}.
+     * </p>
      *
      * @param module The module identifier.
      *
      * @return The associated module scope.
      *
-     * @throws NoSuchSymbolException If no scope has been opened for
-     * the named module.
+     * @throws NoSuchSymbolException If no scope has been opened for the named
+     *         module.
      */
     @Override
     public final ModuleScope getModuleScope(ModuleIdentifier module)
@@ -160,15 +199,17 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>Returns the {@link Scope} introduced and bounded by the given
-     * defining element.</p>
+     * <p>
+     * Returns the {@link Scope} introduced and bounded by the given defining
+     * element.
+     * </p>
      *
      * @param e defining element.
      *
      * @return The associated scope.
      *
-     * @throws NoSuchScopeException If no scope has been opened for
-     * the given defining element.
+     * @throws NoSuchScopeException If no scope has been opened for the given
+     *         defining element.
      */
     @Override
     public final Scope getScope(ResolveConceptualElement e)
@@ -181,8 +222,10 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>Returns the {@link TypeGraph} that relates the types found in this
-     * <code>MathSymbolTable</code>.</p>
+     * <p>
+     * Returns the {@link TypeGraph} that relates the types found in this
+     * <code>MathSymbolTable</code>.
+     * </p>
      *
      * @return The {@link TypeGraph} object.
      */
@@ -192,14 +235,18 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>Returns an immutable snapshot of the working symbol table represented
-     * by this <code>MathSymbolTableBuilder</code> as a <code>MathSymbolTable</code>.</p>
+     * <p>
+     * Returns an immutable snapshot of the working symbol table represented by
+     * this
+     * <code>MathSymbolTableBuilder</code> as a <code>MathSymbolTable</code>.
+     * </p>
      *
      * @return The snapshot.
      *
      * @throws IllegalStateException If there are any open scopes.
-     * @throws NoSuchModuleException If any module claims to import a module
-     * for which there is no associated scope.
+     * @throws NoSuchModuleException If any module claims to import a module for
+     *         which there is no
+     *         associated scope.
      */
     public final MathSymbolTable seal() throws NoSuchModuleException {
         if (myLexicalScopeStack.size() > 1) {
@@ -210,22 +257,25 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>Opens a new working module scope defined by the given
-     * <code>ModuleDec</code>.</p>
+     * <p>
+     * Opens a new working module scope defined by the given
+     * <code>ModuleDec</code>.
+     * </p>
      *
      * @param definingElement The <code>ModuleDec</code> that defines this
-     *                        scope.
+     *        scope.
      *
      * @return The newly opened {@link ModuleScopeBuilder}.
      *
      * @throws IllegalStateException If a module scope is already open.
      * @throws IllegalArgumentException If <code>definingElement</code> is
-     *             <code>null</code>.
+     *         <code>null</code>.
      */
-    public final ModuleScopeBuilder startModuleScope(ModuleDec definingElement) {
+    public final ModuleScopeBuilder
+            startModuleScope(ModuleDec definingElement) {
         if (definingElement == null) {
-            throw new IllegalArgumentException("definingElement may not be "
-                    + "null.");
+            throw new IllegalArgumentException(
+                    "definingElement may not be " + "null.");
         }
 
         if (myCurModuleScope != null) {
@@ -234,9 +284,8 @@ public class MathSymbolTableBuilder extends ScopeRepository {
 
         ScopeBuilder parent = myLexicalScopeStack.peek();
 
-        ModuleScopeBuilder s =
-                new ModuleScopeBuilder(myTypeGraph, definingElement, parent,
-                        this);
+        ModuleScopeBuilder s = new ModuleScopeBuilder(myTypeGraph,
+                definingElement, parent, this);
 
         myCurModuleScope = s;
 
@@ -247,32 +296,35 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>Starts a new working scope to represent the scope defined by
-     * <code>definingElement</code>.  It's parent will be the last unclosed
-     * working scope (including unclosed working module scopes) and who's
-     * root parent is the currently open working module scope.</p>
+     * <p>
+     * Starts a new working scope to represent the scope defined by
+     * <code>definingElement</code>. It's
+     * parent will be the last unclosed working scope (including unclosed
+     * working module scopes) and
+     * who's root parent is the currently open working module scope.
+     * </p>
      *
      * @param definingElement The AST node that defined this scope.
      *
      * @return The newly opened working scope.
      *
      * @throws IllegalArgumentException If <code>definingElement</code> is
-     * <code>null</code>.
+     *         <code>null</code>.
      * @throws IllegalStateException If no module scope is currently open.
      */
-    public final ScopeBuilder startScope(ResolveConceptualElement definingElement) {
+    public final ScopeBuilder
+            startScope(ResolveConceptualElement definingElement) {
         if (definingElement == null) {
-            throw new IllegalArgumentException("definingElement may not be "
-                    + "null.");
+            throw new IllegalArgumentException(
+                    "definingElement may not be " + "null.");
         }
 
         checkModuleScopeOpen();
 
         ScopeBuilder parent = myLexicalScopeStack.peek();
 
-        ScopeBuilder s =
-                new ScopeBuilder(this, myTypeGraph, definingElement, parent,
-                        myCurModuleScope.getModuleIdentifier());
+        ScopeBuilder s = new ScopeBuilder(this, myTypeGraph, definingElement,
+                parent, myCurModuleScope.getModuleIdentifier());
 
         addScope(s, parent);
 
@@ -280,11 +332,15 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
-     * <p><strong>Note:</strong> The {@code toString} method is intended
-     * for printing debugging messages. Do not use its value to perform
-     * compiler actions.</p>
+     * <p>
+     * <strong>Note:</strong> The {@code toString} method is intended for
+     * printing debugging messages.
+     * Do not use its value to perform compiler actions.
+     * </p>
      *
      * @return Object as a string.
      */
@@ -312,7 +368,9 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     // ===========================================================
 
     /**
-     * <p>This adds a new scope to the parent scope.</p>
+     * <p>
+     * This adds a new scope to the parent scope.
+     * </p>
      *
      * @param s The new scope to be added.
      * @param parent The parent scope.
@@ -324,7 +382,9 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>This checks to see if we have any open module scopes.</p>
+     * <p>
+     * This checks to see if we have any open module scopes.
+     * </p>
      */
     private void checkModuleScopeOpen() {
         if (myCurModuleScope == null) {
@@ -333,7 +393,9 @@ public class MathSymbolTableBuilder extends ScopeRepository {
     }
 
     /**
-     * <p>This checks to see if we have any open scopes.</p>
+     * <p>
+     * This checks to see if we have any open scopes.
+     * </p>
      */
     private void checkScopeOpen() {
         if (myLexicalScopeStack.size() == 1) {

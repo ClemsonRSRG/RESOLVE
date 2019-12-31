@@ -1,7 +1,7 @@
 /*
  * ProgramVariableNameExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming named variable expressions objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the programming named variable expressions objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,7 +34,11 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The variable name</p> */
+    /**
+     * <p>
+     * The variable name
+     * </p>
+     */
     private final PosSymbol myVarName;
 
     // ===========================================================
@@ -39,7 +46,9 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming named variable expression.</p>
+     * <p>
+     * This constructs a programming named variable expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param qual A {@link PosSymbol} representing the expression's qualifier.
@@ -100,18 +109,19 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
             ProgramVariableNameExp eAsProgramVariableNameExp =
                     (ProgramVariableNameExp) e;
 
-            retval =
-                    posSymbolEquivalent(getQualifier(),
-                            eAsProgramVariableNameExp.getQualifier())
-                            && posSymbolEquivalent(myVarName,
-                                    eAsProgramVariableNameExp.myVarName);
+            retval = posSymbolEquivalent(getQualifier(),
+                    eAsProgramVariableNameExp.getQualifier())
+                    && posSymbolEquivalent(myVarName,
+                            eAsProgramVariableNameExp.myVarName);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns the variable name.</p>
+     * <p>
+     * This method returns the variable name.
+     * </p>
      *
      * @return The {@link PosSymbol} representation object.
      */

@@ -1,7 +1,7 @@
 /*
  * NotPSymbolException.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.prover.absyn.expressions.PSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 
 /**
- * <p>A {@code NotPSymbolException} indicates we encountered an expression
- * that isn't of type {@link PSymbol}.</p>
+ * <p>
+ * A {@code NotPSymbolException} indicates we encountered an expression that
+ * isn't of type
+ * {@link PSymbol}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -29,7 +32,11 @@ public class NotPSymbolException extends CompilerException {
     // Member Fields
     // ===========================================================
 
-    /** <p>Serial version for Serializable objects</p> */
+    /**
+     * <p>
+     * Serial version for Serializable objects
+     * </p>
+     */
     private static final long serialVersionUID = -6126191138057900190L;
 
     // ==========================================================
@@ -37,8 +44,11 @@ public class NotPSymbolException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor creates an exception that indicates the
-     * automated prover encountered a non-{@link PSymbol} expression.</p>
+     * <p>
+     * This constructor creates an exception that indicates the automated prover
+     * encountered a
+     * non-{@link PSymbol} expression.
+     * </p>
      */
     public NotPSymbolException(PExp exp) {
         super("unhandled PExp: " + exp.toString(), (Throwable) null);

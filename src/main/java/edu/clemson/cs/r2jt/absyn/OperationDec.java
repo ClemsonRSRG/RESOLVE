@@ -1,7 +1,7 @@
 /*
  * OperationDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -47,7 +47,8 @@ public class OperationDec extends Dec implements ModuleParameter {
     public OperationDec() {};
 
     public OperationDec(PosSymbol name, List<ParameterVarDec> parameters,
-            Ty returnTy, List<AffectsItem> stateVars, Exp requires, Exp ensures) {
+            Ty returnTy, List<AffectsItem> stateVars, Exp requires,
+            Exp ensures) {
         this.name = name;
         this.parameters = parameters;
         this.returnTy = returnTy;
@@ -172,10 +173,13 @@ public class OperationDec extends Dec implements ModuleParameter {
         return sb.toString();
     }
 
-    /** The parameter modes 'alters', 'evaluates', 'replaces', and 'restores'
-        place certain restrictions on what state of each argument may be
-        used in the requires and ensures clauses. If an invalid variable
-        is used there, an error string is returned. **/
+    /**
+     * The parameter modes 'alters', 'evaluates', 'replaces', and 'restores'
+     * place certain
+     * restrictions on what state of each argument may be used in the requires
+     * and ensures clauses. If
+     * an invalid variable is used there, an error string is returned.
+     **/
     public String checkRequiresEnsures() {
         Iterator<ParameterVarDec> i = parameters.iterator();
         final String ALTERS = "alters";
@@ -188,58 +192,57 @@ public class OperationDec extends Dec implements ModuleParameter {
             ParameterVarDec param = i.next();
             String varName = (param.getName()).getName();
             if (ALTERS.equals((param.getMode()).getModeName())) {
-                /* "alters" - The ensures clause cannot contain the changed value
-                              of the variable. */
+                /*
+                 * "alters" - The ensures clause cannot contain the changed
+                 * value of the variable.
+                 */
                 if (ensures.containsVar(varName, false)) {
-                    msg =
-                            "Because of parameter mode 'alters', ensures clause of Operation "
-                                    + name.getName() + " cannot contain "
-                                    + varName;
+                    msg = "Because of parameter mode 'alters', ensures clause of Operation "
+                            + name.getName() + " cannot contain " + varName;
                 }
             }
             else if (EVALUATES.equals((param.getMode()).getModeName())) {
-                /* "evaluates" - The ensures clause cannot contain the initial
-                                 value of the variable. */
+                /*
+                 * "evaluates" - The ensures clause cannot contain the initial
+                 * value of the variable.
+                 */
                 if (ensures != null && ensures.containsVar(varName, true)) {
-                    msg =
-                            "Because of parameter mode 'evaluates', ensures clause of Operation "
-                                    + name.getName() + " cannot contain #"
-                                    + varName;
+                    msg = "Because of parameter mode 'evaluates', ensures clause of Operation "
+                            + name.getName() + " cannot contain #" + varName;
                 }
             }
             else if (REPLACES.equals((param.getMode()).getModeName())) {
-                /* "replaces" - The requires clause cannot contain the variable and
-                                the ensures clause cannot contain the initial value
-                                of the variable. */
+                /*
+                 * "replaces" - The requires clause cannot contain the variable
+                 * and the ensures clause
+                 * cannot contain the initial value of the variable.
+                 */
                 if (requires != null && requires.containsVar(varName, false)) {
-                    msg =
-                            "Because of parameter mode 'replaces', requires clause of Operation "
-                                    + name.getName() + " cannot contain "
-                                    + varName;
+                    msg = "Because of parameter mode 'replaces', requires clause of Operation "
+                            + name.getName() + " cannot contain " + varName;
                 }
                 if (ensures != null && ensures.containsVar(varName, true)) {
-                    msg =
-                            "Because of parameter mode 'replaces', ensures clause of Operation "
-                                    + name.getName() + " cannot contain #"
-                                    + varName;
+                    msg = "Because of parameter mode 'replaces', ensures clause of Operation "
+                            + name.getName() + " cannot contain #" + varName;
                 }
             }
             else if (RESTORES.equals((param.getMode()).getModeName())
                     || PRESERVES.equals((param.getMode()).getModeName())) {
-                /* "restores"/"preserves" - The ensures clause cannot contain the
-                                            initial value of the variable. */
+                /*
+                 * "restores"/"preserves" - The ensures clause cannot contain
+                 * the initial value of the
+                 * variable.
+                 */
                 if (ensures != null && ensures.containsVar(varName, true)) {
                     if (RESTORES.equals((param.getMode()).getModeName())) {
-                        msg =
-                                "Because of parameter mode 'restores', ensures clause of Operation "
-                                        + name.getName() + " cannot contain #"
-                                        + varName;
+                        msg = "Because of parameter mode 'restores', ensures clause of Operation "
+                                + name.getName() + " cannot contain #"
+                                + varName;
                     }
                     else {
-                        msg =
-                                "Because of parameter mode 'preserves', ensures clause of Operation "
-                                        + name.getName() + " cannot contain #"
-                                        + varName;
+                        msg = "Because of parameter mode 'preserves', ensures clause of Operation "
+                                + name.getName() + " cannot contain #"
+                                + varName;
                     }
                 }
             }

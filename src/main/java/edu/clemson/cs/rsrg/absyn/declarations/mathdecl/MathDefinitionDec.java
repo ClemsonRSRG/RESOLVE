@@ -1,7 +1,7 @@
 /*
  * MathDefinitionDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,8 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the mathematical definition declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical definition declarations that the
+ * compiler builds using
+ * the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -35,16 +38,32 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
     // Member Fields
     // ===========================================================
 
-    /** <p>Boolean indicating if this is an implicit definition or not.</p> */
+    /**
+     * <p>
+     * Boolean indicating if this is an implicit definition or not.
+     * </p>
+     */
     private final boolean myIsImplicitFlag;
 
-    /** <p>The list of math parameter variable declarations</p> */
+    /**
+     * <p>
+     * The list of math parameter variable declarations
+     * </p>
+     */
     private final List<MathVarDec> myParameters;
 
-    /** <p>The type model for the return value.</p> */
+    /**
+     * <p>
+     * The type model for the return value.
+     * </p>
+     */
     private final Ty myReturnTy;
 
-    /** <p>The definition body.</p> */
+    /**
+     * <p>
+     * The definition body.
+     * </p>
+     */
     private final DefinitionBodyItem myBodyItem;
 
     // ===========================================================
@@ -52,13 +71,16 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical definition.</p>
+     * <p>
+     * This constructs a mathematical definition.
+     * </p>
      *
      * @param name Name of the definition.
      * @param parameters List of parameters for this definition.
      * @param returnTy The return type for this definition.
      * @param bodyItem The definition body (if any).
-     * @param implicitFlag A boolean indicating if this definition is implicit or not.
+     * @param implicitFlag A boolean indicating if this definition is implicit
+     *        or not.
      */
     public MathDefinitionDec(PosSymbol name, List<MathVarDec> parameters,
             Ty returnTy, DefinitionBodyItem bodyItem, boolean implicitFlag) {
@@ -143,7 +165,9 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the base case of an inductive definition.</p>
+     * <p>
+     * This method returns the base case of an inductive definition.
+     * </p>
      *
      * @return An {@code Exp} representing the base case or {@code null}.
      */
@@ -152,25 +176,33 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the definition expression of a standard definition.</p>
+     * <p>
+     * This method returns the definition expression of a standard definition.
+     * </p>
      *
-     * @return An {@code Exp} representing the definition expression or {@code null}.
+     * @return An {@code Exp} representing the definition expression or
+     *         {@code null}.
      */
     public final Exp getDefinition() {
         return myBodyItem == null ? null : myBodyItem.getDefinition();
     }
 
     /**
-     * <p>This method returns the hypothesis of an inductive definition.</p>
+     * <p>
+     * This method returns the hypothesis of an inductive definition.
+     * </p>
      *
-     * @return An {@code Exp} representing the inductive hypothesis or {@code null}.
+     * @return An {@code Exp} representing the inductive hypothesis or
+     *         {@code null}.
      */
     public final Exp getHypothesis() {
         return myBodyItem == null ? null : myBodyItem.getHypothesis();
     }
 
     /**
-     * <p>This method returns whether or not this is an implicit definition.</p>
+     * <p>
+     * This method returns whether or not this is an implicit definition.
+     * </p>
      *
      * @return {@code true} if it is inductive, {@code false} otherwise.
      */
@@ -179,7 +211,9 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns whether or not this is an inductive definition.</p>
+     * <p>
+     * This method returns whether or not this is an inductive definition.
+     * </p>
      *
      * @return {@code true} if it is inductive, {@code false} otherwise.
      */
@@ -188,8 +222,10 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the math variable declarations
-     * for this definition declaration.</p>
+     * <p>
+     * This method returns the math variable declarations for this definition
+     * declaration.
+     * </p>
      *
      * @return A list of {@link MathVarDec} representation objects.
      */
@@ -198,8 +234,9 @@ public class MathDefinitionDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the raw return type
-     * for this definition declaration.</p>
+     * <p>
+     * This method returns the raw return type for this definition declaration.
+     * </p>
      *
      * @return The {@link Ty} representation object.
      */

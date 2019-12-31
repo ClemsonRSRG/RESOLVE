@@ -1,7 +1,7 @@
 /*
  * MathFunctionNamedQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -46,7 +46,7 @@ public class MathFunctionNamedQuery
             intermediateList = myNameQuery.searchFromContext(source, repo);
         }
         catch (DuplicateSymbolException dse) {
-            //Shouldn't be possible
+            // Shouldn't be possible
             throw new RuntimeException(dse);
         }
 
@@ -56,7 +56,7 @@ public class MathFunctionNamedQuery
                 finalList.add(intermediateEntry.toMathSymbolEntry(null));
             }
             catch (SourceErrorException see) {
-                //This is ok, just don't add it to the final list
+                // This is ok, just don't add it to the final list
             }
         }
 

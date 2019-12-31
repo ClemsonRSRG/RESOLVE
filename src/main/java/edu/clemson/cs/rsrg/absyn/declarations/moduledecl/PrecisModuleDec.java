@@ -1,7 +1,7 @@
 /*
  * PrecisModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the class for the precis module declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for the precis module declarations that the compiler builds
+ * using the ANTLR4
+ * AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,7 +36,9 @@ public class PrecisModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>This constructor creates a "Precis" module representation.</p>
+     * <p>
+     * This constructor creates a "Precis" module representation.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
@@ -41,8 +46,9 @@ public class PrecisModuleDec extends ModuleDec {
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
      * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
-     *                           externally realized flags that indicates
-     *                           all the modules that this module declaration depends on.
+     *        externally realized flags
+     *        that indicates all the modules that this module declaration
+     *        depends on.
      */
     public PrecisModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
@@ -83,15 +89,17 @@ public class PrecisModuleDec extends ModuleDec {
     @Override
     protected final PrecisModuleDec copy() {
         // Copy all the items in the lists
-        List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
+        List<ModuleParameterDec> newParameterDecs =
+                new ArrayList<>(myParameterDecs.size());
         Collections.copy(newParameterDecs, myParameterDecs);
         List<UsesItem> newUsesItems = new ArrayList<>(myUsesItems.size());
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies = copyModuleDependencies();
+        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies =
+                copyModuleDependencies();
 
-        return new PrecisModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
-                newUsesItems, newDecs, newModuleDependencies);
+        return new PrecisModuleDec(cloneLocation(), myName.clone(),
+                newParameterDecs, newUsesItems, newDecs, newModuleDependencies);
     }
 }

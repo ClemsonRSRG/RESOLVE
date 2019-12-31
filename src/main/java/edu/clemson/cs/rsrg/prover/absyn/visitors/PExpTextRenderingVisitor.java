@@ -1,7 +1,7 @@
 /*
  * PExpTextRenderingVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,10 @@ import edu.clemson.cs.rsrg.prover.absyn.expressions.*;
 import java.io.IOException;
 
 /**
- * <p>This class visits a {@link PExp PExp} and its sub-expressions to
- * generate a text representation.</p>
+ * <p>
+ * This class visits a {@link PExp PExp} and its sub-expressions to generate a
+ * text representation.
+ * </p>
  *
  * @author Hampton Smith
  * @author Mike Kabbani
@@ -31,13 +33,25 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>An object used to append the output.</p> */
+    /**
+     * <p>
+     * An object used to append the output.
+     * </p>
+     */
     private final Appendable myOutput;
 
-    /** <p>An alternative sub-expression that we have encountered..</p> */
+    /**
+     * <p>
+     * An alternative sub-expression that we have encountered..
+     * </p>
+     */
     private PAlternatives myEncounteredAlternative;
 
-    /** <p>An sub-expression encountered during out visit.</p> */
+    /**
+     * <p>
+     * An sub-expression encountered during out visit.
+     * </p>
+     */
     private PExp myEncounteredResult;
 
     // ===========================================================
@@ -45,7 +59,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     // ===========================================================
 
     /**
-     * <p>This creates a visitor for rendering a {@link PExp}.</p>
+     * <p>
+     * This creates a visitor for rendering a {@link PExp}.
+     * </p>
      *
      * @param w An appendable object used to store the output string.
      */
@@ -58,7 +74,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     // ===========================================================
 
     /**
-     * <p>This method is called before visiting a {@link PExp}.</p>
+     * <p>
+     * This method is called before visiting a {@link PExp}.
+     * </p>
      *
      * @param p A prover expression.
      */
@@ -81,8 +99,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a prefix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting a prefix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -101,8 +120,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting an infix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting an infix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -117,8 +137,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting an outfix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting an outfix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -133,8 +154,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a postfix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting a postfix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -151,7 +173,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a {@link PAlternatives}.</p>
+     * <p>
+     * This method is called before visiting a {@link PAlternatives}.
+     * </p>
      *
      * @param p A prover alternative expression.
      */
@@ -166,7 +190,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a {@link PLambda}.</p>
+     * <p>
+     * This method is called before visiting a {@link PLambda}.
+     * </p>
      *
      * @param l A prover lambda expression.
      */
@@ -195,8 +221,10 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * a prefix form {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for a prefix form
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -211,8 +239,10 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * an infix form {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for an infix form
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -227,8 +257,10 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * an outfix form {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for an outfix form
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -243,8 +275,10 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * a postfix form {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for a postfix form
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -259,8 +293,10 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * a {@link PAlternatives}.</p>
+     * <p>
+     * This method is called right before we end the visit for a
+     * {@link PAlternatives}.
+     * </p>
      *
      * @param p A prover alternative expression.
      */
@@ -275,8 +311,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a prefix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting a prefix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -293,8 +330,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting an infix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting an infix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -309,8 +347,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting an outfix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting an outfix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -325,8 +364,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a postfix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting a postfix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -344,7 +384,9 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a {@link PAlternatives}.</p>
+     * <p>
+     * This method is called after visiting a {@link PAlternatives}.
+     * </p>
      *
      * @param p A prover alternative expression.
      */

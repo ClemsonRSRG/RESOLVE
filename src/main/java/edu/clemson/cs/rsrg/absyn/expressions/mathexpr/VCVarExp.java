@@ -1,7 +1,7 @@
 /*
  * VCVarExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,9 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class serves as a wrapper for an {@link MathExp}.
- * When the {@link VCGenerator} creates new variable expressions,
- * it wraps the original expression inside this class.</p>
+ * <p>
+ * This is the class serves as a wrapper for an {@link MathExp}. When the
+ * {@link VCGenerator}
+ * creates new variable expressions, it wraps the original expression inside
+ * this class.
+ * </p>
  *
  * @version 2.0
  */
@@ -35,10 +38,18 @@ public class VCVarExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The actual declared mathematical expression represented in the code.</p> */
+    /**
+     * <p>
+     * The actual declared mathematical expression represented in the code.
+     * </p>
+     */
     private final Exp myOrigExp;
 
-    /** <p>The state number associated with this expression.</p> */
+    /**
+     * <p>
+     * The state number associated with this expression.
+     * </p>
+     */
     private final int myStateNum;
 
     // ===========================================================
@@ -46,8 +57,10 @@ public class VCVarExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a wrapper expression for the original
-     * mathematical expression.</p>
+     * <p>
+     * This constructs a wrapper expression for the original mathematical
+     * expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param exp An {@link Exp} that represents the actual expression.
@@ -104,9 +117,8 @@ public class VCVarExp extends MathExp {
             // Special handling for FunctionExp inside a DotExp
             Exp lastSegment = segments.get(segments.size() - 1);
             if (lastSegment instanceof FunctionExp) {
-                sb.append(functionExpWithNameModified(
-                        (FunctionExp) lastSegment, primeString.toString())
-                        .asString(0, innerIndentInc));
+                sb.append(functionExpWithNameModified((FunctionExp) lastSegment,
+                        primeString.toString()).asString(0, innerIndentInc));
             }
             else {
                 sb.append(lastSegment.asString(0, innerIndentInc));
@@ -180,16 +192,17 @@ public class VCVarExp extends MathExp {
         boolean retval = false;
         if (e instanceof VCVarExp) {
             VCVarExp eAsVarExp = (VCVarExp) e;
-            retval =
-                    myOrigExp.equivalent(eAsVarExp.myOrigExp)
-                            && myStateNum == eAsVarExp.myStateNum;
+            retval = myOrigExp.equivalent(eAsVarExp.myOrigExp)
+                    && myStateNum == eAsVarExp.myStateNum;
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns this VC variable expression's actual expression.</p>
+     * <p>
+     * This method returns this VC variable expression's actual expression.
+     * </p>
      *
      * @return The {@link Exp} that we prepended the "?" to.
      */
@@ -198,7 +211,9 @@ public class VCVarExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the number of "?" prepended to the actual expression.</p>
+     * <p>
+     * This method returns the number of "?" prepended to the actual expression.
+     * </p>
      *
      * @return The state number.
      */
@@ -245,30 +260,37 @@ public class VCVarExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        Map<Exp, Exp> modifiedSubstitutions = new LinkedHashMap<>(substitutions.size());
+        Map<Exp, Exp> modifiedSubstitutions =
+                new LinkedHashMap<>(substitutions.size());
         for (Exp keyExp : substitutions.keySet()) {
             // YS: Remove the substitution that directly matches our inner expression.
-            //     We don't want to replace that since it is not a direct match.
+            // We don't want to replace that since it is not a direct match.
             if (!keyExp.equivalent((myOrigExp))) {
                 // YS: Special handling for FunctionExp.
                 if (myOrigExp instanceof FunctionExp) {
-                    FunctionExp myOrigExpAsFunctionExp = (FunctionExp) myOrigExp;
+                    FunctionExp myOrigExpAsFunctionExp =
+                            (FunctionExp) myOrigExp;
 
-                    VarExp functionNameExp = (VarExp) myOrigExpAsFunctionExp.getName().clone();
-                    functionNameExp.setQualifier(myOrigExpAsFunctionExp.getQualifier());
+                    VarExp functionNameExp =
+                            (VarExp) myOrigExpAsFunctionExp.getName().clone();
+                    functionNameExp.setQualifier(
+                            myOrigExpAsFunctionExp.getQualifier());
 
                     // Only add if it doesn't match the function name
                     if (!keyExp.equivalent(functionNameExp)) {
-                        modifiedSubstitutions.put(keyExp.clone(), substitutions.get(keyExp).clone());
+                        modifiedSubstitutions.put(keyExp.clone(),
+                                substitutions.get(keyExp).clone());
                     }
                 }
                 else {
-                    modifiedSubstitutions.put(keyExp.clone(), substitutions.get(keyExp).clone());
+                    modifiedSubstitutions.put(keyExp.clone(),
+                            substitutions.get(keyExp).clone());
                 }
             }
         }
 
-        return new VCVarExp(cloneLocation(), myOrigExp.substitute(modifiedSubstitutions), myStateNum);
+        return new VCVarExp(cloneLocation(),
+                myOrigExp.substitute(modifiedSubstitutions), myStateNum);
     }
 
     // ===========================================================
@@ -276,27 +298,30 @@ public class VCVarExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>An helper function for creating a new {@link FunctionExp} with primes
-     * attached to the function name.</p>
+     * <p>
+     * An helper function for creating a new {@link FunctionExp} with primes
+     * attached to the function
+     * name.
+     * </p>
      *
      * @param exp Original function expression.
      * @param primes A string containing the state number of primes.
      *
      * @return A modified function expression.
      */
-    private FunctionExp functionExpWithNameModified(FunctionExp exp, String primes) {
+    private FunctionExp functionExpWithNameModified(FunctionExp exp,
+            String primes) {
         VarExp functionNameExp = exp.getName();
-        PosSymbol newName =
-                new PosSymbol(functionNameExp.getLocation().clone(),
-                        functionNameExp.getName().getName() + primes);
+        PosSymbol newName = new PosSymbol(functionNameExp.getLocation().clone(),
+                functionNameExp.getName().getName() + primes);
         PosSymbol newQualifier = null;
         if (exp.getQualifier() != null) {
             newQualifier = exp.getQualifier().clone();
         }
 
         VarExp newFunctionNameExp =
-                new VarExp(functionNameExp.getLocation().clone(),
-                        newQualifier, newName, functionNameExp.getQuantification());
+                new VarExp(functionNameExp.getLocation().clone(), newQualifier,
+                        newName, functionNameExp.getQuantification());
         if (functionNameExp.isIsPrecisDefinitionName()) {
             newFunctionNameExp.setIsPrecisDefinitionName();
         }
@@ -311,7 +336,7 @@ public class VCVarExp extends MathExp {
             copyArgs.add(argExp.clone());
         }
 
-        return new FunctionExp(exp.getLocation().clone(),
-                newFunctionNameExp, newFunctionCaratExp, copyArgs);
+        return new FunctionExp(exp.getLocation().clone(), newFunctionNameExp,
+                newFunctionCaratExp, copyArgs);
     }
 }

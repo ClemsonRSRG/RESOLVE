@@ -1,7 +1,7 @@
 /*
  * ResolveFile.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,11 +17,15 @@ import java.util.List;
 import org.antlr.v4.runtime.CharStream;
 
 /**
- * <p>This class is the standard "file" format for the RESOLVE compiler.
- * Since the compiler can be invoked from the web interface, we need to
- * be able to support both "real" and "meta" files. Rather than having
- * two compilation paths that look almost identical, we convert all
- * inputs and create an instance of this class.</p>
+ * <p>
+ * This class is the standard "file" format for the RESOLVE compiler. Since the
+ * compiler can be
+ * invoked from the web interface, we need to be able to support both "real" and
+ * "meta" files.
+ * Rather than having two compilation paths that look almost identical, we
+ * convert all inputs and
+ * create an instance of this class.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -32,22 +36,46 @@ public class ResolveFile {
     // Member Fields
     // ===========================================================
 
-    /** <p>This contains all the basic information about this "file".</p> */
+    /**
+     * <p>
+     * This contains all the basic information about this "file".
+     * </p>
+     */
     private final ResolveFileBasicInfo myFileBasicInfo;
 
-    /** <p>Path where is this file is located in our workspace.</p> */
+    /**
+     * <p>
+     * Path where is this file is located in our workspace.
+     * </p>
+     */
     private final String myFilePath;
 
-    /** <p>Input stream that will contain all the RESOLVE source code.</p> */
+    /**
+     * <p>
+     * Input stream that will contain all the RESOLVE source code.
+     * </p>
+     */
     private final CharStream myInputStream;
 
-    /** <p>File's extension type.</p> */
+    /**
+     * <p>
+     * File's extension type.
+     * </p>
+     */
     private final ModuleType myModuleFileType;
 
-    /** <p>Path of the Parent File. (May be {@code null}).</p> */
+    /**
+     * <p>
+     * Path of the Parent File. (May be {@code null}).
+     * </p>
+     */
     private final Path myParentPath;
 
-    /** <p>RESOLVE's package structure (Translator/Archiver).</p> */
+    /**
+     * <p>
+     * RESOLVE's package structure (Translator/Archiver).
+     * </p>
+     */
     private final List<String> myPkgList;
 
     // ===========================================================
@@ -55,15 +83,17 @@ public class ResolveFile {
     // ===========================================================
 
     /**
-     * <p>This constructor takes all the information relevant
-     * from the original source object and creates a "file" object
-     * that the compiler will operate on.</p>
+     * <p>
+     * This constructor takes all the information relevant from the original
+     * source object and creates
+     * a "file" object that the compiler will operate on.
+     * </p>
      *
      * @param fileBasicInfo Basic information about the file.
      * @param moduleType File extension type.
      * @param input The source code input stream.
-     * @param parentPath The parent path if it is known. Otherwise,
-     *                   this can be {@code null}.
+     * @param parentPath The parent path if it is known. Otherwise, this can be
+     *        {@code null}.
      * @param packageList The package where this source file belong.
      * @param filePath The path where this file was found.
      */
@@ -83,11 +113,14 @@ public class ResolveFile {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default equals method implementation.</p>
+     * <p>
+     * This method overrides the default equals method implementation.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -113,8 +146,10 @@ public class ResolveFile {
     }
 
     /**
-     * <p>This returns a path where this {@link ResolveFile} would
-     * be located in our workspace.</p>
+     * <p>
+     * This returns a path where this {@link ResolveFile} would be located in
+     * our workspace.
+     * </p>
      *
      * @return A path in our current system.
      */
@@ -123,7 +158,9 @@ public class ResolveFile {
     }
 
     /**
-     * <p>Obtains the input stream that contains the source code.</p>
+     * <p>
+     * Obtains the input stream that contains the source code.
+     * </p>
      *
      * @return An input stream for ANTLR4.
      */
@@ -132,7 +169,9 @@ public class ResolveFile {
     }
 
     /**
-     * <p>This is the actual name of the file.</p>
+     * <p>
+     * This is the actual name of the file.
+     * </p>
      *
      * @return Filename
      */
@@ -141,8 +180,9 @@ public class ResolveFile {
     }
 
     /**
-     * <p>This retrieves the internal representation of
-     * the extension.</p>
+     * <p>
+     * This retrieves the internal representation of the extension.
+     * </p>
      *
      * @return File's extension.
      */
@@ -151,7 +191,9 @@ public class ResolveFile {
     }
 
     /**
-     * <p>This name of the parent directory.</p>
+     * <p>
+     * This name of the parent directory.
+     * </p>
      *
      * @return File's parent directory name.
      */
@@ -160,8 +202,9 @@ public class ResolveFile {
     }
 
     /**
-     * <p>This returns the parent path associated with this
-     * {@link ResolveFile}.</p>
+     * <p>
+     * This returns the parent path associated with this {@link ResolveFile}.
+     * </p>
      *
      * @return The parent file's path.
      */
@@ -170,9 +213,11 @@ public class ResolveFile {
     }
 
     /**
-     * <p>If the option to translate to Java or create an executable
-     * jar is given, this is the RESOLVE folder structure for the
-     * given file.</p>
+     * <p>
+     * If the option to translate to Java or create an executable jar is given,
+     * this is the RESOLVE
+     * folder structure for the given file.
+     * </p>
      *
      * @return List of directory names that form the package.
      */
@@ -181,7 +226,9 @@ public class ResolveFile {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -191,15 +238,16 @@ public class ResolveFile {
         result = 31 * result + myFilePath.hashCode();
         result = 31 * result + myInputStream.hashCode();
         result = 31 * result + myModuleFileType.hashCode();
-        result =
-                31 * result
-                        + (myParentPath != null ? myParentPath.hashCode() : 0);
+        result = 31 * result
+                + (myParentPath != null ? myParentPath.hashCode() : 0);
         result = 31 * result + myPkgList.hashCode();
         return result;
     }
 
     /**
-     * <p>Returns the name of the file in string format.</p>
+     * <p>
+     * Returns the name of the file in string format.
+     * </p>
      *
      * @return File as a string.
      */

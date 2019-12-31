@@ -1,7 +1,7 @@
 /*
  * OperationProfileEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
 
 /**
- * <p>This creates a symbol table entry for a performance
- * profile for an operation.</p>
+ * <p>
+ * This creates a symbol table entry for a performance profile for an operation.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,7 +34,11 @@ public class OperationProfileEntry extends SymbolTableEntry {
     // Member Fields
     // ===========================================================
 
-    /** <p>The operation entry associated with this entry.</p> */
+    /**
+     * <p>
+     * The operation entry associated with this entry.
+     * </p>
+     */
     private final OperationEntry myCorrespondingOperation;
 
     // ===========================================================
@@ -41,17 +46,21 @@ public class OperationProfileEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This creates a symbol table entry for a performance profile
-     * for an operation.</p>
+     * <p>
+     * This creates a symbol table entry for a performance profile for an
+     * operation.
+     * </p>
      *
      * @param name Name associated with this entry.
      * @param definingElement The element that created this entry.
      * @param sourceModule The module where this entry was created from.
-     * @param correspondingOperation The operation entry associated with this entry.
+     * @param correspondingOperation The operation entry associated with this
+     *        entry.
      */
     public OperationProfileEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, OperationEntry correspondingOperation) {
+            ModuleIdentifier sourceModule,
+            OperationEntry correspondingOperation) {
         super(name, definingElement, sourceModule);
         myCorrespondingOperation = correspondingOperation;
     }
@@ -61,7 +70,9 @@ public class OperationProfileEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This method returns the operation entry associated with this entry.</p>
+     * <p>
+     * This method returns the operation entry associated with this entry.
+     * </p>
      *
      * @return An {@link OperationEntry} representation object.
      */
@@ -70,7 +81,9 @@ public class OperationProfileEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the duration clause associated with this entry.</p>
+     * <p>
+     * This method returns the duration clause associated with this entry.
+     * </p>
      *
      * @return An {@link AssertionClause} representation object.
      */
@@ -80,7 +93,9 @@ public class OperationProfileEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the ensures clause associated with this entry.</p>
+     * <p>
+     * This method returns the ensures clause associated with this entry.
+     * </p>
      *
      * @return An {@link AssertionClause} representation object.
      */
@@ -90,7 +105,9 @@ public class OperationProfileEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns a description associated with this entry.</p>
+     * <p>
+     * This method returns a description associated with this entry.
+     * </p>
      *
      * @return A string.
      */
@@ -100,7 +117,10 @@ public class OperationProfileEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the manipulation displacement clause associated with this entry.</p>
+     * <p>
+     * This method returns the manipulation displacement clause associated with
+     * this entry.
+     * </p>
      *
      * @return An {@link AssertionClause} representation object.
      */
@@ -110,9 +130,11 @@ public class OperationProfileEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method converts a generic {@link SymbolTableEntry} to an entry
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link SymbolTableEntry} to an entry that
+     * has all the generic
+     * types and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -127,13 +149,16 @@ public class OperationProfileEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link OperationProfileEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link OperationProfileEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link OperationProfileEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link OperationProfileEntry} if possible. Otherwise, it throws
+     *         a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final OperationProfileEntry toOperationProfileEntry(Location l) {

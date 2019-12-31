@@ -1,7 +1,7 @@
 /*
  * IdentifiedNodes.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,36 +22,46 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * <p><code>IdentifiedNodes</code> provides a way of associating data of type
- * <code>T</code> with sub-expressions of a root <code>PExp</code> and providing
- * facilities to search those sub-expressions with associated data via which
- * sub-expressions they contain.</p>
+ * <p>
+ * <code>IdentifiedNodes</code> provides a way of associating data of type
+ * <code>T</code> with
+ * sub-expressions of a root <code>PExp</code> and providing facilities to
+ * search those
+ * sub-expressions with associated data via which sub-expressions they contain.
+ * </p>
  * 
- * @param <T> The type of the associated data. 
+ * @param <T> The type of the associated data.
  */
 public class IdentifiedNodes<T> {
 
     private final PExp myRoot;
 
     /**
-     * <p>The set of all those <code>PExp</code>s with associated data that are 
-     * not contained inside another such <code>PExp</code>.  Note that, since
-     * <code>PExp</code>s nest, the elements in this set are therefore disjoint.
+     * <p>
+     * The set of all those <code>PExp</code>s with associated data that are not
+     * contained inside
+     * another such <code>PExp</code>. Note that, since <code>PExp</code>s nest,
+     * the elements in this
+     * set are therefore disjoint.
      * </p>
      */
     private Set<NodeIdentifier> myTopLevelIdentifiedNodes =
             new HashSet<NodeIdentifier>();
 
     /**
-     * <p>A mapping from <code>PExp</code>s with associated data, to the set of
-     * <code>PExp</code>s with associated data contained inside.</p>
+     * <p>
+     * A mapping from <code>PExp</code>s with associated data, to the set of
+     * <code>PExp</code>s with
+     * associated data contained inside.
+     * </p>
      */
     private Map<NodeIdentifier, Set<NodeIdentifier>> myIdentifiedNodes =
             new HashMap<NodeIdentifier, Set<NodeIdentifier>>();
 
     /**
-     * <p>A map from individual sub-expressions to the data associated with 
-     * them.</p>
+     * <p>
+     * A map from individual sub-expressions to the data associated with them.
+     * </p>
      */
     private Map<NodeIdentifier, T> myDataMap = new HashMap<NodeIdentifier, T>();
 
@@ -71,7 +81,7 @@ public class IdentifiedNodes<T> {
                     result);
         }
         catch (NoSuchElementException e) {
-            //That's ok--if it has no ancestors, return an empty list
+            // That's ok--if it has no ancestors, return an empty list
         }
 
         return result;
@@ -108,9 +118,8 @@ public class IdentifiedNodes<T> {
                     path.add(containedIn);
                 }
 
-                result =
-                        getSmallestIdentifiedAncestorIn(id, myIdentifiedNodes
-                                .get(containedIn), path);
+                result = getSmallestIdentifiedAncestorIn(id,
+                        myIdentifiedNodes.get(containedIn), path);
             }
             catch (NoSuchElementException e) {
                 result = containedIn;
@@ -134,9 +143,8 @@ public class IdentifiedNodes<T> {
             Set<NodeIdentifier> nodeChildren = doTopLevelStuff(id, data);
             Set<NodeIdentifier> layer;
             try {
-                NodeIdentifier container =
-                        getSmallestIdentifiedAncestorIn(id,
-                                myTopLevelIdentifiedNodes, null);
+                NodeIdentifier container = getSmallestIdentifiedAncestorIn(id,
+                        myTopLevelIdentifiedNodes, null);
 
                 layer = myIdentifiedNodes.get(container);
             }

@@ -1,7 +1,7 @@
 /*
  * SwingGui.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -31,8 +31,11 @@ public class SwingGui {
 
     /**
      * 
-     * <p>This method generates the java code for the Java Swing GUI to wrap
-     * the compiler-generated RESOLVE program.</p>
+     * <p>
+     * This method generates the java code for the Java Swing GUI to wrap the
+     * compiler-generated
+     * RESOLVE program.
+     * </p>
      * 
      * @return StringBuffer containing the generated Java code.
      */
@@ -68,23 +71,19 @@ public class SwingGui {
         sb.append("public class " + swingName
                 + " extends JFrame implements ActionListener, KeyListener{"
                 + "\n");
-        sb.append("    private final String title = \"" + gui.getTitle()
-                + "\";" + "\n");
-        sb.append("    private final int width = " + gui.getWidth() + ";"
+        sb.append("    private final String title = \"" + gui.getTitle() + "\";"
                 + "\n");
+        sb.append(
+                "    private final int width = " + gui.getWidth() + ";" + "\n");
         sb.append("    private final int height = " + gui.getHeight() + ";"
                 + "\n");
         sb.append("" + "\n");
-        sb
-                .append("    private final Rectangle facilityLabelRec = new Rectangle("
-                        + (int) gui.getFacilityLabelRec().getX()
-                        + ","
-                        + (int) gui.getFacilityLabelRec().getY()
-                        + ","
-                        + (int) gui.getFacilityLabelRec().getWidth()
-                        + ","
-                        + (int) gui.getFacilityLabelRec().getHeight()
-                        + ");"
+        sb.append(
+                "    private final Rectangle facilityLabelRec = new Rectangle("
+                        + (int) gui.getFacilityLabelRec().getX() + ","
+                        + (int) gui.getFacilityLabelRec().getY() + ","
+                        + (int) gui.getFacilityLabelRec().getWidth() + ","
+                        + (int) gui.getFacilityLabelRec().getHeight() + ");"
                         + "\n");
         sb.append("    private final Rectangle inputLabelRec = new Rectangle("
                 + (int) gui.getInputLabelRec().getX() + ","
@@ -101,27 +100,28 @@ public class SwingGui {
                 + (int) gui.getInputFieldRec().getY() + ","
                 + (int) gui.getInputFieldRec().getWidth() + ","
                 + (int) gui.getInputFieldRec().getHeight() + ");" + "\n");
-        sb
-                .append("    private final Rectangle outputTextAreaRec = new Rectangle("
-                        + (int) gui.getOutputTextAreaRec().getX()
-                        + ","
-                        + (int) gui.getOutputTextAreaRec().getY()
-                        + ","
-                        + (int) gui.getOutputTextAreaRec().getWidth()
-                        + ","
-                        + (int) gui.getOutputTextAreaRec().getHeight()
-                        + ");"
+        sb.append(
+                "    private final Rectangle outputTextAreaRec = new Rectangle("
+                        + (int) gui.getOutputTextAreaRec().getX() + ","
+                        + (int) gui.getOutputTextAreaRec().getY() + ","
+                        + (int) gui.getOutputTextAreaRec().getWidth() + ","
+                        + (int) gui.getOutputTextAreaRec().getHeight() + ");"
                         + "\n");
         sb.append("    private final Rectangle runButtonRec = new Rectangle("
                 + (int) gui.getRunButtonRec().getX() + ","
                 + (int) gui.getRunButtonRec().getY() + ","
                 + (int) gui.getRunButtonRec().getWidth() + ","
                 + (int) gui.getRunButtonRec().getHeight() + ");" + "\n");
-        /*sb.append("    private final Rectangle enterButtonRec = new Rectangle(" +
-        				(int) gui.getEnterButtonRec().getX() + "," +
-        				(int) gui.getEnterButtonRec().getY() + "," +
-        				(int) gui.getEnterButtonRec().getWidth() + "," +
-        				(int) gui.getEnterButtonRec().getHeight() + ");"+"\n");*/
+        /*
+         * sb.
+         * append("    private final Rectangle enterButtonRec = new Rectangle("
+         * + (int)
+         * gui.getEnterButtonRec().getX() + "," + (int)
+         * gui.getEnterButtonRec().getY() + "," + (int)
+         * gui.getEnterButtonRec().getWidth() + "," + (int)
+         * gui.getEnterButtonRec().getHeight() +
+         * ");"+"\n");
+         */
         sb.append("    private final Rectangle genMessageRec = new Rectangle("
                 + (int) gui.getGenMessageRec().getX() + ","
                 + (int) gui.getGenMessageRec().getY() + ","
@@ -143,18 +143,19 @@ public class SwingGui {
                 + gui.getFacilityLabelMsg() + ";" + "\n");
         sb.append("    private final String runButtonMsg = \""
                 + gui.getRunButtonMsg() + "\";" + "\n");
-        //sb.append("    private final String enterButtonMsg = \"" + gui.getEnterButtonMsg() + "\";"+"\n");
-        sb.append("    private final String launchMsg = \""
-                + gui.getLaunchMsg() + ";" + "\n");
+        // sb.append(" private final String enterButtonMsg = \"" + gui.getEnterButtonMsg() +
+        // "\";"+"\n");
+        sb.append("    private final String launchMsg = \"" + gui.getLaunchMsg()
+                + ";" + "\n");
         sb.append("    private final String completeMsg = \""
                 + gui.getCompleteMsg() + ";" + "\n");
         sb.append("    private final String genMsg = \"" + gui.getGenMsg()
                 + "\";" + "\n");
         sb.append("    private final Date date = new Date("
-                + gui.getDate().getYear() + "," + gui.getDate().getMonth()
-                + "," + gui.getDate().getDate() + ","
-                + gui.getDate().getHours() + "," + gui.getDate().getMinutes()
-                + "," + gui.getDate().getSeconds() + ");" + "\n");
+                + gui.getDate().getYear() + "," + gui.getDate().getMonth() + ","
+                + gui.getDate().getDate() + "," + gui.getDate().getHours() + ","
+                + gui.getDate().getMinutes() + "," + gui.getDate().getSeconds()
+                + ");" + "\n");
         sb.append("    private final String dateFormatString = \""
                 + gui.getDateFormatString() + "\";" + "\n");
         sb.append("" + "\n");
@@ -167,7 +168,7 @@ public class SwingGui {
         sb.append("    private JTextField inputField;" + "\n");
         sb.append("    private JScrollPane outputScroll;" + "\n");
         sb.append("    private JButton runButton;" + "\n");
-        //sb.append("    private JButton enterButton;"+"\n");
+        // sb.append(" private JButton enterButton;"+"\n");
         sb.append("" + "\n");
         sb.append("    private Thread programThread;" + "\n");
         sb.append("" + "\n");
@@ -191,7 +192,7 @@ public class SwingGui {
         sb.append("        inputField.addKeyListener(this);" + "\n");
         sb.append("        inputField.setFocusTraversalKeysEnabled(false);"
                 + "\n");
-        //sb.append("        enterButton.addActionListener(this);"+"\n");
+        // sb.append(" enterButton.addActionListener(this);"+"\n");
         sb.append("        runButton.addActionListener(this);" + "\n");
         sb.append("    }" + "\n");
         sb.append("" + "\n");
@@ -203,9 +204,8 @@ public class SwingGui {
         sb.append("" + "\n");
         sb.append("    public void keyPressed(KeyEvent e) {" + "\n");
         sb.append("        if(programRunning){" + "\n");
-        sb
-                .append("            if(e.getKeyCode() == KeyEvent.VK_ENTER){"
-                        + "\n");
+        sb.append(
+                "            if(e.getKeyCode() == KeyEvent.VK_ENTER){" + "\n");
         sb.append("                writeText();" + "\n");
         sb.append("            }" + "\n");
         sb.append("        }" + "\n");
@@ -218,14 +218,14 @@ public class SwingGui {
         sb.append("    }" + "\n");
         sb.append("" + "\n");
         sb.append("    public void actionPerformed(ActionEvent evt){" + "\n");
-        //sb.append("        if(evt.getSource() == enterButton){"+"\n");
-        //sb.append("            writeText();"+"\n");
-        //sb.append("        }"+"\n");
+        // sb.append(" if(evt.getSource() == enterButton){"+"\n");
+        // sb.append(" writeText();"+"\n");
+        // sb.append(" }"+"\n");
         sb.append("        if(evt.getSource() == runButton){" + "\n");
         sb.append("            inputField.setText(\"\");" + "\n");
         sb.append("            programRunning = true;" + "\n");
         sb.append("            runButton.setEnabled(false);" + "\n");
-        //sb.append("            enterButton.setEnabled(true);"+"\n");
+        // sb.append(" enterButton.setEnabled(true);"+"\n");
         sb.append("            startThread();" + "\n");
         sb.append("        }" + "\n");
         sb.append("    }" + "\n");
@@ -262,8 +262,8 @@ public class SwingGui {
         sb.append("    }" + "\n");
         sb.append("" + "\n");
         sb.append("    private void initUIComponents(){" + "\n");
-        sb.append("        facilityLabel = new JLabel(facilityLabelMsg);"
-                + "\n");
+        sb.append(
+                "        facilityLabel = new JLabel(facilityLabelMsg);" + "\n");
         sb.append("        inputLabel = new JLabel(consoleInMsg);" + "\n");
         sb.append("        outputLabel = new JLabel(consoleOutMsg);" + "\n");
         sb.append("        inputField = new JTextField(\"\",100);" + "\n");
@@ -271,19 +271,19 @@ public class SwingGui {
                 + "\n");
         sb.append("        outputScroll = new JScrollPane(outputTextArea);"
                 + "\n");
-        sb
-                .append("        outputScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);"
+        sb.append(
+                "        outputScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);"
                         + "\n");
         sb.append("        runButton = new JButton(runButtonMsg);" + "\n");
-        //sb.append("        enterButton = new JButton(enterButtonMsg);"+"\n");
+        // sb.append(" enterButton = new JButton(enterButtonMsg);"+"\n");
         sb.append("        facilityLabel.setBounds(facilityLabelRec);" + "\n");
         sb.append("        inputLabel.setBounds(inputLabelRec);" + "\n");
         sb.append("        outputLabel.setBounds(outputLabelRec);" + "\n");
         sb.append("        inputField.setBounds(inputFieldRec);" + "\n");
         sb.append("        outputScroll.setBounds(outputTextAreaRec);" + "\n");
         sb.append("        runButton.setBounds(runButtonRec);" + "\n");
-        //sb.append("        enterButton.setBounds(enterButtonRec);"+"\n");
-        //sb.append("        enterButton.setEnabled(false);"+"\n");
+        // sb.append(" enterButton.setBounds(enterButtonRec);"+"\n");
+        // sb.append(" enterButton.setEnabled(false);"+"\n");
         sb.append("    }" + "\n");
         sb.append("" + "\n");
         sb.append("    private void addUIComponents(JPanel panel){" + "\n");
@@ -291,7 +291,7 @@ public class SwingGui {
         sb.append("        panel.add(inputLabel);" + "\n");
         sb.append("        panel.add(outputLabel);" + "\n");
         sb.append("        panel.add(runButton);" + "\n");
-        //sb.append("        panel.add(enterButton);"+"\n");
+        // sb.append(" panel.add(enterButton);"+"\n");
         sb.append("        panel.add(inputField);" + "\n");
         sb.append("        panel.add(outputScroll);" + "\n");
         sb.append("    }" + "\n");
@@ -310,8 +310,8 @@ public class SwingGui {
         sb.append("" + "\n");
         sb.append("    private void initGenMsg(JPanel panel){" + "\n");
         sb.append("        genMsgLabel = new JLabel(genMsg);" + "\n");
-        sb
-                .append("        SimpleDateFormat sdf = new SimpleDateFormat(dateFormatString);"
+        sb.append(
+                "        SimpleDateFormat sdf = new SimpleDateFormat(dateFormatString);"
                         + "\n");
         sb.append("        dateLabel = new JLabel(sdf.format(date));" + "\n");
         sb.append("        genMsgLabel.setBounds(genMessageRec);" + "\n");
@@ -330,8 +330,8 @@ public class SwingGui {
         sb.append("        programThread.start();" + "\n");
         sb.append("    }" + "\n");
         sb.append("" + "\n");
-        sb
-                .append("    private void launchProgram(PipedInputStream ip, PrintStream newOut){"
+        sb.append(
+                "    private void launchProgram(PipedInputStream ip, PrintStream newOut){"
                         + "\n");
         sb.append("        InputStream p = System.in;" + "\n");
         sb.append("        System.setIn(ip);" + "\n");
@@ -343,7 +343,7 @@ public class SwingGui {
         sb.append("        System.setIn(p);" + "\n");
         sb.append("        programRunning = false;" + "\n");
         sb.append("        runButton.setEnabled(true);" + "\n");
-        //sb.append("        enterButton.setEnabled(false);"+"\n");
+        // sb.append(" enterButton.setEnabled(false);"+"\n");
         sb.append("    }" + "\n");
         sb.append("" + "\n");
         sb.append("    private void updateOutputBuffer(final String text) {"
@@ -360,24 +360,22 @@ public class SwingGui {
         sb.append("            @Override" + "\n");
         sb.append("            public void write(int b) throws IOException {"
                 + "\n");
-        sb
-                .append("                updateOutputBuffer(String.valueOf((char) b));"
+        sb.append(
+                "                updateOutputBuffer(String.valueOf((char) b));"
                         + "\n");
         sb.append("            }" + "\n");
         sb.append("" + "\n");
         sb.append("            @Override" + "\n");
-        sb
-                .append("            public void write(byte[] b, int off, int len) throws IOException {"
+        sb.append(
+                "            public void write(byte[] b, int off, int len) throws IOException {"
                         + "\n");
-        sb
-                .append("                updateOutputBuffer(new String(b, off, len));"
-                        + "\n");
+        sb.append("                updateOutputBuffer(new String(b, off, len));"
+                + "\n");
         sb.append("            }" + "\n");
         sb.append("" + "\n");
         sb.append("            @Override" + "\n");
-        sb
-                .append("            public void write(byte[] b) throws IOException {"
-                        + "\n");
+        sb.append("            public void write(byte[] b) throws IOException {"
+                + "\n");
         sb.append("                write(b, 0, b.length);" + "\n");
         sb.append("            }" + "\n");
         sb.append("        };" + "\n");

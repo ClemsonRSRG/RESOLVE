@@ -1,7 +1,7 @@
 /*
  * TypeDefinitionDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the type definition declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the type definition declaration objects that the
+ * compiler builds using
+ * the ANTLR4 AST nodes.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -29,7 +32,11 @@ public class TypeDefinitionDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The type model for the new type definition.</p> */
+    /**
+     * <p>
+     * The type model for the new type definition.
+     * </p>
+     */
     private final Ty myTy;
 
     // ===========================================================
@@ -37,7 +44,9 @@ public class TypeDefinitionDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs a type definition declaration.</p>
+     * <p>
+     * This constructs a type definition declaration.
+     * </p>
      *
      * @param name Name of the new type definition.
      * @param ty Model for the new type definition.
@@ -85,8 +94,9 @@ public class TypeDefinitionDec extends Dec {
     }
 
     /**
-     * <p>Returns the raw type model representation
-     * of this type definition.</p>
+     * <p>
+     * Returns the raw type model representation of this type definition.
+     * </p>
      *
      * @return The raw type in {@link Ty} format.
      */

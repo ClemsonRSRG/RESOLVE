@@ -1,7 +1,7 @@
 /*
  * ProgramIntegerExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -119,8 +119,9 @@ public class ProgramIntegerExp extends ProgramExp {
         return null;
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         return false;
     }

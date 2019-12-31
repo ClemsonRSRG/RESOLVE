@@ -1,7 +1,7 @@
 /*
  * IfStmtRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -37,8 +37,9 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for applying the {@code if-else}
- * rule.</p>
+ * <p>
+ * This class contains the logic for applying the {@code if-else} rule.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -52,30 +53,42 @@ public class IfStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>The module scope for the file we are generating
-     * {@code VCs} for.</p>
+     * <p>
+     * The module scope for the file we are generating {@code VCs} for.
+     * </p>
      */
     private final ModuleScope myCurrentModuleScope;
 
     /**
-     * <p>If we are in a {@code Procedure} and it is an recursive
-     * operation implementation, then this stores the decreasing clause
-     * expression.</p>
+     * <p>
+     * If we are in a {@code Procedure} and it is an recursive operation
+     * implementation, then this
+     * stores the decreasing clause expression.
+     * </p>
      */
     private final Exp myCurrentProcedureDecreasingExp;
 
     /**
-     * <p>The {@link OperationEntry} associated with this {@code If}
-     * statement if we are inside a {@code ProcedureDec}.</p>
+     * <p>
+     * The {@link OperationEntry} associated with this {@code If} statement if
+     * we are inside a
+     * {@code ProcedureDec}.
+     * </p>
      */
     private final OperationEntry myCurrentProcedureOperationEntry;
 
-    /** <p>The {@link IfStmt} we are applying the rule to.</p> */
+    /**
+     * <p>
+     * The {@link IfStmt} we are applying the rule to.
+     * </p>
+     */
     private final IfStmt myIfStmt;
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
@@ -84,17 +97,18 @@ public class IfStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application of the {@code if-else}
-     * rule.</p>
+     * <p>
+     * This creates a new application of the {@code if-else} rule.
+     * </p>
      *
-     * @param ifStmt The {@link IfStmt} we are applying
-     *               the rule to.
+     * @param ifStmt The {@link IfStmt} we are applying the rule to.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
-     * @param context The verification context that contains all
-     *                the information we have collected so far.
+     * @param block The assertive code block that the subclasses are applying
+     *        the rule to.
+     * @param context The verification context that contains all the information
+     *        we have collected so
+     *        far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
@@ -103,9 +117,8 @@ public class IfStmtRule extends AbstractProofRuleApplication
             VerificationContext context, STGroup stGroup, ST blockModel) {
         super(block, context, stGroup, blockModel);
         myCurrentModuleScope = moduleScope;
-        myCurrentProcedureDecreasingExp =
-                myCurrentAssertiveCodeBlock
-                        .getCorrespondingOperationDecreasingExp();
+        myCurrentProcedureDecreasingExp = myCurrentAssertiveCodeBlock
+                .getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry =
                 myCurrentAssertiveCodeBlock.getCorrespondingOperation();
         myIfStmt = ifStmt;
@@ -117,7 +130,9 @@ public class IfStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Proof Rule}.</p>
+     * <p>
+     * This method applies the {@code Proof Rule}.
+     * </p>
      */
     @Override
     public final void applyRule() {
@@ -138,25 +153,22 @@ public class IfStmtRule extends AbstractProofRuleApplication
                     (ProgramFunctionExp) ifCondition;
             ProgramFunctionExpWalker walker;
             if (myCurrentProcedureOperationEntry == null) {
-                walker =
-                        new ProgramFunctionExpWalker(
-                                myCurrentVerificationContext,
-                                myCurrentModuleScope, myTypeGraph);
+                walker = new ProgramFunctionExpWalker(
+                        myCurrentVerificationContext, myCurrentModuleScope,
+                        myTypeGraph);
             }
             else {
-                walker =
-                        new ProgramFunctionExpWalker(
-                                myCurrentProcedureOperationEntry,
-                                myCurrentProcedureDecreasingExp,
-                                myCurrentVerificationContext,
-                                myCurrentModuleScope, myTypeGraph);
+                walker = new ProgramFunctionExpWalker(
+                        myCurrentProcedureOperationEntry,
+                        myCurrentProcedureDecreasingExp,
+                        myCurrentVerificationContext, myCurrentModuleScope,
+                        myTypeGraph);
             }
             TreeWalker.visit(walker, ifConditionAsProgramFunctionExp);
 
             // Retrieve the various pieces of information from the walker
-            Exp generatedRequires =
-                    walker.getRequiresClause(ifConditionItem.getTest()
-                            .getLocation());
+            Exp generatedRequires = walker
+                    .getRequiresClause(ifConditionItem.getTest().getLocation());
             Exp generatedEnsures =
                     walker.getEnsuresClause(ifConditionAsProgramFunctionExp);
             List<ConfirmStmt> terminationConfirms =
@@ -164,15 +176,15 @@ public class IfStmtRule extends AbstractProofRuleApplication
 
             // If part of the rule
             // 1) If the testing condition contains recursive calls,
-            //    we need to add all the termination confirm statements
-            //    to the if assertive code block.
+            // we need to add all the termination confirm statements
+            // to the if assertive code block.
             for (ConfirmStmt confirmStmt : terminationConfirms) {
                 myCurrentAssertiveCodeBlock.addStatement(confirmStmt);
             }
 
             // 2) If the testing condition has any requires clauses,
-            //    we need to add it as a new confirm statement.
-            //    ( Confirm Invk_Cond(BE) )
+            // we need to add it as a new confirm statement.
+            // ( Confirm Invk_Cond(BE) )
             if (!VarExp.isLiteralTrue(generatedRequires)) {
                 myCurrentAssertiveCodeBlock.addStatement(new ConfirmStmt(
                         ifConditionItem.getTest().getLocation().clone(),
@@ -180,57 +192,58 @@ public class IfStmtRule extends AbstractProofRuleApplication
             }
 
             // 3) Add the testing condition as a new stipulate assume statement.
-            //    ( Stipulate Math(BE) )
+            // ( Stipulate Math(BE) )
             Exp ifConditionBEExp = generatedEnsures.clone();
             ifConditionBEExp.setLocationDetailModel(new LocationDetailModel(
-                    generatedEnsures.getLocation(), ifConditionBEExp
-                            .getLocation(), "If Statement Condition"));
-            myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(ifCondition
-                    .getLocation().clone(), ifConditionBEExp, true));
+                    generatedEnsures.getLocation(),
+                    ifConditionBEExp.getLocation(), "If Statement Condition"));
+            myCurrentAssertiveCodeBlock.addStatement(new AssumeStmt(
+                    ifCondition.getLocation().clone(), ifConditionBEExp, true));
 
             // 5) Add all the statements inside the if-part to the
-            //    if-assertive code block.
-            myCurrentAssertiveCodeBlock.addStatements(ifConditionItem
-                    .getStatements());
+            // if-assertive code block.
+            myCurrentAssertiveCodeBlock
+                    .addStatements(ifConditionItem.getStatements());
 
             // NY YS
             // TODO: Duration for If Part
 
             // 6) Add a branching condition for this block
-            myCurrentAssertiveCodeBlock.addBranchingCondition(ifCondition
-                    .getLocation().clone(), ifConditionBEExp.toString(), true);
+            myCurrentAssertiveCodeBlock.addBranchingCondition(
+                    ifCondition.getLocation().clone(),
+                    ifConditionBEExp.toString(), true);
 
             // 7) Add the different details to the various different output models
             ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-            stepModel.add("proofRuleName", "If-Part Rule").add(
-                    "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+            stepModel.add("proofRuleName", "If-Part Rule")
+                    .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
             myBlockModel.add("vcGenSteps", stepModel.render());
 
             // Else part of the rule
             // 1) Add the testing condition as a new stipulate assume statement.
-            //    ( Stipulate not(Math(BE)) )
+            // ( Stipulate not(Math(BE)) )
             Exp elseConditionBEExp = generatedEnsures.clone();
-            elseConditionBEExp =
-                    Utilities
-                            .negateExp(elseConditionBEExp, myTypeGraph.BOOLEAN);
-            elseConditionBEExp.setLocationDetailModel(new LocationDetailModel(
-                    generatedEnsures.getLocation(), elseConditionBEExp
-                            .getLocation(),
-                    "Negation of If Statement Condition"));
-            negIfAssertiveCodeBlock.addStatement(new AssumeStmt(ifCondition
-                    .getLocation().clone(), elseConditionBEExp, true));
+            elseConditionBEExp = Utilities.negateExp(elseConditionBEExp,
+                    myTypeGraph.BOOLEAN);
+            elseConditionBEExp.setLocationDetailModel(
+                    new LocationDetailModel(generatedEnsures.getLocation(),
+                            elseConditionBEExp.getLocation(),
+                            "Negation of If Statement Condition"));
+            negIfAssertiveCodeBlock.addStatement(
+                    new AssumeStmt(ifCondition.getLocation().clone(),
+                            elseConditionBEExp, true));
 
             // 2) Add all the statements inside the else-part to the
-            //    else-assertive code block.
+            // else-assertive code block.
             negIfAssertiveCodeBlock.addStatements(myIfStmt.getElseclause());
 
             // NY YS
             // TODO: Duration for Else Part
 
             // 3) Add a branching condition for this block
-            negIfAssertiveCodeBlock.addBranchingCondition(ifCondition
-                    .getLocation().clone(), elseConditionBEExp.toString(),
-                    false);
+            negIfAssertiveCodeBlock.addBranchingCondition(
+                    ifCondition.getLocation().clone(),
+                    elseConditionBEExp.toString(), false);
 
             // 4) Store the new block and add a new block model that goes with it.
             myResultingAssertiveCodeBlocks.add(negIfAssertiveCodeBlock);
@@ -239,8 +252,8 @@ public class IfStmtRule extends AbstractProofRuleApplication
                     mySTGroup.getInstanceOf("outputAssertiveCodeBlock");
             negIfBlockModel.add("blockName", negIfAssertiveCodeBlock.getName());
             ST negIfStepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-            negIfStepModel.add("proofRuleName", "Else-Part Rule").add(
-                    "currentStateOfBlock", negIfAssertiveCodeBlock);
+            negIfStepModel.add("proofRuleName", "Else-Part Rule")
+                    .add("currentStateOfBlock", negIfAssertiveCodeBlock);
             negIfBlockModel.add("vcGenSteps", negIfStepModel.render());
             myNewAssertiveCodeBlockModels.put(negIfAssertiveCodeBlock,
                     negIfBlockModel);
@@ -251,8 +264,9 @@ public class IfStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Proof Rule}.</p>
+     * <p>
+     * This method returns a description associated with the {@code Proof Rule}.
+     * </p>
      *
      * @return A string.
      */

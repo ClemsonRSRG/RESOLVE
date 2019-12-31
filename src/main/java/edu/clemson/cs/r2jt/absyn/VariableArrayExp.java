@@ -1,7 +1,7 @@
 /*
  * VariableArrayExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -139,8 +139,8 @@ public class VariableArrayExp extends VariableExp {
 
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
-        //Environment   env	= Environment.getInstance();
-        //if(env.isabelle()){return toIsabelleString(indent);};
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
 
         StringBuffer sb = new StringBuffer();
 
@@ -182,8 +182,9 @@ public class VariableArrayExp extends VariableExp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         if (argument != null) {
             return argument.containsVar(varName, IsOldExp);

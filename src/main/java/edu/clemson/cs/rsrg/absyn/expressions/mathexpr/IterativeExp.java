@@ -1,7 +1,7 @@
 /*
  * IterativeExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical iterative expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical iterative expression objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,11 +36,14 @@ public class IterativeExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This defines the various iterable operators.</p>
+     * <p>
+     * This defines the various iterable operators.
+     * </p>
      *
      * @version 2.0
      */
     public enum Operator {
+
         SUM {
 
             @Override
@@ -80,7 +86,9 @@ public class IterativeExp extends MathExp {
         };
 
         /**
-         * <p>This method returns a deep copy of the operator name.</p>
+         * <p>
+         * This method returns a deep copy of the operator name.
+         * </p>
          *
          * @param l A {@link Location} representation object.
          *
@@ -95,16 +103,32 @@ public class IterativeExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's operation.</p> */
+    /**
+     * <p>
+     * The expression's operation.
+     * </p>
+     */
     private final Operator myOperator;
 
-    /** <p>The mathematical variable in this iterative expression.</p> */
+    /**
+     * <p>
+     * The mathematical variable in this iterative expression.
+     * </p>
+     */
     private final MathVarDec myVar;
 
-    /** <p>The iterative expression's where part.</p> */
+    /**
+     * <p>
+     * The iterative expression's where part.
+     * </p>
+     */
     private final Exp myWhereExp;
 
-    /** <p>The iterative expression's body.</p> */
+    /**
+     * <p>
+     * The iterative expression's body.
+     * </p>
+     */
     private final Exp myBodyExp;
 
     // ===========================================================
@@ -112,7 +136,9 @@ public class IterativeExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a iterative expression.</p>
+     * <p>
+     * This constructs a iterative expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param operator A {@link Operator} representing the operator.
@@ -218,14 +244,10 @@ public class IterativeExp extends MathExp {
         boolean retval = e instanceof IterativeExp;
         if (retval) {
             IterativeExp eAsIterativeExp = (IterativeExp) e;
-            retval =
-                    myOperator.getOperatorAsPosSymbol(myLoc).equals(
-                            eAsIterativeExp.myOperator
-                                    .getOperatorAsPosSymbol(myLoc));
-            retval &=
-                    myVar.getName().equals(eAsIterativeExp.myVar.getName())
-                            && myVar.getTy().equals(
-                                    eAsIterativeExp.myVar.getTy());
+            retval = myOperator.getOperatorAsPosSymbol(myLoc).equals(
+                    eAsIterativeExp.myOperator.getOperatorAsPosSymbol(myLoc));
+            retval &= myVar.getName().equals(eAsIterativeExp.myVar.getName())
+                    && myVar.getTy().equals(eAsIterativeExp.myVar.getTy());
             retval &= equivalent(myWhereExp, eAsIterativeExp.myWhereExp);
             retval &= equivalent(myBodyExp, eAsIterativeExp.myBodyExp);
         }
@@ -234,7 +256,9 @@ public class IterativeExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the body expression.</p>
+     * <p>
+     * This method returns the body expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -243,7 +267,9 @@ public class IterativeExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the operator.</p>
+     * <p>
+     * This method returns the operator.
+     * </p>
      *
      * @return A {@link Operator} object containing the operator.
      */
@@ -264,7 +290,9 @@ public class IterativeExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the variable.</p>
+     * <p>
+     * This method returns the variable.
+     * </p>
      *
      * @return The {@link MathVarDec} representation object.
      */
@@ -273,7 +301,9 @@ public class IterativeExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the where expression.</p>
+     * <p>
+     * This method returns the where expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -308,8 +338,8 @@ public class IterativeExp extends MathExp {
             newWhere = myWhereExp.clone();
         }
 
-        return new IterativeExp(cloneLocation(), myOperator, (MathVarDec) myVar
-                .clone(), newWhere, myBodyExp.clone());
+        return new IterativeExp(cloneLocation(), myOperator,
+                (MathVarDec) myVar.clone(), newWhere, myBodyExp.clone());
     }
 
     /**
@@ -322,8 +352,9 @@ public class IterativeExp extends MathExp {
             newWhere = substitute(myWhereExp, substitutions);
         }
 
-        return new IterativeExp(cloneLocation(), myOperator, (MathVarDec) myVar
-                .clone(), newWhere, substitute(myBodyExp, substitutions));
+        return new IterativeExp(cloneLocation(), myOperator,
+                (MathVarDec) myVar.clone(), newWhere,
+                substitute(myBodyExp, substitutions));
     }
 
 }

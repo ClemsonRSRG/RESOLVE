@@ -1,7 +1,7 @@
 /*
  * FacilityInitFinalItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.List;
 
 /**
- * <p>This is the class for all the facility type initialization/finalization block
- * objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the facility type initialization/finalization block
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 1.0
  */
@@ -32,10 +35,18 @@ public class FacilityInitFinalItem extends AbstractInitFinalItem {
     // Member Fields
     // ===========================================================
 
-    /** <p>The requires expression</p> */
+    /**
+     * <p>
+     * The requires expression
+     * </p>
+     */
     private final AssertionClause myRequires;
 
-    /** <p>The ensures expression</p> */
+    /**
+     * <p>
+     * The ensures expression
+     * </p>
+     */
     private final AssertionClause myEnsures;
 
     // ===========================================================
@@ -43,17 +54,21 @@ public class FacilityInitFinalItem extends AbstractInitFinalItem {
     // ===========================================================
 
     /**
-     * <p>This constructs a facility type initialization/finalization block
-     * that happens when a variable of this type is initialized/finalized.</p>
+     * <p>
+     * This constructs a facility type initialization/finalization block that
+     * happens when a variable
+     * of this type is initialized/finalized.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates if it is an initialization or finalization block.
-     * @param affects A {@link AffectsClause} representing the initialization's/finalization's
-     *                affects clause.
+     * @param affects A {@link AffectsClause} representing the
+     *        initialization's/finalization's affects
+     *        clause.
      * @param requires A {@link AssertionClause} representing the operation's
-     *                 requires clause.
+     *        requires clause.
      * @param ensures A {@link AssertionClause} representing the operation's
-     *                ensures clause.
+     *        ensures clause.
      * @param facilities List of facility declarations in this block.
      * @param variables List of variables in this block.
      * @param statements List of statements in this block.
@@ -153,8 +168,9 @@ public class FacilityInitFinalItem extends AbstractInitFinalItem {
     }
 
     /**
-     * <p>This method returns the ensures clause
-     * for this item.</p>
+     * <p>
+     * This method returns the ensures clause for this item.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -163,8 +179,9 @@ public class FacilityInitFinalItem extends AbstractInitFinalItem {
     }
 
     /**
-     * <p>This method returns the requires clause
-     * for this item.</p>
+     * <p>
+     * This method returns the requires clause for this item.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */

@@ -1,7 +1,7 @@
 /*
  * CompilerException.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,9 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>The abstract parent class for all runtime exceptions the compiler.</p>
+ * <p>
+ * The abstract parent class for all runtime exceptions the compiler.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 2.0
@@ -27,7 +29,11 @@ public abstract class CompilerException extends RuntimeException {
     // Member Fields
     // ===========================================================
 
-    /** <p>Location that caused the exception to be thrown</p> */
+    /**
+     * <p>
+     * Location that caused the exception to be thrown
+     * </p>
+     */
     private final Location myErrorLocation;
 
     // ==========================================================
@@ -35,8 +41,11 @@ public abstract class CompilerException extends RuntimeException {
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a throwable cause and a message
-     * that caused the exception to be thrown.</p>
+     * <p>
+     * This constructor takes in a throwable cause and a message that caused the
+     * exception to be
+     * thrown.
+     * </p>
      *
      * @param message Message to be displayed when the exception is thrown.
      * @param location Location where the exception originated from.
@@ -46,8 +55,10 @@ public abstract class CompilerException extends RuntimeException {
     }
 
     /**
-     * <p>This constructor takes in a message for the
-     * symbol that caused the exception to be thrown.</p>
+     * <p>
+     * This constructor takes in a message for the symbol that caused the
+     * exception to be thrown.
+     * </p>
      *
      * @param message Message to be displayed when the exception is thrown.
      * @param symbol Offending symbol
@@ -57,8 +68,11 @@ public abstract class CompilerException extends RuntimeException {
     }
 
     /**
-     * <p>This constructor takes in a throwable cause and a message
-     * that caused the exception to be thrown.</p>
+     * <p>
+     * This constructor takes in a throwable cause and a message that caused the
+     * exception to be
+     * thrown.
+     * </p>
      *
      * @param message Message to be displayed when the exception is thrown.
      * @param cause Cause of the exception.
@@ -68,8 +82,11 @@ public abstract class CompilerException extends RuntimeException {
     }
 
     /**
-     * <p>This constructor takes in a throwable cause and a message for the
-     * symbol that caused the exception to be thrown.</p>
+     * <p>
+     * This constructor takes in a throwable cause and a message for the symbol
+     * that caused the
+     * exception to be thrown.
+     * </p>
      *
      * @param message Message to be displayed when the exception is thrown.
      * @param symbol Offending symbol
@@ -81,8 +98,11 @@ public abstract class CompilerException extends RuntimeException {
     }
 
     /**
-     * <p>This constructor takes in a throwable cause, a message and a location
-     * that caused the exception to be thrown.</p>
+     * <p>
+     * This constructor takes in a throwable cause, a message and a location
+     * that caused the exception
+     * to be thrown.
+     * </p>
      *
      * @param message Message to be displayed when the exception is thrown.
      * @param location Location where the exception originated from.
@@ -99,7 +119,9 @@ public abstract class CompilerException extends RuntimeException {
     // ===========================================================
 
     /**
-     * <p>Return the location that caused this exception to be thrown.</p>
+     * <p>
+     * Return the location that caused this exception to be thrown.
+     * </p>
      *
      * @return A {@link Location} object.
      */
@@ -108,8 +130,10 @@ public abstract class CompilerException extends RuntimeException {
     }
 
     /**
-     * <p>Appending the error location to the end of the message if
-     * we have a {@link Location} object.</p>
+     * <p>
+     * Appending the error location to the end of the message if we have a
+     * {@link Location} object.
+     * </p>
      *
      * @return A {@link String} object.
      */

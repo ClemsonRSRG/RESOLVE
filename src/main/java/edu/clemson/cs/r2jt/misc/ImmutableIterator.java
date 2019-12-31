@@ -1,7 +1,7 @@
 /*
  * ImmutableIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,10 +15,13 @@ package edu.clemson.cs.r2jt.misc;
 import java.util.Iterator;
 
 /**
- * <p>Wraps an existing <code>Iterator</code> and disables its 
- * <code>remove()</code> method, ensuring that clients cannot change the
- * contents of encapsulated lists.  Note that if the iterator returns mutable
- * objects, the contained objects themselves could still be changed.</p>
+ * <p>
+ * Wraps an existing <code>Iterator</code> and disables its
+ * <code>remove()</code> method, ensuring
+ * that clients cannot change the contents of encapsulated lists. Note that if
+ * the iterator returns
+ * mutable objects, the contained objects themselves could still be changed.
+ * </p>
  */
 public class ImmutableIterator<T> implements Iterator<T> {
 

@@ -1,7 +1,7 @@
 /*
  * ResultProcessingSearcher.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -35,7 +35,8 @@ public class ResultProcessingSearcher<T extends SymbolTableEntry, R extends Symb
 
     @Override
     public boolean addMatches(SymbolTable entries, List<R> matches,
-            SearchContext l) throws DuplicateSymbolException {
+            SearchContext l)
+            throws DuplicateSymbolException {
 
         boolean result;
 

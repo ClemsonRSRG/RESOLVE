@@ -1,7 +1,7 @@
 /*
  * AbstractBlockDeclRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -40,36 +40,49 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This is the abstract base class for all the {@code declaration}'s
- * that contains a block of inner {@code declarations} and/or
- * {@code statements}.</p>
+ * <p>
+ * This is the abstract base class for all the {@code declaration}'s that
+ * contains a block of inner
+ * {@code declarations} and/or {@code statements}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public abstract class AbstractBlockDeclRule
-        extends
-            AbstractProofRuleApplication implements ProofRuleApplication {
+public abstract class AbstractBlockDeclRule extends AbstractProofRuleApplication
+        implements
+            ProofRuleApplication {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>All the shared variables affected by the current {@code block}.</p> */
+    /**
+     * <p>
+     * All the shared variables affected by the current {@code block}.
+     * </p>
+     */
     protected final Set<Exp> myAffectedExps;
 
     /**
-     * <p>The module scope for the file we are generating
-     * {@code VCs} for.</p>
+     * <p>
+     * The module scope for the file we are generating {@code VCs} for.
+     * </p>
      */
     protected final ModuleScope myCurrentModuleScope;
 
-    /** <p>This is the name for the current block we are applying the rule to.</p> */
+    /**
+     * <p>
+     * This is the name for the current block we are applying the rule to.
+     * </p>
+     */
     private final String myDeclName;
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     protected final TypeGraph myTypeGraph;
 
@@ -78,16 +91,20 @@ public abstract class AbstractBlockDeclRule
     // ===========================================================
 
     /**
-     * <p>An helper constructor stores all declaration related items for
-     * a class that inherits from {@code AbstractBlockDeclRule}.</p>
+     * <p>
+     * An helper constructor stores all declaration related items for a class
+     * that inherits from
+     * {@code AbstractBlockDeclRule}.
+     * </p>
      *
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
+     * @param block The assertive code block that the subclasses are applying
+     *        the rule to.
      * @param declName Name associated with the declaration.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
-     * @param context The verification context that contains all
-     *                the information we have collected so far.
+     * @param context The verification context that contains all the information
+     *        we have collected so
+     *        far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
@@ -106,39 +123,47 @@ public abstract class AbstractBlockDeclRule
     // ===========================================================
 
     /**
-     * <p>This method adds appropriate substitutions for affected {@code Shared Variables}.</p>
+     * <p>
+     * This method adds appropriate substitutions for affected
+     * {@code Shared Variables}.
+     * </p>
      *
      * @param affectsClause The affects clause we are processing.
-     * @param substitutionMap The substitution map where these expressions
-     *                        are needed.
+     * @param substitutionMap The substitution map where these expressions are
+     *        needed.
      * @param booleanType Mathematical boolean type.
      *
      * @return An updated map.
      */
-    protected final Map<Exp, Exp> addAffectedConceptualSharedVars(AffectsClause affectsClause,
-            Map<Exp, Exp> substitutionMap, MTType booleanType) {
+    protected final Map<Exp, Exp> addAffectedConceptualSharedVars(
+            AffectsClause affectsClause, Map<Exp, Exp> substitutionMap,
+            MTType booleanType) {
         if (affectsClause != null) {
             for (Exp exp : affectsClause.getAffectedExps()) {
                 VarExp sharedVarExp = (VarExp) exp;
                 OldExp odlSharedVarExp =
-                        new OldExp(sharedVarExp.getLocation().clone(), sharedVarExp.clone());
+                        new OldExp(sharedVarExp.getLocation().clone(),
+                                sharedVarExp.clone());
                 odlSharedVarExp.setMathType(sharedVarExp.getMathType());
 
                 // Create Conc.<sharedVarExp>
                 VarExp concVarExp =
                         Utilities.createVarExp(sharedVarExp.getLocation(), null,
-                                new PosSymbol(sharedVarExp.getLocation().clone(), "Conc"),
+                                new PosSymbol(
+                                        sharedVarExp.getLocation().clone(),
+                                        "Conc"),
                                 booleanType, null);
                 List<Exp> segments = new ArrayList<>();
                 segments.add(concVarExp);
                 segments.add(sharedVarExp.clone());
 
-                DotExp concSharedVarExp = new DotExp(sharedVarExp.getLocation().clone(), segments);
+                DotExp concSharedVarExp = new DotExp(
+                        sharedVarExp.getLocation().clone(), segments);
                 concSharedVarExp.setMathType(sharedVarExp.getMathType());
 
                 // Add this as a substitution
-                substitutionMap = addConceptualVariables(sharedVarExp, odlSharedVarExp,
-                        concSharedVarExp, substitutionMap);
+                substitutionMap = addConceptualVariables(sharedVarExp,
+                        odlSharedVarExp, concSharedVarExp, substitutionMap);
             }
         }
 
@@ -146,22 +171,25 @@ public abstract class AbstractBlockDeclRule
     }
 
     /**
-     * <p>This method adds the appropriate substitutions
-     * for the different versions of {@code varExp}.</p>
+     * <p>
+     * This method adds the appropriate substitutions for the different versions
+     * of {@code varExp}.
+     * </p>
      *
      * @param varExp A variable expression.
      * @param oldVarExp The incoming version of {@code varExp}.
      * @param concVarExp The conceptual version of {@code varExp}.
-     * @param substitutionMap The substitution map where these expressions
-     *                        are needed.
+     * @param substitutionMap The substitution map where these expressions are
+     *        needed.
      *
      * @return An updated map.
      */
     protected final Map<Exp, Exp> addConceptualVariables(VarExp varExp,
-            OldExp oldVarExp, DotExp concVarExp, Map<Exp, Exp> substitutionMap) {
+            OldExp oldVarExp, DotExp concVarExp,
+            Map<Exp, Exp> substitutionMap) {
         // Create an incoming version of the conceptual variable
-        OldExp oldConcVarExp =
-                new OldExp(concVarExp.getLocation().clone(), concVarExp.clone());
+        OldExp oldConcVarExp = new OldExp(concVarExp.getLocation().clone(),
+                concVarExp.clone());
         oldConcVarExp.setMathType(concVarExp.getMathType());
 
         // Add these to our substitution map
@@ -172,15 +200,18 @@ public abstract class AbstractBlockDeclRule
     }
 
     /**
-     * <p>This method creates a {@code restores ensures} clause for any {@code shared variables}
-     * not being affected by the current declaration.</p>
+     * <p>
+     * This method creates a {@code restores ensures} clause for any
+     * {@code shared variables} not
+     * being affected by the current declaration.
+     * </p>
      *
      * @param declLoc The current declaration's location.
      * @param exp The expression where we are going add the new {@code ensures}
-     *            expressions to.
+     *        expressions to.
      *
-     * @return A modified {@code ensures} clause with the new
-     * {@code restores} expression.
+     * @return A modified {@code ensures} clause with the new {@code restores}
+     *         expression.
      */
     protected final Exp createFacilitySharedVarRestoresEnsuresExp(
             Location declLoc, Exp exp) {
@@ -193,11 +224,10 @@ public abstract class AbstractBlockDeclRule
                     .getConceptSharedStates()) {
                 for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
                     // Convert the math variables to variable expressions
-                    VarExp stateVarExp =
-                            Utilities.createVarExp(declLoc.clone(),
-                                    facilityDecl.getInstantiatedFacilityName(),
-                                    mathVarDec.getName(), mathVarDec
-                                            .getMathType(), null);
+                    VarExp stateVarExp = Utilities.createVarExp(declLoc.clone(),
+                            facilityDecl.getInstantiatedFacilityName(),
+                            mathVarDec.getName(), mathVarDec.getMathType(),
+                            null);
                     OldExp oldStateVarExp =
                             new OldExp(declLoc.clone(), stateVarExp);
                     oldStateVarExp.setMathType(stateVarExp.getMathType());
@@ -205,9 +235,8 @@ public abstract class AbstractBlockDeclRule
                     // Add a "restores" mode to any shared variables not being affected
                     if (!Utilities.containsEquivalentExp(myAffectedExps,
                             stateVarExp)) {
-                        retExp =
-                                createRestoresExpForSharedVars(declLoc,
-                                        stateVarExp, oldStateVarExp, retExp);
+                        retExp = createRestoresExpForSharedVars(declLoc,
+                                stateVarExp, oldStateVarExp, retExp);
                     }
                 }
             }
@@ -218,11 +247,10 @@ public abstract class AbstractBlockDeclRule
                         .getDefinitionVarList()) {
                     // Convert the math definition variables to variable expressions
                     MathVarDec mathVarDec = mathDefVariableDec.getVariable();
-                    VarExp defVarExp =
-                            Utilities.createVarExp(declLoc.clone(),
-                                    facilityDecl.getInstantiatedFacilityName(),
-                                    mathVarDec.getName(), mathVarDec
-                                            .getMathType(), null);
+                    VarExp defVarExp = Utilities.createVarExp(declLoc.clone(),
+                            facilityDecl.getInstantiatedFacilityName(),
+                            mathVarDec.getName(), mathVarDec.getMathType(),
+                            null);
                     OldExp oldDefVarExp =
                             new OldExp(declLoc.clone(), defVarExp);
                     oldDefVarExp.setMathType(defVarExp.getMathType());
@@ -230,9 +258,8 @@ public abstract class AbstractBlockDeclRule
                     // Add a "restores" mode to any definition variables not being affected
                     if (!Utilities.containsEquivalentExp(myAffectedExps,
                             defVarExp)) {
-                        retExp =
-                                createRestoresExpForDefVars(declLoc, defVarExp,
-                                        oldDefVarExp, retExp);
+                        retExp = createRestoresExpForDefVars(declLoc, defVarExp,
+                                oldDefVarExp, retExp);
                     }
                 }
             }
@@ -242,17 +269,19 @@ public abstract class AbstractBlockDeclRule
     }
 
     /**
-     * <p>This method creates a new {@code ensures} expression
-     * that includes a {@code restores} mode clause for the given
-     * math definition variable.</p>
+     * <p>
+     * This method creates a new {@code ensures} expression that includes a
+     * {@code restores} mode
+     * clause for the given math definition variable.
+     * </p>
      *
      * @param declLoc The current declaration's location.
      * @param defVarExp A math definition variable as a {@link VarExp}.
      * @param oldDefVarExp The incoming value of {@code defVarExp}.
      * @param ensuresExp The current ensures clause we are building.
      *
-     * @return A modified {@code ensures} clause with the new
-     * {@code restores} expression.
+     * @return A modified {@code ensures} clause with the new {@code restores}
+     *         expression.
      */
     protected final Exp createRestoresExpForDefVars(Location declLoc,
             VarExp defVarExp, OldExp oldDefVarExp, Exp ensuresExp) {
@@ -262,13 +291,10 @@ public abstract class AbstractBlockDeclRule
                 new EqualsExp(declLoc.clone(), defVarExp.clone(), null,
                         EqualsExp.Operator.EQUAL, oldDefVarExp.clone());
         restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
-        restoresConditionExp
-                .setLocationDetailModel(new LocationDetailModel(
-                        declLoc.clone(),
-                        declLoc.clone(),
-                        "Ensures Clause of "
-                                + myDeclName
-                                + " (Condition from Non-Affected Definition Variable)"));
+        restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
+                declLoc.clone(), declLoc.clone(),
+                "Ensures Clause of " + myDeclName
+                        + " (Condition from Non-Affected Definition Variable)"));
 
         // Form a conjunct if needed.
         Exp retExp;
@@ -276,26 +302,27 @@ public abstract class AbstractBlockDeclRule
             retExp = restoresConditionExp;
         }
         else {
-            retExp =
-                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
-                            restoresConditionExp);
+            retExp = InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
+                    restoresConditionExp);
         }
 
         return retExp;
     }
 
     /**
-     * <p>This method creates a new {@code ensures} expression
-     * that includes a {@code restores} mode clause for the given
-     * global state variable.</p>
+     * <p>
+     * This method creates a new {@code ensures} expression that includes a
+     * {@code restores} mode
+     * clause for the given global state variable.
+     * </p>
      *
      * @param declLoc The current declaration's location.
      * @param stateVarExp A global state variable as a {@link VarExp}.
      * @param oldStateVarExp The incoming value of {@code stateVarExp}.
      * @param ensuresExp The current ensures clause we are building.
      *
-     * @return A modified {@code ensures} clause with the new
-     * {@code restores} expression.
+     * @return A modified {@code ensures} clause with the new {@code restores}
+     *         expression.
      */
     protected final Exp createRestoresExpForSharedVars(Location declLoc,
             VarExp stateVarExp, OldExp oldStateVarExp, Exp ensuresExp) {
@@ -306,8 +333,8 @@ public abstract class AbstractBlockDeclRule
                         EqualsExp.Operator.EQUAL, oldStateVarExp.clone());
         restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
         restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
-                declLoc.clone(), declLoc.clone(), "Ensures Clause of "
-                        + myDeclName
+                declLoc.clone(), declLoc.clone(),
+                "Ensures Clause of " + myDeclName
                         + " (Condition from Non-Affected Shared Variable)"));
 
         // Form a conjunct if needed.
@@ -316,28 +343,38 @@ public abstract class AbstractBlockDeclRule
             retExp = restoresConditionExp;
         }
         else {
-            retExp =
-                    InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
-                            restoresConditionExp);
+            retExp = InfixExp.formConjunct(ensuresExp.getLocation(), ensuresExp,
+                    restoresConditionExp);
         }
 
         return retExp;
     }
 
     /**
-     * <p>This method processes all non-affected {@code Shared Variables} and/or
-     * {@code Def Vars} and generate the proper {@code ensures} clause.</p>
+     * <p>
+     * This method processes all non-affected {@code Shared Variables} and/or
+     * {@code Def Vars} and
+     * generate the proper {@code ensures} clause.
+     * </p>
      *
-     * <p>Note that this method should only be called by {@link TypeRepresentationInitRule}
-     * and {@link TypeRepresentationFinalRule} due to the fact that it does substitutions
-     * for conceptual variables.</p>
+     * <p>
+     * Note that this method should only be called by
+     * {@link TypeRepresentationInitRule} and
+     * {@link TypeRepresentationFinalRule} due to the fact that it does
+     * substitutions for conceptual
+     * variables.
+     * </p>
      *
-     * @param ensuresLoc Location to be used for the new {@code ensures} clauses.
+     * @param ensuresLoc Location to be used for the new {@code ensures}
+     *        clauses.
      * @param ensuresExp The current ensures clause we are building.
-     * @param typeFamilyDec The current type family declaration we are processing.
+     * @param typeFamilyDec The current type family declaration we are
+     *        processing.
      *
-     * @return A modified {@code ensures} clause with {@code restores} mode {@code ensures}
-     * clause for each non-affected {@code Shared Variable} and/or {@code Def Vars}.
+     * @return A modified {@code ensures} clause with {@code restores} mode
+     *         {@code ensures} clause for
+     *         each non-affected {@code Shared Variable} and/or
+     *         {@code Def Vars}.
      */
     protected final Exp processNonAffectedVarsEnsures(Location ensuresLoc,
             Exp ensuresExp, TypeFamilyDec typeFamilyDec) {
@@ -354,23 +391,25 @@ public abstract class AbstractBlockDeclRule
         for (SharedStateDec stateDec : sharedStateDecs) {
             for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
                 // Convert the math variables to variable expressions
-                VarExp stateVarExp =
-                        Utilities.createVarExp(ensuresLoc.clone(), null,
-                                mathVarDec.getName(), mathVarDec.getMathType(), null);
-                OldExp oldStateVarExp = new OldExp(ensuresLoc.clone(), stateVarExp);
+                VarExp stateVarExp = Utilities.createVarExp(ensuresLoc.clone(),
+                        null, mathVarDec.getName(), mathVarDec.getMathType(),
+                        null);
+                OldExp oldStateVarExp =
+                        new OldExp(ensuresLoc.clone(), stateVarExp);
                 oldStateVarExp.setMathType(stateVarExp.getMathType());
 
                 // Add a "restores" mode to any shared variables not being affected
-                if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps,
+                        stateVarExp)) {
                     retExp = createRestoresExpForSharedVars(ensuresLoc.clone(),
                             stateVarExp, oldStateVarExp, retExp);
                     // Our ensures clause should say something about the conceptual
                     // shared variables so we create the appropriate conceptual versions
                     // of the shared variables and add them to our substitution maps.
-                    DotExp concVarExp =
-                            Utilities.createConcVarExp(
-                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    DotExp concVarExp = Utilities.createConcVarExp(
+                            new VarDec(mathVarDec.getName(),
+                                    mathVarDec.getTy()),
+                            mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
                     substitutionParamToConc =
                             addConceptualVariables(stateVarExp, oldStateVarExp,
                                     concVarExp, substitutionParamToConc);
@@ -379,12 +418,12 @@ public abstract class AbstractBlockDeclRule
         }
 
         // Generate a "restores" ensures clause for non-affected definition variables in our type family
-        for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+        for (MathDefVariableDec mathDefVariableDec : typeFamilyDec
+                .getDefinitionVarList()) {
             // Convert the math definition variables to variable expressions
             MathVarDec mathVarDec = mathDefVariableDec.getVariable();
-            VarExp defVarExp =
-                    Utilities.createVarExp(ensuresLoc.clone(), null,
-                            mathVarDec.getName(), mathVarDec.getMathType(), null);
+            VarExp defVarExp = Utilities.createVarExp(ensuresLoc.clone(), null,
+                    mathVarDec.getName(), mathVarDec.getMathType(), null);
             OldExp oldDefVarExp = new OldExp(ensuresLoc.clone(), defVarExp);
             oldDefVarExp.setMathType(defVarExp.getMathType());
 
@@ -396,19 +435,18 @@ public abstract class AbstractBlockDeclRule
                 // Our ensures clause should say something about the conceptual
                 // shared variables so we create the appropriate conceptual versions
                 // of the shared variables and add them to our substitution maps.
-                DotExp concVarExp =
-                        Utilities.createConcVarExp(
-                                new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                substitutionParamToConc =
-                        addConceptualVariables(defVarExp, oldDefVarExp,
-                                concVarExp, substitutionParamToConc);
+                DotExp concVarExp = Utilities.createConcVarExp(
+                        new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
+                        mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                substitutionParamToConc = addConceptualVariables(defVarExp,
+                        oldDefVarExp, concVarExp, substitutionParamToConc);
             }
         }
 
         // Loop through all instantiated facility's and generate a "restores" ensures clause
         // for non-affected shared variables/math definition variables.
-        retExp = createFacilitySharedVarRestoresEnsuresExp(ensuresLoc.clone(), retExp);
+        retExp = createFacilitySharedVarRestoresEnsuresExp(ensuresLoc.clone(),
+                retExp);
 
         // Apply any substitution and return the modified expression
         return retExp.substitute(substitutionParamToConc);

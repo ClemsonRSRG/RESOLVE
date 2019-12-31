@@ -1,7 +1,7 @@
 /*
  * TypeReceptaclesExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,12 +19,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class represents a programming type {@code Receptacles}
- * as an expression that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class represents a programming type {@code Receptacles} as an
+ * expression that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
- * <p>As an example a programming type: {@code Stack}'s {@code Receptacles}
- * ({@code Stack.Receptacles} indicate the named and unnamed {@code Stack}s
- * declared in the current execution context.</p>
+ * <p>
+ * As an example a programming type: {@code Stack}'s {@code Receptacles}
+ * ({@code Stack.Receptacles}
+ * indicate the named and unnamed {@code Stack}s declared in the current
+ * execution context.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -35,7 +41,11 @@ public class TypeReceptaclesExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's type represented as an {@link VarExp}.</p> */
+    /**
+     * <p>
+     * The expression's type represented as an {@link VarExp}.
+     * </p>
+     */
     private final VarExp myTypeAsVarExp;
 
     // ===========================================================
@@ -115,9 +125,8 @@ public class TypeReceptaclesExp extends MathExp {
         boolean retval = false;
         if (e instanceof TypeReceptaclesExp) {
             TypeReceptaclesExp eAsTypeReceptaclesExp = (TypeReceptaclesExp) e;
-            retval =
-                    (myTypeAsVarExp
-                            .equivalent(eAsTypeReceptaclesExp.myTypeAsVarExp));
+            retval = (myTypeAsVarExp
+                    .equivalent(eAsTypeReceptaclesExp.myTypeAsVarExp));
         }
 
         return retval;
@@ -132,7 +141,9 @@ public class TypeReceptaclesExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the type name with any qualifiers.</p>
+     * <p>
+     * This method returns the type name with any qualifiers.
+     * </p>
      *
      * @return The {@link VarExp} representation object.
      */
@@ -159,8 +170,8 @@ public class TypeReceptaclesExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        return new TypeReceptaclesExp(cloneLocation(), (VarExp) myTypeAsVarExp
-                .clone());
+        return new TypeReceptaclesExp(cloneLocation(),
+                (VarExp) myTypeAsVarExp.clone());
     }
 
     /**
@@ -168,8 +179,8 @@ public class TypeReceptaclesExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new TypeReceptaclesExp(cloneLocation(), (VarExp) substitute(
-                myTypeAsVarExp, substitutions));
+        return new TypeReceptaclesExp(cloneLocation(),
+                (VarExp) substitute(myTypeAsVarExp, substitutions));
     }
 
 }

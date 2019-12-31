@@ -1,7 +1,7 @@
 /*
  * ModuleArgumentItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,17 +24,24 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>If this argument names a program type, this will be set by the 
-     * populator to point to the correct type.</p>
+     * <p>
+     * If this argument names a program type, this will be set by the populator
+     * to point to the
+     * correct type.
+     * </p>
      */
     private PTType myTypeValue;
 
     /**
-     * <p>So if the expression to be passed happens to just be a name, rather
-     * than setting evalExp with a normal VarExp so that all the usual 
-     * mechanisms can be used, we just set the name parameter.  I have no words
-     * for how angry that makes me, but I have no time to fix it.  This field
-     * will hold the type of the "expression" represented by </p>
+     * <p>
+     * So if the expression to be passed happens to just be a name, rather than
+     * setting evalExp with a
+     * normal VarExp so that all the usual mechanisms can be used, we just set
+     * the name parameter. I
+     * have no words for how angry that makes me, but I have no time to fix it.
+     * This field will hold
+     * the type of the "expression" represented by
+     * </p>
      */
     private MTType myMathType;
 

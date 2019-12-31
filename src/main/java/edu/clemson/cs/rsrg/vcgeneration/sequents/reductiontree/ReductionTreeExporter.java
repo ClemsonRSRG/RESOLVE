@@ -1,7 +1,7 @@
 /*
  * ReductionTreeExporter.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,9 +17,11 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
- * <p>A common interface that allows the {@code Sequent Reduction Tree}
- * to be exported as a {@link String}. The format of the output is
- * implementation dependent.</p>
+ * <p>
+ * A common interface that allows the {@code Sequent Reduction Tree} to be
+ * exported as a
+ * {@link String}. The format of the output is implementation dependent.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -27,11 +29,11 @@ import org.jgrapht.graph.DefaultEdge;
 public interface ReductionTreeExporter {
 
     /**
-     * <p>This method returns the {@code reductionTree}
-     * as a string.</p>
+     * <p>
+     * This method returns the {@code reductionTree} as a string.
+     * </p>
      *
-     * @param reductionTree A {@link Graph} representing
-     *                      a reduction tree.
+     * @param reductionTree A {@link Graph} representing a reduction tree.
      *
      * @return A string.
      */

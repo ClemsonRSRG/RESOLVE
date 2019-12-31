@@ -1,7 +1,7 @@
 /*
  * CanonicalizingVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -66,8 +66,8 @@ public class CanonicalizingVisitor extends MutatingVisitor {
     @Override
     public void mutateBeginMTType(MTType t) {
         if (mySpentFlag) {
-            throw new IllegalStateException("Cannot reuse a " + this.getClass()
-                    + ".  Make a new one.");
+            throw new IllegalStateException(
+                    "Cannot reuse a " + this.getClass() + ".  Make a new one.");
         }
 
         if (myRoot == null) {
@@ -78,8 +78,8 @@ public class CanonicalizingVisitor extends MutatingVisitor {
     @Override
     public void mutateEndMTType(MTType t) {
         if (atRoot()) {
-            //Note at this point that myFinalExpression has no big unions and 
-            //unique quantified variable names
+            // Note at this point that myFinalExpression has no big unions and
+            // unique quantified variable names
 
             Map<String, MTType> quantifiedVariables =
                     new HashMap<String, MTType>();
@@ -92,9 +92,8 @@ public class CanonicalizingVisitor extends MutatingVisitor {
                 quantifiedVariables.put("", myTypeGraph.CLS);
             }
 
-            myFinalExpression =
-                    new MTBigUnion(myTypeGraph, quantifiedVariables,
-                            myFinalExpression);
+            myFinalExpression = new MTBigUnion(myTypeGraph, quantifiedVariables,
+                    myFinalExpression);
 
             myRoot = null;
 
@@ -111,52 +110,51 @@ public class CanonicalizingVisitor extends MutatingVisitor {
             originalBinding = getInnermostBinding(t.name);
         }
         catch (NoSuchElementException e) {
-            //The variable is unbound.  Must be in the environment
+            // The variable is unbound. Must be in the environment
             try {
-                //We cast rather than call toMathSymbolEntry() because this 
-                //would represent an error in the compiler code rather than the
-                //RESOLVE source: you shouldn't be able to canonicalize anything
-                //containing non-math-symbol pieces
-                MathSymbolEntry entry =
-                        (MathSymbolEntry) myEnvironment
-                                .queryForOne(new UnqualifiedNameQuery(t.name));
+                // We cast rather than call toMathSymbolEntry() because this
+                // would represent an error in the compiler code rather than the
+                // RESOLVE source: you shouldn't be able to canonicalize anything
+                // containing non-math-symbol pieces
+                MathSymbolEntry entry = (MathSymbolEntry) myEnvironment
+                        .queryForOne(new UnqualifiedNameQuery(t.name));
 
-                if (entry.getQuantification().equals(
-                        SymbolTableEntry.Quantification.UNIVERSAL)) {
+                if (entry.getQuantification()
+                        .equals(SymbolTableEntry.Quantification.UNIVERSAL)) {
                     originalBinding = entry.getType();
-                    myCanonicalToEnvironmentOriginal.put(canonicalName
-                            + myPredicateSuffix, t.name);
+                    myCanonicalToEnvironmentOriginal
+                            .put(canonicalName + myPredicateSuffix, t.name);
                 }
             }
             catch (NoSuchSymbolException nsse) {
-                //Shouldn't be possible--we'd've noticed it before now
+                // Shouldn't be possible--we'd've noticed it before now
                 throw new RuntimeException(nsse);
             }
             catch (DuplicateSymbolException dse) {
-                //Shouldn't be possible--we're in the context of a math 
-                //expression
+                // Shouldn't be possible--we're in the context of a math
+                // expression
                 throw new RuntimeException(dse);
             }
         }
 
-        //if originalBinding is null, then we name some 
-        //non-universally-quantified thing, so we do nothing
+        // if originalBinding is null, then we name some
+        // non-universally-quantified thing, so we do nothing
         if (originalBinding != null) {
-            //Construct a canonical variable to represent this thing we've just
-            //encountered
+            // Construct a canonical variable to represent this thing we've just
+            // encountered
             MTNamed canonicalType = new MTNamed(myTypeGraph, canonicalName);
             MTNamed canonicalTypeWithSuffix =
                     new MTNamed(myTypeGraph, canonicalName + myPredicateSuffix);
             myQuantifiedVariableCount++;
 
-            //We're going to weaken it's declared type all the way to MType, so
-            //make a note of its original declared type
+            // We're going to weaken it's declared type all the way to MType, so
+            // make a note of its original declared type
             myPredicates.add(new IsInPredicate(myTypeGraph,
                     canonicalTypeWithSuffix, originalBinding));
 
-            //If we've already encountered this particular variable, we're going
-            //to remove that information as we canonicalize, so we make a note
-            //that this new canonical variable should equal the last one
+            // If we've already encountered this particular variable, we're going
+            // to remove that information as we canonicalize, so we make a note
+            // that this new canonical variable should equal the last one
             MTNamed lastReplace =
                     (MTNamed) getInnermostBindingAnnotation(t.name,
                             "LastReplace");
@@ -168,22 +166,22 @@ public class CanonicalizingVisitor extends MutatingVisitor {
             annotateInnermostBinding(t.name, "LastReplace",
                     canonicalTypeWithSuffix);
 
-            //Replace "t" with "canonical" in the final expression
+            // Replace "t" with "canonical" in the final expression
             replaceWith(canonicalType);
         }
     }
 
     @Override
-    public void annotateInnermostBinding(String name, Object key, Object value) {
+    public void annotateInnermostBinding(String name, Object key,
+            Object value) {
 
         try {
             super.annotateInnermostBinding(name, key, value);
         }
         catch (NoSuchElementException e) {
             try {
-                SymbolTableEntry entry =
-                        myEnvironment
-                                .queryForOne(new UnqualifiedNameQuery(name));
+                SymbolTableEntry entry = myEnvironment
+                        .queryForOne(new UnqualifiedNameQuery(name));
 
                 Map<Object, Object> annotations =
                         myEnvironmentAnnotations.get(entry);
@@ -197,7 +195,7 @@ public class CanonicalizingVisitor extends MutatingVisitor {
                 throw new NoSuchElementException(name);
             }
             catch (DuplicateSymbolException dse) {
-                //Shouldn't be possible--the query returns exactly one match
+                // Shouldn't be possible--the query returns exactly one match
                 throw new RuntimeException(dse);
             }
         }
@@ -212,9 +210,8 @@ public class CanonicalizingVisitor extends MutatingVisitor {
         }
         catch (NoSuchElementException e) {
             try {
-                SymbolTableEntry entry =
-                        myEnvironment
-                                .queryForOne(new UnqualifiedNameQuery(name));
+                SymbolTableEntry entry = myEnvironment
+                        .queryForOne(new UnqualifiedNameQuery(name));
 
                 Map<Object, Object> annotations =
                         myEnvironmentAnnotations.get(entry);
@@ -229,7 +226,7 @@ public class CanonicalizingVisitor extends MutatingVisitor {
                 throw new NoSuchElementException(name);
             }
             catch (DuplicateSymbolException dse) {
-                //Shouldn't be possible--the query returns exactly one match
+                // Shouldn't be possible--the query returns exactly one match
                 throw new RuntimeException(dse);
             }
         }
@@ -244,22 +241,22 @@ public class CanonicalizingVisitor extends MutatingVisitor {
 
     @Override
     public void boundEndMTBigUnion(MTBigUnion t) {
-        //We better have encountered each quantified type explicitly
+        // We better have encountered each quantified type explicitly
         for (String var : t.getQuantifiedVariables().keySet()) {
             Object lastReplace =
                     getInnermostBindingAnnotation(var, "LastReplace");
 
             if (lastReplace == null) {
-                //TODO : Ideally this exception would be semantically connected
-                //       to the location in the RESOLVE source code that caused 
-                //       the error so we could give nice error output
+                // TODO : Ideally this exception would be semantically connected
+                // to the location in the RESOLVE source code that caused
+                // the error so we could give nice error output
                 throw new IllegalArgumentException("Universal type variable "
                         + "\"" + var + "\" is not concretely bound.");
             }
         }
 
-        //We're gonna get rid of all intermediate big unions and just have one
-        //big one at the top
+        // We're gonna get rid of all intermediate big unions and just have one
+        // big one at the top
         replaceWith(((MTBigUnion) getTransformedVersion()).getExpression());
     }
 }

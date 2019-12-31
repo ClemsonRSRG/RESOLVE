@@ -1,7 +1,7 @@
 /*
  * StrengthenConsequentStep.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -45,8 +45,8 @@ public class StrengthenConsequentStep extends AbstractProofStep {
         Iterator<Integer> indexIter = eliminatedConjunctsIndecis.iterator();
         int index = 0;
         while (conjunctIter.hasNext()) {
-            myEliminatedConjuncts[index] =
-                    new ConjunctWithIndex(conjunctIter.next(), indexIter.next());
+            myEliminatedConjuncts[index] = new ConjunctWithIndex(
+                    conjunctIter.next(), indexIter.next());
             index++;
         }
         Arrays.sort(myEliminatedConjuncts);

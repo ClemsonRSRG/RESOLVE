@@ -1,7 +1,7 @@
 /*
  * TreeWalker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,9 +22,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>The {@code TreeWalker} is used to apply the visitor pattern to the
- * RESOLVE abstract syntax tree. The visitor logic is implemented as a
- * {@link TreeWalkerVisitor} or as a {@link TreeWalkerStackVisitor}.</p>
+ * <p>
+ * The {@code TreeWalker} is used to apply the visitor pattern to the RESOLVE
+ * abstract syntax tree.
+ * The visitor logic is implemented as a {@link TreeWalkerVisitor} or as a
+ * {@link TreeWalkerStackVisitor}.
+ * </p>
  *
  * @author Blair Durkee
  * @author Yu-Shan Sun
@@ -38,17 +41,22 @@ public class TreeWalker {
     // ===========================================================
 
     /**
-     * <p>Visits the node {@code e} by calling pre visitor methods,
-     * recursively visiting child nodes, and calling appropriate
-     * post methods.</p>
+     * <p>
+     * Visits the node {@code e} by calling pre visitor methods, recursively
+     * visiting child nodes, and
+     * calling appropriate post methods.
+     * </p>
      *
-     * <p>If the {@link TreeWalkerVisitor} happens to encounter a method
-     * named {@code walk[className]}, that returns true, the children are
-     * skipped.</p>
+     * <p>
+     * If the {@link TreeWalkerVisitor} happens to encounter a method named
+     * {@code walk[className]},
+     * that returns true, the children are skipped.
+     * </p>
      *
      * @param visitor An instance of {@link TreeWalkerVisitor} which implements
-     *                visit methods to be applied to nodes of the RESOLVE AST.
-     * @param e	The RESOLVE ast node to walk
+     *        visit methods to be
+     *        applied to nodes of the RESOLVE AST.
+     * @param e The RESOLVE ast node to walk
      */
     public static void visit(TreeWalkerVisitor visitor,
             ResolveConceptualElement e) {
@@ -84,18 +92,22 @@ public class TreeWalker {
     // ===========================================================
 
     /**
-     * <p>Invokes each of the visitor methods on the various different
-     * {@link ResolveConceptualElement}s.</p>
+     * <p>
+     * Invokes each of the visitor methods on the various different
+     * {@link ResolveConceptualElement}s.
+     * </p>
      *
      * @param visitor An instance of {@link TreeWalkerVisitor} which implements
-     *                visit methods to be applied to nodes of the RESOLVE AST.
+     *        visit methods to be
+     *        applied to nodes of the RESOLVE AST.
      * @param prefix Prefix string for the current walking method.
      * @param e The node to walk.
      */
-    private static void invokeVisitorMethods(TreeWalkerVisitor visitor, String prefix,
-            ResolveConceptualElement... e) {
-        boolean pre = prefix.equals("pre"), post = prefix.equals("post"), mid =
-                prefix.equals("mid"), list = (e[0] instanceof VirtualListNode);
+    private static void invokeVisitorMethods(TreeWalkerVisitor visitor,
+            String prefix, ResolveConceptualElement... e) {
+        boolean pre = prefix.equals("pre"), post = prefix.equals("post"),
+                mid = prefix.equals("mid"),
+                list = (e[0] instanceof VirtualListNode);
 
         // Invoke generic visitor methods (preAny, postAny)
         if (pre) {
@@ -152,37 +164,38 @@ public class TreeWalker {
             try {
                 Method visitorMethod;
                 if (pre || post) { // pre and post methods
-                    visitorMethod =
-                            visitor.getClass().getMethod(methodName,
-                                    currentClass);
+                    visitorMethod = visitor.getClass().getMethod(methodName,
+                            currentClass);
                 }
                 else { // mid methods
-                    visitorMethod =
-                            visitor.getClass().getMethod(methodName,
-                                    currentClass, paramType, paramType);
+                    visitorMethod = visitor.getClass().getMethod(methodName,
+                            currentClass, paramType, paramType);
                 }
 
                 // Invoking the visitor method now!!!
                 visitorMethod.invoke(visitor, (Object[]) parent);
             }
             catch (NoSuchMethodException nsme) {
-                //This is fine if we're dealing with a virtual node, otherwise
-                //it shouldn't be possible
+                // This is fine if we're dealing with a virtual node, otherwise
+                // it shouldn't be possible
                 if (!list) {
                     throw new RuntimeException("Cannot locate method", nsme);
                 }
             }
             catch (IllegalAccessException iae) {
-                throw new RuntimeException("Error accessing class: " + currentClass.getSimpleName(), iae);
+                throw new RuntimeException("Error accessing class: "
+                        + currentClass.getSimpleName(), iae);
             }
             catch (InvocationTargetException ite) {
-                //An exception was thrown inside the corresponding walk method
+                // An exception was thrown inside the corresponding walk method
                 Throwable throwable = ite.getTargetException();
-                while (throwable instanceof RuntimeException && throwable.getCause() != null) {
+                while (throwable instanceof RuntimeException
+                        && throwable.getCause() != null) {
                     throwable = throwable.getCause();
                 }
 
-                throw new RuntimeException("Target invocation error for class: " + currentClass.getSimpleName(), throwable);
+                throw new RuntimeException("Target invocation error for class: "
+                        + currentClass.getSimpleName(), throwable);
             }
         }
 
@@ -192,16 +205,19 @@ public class TreeWalker {
     }
 
     /**
-     * <p>Check to see if {@code e} has override the default
-     * walking mechanism.</p>
+     * <p>
+     * Check to see if {@code e} has override the default walking mechanism.
+     * </p>
      *
      * @param visitor An instance of {@link TreeWalkerVisitor} which implements
-     *                visit methods to be applied to nodes of the RESOLVE AST.
+     *        visit methods to be
+     *        applied to nodes of the RESOLVE AST.
      * @param e Current element that we are walking.
      *
      * @return {@code true} if override exists, {@code false} otherwise.
      */
-    private static boolean walkOverride(TreeWalkerVisitor visitor, ResolveConceptualElement e) {
+    private static boolean walkOverride(TreeWalkerVisitor visitor,
+            ResolveConceptualElement e) {
         Class<?> elementClass = e.getClass();
         List<Class<?>> classHierarchy = new ArrayList<>();
         while (elementClass != ResolveConceptualElement.class) {
@@ -218,27 +234,31 @@ public class TreeWalker {
                 String walkMethodName = "walk" + c.getSimpleName();
                 try {
                     Method walkMethod =
-                            visitor.getClass().getMethod(walkMethodName,
-                                    c);
-                    foundOverride =
-                            ((Boolean) walkMethod.invoke(visitor, e));
+                            visitor.getClass().getMethod(walkMethodName, c);
+                    foundOverride = ((Boolean) walkMethod.invoke(visitor, e));
                 }
                 catch (NoSuchMethodException nsme) {
-                    //Shouldn't be possible
-                    throw new RuntimeException("Cannot locate method: " + walkMethodName, nsme);
+                    // Shouldn't be possible
+                    throw new RuntimeException(
+                            "Cannot locate method: " + walkMethodName, nsme);
                 }
                 catch (IllegalAccessException iae) {
-                    //Shouldn't be possible
-                    throw new RuntimeException("Error accessing class: " + c.getSimpleName(), iae);
+                    // Shouldn't be possible
+                    throw new RuntimeException(
+                            "Error accessing class: " + c.getSimpleName(), iae);
                 }
                 catch (InvocationTargetException ite) {
-                    //An exception was thrown inside the corresponding walk method
+                    // An exception was thrown inside the corresponding walk method
                     Throwable throwable = ite.getTargetException();
-                    while (throwable instanceof RuntimeException && throwable.getCause() != null) {
+                    while (throwable instanceof RuntimeException
+                            && throwable.getCause() != null) {
                         throwable = throwable.getCause();
                     }
 
-                    throw new RuntimeException("Target invocation error for class: " + c.getSimpleName(), throwable);
+                    throw new RuntimeException(
+                            "Target invocation error for class: "
+                                    + c.getSimpleName(),
+                            throwable);
                 }
             }
         }

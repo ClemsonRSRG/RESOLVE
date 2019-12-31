@@ -1,7 +1,7 @@
 /*
  * ResolveTokenFactory.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,9 +20,13 @@ import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
 /**
- * <p>A {@code ResolveTokenFactory} produces {@link ResolveToken}s. This
- * can be plugged into to the RESOLVE lexer and parser to outfit the parse tree
- * with {@link ResolveToken}s, as opposed to {@link CommonToken}s.</p>
+ * <p>
+ * A {@code ResolveTokenFactory} produces {@link ResolveToken}s. This can be
+ * plugged into to the
+ * RESOLVE lexer and parser to outfit the parse tree with {@link ResolveToken}s,
+ * as opposed to
+ * {@link CommonToken}s.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -34,7 +38,11 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     // Member Fields
     // ===========================================================
 
-    /** <p>The file that created this token factory.</p> */
+    /**
+     * <p>
+     * The file that created this token factory.
+     * </p>
+     */
     private final ResolveFile myFile;
 
     // ===========================================================
@@ -42,7 +50,9 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     // ===========================================================
 
     /**
-     * <p>This object creates {@link ResolveToken}s rather than the default tokens.</p>
+     * <p>
+     * This object creates {@link ResolveToken}s rather than the default tokens.
+     * </p>
      *
      * @param file Input file.
      */
@@ -55,7 +65,9 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     // ===========================================================
 
     /**
-     * <p>Creates a generic RESOLVE token.</p>
+     * <p>
+     * Creates a generic RESOLVE token.
+     * </p>
      *
      * @param type Token type.
      * @param text Token text.
@@ -68,7 +80,9 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     }
 
     /**
-     * <p>Creates a RESOLVE token from a source pair.</p>
+     * <p>
+     * Creates a RESOLVE token from a source pair.
+     * </p>
      *
      * @param source Token source.
      * @param type Token type.
@@ -94,7 +108,9 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     }
 
     /**
-     * <p>This returns the {@code file} we are associated with.</p>
+     * <p>
+     * This returns the {@code file} we are associated with.
+     * </p>
      *
      * @return A {@link ResolveFile}.
      */

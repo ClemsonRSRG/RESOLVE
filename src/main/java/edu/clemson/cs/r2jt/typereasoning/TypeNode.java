@@ -1,7 +1,7 @@
 /*
  * TypeNode.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -42,15 +42,18 @@ public class TypeNode {
     }
 
     public Exp getValidTypeConditionsTo(Exp value, MTType dst,
-            Map<String, MTType> bindings) throws TypeMismatchException {
+            Map<String, MTType> bindings)
+            throws TypeMismatchException {
 
         return getValidTypeConditionsTo(value, dst, bindings, EXP_VALUE_PATH);
     }
 
     public Exp getValidTypeConditionsTo(MTType value, MTType dst,
-            Map<String, MTType> bindings) throws TypeMismatchException {
+            Map<String, MTType> bindings)
+            throws TypeMismatchException {
 
-        return getValidTypeConditionsTo(value, dst, bindings, MTTYPE_VALUE_PATH);
+        return getValidTypeConditionsTo(value, dst, bindings,
+                MTTYPE_VALUE_PATH);
     }
 
     private <V> Exp getValidTypeConditionsTo(V value, MTType dst,
@@ -78,9 +81,8 @@ public class TypeNode {
 
                 foundTrivialPath = (relationshipConditions.isLiteralTrue());
 
-                finalConditions =
-                        myTypeGraph.formDisjunct(relationshipConditions,
-                                finalConditions);
+                finalConditions = myTypeGraph
+                        .formDisjunct(relationshipConditions, finalConditions);
             }
             catch (NoSolutionException nse) {}
         }
@@ -126,24 +128,26 @@ public class TypeNode {
     }
 
     public boolean hasPathTo(TypeNode node, Exp bindingExpr) {
-        /*Iterator<TypeRelationship> iter = myRelationships.iterator();
-        while(iter.hasNext()) {
-        	TypeRelationship rel = iter.next();
-        	if (rel.getDestinationNode() == node && rel.exprBinds(bindingExpr)) {
-        		bindingExpr.getMathType().equals(rel.getSourceType());
-        		System.out.println("Coercion! Expression [ " + rel.getBindingExpressionString() + " ] binds to [ " + bindingExpr.toString() + " ]");
-        		if (!rel.hasTrivialBindingCondition()) {
-        			System.out.println("Raised proof obligation(s):\n" + rel.getBindingConditionString());
-        		}
-        		return true;
-        	}
-        }
-        return false;*/
-        //throw new UnsupportedOperationException();
+        /*
+         * Iterator<TypeRelationship> iter = myRelationships.iterator();
+         * while(iter.hasNext()) {
+         * TypeRelationship rel = iter.next(); if (rel.getDestinationNode() ==
+         * node &&
+         * rel.exprBinds(bindingExpr)) {
+         * bindingExpr.getMathType().equals(rel.getSourceType());
+         * System.out.println("Coercion! Expression [ " +
+         * rel.getBindingExpressionString() +
+         * " ] binds to [ " + bindingExpr.toString() + " ]"); if
+         * (!rel.hasTrivialBindingCondition()) {
+         * System.out.println("Raised proof obligation(s):\n" +
+         * rel.getBindingConditionString()); }
+         * return true; } } return false;
+         */
+        // throw new UnsupportedOperationException();
         return true;
     }
 
-    //XXX : Can we do this so that analyzer isn't setting up TypeRelationship objects?
+    // XXX : Can we do this so that analyzer isn't setting up TypeRelationship objects?
     void addRelationship(TypeRelationship relationship) {
         Set<TypeRelationship> bucket =
                 myRelationships.get(relationship.getDestinationType());

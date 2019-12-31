@@ -1,7 +1,7 @@
 /*
  * VariablePropagator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -85,10 +85,14 @@ public class VariablePropagator implements Automator {
     }
 
     /**
-     * <p>Takes an expression and returns the same expression if it represents
-     * a single, unquantified variable.  Otherwise it returns null.</p>
+     * <p>
+     * Takes an expression and returns the same expression if it represents a
+     * single, unquantified
+     * variable. Otherwise it returns null.
+     * </p>
+     * 
      * @param e
-     * @return 
+     * @return
      */
     private PExp getSingleVariable(PExp e) {
         PExp result = null;

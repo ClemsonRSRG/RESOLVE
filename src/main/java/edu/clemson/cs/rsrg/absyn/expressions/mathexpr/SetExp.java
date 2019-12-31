@@ -1,7 +1,7 @@
 /*
  * SetExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical set expression objects
- * of the kind {@code {x : Z | x < y}} that the compiler builds using
- * the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical set expression objects of the kind
+ * {@code {x : Z | x <
+ * y}} that the compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,13 +34,25 @@ public class SetExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The mathematical variable in this set expression.</p> */
+    /**
+     * <p>
+     * The mathematical variable in this set expression.
+     * </p>
+     */
     private final MathVarDec myVar;
 
-    /** <p>The set expression's where part.</p> */
+    /**
+     * <p>
+     * The set expression's where part.
+     * </p>
+     */
     private final Exp myWhereExp;
 
-    /** <p>The set expression's body.</p> */
+    /**
+     * <p>
+     * The set expression's body.
+     * </p>
+     */
     private final Exp myBodyExp;
 
     // ===========================================================
@@ -46,7 +60,9 @@ public class SetExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a set expression.</p>
+     * <p>
+     * This constructs a set expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param var A {@link MathVarDec} representing the expression's variable.
@@ -142,9 +158,8 @@ public class SetExp extends MathExp {
         boolean retval = e instanceof SetExp;
         if (retval) {
             SetExp eAsSetExp = (SetExp) e;
-            retval =
-                    myVar.getName().equals(eAsSetExp.myVar.getName())
-                            && myVar.getTy().equals(eAsSetExp.myVar.getTy());
+            retval = myVar.getName().equals(eAsSetExp.myVar.getName())
+                    && myVar.getTy().equals(eAsSetExp.myVar.getTy());
             retval &= equivalent(myWhereExp, eAsSetExp.myWhereExp);
             retval &= equivalent(myBodyExp, eAsSetExp.myBodyExp);
         }
@@ -153,7 +168,9 @@ public class SetExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the body expression.</p>
+     * <p>
+     * This method returns the body expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -174,7 +191,9 @@ public class SetExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the variable.</p>
+     * <p>
+     * This method returns the variable.
+     * </p>
      *
      * @return The {@link MathVarDec} representation object.
      */
@@ -183,7 +202,9 @@ public class SetExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the where expression.</p>
+     * <p>
+     * This method returns the where expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -217,8 +238,8 @@ public class SetExp extends MathExp {
             newWhere = myWhereExp.clone();
         }
 
-        return new SetExp(cloneLocation(), (MathVarDec) myVar.clone(),
-                newWhere, myBodyExp.clone());
+        return new SetExp(cloneLocation(), (MathVarDec) myVar.clone(), newWhere,
+                myBodyExp.clone());
     }
 
     /**
@@ -231,8 +252,8 @@ public class SetExp extends MathExp {
             newWhere = substitute(myWhereExp, substitutions);
         }
 
-        return new SetExp(cloneLocation(), (MathVarDec) myVar.clone(),
-                newWhere, substitute(myBodyExp, substitutions));
+        return new SetExp(cloneLocation(), (MathVarDec) myVar.clone(), newWhere,
+                substitute(myBodyExp, substitutions));
     }
 
 }

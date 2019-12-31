@@ -1,7 +1,7 @@
 /*
  * VisitorCodeGeneration.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,9 +33,11 @@ public class VisitorCodeGeneration {
     private static String myPackagePath = "edu.clemson.cs.r2jt.";
 
     /**
-     * Generates a treewalker. Two optional argument sin the array:
-     * 1: the desired name of the walker (default: TreeWalkerVisitor)
-     * 2: the output package directory (default: treewalk)
+     * Generates a treewalker. Two optional argument sin the array: 1: the
+     * desired name of the walker
+     * (default: TreeWalkerVisitor) 2: the output package directory (default:
+     * treewalk)
+     * 
      * @param String array
      */
     public static void main(String[] args) {
@@ -97,14 +99,15 @@ public class VisitorCodeGeneration {
         buffer.append("public abstract class ");
         buffer.append(walkerName);
         buffer.append(" {\n");
-        buffer
-                .append("\tpublic void preAny(ResolveConceptualElement data) { }\n");
-        buffer
-                .append("\tpublic void postAny(ResolveConceptualElement data) { }\n\n");
+        buffer.append(
+                "\tpublic void preAny(ResolveConceptualElement data) { }\n");
+        buffer.append(
+                "\tpublic void postAny(ResolveConceptualElement data) { }\n\n");
         try {
             Class<?>[] absynClasses = getClasses(myPackagePath + "absyn");
             for (Class<?> absynClass : absynClasses) {
-                if (ResolveConceptualElement.class.isAssignableFrom(absynClass)) {
+                if (ResolveConceptualElement.class
+                        .isAssignableFrom(absynClass)) {
                     if (VirtualListNode.class.isAssignableFrom(absynClass)) {
                         continue;
                     }
@@ -120,8 +123,8 @@ public class VisitorCodeGeneration {
                             String typeParam =
                                     ((Class<?>) ((ParameterizedType) curField
                                             .getGenericType())
-                                            .getActualTypeArguments()[0])
-                                            .getSimpleName();
+                                                    .getActualTypeArguments()[0])
+                                                            .getSimpleName();
                             String listName = toCamelCase(curField.getName());
                             buffer.append("\n");
                             addMethods(buffer, className + listName, className,
@@ -190,13 +193,15 @@ public class VisitorCodeGeneration {
     }
 
     /**
-     * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
+     * Scans all classes accessible from the context class loader which belong
+     * to the given package
+     * and subpackages.
      *
      * @param packageName The base package
      * @return The classes
      * @throws ClassNotFoundException
      * @throws IOException
-     * @throws URISyntaxException 
+     * @throws URISyntaxException
      */
     private static Class<?>[] getClasses(String packageName)
             throws ClassNotFoundException,
@@ -221,15 +226,18 @@ public class VisitorCodeGeneration {
     }
 
     /**
-     * Recursive method used to find all classes in a given directory and subdirs.
+     * Recursive method used to find all classes in a given directory and
+     * subdirs.
      *
-     * @param directory   The base directory
-     * @param packageName The package name for classes found inside the base directory
+     * @param directory The base directory
+     * @param packageName The package name for classes found inside the base
+     *        directory
      * @return The classes
      * @throws ClassNotFoundException
      */
     private static ArrayList<Class<?>> findClasses(File directory,
-            String packageName) throws ClassNotFoundException {
+            String packageName)
+            throws ClassNotFoundException {
         ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
         if (!directory.exists()) {
             return classes;
@@ -238,14 +246,12 @@ public class VisitorCodeGeneration {
         for (File file : files) {
             if (file.isDirectory()) {
                 assert !file.getName().contains(".");
-                classes.addAll(findClasses(file, packageName + "."
-                        + file.getName()));
+                classes.addAll(
+                        findClasses(file, packageName + "." + file.getName()));
             }
             else if (file.getName().endsWith(".class")) {
-                classes.add(Class.forName(packageName
-                        + '.'
-                        + file.getName().substring(0,
-                                file.getName().length() - 6)));
+                classes.add(Class.forName(packageName + '.' + file.getName()
+                        .substring(0, file.getName().length() - 6)));
             }
         }
         return classes;

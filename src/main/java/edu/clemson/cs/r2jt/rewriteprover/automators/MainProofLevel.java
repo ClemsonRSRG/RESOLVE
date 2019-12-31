@@ -1,7 +1,7 @@
 /*
  * MainProofLevel.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -27,23 +27,32 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * <p><code>MainProofLevel</code> is an @{link Automator Automator} that 
- * attempts to apply series of 
+ * <p>
+ * <code>MainProofLevel</code> is an @{link Automator Automator} that attempts
+ * to apply series of
  * {@link edu.clemson.cs.r2jt.rewriteprover.transformations.Transformation
- *     Transformation}s, by spawning a 
- * {@link ApplicationApplier ApplicationApplier} on the automator stack for 
- * each application of each transformation.  When applying the application is
- * done, this automator spawns a {@link Simplify Simplify} automator,
- * followed by a {@link CheckDone CheckDone} automator.  Assuming the proof is
- * not completed, it then spawns a {@link Restore Restore} automator on the
+ * Transformation}s, by
+ * spawning a {@link ApplicationApplier ApplicationApplier} on the automator
+ * stack for each
+ * application of each transformation. When applying the application is done,
+ * this automator spawns
+ * a {@link Simplify Simplify} automator, followed by a {@link CheckDone
+ * CheckDone} automator.
+ * Assuming the proof is not completed, it then spawns a {@link Restore Restore}
+ * automator on the
  * stack that will restore the proof to how it looked before the application,
- * then spawns a new <code>MainProofLevel</code> automator on top.</p>
+ * then spawns a new
+ * <code>MainProofLevel</code> automator on top.
+ * </p>
  * 
- * <p>Each <code>MainProofLevel</code> has a "tether length".  When it spawns
- * a new, sub-<code>MainProofLevel</code>, the new one will have a tether length
- * one less than its spawner.  A <code>MainProofLevel</code> with a tether
- * length of zero will not spawn further levels, but simply pop itself off the
- * stack.</p>
+ * <p>
+ * Each <code>MainProofLevel</code> has a "tether length". When it spawns a new,
+ * sub-<code>MainProofLevel</code>, the new one will have a tether length one
+ * less than its spawner.
+ * A <code>MainProofLevel</code> with a tether length of zero will not spawn
+ * further levels, but
+ * simply pop itself off the stack.
+ * </p>
  */
 public class MainProofLevel implements Automator {
 
@@ -95,13 +104,14 @@ public class MainProofLevel implements Automator {
             }
         }
 
-        myTransformationsIterator =
-                new ChainingIterator<Transformation>(localTransformations
-                        .iterator(), myTransformations.iterator());
+        myTransformationsIterator = new ChainingIterator<Transformation>(
+                localTransformations.iterator(), myTransformations.iterator());
     }
 
     /**
-     * <p>Performs bookkeeping before a restore happens.</p>
+     * <p>
+     * Performs bookkeeping before a restore happens.
+     * </p>
      */
     public void prepForRestore() {
         if (!myDetectedCycleFlag) {
@@ -120,7 +130,7 @@ public class MainProofLevel implements Automator {
 
         switch (myStep) {
         case 0:
-            //Apply some application
+            // Apply some application
             while (!myCurrentApplications.hasNext()
                     && myTransformationsIterator.hasNext()) {
 
@@ -137,17 +147,16 @@ public class MainProofLevel implements Automator {
             }
             break;
         case 1:
-            //Simplify
+            // Simplify
             stack.push(Simplify.INSTANCE);
             break;
         case 2:
-            //Next level
+            // Next level
             stack.push(myRestore);
 
             myDetectedCycleFlag =
-                    AutomatedProver.H_DETECT_CYCLES
-                            && myPreviousProofStates.contains(myModel
-                                    .implicationHashCode());
+                    AutomatedProver.H_DETECT_CYCLES && myPreviousProofStates
+                            .contains(myModel.implicationHashCode());
 
             if (myTetherLength > 0 && !myDetectedCycleFlag) {
                 stack.push(new MainProofLevel(myModel, myTetherLength - 1,

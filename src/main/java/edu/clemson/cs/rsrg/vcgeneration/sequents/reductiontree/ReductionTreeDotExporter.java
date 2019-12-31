@@ -1,7 +1,7 @@
 /*
  * ReductionTreeDotExporter.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,10 @@ import org.jgrapht.io.*;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
- * <p>This class outputs the {@code Sequent Reduction Tree} as a
- * to be exported as a {@code DOT file}.</p>
+ * <p>
+ * This class outputs the {@code Sequent Reduction Tree} as a to be exported as
+ * a {@code DOT file}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -33,7 +35,11 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
     // Member Fields
     // ===========================================================
 
-    /** <p>A {@link DOTExporter} object.</p> */
+    /**
+     * <p>
+     * A {@link DOTExporter} object.
+     * </p>
+     */
     private final DOTExporter<Sequent, DefaultEdge> myDotExporter;
 
     // ===========================================================
@@ -41,14 +47,17 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
     // ===========================================================
 
     /**
-     * <p>This construct an object that will handle all the necessary
-     * steps to output our {@code Sequent Reduction Tree} using the
-     * {@link DOTExporter}.</p>
+     * <p>
+     * This construct an object that will handle all the necessary steps to
+     * output our
+     * {@code Sequent Reduction Tree} using the {@link DOTExporter}.
+     * </p>
      */
     public ReductionTreeDotExporter() {
-        myDotExporter = new DOTExporter<>(new IntegerComponentNameProvider<Sequent>(),
-                new StringComponentNameProvider<Sequent>(), null,
-                new SequentAttributeProvider<>(), null);
+        myDotExporter =
+                new DOTExporter<>(new IntegerComponentNameProvider<Sequent>(),
+                        new StringComponentNameProvider<Sequent>(), null,
+                        new SequentAttributeProvider<>(), null);
     }
 
     // ===========================================================
@@ -56,11 +65,11 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
     // ===========================================================
 
     /**
-     * <p>This method returns the {@code reductionTree}
-     * as a string.</p>
+     * <p>
+     * This method returns the {@code reductionTree} as a string.
+     * </p>
      *
-     * @param reductionTree A {@link Graph} representing
-     *                      a reduction tree.
+     * @param reductionTree A {@link Graph} representing a reduction tree.
      *
      * @return A string.
      */
@@ -78,7 +87,9 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
     // ===========================================================
 
     /**
-     * <p>An helper class that adds attribute fields to the {@code DOT} graph.</p>
+     * <p>
+     * An helper class that adds attribute fields to the {@code DOT} graph.
+     * </p>
      *
      * @author Yu-Shan Sun
      * @version 1.0
@@ -88,7 +99,10 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
                 ComponentAttributeProvider<T> {
 
         /**
-         * <p>This method returns a set of attribute key/value pairs for a {@link Sequent}.</p>
+         * <p>
+         * This method returns a set of attribute key/value pairs for a
+         * {@link Sequent}.
+         * </p>
          *
          * @param sequent A {@link Sequent} node in a DOT graph.
          *
@@ -101,7 +115,8 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
             // Add the attributes for the sequent to the map
             attributesMap.put("shape", DefaultAttribute.createAttribute("box"));
             if (sequent.consistOfAtomicFormulas()) {
-                attributesMap.put("color", DefaultAttribute.createAttribute("red"));
+                attributesMap.put("color",
+                        DefaultAttribute.createAttribute("red"));
             }
 
             return attributesMap;

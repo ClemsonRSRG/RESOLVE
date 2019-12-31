@@ -1,7 +1,7 @@
 /*
  * NormalizedAtomicExpression.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -72,7 +72,8 @@ public class NormalizedAtomicExpression {
         return m_opIdSet;
     }
 
-    protected Map<String, Integer> getOperatorsAsStrings(boolean justArguments) {
+    protected Map<String, Integer>
+            getOperatorsAsStrings(boolean justArguments) {
         if (justArguments && m_argMmap != null) {
             return new HashMap<String, Integer>(m_argMmap);
         }
@@ -120,7 +121,8 @@ public class NormalizedAtomicExpression {
         return m_registry.getSymbolForIndex(m_expression[position]);
     }
 
-    // return array contains 'n' if sint is an arg used at position 'n', 0 denotes operator, -1 denotes cong class
+    // return array contains 'n' if sint is an arg used at position 'n', 0 denotes operator, -1
+    // denotes cong class
     public int[] getPositionsFor(int sint) {
         int[] rArray = new int[arity + 2];
         int count = 0;
@@ -139,9 +141,8 @@ public class NormalizedAtomicExpression {
     public int[] rootedLiterals(Map<String, String> overMap, Registry vc_Reg) {
         int[] rArray = new int[m_expression.length + 1];
         for (int i = 0; i <= m_expression.length; ++i) {
-            int expI =
-                    (i < m_expression.length) ? m_expression[i]
-                            : m_classConstant;
+            int expI = (i < m_expression.length) ? m_expression[i]
+                    : m_classConstant;
             String k = m_registry.getSymbolForIndex(expI);
             String v = (overMap.containsKey(k)) ? overMap.get(k) : k;
             if (v.equals("")) {
@@ -287,8 +288,8 @@ public class NormalizedAtomicExpression {
         int c = 0;
         for (String k : getOperatorsAsStrings(false).keySet()) {
             if (m_registry.getUsage(k).equals(Registry.Usage.FORALL)
-                    || m_registry.getUsage(k).equals(
-                            Registry.Usage.HASARGS_FORALL)
+                    || m_registry.getUsage(k)
+                            .equals(Registry.Usage.HASARGS_FORALL)
                     || m_registry.getUsage(k).equals(Registry.Usage.CREATED)) {
                 c++;
             }

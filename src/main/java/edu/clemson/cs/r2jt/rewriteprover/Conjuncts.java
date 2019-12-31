@@ -1,7 +1,7 @@
 /*
  * Conjuncts.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,8 +33,11 @@ public class Conjuncts extends List<Exp> {
     }
 
     /**
-     * <p>Splits <code>e</code> into conjuncts (X <em>and</em> Y <em>and</em>
-     * Z <em>and</em> ...) by adding each conjunct to this list.</p>
+     * <p>
+     * Splits <code>e</code> into conjuncts (X <em>and</em> Y <em>and</em> Z
+     * <em>and</em> ...) by
+     * adding each conjunct to this list.
+     * </p>
      *
      * @param e The expression to split into conjuncts.
      */
@@ -58,9 +61,13 @@ public class Conjuncts extends List<Exp> {
     }
 
     /**
-     * <p>Eliminates expressions from <code>expressions</code> that are very
-     * obviously <code>true</code>.  Examples are the actual "true" value and
-     * equalities with the same thing on the left and right side.</p>
+     * <p>
+     * Eliminates expressions from <code>expressions</code> that are very
+     * obviously <code>true</code>.
+     * Examples are the actual "true" value and equalities with the same thing
+     * on the left and right
+     * side.
+     * </p>
      *
      * @param expressions The expressions to process.
      */
@@ -90,11 +97,13 @@ public class Conjuncts extends List<Exp> {
     public void eliminateRedundantConjuncts() {
 
         Exp curExp;
-        for (int curUniqueIndex = 0; curUniqueIndex < size(); curUniqueIndex++) {
+        for (int curUniqueIndex =
+                0; curUniqueIndex < size(); curUniqueIndex++) {
 
             curExp = get(curUniqueIndex);
 
-            for (int compareIndex = curUniqueIndex + 1; compareIndex < size(); compareIndex++) {
+            for (int compareIndex =
+                    curUniqueIndex + 1; compareIndex < size(); compareIndex++) {
 
                 while (compareIndex < size()
                         && curExp.equivalent(get(compareIndex))) {

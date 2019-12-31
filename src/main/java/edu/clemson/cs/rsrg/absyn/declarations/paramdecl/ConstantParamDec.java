@@ -1,7 +1,7 @@
 /*
  * ConstantParamDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 
 /**
- * <p>This is the class for all the constant parameter declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the constant parameter declaration objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,7 +33,11 @@ public class ConstantParamDec extends Dec implements ModuleParameter {
     // Member Fields
     // ===========================================================
 
-    /** <p>The parameter variable.</p> */
+    /**
+     * <p>
+     * The parameter variable.
+     * </p>
+     */
     private final ParameterVarDec myParameterDec;
 
     // ===========================================================
@@ -38,17 +45,18 @@ public class ConstantParamDec extends Dec implements ModuleParameter {
     // ===========================================================
 
     /**
-     * <p>This constructs a constant variable that is passed as a parameter
-     * to a module.</p>
+     * <p>
+     * This constructs a constant variable that is passed as a parameter to a
+     * module.
+     * </p>
      *
      * @param name A {@link PosSymbol} representing the variable's name.
      * @param ty A {@link Ty} representing the variable's raw type.
      */
     public ConstantParamDec(PosSymbol name, Ty ty) {
         super(name.getLocation(), name);
-        myParameterDec =
-                new ParameterVarDec(
-                        ProgramParameterEntry.ParameterMode.EVALUATES, name, ty);
+        myParameterDec = new ParameterVarDec(
+                ProgramParameterEntry.ParameterMode.EVALUATES, name, ty);
     }
 
     // ===========================================================
@@ -64,7 +72,9 @@ public class ConstantParamDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>Returns the variable defined in this parameter declaration.</p>
+     * <p>
+     * Returns the variable defined in this parameter declaration.
+     * </p>
      *
      * @return A {@link ParameterVarDec} representation object.
      */
@@ -81,8 +91,8 @@ public class ConstantParamDec extends Dec implements ModuleParameter {
      */
     @Override
     protected final ConstantParamDec copy() {
-        return new ConstantParamDec(myName.clone(), myParameterDec.getTy()
-                .clone());
+        return new ConstantParamDec(myName.clone(),
+                myParameterDec.getTy().clone());
     }
 
 }

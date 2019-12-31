@@ -1,7 +1,7 @@
 /*
  * Metrics.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,8 +15,10 @@ package edu.clemson.cs.r2jt.rewriteprover;
 import java.math.BigInteger;
 
 /**
- * <p>The <code>Metrics</code> class contains aggregate data about a full proof
- * attempt.</p>
+ * <p>
+ * The <code>Metrics</code> class contains aggregate data about a full proof
+ * attempt.
+ * </p>
  */
 public class Metrics {
 

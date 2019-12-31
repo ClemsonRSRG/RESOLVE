@@ -1,7 +1,7 @@
 /*
  * RepresentationDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -45,7 +45,8 @@ public class RepresentationDec extends Dec {
     public RepresentationDec() {};
 
     public RepresentationDec(PosSymbol name, Ty representation, Exp convention,
-            Exp correspondence, InitItem initialization, FinalItem finalization) {
+            Exp correspondence, InitItem initialization,
+            FinalItem finalization) {
         this.name = name;
         this.representation = representation;
         this.convention = convention;

@@ -1,7 +1,7 @@
 /*
  * LazyMappingIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,12 +17,16 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 /**
- * <p>A <code>LazyMappingIterator</code> wraps an <code>Iterator</code> that
- * iterates over objects of type <code>I</code> and presents an interface for
- * mapping over objects of type <code>O</code>. A <code>Mapping</code> from
- * <code>I</code> to <code>O</code> is used to transform each object as it is
- * requested.</p>
-
+ * <p>
+ * A <code>LazyMappingIterator</code> wraps an <code>Iterator</code> that
+ * iterates over objects of
+ * type <code>I</code> and presents an interface for mapping over objects of
+ * type <code>O</code>. A
+ * <code>Mapping</code> from <code>I</code> to <code>O</code> is used to
+ * transform each object as it
+ * is requested.
+ * </p>
+ * 
  * @param <I> The type of the objects in the source iterator.
  * @param <O> The type of the final objects.
  *
@@ -35,10 +39,18 @@ public final class LazyMappingIterator<I, O> implements Iterator<O> {
     // Member Fields
     // ===========================================================
 
-    /** <p>The source iterator.</p> */
+    /**
+     * <p>
+     * The source iterator.
+     * </p>
+     */
     private final Iterator<I> mySource;
 
-    /** <p>A mapping to items</p> */
+    /**
+     * <p>
+     * A mapping to items
+     * </p>
+     */
     private final Mapping<I, O> myMapper;
 
     // ===========================================================
@@ -46,7 +58,9 @@ public final class LazyMappingIterator<I, O> implements Iterator<O> {
     // ===========================================================
 
     /**
-     * <p>Creates an lazy iterator for a mapping of elements.</p>
+     * <p>
+     * Creates an lazy iterator for a mapping of elements.
+     * </p>
      *
      * @param source The source iterator.
      * @param mapper The mapping of elements.

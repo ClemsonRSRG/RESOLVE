@@ -1,7 +1,7 @@
 /*
  * MathAssertionDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the mathematical assertion declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical assertion declarations that the
+ * compiler builds using
+ * the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,7 +32,9 @@ public class MathAssertionDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This defines the various different theorem subtypes.</p>
+     * <p>
+     * This defines the various different theorem subtypes.
+     * </p>
      *
      * @version 2.0
      */
@@ -65,7 +70,9 @@ public class MathAssertionDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This defines the various different mathematical assertion types.</p>
+     * <p>
+     * This defines the various different mathematical assertion types.
+     * </p>
      *
      * @version 2.0
      */
@@ -116,16 +123,26 @@ public class MathAssertionDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The type of assertion</p> */
+    /**
+     * <p>
+     * The type of assertion
+     * </p>
+     */
     private final AssertionType myAssertionType;
 
-    /** <p>The mathematical assertion expression</p> */
+    /**
+     * <p>
+     * The mathematical assertion expression
+     * </p>
+     */
     private final Exp myAssertion;
 
     /**
-     * <p>For <em>theorem</em>s only, defines any special properties of the
-     * theorem, such as if it is flagged as an associativity or commutativity
-     * theorem in the definition.</p>
+     * <p>
+     * For <em>theorem</em>s only, defines any special properties of the
+     * theorem, such as if it is
+     * flagged as an associativity or commutativity theorem in the definition.
+     * </p>
      */
     private final TheoremSubtype myTheoremSubtype;
 
@@ -134,8 +151,10 @@ public class MathAssertionDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs either a mathematical axiom,
-     * corollary, lemma or property assertion.</p>
+     * <p>
+     * This constructs either a mathematical axiom, corollary, lemma or property
+     * assertion.
+     * </p>
      *
      * @param name Name of the assertion declaration.
      * @param assertionType Type of assertion declaration.
@@ -150,8 +169,9 @@ public class MathAssertionDec extends Dec {
     }
 
     /**
-     * <p>This constructs either a mathematical theorem
-     * assertion.</p>
+     * <p>
+     * This constructs either a mathematical theorem assertion.
+     * </p>
      *
      * @param name Name of the assertion declaration.
      * @param theoremSubtype Theorem subtype properties.
@@ -213,7 +233,9 @@ public class MathAssertionDec extends Dec {
     }
 
     /**
-     * <p>Returns the assertion expression for this math assertion declaration.</p>
+     * <p>
+     * Returns the assertion expression for this math assertion declaration.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -222,7 +244,9 @@ public class MathAssertionDec extends Dec {
     }
 
     /**
-     * <p>Returns the assertion type for this math assertion declaration.</p>
+     * <p>
+     * Returns the assertion type for this math assertion declaration.
+     * </p>
      *
      * @return The {@link AssertionType} representation object.
      */
@@ -231,8 +255,10 @@ public class MathAssertionDec extends Dec {
     }
 
     /**
-     * <p>Returns the specific subtype of the theorem represented by this
-     * math assertion declaration.</p>
+     * <p>
+     * Returns the specific subtype of the theorem represented by this math
+     * assertion declaration.
+     * </p>
      *
      * @return The {@link TheoremSubtype} representation object.
      */
@@ -248,11 +274,8 @@ public class MathAssertionDec extends Dec {
         int result = super.hashCode();
         result = 31 * result + myAssertionType.hashCode();
         result = 31 * result + myAssertion.hashCode();
-        result =
-                31
-                        * result
-                        + (myTheoremSubtype != null ? myTheoremSubtype
-                                .hashCode() : 0);
+        result = 31 * result
+                + (myTheoremSubtype != null ? myTheoremSubtype.hashCode() : 0);
         return result;
     }
 
@@ -267,14 +290,12 @@ public class MathAssertionDec extends Dec {
     protected final MathAssertionDec copy() {
         MathAssertionDec copyDec;
         if (myTheoremSubtype != null) {
-            copyDec =
-                    new MathAssertionDec(myName.clone(), myTheoremSubtype,
-                            myAssertion.clone());
+            copyDec = new MathAssertionDec(myName.clone(), myTheoremSubtype,
+                    myAssertion.clone());
         }
         else {
-            copyDec =
-                    new MathAssertionDec(myName.clone(), myAssertionType,
-                            myAssertion.clone());
+            copyDec = new MathAssertionDec(myName.clone(), myAssertionType,
+                    myAssertion.clone());
         }
 
         return copyDec;

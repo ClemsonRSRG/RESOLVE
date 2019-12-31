@@ -1,7 +1,7 @@
 /*
  * NormalizedAtomicExpression.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,9 @@ import edu.clemson.cs.rsrg.prover.utilities.Registry;
 import java.util.*;
 
 /**
- * <p>This class represents a normalized atomic expression.</p>
+ * <p>
+ * This class represents a normalized atomic expression.
+ * </p>
  *
  * @author Mike Khabbani
  * @version 2.0
@@ -27,25 +29,53 @@ public class NormalizedAtomicExpression {
     // Member Fields
     // ===========================================================
 
-    /** <p>A map from argument name to its integer representation.</p> */
+    /**
+     * <p>
+     * A map from argument name to its integer representation.
+     * </p>
+     */
     private Map<String, Integer> myArgMap;
 
-    /** <p>Number of arguments</p> */
+    /**
+     * <p>
+     * Number of arguments
+     * </p>
+     */
     private int myArity;
 
-    /** <p>Integer index representing the root symbol.</p> */
+    /**
+     * <p>
+     * Integer index representing the root symbol.
+     * </p>
+     */
     private int myClassConstant;
 
-    /** <p>Index for each normalized atomic expression.</p> */
+    /**
+     * <p>
+     * Index for each normalized atomic expression.
+     * </p>
+     */
     private final int[] myExpression;
 
-    /** <p>A set of operation ids.</p> */
+    /**
+     * <p>
+     * A set of operation ids.
+     * </p>
+     */
     private Set<Integer> myOpIdSet;
 
-    /** <p>A map from operation name to its integer representation.</p> */
+    /**
+     * <p>
+     * A map from operation name to its integer representation.
+     * </p>
+     */
     private Map<String, Integer> myOpMap;
 
-    /** <p>Registry for symbols that we have encountered so far.</p> */
+    /**
+     * <p>
+     * Registry for symbols that we have encountered so far.
+     * </p>
+     */
     private final Registry myRegistry;
 
     // ===========================================================
@@ -53,11 +83,13 @@ public class NormalizedAtomicExpression {
     // ===========================================================
 
     /**
-     * <p>This constructs a normalized atomic expression.</p>
+     * <p>
+     * This constructs a normalized atomic expression.
+     * </p>
      *
      * @param registry A registry of symbols encountered so far.
-     * @param intArray An integer array representing each of the symbols
-     *                 in this expression.
+     * @param intArray An integer array representing each of the symbols in this
+     *        expression.
      */
     public NormalizedAtomicExpression(Registry registry, int[] intArray) {
         myRegistry = registry;
@@ -87,11 +119,14 @@ public class NormalizedAtomicExpression {
     // ===========================================================
 
     /**
-     * <p>Equals method to compare two normalized atomic expressions.</p>
+     * <p>
+     * Equals method to compare two normalized atomic expressions.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -106,14 +141,17 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns all operator symbols as a string.</p>
+     * <p>
+     * This method returns all operator symbols as a string.
+     * </p>
      *
-     * @param justArguments A flag that indicates that we are only
-     *                      want arguments expressions.
+     * @param justArguments A flag that indicates that we are only want
+     *        arguments expressions.
      *
      * @return A map containing the results.
      */
-    public final Map<String, Integer> getOperatorsAsStrings(boolean justArguments) {
+    public final Map<String, Integer>
+            getOperatorsAsStrings(boolean justArguments) {
         if (justArguments && myArgMap != null) {
             return new HashMap<>(myArgMap);
         }
@@ -158,8 +196,11 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation
-     * for the {@code NormalizedAtomicExpression} class.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation
+     * for the
+     * {@code NormalizedAtomicExpression} class.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -169,7 +210,9 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns the root index value for this expression.</p>
+     * <p>
+     * This method returns the root index value for this expression.
+     * </p>
      *
      * @return An integer index.
      */
@@ -178,7 +221,10 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns the {@code NormalizedAtomicExpression} in string format.</p>
+     * <p>
+     * This method returns the {@code NormalizedAtomicExpression} in string
+     * format.
+     * </p>
      *
      * @return Expression as a string.
      */
@@ -213,7 +259,9 @@ public class NormalizedAtomicExpression {
     // ===========================================================
 
     /**
-     * <p>This method returns the number of arguments in this expression.</p>
+     * <p>
+     * This method returns the number of arguments in this expression.
+     * </p>
      *
      * @return Number of arguments
      */
@@ -222,7 +270,9 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns a set of all the operation ids.</p>
+     * <p>
+     * This method returns a set of all the operation ids.
+     * </p>
      *
      * @return Operation ids.
      */
@@ -244,9 +294,12 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns an array containing {@code n} if
-     * an argument is used at position {@code n}. A {@code 0} denotes an
-     * operator and {@code -1} denotes a congruence class.</p>
+     * <p>
+     * This method returns an array containing {@code n} if an argument is used
+     * at position {@code n}.
+     * A {@code 0} denotes an operator and {@code -1} denotes a congruence
+     * class.
+     * </p>
      *
      * @param sint Index value we are searching for.
      *
@@ -267,7 +320,9 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns the registry used by this expression.</p>
+     * <p>
+     * This method returns the registry used by this expression.
+     * </p>
      *
      * @return A {@link Registry}.
      */
@@ -276,11 +331,12 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method checks to see if we have any variable named
-     * operations.</p>
+     * <p>
+     * This method checks to see if we have any variable named operations.
+     * </p>
      *
-     * @return {@code true} if we have a variable named operation,
-     * {@code false} otherwise.
+     * @return {@code true} if we have a variable named operation, {@code false}
+     *         otherwise.
      */
     final boolean hasVarOps() {
         boolean isVar = false;
@@ -304,8 +360,10 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns the integer index value for the
-     * symbol located at the specified position.</p>
+     * <p>
+     * This method returns the integer index value for the symbol located at the
+     * specified position.
+     * </p>
      *
      * @param position A position in the expression.
      *
@@ -316,8 +374,9 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns the symbol located at the
-     * specified position.</p>
+     * <p>
+     * This method returns the symbol located at the specified position.
+     * </p>
      *
      * @param position A position in the expression.
      *
@@ -328,13 +387,15 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method replaces an operator in our expression.</p>
+     * <p>
+     * This method replaces an operator in our expression.
+     * </p>
      *
      * @param orig Original operator.
      * @param repl Replacement operation operator.
      *
-     * @return A new {@link NormalizedAtomicExpression} with
-     * replacements or {@code this}.
+     * @return A new {@link NormalizedAtomicExpression} with replacements or
+     *         {@code this}.
      */
     final NormalizedAtomicExpression replaceOperator(int orig, int repl) {
         if (orig == repl) {
@@ -374,8 +435,11 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns an integer array containing all rooted
-     * literals. Note any {@code -1} means it is a wildcard.</p>
+     * <p>
+     * This method returns an integer array containing all rooted literals. Note
+     * any {@code -1} means
+     * it is a wildcard.
+     * </p>
      *
      * @param overMap A map from symbol to symbol.
      * @param vc_Reg A registry for the {@code VC} we are processing.
@@ -385,9 +449,8 @@ public class NormalizedAtomicExpression {
     final int[] rootedLiterals(Map<String, String> overMap, Registry vc_Reg) {
         int[] rArray = new int[myExpression.length + 1];
         for (int i = 0; i <= myExpression.length; ++i) {
-            int expI =
-                    (i < myExpression.length) ? myExpression[i]
-                            : myClassConstant;
+            int expI = (i < myExpression.length) ? myExpression[i]
+                    : myClassConstant;
             String k = myRegistry.getSymbolForIndex(expI);
             String v = (overMap.containsKey(k)) ? overMap.get(k) : k;
 
@@ -406,8 +469,10 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns a new normalized atomic expression
-     * with the root operators.</p>
+     * <p>
+     * This method returns a new normalized atomic expression with the root
+     * operators.
+     * </p>
      *
      * @return A new {@link NormalizedAtomicExpression}.
      */
@@ -421,9 +486,11 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method returns a string array containing all the
-     * unmapped wildcard operators. Note that {@code ""} means
-     * it is being mapped.</p>
+     * <p>
+     * This method returns a string array containing all the unmapped wildcard
+     * operators. Note that
+     * {@code ""} means it is being mapped.
+     * </p>
      *
      * @param overMap A map from symbol to symbol.
      *
@@ -453,7 +520,9 @@ public class NormalizedAtomicExpression {
     }
 
     /**
-     * <p>This method writes a new root for this expression.</p>
+     * <p>
+     * This method writes a new root for this expression.
+     * </p>
      *
      * @param root Index for new root value.
      */
@@ -468,18 +537,19 @@ public class NormalizedAtomicExpression {
     // ===========================================================
 
     /**
-     * <p>An helper method for retrieving the number of universally
-     * quantifiers in this expression.</p>
+     * <p>
+     * An helper method for retrieving the number of universally quantifiers in
+     * this expression.
+     * </p>
      *
-     * @return An integer representing the number of universal
-     * quantifiers.
+     * @return An integer representing the number of universal quantifiers.
      */
     private int numberOfQuants() {
         int c = 0;
         for (String k : getOperatorsAsStrings(false).keySet()) {
             if (myRegistry.getUsage(k).equals(Registry.Usage.FORALL)
-                    || myRegistry.getUsage(k).equals(
-                            Registry.Usage.HASARGS_FORALL)
+                    || myRegistry.getUsage(k)
+                            .equals(Registry.Usage.HASARGS_FORALL)
                     || myRegistry.getUsage(k).equals(Registry.Usage.CREATED)) {
                 c++;
             }
@@ -493,15 +563,19 @@ public class NormalizedAtomicExpression {
     // ===========================================================
 
     /**
-     * <p>An helper class that compares the number of quantifiers in
-     * two {@link NormalizedAtomicExpression NormalizedAtomicExpressions}.</p>
+     * <p>
+     * An helper class that compares the number of quantifiers in two
+     * {@link NormalizedAtomicExpression NormalizedAtomicExpressions}.
+     * </p>
      */
     public static class numQuantsComparator
             implements
                 Comparator<NormalizedAtomicExpression> {
 
         /**
-         * <p>Compares {@code nae1} and {@code nae2}.</p>
+         * <p>
+         * Compares {@code nae1} and {@code nae2}.
+         * </p>
          *
          * @param nae1 A normalized atomic expression.
          * @param nae2 Another normalized atomic expression

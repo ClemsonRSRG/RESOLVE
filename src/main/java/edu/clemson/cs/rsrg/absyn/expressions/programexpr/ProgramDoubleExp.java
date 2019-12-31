@@ -1,7 +1,7 @@
 /*
  * ProgramDoubleExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming double expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the programming double expression objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,11 @@ public class ProgramDoubleExp extends ProgramLiteralExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The double representing this programming double</p> */
+    /**
+     * <p>
+     * The double representing this programming double
+     * </p>
+     */
     private final double myDouble;
 
     // ===========================================================
@@ -36,7 +43,9 @@ public class ProgramDoubleExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming double expression.</p>
+     * <p>
+     * This constructs a programming double expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param d A double value.
@@ -94,7 +103,9 @@ public class ProgramDoubleExp extends ProgramLiteralExp {
     }
 
     /**
-     * <p>This method returns the double value.</p>
+     * <p>
+     * This method returns the double value.
+     * </p>
      *
      * @return The double value.
      */

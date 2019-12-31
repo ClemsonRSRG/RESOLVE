@@ -1,7 +1,7 @@
 /*
  * ModuleType.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This class contains all the possible RESOLVE extension files as
- * well as helper methods to retrieve the description and
- * name of the extension.</p>
+ * <p>
+ * This class contains all the possible RESOLVE extension files as well as
+ * helper methods to
+ * retrieve the description and name of the extension.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -29,40 +31,72 @@ public class ModuleType {
     // Member Fields
     // ===========================================================
 
-    /** <p>Extension Description.</p> */
+    /**
+     * <p>
+     * Extension Description.
+     * </p>
+     */
     private final String myDescription;
 
-    /** <p>Extension Name.</p> */
+    /**
+     * <p>
+     * Extension Name.
+     * </p>
+     */
     private final String myExtension;
 
     // ===========================================================
     // Objects
     // ===========================================================
 
-    /** <p>The extension type object for theory files.</p> */
+    /**
+     * <p>
+     * The extension type object for theory files.
+     * </p>
+     */
     public final static ModuleType THEORY =
             new ModuleType("mt", "Theory files");
 
-    /** <p>The extension type object for concept module files.</p> */
+    /**
+     * <p>
+     * The extension type object for concept module files.
+     * </p>
+     */
     public final static ModuleType CONCEPT =
             new ModuleType("co", "Concept modules");
 
-    /** <p>The extension type object for enhancement module files.</p> */
+    /**
+     * <p>
+     * The extension type object for enhancement module files.
+     * </p>
+     */
     public final static ModuleType ENHANCEMENT =
             new ModuleType("en", "Enhancement modules");
 
-    /** <p>The extension type object for concept/enhancement realization module files.</p> */
+    /**
+     * <p>
+     * The extension type object for concept/enhancement realization module
+     * files.
+     * </p>
+     */
     public final static ModuleType REALIZATION =
             new ModuleType("rb", "Realization for Concept/Enhancement modules");
 
-    /** <p>The extension type object for facility module files.</p> */
+    /**
+     * <p>
+     * The extension type object for facility module files.
+     * </p>
+     */
     public final static ModuleType FACILITY =
             new ModuleType("fa", "Facility modules");
 
-    /** <p>The extension type object for performance profile files.</p> */
-    public final static ModuleType PROFILE =
-            new ModuleType("pp",
-                    "Performance profiles for Concept/Enhancement modules");
+    /**
+     * <p>
+     * The extension type object for performance profile files.
+     * </p>
+     */
+    public final static ModuleType PROFILE = new ModuleType("pp",
+            "Performance profiles for Concept/Enhancement modules");
 
     // ===========================================================
     // Constructors
@@ -78,8 +112,9 @@ public class ModuleType {
     // ===========================================================
 
     /**
-     * <p>Obtain the list of all possible extensions for RESOLVE
-     * files.</p>
+     * <p>
+     * Obtain the list of all possible extensions for RESOLVE files.
+     * </p>
      *
      * @return The list of extension names.
      */
@@ -96,7 +131,9 @@ public class ModuleType {
     }
 
     /**
-     * <p>Obtains the description of the extension as a {@code String}.</p>
+     * <p>
+     * Obtains the description of the extension as a {@code String}.
+     * </p>
      *
      * @return The extension's description.
      */
@@ -105,7 +142,9 @@ public class ModuleType {
     }
 
     /**
-     * <p>Obtains the name of the extension as a {@code String}.</p>
+     * <p>
+     * Obtains the name of the extension as a {@code String}.
+     * </p>
      *
      * @return The extension's name.
      */

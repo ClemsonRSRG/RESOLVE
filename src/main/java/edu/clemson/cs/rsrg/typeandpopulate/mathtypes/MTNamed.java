@@ -1,7 +1,7 @@
 /*
  * MTNamed.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>Represents a type that is simply a named reference to some bound variable.
- * For example, in <code>BigUnion{t : MType}{t}</code>, the second "t" is a named type.</p>
+ * <p>
+ * Represents a type that is simply a named reference to some bound variable.
+ * For example, in
+ * <code>BigUnion{t : MType}{t}</code>, the second "t" is a named type.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,10 +34,18 @@ public class MTNamed extends MTType {
     // Member Fields
     // ===========================================================
 
-    /** <p>An integer value that helps us retrieve the hashcode for this class.</p> */
+    /**
+     * <p>
+     * An integer value that helps us retrieve the hashcode for this class.
+     * </p>
+     */
     private final static int BASE_HASH = "MTNamed".hashCode();
 
-    /** <p>The named type's name.</p> */
+    /**
+     * <p>
+     * The named type's name.
+     * </p>
+     */
     private final String myName;
 
     // ===========================================================
@@ -42,7 +53,9 @@ public class MTNamed extends MTType {
     // ===========================================================
 
     /**
-     * <p>This constructs a type that references some bound variable.</p>
+     * <p>
+     * This constructs a type that references some bound variable.
+     * </p>
      *
      * @param g The current type graph.
      * @param name The name for this type.
@@ -57,8 +70,11 @@ public class MTNamed extends MTType {
     // ===========================================================
 
     /**
-     * <p>This method is the {@code accept()} method in a visitor pattern
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method is the {@code accept()} method in a visitor pattern for
+     * invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -73,8 +89,10 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method implements the post-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the post-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -85,8 +103,10 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method implements the pre-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the pre-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -97,11 +117,12 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method returns a list of {@link MTType}s
-     * that are part of this type.</p>
+     * <p>
+     * This method returns a list of {@link MTType}s that are part of this type.
+     * </p>
      *
-     * @return An empty list, because {@link MTNamed} cannot
-     * contain component types.
+     * @return An empty list, because {@link MTNamed} cannot contain component
+     *         types.
      */
     @Override
     public final List<MTType> getComponentTypes() {
@@ -109,7 +130,9 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method returns the name for this {@link MTNamed} type.</p>
+     * <p>
+     * This method returns the name for this {@link MTNamed} type.
+     * </p>
      *
      * @return Name as a string.
      */
@@ -118,15 +141,18 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method takes a map of original types and converts it to a map
-     * of {@code MTNamed} types.</p>
+     * <p>
+     * This method takes a map of original types and converts it to a map of
+     * {@code MTNamed} types.
+     * </p>
      *
      * @param source The current type graph.
      * @param original Original map of {@link MTType}s.
      *
      * @return A map of {@link MTNamed} types.
      */
-    public static Map<MTNamed, MTType> toMTNamedMap(TypeGraph source, Map<String, MTType> original) {
+    public static Map<MTNamed, MTType> toMTNamedMap(TypeGraph source,
+            Map<String, MTType> original) {
         Map<MTNamed, MTType> result = new HashMap<>();
 
         for (Map.Entry<String, MTType> e : original.entrySet()) {
@@ -137,7 +163,9 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */
@@ -147,14 +175,17 @@ public class MTNamed extends MTType {
     }
 
     /**
-     * <p>This method attempts to replace a component type at the specified
-     * index.</p>
+     * <p>
+     * This method attempts to replace a component type at the specified index.
+     * </p>
      *
      * @param index Index to a component type.
-     * @param newType The {@link MTType} to replace the one in our component list.
+     * @param newType The {@link MTType} to replace the one in our component
+     *        list.
      *
-     * @return This method will always throw an {@link IndexOutOfBoundsException},
-     * since {@link MTNamed} cannot contain component types.
+     * @return This method will always throw an
+     *         {@link IndexOutOfBoundsException}, since
+     *         {@link MTNamed} cannot contain component types.
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
@@ -166,13 +197,16 @@ public class MTNamed extends MTType {
     // ===========================================================
 
     /**
-     * <p>This is just a template method to <em>force</em> all concrete
-     * subclasses of {@link MTType} to implement <code>hashCode()</code>,
-     * as the type resolution algorithm depends on it being implemented
-     * sensibly.</p>
+     * <p>
+     * This is just a template method to <em>force</em> all concrete subclasses
+     * of {@link MTType} to
+     * implement <code>hashCode()</code>, as the type resolution algorithm
+     * depends on it being
+     * implemented sensibly.
+     * </p>
      *
      * @return A hashcode consistent with <code>equals()</code> and thus
-     * alpha-equivalency.
+     *         alpha-equivalency.
      */
     @Override
     protected final int getHashCode() {

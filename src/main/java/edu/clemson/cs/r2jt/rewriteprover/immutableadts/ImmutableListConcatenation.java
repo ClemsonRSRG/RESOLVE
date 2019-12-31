@@ -1,7 +1,7 @@
 /*
  * ImmutableListConcatenation.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -60,9 +60,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
             retval = myFirstList.head(length);
         }
         else {
-            retval =
-                    new ImmutableListConcatenation<E>(myFirstList, mySecondList
-                            .head(length - myFirstListSize));
+            retval = new ImmutableListConcatenation<E>(myFirstList,
+                    mySecondList.head(length - myFirstListSize));
         }
 
         return retval;
@@ -70,8 +69,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
 
     @Override
     public Iterator<E> iterator() {
-        return new ChainingIterator<E>(myFirstList.iterator(), mySecondList
-                .iterator());
+        return new ChainingIterator<E>(myFirstList.iterator(),
+                mySecondList.iterator());
     }
 
     @Override
@@ -89,9 +88,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
         ImmutableList<E> retval;
 
         if (startIndex < myFirstListSize) {
-            retval =
-                    new ImmutableListConcatenation<E>(myFirstList
-                            .tail(startIndex), mySecondList);
+            retval = new ImmutableListConcatenation<E>(
+                    myFirstList.tail(startIndex), mySecondList);
         }
         else {
             retval = mySecondList.tail(startIndex - myFirstListSize);

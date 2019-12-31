@@ -1,7 +1,7 @@
 /*
  * VariableReplacingVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * <p>This class visits the named types to see if any of the
- * given names needs to be replaced.</p>
+ * <p>
+ * This class visits the named types to see if any of the given names needs to
+ * be replaced.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,7 +33,11 @@ public class VariableReplacingVisitor extends MutatingVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>A map of substituting types.</p> */
+    /**
+     * <p>
+     * A map of substituting types.
+     * </p>
+     */
     private final Map<String, MTType> mySubstitutions;
 
     // ===========================================================
@@ -39,8 +45,10 @@ public class VariableReplacingVisitor extends MutatingVisitor {
     // ===========================================================
 
     /**
-     * <p>This constructs a visitor used to replace all variable
-     * that are provided in the map.</p>
+     * <p>
+     * This constructs a visitor used to replace all variable that are provided
+     * in the map.
+     * </p>
      *
      * @param substitutions A map of substitution types as strings.
      * @param g The current type graph.
@@ -51,8 +59,10 @@ public class VariableReplacingVisitor extends MutatingVisitor {
     }
 
     /**
-     * <p>This constructs a visitor used to replace all variable
-     * that are provided in the map.</p>
+     * <p>
+     * This constructs a visitor used to replace all variable that are provided
+     * in the map.
+     * </p>
      *
      * @param substitutions A map of substituting types.
      */
@@ -65,9 +75,11 @@ public class VariableReplacingVisitor extends MutatingVisitor {
     // ===========================================================
 
     /**
-     * <p>This method adds additional logic after we visit
-     * a {@link MTNamed} by replacing it with the {@link MTType}
-     * with the changes provided by the map.</p>
+     * <p>
+     * This method adds additional logic after we visit a {@link MTNamed} by
+     * replacing it with the
+     * {@link MTType} with the changes provided by the map.
+     * </p>
      *
      * @param t A math type.
      */
@@ -76,7 +88,7 @@ public class VariableReplacingVisitor extends MutatingVisitor {
         if (mySubstitutions.containsKey(t.getName())) {
             try {
                 getInnermostBinding(t.getName());
-                //This is bound to some inner scope
+                // This is bound to some inner scope
             }
             catch (NoSuchElementException e) {
                 replaceWith(mySubstitutions.get(t.getName()));
@@ -89,14 +101,17 @@ public class VariableReplacingVisitor extends MutatingVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns a map of substituting types.</p>
+     * <p>
+     * This method returns a map of substituting types.
+     * </p>
      *
      * @param original A map of substitution types as strings.
      * @param g The current type graph.
      *
      * @return A map from {@link String} to {@link MTType}.
      */
-    private static Map<String, MTType> convertToMTNamedMap(Map<String, String> original, TypeGraph g) {
+    private static Map<String, MTType>
+            convertToMTNamedMap(Map<String, String> original, TypeGraph g) {
         Map<String, MTType> result = new HashMap<>();
 
         for (Map.Entry<String, String> entry : original.entrySet()) {

@@ -1,7 +1,7 @@
 /*
  * Registry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.*;
 
 /**
- * <p>This class serves as a registry for the symbols we have encountered
- * during the automated proving process.</p>
+ * <p>
+ * This class serves as a registry for the symbols we have encountered during
+ * the automated proving
+ * process.
+ * </p>
  *
  * @author Mike Khabbani
  * @version 2.0
@@ -31,7 +34,9 @@ public class Registry {
     // ===========================================================
 
     /**
-     * <p>This defines the various usage types for a symbol.</p>
+     * <p>
+     * This defines the various usage types for a symbol.
+     * </p>
      *
      * @version 2.0
      */
@@ -44,69 +49,139 @@ public class Registry {
     // Member Fields
     // ===========================================================
 
-    /** <p>A map that caches the isSubtype results.</p> */
+    /**
+     * <p>
+     * A map that caches the isSubtype results.
+     * </p>
+     */
     private final Map<String, Boolean> myCachedIsSubtype;
 
-    /** <p>A set of operators that are commutative.</p> */
+    /**
+     * <p>
+     * A set of operators that are commutative.
+     * </p>
+     */
     private final Set<String> myCommutativeOperators;
 
-    /** <p>A set of symbol names that are universally quantified.</p> */
+    /**
+     * <p>
+     * A set of symbol names that are universally quantified.
+     * </p>
+     */
     private final Set<String> myForAlls;
 
-    /** <p>A set of names that come from some lambda expression.</p> */
+    /**
+     * <p>
+     * A set of names that come from some lambda expression.
+     * </p>
+     */
     private final Set<String> myLambdaNames;
 
-    /** <p>A set that keeps track of dotted symbols.</p> */
+    /**
+     * <p>
+     * A set that keeps track of dotted symbols.
+     * </p>
+     */
     private final Set<String> myPartTypes;
 
-    /** <p>A map from part type index to parent array.</p> */
+    /**
+     * <p>
+     * A map from part type index to parent array.
+     * </p>
+     */
     private final Map<Integer, ArrayList<Integer>> myPartTypeParentArray;
 
-    /** <p>A map from symbol name to usage type.</p> */
+    /**
+     * <p>
+     * A map from symbol name to usage type.
+     * </p>
+     */
     private final Map<String, Usage> mySymbolToUsage;
 
-    /** <p>A map from symbol name to type.</p> */
+    /**
+     * <p>
+     * A map from symbol name to type.
+     * </p>
+     */
     private final Map<String, MTType> myTypeDictionary;
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
-    /** <p>A stack containing indices that have been set to unused.</p> */
+    /**
+     * <p>
+     * A stack containing indices that have been set to unused.
+     * </p>
+     */
     private final Stack<Integer> myUnusedIndices;
 
     // -----------------------------------------------------------
     // Public fields
     // -----------------------------------------------------------
 
-    /** <p>A list of symbol names.</p> */
+    /**
+     * <p>
+     * A list of symbol names.
+     * </p>
+     */
     public final ArrayList<String> myIndexToSymbol;
 
-    /** <p>A list of mathematical types.</p> */
+    /**
+     * <p>
+     * A list of mathematical types.
+     * </p>
+     */
     public final ArrayList<MTType> myIndexToType;
 
-    /** <p>A tree map from symbol names to their associated index.</p> */
+    /**
+     * <p>
+     * A tree map from symbol names to their associated index.
+     * </p>
+     */
     public final TreeMap<String, Integer> mySymbolToIndex;
 
-    /** <p>A map from a mathematical type to the set of associated operators.</p> */
+    /**
+     * <p>
+     * A map from a mathematical type to the set of associated operators.
+     * </p>
+     */
     public final Map<MTType, TreeSet<String>> myTypeToSetOfOperators;
 
-    /** <p>A list of indices referring to a parent array.</p> */
+    /**
+     * <p>
+     * A list of indices referring to a parent array.
+     * </p>
+     */
     public final ArrayList<Integer> mySymbolIndexParentArray;
 
     // -----------------------------------------------------------
     // MakeSymbol-related
     // -----------------------------------------------------------
 
-    /** <p>Regex for regular symbols.</p> */
+    /**
+     * <p>
+     * Regex for regular symbols.
+     * </p>
+     */
     private final String myCCFormat = "¢c%03d";
 
-    /** <p>Regex for variable symbols.</p> */
+    /**
+     * <p>
+     * Regex for variable symbols.
+     * </p>
+     */
     private final String myCVFormat = "¢v%03d";
 
-    /** <p>Counter for keeping track of number of symbols created.</p> */
+    /**
+     * <p>
+     * Counter for keeping track of number of symbols created.
+     * </p>
+     */
     private int myUniqueCounter = 0;
 
     // ===========================================================
@@ -114,8 +189,11 @@ public class Registry {
     // ===========================================================
 
     /**
-     * <p>This constructs a registry table containing the various different
-     * pieces of information on symbols we have encountered.</p>
+     * <p>
+     * This constructs a registry table containing the various different pieces
+     * of information on
+     * symbols we have encountered.
+     * </p>
      *
      * @param g The current type graph.
      */
@@ -132,7 +210,11 @@ public class Registry {
         myTypeDictionary = new TreeMap<>();
 
         addSymbol("=B", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
-                Usage.LITERAL); // = as a predicate function, not as an assertion
+                Usage.LITERAL); // = as a
+                                                                                                  // predicate
+                                                                                                  // function,
+                                                                                                  // not as an
+                                                                                                  // assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         addSymbol("false", g.BOOLEAN, Usage.LITERAL);
 
@@ -158,8 +240,11 @@ public class Registry {
     // ===========================================================
 
     /**
-     * <p>This method adds the symbol to the registry if it is new,
-     * otherwise it returns the integer representation for that symbol.</p>
+     * <p>
+     * This method adds the symbol to the registry if it is new, otherwise it
+     * returns the integer
+     * representation for that symbol.
+     * </p>
      *
      * @param symbolName Symbol name
      * @param symbolType Symbol's mathematical type.
@@ -167,7 +252,8 @@ public class Registry {
      *
      * @return An integer representing the symbol.
      */
-    public final int addSymbol(String symbolName, MTType symbolType, Usage usage) {
+    public final int addSymbol(String symbolName, MTType symbolType,
+            Usage usage) {
         symbolName = symbolName.replaceAll("\\p{Cc}", "");
         if (symbolName.contains("lambda")) {
             myLambdaNames.add(symbolName);
@@ -216,8 +302,10 @@ public class Registry {
     }
 
     /**
-     * <p>This method uses the passed in integer index and attempts
-     * to compress the symbol indices.</p>
+     * <p>
+     * This method uses the passed in integer index and attempts to compress the
+     * symbol indices.
+     * </p>
      *
      * @param index Integer index to be compressed.
      *
@@ -230,7 +318,8 @@ public class Registry {
 
         Stack<Integer> needToUpdate = new Stack<>();
 
-        assert index < mySymbolIndexParentArray.size() : "findAndCompress error";
+        assert index < mySymbolIndexParentArray
+                .size() : "findAndCompress error";
 
         int parent = mySymbolIndexParentArray.get(index);
         while (parent != index) {
@@ -247,10 +336,14 @@ public class Registry {
     }
 
     /**
-     * <p>This method gets the set of children symbol names.</p>
+     * <p>
+     * This method gets the set of children symbol names.
+     * </p>
      *
-     * <p><em>Note:</em> Use sparingly, call with a parent symbol.
-     * Assumes parent array is compressed.</p>
+     * <p>
+     * <em>Note:</em> Use sparingly, call with a parent symbol. Assumes parent
+     * array is compressed.
+     * </p>
      *
      * @param parent A parent symbol name.
      *
@@ -276,8 +369,9 @@ public class Registry {
     }
 
     /**
-     * <p>This method returns all the symbols that are
-     * universally bounded.</p>
+     * <p>
+     * This method returns all the symbols that are universally bounded.
+     * </p>
      *
      * @return A set of symbols names.
      */
@@ -286,8 +380,9 @@ public class Registry {
     }
 
     /**
-     * <p>This method returns the integer index that represents
-     * this symbol.</p>
+     * <p>
+     * This method returns the integer index that represents this symbol.
+     * </p>
      *
      * @param symbol The symbol name we are searching.
      *
@@ -307,8 +402,9 @@ public class Registry {
     }
 
     /**
-     * <p>This method returns all the parent symbols that
-     * have the same type.</p>
+     * <p>
+     * This method returns all the parent symbols that have the same type.
+     * </p>
      *
      * @param t A mathematical type.
      *
@@ -328,7 +424,9 @@ public class Registry {
     }
 
     /**
-     * <p>This method returns all the root symbol for {@code sym}.</p>
+     * <p>
+     * This method returns all the root symbol for {@code sym}.
+     * </p>
      *
      * @param sym The symbol name we are searching.
      *
@@ -344,8 +442,9 @@ public class Registry {
     }
 
     /**
-     * <p>This method returns the symbol located at the
-     * specified index.</p>
+     * <p>
+     * This method returns the symbol located at the specified index.
+     * </p>
      *
      * @param index An index referring to a symbol in our registry.
      *
@@ -362,8 +461,10 @@ public class Registry {
     }
 
     /**
-     * <p>This method returns the mathematical type of the
-     * symbol at the specified index.</p>
+     * <p>
+     * This method returns the mathematical type of the symbol at the specified
+     * index.
+     * </p>
      *
      * @param index An index referring to a symbol in our registry.
      *
@@ -374,7 +475,9 @@ public class Registry {
     }
 
     /**
-     * <p>The type graph containing all the type relationships.</p>
+     * <p>
+     * The type graph containing all the type relationships.
+     * </p>
      *
      * @return The type graph for the compiler.
      */
@@ -383,8 +486,9 @@ public class Registry {
     }
 
     /**
-     * <p>This method returns the usage type for the specified
-     * symbol.</p>
+     * <p>
+     * This method returns the usage type for the specified symbol.
+     * </p>
      *
      * @param symbol The symbol name we are searching.
      *
@@ -395,13 +499,13 @@ public class Registry {
     }
 
     /**
-     * <p>This method checks to see if the operation is
-     * commutative.</p>
+     * <p>
+     * This method checks to see if the operation is commutative.
+     * </p>
      *
      * @param opNum An index referring to an operation.
      *
-     * @return {@code true} if it is commutative,
-     * {@code false} otherwise.
+     * @return {@code true} if it is commutative, {@code false} otherwise.
      */
     public final boolean isCommutative(int opNum) {
         String root = getSymbolForIndex(opNum);
@@ -410,8 +514,11 @@ public class Registry {
     }
 
     /**
-     * <p>This method checks if {@code a} is a subtype of
-     * {@code b} and caches the result for future queries.</p>
+     * <p>
+     * This method checks if {@code a} is a subtype of {@code b} and caches the
+     * result for future
+     * queries.
+     * </p>
      *
      * @param a Mathematical type A.
      * @param b Mathematical type B.
@@ -435,7 +542,9 @@ public class Registry {
     }
 
     /**
-     * <p>This method converts a mathematical type to a symbol.</p>
+     * <p>
+     * This method converts a mathematical type to a symbol.
+     * </p>
      *
      * @param symbolType A mathematical type.
      * @param isVariable A flag that indicates if this is a variable.
@@ -455,7 +564,9 @@ public class Registry {
     }
 
     /**
-     * <p>This method substitutes the indices of A and B.</p>
+     * <p>
+     * This method substitutes the indices of A and B.
+     * </p>
      *
      * @param opIndexA index that becomes parent of B
      * @param opIndexB index to be replaced by opIndexA
@@ -494,8 +605,11 @@ public class Registry {
     // ===========================================================
 
     /**
-     * <p>An helper method for retrieving all symbols
-     * that are associated with {@code t} or any of its subtypes.</p>
+     * <p>
+     * An helper method for retrieving all symbols that are associated with
+     * {@code t} or any of its
+     * subtypes.
+     * </p>
      *
      * @param t A mathematical type.
      *
@@ -506,7 +620,8 @@ public class Registry {
         Set<String> rSet = new HashSet<>();
         Set<MTType> allTypesInSet = myTypeToSetOfOperators.keySet();
 
-        assert !myTypeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
+        assert !myTypeToSetOfOperators
+                .isEmpty() : "empty m_typeToSetOfOperator.keySet()";
         assert allTypesInSet != null : "null set in Registry.getSetMatchingType";
 
         // if there are subtypes of t, return those too
@@ -525,26 +640,28 @@ public class Registry {
     }
 
     /**
-     * <p>An helper method that checks if an symbol
-     * is a commutative operator.</p>
+     * <p>
+     * An helper method that checks if an symbol is a commutative operator.
+     * </p>
      *
      * @param op The symbol name we are searching.
      *
-     * @return {@code true} if {@code op} is an commutative
-     * operator, {@code false} otherwise.
+     * @return {@code true} if {@code op} is an commutative operator,
+     *         {@code false} otherwise.
      */
     private boolean isCommutative(String op) {
         return myCommutativeOperators.contains(op);
     }
 
     /**
-     * <p>An helper method that checks to see if a symbol is in
-     * our registry table.</p>
+     * <p>
+     * An helper method that checks to see if a symbol is in our registry table.
+     * </p>
      *
      * @param symbol The symbol name we are searching.
      *
-     * @return {@code true} if it is in our registry table,
-     * {@code false} otherwise.
+     * @return {@code true} if it is in our registry table, {@code false}
+     *         otherwise.
      */
     private boolean isSymbolInTable(String symbol) {
         return mySymbolToIndex.containsKey(symbol);

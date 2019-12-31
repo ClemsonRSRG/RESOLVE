@@ -1,7 +1,7 @@
 /*
  * Utils.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,7 +28,9 @@ public class Utils {
     }
 
     /**
-     * <p>A builder of objects of type <code>T</code>.</p>
+     * <p>
+     * A builder of objects of type <code>T</code>.
+     * </p>
      *
      * @param <T> The type object to be created.
      */
@@ -38,7 +40,9 @@ public class Utils {
     }
 
     /**
-     * <p>A two-parameter mapping.</p>
+     * <p>
+     * A two-parameter mapping.
+     * </p>
      */
     public interface Mapping<I, O> {
 
@@ -46,7 +50,9 @@ public class Utils {
     }
 
     /**
-     * <p>A three-parameter mapping.</p>
+     * <p>
+     * A three-parameter mapping.
+     * </p>
      */
     public interface Mapping3<P1, P2, P3, R> {
 
@@ -89,21 +95,23 @@ public class Utils {
 
     /**
      * Returns a list of {@code E} given: an expected type {@code T}, some
-     * number
-     * of concrete syntax {@code nodes}, and a mapping from rule contexts to
-     * some number of elements descending from {@code E}.
+     * number of concrete syntax
+     * {@code nodes}, and a mapping from rule contexts to some number of
+     * elements descending from
+     * {@code E}.
      *
      * @param expectedType The class type to inhabit the returned list
-     * @param nodes A list of concrete syntax nodes, as obtained through
-     *        a visitor, listener, etc.
-     * @param annotations A map from rule context to the primary supertype
-     *        of {@code expectedType} ({@code E}).
+     * @param nodes A list of concrete syntax nodes, as obtained through a
+     *        visitor, listener, etc.
+     * @param annotations A map from rule context to the primary supertype of
+     *        {@code expectedType}
+     *        ({@code E}).
      * @param <E> Super type of {@code expectedType}.
      * @param <T> The expected type.
      * @return A list of {@code T}.
      */
-    public static <E, T extends E> List<T> collect(
-            Class<T> expectedType, List<? extends ParseTree> nodes,
+    public static <E, T extends E> List<T> collect(Class<T> expectedType,
+            List<? extends ParseTree> nodes,
             ParseTreeProperty<? extends E> annotations) {
         List<T> result = new ArrayList<>();
         for (ParseTree node : nodes) {

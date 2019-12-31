@@ -1,7 +1,7 @@
 /*
  * PosSymbol.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -82,8 +82,8 @@ public class PosSymbol implements AsStringCapability {
     // ===========================================================
 
     /**
-     * Returns true if both the symbol field inside the PosSymbol
-     * matches our symbol.
+     * Returns true if both the symbol field inside the PosSymbol matches our
+     * symbol.
      *
      * @param pos PosSymbol to be compared.
      *
@@ -94,8 +94,7 @@ public class PosSymbol implements AsStringCapability {
     }
 
     /**
-     * Returns true if both the symbol field matches
-     * our symbol.
+     * Returns true if both the symbol field matches our symbol.
      *
      * @param sym Symbol to be compared.
      *
@@ -106,8 +105,8 @@ public class PosSymbol implements AsStringCapability {
     }
 
     /**
-     * Returns true if the symbol field matches the symbol created
-     * by the specified string.
+     * Returns true if the symbol field matches the symbol created by the
+     * specified string.
      *
      * @param str String to be compared.
      *

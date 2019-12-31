@@ -1,7 +1,7 @@
 /*
  * SingletonIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,7 +15,9 @@ package edu.clemson.cs.rsrg.prover.iterators;
 import java.util.Iterator;
 
 /**
- * <p>This class implements the iterator class for a singleton element.</p>
+ * <p>
+ * This class implements the iterator class for a singleton element.
+ * </p>
  *
  * @param <T> Element to to be iterated.
  *
@@ -28,12 +30,18 @@ public class SingletonIterator<T> implements Iterator<T> {
     // Member Fields
     // ===========================================================
 
-    /** <p>The singleton element to be iterated.</p> */
+    /**
+     * <p>
+     * The singleton element to be iterated.
+     * </p>
+     */
     private final T myElement;
 
     /**
-     * <p>Flag that indicates whether or not we have iterated over
-     * this element yet.</p>
+     * <p>
+     * Flag that indicates whether or not we have iterated over this element
+     * yet.
+     * </p>
      */
     private boolean myReturnedFlag = false;
 
@@ -42,7 +50,9 @@ public class SingletonIterator<T> implements Iterator<T> {
     // ===========================================================
 
     /**
-     * <p>Creates an iterator for a single element.</p>
+     * <p>
+     * Creates an iterator for a single element.
+     * </p>
      *
      * @param element Element to be iterated.
      */

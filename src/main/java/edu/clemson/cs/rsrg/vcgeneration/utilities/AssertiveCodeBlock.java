@@ -1,7 +1,7 @@
 /*
  * AssertiveCodeBlock.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,8 +28,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>This class represents an assertive code block that the {@link VCGenerator}
- * uses to apply the various different proof rules.</p>
+ * <p>
+ * This class represents an assertive code block that the {@link VCGenerator}
+ * uses to apply the
+ * various different proof rules.
+ * </p>
  *
  * @author Heather Keown Harton
  * @author Yu-Shan Sun
@@ -41,45 +44,71 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     // Member Fields
     // ===========================================================
 
-    /** <p>Name of the {@link ResolveConceptualElement} that created this object.</p> */
+    /**
+     * <p>
+     * Name of the {@link ResolveConceptualElement} that created this object.
+     * </p>
+     */
     private final PosSymbol myBlockName;
 
-    /** <p>Deque of branching condition(s) that generated this assertive code block.</p> */
+    /**
+     * <p>
+     * Deque of branching condition(s) that generated this assertive code block.
+     * </p>
+     */
     private final Deque<String> myBranchingConditions;
 
     /**
-     * <p>While walking a procedure, this is set to the entry for the operation
-     * or {@link OperationProcedureDec} that the procedure is attempting to implement.</p>
+     * <p>
+     * While walking a procedure, this is set to the entry for the operation or
+     * {@link OperationProcedureDec} that the procedure is attempting to
+     * implement.
+     * </p>
      */
     private final OperationEntry myCorrespondingOperation;
 
     /**
-     * <p>While walking a procedure, if it is an recursive operation implementation,
-     * then this stores the decreasing clause expression.</p>
+     * <p>
+     * While walking a procedure, if it is an recursive operation
+     * implementation, then this stores the
+     * decreasing clause expression.
+     * </p>
      */
     private final Exp myCorrespondingOperationDecreasingExp;
 
-    /** <p>List of free variables.</p> */
+    /**
+     * <p>
+     * List of free variables.
+     * </p>
+     */
     private final List<Exp> myFreeVars;
 
-    /** <p>{@link ResolveConceptualElement} that created this object.</p> */
+    /**
+     * <p>
+     * {@link ResolveConceptualElement} that created this object.
+     * </p>
+     */
     private final ResolveConceptualElement myInstantiatingElement;
 
     /**
-     * <p>List of {@link VerificationCondition VCs} we are trying
-     * to prove.</p>
+     * <p>
+     * List of {@link VerificationCondition VCs} we are trying to prove.
+     * </p>
      */
     private List<VerificationCondition> myVCs;
 
     /**
-     * <p>List of {@link Statement Statements} that we
-     * need to apply proof rules to./p>
+     * <p>
+     * List of {@link Statement Statements} that we need to apply proof rules
+     * to./p>
      */
     private final LinkedList<Statement> myStatements;
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
@@ -88,13 +117,13 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     // ===========================================================
 
     /**
-     * <p>This creates a new assertive code block for the
-     * {@link VCGenerator}.</p>
+     * <p>
+     * This creates a new assertive code block for the {@link VCGenerator}.
+     * </p>
      *
-     * @param name Name of the element that created this assertive
-     *             code block.
-     * @param instantiatingElement The element that created this
-     *                             assertive code block.
+     * @param name Name of the element that created this assertive code block.
+     * @param instantiatingElement The element that created this assertive code
+     *        block.
      * @param g The current type graph.
      */
     public AssertiveCodeBlock(PosSymbol name,
@@ -103,15 +132,18 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This creates a new assertive code block from a
-     * {@code procedure} declaration for the {@link VCGenerator}.</p>
+     * <p>
+     * This creates a new assertive code block from a {@code procedure}
+     * declaration for the
+     * {@link VCGenerator}.
+     * </p>
      *
-     * @param name Name of the element that created this assertive
-     *             code block.
-     * @param instantiatingElement The element that created this
-     *                             assertive code block.
+     * @param name Name of the element that created this assertive code block.
+     * @param instantiatingElement The element that created this assertive code
+     *        block.
      * @param correspondingOperation The {@link OperationEntry} corresponding to
-     *                               the {@code procedure}.
+     *        the
+     *        {@code procedure}.
      * @param g The current type graph.
      */
     public AssertiveCodeBlock(PosSymbol name,
@@ -121,16 +153,20 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This creates a new assertive code block from a
-     * {@code recursive procedure} declaration for the {@link VCGenerator}.</p>
+     * <p>
+     * This creates a new assertive code block from a
+     * {@code recursive procedure} declaration for the
+     * {@link VCGenerator}.
+     * </p>
      *
-     * @param name Name of the element that created this assertive
-     *             code block.
-     * @param instantiatingElement The element that created this
-     *                             assertive code block.
+     * @param name Name of the element that created this assertive code block.
+     * @param instantiatingElement The element that created this assertive code
+     *        block.
      * @param correspondingOperation The {@link OperationEntry} corresponding to
-     *                               the {@code procedure}.
-     * @param correspondingOperationDecreasingExp The {@code procedure}'s decreasing clause.
+     *        the
+     *        {@code procedure}.
+     * @param correspondingOperationDecreasingExp The {@code procedure}'s
+     *        decreasing clause.
      * @param g The current type graph.
      */
     public AssertiveCodeBlock(PosSymbol name,
@@ -140,7 +176,8 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         myBlockName = name;
         myBranchingConditions = new LinkedList<>();
         myCorrespondingOperation = correspondingOperation;
-        myCorrespondingOperationDecreasingExp = correspondingOperationDecreasingExp;
+        myCorrespondingOperationDecreasingExp =
+                correspondingOperationDecreasingExp;
         myFreeVars = new LinkedList<>();
         myInstantiatingElement = instantiatingElement;
         myVCs = new LinkedList<>();
@@ -153,12 +190,14 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     // ===========================================================
 
     /**
-     * <p>Adds a new branching condition detail for this assertive code block.</p>
+     * <p>
+     * Adds a new branching condition detail for this assertive code block.
+     * </p>
      *
-     * @param branchingLoc A {@link Location} that indicates where the
-     *                     branching occurred.
+     * @param branchingLoc A {@link Location} that indicates where the branching
+     *        occurred.
      * @param branchingExpAsString The branching condition converted to a
-     *                             mathematical {@link Exp}.
+     *        mathematical {@link Exp}.
      * @param evalResult The results of the evaluation.
      */
     public final void addBranchingCondition(Location branchingLoc,
@@ -168,8 +207,11 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>Add the {@link Exp} containing the name of the free variable
-     * if it is not already in our free variable list.</p>
+     * <p>
+     * Add the {@link Exp} containing the name of the free variable if it is not
+     * already in our free
+     * variable list.
+     * </p>
      *
      * @param var A new variable.
      */
@@ -180,7 +222,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>Adds a new statement to the assertive code block.</p>
+     * <p>
+     * Adds a new statement to the assertive code block.
+     * </p>
      *
      * @param statement A new {@link Statement}.
      */
@@ -189,7 +233,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>Adds new statements to the assertive code block.</p>
+     * <p>
+     * Adds new statements to the assertive code block.
+     * </p>
      *
      * @param statements A list of new {@link Statement Statements}.
      */
@@ -198,13 +244,14 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method creates a special indented
-     * text version of the instantiated object.</p>
+     * <p>
+     * This method creates a special indented text version of the instantiated
+     * object.
+     * </p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentInc The additional indentation increment
-     *                       for the subsequent lines.
+     * @param indentSize The base indentation to the first line of the text.
+     * @param innerIndentInc The additional indentation increment for the
+     *        subsequent lines.
      *
      * @return A formatted text string of the class.
      */
@@ -248,7 +295,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method overrides the default {@code clone} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code clone} method implementation.
+     * </p>
      *
      * @return A deep copy of the object.
      */
@@ -261,10 +310,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         }
 
         // Copy a new assertive code block using the stored information
-        AssertiveCodeBlock newBlock =
-                new AssertiveCodeBlock(myBlockName.clone(),
-                        myInstantiatingElement, myCorrespondingOperation,
-                        newDecreasingExp, myTypeGraph);
+        AssertiveCodeBlock newBlock = new AssertiveCodeBlock(
+                myBlockName.clone(), myInstantiatingElement,
+                myCorrespondingOperation, newDecreasingExp, myTypeGraph);
 
         // Copy over any branching conditions
         newBlock.myBranchingConditions.addAll(myBranchingConditions);
@@ -287,13 +335,15 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>Checks if there is already a free variable that matches the provided
-     * expression.</p>
+     * <p>
+     * Checks if there is already a free variable that matches the provided
+     * expression.
+     * </p>
      *
      * @param var A variable expression to be checked.
      *
-     * @return {@code true} if it contains this free var,
-     * {@code false} otherwise.
+     * @return {@code true} if it contains this free var, {@code false}
+     *         otherwise.
      */
     public final boolean containsFreeVar(Exp var) {
         boolean contains = false;
@@ -307,11 +357,14 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method overrides the default {@code equals} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code equals} method implementation.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -324,11 +377,13 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
 
         return myBlockName.equals(that.myBlockName)
                 && myBranchingConditions.equals(that.myBranchingConditions)
-                && (myCorrespondingOperation != null ? myCorrespondingOperation
-                        .equals(that.myCorrespondingOperation)
+                && (myCorrespondingOperation != null
+                        ? myCorrespondingOperation
+                                .equals(that.myCorrespondingOperation)
                         : that.myCorrespondingOperation == null)
-                && (myCorrespondingOperationDecreasingExp != null ? myCorrespondingOperationDecreasingExp
-                        .equals(that.myCorrespondingOperationDecreasingExp)
+                && (myCorrespondingOperationDecreasingExp != null
+                        ? myCorrespondingOperationDecreasingExp.equals(
+                                that.myCorrespondingOperationDecreasingExp)
                         : that.myCorrespondingOperationDecreasingExp == null)
                 && myFreeVars.equals(that.myFreeVars)
                 && myInstantiatingElement.equals(that.myInstantiatingElement)
@@ -338,8 +393,11 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method returns a collection of branching conditions
-     * that generated this assertive code block.</p>
+     * <p>
+     * This method returns a collection of branching conditions that generated
+     * this assertive code
+     * block.
+     * </p>
      *
      * @return A {@link Deque} containing details on each condition.
      */
@@ -348,29 +406,39 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method returns an {@link OperationEntry} that is associated with
-     * this assertive code block.</p>
+     * <p>
+     * This method returns an {@link OperationEntry} that is associated with
+     * this assertive code
+     * block.
+     * </p>
      *
      * @return An {@link OperationEntry} if it originated from some kind of
-     * {@code procedure} declaration, {@code null} otherwise.
+     *         {@code procedure}
+     *         declaration, {@code null} otherwise.
      */
     public final OperationEntry getCorrespondingOperation() {
         return myCorrespondingOperation;
     }
 
     /**
-     * <p>This method returns a {@code decreasing} clause that is associated with
-     * the {@code recursive procedure} that created this assertive code block.</p>
+     * <p>
+     * This method returns a {@code decreasing} clause that is associated with
+     * the
+     * {@code recursive procedure} that created this assertive code block.
+     * </p>
      *
-     * @return An {@link Exp} containing the decreasing clause, {@code null} otherwise.
+     * @return An {@link Exp} containing the decreasing clause, {@code null}
+     *         otherwise.
      */
     public final Exp getCorrespondingOperationDecreasingExp() {
         return myCorrespondingOperationDecreasingExp;
     }
 
     /**
-     * <p>This method returns the instantiating element that created
-     * this assertive code block.</p>
+     * <p>
+     * This method returns the instantiating element that created this assertive
+     * code block.
+     * </p>
      *
      * @return A {@link ResolveConceptualElement}.
      */
@@ -379,8 +447,11 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method returns the name for the instantiating element that created
-     * this assertive code block.</p>
+     * <p>
+     * This method returns the name for the instantiating element that created
+     * this assertive code
+     * block.
+     * </p>
      *
      * @return The name as a {@link PosSymbol}.
      */
@@ -389,8 +460,10 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method returns the list of {@code VCs} stored inside
-     * this assertive code block.</p>
+     * <p>
+     * This method returns the list of {@code VCs} stored inside this assertive
+     * code block.
+     * </p>
      *
      * @return A list of {@link VerificationCondition VCs}.
      */
@@ -399,7 +472,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>The type graph containing all the type relationships.</p>
+     * <p>
+     * The type graph containing all the type relationships.
+     * </p>
      *
      * @return The type graph for the compiler.
      */
@@ -408,7 +483,9 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -422,9 +499,8 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
         }
 
         if (myCorrespondingOperationDecreasingExp != null) {
-            result =
-                    31 * result
-                            + myCorrespondingOperationDecreasingExp.hashCode();
+            result = 31 * result
+                    + myCorrespondingOperationDecreasingExp.hashCode();
         }
 
         result = 31 * result + myFreeVars.hashCode();
@@ -437,19 +513,24 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>Checks if we have {@link Statement Statements} that we still
-     * need to apply proof rules to.</p>
+     * <p>
+     * Checks if we have {@link Statement Statements} that we still need to
+     * apply proof rules to.
+     * </p>
      *
-     * @return {@code true} if we have more {@link Statement Statements}
-     * that needs to be processed, {@code false} otherwise.
+     * @return {@code true} if we have more {@link Statement Statements} that
+     *         needs to be processed,
+     *         {@code false} otherwise.
      */
     public final boolean hasMoreStatements() {
         return (!myStatements.isEmpty());
     }
 
     /**
-     * <p>This method removes the last {@link Statement} that is stored
-     * inside this assertive code block.</p>
+     * <p>
+     * This method removes the last {@link Statement} that is stored inside this
+     * assertive code block.
+     * </p>
      *
      * @return A {@link Statement} representation object.
      */
@@ -458,18 +539,23 @@ public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {
     }
 
     /**
-     * <p>This method replaces the list of {@link VerificationCondition VCs}
-     * in this assertive code with {@code vcs}.</p>
+     * <p>
+     * This method replaces the list of {@link VerificationCondition VCs} in
+     * this assertive code with
+     * {@code vcs}.
+     * </p>
      *
-     * @param vcs A new list of {@link VerificationCondition VCs}
-     *            for this assertive code block.
+     * @param vcs A new list of {@link VerificationCondition VCs} for this
+     *        assertive code block.
      */
     public final void setVCs(List<VerificationCondition> vcs) {
         myVCs = vcs;
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */

@@ -1,7 +1,7 @@
 /*
  * Populator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -63,9 +63,12 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.*;
 
 /**
- * <p>This class populates the symbol table and assigns mathematical types to the
- * provided RESOLVE abstract syntax tree. This visitor logic is implemented as
- * a {@link TreeWalkerVisitor}.</p>
+ * <p>
+ * This class populates the symbol table and assigns mathematical types to the
+ * provided RESOLVE
+ * abstract syntax tree. This visitor logic is implemented as a
+ * {@link TreeWalkerVisitor}.
+ * </p>
  *
  * @version 2.0
  */
@@ -75,24 +78,40 @@ public class Populator extends TreeWalkerVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>The symbol table we are currently building.</p> */
+    /**
+     * <p>
+     * The symbol table we are currently building.
+     * </p>
+     */
     private final MathSymbolTableBuilder myBuilder;
 
     /**
-     * <p>The current job's compilation environment
-     * that stores all necessary objects and flags.</p>
+     * <p>
+     * The current job's compilation environment that stores all necessary
+     * objects and flags.
+     * </p>
      */
     private final CompileEnvironment myCompileEnvironment;
 
-    /** <p>The current scope for the module we are currently building.</p> */
+    /**
+     * <p>
+     * The current scope for the module we are currently building.
+     * </p>
+     */
     private ModuleScopeBuilder myCurModuleScope;
 
-    /** <p>This is the status handler for the RESOLVE compiler.</p> */
+    /**
+     * <p>
+     * This is the status handler for the RESOLVE compiler.
+     * </p>
+     */
     private final StatusHandler myStatusHandler;
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
@@ -101,26 +120,39 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>A {@link TypeComparison} for to find exact domain match between a
-     * {@link AbstractFunctionExp} and a {@link MTType}.</p>
+     * <p>
+     * A {@link TypeComparison} for to find exact domain match between a
+     * {@link AbstractFunctionExp}
+     * and a {@link MTType}.
+     * </p>
      */
     private static final TypeComparison<AbstractFunctionExp, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
 
-    /** <p>An exact parameter {@link Comparator} for {@link MTType}.</p> */
+    /**
+     * <p>
+     * An exact parameter {@link Comparator} for {@link MTType}.
+     * </p>
+     */
     private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
             new ExactParameterMatch();
 
     /**
-     * <p>A {@link TypeComparison} for to find inexact domain match between a
-     * {@link AbstractFunctionExp} and a {@link MTType}.</p>
+     * <p>
+     * A {@link TypeComparison} for to find inexact domain match between a
+     * {@link AbstractFunctionExp}
+     * and a {@link MTType}.
+     * </p>
      */
     private final TypeComparison<AbstractFunctionExp, MTFunction> INEXACT_DOMAIN_MATCH =
             new InexactDomainMatch();
 
     /**
-     * <p>A {@link TypeComparison} for to find inexact parameter match between a
-     * {@link Exp} and a {@link MTType}.</p>
+     * <p>
+     * A {@link TypeComparison} for to find inexact parameter match between a
+     * {@link Exp} and a
+     * {@link MTType}.
+     * </p>
      */
     private final TypeComparison<Exp, MTType> INEXACT_PARAMETER_MATCH =
             new InexactParameterMatch();
@@ -130,45 +162,64 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>While walking a procedure, this is set to the entry for the operation
-     * or {@link OperationProcedureDec} that the procedure is attempting to implement.</p>
+     * <p>
+     * While walking a procedure, this is set to the entry for the operation or
+     * {@link OperationProcedureDec} that the procedure is attempting to
+     * implement.
+     * </p>
      *
-     * <p><strong>INVARIANT:</strong>
-     * <code>myCorrespondingOperation != null</code> <em>implies</em>
-     * <code>myCurrentParameters != null</code>.</p>
+     * <p>
+     * <strong>INVARIANT:</strong> <code>myCorrespondingOperation != null</code>
+     * <em>implies</em>
+     * <code>myCurrentParameters != null</code>.
+     * </p>
      */
     private OperationEntry myCorrespondingOperation;
 
     /**
-     * <p>While we walk the children of an operation, {@link OperationProcedureDec}, or
-     * procedure, this list will contain all formal parameters encountered so
-     * far, otherwise it will be null.  Since none of these structures can be
-     * be nested, there's no need for a stack.</p>
+     * <p>
+     * While we walk the children of an operation,
+     * {@link OperationProcedureDec}, or procedure, this
+     * list will contain all formal parameters encountered so far, otherwise it
+     * will be null. Since
+     * none of these structures can be be nested, there's no need for a stack.
+     * </p>
      *
-     * <p>If you need to distinguish if you're in the middle of an
+     * <p>
+     * If you need to distinguish if you're in the middle of an
      * operation/{@link OperationProcedureDec} or a procedure, check
-     * {@code myCorrespondingOperation}.</p>
+     * {@code myCorrespondingOperation}.
+     * </p>
      */
     private List<ProgramParameterEntry> myCurrentParameters;
 
     /**
-     * <p>While we walk the children of a {@link OperationProcedureDec},
-     * this will be set to the {@link OperationProcedureDec}.
-     * Otherwise it will be {@code null}.</p>
+     * <p>
+     * While we walk the children of a {@link OperationProcedureDec}, this will
+     * be set to the
+     * {@link OperationProcedureDec}. Otherwise it will be {@code null}.
+     * </p>
      */
     private OperationProcedureDec myCurrentLocalProcedure;
 
     /**
-     * <p>While we walk the children of a {@link OperationProcedureDec}, this will be set
-     * to the scope prior to the {@link OperationProcedureDec} scope.
-     * Otherwise it will be {@code null}.</p>
+     * <p>
+     * While we walk the children of a {@link OperationProcedureDec}, this will
+     * be set to the scope
+     * prior to the {@link OperationProcedureDec} scope. Otherwise it will be
+     * {@code null}.
+     * </p>
      */
     private ScopeBuilder myPreOperationProcedureDecScope;
 
     /**
-     * <p>While we walk the children of a {@link OperationProcedureDec} or {@link ProcedureDec}, this will
-     * initially be set to {@code null}. If we detect a recursive call to itself, this will
-     * be set to the location of the first recursive call.</p>
+     * <p>
+     * While we walk the children of a {@link OperationProcedureDec} or
+     * {@link ProcedureDec}, this
+     * will initially be set to {@code null}. If we detect a recursive call to
+     * itself, this will be
+     * set to the location of the first recursive call.
+     * </p>
      */
     private Location myRecursiveCallLocation;
 
@@ -177,16 +228,21 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>When parsing a type realization declaration, this is set to the
-     * entry corresponding to the conceptual declaration from the concept. When
-     * not inside such a declaration, this will be null.</p>
+     * <p>
+     * When parsing a type realization declaration, this is set to the entry
+     * corresponding to the
+     * conceptual declaration from the concept. When not inside such a
+     * declaration, this will be null.
+     * </p>
      */
     private TypeFamilyEntry myTypeFamilyEntry;
 
     /**
-     * <p>When parsing a type realization declaration, this is set to its
-     * representation entry obtained from its children. When
-     * not inside such a declaration, this will be null.</p>
+     * <p>
+     * When parsing a type realization declaration, this is set to its
+     * representation entry obtained
+     * from its children. When not inside such a declaration, this will be null.
+     * </p>
      */
     private PTRepresentation myPTRepresentationType;
 
@@ -195,71 +251,102 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Any quantification-introducing syntactic node (like, e.g., a
-     * {@link QuantExp}), introduces a level to this stack to reflect the quantification
-     * that should be applied to named variables as they are encountered.  Note
-     * that this may change as the children of the node are processed--for
-     * example, {@link MathVarDec MathVarDecs} found in the declaration portion of a {@link QuantExp}
+     * <p>
+     * Any quantification-introducing syntactic node (like, e.g., a
+     * {@link QuantExp}), introduces a
+     * level to this stack to reflect the quantification that should be applied
+     * to named variables as
+     * they are encountered. Note that this may change as the children of the
+     * node are processed--for
+     * example, {@link MathVarDec MathVarDecs} found in the declaration portion
+     * of a {@link QuantExp}
      * should have quantification (universal or existential) applied, while
-     * those found in the body of the {@link QuantExp} should have no quantification
-     * (unless there is an embedded {@link QuantExp}).  In this case, {@link QuantExp} should
-     * <em>not</em> remove its layer, but rather change it to
-     * MathSymbolTableEntry.None.</p>
+     * those found in the body of
+     * the {@link QuantExp} should have no quantification (unless there is an
+     * embedded
+     * {@link QuantExp}). In this case, {@link QuantExp} should <em>not</em>
+     * remove its layer, but
+     * rather change it to MathSymbolTableEntry.None.
+     * </p>
      *
-     * <p>This stack is never empty, but rather the bottom layer is always
-     * MathSymbolTableEntry.None.</p>
+     * <p>
+     * This stack is never empty, but rather the bottom layer is always
+     * MathSymbolTableEntry.None.
+     * </p>
      */
-    private final Deque<SymbolTableEntry.Quantification> myActiveQuantifications = new LinkedList<>();
+    private final Deque<SymbolTableEntry.Quantification> myActiveQuantifications =
+            new LinkedList<>();
 
     /**
-     * <p>While we walk the children of a direct definition, this will be set
-     * with a pointer to the definition declaration we are walking, otherwise
-     * it will be null.  Note that definitions cannot be nested, so there's
-     * no need for a stack.</p>
+     * <p>
+     * While we walk the children of a direct definition, this will be set with
+     * a pointer to the
+     * definition declaration we are walking, otherwise it will be null. Note
+     * that definitions cannot
+     * be nested, so there's no need for a stack.
+     * </p>
      */
     private MathDefinitionDec myCurrentDirectDefinition;
 
     /**
-     * <p>This simply enables an error check--as a definition uses named types,
-     * we keep track of them, and when an implicit type is introduced, we make
-     * sure that it hasn't been "used" yet, thus leading to a confusing scenario
-     * where some instances of the name should refer to a type already in scope
-     * as the definition is declared and other instance refer to the implicit
-     * type parameter.</p>
+     * <p>
+     * This simply enables an error check--as a definition uses named types, we
+     * keep track of them,
+     * and when an implicit type is introduced, we make sure that it hasn't been
+     * "used" yet, thus
+     * leading to a confusing scenario where some instances of the name should
+     * refer to a type already
+     * in scope as the definition is declared and other instance refer to the
+     * implicit type parameter.
+     * </p>
      */
     private final Set<String> myDefinitionNamedTypes = new HashSet<>();
 
     /**
-     * <p>While walking the parameters of a definition, this flag will be set
-     * to true.</p>
+     * <p>
+     * While walking the parameters of a definition, this flag will be set to
+     * true.
+     * </p>
      */
     private boolean myDefinitionParameterSectionFlag = false;
 
     /**
-     * <p>A mapping for definition defined schematic types.</p>
+     * <p>
+     * A mapping for definition defined schematic types.
+     * </p>
      */
-    private final Map<String, MTType> myDefinitionSchematicTypes = new HashMap<>();
+    private final Map<String, MTType> myDefinitionSchematicTypes =
+            new HashMap<>();
 
     /**
-     * <p>A mapping from generic types that appear in the module to the math
-     * types that bound their possible values.</p>
+     * <p>
+     * A mapping from generic types that appear in the module to the math types
+     * that bound their
+     * possible values.
+     * </p>
      */
     private final Map<String, MTType> myGenericTypes = new HashMap<>();
 
     /**
-     * <p>An helper value that helps evaluate how deep is the expression
-     * we are trying to evaluate.</p>
+     * <p>
+     * An helper value that helps evaluate how deep is the expression we are
+     * trying to evaluate.
+     * </p>
      */
     private int myExpressionDepth = 0;
 
     /**
-     * <p>A flag that indicates whether or not we are binding an expression
-     * inside a type theorem.</p>
+     * <p>
+     * A flag that indicates whether or not we are binding an expression inside
+     * a type theorem.
+     * </p>
      */
     private boolean myInTypeTheoremBindingExpFlag = false;
 
     /**
-     * <p>An helper value that helps evaluate mathematical type values.</p>
+     * <p>
+     * An helper value that helps evaluate mathematical type values.
+     * </p>
      */
     private int myTypeValueDepth = 0;
 
@@ -268,24 +355,30 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
 
     private static final String FLAG_POPULATOR_NAME = "Populator";
-    private static final String FLAG_POPULATOR_DEBUG_INFO = "Populator Debug Flag";
+    private static final String FLAG_POPULATOR_DEBUG_INFO =
+            "Populator Debug Flag";
 
     // ===========================================================
     // Flags
     // ===========================================================
 
     /**
-     * <p>Tells the compiler to print out {@code Populator}/{@code TypeGraph} information messages.</p>
+     * <p>
+     * Tells the compiler to print out {@code Populator}/{@code TypeGraph}
+     * information messages.
+     * </p>
      */
-    public static final Flag FLAG_POPULATOR_DEBUG =
-            new Flag(FLAG_POPULATOR_NAME, "populatorDebug",
-                    FLAG_POPULATOR_DEBUG_INFO);
+    public static final Flag FLAG_POPULATOR_DEBUG = new Flag(
+            FLAG_POPULATOR_NAME, "populatorDebug", FLAG_POPULATOR_DEBUG_INFO);
 
     /**
-     * <p>Add all the required and implied flags for the {@code Populator}.</p>
+     * <p>
+     * Add all the required and implied flags for the {@code Populator}.
+     * </p>
      */
     public static void setUpFlags() {
-        FlagDependencies.addImplies(FLAG_POPULATOR_DEBUG, ResolveCompiler.FLAG_DEBUG);
+        FlagDependencies.addImplies(FLAG_POPULATOR_DEBUG,
+                ResolveCompiler.FLAG_DEBUG);
     }
 
     // ===========================================================
@@ -293,14 +386,19 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This creates an object that overrides methods to populate and analyze
-     * a generated {@link ModuleDec}.</p>
+     * <p>
+     * This creates an object that overrides methods to populate and analyze a
+     * generated
+     * {@link ModuleDec}.
+     * </p>
      *
      * @param builder A scope builder for a symbol table.
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
+     * @param compileEnvironment The current job's compilation environment that
+     *        stores all necessary
+     *        objects and flags.
      */
-    public Populator(MathSymbolTableBuilder builder, CompileEnvironment compileEnvironment) {
+    public Populator(MathSymbolTableBuilder builder,
+            CompileEnvironment compileEnvironment) {
         myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
         myTypeGraph = builder.getTypeGraph();
         myBuilder = builder;
@@ -313,7 +411,10 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>Code that gets executed after visiting any {@link ResolveConceptualElement}.</p>
+     * <p>
+     * Code that gets executed after visiting any
+     * {@link ResolveConceptualElement}.
+     * </p>
      *
      * @param e Any element that inherits from {@link ResolveConceptualElement}.
      */
@@ -322,20 +423,16 @@ public class Populator extends TreeWalkerVisitor {
         if (e instanceof Ty) {
             Ty eTy = (Ty) e;
             if (eTy.getMathTypeValue() == null) {
-                throw new NullMathTypeException(
-                        "Ty "
-                                + e
-                                + " ("
-                                + e.getClass()
-                                + ", "
-                                + e.getLocation()
-                                + ") got through the populator with no math type value.");
+                throw new NullMathTypeException("Ty " + e + " (" + e.getClass()
+                        + ", " + e.getLocation()
+                        + ") got through the populator with no math type value.");
             }
             if (!(e instanceof ArbitraryExpTy)
                     && eTy.getProgramType() == null) {
-                throw new NullProgramTypeException("Ty " + e + " (" + e.getClass()
-                        + ", " + e.getLocation() + ") got through the "
-                        + "populator with no program type value.");
+                throw new NullProgramTypeException(
+                        "Ty " + e + " (" + e.getClass() + ", " + e.getLocation()
+                                + ") got through the "
+                                + "populator with no program type value.");
             }
         }
     }
@@ -345,7 +442,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ModuleDec}.
+     * </p>
      *
      * @param dec A module declaration.
      */
@@ -357,7 +456,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ModuleDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ModuleDec}.
+     * </p>
      *
      * @param dec A module declaration.
      */
@@ -372,7 +473,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>This method redefines how a {@link ConceptModuleDec} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link ConceptModuleDec} should be walked.
+     * </p>
      *
      * @param dec A concept module declaration.
      *
@@ -421,24 +524,29 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ConceptRealizModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ConceptRealizModuleDec}.
+     * </p>
      *
      * @param conceptRealization A concept realization module declaration.
      */
     @Override
-    public final void preConceptRealizModuleDec(ConceptRealizModuleDec conceptRealization) {
+    public final void preConceptRealizModuleDec(
+            ConceptRealizModuleDec conceptRealization) {
         // Concept Module Identifier
-        ModuleIdentifier id =
-                new ModuleIdentifier(conceptRealization.getConceptName().getName());
+        ModuleIdentifier id = new ModuleIdentifier(
+                conceptRealization.getConceptName().getName());
 
         // Check if the concept realization implements all operations specified
         // by the concept.
         try {
-            ConceptModuleDec concept =
-                    (ConceptModuleDec) myBuilder.getModuleScope(id)
-                            .getDefiningElement();
-            ImplementAllOperChecker allOperChecker = new ImplementAllOperChecker(conceptRealization.getLocation(),
-                    concept.getDecList(), conceptRealization.getDecList());
+            ConceptModuleDec concept = (ConceptModuleDec) myBuilder
+                    .getModuleScope(id).getDefiningElement();
+            ImplementAllOperChecker allOperChecker =
+                    new ImplementAllOperChecker(
+                            conceptRealization.getLocation(),
+                            concept.getDecList(),
+                            conceptRealization.getDecList());
             allOperChecker.implementAllOper();
         }
         catch (NoSuchSymbolException e) {
@@ -450,14 +558,18 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link ConceptRealizModuleDec} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link ConceptRealizModuleDec} should be
+     * walked.
+     * </p>
      *
      * @param dec A concept realization module declaration.
      *
      * @return {@code true}
      */
     @Override
-    public final boolean walkConceptRealizModuleDec(ConceptRealizModuleDec dec) {
+    public final boolean
+            walkConceptRealizModuleDec(ConceptRealizModuleDec dec) {
         preAny(dec);
         preDec(dec);
         preModuleDec(dec);
@@ -494,19 +606,25 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting an {@link EnhancementModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting an {@link EnhancementModuleDec}.
+     * </p>
      *
      * @param enhancement An enhancement module declaration.
      */
     @Override
-    public final void preEnhancementModuleDec(EnhancementModuleDec enhancement) {
+    public final void
+            preEnhancementModuleDec(EnhancementModuleDec enhancement) {
         // Enhancements implicitly import the concepts they enhance
-        myCurModuleScope.addImport(new ModuleIdentifier(enhancement
-                .getConceptName().getName()));
+        myCurModuleScope.addImport(
+                new ModuleIdentifier(enhancement.getConceptName().getName()));
     }
 
     /**
-     * <p>This method redefines how an {@link EnhancementModuleDec} should be walked.</p>
+     * <p>
+     * This method redefines how an {@link EnhancementModuleDec} should be
+     * walked.
+     * </p>
      *
      * @param dec An enhancement module declaration.
      *
@@ -550,31 +668,35 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting an {@link EnhancementRealizModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting an
+     * {@link EnhancementRealizModuleDec}.
+     * </p>
      *
-     * @param enhancementRealization An enhancement realization module declaration.
+     * @param enhancementRealization An enhancement realization module
+     *        declaration.
      */
     @Override
-    public final void preEnhancementRealizModuleDec(EnhancementRealizModuleDec enhancementRealization) {
+    public final void preEnhancementRealizModuleDec(
+            EnhancementRealizModuleDec enhancementRealization) {
         // Concept Module Identifier
-        ModuleIdentifier coId =
-                new ModuleIdentifier(enhancementRealization.getConceptName()
-                        .getName());
+        ModuleIdentifier coId = new ModuleIdentifier(
+                enhancementRealization.getConceptName().getName());
 
         // Enhancement Module Identifier
-        ModuleIdentifier enId =
-                new ModuleIdentifier(enhancementRealization
-                        .getEnhancementName().getName());
+        ModuleIdentifier enId = new ModuleIdentifier(
+                enhancementRealization.getEnhancementName().getName());
 
         // Check if the enhancement realization implements all operations specified
         // by the enhancement.
         try {
-            EnhancementModuleDec enhancement =
-                    (EnhancementModuleDec) myBuilder.getModuleScope(enId)
-                            .getDefiningElement();
+            EnhancementModuleDec enhancement = (EnhancementModuleDec) myBuilder
+                    .getModuleScope(enId).getDefiningElement();
             ImplementAllOperChecker allOperChecker =
-                    new ImplementAllOperChecker(enhancementRealization.getLocation(),
-                            enhancement.getDecList(), enhancementRealization.getDecList());
+                    new ImplementAllOperChecker(
+                            enhancementRealization.getLocation(),
+                            enhancement.getDecList(),
+                            enhancementRealization.getDecList());
             allOperChecker.implementAllOper();
         }
         catch (NoSuchSymbolException e) {
@@ -590,20 +712,24 @@ public class Populator extends TreeWalkerVisitor {
         // if they are specified.
         PosSymbol profileName = enhancementRealization.getProfileName();
         if (profileName != null) {
-            myCurModuleScope.addImport(new ModuleIdentifier(profileName
-                    .getName()));
+            myCurModuleScope
+                    .addImport(new ModuleIdentifier(profileName.getName()));
         }
     }
 
     /**
-     * <p>This method redefines how an {@link EnhancementRealizModuleDec} should be walked.</p>
+     * <p>
+     * This method redefines how an {@link EnhancementRealizModuleDec} should be
+     * walked.
+     * </p>
      *
      * @param dec An enhancement realization module declaration.
      *
      * @return {@code true}
      */
     @Override
-    public final boolean walkEnhancementRealizModuleDec(EnhancementRealizModuleDec dec) {
+    public final boolean
+            walkEnhancementRealizModuleDec(EnhancementRealizModuleDec dec) {
         preAny(dec);
         preDec(dec);
         preModuleDec(dec);
@@ -640,15 +766,19 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link PerformanceConceptModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link PerformanceConceptModuleDec}.
+     * </p>
      *
      * @param conceptProfile A concept profile module declaration.
      */
     @Override
-    public final void prePerformanceConceptModuleDec(PerformanceConceptModuleDec conceptProfile) {
+    public final void prePerformanceConceptModuleDec(
+            PerformanceConceptModuleDec conceptProfile) {
         // Concept performance profiles implicitly import the concepts they are profiling
-        myCurModuleScope.addImport(new ModuleIdentifier(conceptProfile.
-                getConceptName().getName()));
+        myCurModuleScope.addImport(new ModuleIdentifier(
+                conceptProfile.getConceptName().getName()));
     }
 
     // -----------------------------------------------------------
@@ -656,20 +786,24 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link PerformanceEnhancementModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link PerformanceEnhancementModuleDec}.
+     * </p>
      *
      * @param enhancementProfile An enhancement profile module declaration.
      */
     @Override
-    public final void prePerformanceEnhancementModuleDec(PerformanceEnhancementModuleDec enhancementProfile) {
+    public final void prePerformanceEnhancementModuleDec(
+            PerformanceEnhancementModuleDec enhancementProfile) {
         // Enhancement performance profiles implicitly import the concepts,
         // concept profile and enhancement they are profiling.
-        myCurModuleScope.addImport(new ModuleIdentifier(enhancementProfile.
-                getConceptName().getName()));
-        myCurModuleScope.addImport(new ModuleIdentifier(enhancementProfile.
-                getConceptProfileName().getName()));
-        myCurModuleScope.addImport(new ModuleIdentifier(enhancementProfile.
-                getEnhancementName().getName()));
+        myCurModuleScope.addImport(new ModuleIdentifier(
+                enhancementProfile.getConceptName().getName()));
+        myCurModuleScope.addImport(new ModuleIdentifier(
+                enhancementProfile.getConceptProfileName().getName()));
+        myCurModuleScope.addImport(new ModuleIdentifier(
+                enhancementProfile.getEnhancementName().getName()));
     }
 
     // -----------------------------------------------------------
@@ -677,7 +811,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting a {@link UsesItem}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link UsesItem}.
+     * </p>
      *
      * @param uses An uses item declaration.
      */
@@ -690,13 +826,16 @@ public class Populator extends TreeWalkerVisitor {
 
         // Check if we are importing a sharing concept.
         try {
-            ModuleDec moduleDec = myBuilder.getModuleScope(id).getDefiningElement();
+            ModuleDec moduleDec =
+                    myBuilder.getModuleScope(id).getDefiningElement();
             NoSharingConceptImportChecker checker =
                     new NoSharingConceptImportChecker(uses.getLocation(),
                             moduleDec, myBuilder.getInnermostActiveScope());
             if (checker.importingSharingConcept()) {
-                throw new SourceErrorException("Cannot import a Sharing Concept or a module that " +
-                        "contains an instantiation of a Sharing Concept.", uses.getLocation());
+                throw new SourceErrorException(
+                        "Cannot import a Sharing Concept or a module that "
+                                + "contains an instantiation of a Sharing Concept.",
+                        uses.getLocation());
             }
         }
         catch (NoSuchSymbolException e) {
@@ -709,7 +848,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting a {@link ModuleParameterDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ModuleParameterDec}.
+     * </p>
      *
      * @param d A module parameter declaration.
      */
@@ -717,8 +858,8 @@ public class Populator extends TreeWalkerVisitor {
     public final void postModuleParameterDec(ModuleParameterDec d) {
         if (!(d.getWrappedDec() instanceof OperationDec)) {
             if (d.getWrappedDec().getMathType() == null) {
-                throw new NullMathTypeException(d.getWrappedDec().getClass()
-                        + " has null type");
+                throw new NullMathTypeException(
+                        d.getWrappedDec().getClass() + " has null type");
             }
 
             d.setMathType(d.getWrappedDec().getMathType());
@@ -733,7 +874,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ConceptTypeParamDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ConceptTypeParamDec}.
+     * </p>
      *
      * @param param A concept type parameter declaration.
      */
@@ -743,19 +886,22 @@ public class Populator extends TreeWalkerVisitor {
             String paramName = param.getName().getName();
 
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
-                    param, ProgramParameterEntry.ParameterMode.TYPE, new PTElement(myTypeGraph));
+                    param, ProgramParameterEntry.ParameterMode.TYPE,
+                    new PTElement(myTypeGraph));
 
             myGenericTypes.put(paramName, myTypeGraph.SSET);
             param.setMathType(myTypeGraph.SSET);
         }
         catch (DuplicateSymbolException dse) {
-            duplicateSymbol(param.getName().getName(), param.getName()
-                    .getLocation());
+            duplicateSymbol(param.getName().getName(),
+                    param.getName().getLocation());
         }
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ConstantParamDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ConstantParamDec}.
+     * </p>
      *
      * @param param A constant parameter declaration.
      */
@@ -771,13 +917,15 @@ public class Populator extends TreeWalkerVisitor {
             param.setMathType(rawType.getMathTypeValue());
         }
         catch (DuplicateSymbolException dse) {
-            duplicateSymbol(param.getName().getName(), param.getName()
-                    .getLocation());
+            duplicateSymbol(param.getName().getName(),
+                    param.getName().getLocation());
         }
     }
 
     /**
-     * <p>This method redefines how a {@link ConstantParamDec} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link ConstantParamDec} should be walked.
+     * </p>
      *
      * @param param A constant parameter declaration.
      *
@@ -807,7 +955,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link TypeDefinitionDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link TypeDefinitionDec}.
+     * </p>
      *
      * @param dec A mathematical type definition declaration.
      */
@@ -820,7 +970,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link TypeDefinitionDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link TypeDefinitionDec}.
+     * </p>
      *
      * @param dec A mathematical type definition declaration.
      */
@@ -835,9 +987,9 @@ public class Populator extends TreeWalkerVisitor {
         addBinding(definitionSymbol, dec.getName().getLocation(), dec,
                 declaredType, typeValue, myDefinitionSchematicTypes);
 
-        emitDebug(dec.getLocation(), "\t\tNew type definition: "
-                + definitionSymbol + " of type " + declaredType
-                + " with type value " + typeValue);
+        emitDebug(dec.getLocation(),
+                "\t\tNew type definition: " + definitionSymbol + " of type "
+                        + declaredType + " with type value " + typeValue);
 
         myCurrentDirectDefinition = null;
         myDefinitionSchematicTypes.clear();
@@ -850,7 +1002,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting a {@link MathAssertionDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link MathAssertionDec}.
+     * </p>
      *
      * @param dec A mathematical assertion declaration.
      */
@@ -873,7 +1027,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link MathDefinitionDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link MathDefinitionDec}.
+     * </p>
      *
      * @param dec A mathematical definition declaration.
      */
@@ -890,8 +1046,11 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting the list of parameter declarations
-     * inside a {@link MathDefinitionDec}.</p>
+     * <p>
+     * Code that gets executed before visiting the list of parameter
+     * declarations inside a
+     * {@link MathDefinitionDec}.
+     * </p>
      *
      * @param dec A mathematical definition declaration.
      */
@@ -901,8 +1060,11 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting the list of parameter declarations
-     * inside a {@link MathDefinitionDec}.</p>
+     * <p>
+     * Code that gets executed after visiting the list of parameter declarations
+     * inside a
+     * {@link MathDefinitionDec}.
+     * </p>
      *
      * @param dec A mathematical definition declaration.
      */
@@ -912,7 +1074,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed in between visiting items inside {@link MathDefinitionDec}.</p>
+     * <p>
+     * Code that gets executed in between visiting items inside
+     * {@link MathDefinitionDec}.
+     * </p>
      *
      * @param dec A mathematical definition declaration.
      * @param prevChild The previous child item visited.
@@ -920,8 +1085,10 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void midMathDefinitionDec(MathDefinitionDec dec,
-            ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
-        if (dec.getIsInductiveFlag() && nextChild instanceof DefinitionBodyItem) {
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        if (dec.getIsInductiveFlag()
+                && nextChild instanceof DefinitionBodyItem) {
             try {
                 myBuilder.getInnermostActiveScope().addBinding(
                         dec.getName().getName(), dec,
@@ -934,7 +1101,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link MathDefinitionDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link MathDefinitionDec}.
+     * </p>
      *
      * @param dec A mathematical definition declaration.
      */
@@ -970,8 +1139,8 @@ public class Populator extends TreeWalkerVisitor {
         addBinding(definitionSymbol, dec.getName().getLocation(), dec,
                 declaredType, typeValue, myDefinitionSchematicTypes);
 
-        emitDebug(dec.getLocation(), "\t\tNew definition: " + definitionSymbol + " of type "
-                + declaredType
+        emitDebug(dec.getLocation(), "\t\tNew definition: " + definitionSymbol
+                + " of type " + declaredType
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
         myCurrentDirectDefinition = null;
@@ -981,7 +1150,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link MathDefVariableDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link MathDefVariableDec}.
+     * </p>
      *
      * @param dec A mathematical definition variable declaration.
      */
@@ -993,7 +1164,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link MathDefVariableDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link MathDefVariableDec}.
+     * </p>
      *
      * @param dec A mathematical definition variable declaration.
      */
@@ -1009,7 +1182,7 @@ public class Populator extends TreeWalkerVisitor {
         // Make sure that our definition matches the declared type
         if (dec.getDefinitionAsExp() != null) {
             // TODO (YS): Try to see why our definition variable's type doesn't match the definition.
-            //expectType(dec.getDefinitionAsExp(), declaredType);
+            // expectType(dec.getDefinitionAsExp(), declaredType);
         }
 
         String definitionSymbol = varDec.getName().getName();
@@ -1022,12 +1195,12 @@ public class Populator extends TreeWalkerVisitor {
         // Note that, even if typeValue is null at this point, if declaredType
         // returns true from knownToContainOnlyMTypes(), a new type value will
         // still be created by the symbol table
-        myCurModuleScope.addBinding(definitionSymbol, SymbolTableEntry.Quantification.NONE,
-                dec, declaredType, typeValue, myDefinitionSchematicTypes, myGenericTypes);
+        myCurModuleScope.addBinding(definitionSymbol,
+                SymbolTableEntry.Quantification.NONE, dec, declaredType,
+                typeValue, myDefinitionSchematicTypes, myGenericTypes);
 
         emitDebug(dec.getLocation(), "\t\tNew definition variable: "
-                + definitionSymbol + " of type "
-                + declaredType
+                + definitionSymbol + " of type " + declaredType
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
         myCurrentDirectDefinition = null;
@@ -1037,7 +1210,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link MathDefVariableDec} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link MathDefVariableDec} should be walked.
+     * </p>
      *
      * @param dec A mathematical definition variable declaration.
      *
@@ -1067,7 +1242,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link MathTypeTheoremDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link MathTypeTheoremDec}.
+     * </p>
      *
      * @param dec A mathematical type theorem declaration.
      */
@@ -1079,19 +1256,25 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting the list of universal variable declarations
-     * inside a {@link MathTypeTheoremDec}.</p>
+     * <p>
+     * Code that gets executed after visiting the list of universal variable
+     * declarations inside a
+     * {@link MathTypeTheoremDec}.
+     * </p>
      *
      * @param dec A mathematical type theorem declaration.
      */
     @Override
-    public final void postMathTypeTheoremDecMyUniversalVars(MathTypeTheoremDec dec) {
+    public final void
+            postMathTypeTheoremDecMyUniversalVars(MathTypeTheoremDec dec) {
         myInTypeTheoremBindingExpFlag = true;
         myActiveQuantifications.pop();
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link MathTypeTheoremDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link MathTypeTheoremDec}.
+     * </p>
      *
      * @param dec A mathematical type theorem declaration.
      */
@@ -1117,7 +1300,8 @@ public class Populator extends TreeWalkerVisitor {
                 }
             }
             else {
-                condition = MathExp.getTrueVarExp(dec.getLocation(), myTypeGraph);
+                condition =
+                        MathExp.getTrueVarExp(dec.getLocation(), myTypeGraph);
             }
 
             TypeAssertionExp assertionAsTAE = (TypeAssertionExp) assertion;
@@ -1126,19 +1310,20 @@ public class Populator extends TreeWalkerVisitor {
             typeExp = assertionAsTAE.getAssertedTy();
 
             try {
-                myTypeGraph.addRelationship(bindingExpression, typeExp
-                        .getMathTypeValue(), condition, myBuilder
-                        .getInnermostActiveScope());
+                myTypeGraph.addRelationship(bindingExpression,
+                        typeExp.getMathTypeValue(), condition,
+                        myBuilder.getInnermostActiveScope());
             }
             catch (IllegalArgumentException iae) {
-                throw new SourceErrorException(iae.getMessage(), dec
-                        .getLocation());
+                throw new SourceErrorException(iae.getMessage(),
+                        dec.getLocation());
             }
         }
         catch (ClassCastException cse) {
-            throw new SourceErrorException("top level of type theorem "
-                    + "assertion must be 'implies' or ':'", assertion
-                    .getLocation());
+            throw new SourceErrorException(
+                    "top level of type theorem "
+                            + "assertion must be 'implies' or ':'",
+                    assertion.getLocation());
         }
 
         myBuilder.endScope();
@@ -1149,14 +1334,17 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting a {@link FacilityDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link FacilityDec}.
+     * </p>
      *
      * @param facility A facility declaration.
      */
     @Override
     public final void postFacilityDec(FacilityDec facility) {
         // Sanity check the facility declaration
-        ValidFacilityDeclChecker facilityDeclChecker = new ValidFacilityDeclChecker(facility, myBuilder);
+        ValidFacilityDeclChecker facilityDeclChecker =
+                new ValidFacilityDeclChecker(facility, myBuilder);
         facilityDeclChecker.hasValidModuleArgumentItems();
 
         // Concept Module Identifier
@@ -1165,22 +1353,24 @@ public class Populator extends TreeWalkerVisitor {
 
         // Check to see if we are instantiating a sharing concept
         try {
-            ConceptModuleDec concept =
-                    (ConceptModuleDec) myBuilder.getModuleScope(id)
-                            .getDefiningElement();
-            myBuilder.getInnermostActiveScope().addFacility(facility, concept.isSharingConcept());
+            ConceptModuleDec concept = (ConceptModuleDec) myBuilder
+                    .getModuleScope(id).getDefiningElement();
+            myBuilder.getInnermostActiveScope().addFacility(facility,
+                    concept.isSharingConcept());
         }
         catch (NoSuchSymbolException e) {
             noSuchModule(facility.getConceptName());
         }
         catch (DuplicateSymbolException dse) {
-            duplicateSymbol(facility.getName().getName(), facility.getName()
-                    .getLocation());
+            duplicateSymbol(facility.getName().getName(),
+                    facility.getName().getLocation());
         }
     }
 
     /**
-     * <p>This method redefines how a {@link ModuleArgumentItem} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link ModuleArgumentItem} should be walked.
+     * </p>
      *
      * @param item A module argument item from a facility declaration.
      *
@@ -1192,7 +1382,7 @@ public class Populator extends TreeWalkerVisitor {
 
         // YS - There are two possible scenarios for a module argument item.
         // 1. It is a program variable name that refers to some definition,
-        //    operation or type.
+        // operation or type.
         // 2. It is a program expression that is getting evaluated.
         // For #1, we will need to query for a symbol table entry with the
         // same name and assign whatever type we find. Sanity checking happens
@@ -1205,15 +1395,17 @@ public class Populator extends TreeWalkerVisitor {
             // possibly pass a ProgramVariableDotExp in a module argument item
             // that isn't used as an evaluated expression. If this ever comes up,
             // we will need to do some kind of special logic.
-            ProgramVariableNameExp argExpAsProgVarNameExp = (ProgramVariableNameExp) argumentExp;
-            List<SymbolTableEntry> es =
-                    myBuilder.getInnermostActiveScope().query(
-                            new NameQuery(argExpAsProgVarNameExp.getQualifier(),
-                                    argExpAsProgVarNameExp.getName(), ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE, false));
+            ProgramVariableNameExp argExpAsProgVarNameExp =
+                    (ProgramVariableNameExp) argumentExp;
+            List<SymbolTableEntry> es = myBuilder.getInnermostActiveScope()
+                    .query(new NameQuery(argExpAsProgVarNameExp.getQualifier(),
+                            argExpAsProgVarNameExp.getName(),
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_INSTANTIATE, false));
 
             if (es.isEmpty()) {
-                noSuchSymbol(argExpAsProgVarNameExp.getQualifier(), argExpAsProgVarNameExp.getName());
+                noSuchSymbol(argExpAsProgVarNameExp.getQualifier(),
+                        argExpAsProgVarNameExp.getName());
             }
             else if (es.size() > 1) {
                 ambiguousSymbol(argExpAsProgVarNameExp.getName(), es);
@@ -1227,31 +1419,36 @@ public class Populator extends TreeWalkerVisitor {
                     // Store it's math type
                     if (rce instanceof TypeFamilyDec) {
                         pt = ste.toProgramTypeEntry(
-                                argExpAsProgVarNameExp.getLocation()).getProgramType();
+                                argExpAsProgVarNameExp.getLocation())
+                                .getProgramType();
                     }
                     else if (rce instanceof OperationDec
                             || rce instanceof OperationProcedureDec) {
                         pt = ste.toOperationEntry(
-                                argExpAsProgVarNameExp.getLocation()).getReturnType();
+                                argExpAsProgVarNameExp.getLocation())
+                                .getReturnType();
                     }
                     else if (rce instanceof FacilityTypeRepresentationDec) {
                         pt = ste.toFacilityTypeRepresentationEntry(
-                                argExpAsProgVarNameExp.getLocation()).getRepresentationType();
+                                argExpAsProgVarNameExp.getLocation())
+                                .getRepresentationType();
                     }
                     else {
                         pt = ste.toProgramVariableEntry(
-                                argExpAsProgVarNameExp.getLocation()).getProgramType();
+                                argExpAsProgVarNameExp.getLocation())
+                                .getProgramType();
                     }
                     argExpAsProgVarNameExp.setMathType(pt.toMath());
 
                     // Store it's program type
-                    ProgramTypeEntry e =
-                            ste.toProgramTypeEntry(argExpAsProgVarNameExp.getLocation());
+                    ProgramTypeEntry e = ste.toProgramTypeEntry(
+                            argExpAsProgVarNameExp.getLocation());
                     argExpAsProgVarNameExp.setProgramType(e.getProgramType());
                 }
                 catch (SourceErrorException see) {
                     // YS - Our sanity check will detect this as an error.
-                    argExpAsProgVarNameExp.setProgramType(PTVoid.getInstance(myTypeGraph));
+                    argExpAsProgVarNameExp
+                            .setProgramType(PTVoid.getInstance(myTypeGraph));
                 }
             }
         }
@@ -1269,7 +1466,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting an {@link OperationProcedureDec}.</p>
+     * <p>
+     * Code that gets executed before visiting an {@link OperationProcedureDec}.
+     * </p>
      *
      * @param dec A local operation with procedure declaration.
      */
@@ -1288,7 +1487,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link OperationProcedureDec}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link OperationProcedureDec}.
+     * </p>
      *
      * @param dec A local operation with procedure declaration.
      */
@@ -1298,8 +1499,10 @@ public class Populator extends TreeWalkerVisitor {
 
         // Sanity checks to make sure it is a valid recursive procedure
         ValidOperationDeclChecker validOperationDeclChecker =
-                new ValidOperationDeclChecker(dec.getLocation(), myCorrespondingOperation, myCurrentParameters);
-        validOperationDeclChecker.isValidRecursiveProcedure(dec.getRecursive(), myRecursiveCallLocation);
+                new ValidOperationDeclChecker(dec.getLocation(),
+                        myCorrespondingOperation, myCurrentParameters);
+        validOperationDeclChecker.isValidRecursiveProcedure(dec.getRecursive(),
+                myRecursiveCallLocation);
 
         myCurrentParameters = null;
         myPreOperationProcedureDecScope = null;
@@ -1308,7 +1511,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting an {@link OperationDec}.</p>
+     * <p>
+     * Code that gets executed before visiting an {@link OperationDec}.
+     * </p>
      *
      * @param dec An operation declaration.
      */
@@ -1325,47 +1530,53 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed in between visiting items inside {@link OperationDec}.</p>
+     * <p>
+     * Code that gets executed in between visiting items inside
+     * {@link OperationDec}.
+     * </p>
      *
      * @param node An operation declaration.
      * @param prevChild The previous child item visited.
      * @param nextChild The next child item to be visited.
      */
     @Override
-    public final void midOperationDec(OperationDec node, ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+    public final void midOperationDec(OperationDec node,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
         // If this is not an OperationDec wrapped inside a OperationProcedureDec,
         // then we need to add the return variable as a mathematical symbol to the OperationDec scope.
         if (myCurrentLocalProcedure == null) {
             if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
                 try {
-                    //Inside the operation's assertions, the name of the operation
-                    //refers to its return value
+                    // Inside the operation's assertions, the name of the operation
+                    // refers to its return value
                     myBuilder.getInnermostActiveScope().addBinding(
                             node.getName().getName(), node,
                             node.getReturnTy().getMathTypeValue());
                 }
                 catch (DuplicateSymbolException dse) {
-                    //This shouldn't be possible--the operation declaration has a
-                    //scope all its own and we're the first ones to get to
-                    //introduce anything
+                    // This shouldn't be possible--the operation declaration has a
+                    // scope all its own and we're the first ones to get to
+                    // introduce anything
                     throw new RuntimeException(dse);
                 }
             }
         }
-        // Else we need to add the return variable as a programming variable to the OperationProcedureDec scope.
+        // Else we need to add the return variable as a programming variable to the
+        // OperationProcedureDec scope.
         else {
             if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
                 try {
-                    //Inside the operation's assertions, the name of the operation
-                    //refers to its return value
+                    // Inside the operation's assertions, the name of the operation
+                    // refers to its return value
                     myBuilder.getInnermostActiveScope().addProgramVariable(
                             node.getName().getName(), node,
                             node.getReturnTy().getProgramType());
                 }
                 catch (DuplicateSymbolException dse) {
-                    //This shouldn't be possible--the operation declaration has a
-                    //scope all its own and we're the first ones to get to
-                    //introduce anything
+                    // This shouldn't be possible--the operation declaration has a
+                    // scope all its own and we're the first ones to get to
+                    // introduce anything
                     throw new RuntimeException(dse);
                 }
             }
@@ -1373,7 +1584,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link OperationDec}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link OperationDec}.
+     * </p>
      *
      * @param dec An operation declaration.
      */
@@ -1385,17 +1598,16 @@ public class Populator extends TreeWalkerVisitor {
         if (myCurrentLocalProcedure == null) {
             myBuilder.endScope();
 
-            putOperationLikeThingInSymbolTable(dec.getName(),
-                    dec.getReturnTy(), dec, myBuilder.getInnermostActiveScope());
+            putOperationLikeThingInSymbolTable(dec.getName(), dec.getReturnTy(),
+                    dec, myBuilder.getInnermostActiveScope());
 
             myCurrentParameters = null;
         }
         // Else we need to add the OperationProcedureDec to the SymbolTable
         // using the stored pre-OperationProcedureDec scope.
         else {
-            putOperationLikeThingInSymbolTable(dec.getName(),
-                    dec.getReturnTy(), myCurrentLocalProcedure,
-                    myPreOperationProcedureDecScope);
+            putOperationLikeThingInSymbolTable(dec.getName(), dec.getReturnTy(),
+                    myCurrentLocalProcedure, myPreOperationProcedureDecScope);
 
             // Similar to preProcedureDec, need to store the OperationEntry for
             // walking the statements.
@@ -1403,24 +1615,17 @@ public class Populator extends TreeWalkerVisitor {
                 // Figure out what Operation we correspond to (we don't use
                 // OperationQuery because we want to check parameter types
                 // separately in postProcedureDec)
-                myCorrespondingOperation =
-                        myBuilder
-                                .getInnermostActiveScope()
-                                .queryForOne(
-                                        new NameAndEntryTypeQuery<>(
-                                                null,
-                                                dec.getName(),
-                                                OperationEntry.class,
-                                                ImportStrategy.IMPORT_NAMED,
-                                                FacilityStrategy.FACILITY_IGNORE,
-                                                false)).toOperationEntry(
-                                dec.getLocation());
+                myCorrespondingOperation = myBuilder.getInnermostActiveScope()
+                        .queryForOne(new NameAndEntryTypeQuery<>(null,
+                                dec.getName(), OperationEntry.class,
+                                ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_IGNORE, false))
+                        .toOperationEntry(dec.getLocation());
             }
             catch (NoSuchSymbolException nsse) {
-                //We just added this, so this is not possible.
-                throw new RuntimeException(
-                        "Cannot find an Operation with name "
-                                + dec.getName().getName() + "?");
+                // We just added this, so this is not possible.
+                throw new RuntimeException("Cannot find an Operation with name "
+                        + dec.getName().getName() + "?");
             }
             catch (DuplicateSymbolException dse) {
                 // We should have caught this before now, like when we defined the
@@ -1432,23 +1637,24 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProcedureDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ProcedureDec}.
+     * </p>
      *
      * @param dec A procedure declaration.
      */
     @Override
     public final void preProcedureDec(ProcedureDec dec) {
         try {
-            //Figure out what Operation we correspond to (we don't use
-            //OperationQuery because we want to check parameter types
-            //separately in postProcedureDec)
-            myCorrespondingOperation =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameAndEntryTypeQuery<>(null, dec.getName(),
-                                    OperationEntry.class,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_IGNORE, false))
-                            .toOperationEntry(dec.getLocation());
+            // Figure out what Operation we correspond to (we don't use
+            // OperationQuery because we want to check parameter types
+            // separately in postProcedureDec)
+            myCorrespondingOperation = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new NameAndEntryTypeQuery<>(null,
+                            dec.getName(), OperationEntry.class,
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_IGNORE, false))
+                    .toOperationEntry(dec.getLocation());
 
             myBuilder.startScope(dec);
 
@@ -1460,21 +1666,24 @@ public class Populator extends TreeWalkerVisitor {
             myRecursiveCallLocation = null;
         }
         catch (NoSuchSymbolException nsse) {
-            throw new SourceErrorException("Procedure "
-                    + dec.getName().getName()
-                    + " does not implement any known operation.", dec.getName()
-                    .getLocation());
+            throw new SourceErrorException(
+                    "Procedure " + dec.getName().getName()
+                            + " does not implement any known operation.",
+                    dec.getName().getLocation());
         }
         catch (DuplicateSymbolException dse) {
-            //We should have caught this before now, like when we defined the
-            //duplicate Operation
+            // We should have caught this before now, like when we defined the
+            // duplicate Operation
             throw new RuntimeException("Duplicate Operations for "
                     + dec.getName().getName() + "?");
         }
     }
 
     /**
-     * <p>Code that gets executed in between visiting items inside {@link ProcedureDec}.</p>
+     * <p>
+     * Code that gets executed in between visiting items inside
+     * {@link ProcedureDec}.
+     * </p>
      *
      * @param node An operation declaration.
      * @param prevChild The previous child item visited.
@@ -1482,7 +1691,8 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void midProcedureDec(ProcedureDec node,
-            ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
         if (prevChild != null && prevChild == node.getReturnTy()) {
             try {
                 myBuilder.getInnermostActiveScope().addProgramVariable(
@@ -1490,14 +1700,16 @@ public class Populator extends TreeWalkerVisitor {
                         node.getReturnTy().getProgramType());
             }
             catch (DuplicateSymbolException dse) {
-                duplicateSymbol(node.getName().getName(), node.getName()
-                        .getLocation());
+                duplicateSymbol(node.getName().getName(),
+                        node.getName().getLocation());
             }
         }
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ProcedureDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ProcedureDec}.
+     * </p>
      *
      * @param dec A procedure declaration.
      */
@@ -1506,7 +1718,7 @@ public class Populator extends TreeWalkerVisitor {
         myBuilder.endScope();
 
         // We're about to throw away all information about procedure parameters,
-        // since they're redundant anyway.  So we sanity-check them first.
+        // since they're redundant anyway. So we sanity-check them first.
         Ty returnTy = dec.getReturnTy();
         PTType returnType;
         if (returnTy == null) {
@@ -1518,19 +1730,21 @@ public class Populator extends TreeWalkerVisitor {
 
         // Various different sanity checks
         ValidOperationDeclChecker validOperationDeclChecker =
-                new ValidOperationDeclChecker(dec.getLocation(), myCorrespondingOperation, myCurrentParameters);
+                new ValidOperationDeclChecker(dec.getLocation(),
+                        myCorrespondingOperation, myCurrentParameters);
         validOperationDeclChecker.isSameReturnType(returnType);
         validOperationDeclChecker.isSameNumberOfParameters();
         validOperationDeclChecker.hasValidParameterModesImpl();
-        validOperationDeclChecker.isValidRecursiveProcedure(dec.getRecursive(), myRecursiveCallLocation);
+        validOperationDeclChecker.isValidRecursiveProcedure(dec.getRecursive(),
+                myRecursiveCallLocation);
 
         try {
             myBuilder.getInnermostActiveScope().addProcedure(
                     dec.getName().getName(), dec, myCorrespondingOperation);
         }
         catch (DuplicateSymbolException dse) {
-            duplicateSymbol(dec.getName().getName(), dec.getName()
-                    .getLocation());
+            duplicateSymbol(dec.getName().getName(),
+                    dec.getName().getLocation());
         }
 
         myCurrentParameters = null;
@@ -1538,7 +1752,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link PerformanceOperationDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link PerformanceOperationDec}.
+     * </p>
      *
      * @param dec A performance operation declaration.
      */
@@ -1548,23 +1765,22 @@ public class Populator extends TreeWalkerVisitor {
             // Figure out what Operation we correspond to (we don't use
             // OperationQuery because we want to check parameter types
             // separately in postProcedureDec)
-            myCorrespondingOperation =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameAndEntryTypeQuery<>(null, dec.getName(),
-                                    OperationEntry.class,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_IGNORE, false))
-                            .toOperationEntry(dec.getLocation());
+            myCorrespondingOperation = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new NameAndEntryTypeQuery<>(null,
+                            dec.getName(), OperationEntry.class,
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_IGNORE, false))
+                    .toOperationEntry(dec.getLocation());
 
             myBuilder.startScope(dec);
 
             myCurrentParameters = new LinkedList<>();
         }
         catch (NoSuchSymbolException nsse) {
-            throw new SourceErrorException("Operation Profile "
-                    + dec.getName().getName()
-                    + " does not profile any known operation.", dec.getName()
-                    .getLocation());
+            throw new SourceErrorException(
+                    "Operation Profile " + dec.getName().getName()
+                            + " does not profile any known operation.",
+                    dec.getName().getLocation());
         }
         catch (DuplicateSymbolException dse) {
             // We should have caught this before now, like when we defined the
@@ -1575,7 +1791,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link PerformanceOperationDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link PerformanceOperationDec}.
+     * </p>
      *
      * @param dec A performance operation declaration.
      */
@@ -1588,8 +1806,8 @@ public class Populator extends TreeWalkerVisitor {
                     dec.getName().getName(), dec, myCorrespondingOperation);
         }
         catch (DuplicateSymbolException dse) {
-            duplicateSymbol(dec.getName().getName(), dec.getName()
-                    .getLocation());
+            duplicateSymbol(dec.getName().getName(),
+                    dec.getName().getLocation());
         }
 
         myCurrentParameters = null;
@@ -1600,26 +1818,32 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting a {@link FuncAssignStmt}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link FuncAssignStmt}.
+     * </p>
      *
      * @param stmt A function assignment statement.
      */
     @Override
     public final void postFuncAssignStmt(FuncAssignStmt stmt) {
         // Sanity check to make sure left and right program types are the same.
-        SameProgTypeChecker checker = new SameProgTypeChecker(stmt.getVariableExp(), stmt.getAssignExp());
+        SameProgTypeChecker checker = new SameProgTypeChecker(
+                stmt.getVariableExp(), stmt.getAssignExp());
         checker.hasSameProgrammingType();
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link SwapStmt}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link SwapStmt}.
+     * </p>
      *
      * @param stmt A swap statement.
      */
     @Override
     public final void postSwapStmt(SwapStmt stmt) {
         // Sanity check to make sure left and right program types are the same.
-        SameProgTypeChecker checker = new SameProgTypeChecker(stmt.getLeft(), stmt.getRight());
+        SameProgTypeChecker checker =
+                new SameProgTypeChecker(stmt.getLeft(), stmt.getRight());
         checker.hasSameProgrammingType();
     }
 
@@ -1628,7 +1852,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting a {@link MathVarDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link MathVarDec}.
+     * </p>
      *
      * @param dec A mathematical variable declaration.
      */
@@ -1647,7 +1873,9 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         if ((myDefinitionParameterSectionFlag || (myActiveQuantifications
-                .size() > 0 && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE))
+                .size() > 0
+                && myActiveQuantifications
+                        .peek() != SymbolTableEntry.Quantification.NONE))
                 && mathTypeValue.isKnownToContainOnlyMTypes()) {
             myDefinitionSchematicTypes.put(varName, mathTypeValue);
         }
@@ -1662,15 +1890,19 @@ public class Populator extends TreeWalkerVisitor {
             q = myActiveQuantifications.peek();
         }
 
-        addBinding(varName, dec.getName().getLocation(), q, dec,
-                mathTypeValue, new HashMap<String, MTType>());
+        addBinding(varName, dec.getName().getLocation(), q, dec, mathTypeValue,
+                new HashMap<String, MTType>());
 
-        emitDebug(dec.getLocation(), "\t\tNew variable: " + varName + " of type "
-                + mathTypeValue.toString() + " with quantification " + q + ".");
+        emitDebug(dec.getLocation(),
+                "\t\tNew variable: " + varName + " of type "
+                        + mathTypeValue.toString() + " with quantification " + q
+                        + ".");
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ParameterVarDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ParameterVarDec}.
+     * </p>
      *
      * @param dec A parameter declaration.
      */
@@ -1684,15 +1916,17 @@ public class Populator extends TreeWalkerVisitor {
             myCurrentParameters.add(paramEntry);
         }
         catch (DuplicateSymbolException e) {
-            duplicateSymbol(dec.getName().getName(), dec.getName()
-                    .getLocation());
+            duplicateSymbol(dec.getName().getName(),
+                    dec.getName().getLocation());
         }
 
         dec.setMathType(dec.getTy().getMathTypeValue());
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link VarDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link VarDec}.
+     * </p>
      *
      * @param dec A variable declaration.
      */
@@ -1703,15 +1937,17 @@ public class Populator extends TreeWalkerVisitor {
 
         dec.setMathType(mathTypeValue);
         try {
-            myBuilder.getInnermostActiveScope().addProgramVariable(varName,
-                    dec, dec.getTy().getProgramType());
+            myBuilder.getInnermostActiveScope().addProgramVariable(varName, dec,
+                    dec.getTy().getProgramType());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(varName, dec.getLocation());
         }
 
-        emitDebug(dec.getLocation(), "\t\tNew program variable: " + varName + " of type "
-                + mathTypeValue.toString() + " with quantification NONE");
+        emitDebug(dec.getLocation(),
+                "\t\tNew program variable: " + varName + " of type "
+                        + mathTypeValue.toString()
+                        + " with quantification NONE");
     }
 
     // -----------------------------------------------------------
@@ -1719,7 +1955,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link TypeFamilyDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link TypeFamilyDec}.
+     * </p>
      *
      * @param dec A type family declared in a {@code Concept}.
      */
@@ -1729,7 +1967,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed in between visiting items inside {@link TypeFamilyDec}.</p>
+     * <p>
+     * Code that gets executed in between visiting items inside
+     * {@link TypeFamilyDec}.
+     * </p>
      *
      * @param dec A type family declared in a {@code Concept}.
      * @param prevChild The previous child item visited.
@@ -1737,7 +1978,8 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void midTypeFamilyDec(TypeFamilyDec dec,
-            ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
         if (prevChild == dec.getModel()) {
             // We've parsed the model, but nothing else, so we can add our
             // exemplar to scope
@@ -1745,10 +1987,9 @@ public class Populator extends TreeWalkerVisitor {
             MathSymbolEntry exemplarEntry;
 
             try {
-                exemplarEntry =
-                        myBuilder.getInnermostActiveScope().addBinding(
-                                exemplar.getName(), dec,
-                                dec.getModel().getMathTypeValue());
+                exemplarEntry = myBuilder.getInnermostActiveScope().addBinding(
+                        exemplar.getName(), dec,
+                        dec.getModel().getMathTypeValue());
             }
             catch (DuplicateSymbolException dse) {
                 // This shouldn't be possible--the type declaration has a
@@ -1762,18 +2003,21 @@ public class Populator extends TreeWalkerVisitor {
             // definition variables that needs that in the symbol table. So
             // we add it here to the current module scope.
             try {
-                myCurModuleScope.addProgramTypeDefinition(dec.getName().getName(),
-                        dec, dec.getModel().getMathTypeValue(), exemplarEntry);
+                myCurModuleScope.addProgramTypeDefinition(
+                        dec.getName().getName(), dec,
+                        dec.getModel().getMathTypeValue(), exemplarEntry);
             }
             catch (DuplicateSymbolException dse) {
-                duplicateSymbol(dec.getName().getName(), dec.getName()
-                        .getLocation());
+                duplicateSymbol(dec.getName().getName(),
+                        dec.getName().getLocation());
             }
         }
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link TypeFamilyDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link TypeFamilyDec}.
+     * </p>
      *
      * @param dec A type family declared in a {@code Concept}.
      */
@@ -1783,25 +2027,31 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link PerformanceTypeFamilyDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link PerformanceTypeFamilyDec}.
+     * </p>
      *
-     * @param dec A type family declared in a {@code Concept} performance profile.
+     * @param dec A type family declared in a {@code Concept} performance
+     *        profile.
      */
     @Override
-    public final void prePerformanceTypeFamilyDec(PerformanceTypeFamilyDec dec) {
+    public final void
+            prePerformanceTypeFamilyDec(PerformanceTypeFamilyDec dec) {
         myBuilder.startScope(dec);
 
         try {
             ProgramTypeEntry correspondingTypeDeclaration =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameAndEntryTypeQuery<>(null, dec.getName(),
-                                    ProgramTypeEntry.class,
+                    myBuilder.getInnermostActiveScope()
+                            .queryForOne(new NameAndEntryTypeQuery<>(null,
+                                    dec.getName(), ProgramTypeEntry.class,
                                     ImportStrategy.IMPORT_NAMED,
                                     FacilityStrategy.FACILITY_IGNORE, false))
                             .toProgramTypeEntry(null);
 
             TypeFamilyDec typeFamilyDec =
-                    (TypeFamilyDec) correspondingTypeDeclaration.getDefiningElement();
+                    (TypeFamilyDec) correspondingTypeDeclaration
+                            .getDefiningElement();
 
             // Sanity check the raw types to make sure they are the same
             if (!typeFamilyDec.getModel().equals(dec.getModel())) {
@@ -1826,28 +2076,37 @@ public class Populator extends TreeWalkerVisitor {
             }
         }
         catch (DuplicateSymbolException dse) {
-            throw new SourceErrorException("Multiple types named "
-                    + dec.getName() + ".", dec.getName().getLocation());
+            throw new SourceErrorException(
+                    "Multiple types named " + dec.getName() + ".",
+                    dec.getName().getLocation());
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException(
                     "No corresponding type definition for \"" + dec.getName()
-                            + "\".", dec.getName().getLocation());
+                            + "\".",
+                    dec.getName().getLocation());
         }
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link PerformanceTypeFamilyDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a
+     * {@link PerformanceTypeFamilyDec}.
+     * </p>
      *
-     * @param dec A type family declared in a {@code Concept} performance profile.
+     * @param dec A type family declared in a {@code Concept} performance
+     *        profile.
      */
     @Override
-    public final void postPerformanceTypeFamilyDec(PerformanceTypeFamilyDec dec) {
+    public final void
+            postPerformanceTypeFamilyDec(PerformanceTypeFamilyDec dec) {
         myBuilder.endScope();
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link TypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link TypeRepresentationDec}.
+     * </p>
      *
      * @param r A type representation declared in a {@code Concept Realization}.
      */
@@ -1857,10 +2116,9 @@ public class Populator extends TreeWalkerVisitor {
 
         PosSymbol type = r.getName();
 
-        List<SymbolTableEntry> es =
-                myBuilder.getInnermostActiveScope().query(
-                        new NameQuery(null, type, ImportStrategy.IMPORT_NAMED,
-                                FacilityStrategy.FACILITY_IGNORE, false));
+        List<SymbolTableEntry> es = myBuilder.getInnermostActiveScope()
+                .query(new NameQuery(null, type, ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_IGNORE, false));
 
         if (es.isEmpty()) {
             noSuchSymbol(null, type);
@@ -1869,39 +2127,47 @@ public class Populator extends TreeWalkerVisitor {
             ambiguousSymbol(type, es);
         }
         else {
-            myTypeFamilyEntry =
-                    es.get(0).toTypeFamilyEntry(r.getLocation());
+            myTypeFamilyEntry = es.get(0).toTypeFamilyEntry(r.getLocation());
 
             // Sanity check: Make sure that when we have an independent or dependent
             // correspondence, the concept is declared to be a shared concept.
             AssertionClause correspondence = r.getCorrespondence();
-            AssertionClause.ClauseType clauseType = r.getCorrespondence().getClauseType();
-            if (clauseType.equals(AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE) ||
-                    clauseType.equals(AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE)) {
-                ModuleIdentifier id = myTypeFamilyEntry.getSourceModuleIdentifier();
-                ConceptModuleDec concept =
-                        (ConceptModuleDec) myBuilder.getModuleScope(id)
-                                .getDefiningElement();
+            AssertionClause.ClauseType clauseType =
+                    r.getCorrespondence().getClauseType();
+            if (clauseType.equals(
+                    AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE)
+                    || clauseType.equals(
+                            AssertionClause.ClauseType.DEPENDENT_CORRESPONDENCE)) {
+                ModuleIdentifier id =
+                        myTypeFamilyEntry.getSourceModuleIdentifier();
+                ConceptModuleDec concept = (ConceptModuleDec) myBuilder
+                        .getModuleScope(id).getDefiningElement();
                 if (!concept.isSharingConcept()) {
                     String message;
-                    if (clauseType.equals(AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE)) {
-                        message = "n " + correspondence.getClauseType().toString();
+                    if (clauseType.equals(
+                            AssertionClause.ClauseType.INDEPENDENT_CORRESPONDENCE)) {
+                        message = "n "
+                                + correspondence.getClauseType().toString();
                     }
                     else {
-                        message = " " + correspondence.getClauseType().toString();
+                        message =
+                                " " + correspondence.getClauseType().toString();
                     }
 
                     throw new SourceErrorException("Concept: "
-                                    + concept.getName().getName()
-                                    + " must be declared to be a sharing concept in order to use a"
-                                    + message, correspondence.getLocation());
+                            + concept.getName().getName()
+                            + " must be declared to be a sharing concept in order to use a"
+                            + message, correspondence.getLocation());
                 }
             }
         }
     }
 
     /**
-     * <p>Code that gets executed in between visiting items inside {@link TypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed in between visiting items inside
+     * {@link TypeRepresentationDec}.
+     * </p>
      *
      * @param r A type representation declared in a {@code Concept Realization}.
      * @param prevChild The previous child item visited.
@@ -1909,18 +2175,19 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void midTypeRepresentationDec(TypeRepresentationDec r,
-            ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) {
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
         if (prevChild instanceof Ty) {
             // We've finished the representation and are about to parse
-            // conventions, etc.  We introduce the exemplar gets added as
+            // conventions, etc. We introduce the exemplar gets added as
             // a program variable with the appropriate type.
-            myPTRepresentationType =
-                    new PTRepresentation(myTypeGraph, (PTInstantiated) ((Ty) prevChild)
-                            .getProgramType(), myTypeFamilyEntry);
+            myPTRepresentationType = new PTRepresentation(myTypeGraph,
+                    (PTInstantiated) ((Ty) prevChild).getProgramType(),
+                    myTypeFamilyEntry);
             try {
                 myBuilder.getInnermostActiveScope().addProgramVariable(
-                        myTypeFamilyEntry.getProgramType()
-                                .getExemplarName(), r, myPTRepresentationType);
+                        myTypeFamilyEntry.getProgramType().getExemplarName(), r,
+                        myPTRepresentationType);
             }
             catch (DuplicateSymbolException dse) {
                 // This shouldn't be possible--the type declaration has a
@@ -1932,7 +2199,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link TypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link TypeRepresentationDec}.
+     * </p>
      *
      * @param r A type representation declared in a {@code Concept Realization}.
      */
@@ -1955,29 +2224,38 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link FacilityTypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link FacilityTypeRepresentationDec}.
+     * </p>
      *
      * @param e A type representation declared in a facility.
      */
     @Override
-    public final void preFacilityTypeRepresentationDec(FacilityTypeRepresentationDec e) {
+    public final void
+            preFacilityTypeRepresentationDec(FacilityTypeRepresentationDec e) {
         myBuilder.startScope(e);
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link FacilityTypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a
+     * {@link FacilityTypeRepresentationDec}.
+     * </p>
      *
      * @param e A type representation declared in a facility.
      */
     @Override
-    public final void postFacilityTypeRepresentationDec(FacilityTypeRepresentationDec e) {
+    public final void
+            postFacilityTypeRepresentationDec(FacilityTypeRepresentationDec e) {
         myBuilder.endScope();
 
         try {
             // Since FacilityTypeRepresentation can only exist inside Facilities,
             // so any type we use to implement it must be an instantiated type.
             myBuilder.getInnermostActiveScope().addFacilityRepresentationEntry(
-                    e.getName().getName(), e, (PTInstantiated) e.getRepresentation().getProgramType(),
+                    e.getName().getName(), e,
+                    (PTInstantiated) e.getRepresentation().getProgramType(),
                     e.getConvention());
         }
         catch (DuplicateSymbolException dse) {
@@ -1986,7 +2264,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting an {@link AbstractInitFinalItem}.</p>
+     * <p>
+     * Code that gets executed before visiting an {@link AbstractInitFinalItem}.
+     * </p>
      *
      * @param item An initialization or finalization block.
      */
@@ -1997,7 +2277,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link AbstractInitFinalItem}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link AbstractInitFinalItem}.
+     * </p>
      *
      * @param item An initialization or finalization block.
      */
@@ -2011,7 +2293,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting an {@link Exp}.</p>
+     * <p>
+     * Code that gets executed before visiting an {@link Exp}.
+     * </p>
      *
      * @param exp An expression.
      */
@@ -2021,7 +2305,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link Exp}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link Exp}.
+     * </p>
      *
      * @param exp An expression.
      */
@@ -2029,14 +2315,14 @@ public class Populator extends TreeWalkerVisitor {
     public final void postExp(Exp exp) {
         if (exp.getMathType() == null) {
             throw new NullMathTypeException("Exp " + exp + " (" + exp.getClass()
-                    + ", " + exp.getLocation()
-                    + ") got through the populator " + "with no math type.");
+                    + ", " + exp.getLocation() + ") got through the populator "
+                    + "with no math type.");
         }
 
         if (exp instanceof ProgramExp
                 && ((ProgramExp) exp).getProgramType() == null) {
-            throw new NullProgramTypeException("Exp " + exp + " (" + exp.getClass()
-                    + ", " + exp.getLocation()
+            throw new NullProgramTypeException("Exp " + exp + " ("
+                    + exp.getClass() + ", " + exp.getLocation()
                     + ") got through the populator " + "with no program type.");
         }
 
@@ -2048,7 +2334,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting an {@link AbstractFunctionExp}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link AbstractFunctionExp}.
+     * </p>
      *
      * @param exp An abstract function expression.
      */
@@ -2058,8 +2346,7 @@ public class Populator extends TreeWalkerVisitor {
         foundExpType = exp.getConservativePreApplicationType(myTypeGraph);
 
         emitDebug(exp.getLocation(), "\tExpression: " + exp.toString() + "["
-                + exp.getLocation() + "] of type "
-                + foundExpType.toString());
+                + exp.getLocation() + "] of type " + foundExpType.toString());
 
         MathSymbolEntry intendedEntry = getIntendedFunction(exp);
 
@@ -2072,7 +2359,7 @@ public class Populator extends TreeWalkerVisitor {
         exp.setQuantification(intendedEntry.getQuantification());
 
         if (myTypeValueDepth > 0) {
-            //I had better identify a type
+            // I had better identify a type
             MTFunction entryType = (MTFunction) intendedEntry.getType();
 
             List<MTType> arguments = new LinkedList<>();
@@ -2087,13 +2374,15 @@ public class Populator extends TreeWalkerVisitor {
                 arguments.add(argTypeValue);
             }
 
-            exp.setMathTypeValue(entryType.getApplicationType(
-                    intendedEntry.getName(), arguments));
+            exp.setMathTypeValue(entryType
+                    .getApplicationType(intendedEntry.getName(), arguments));
         }
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link AlternativeExp}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link AlternativeExp}.
+     * </p>
      *
      * @param exp An alternative expression.
      */
@@ -2116,7 +2405,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link AltItemExp}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link AltItemExp}.
+     * </p>
      *
      * @param exp An alternative item expression.
      */
@@ -2131,7 +2422,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link BetweenExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link BetweenExp}.
+     * </p>
      *
      * @param exp A conjunct expression.
      */
@@ -2141,7 +2434,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link CrossTypeExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link CrossTypeExp}.
+     * </p>
      *
      * @param exp A cartesian product expression.
      */
@@ -2151,7 +2446,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link CrossTypeExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link CrossTypeExp}.
+     * </p>
      *
      * @param exp A cartesian product expression.
      */
@@ -2159,9 +2456,11 @@ public class Populator extends TreeWalkerVisitor {
     public final void postCrossTypeExp(CrossTypeExp exp) {
         List<MTCartesian.Element> fieldTypes = new LinkedList<>();
 
-        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = exp.getTagsToFieldsMap();
+        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap =
+                exp.getTagsToFieldsMap();
         for (PosSymbol psTag : tagsToFieldsMap.keySet()) {
-            fieldTypes.add(new MTCartesian.Element(psTag.getName(), tagsToFieldsMap.get(psTag).getMathTypeValue()));
+            fieldTypes.add(new MTCartesian.Element(psTag.getName(),
+                    tagsToFieldsMap.get(psTag).getMathTypeValue()));
         }
 
         exp.setMathType(myTypeGraph.CLS);
@@ -2171,7 +2470,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link CrossTypeExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link CrossTypeExp} should be walked.
+     * </p>
      *
      * @param exp A cartesian product expression.
      *
@@ -2188,7 +2489,8 @@ public class Populator extends TreeWalkerVisitor {
         // a list containing just the ArbitraryTys just so that the TreeWalker
         // would detect it as a list and walk it. We could in theory add maps to the
         // TreeWalker logic, but this is easier...
-        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap = exp.getTagsToFieldsMap();
+        Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap =
+                exp.getTagsToFieldsMap();
         for (PosSymbol psTag : tagsToFieldsMap.keySet()) {
             TreeWalker.visit(this, tagsToFieldsMap.get(psTag));
         }
@@ -2202,7 +2504,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link DotExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link DotExp}.
+     * </p>
      *
      * @param exp A dotted expression.
      */
@@ -2221,7 +2525,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link DotExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link DotExp} should be walked.
+     * </p>
      *
      * @param exp A dotted expression.
      *
@@ -2253,8 +2559,8 @@ public class Populator extends TreeWalkerVisitor {
                 curType = curTypeCartesian.getFactor(segmentName);
             }
             catch (ClassCastException cce) {
-                curType =
-                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment, segmentName);
+                curType = HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
+                        segmentName);
 
                 if (curType == null) {
                     throw new SourceErrorException("Value not a tuple.",
@@ -2263,13 +2569,15 @@ public class Populator extends TreeWalkerVisitor {
                 // YS: Make sure we don't have more segments to process after a
                 // MetaFieldType. In other words, this is illegal: Entry.Is_Initial(x).Foo
                 else if (segments.hasNext()) {
-                    throw new SourceErrorException("Illegal dotted expression following: "
-                            + segmentName, nextSegment.getLocation());
+                    throw new SourceErrorException(
+                            "Illegal dotted expression following: "
+                                    + segmentName,
+                            nextSegment.getLocation());
                 }
             }
             catch (NoSuchElementException nsee) {
-                curType =
-                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment, segmentName);
+                curType = HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
+                        segmentName);
 
                 if (curType == null) {
                     throw new SourceErrorException("No such factor.", lastGood);
@@ -2277,29 +2585,32 @@ public class Populator extends TreeWalkerVisitor {
                 // YS: Make sure we don't have more segments to process after a
                 // MetaFieldType. In other words, this is illegal: Entry.Is_Initial(x).Foo
                 else if (segments.hasNext()) {
-                    throw new SourceErrorException("Illegal dotted expression following: "
-                            + segmentName, nextSegment.getLocation());
+                    throw new SourceErrorException(
+                            "Illegal dotted expression following: "
+                                    + segmentName,
+                            nextSegment.getLocation());
                 }
             }
 
-            //getName() would have thrown an exception if nextSegment wasn't
-            //a VarExp or a FunctionExp.  In the former case, we're good to
-            //go--but in the latter case, we still need to typecheck
-            //parameters, assure they match the signature, and adjust
-            //curType to reflect the RANGE of the function type rather than
-            //the entire type
+            // getName() would have thrown an exception if nextSegment wasn't
+            // a VarExp or a FunctionExp. In the former case, we're good to
+            // go--but in the latter case, we still need to typecheck
+            // parameters, assure they match the signature, and adjust
+            // curType to reflect the RANGE of the function type rather than
+            // the entire type
             if (nextSegment instanceof FunctionExp) {
-                FunctionExp nextSegmentAsFunctionExp = (FunctionExp) nextSegment;
+                FunctionExp nextSegmentAsFunctionExp =
+                        (FunctionExp) nextSegment;
 
                 // YS: If we happen to encounter a "Val_in" function, we will need to
                 // typecheck it differently than an "Is_Initial" function.
-                if (nextSegmentAsFunctionExp.getOperatorAsString().equals("Val_in")) {
-                    curType =
-                            applyValInFunction(lastSegment, nextSegmentAsFunctionExp, curType);
+                if (nextSegmentAsFunctionExp.getOperatorAsString()
+                        .equals("Val_in")) {
+                    curType = applyValInFunction(lastSegment,
+                            nextSegmentAsFunctionExp, curType);
                 }
                 else {
-                    curType =
-                            applyFunction(nextSegmentAsFunctionExp, curType);
+                    curType = applyFunction(nextSegmentAsFunctionExp, curType);
                 }
             }
 
@@ -2316,7 +2627,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link FunctionExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link FunctionExp} should be walked.
+     * </p>
      *
      * @param exp A function expression.
      *
@@ -2354,7 +2667,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link IfExp}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link IfExp}.
+     * </p>
      *
      * @param exp An if expression.
      */
@@ -2362,8 +2677,8 @@ public class Populator extends TreeWalkerVisitor {
     public final void postIfExp(IfExp exp) {
         // An "if expression" is a functional condition, as in the following
         // example:
-        //   x = (if (y > 0) then y else -y)
-        // Its condition had better be a boolean.  Its type resolves to the
+        // x = (if (y > 0) then y else -y)
+        // Its condition had better be a boolean. Its type resolves to the
         // shared type of its branches.
         expectType(exp.getTest(), myTypeGraph.BOOLEAN);
 
@@ -2377,9 +2692,10 @@ public class Populator extends TreeWalkerVisitor {
 
         // One of these had better be a (non-strict) subtype of the other
         if (!ifIsSuperType && !myTypeGraph.isSubtype(ifType, elseType)) {
-            throw new SourceErrorException("Branches must share a type.\n"
-                    + "If branch:   " + ifType + "\n" + "Else branch: "
-                    + elseType, exp.getLocation());
+            throw new SourceErrorException(
+                    "Branches must share a type.\n" + "If branch:   " + ifType
+                            + "\n" + "Else branch: " + elseType,
+                    exp.getLocation());
         }
 
         MTType finalType, finalTypeValue;
@@ -2397,7 +2713,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link IntegerExp}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link IntegerExp}.
+     * </p>
      *
      * @param exp An integer expression.
      */
@@ -2407,7 +2725,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link LambdaExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link LambdaExp}.
+     * </p>
      *
      * @param exp A lambda expression.
      */
@@ -2418,8 +2738,11 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting the list of parameter expressions
-     * inside a {@link LambdaExp}.</p>
+     * <p>
+     * Code that gets executed before visiting the list of parameter expressions
+     * inside a
+     * {@link LambdaExp}.
+     * </p>
      *
      * @param exp A lambda expression.
      */
@@ -2429,8 +2752,11 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting the list of parameter expressions
-     * inside a {@link LambdaExp}.</p>
+     * <p>
+     * Code that gets executed after visiting the list of parameter expressions
+     * inside a
+     * {@link LambdaExp}.
+     * </p>
      *
      * @param exp A lambda expression.
      */
@@ -2440,7 +2766,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link LambdaExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link LambdaExp}.
+     * </p>
      *
      * @param exp A lambda expression.
      */
@@ -2458,7 +2786,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link OldExp}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link OldExp}.
+     * </p>
      *
      * @param exp An {@code old} expression.
      */
@@ -2469,7 +2799,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link QuantExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link QuantExp}.
+     * </p>
      *
      * @param exp A quantified expression.
      */
@@ -2480,7 +2812,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link QuantExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link QuantExp}.
+     * </p>
      *
      * @param exp A quantified expression.
      */
@@ -2493,7 +2827,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link QuantExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link QuantExp} should be walked.
+     * </p>
      *
      * @param exp A quantified expression.
      *
@@ -2508,7 +2844,8 @@ public class Populator extends TreeWalkerVisitor {
         emitDebug(exp.getLocation(), "\tEntering walkQuantExp...");
 
         List<MathVarDec> vars = exp.getVars();
-        SymbolTableEntry.Quantification quantification = exp.getQuantification();
+        SymbolTableEntry.Quantification quantification =
+                exp.getQuantification();
         myActiveQuantifications.push(quantification);
         for (MathVarDec v : vars) {
             TreeWalker.visit(this, v);
@@ -2529,7 +2866,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link RecpExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link RecpExp}.
+     * </p>
      *
      * @param exp A recp expression.
      */
@@ -2539,7 +2878,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link SetExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link SetExp}.
+     * </p>
      *
      * @param exp A set expression.
      */
@@ -2553,16 +2894,19 @@ public class Populator extends TreeWalkerVisitor {
         expectType(body, myTypeGraph.BOOLEAN);
 
         if (exp.getWhere() != null) {
-            body = MathExp.formConjunct(exp.getLocation(), exp.getWhere(), body);
+            body = MathExp.formConjunct(exp.getLocation(), exp.getWhere(),
+                    body);
         }
 
-        exp.setMathType(new MTSetRestriction(myTypeGraph, varType, varDec
-                .getName().getName(), body));
+        exp.setMathType(new MTSetRestriction(myTypeGraph, varType,
+                varDec.getName().getName(), body));
         exp.setMathTypeValue(new MTPowersetApplication(myTypeGraph, varType));
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link SetCollectionExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link SetCollectionExp}.
+     * </p>
      *
      * @param exp A set collection expression.
      */
@@ -2585,8 +2929,8 @@ public class Populator extends TreeWalkerVisitor {
             Set<MathExp> vars = exp.getVars();
             for (MathExp v : vars) {
                 MTType vType = v.getMathType();
-                if (superTypeOfAllElementsInSet == null ||
-                        superTypeOfAllElementsInSet.isSubtypeOf(vType)) {
+                if (superTypeOfAllElementsInSet == null
+                        || superTypeOfAllElementsInSet.isSubtypeOf(vType)) {
                     expContainingSuperType = v;
                     superTypeOfAllElementsInSet = vType;
                 }
@@ -2598,7 +2942,8 @@ public class Populator extends TreeWalkerVisitor {
                 }
             }
 
-            setTypeValue = new MTPowersetApplication(myTypeGraph, superTypeOfAllElementsInSet);
+            setTypeValue = new MTPowersetApplication(myTypeGraph,
+                    superTypeOfAllElementsInSet);
         }
 
         // This must be our type and type value
@@ -2607,7 +2952,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link SetCollectionExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link SetCollectionExp} should be walked.
+     * </p>
      *
      * @param exp A set collection expression.
      *
@@ -2637,7 +2984,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link TupleExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link TupleExp}.
+     * </p>
      *
      * @param exp A tuple expression.
      */
@@ -2654,7 +3003,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link TypeAssertionExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link TypeAssertionExp}.
+     * </p>
      *
      * @param exp A type assertion expression.
      */
@@ -2668,21 +3019,21 @@ public class Populator extends TreeWalkerVisitor {
                     + "       [<condition> implies] <expression> : "
                     + "<assertedType>", exp.getLocation());
         }
-        else if (myActiveQuantifications.size() > 0
-                && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE) {
+        else if (myActiveQuantifications.size() > 0 && myActiveQuantifications
+                .peek() != SymbolTableEntry.Quantification.NONE) {
             throw new SourceErrorException(
                     "Implicit types are not permitted inside "
                             + "quantified variable declarations. \n"
-                            + "Quantify the type explicitly instead.", exp
-                    .getLocation());
+                            + "Quantify the type explicitly instead.",
+                    exp.getLocation());
         }
-        //Note that postMathTypeTheoremDec() checks the "form" of a type theorem at
-        //the top two levels.  So all we're checking for here is that the type
-        //assertion didn't happen deeper than that (where it shouldn't appear).
+        // Note that postMathTypeTheoremDec() checks the "form" of a type theorem at
+        // the top two levels. So all we're checking for here is that the type
+        // assertion didn't happen deeper than that (where it shouldn't appear).
 
-        //If we're the assertion of a type theorem, then postMathTypeTheoremDec()
-        //will take care of any logic.  If we're part of a type declaration,
-        //on the other hand, we've got some bookkeeping to do...
+        // If we're the assertion of a type theorem, then postMathTypeTheoremDec()
+        // will take care of any logic. If we're part of a type declaration,
+        // on the other hand, we've got some bookkeeping to do...
         if (myTypeValueDepth > 0) {
             try {
                 VarExp nodeExp = (VarExp) exp.getExp();
@@ -2690,7 +3041,8 @@ public class Populator extends TreeWalkerVisitor {
                 try {
                     MTType expType = exp.getAssertedTy().getMathTypeValue();
                     myBuilder.getInnermostActiveScope().addBinding(nodeExpName,
-                            SymbolTableEntry.Quantification.UNIVERSAL, exp, expType);
+                            SymbolTableEntry.Quantification.UNIVERSAL, exp,
+                            expType);
 
                     // YS: So we don't really care about what the raw type's
                     // math type is. What we really care about is what type
@@ -2705,19 +3057,19 @@ public class Populator extends TreeWalkerVisitor {
                     nodeExp.setMathType(new MTNamed(myTypeGraph, nodeExpName));
 
                     if (myDefinitionNamedTypes.contains(nodeExpName)) {
-                        //Regardless of where in the expression it appears, an
-                        //implicit type parameter exists at the top level of a
-                        //definition, and thus a definition that contains, e.g.,
-                        //an implicit type parameter T cannot make reference
-                        //to some existing type with that name (except via full
-                        //qualification), thus the introduction of an implicit
-                        //type parameter must precede any use of that
-                        //parameter's name, even if the name exists in-scope
-                        //before the parameter is declared
+                        // Regardless of where in the expression it appears, an
+                        // implicit type parameter exists at the top level of a
+                        // definition, and thus a definition that contains, e.g.,
+                        // an implicit type parameter T cannot make reference
+                        // to some existing type with that name (except via full
+                        // qualification), thus the introduction of an implicit
+                        // type parameter must precede any use of that
+                        // parameter's name, even if the name exists in-scope
+                        // before the parameter is declared
                         throw new SourceErrorException("Introduction of "
                                 + "implicit type parameter must precede any "
-                                + "use of that variable name.", nodeExp
-                                .getLocation());
+                                + "use of that variable name.",
+                                nodeExp.getLocation());
                     }
 
                     // Note that a redundantly named type parameter would be
@@ -2735,8 +3087,8 @@ public class Populator extends TreeWalkerVisitor {
                 }
             }
             catch (ClassCastException cce) {
-                throw new SourceErrorException("Must be a variable name.", exp
-                        .getExp().getLocation());
+                throw new SourceErrorException("Must be a variable name.",
+                        exp.getExp().getLocation());
             }
         }
         else {
@@ -2745,7 +3097,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link TypeAssertionExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link TypeAssertionExp} should be walked.
+     * </p>
      *
      * @param exp A type assertion expression.
      *
@@ -2755,10 +3109,10 @@ public class Populator extends TreeWalkerVisitor {
     public final boolean walkTypeAssertionExp(TypeAssertionExp exp) {
         preTypeAssertionExp(exp);
 
-        //If we exist as an implicit type parameter, there's no way our
-        //expression can know its own type (that's defined by the asserted Ty),
-        //so we skip walking it and let postTypeAssertionExp() set its type for
-        //it
+        // If we exist as an implicit type parameter, there's no way our
+        // expression can know its own type (that's defined by the asserted Ty),
+        // so we skip walking it and let postTypeAssertionExp() set its type for
+        // it
         if (myTypeValueDepth == 0) {
             TreeWalker.visit(this, exp.getExp());
         }
@@ -2770,7 +3124,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link TypeReceptaclesExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link TypeReceptaclesExp}.
+     * </p>
      *
      * @param exp A type receptacles expression.
      */
@@ -2781,7 +3137,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link VarExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link VarExp}.
+     * </p>
      *
      * @param exp A variable expression.
      */
@@ -2796,7 +3154,7 @@ public class Populator extends TreeWalkerVisitor {
                 myDefinitionNamedTypes.add(intendedEntry.getName());
             }
             catch (SymbolNotOfKindTypeException snokte) {
-                //No problem, just don't need to add it
+                // No problem, just don't need to add it
             }
         }
 
@@ -2805,12 +3163,12 @@ public class Populator extends TreeWalkerVisitor {
         exp.setQuantification(intendedEntry.getQuantification());
 
         // YS: Check to see if this refers to a definition name from a Precis.
-        //     This information will be used by the VC generator to generate
-        //     parsimonious VCs. Note that we also have to consider things from
-        //     that are built-in.
+        // This information will be used by the VC generator to generate
+        // parsimonious VCs. Note that we also have to consider things from
+        // that are built-in.
         ModuleIdentifier id = intendedEntry.getSourceModuleIdentifier();
-        if (id.equals(ModuleIdentifier.GLOBAL) ||
-                myCompileEnvironment.getModuleAST(id) instanceof PrecisModuleDec) {
+        if (id.equals(ModuleIdentifier.GLOBAL) || myCompileEnvironment
+                .getModuleAST(id) instanceof PrecisModuleDec) {
             exp.setIsPrecisDefinitionName();
         }
     }
@@ -2820,7 +3178,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed after visiting a {@link ProgramCharExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ProgramCharExp}.
+     * </p>
      *
      * @param exp A programming character expression.
      */
@@ -2836,7 +3196,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ProgramFunctionExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ProgramFunctionExp}.
+     * </p>
      *
      * @param exp A programming function call
      */
@@ -2852,9 +3214,8 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         try {
-            OperationEntry op =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new OperationQuery(qualifier, name, argTypes));
+            OperationEntry op = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new OperationQuery(qualifier, name, argTypes));
 
             // YS: Sanity check preserves/evaluates mode.
             ValidFunctionCallChecker checker =
@@ -2874,8 +3235,8 @@ public class Populator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
-                    + "to the call with the specified arguments: " + exp.getName(),
-                    exp.getLocation());
+                    + "to the call with the specified arguments: "
+                    + exp.getName(), exp.getLocation());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(exp.getName().getName(), exp.getLocation());
@@ -2883,7 +3244,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ProgramIntegerExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ProgramIntegerExp}.
+     * </p>
      *
      * @param exp A programming integer expression.
      */
@@ -2899,7 +3262,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ProgramStringExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ProgramStringExp}.
+     * </p>
      *
      * @param exp A programming string expression.
      */
@@ -2915,7 +3280,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramVariableArrayExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link ProgramVariableArrayExp}.
+     * </p>
      *
      * @param exp A programming variable array expression.
      */
@@ -2924,24 +3292,27 @@ public class Populator extends TreeWalkerVisitor {
         // This should have been converted when constructing our AST, so nothing should
         // be a ProgramVariableArrayExp. This check is to make sure we don't accidentally
         // construct one in the future.
-        throw new SourceErrorException("This array expression should have been converted an operation call.",
+        throw new SourceErrorException(
+                "This array expression should have been converted an operation call.",
                 exp.getLocation(), new IllegalStateException());
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ProgramVariableNameExp}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ProgramVariableNameExp}.
+     * </p>
      *
      * @param exp A programming variable name expression.
      */
     @Override
     public final void postProgramVariableNameExp(ProgramVariableNameExp exp) {
         try {
-            ProgramVariableEntry entry =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new ProgramVariableQuery(exp.getQualifier(), exp.getName()));
+            ProgramVariableEntry entry = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new ProgramVariableQuery(exp.getQualifier(),
+                            exp.getName()));
 
             // YS - For generic concept types, we need to query the actual type
-            //      and not just assign the PTElement that is associated with the actual parameter.
+            // and not just assign the PTElement that is associated with the actual parameter.
             if (entry.getDefiningElement() instanceof ConceptTypeParamDec) {
                 ConceptTypeParamDec typeParamDec =
                         (ConceptTypeParamDec) entry.getDefiningElement();
@@ -2961,7 +3332,7 @@ public class Populator extends TreeWalkerVisitor {
                 }
             }
             // YS - For all other types, simply assign the program type from the
-            //      associated program variable.
+            // associated program variable.
             else {
                 exp.setProgramType(entry.getProgramType());
             }
@@ -2970,7 +3341,8 @@ public class Populator extends TreeWalkerVisitor {
             postSymbolExp(exp.getQualifier(), exp.getName().getName(), exp);
         }
         catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(exp.getQualifier(), exp.getName().getName(), exp.getLocation());
+            noSuchSymbol(exp.getQualifier(), exp.getName().getName(),
+                    exp.getLocation());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(exp.getName());
@@ -2978,26 +3350,27 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramVariableDotExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ProgramVariableDotExp}.
+     * </p>
      *
      * @param exp A programming variable dotted expression.
      */
     @Override
     public final void preProgramVariableDotExp(ProgramVariableDotExp exp) {
-        //Dot expressions are handled ridiculously, even for this compiler, so
-        //this method just deals with the cases we've encountered so far and
-        //lots of assumptions are made.  Expect it to break frequently when you
-        //encounter some new case
+        // Dot expressions are handled ridiculously, even for this compiler, so
+        // this method just deals with the cases we've encountered so far and
+        // lots of assumptions are made. Expect it to break frequently when you
+        // encounter some new case
 
         PosSymbol firstNamePos =
                 ((ProgramVariableNameExp) exp.getSegments().get(0)).getName();
         String firstName = firstNamePos.getName();
 
         try {
-            ProgramVariableEntry eEntry =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(null, firstName))
-                            .toProgramVariableEntry(firstNamePos.getLocation());
+            ProgramVariableEntry eEntry = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new NameQuery(null, firstName))
+                    .toProgramVariableEntry(firstNamePos.getLocation());
             exp.getSegments().get(0).setProgramType(eEntry.getProgramType());
             exp.getSegments().get(0)
                     .setMathType(eEntry.getProgramType().toMath());
@@ -3015,14 +3388,14 @@ public class Populator extends TreeWalkerVisitor {
             PTRecord recordType = (PTRecord) eType;
 
             String fieldName =
-                    ((ProgramVariableNameExp) exp.getSegments().get(1)).getName().getName();
+                    ((ProgramVariableNameExp) exp.getSegments().get(1))
+                            .getName().getName();
 
             PTType fieldType = recordType.getFieldType(fieldName);
 
             if (fieldType == null) {
                 throw new NullProgramTypeException("Could not retrieve type of "
-                        + " field '" + fieldName
-                        + "'. Either it doesn't exist "
+                        + " field '" + fieldName + "'. Either it doesn't exist "
                         + "in the record or it's missing a type.");
             }
 
@@ -3043,7 +3416,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link ProgramVariableDotExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link ProgramVariableDotExp} should be
+     * walked.
+     * </p>
      *
      * @param exp A programming variable dotted expression.
      *
@@ -3071,7 +3447,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting an {@link ArbitraryExpTy}.</p>
+     * <p>
+     * Code that gets executed before visiting an {@link ArbitraryExpTy}.
+     * </p>
      *
      * @param ty A raw arbitrary type.
      */
@@ -3081,7 +3459,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting an {@link ArbitraryExpTy}.</p>
+     * <p>
+     * Code that gets executed after visiting an {@link ArbitraryExpTy}.
+     * </p>
      *
      * @param ty A raw arbitrary type.
      */
@@ -3101,7 +3481,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link NameTy}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link NameTy}.
+     * </p>
      *
      * @param ty A raw named type.
      */
@@ -3115,27 +3497,22 @@ public class Populator extends TreeWalkerVisitor {
         String tyName = tySymbol.getName();
 
         try {
-            ProgramTypeEntry type =
-                    myBuilder
-                            .getInnermostActiveScope()
-                            .queryForOne(
-                                    new NameQuery(
-                                            tyQualifier,
-                                            tySymbol,
-                                            ImportStrategy.IMPORT_NAMED,
-                                            FacilityStrategy.FACILITY_INSTANTIATE,
-                                            true)).toProgramTypeEntry(
-                            tyLocation);
+            ProgramTypeEntry type = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new NameQuery(tyQualifier, tySymbol,
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_INSTANTIATE, true))
+                    .toProgramTypeEntry(tyLocation);
 
             // Check to see if we have a facility qualifier
             if (tyQualifier != null) {
-                FacilityEntry facilityEntry =
-                        myBuilder.getInnermostActiveScope().queryForOne(
-                                new NameQuery(null, tyQualifier,
-                                        ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_INSTANTIATE,
-                                        true)).toFacilityEntry(tyLocation);
-                ty.setProgramType(new PTNamed(myTypeGraph,
-                        facilityEntry, (PTFamily) type.getProgramType()));
+                FacilityEntry facilityEntry = myBuilder
+                        .getInnermostActiveScope()
+                        .queryForOne(new NameQuery(null, tyQualifier,
+                                ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_INSTANTIATE, true))
+                        .toFacilityEntry(tyLocation);
+                ty.setProgramType(new PTNamed(myTypeGraph, facilityEntry,
+                        (PTFamily) type.getProgramType()));
             }
             else {
                 ty.setProgramType(type.getProgramType());
@@ -3153,7 +3530,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link RecordTy}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link RecordTy}.
+     * </p>
      *
      * @param ty A raw record type.
      */
@@ -3162,7 +3541,8 @@ public class Populator extends TreeWalkerVisitor {
         Map<String, PTType> fieldMap = new HashMap<>();
         List<VarDec> fields = ty.getFields();
         for (VarDec field : fields) {
-            fieldMap.put(field.getName().getName(), field.getTy().getProgramType());
+            fieldMap.put(field.getName().getName(),
+                    field.getTy().getProgramType());
         }
 
         PTRecord record = new PTRecord(myTypeGraph, fieldMap);
@@ -3177,7 +3557,9 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>The type graph containing all the type relationships.</p>
+     * <p>
+     * The type graph containing all the type relationships.
+     * </p>
      *
      * @return The type graph for the compiler.
      */
@@ -3194,8 +3576,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>An helper method to print debugging messages if the debug
-     * flag is on.</p>
+     * <p>
+     * An helper method to print debugging messages if the debug flag is on.
+     * </p>
      *
      * @param l Location that generated the message.
      * @param message The message to be outputted.
@@ -3211,8 +3594,11 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>This is an helper method that puts operation-like item ({@link OperationDec}
-     * or {@link ProcedureDec}) into the symbol table.</p>
+     * <p>
+     * This is an helper method that puts operation-like item
+     * ({@link OperationDec} or
+     * {@link ProcedureDec}) into the symbol table.
+     * </p>
      *
      * @param name Name of the operation.
      * @param returnTy The return value for the operation.
@@ -3243,7 +3629,9 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Add a new binding for a {@link ResolveConceptualElement}.</p>
+     * <p>
+     * Add a new binding for a {@link ResolveConceptualElement}.
+     * </p>
      *
      * @param name Name of the entry.
      * @param l Location where this element was found.
@@ -3253,26 +3641,31 @@ public class Populator extends TreeWalkerVisitor {
      * @param typeValue The mathematical type value associated with the object.
      * @param schematicTypes The schematic types associated with the object.
      */
-    private void addBinding(String name, Location l, SymbolTableEntry.Quantification q,
-            ResolveConceptualElement definingElement, MTType type, MTType typeValue,
-            Map<String, MTType> schematicTypes) {
+    private void addBinding(String name, Location l,
+            SymbolTableEntry.Quantification q,
+            ResolveConceptualElement definingElement, MTType type,
+            MTType typeValue, Map<String, MTType> schematicTypes) {
         if (type == null) {
             throw new NullPointerException();
         }
         else {
             try {
-                myBuilder.getInnermostActiveScope().addBinding(name, q, definingElement,
-                        type, typeValue, schematicTypes, myGenericTypes);
+                myBuilder.getInnermostActiveScope().addBinding(name, q,
+                        definingElement, type, typeValue, schematicTypes,
+                        myGenericTypes);
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(name, l);
-                throw new RuntimeException(); //This will never fire
+                throw new RuntimeException(); // This will never fire
             }
         }
     }
 
     /**
-     * <p>Add a new binding for a {@link ResolveConceptualElement} with no quantification.</p>
+     * <p>
+     * Add a new binding for a {@link ResolveConceptualElement} with no
+     * quantification.
+     * </p>
      *
      * @param name Name of the entry.
      * @param l Location where this element was found.
@@ -3281,15 +3674,18 @@ public class Populator extends TreeWalkerVisitor {
      * @param typeValue The mathematical type value associated with the object.
      * @param schematicTypes The schematic types associated with the object.
      */
-    private void addBinding(String name, Location l, ResolveConceptualElement definingElement,
-            MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
+    private void addBinding(String name, Location l,
+            ResolveConceptualElement definingElement, MTType type,
+            MTType typeValue, Map<String, MTType> schematicTypes) {
         addBinding(name, l, SymbolTableEntry.Quantification.NONE,
                 definingElement, type, typeValue, schematicTypes);
     }
 
     /**
-     * <p>Add a new binding for a {@link ResolveConceptualElement} with
-     * no mathematical type value.</p>
+     * <p>
+     * Add a new binding for a {@link ResolveConceptualElement} with no
+     * mathematical type value.
+     * </p>
      *
      * @param name Name of the entry.
      * @param l Location where this element was found.
@@ -3298,14 +3694,17 @@ public class Populator extends TreeWalkerVisitor {
      * @param type The mathematical type associated with the object.
      * @param schematicTypes The schematic types associated with the object.
      */
-    private void addBinding(String name, Location l, SymbolTableEntry.Quantification q,
+    private void addBinding(String name, Location l,
+            SymbolTableEntry.Quantification q,
             ResolveConceptualElement definingElement, MTType type,
             Map<String, MTType> schematicTypes) {
         addBinding(name, l, q, definingElement, type, null, schematicTypes);
     }
 
     /**
-     * <p>Applies the provided mathematical type to a {@link FunctionExp}.</p>
+     * <p>
+     * Applies the provided mathematical type to a {@link FunctionExp}.
+     * </p>
      *
      * @param functionSegment A function expression.
      * @param type The type to be applied.
@@ -3318,45 +3717,52 @@ public class Populator extends TreeWalkerVisitor {
         try {
             MTFunction functionType = (MTFunction) type;
 
-            //Ok, we need to type check our arguments before we can
-            //continue
+            // Ok, we need to type check our arguments before we can
+            // continue
             for (Exp exp : functionSegment.getArguments()) {
                 TreeWalker.visit(this, exp);
             }
 
-            if (!INEXACT_DOMAIN_MATCH.compare(functionSegment, functionSegment
+            if (!INEXACT_DOMAIN_MATCH.compare(
+                    functionSegment, functionSegment
                             .getConservativePreApplicationType(myTypeGraph),
                     functionType)) {
-                throw new SourceErrorException("Parameters do not "
-                        + "match function range.\n\nExpected: "
-                        + functionType.getDomain()
-                        + "\nFound:    "
-                        + functionSegment.getConservativePreApplicationType(
-                        myTypeGraph).getDomain(), functionSegment
-                        .getLocation());
+                throw new SourceErrorException(
+                        "Parameters do not "
+                                + "match function range.\n\nExpected: "
+                                + functionType.getDomain() + "\nFound:    "
+                                + functionSegment
+                                        .getConservativePreApplicationType(
+                                                myTypeGraph)
+                                        .getDomain(),
+                        functionSegment.getLocation());
             }
 
             result = functionType.getRange();
         }
         catch (ClassCastException cce) {
-            throw new SourceErrorException("Not a function.", functionSegment
-                    .getLocation());
+            throw new SourceErrorException("Not a function.",
+                    functionSegment.getLocation());
         }
 
         return result;
     }
 
     /**
-     * <p>Applies the provided mathematical type to the {@code Val_in} function.</p>
+     * <p>
+     * Applies the provided mathematical type to the {@code Val_in} function.
+     * </p>
      *
-     * @param lastSegment The segment that contains the type information for
-     *                    the {@code Val_in} function.
+     * @param lastSegment The segment that contains the type information for the
+     *        {@code Val_in}
+     *        function.
      * @param functionSegment A function expression.
      * @param type The type to be applied.
      *
      * @return The resulting mathematical type.
      */
-    private MTType applyValInFunction(Exp lastSegment, FunctionExp functionSegment, MTType type) {
+    private MTType applyValInFunction(Exp lastSegment,
+            FunctionExp functionSegment, MTType type) {
         MTType result;
 
         try {
@@ -3375,35 +3781,43 @@ public class Populator extends TreeWalkerVisitor {
                 TreeWalker.visit(this, argExp);
 
                 // Sanity check to make sure the argument is valid
-                ValidVal_inChecker checker = new ValidVal_inChecker(myTypeGraph, myBuilder);
+                ValidVal_inChecker checker =
+                        new ValidVal_inChecker(myTypeGraph, myBuilder);
                 checker.validArgument(lastSegment, argExp);
             }
 
             result = functionType.getRange();
         }
         catch (ClassCastException cce) {
-            throw new SourceErrorException("Not a function.", functionSegment
-                    .getLocation());
+            throw new SourceErrorException("Not a function.",
+                    functionSegment.getLocation());
         }
 
         return result;
     }
 
     /**
-     * <p>An helper method that indicates we are beginning to evaluate a type value node.</p>
+     * <p>
+     * An helper method that indicates we are beginning to evaluate a type value
+     * node.
+     * </p>
      */
     private void enteringTypeValueNode() {
         myTypeValueDepth++;
     }
 
     /**
-     * <p>Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
-     * candidates to find the {@link MathSymbolEntry} that match the given expression
-     * using a type comparison algorithm.</p>
+     * <p>
+     * Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
+     * candidates to find the
+     * {@link MathSymbolEntry} that match the given expression using a type
+     * comparison algorithm.
+     * </p>
      *
      * @param e The expression we are searching for.
-     * @param eType The expression's type.
-     *              (<em>Note:</em> It might be different from calling {@code e.getMathType()}.)
+     * @param eType The expression's type. (<em>Note:</em> It might be different
+     *        from calling
+     *        {@code e.getMathType()}.)
      * @param candidates List of candidate symbol table entries.
      * @param comparison The domain type comparator to be used.
      *
@@ -3411,8 +3825,9 @@ public class Populator extends TreeWalkerVisitor {
      *
      * @throws NoSolutionException We simply couldn't find it.
      */
-    private MathSymbolEntry getDomainTypeMatch(AbstractFunctionExp e, MTFunction eType,
-            List<MathSymbolEntry> candidates, TypeComparison<AbstractFunctionExp, MTFunction> comparison)
+    private MathSymbolEntry getDomainTypeMatch(AbstractFunctionExp e,
+            MTFunction eType, List<MathSymbolEntry> candidates,
+            TypeComparison<AbstractFunctionExp, MTFunction> comparison)
             throws NoSolutionException {
         MathSymbolEntry match = null;
 
@@ -3420,10 +3835,9 @@ public class Populator extends TreeWalkerVisitor {
         for (MathSymbolEntry candidate : candidates) {
             if (candidate.getType() instanceof MTFunction) {
                 try {
-                    candidate =
-                            candidate.deschematize(e.getParameters(), myBuilder
-                                            .getInnermostActiveScope(),
-                                    myDefinitionSchematicTypes);
+                    candidate = candidate.deschematize(e.getParameters(),
+                            myBuilder.getInnermostActiveScope(),
+                            myDefinitionSchematicTypes);
                     candidateType = (MTFunction) candidate.getType();
                     emitDebug(e.getLocation(), "\t" + eType
                             + " deschematizes to " + candidateType);
@@ -3436,8 +3850,8 @@ public class Populator extends TreeWalkerVisitor {
                                     + match.getName() + " : " + match.getType()
                                     + " and " + candidate.getName() + " : "
                                     + candidate.getType()
-                                    + ".  Consider explicitly qualifying.", e
-                                    .getLocation());
+                                    + ".  Consider explicitly qualifying.",
+                                    e.getLocation());
                         }
 
                         match = candidate;
@@ -3445,18 +3859,22 @@ public class Populator extends TreeWalkerVisitor {
                     // YS: eType's domain could be a function application that generates
                     // the candidate type, therefore we will need check the function inside
                     // the function application to see if it matches.
-                    else if (eType.getDomain() instanceof MTFunctionApplication) {
-                        MTFunctionApplication eTypeDomainType = (MTFunctionApplication) eType.getDomain();
-                        if (comparison.compare(e, eTypeDomainType.getFunction(), candidateType)) {
+                    else if (eType
+                            .getDomain() instanceof MTFunctionApplication) {
+                        MTFunctionApplication eTypeDomainType =
+                                (MTFunctionApplication) eType.getDomain();
+                        if (comparison.compare(e, eTypeDomainType.getFunction(),
+                                candidateType)) {
                             if (match != null) {
                                 throw new SourceErrorException("Multiple "
                                         + comparison.description() + " domain "
                                         + "matches.  For example, "
-                                        + match.getName() + " : " + match.getType()
-                                        + " and " + candidate.getName() + " : "
+                                        + match.getName() + " : "
+                                        + match.getType() + " and "
+                                        + candidate.getName() + " : "
                                         + candidate.getType()
-                                        + ".  Consider explicitly qualifying.", e
-                                        .getLocation());
+                                        + ".  Consider explicitly qualifying.",
+                                        e.getLocation());
                             }
 
                             match = candidate;
@@ -3464,9 +3882,12 @@ public class Populator extends TreeWalkerVisitor {
                     }
                 }
                 catch (NoSolutionException nse) {
-                    //couldn't deschematize--try the next one
-                    emitDebug(e.getLocation(), "\t" + candidate.getType() + " doesn't deschematize "
-                            + "against " + e.getParameters() + " using " + comparison.description());
+                    // couldn't deschematize--try the next one
+                    emitDebug(e.getLocation(),
+                            "\t" + candidate.getType()
+                                    + " doesn't deschematize " + "against "
+                                    + e.getParameters() + " using "
+                                    + comparison.description());
                 }
             }
         }
@@ -3476,52 +3897,66 @@ public class Populator extends TreeWalkerVisitor {
                     + e + " using " + comparison.description(), null);
         }
 
-        emitDebug(e.getLocation(), "\tFound a match using " + comparison.description());
+        emitDebug(e.getLocation(),
+                "\tFound a match using " + comparison.description());
 
         return match;
     }
 
     /**
-     * <p>Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
-     * candidates to find the {@link MathSymbolEntry} that match the given expression
-     * using an exact domain match.</p>
+     * <p>
+     * Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
+     * candidates to find the
+     * {@link MathSymbolEntry} that match the given expression using an exact
+     * domain match.
+     * </p>
      *
      * @param e The expression we are searching for.
-     * @param eType The expression's type.
-     *              (<em>Note:</em> It might be different from calling {@code e.getMathType()}.)
+     * @param eType The expression's type. (<em>Note:</em> It might be different
+     *        from calling
+     *        {@code e.getMathType()}.)
      * @param candidates List of candidate symbol table entries.
      *
      * @return The corresponding {@link MathSymbolEntry}.
      *
      * @throws NoSolutionException We simply couldn't find it.
      */
-    private MathSymbolEntry getExactDomainTypeMatch(AbstractFunctionExp e, MTFunction eType,
-            List<MathSymbolEntry> candidates) throws NoSolutionException {
+    private MathSymbolEntry getExactDomainTypeMatch(AbstractFunctionExp e,
+            MTFunction eType, List<MathSymbolEntry> candidates)
+            throws NoSolutionException {
         return getDomainTypeMatch(e, eType, candidates, EXACT_DOMAIN_MATCH);
     }
 
     /**
-     * <p>Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
-     * candidates to find the {@link MathSymbolEntry} that match the given expression
-     * using an inexact domain match.</p>
+     * <p>
+     * Attempts to use the list of {@link SymbolTableEntry SymbolTableEntries}
+     * candidates to find the
+     * {@link MathSymbolEntry} that match the given expression using an inexact
+     * domain match.
+     * </p>
      *
      * @param e The expression we are searching for.
-     * @param eType The expression's type.
-     *              (<em>Note:</em> It might be different from calling {@code e.getMathType()}.)
+     * @param eType The expression's type. (<em>Note:</em> It might be different
+     *        from calling
+     *        {@code e.getMathType()}.)
      * @param candidates List of candidate symbol table entries.
      *
      * @return The corresponding {@link MathSymbolEntry}.
      *
      * @throws NoSolutionException We simply couldn't find it.
      */
-    private MathSymbolEntry getInexactDomainTypeMatch(AbstractFunctionExp e, MTFunction eType,
-            List<MathSymbolEntry> candidates) throws NoSolutionException {
+    private MathSymbolEntry getInexactDomainTypeMatch(AbstractFunctionExp e,
+            MTFunction eType, List<MathSymbolEntry> candidates)
+            throws NoSolutionException {
         return getDomainTypeMatch(e, eType, candidates, INEXACT_DOMAIN_MATCH);
     }
 
     /**
-     * <p>For a given {@link AbstractFunctionExp}, finds the entry in the
-     * symbol table to which it refers.</p>
+     * <p>
+     * For a given {@link AbstractFunctionExp}, finds the entry in the symbol
+     * table to which it
+     * refers.
+     * </p>
      *
      * @param e The expression we are searching for.
      *
@@ -3534,22 +3969,26 @@ public class Populator extends TreeWalkerVisitor {
         String eOperatorString = eOperator.getName();
 
         List<MathSymbolEntry> sameNameFunctions =
-                myBuilder.getInnermostActiveScope().query(
-                        new MathFunctionNamedQuery(e.getQualifier(), e
-                                .getOperatorAsPosSymbol()));
+                myBuilder.getInnermostActiveScope()
+                        .query(new MathFunctionNamedQuery(e.getQualifier(),
+                                e.getOperatorAsPosSymbol()));
 
         if (sameNameFunctions.isEmpty()) {
-            throw new SourceErrorException("No such function: " + e.getOperatorAsString(), e.getLocation());
+            throw new SourceErrorException(
+                    "No such function: " + e.getOperatorAsString(),
+                    e.getLocation());
         }
 
         MathSymbolEntry intendedEntry;
         try {
-            intendedEntry = getExactDomainTypeMatch(e, eType, sameNameFunctions);
+            intendedEntry =
+                    getExactDomainTypeMatch(e, eType, sameNameFunctions);
         }
         catch (NoSolutionException nse) {
             try {
                 emitDebug(e.getLocation(), "\t" + nse.getMessage());
-                intendedEntry = getInexactDomainTypeMatch(e, eType, sameNameFunctions);
+                intendedEntry =
+                        getInexactDomainTypeMatch(e, eType, sameNameFunctions);
             }
             catch (NoSolutionException nsee2) {
                 try {
@@ -3557,44 +3996,52 @@ public class Populator extends TreeWalkerVisitor {
 
                     if (!myDefinitionSchematicTypes.isEmpty()) {
                         // Create a copy of the original expression and assign it the conservative type
-                        AbstractFunctionExp eCopy = (AbstractFunctionExp) e.clone();
+                        AbstractFunctionExp eCopy =
+                                (AbstractFunctionExp) e.clone();
                         eCopy.setMathType(eType);
 
                         // Obtain a new AbstractFunctionExp with the schematic types replaced.
-                        eCopy = (AbstractFunctionExp) TypeGraph.getCopyWithVariablesSubstituted(
-                                eCopy, myDefinitionSchematicTypes);
+                        eCopy = (AbstractFunctionExp) TypeGraph
+                                .getCopyWithVariablesSubstituted(eCopy,
+                                        myDefinitionSchematicTypes);
 
                         // If we happen to have any generic program types, replace those as well
                         if (!myGenericTypes.isEmpty()) {
-                            eCopy = (AbstractFunctionExp) TypeGraph.getCopyWithVariablesSubstituted(
-                                    eCopy, myGenericTypes);
+                            eCopy = (AbstractFunctionExp) TypeGraph
+                                    .getCopyWithVariablesSubstituted(eCopy,
+                                            myGenericTypes);
                         }
 
                         MTFunction eCopyType = (MTFunction) eCopy.getMathType();
 
-                        emitDebug(eCopy.getLocation(), "\tReplaced schematic types in expression: "
-                                + eCopy.toString() + "("
-                                + eCopy.getLocation() + ") with new type "
-                                + eCopyType.toString());
+                        emitDebug(eCopy.getLocation(),
+                                "\tReplaced schematic types in expression: "
+                                        + eCopy.toString() + "("
+                                        + eCopy.getLocation()
+                                        + ") with new type "
+                                        + eCopyType.toString());
 
-                        intendedEntry = getInexactDomainTypeMatch(eCopy, eCopyType, sameNameFunctions);
+                        intendedEntry = getInexactDomainTypeMatch(eCopy,
+                                eCopyType, sameNameFunctions);
                     }
                     else {
-                        throw new NoSolutionException("No schematic types", null);
+                        throw new NoSolutionException("No schematic types",
+                                null);
                     }
                 }
                 catch (NoSolutionException nsee3) {
                     emitDebug(e.getLocation(), "\t" + nsee3.getMessage());
 
                     boolean foundOne = false;
-                    String errorMessage =
-                            "No function applicable for " + "domain: "
-                                    + eType.getDomain() + "\t[" + e.getLocation() + "]\n\nCandidates:\n";
+                    String errorMessage = "No function applicable for "
+                            + "domain: " + eType.getDomain() + "\t["
+                            + e.getLocation() + "]\n\nCandidates:\n";
 
                     StringBuilder sb = new StringBuilder(errorMessage);
                     for (SymbolTableEntry entry : sameNameFunctions) {
                         if (entry instanceof MathSymbolEntry
-                                && ((MathSymbolEntry) entry).getType() instanceof MTFunction) {
+                                && ((MathSymbolEntry) entry)
+                                        .getType() instanceof MTFunction) {
                             sb.append("\t[");
                             sb.append(entry.getDefiningElement().getLocation());
                             sb.append("]\t");
@@ -3608,31 +4055,36 @@ public class Populator extends TreeWalkerVisitor {
                     }
 
                     if (!foundOne) {
-                        throw new SourceErrorException("No such function.", e
-                                .getLocation());
+                        throw new SourceErrorException("No such function.",
+                                e.getLocation());
                     }
 
-                    throw new SourceErrorException(sb.toString(), (Location) null);
+                    throw new SourceErrorException(sb.toString(),
+                            (Location) null);
                 }
             }
         }
 
         if (intendedEntry.getDefiningElement() == myCurrentDirectDefinition) {
-            throw new SourceErrorException("Direct definition cannot "
-                    + "contain recursive call.", e.getLocation());
+            throw new SourceErrorException(
+                    "Direct definition cannot " + "contain recursive call.",
+                    e.getLocation());
         }
 
         MTFunction intendedEntryType = (MTFunction) intendedEntry.getType();
 
-        emitDebug(e.getLocation(), "\tMatching " + eOperatorString + " : " + eType
-                + " to " + intendedEntry.getName() + " : " + intendedEntryType
-                + ".");
+        emitDebug(e.getLocation(),
+                "\tMatching " + eOperatorString + " : " + eType + " to "
+                        + intendedEntry.getName() + " : " + intendedEntryType
+                        + ".");
 
         return intendedEntry;
     }
 
     /**
-     * <p>Returns the name component of a {@link VarExp} or {@link FunctionExp}.</p>
+     * <p>
+     * Returns the name component of a {@link VarExp} or {@link FunctionExp}.
+     * </p>
      *
      * @param e Expression to be evaluated.
      *
@@ -3656,21 +4108,29 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method has to do an annoying amount of work, so pay attention:
-     * takes an iterator over segments as returned from DotExp.getSegments().
-     * Either the first segment or first two segments will be advanced over
-     * from the iterator, depending on whether this method determines the DotExp
-     * refers to a local value (one segment), is a qualified name referring to
-     * a value in another module (two segments), or is a Conc expression (two
-     * segments).  The segments will receive appropriate types.  The data field
-     * of lastGood will be set with the location of the last segment read.
-     * Then, the <code>MathSymbolEntry</code> corresponding to the correct
-     * top-level value will be returned.</p>
+     * <p>
+     * This method has to do an annoying amount of work, so pay attention: takes
+     * an iterator over
+     * segments as returned from DotExp.getSegments(). Either the first segment
+     * or first two segments
+     * will be advanced over from the iterator, depending on whether this method
+     * determines the DotExp
+     * refers to a local value (one segment), is a qualified name referring to a
+     * value in another
+     * module (two segments), or is a Conc expression (two segments). The
+     * segments will receive
+     * appropriate types. The data field of lastGood will be set with the
+     * location of the last segment
+     * read. Then, the <code>MathSymbolEntry</code> corresponding to the correct
+     * top-level value will
+     * be returned.
+     * </p>
      *
      * @param segments An iterator for the various segments of an {@link Exp}.
      * @param lastGood An object that indirectly refer to the last good segment.
      */
-    private MathSymbolEntry getTopLevelValue(Iterator<Exp> segments, Indirect<Exp> lastGood) {
+    private MathSymbolEntry getTopLevelValue(Iterator<Exp> segments,
+            Indirect<Exp> lastGood) {
         MathSymbolEntry result;
 
         Exp first = segments.next();
@@ -3678,7 +4138,8 @@ public class Populator extends TreeWalkerVisitor {
         PosSymbol firstQualifier = null;
         PosSymbol firstName;
         if (first instanceof OldExp) {
-            firstQualifier = ((VarExp) ((OldExp) first).getExp()).getQualifier();
+            firstQualifier =
+                    ((VarExp) ((OldExp) first).getExp()).getQualifier();
             firstName = ((VarExp) ((OldExp) first).getExp()).getName();
         }
         else if (first instanceof VarExp) {
@@ -3686,8 +4147,9 @@ public class Populator extends TreeWalkerVisitor {
             firstName = ((VarExp) first).getName();
         }
         else {
-            throw new RuntimeException("DotExp must start with VarExp or "
-                    + "OldExp, found: " + first + " (" + first.getClass() + ")");
+            throw new RuntimeException(
+                    "DotExp must start with VarExp or " + "OldExp, found: "
+                            + first + " (" + first.getClass() + ")");
         }
 
         // First, we'll see if we're a Conc expression
@@ -3708,17 +4170,11 @@ public class Populator extends TreeWalkerVisitor {
             // We are in a shared state realization and our second segment
             // refers to one of the global variables.
             else {
-                result =
-                        myBuilder
-                                .getInnermostActiveScope()
-                                .queryForOne(
-                                        new NameQuery(
-                                                null,
-                                                second.getName(),
-                                                ImportStrategy.IMPORT_NAMED,
-                                                FacilityStrategy.FACILITY_IGNORE,
-                                                true)).toMathSymbolEntry(
-                                second.getLocation());
+                result = myBuilder.getInnermostActiveScope()
+                        .queryForOne(new NameQuery(null, second.getName(),
+                                ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_IGNORE, true))
+                        .toMathSymbolEntry(second.getLocation());
                 second.setMathType(result.getType());
             }
 
@@ -3728,22 +4184,16 @@ public class Populator extends TreeWalkerVisitor {
             lastGood.data = second;
         }
         else {
-            //Next, we'll see if there's a locally-accessible symbol with this
-            //name
+            // Next, we'll see if there's a locally-accessible symbol with this
+            // name
             try {
-                result =
-                        myBuilder
-                                .getInnermostActiveScope()
-                                .queryForOne(
-                                        new NameQuery(
-                                                firstQualifier,
-                                                firstName,
-                                                ImportStrategy.IMPORT_NAMED,
-                                                FacilityStrategy.FACILITY_INSTANTIATE,
-                                                true)).toMathSymbolEntry(
-                                first.getLocation());
+                result = myBuilder.getInnermostActiveScope()
+                        .queryForOne(new NameQuery(firstQualifier, firstName,
+                                ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_INSTANTIATE, true))
+                        .toMathSymbolEntry(first.getLocation());
 
-                //There is.  Cool.  We type it and we're done
+                // There is. Cool. We type it and we're done
                 lastGood.data = first;
                 first.setMathType(result.getType());
                 try {
@@ -3754,52 +4204,57 @@ public class Populator extends TreeWalkerVisitor {
                 }
             }
             catch (NoSuchSymbolException nsse) {
-                // TODO: Figure out if the following is needed now that we don't use dots as qualifier symbol
-                //No such luck.  Maybe firstName identifies a module and the
-                //second segment (which had better be a VarExp) is the name of
-                //the value we want
+                // TODO: Figure out if the following is needed now that we don't use dots as qualifier
+                // symbol
+                // No such luck. Maybe firstName identifies a module and the
+                // second segment (which had better be a VarExp) is the name of
+                // the value we want
                 Exp second = segments.next();
                 if (second instanceof VarExp) {
                     VarExp secondAsVarExp = (VarExp) second;
 
                     try {
-                        result =
-                                myBuilder.getInnermostActiveScope().queryForOne(
-                                        new NameQuery(firstName, secondAsVarExp.getName(),
-                                                ImportStrategy.IMPORT_NAMED,
-                                                FacilityStrategy.FACILITY_IGNORE,
-                                                true)).toMathSymbolEntry(
-                                        first.getLocation());
+                        result = myBuilder.getInnermostActiveScope()
+                                .queryForOne(new NameQuery(firstName,
+                                        secondAsVarExp.getName(),
+                                        ImportStrategy.IMPORT_NAMED,
+                                        FacilityStrategy.FACILITY_IGNORE, true))
+                                .toMathSymbolEntry(first.getLocation());
 
-                        //A qualifier doesn't have a sensible type, but we'll set one
-                        //for completeness.
+                        // A qualifier doesn't have a sensible type, but we'll set one
+                        // for completeness.
                         first.setMathType(myTypeGraph.BOOLEAN);
 
-                        //Now the value itself
+                        // Now the value itself
                         lastGood.data = second;
                         second.setMathType(result.getType());
                         try {
                             second.setMathTypeValue(result.getTypeValue());
-                        } catch (SymbolNotOfKindTypeException snokte) {
+                        }
+                        catch (SymbolNotOfKindTypeException snokte) {
 
                         }
-                    } catch (NoSuchSymbolException nsse2) {
+                    }
+                    catch (NoSuchSymbolException nsse2) {
                         noSuchSymbol(firstName, secondAsVarExp.getName());
-                        throw new RuntimeException(); //This will never fire
-                    } catch (DuplicateSymbolException dse) {
-                        //This shouldn't be possible--there can only be one symbol
-                        //with the given name inside a particular module
+                        throw new RuntimeException(); // This will never fire
+                    }
+                    catch (DuplicateSymbolException dse) {
+                        // This shouldn't be possible--there can only be one symbol
+                        // with the given name inside a particular module
                         throw new RuntimeException();
                     }
                 }
                 else {
-                    throw new SourceErrorException("Expecting a VarExp.\nFound: "
-                            + second.getClass().getSimpleName(), second.getLocation());
+                    throw new SourceErrorException(
+                            "Expecting a VarExp.\nFound: "
+                                    + second.getClass().getSimpleName(),
+                            second.getLocation());
                 }
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(firstName);
-                throw new RuntimeException(); //This will never fire
+                throw new RuntimeException(); // This will never fire
             }
         }
 
@@ -3807,7 +4262,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that indicates we are leaving a type value node.</p>
+     * <p>
+     * An helper method that indicates we are leaving a type value node.
+     * </p>
      */
     private void leavingTypeValueNode() {
         myTypeValueDepth--;
@@ -3818,8 +4275,10 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>An helper method that returns the built-in <code>Character</code>
-     * program type.</p>
+     * <p>
+     * An helper method that returns the built-in <code>Character</code> program
+     * type.
+     * </p>
      *
      * @param l A {@link Location} in file.
      *
@@ -3829,12 +4288,11 @@ public class Populator extends TreeWalkerVisitor {
         PTType result;
 
         try {
-            ProgramTypeEntry type =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(null, "Character",
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                    false)).toProgramTypeEntry(l);
+            ProgramTypeEntry type = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new NameQuery(null, "Character",
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_INSTANTIATE, false))
+                    .toProgramTypeEntry(l);
 
             result = type.getProgramType();
         }
@@ -3842,7 +4300,7 @@ public class Populator extends TreeWalkerVisitor {
             throw new RuntimeException("No program Character type in scope???");
         }
         catch (DuplicateSymbolException dse) {
-            //Shouldn't be possible--NameQuery can't throw this
+            // Shouldn't be possible--NameQuery can't throw this
             throw new RuntimeException(dse);
         }
 
@@ -3850,8 +4308,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that returns the built-in <code>Integer</code>
-     * program type.</p>
+     * <p>
+     * An helper method that returns the built-in <code>Integer</code> program
+     * type.
+     * </p>
      *
      * @param l A {@link Location} in file.
      *
@@ -3861,12 +4321,11 @@ public class Populator extends TreeWalkerVisitor {
         PTType result;
 
         try {
-            ProgramTypeEntry type =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(null, "Integer",
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                    false)).toProgramTypeEntry(l);
+            ProgramTypeEntry type = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new NameQuery(null, "Integer",
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_INSTANTIATE, false))
+                    .toProgramTypeEntry(l);
 
             result = type.getProgramType();
         }
@@ -3882,8 +4341,10 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that returns the built-in <code>Char_Str</code>
-     * program type.</p>
+     * <p>
+     * An helper method that returns the built-in <code>Char_Str</code> program
+     * type.
+     * </p>
      *
      * @param l A {@link Location} in file.
      *
@@ -3893,12 +4354,11 @@ public class Populator extends TreeWalkerVisitor {
         PTType result;
 
         try {
-            ProgramTypeEntry type =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(null, "Char_Str",
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                    false)).toProgramTypeEntry(l);
+            ProgramTypeEntry type = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new NameQuery(null, "Char_Str",
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_INSTANTIATE, false))
+                    .toProgramTypeEntry(l);
 
             result = type.getProgramType();
         }
@@ -3906,7 +4366,7 @@ public class Populator extends TreeWalkerVisitor {
             throw new RuntimeException("No program String type in scope???");
         }
         catch (DuplicateSymbolException dse) {
-            //Shouldn't be possible--NameQuery can't throw this
+            // Shouldn't be possible--NameQuery can't throw this
             throw new RuntimeException(dse);
         }
 
@@ -3918,47 +4378,55 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>An helper method that retrieves the mathematical symbol entry
-     * using the provided information.</p>
+     * <p>
+     * An helper method that retrieves the mathematical symbol entry using the
+     * provided information.
+     * </p>
      *
      * @param qualifier Qualifier for the expression.
      * @param symbolName The symbol name.
      * @param node The expression encountered.
      *
-     * @return A {@link MathSymbolEntry} that is associated with the provided information.
+     * @return A {@link MathSymbolEntry} that is associated with the provided
+     *         information.
      */
-    private MathSymbolEntry getIntendedEntry(PosSymbol qualifier, String symbolName, Exp node) {
+    private MathSymbolEntry getIntendedEntry(PosSymbol qualifier,
+            String symbolName, Exp node) {
         MathSymbolEntry result;
 
         try {
-            result =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new MathSymbolQuery(qualifier, symbolName, node
-                                    .getLocation()));
+            result = myBuilder.getInnermostActiveScope()
+                    .queryForOne(new MathSymbolQuery(qualifier, symbolName,
+                            node.getLocation()));
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(symbolName, node.getLocation());
-            throw new RuntimeException(); //This will never fire
+            throw new RuntimeException(); // This will never fire
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(qualifier, symbolName, node.getLocation());
-            throw new RuntimeException(); //This will never fire
+            throw new RuntimeException(); // This will never fire
         }
 
         return result;
     }
 
     /**
-     * <p>An helper method that handles the additional logic that happens
-     * after we encounter a symbol expression.</p>
+     * <p>
+     * An helper method that handles the additional logic that happens after we
+     * encounter a symbol
+     * expression.
+     * </p>
      *
      * @param qualifier Qualifier for the expression.
      * @param symbolName The symbol name.
      * @param node The expression encountered.
      *
-     * @return A typed {@link MathSymbolEntry} that is associated with the provided information.
+     * @return A typed {@link MathSymbolEntry} that is associated with the
+     *         provided information.
      */
-    private MathSymbolEntry postSymbolExp(PosSymbol qualifier, String symbolName, Exp node) {
+    private MathSymbolEntry postSymbolExp(PosSymbol qualifier,
+            String symbolName, Exp node) {
         MathSymbolEntry intendedEntry =
                 getIntendedEntry(qualifier, symbolName, node);
         node.setMathType(intendedEntry.getType());
@@ -3968,29 +4436,34 @@ public class Populator extends TreeWalkerVisitor {
         String typeValueDesc = "";
 
         if (node.getMathTypeValue() != null) {
-            typeValueDesc =
-                    ", referencing math type " + node.getMathTypeValue() + " ("
-                            + node.getMathTypeValue().getClass() + ")";
+            typeValueDesc = ", referencing math type " + node.getMathTypeValue()
+                    + " (" + node.getMathTypeValue().getClass() + ")";
         }
 
-        emitDebug(node.getLocation(), "\tProcessed symbol " + symbolName +
-                " with type " + node.getMathType() + typeValueDesc);
+        emitDebug(node.getLocation(), "\tProcessed symbol " + symbolName
+                + " with type " + node.getMathType() + typeValueDesc);
 
         return intendedEntry;
     }
 
     /**
-     * <p>An helper method that handles the logic for assigning the mathematical
-     * type value for a given expression.</p>
+     * <p>
+     * An helper method that handles the logic for assigning the mathematical
+     * type value for a given
+     * expression.
+     * </p>
      *
      * @param node The expression encountered.
      * @param symbolName The symbol name.
-     * @param intendedEntry An untyped {@link MathSymbolEntry} that is associated with the
-     *                      provided information.
+     * @param intendedEntry An untyped {@link MathSymbolEntry} that is
+     *        associated with the provided
+     *        information.
      */
-    private void setSymbolTypeValue(Exp node, String symbolName, MathSymbolEntry intendedEntry) {
+    private void setSymbolTypeValue(Exp node, String symbolName,
+            MathSymbolEntry intendedEntry) {
         try {
-            if (intendedEntry.getQuantification() == SymbolTableEntry.Quantification.NONE) {
+            if (intendedEntry
+                    .getQuantification() == SymbolTableEntry.Quantification.NONE) {
                 node.setMathTypeValue(intendedEntry.getTypeValue());
             }
             else {
@@ -4012,25 +4485,31 @@ public class Populator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>An helper method that indicates we have an ambiguous symbol.</p>
+     * <p>
+     * An helper method that indicates we have an ambiguous symbol.
+     * </p>
      *
      * @param symbol The symbol represented as a {@link PosSymbol}.
      * @param candidates List of symbol entries that match {@code symbol}.
      * @param <T> A type that extends from {@link SymbolTableEntry}.
      */
-    private <T extends SymbolTableEntry> void ambiguousSymbol(PosSymbol symbol, List<T> candidates) {
+    private <T extends SymbolTableEntry> void ambiguousSymbol(PosSymbol symbol,
+            List<T> candidates) {
         ambiguousSymbol(symbol.getName(), symbol.getLocation(), candidates);
     }
 
     /**
-     * <p>An helper method that indicates we have an ambiguous symbol.</p>
+     * <p>
+     * An helper method that indicates we have an ambiguous symbol.
+     * </p>
      *
      * @param symbolName The symbol represented as a {@link String}.
      * @param l The location where {@code symbolName} was found.
      * @param candidates List of symbol entries that match {@code symbolName}.
      * @param <T> A type that extends from {@link SymbolTableEntry}.
      */
-    private <T extends SymbolTableEntry> void ambiguousSymbol(String symbolName, Location l, List<T> candidates) {
+    private <T extends SymbolTableEntry> void ambiguousSymbol(String symbolName,
+            Location l, List<T> candidates) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Ambiguous symbol.  Candidates: ");
@@ -4043,7 +4522,8 @@ public class Populator extends TreeWalkerVisitor {
                 sb.append(", ");
             }
 
-            sb.append(candidate.getSourceModuleIdentifier().fullyQualifiedRepresentation(symbolName));
+            sb.append(candidate.getSourceModuleIdentifier()
+                    .fullyQualifiedRepresentation(symbolName));
         }
         sb.append(".  Consider qualifying.");
 
@@ -4051,7 +4531,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that indicates we have a duplicate symbol.</p>
+     * <p>
+     * An helper method that indicates we have a duplicate symbol.
+     * </p>
      *
      * @param symbol The symbol represented as a {@link PosSymbol}.
      */
@@ -4060,7 +4542,9 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that indicates we have a duplicate symbol.</p>
+     * <p>
+     * An helper method that indicates we have a duplicate symbol.
+     * </p>
      *
      * @param symbol The symbol represented as a {@link PosSymbol}.
      * @param l The location where {@code symbol} was found.
@@ -4070,20 +4554,25 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that indicates the expected type differs
-     * from the one we found.</p>
+     * <p>
+     * An helper method that indicates the expected type differs from the one we
+     * found.
+     * </p>
      *
      * @param e Expression that is being evaluated.
      * @param expectedType The expected type for {@code e}.
      */
     private void expected(Exp e, MTType expectedType) {
-        throw new SourceErrorException("Expected: " + expectedType
-                + "\nFound: " + e.getMathType(), e.getLocation());
+        throw new SourceErrorException(
+                "Expected: " + expectedType + "\nFound: " + e.getMathType(),
+                e.getLocation());
     }
 
     /**
-     * <p>An helper method that indicates the type we found is not known
-     * to be in the expected type.</p>
+     * <p>
+     * An helper method that indicates the type we found is not known to be in
+     * the expected type.
+     * </p>
      *
      * @param e Expression that is being evaluated.
      * @param expectedType The expected type for {@code e}.
@@ -4093,8 +4582,8 @@ public class Populator extends TreeWalkerVisitor {
             // YS: Our expected type might be the generic program type, so
             // we replace it and try to see if it is known to be in.
             if (!myGenericTypes.isEmpty()) {
-                MTType newExpectedType =
-                        expectedType.getCopyWithVariablesSubstituted(myGenericTypes);
+                MTType newExpectedType = expectedType
+                        .getCopyWithVariablesSubstituted(myGenericTypes);
 
                 if (!myTypeGraph.isKnownToBeIn(e, newExpectedType)) {
                     expected(e, newExpectedType);
@@ -4107,41 +4596,53 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that indicates that the symbol table entry is not
-     * known to be a type.</p>
+     * <p>
+     * An helper method that indicates that the symbol table entry is not known
+     * to be a type.
+     * </p>
      *
      * @param entry An entry in our symbol table.
      * @param l The location where this entry was found.
      */
     private void notAType(SymbolTableEntry entry, Location l) {
-        throw new SourceErrorException(entry.getSourceModuleIdentifier()
-                .fullyQualifiedRepresentation(entry.getName())
-                + " is not known to be a type.", l);
+        throw new SourceErrorException(
+                entry.getSourceModuleIdentifier().fullyQualifiedRepresentation(
+                        entry.getName()) + " is not known to be a type.",
+                l);
     }
 
     /**
-     * <p>An helper method that indicates that the evaluated expression is not
-     * known to be a type.</p>
+     * <p>
+     * An helper method that indicates that the evaluated expression is not
+     * known to be a type.
+     * </p>
      *
      * @param e An expression that is being evaluated.
      */
     private void notAType(Exp e) {
-        throw new SourceErrorException("Not known to be a type.", e.getLocation());
+        throw new SourceErrorException("Not known to be a type.",
+                e.getLocation());
     }
 
     /**
-     * <p>An helper method that indicates that a module with the specified name
-     * cannot be found.</p>
+     * <p>
+     * An helper method that indicates that a module with the specified name
+     * cannot be found.
+     * </p>
      *
      * @param qualifier The name of a module.
      */
     private void noSuchModule(PosSymbol qualifier) {
-        throw new SourceErrorException("Module does not exist or is not in scope.", qualifier);
+        throw new SourceErrorException(
+                "Module does not exist or is not in scope.", qualifier);
     }
 
     /**
-     * <p>An helper method that indicates that a symbol with the specified qualifier
-     * and name cannot be found.</p>
+     * <p>
+     * An helper method that indicates that a symbol with the specified
+     * qualifier and name cannot be
+     * found.
+     * </p>
      *
      * @param qualifier The module qualifier for the symbol.
      * @param symbol The name of the symbol represented as a {@link PosSymbol}.
@@ -4151,23 +4652,26 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that indicates that a symbol with the specified qualifier
-     * and name cannot be found.</p>
+     * <p>
+     * An helper method that indicates that a symbol with the specified
+     * qualifier and name cannot be
+     * found.
+     * </p>
      *
      * @param qualifier The module qualifier for the symbol.
      * @param symbolName The name of the symbol represented as a {@link String}.
      * @param l The location where this symbol was found.
      */
-    private void noSuchSymbol(PosSymbol qualifier, String symbolName, Location l) {
+    private void noSuchSymbol(PosSymbol qualifier, String symbolName,
+            Location l) {
         String message;
 
         if (qualifier == null) {
             message = "No such symbol: " + symbolName;
         }
         else {
-            message =
-                    "No such symbol in module: " + qualifier.getName() + "::"
-                            + symbolName;
+            message = "No such symbol in module: " + qualifier.getName() + "::"
+                    + symbolName;
         }
 
         throw new SourceErrorException(message, l);
@@ -4178,22 +4682,29 @@ public class Populator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>An helper class that indicates an exact domain match between an {@link AbstractFunctionExp}
-     * and a {@link MTFunction}.</p>
+     * <p>
+     * An helper class that indicates an exact domain match between an
+     * {@link AbstractFunctionExp} and
+     * a {@link MTFunction}.
+     * </p>
      */
     private static class ExactDomainMatch
             implements
                 TypeComparison<AbstractFunctionExp, MTFunction> {
 
         /**
-         * <p>Takes an instance of {@link AbstractFunctionExp} and use the {@link MTType}
-         * found in the expression and compare it with the expected {@link MTType}.</p>
+         * <p>
+         * Takes an instance of {@link AbstractFunctionExp} and use the
+         * {@link MTType} found in the
+         * expression and compare it with the expected {@link MTType}.
+         * </p>
          *
          * @param foundValue The expression to be compared.
          * @param foundType The type for the expression.
          * @param expectedType The expected type for the expression.
          *
-         * @return {@code true} if {@code foundType = expectedType}, {@code false} otherwise.
+         * @return {@code true} if {@code foundType = expectedType},
+         *         {@code false} otherwise.
          */
         @Override
         public final boolean compare(AbstractFunctionExp foundValue,
@@ -4203,7 +4714,9 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         /**
-         * <p>This method returns a string description for each type comparison.</p>
+         * <p>
+         * This method returns a string description for each type comparison.
+         * </p>
          *
          * @return A string.
          */
@@ -4215,22 +4728,29 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper class that indicates an inexact domain match between an {@link AbstractFunctionExp}
-     * and a {@link MTFunction}.</p>
+     * <p>
+     * An helper class that indicates an inexact domain match between an
+     * {@link AbstractFunctionExp}
+     * and a {@link MTFunction}.
+     * </p>
      */
     private class InexactDomainMatch
             implements
                 TypeComparison<AbstractFunctionExp, MTFunction> {
 
         /**
-         * <p>Takes an instance of {@link AbstractFunctionExp} and use the {@link MTType}
-         * found in the expression and compare it with the expected {@link MTType}.</p>
+         * <p>
+         * Takes an instance of {@link AbstractFunctionExp} and use the
+         * {@link MTType} found in the
+         * expression and compare it with the expected {@link MTType}.
+         * </p>
          *
          * @param foundValue The expression to be compared.
          * @param foundType The type for the expression.
          * @param expectedType The expected type for the expression.
          *
-         * @return {@code true} if {@code foundType = expectedType}, {@code false} otherwise.
+         * @return {@code true} if {@code foundType = expectedType},
+         *         {@code false} otherwise.
          */
         @Override
         public final boolean compare(AbstractFunctionExp foundValue,
@@ -4240,7 +4760,9 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         /**
-         * <p>This method returns a string description for each type comparison.</p>
+         * <p>
+         * This method returns a string description for each type comparison.
+         * </p>
          *
          * @return A string.
          */
@@ -4252,13 +4774,17 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper class that indicates an exact parameter match between
-     * two {@link MTType MTTypes}.</p>
+     * <p>
+     * An helper class that indicates an exact parameter match between two
+     * {@link MTType MTTypes}.
+     * </p>
      */
     private static class ExactParameterMatch implements Comparator<MTType> {
 
         /**
-         * <p>Compares <code>o1</code> and <code>o2</code>.</p>
+         * <p>
+         * Compares <code>o1</code> and <code>o2</code>.
+         * </p>
          *
          * @param o1 A mathematical type.
          * @param o2 Another mathematical type.
@@ -4282,20 +4808,27 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper class that indicates an inexact domain match between an {@link Exp}
-     * and a {@link MTType}.</p>
+     * <p>
+     * An helper class that indicates an inexact domain match between an
+     * {@link Exp} and a
+     * {@link MTType}.
+     * </p>
      */
     private class InexactParameterMatch implements TypeComparison<Exp, MTType> {
 
         /**
-         * <p>Takes an instance of {@link Exp} and use the {@link MTType}
-         * found in the expression and compare it with the expected {@link MTType}.</p>
+         * <p>
+         * Takes an instance of {@link Exp} and use the {@link MTType} found in
+         * the expression and
+         * compare it with the expected {@link MTType}.
+         * </p>
          *
          * @param foundValue The expression to be compared.
          * @param foundType The type for the expression.
          * @param expectedType The expected type for the expression.
          *
-         * @return {@code true} if {@code foundType = expectedType}, {@code false} otherwise.
+         * @return {@code true} if {@code foundType = expectedType},
+         *         {@code false} otherwise.
          */
         @Override
         public final boolean compare(Exp foundValue, MTType foundType,
@@ -4311,12 +4844,11 @@ public class Populator extends TreeWalkerVisitor {
                 MTFunction foundTypeAsFunction =
                         (MTFunction) foundValueAsLambda.getMathType();
 
-                result =
-                        myTypeGraph.isSubtype(foundTypeAsFunction.getDomain(),
-                                expectedTypeAsFunction.getDomain())
-                                && myTypeGraph.isKnownToBeIn(foundValueAsLambda
-                                        .getBody(), expectedTypeAsFunction
-                                        .getRange());
+                result = myTypeGraph.isSubtype(foundTypeAsFunction.getDomain(),
+                        expectedTypeAsFunction.getDomain())
+                        && myTypeGraph.isKnownToBeIn(
+                                foundValueAsLambda.getBody(),
+                                expectedTypeAsFunction.getRange());
             }
 
             // YS: Not sure if this is quite right, but here is the explanation:
@@ -4327,10 +4859,13 @@ public class Populator extends TreeWalkerVisitor {
             if (!result && foundValue instanceof VarExp) {
                 VarExp foundValueAsVarExp = (VarExp) foundValue;
                 if (foundValueAsVarExp.getMathTypeValue() != null
-                        && foundValueAsVarExp.getMathTypeValue() instanceof MTNamed) {
-                    String foundValueName = foundValueAsVarExp.getName().getName();
+                        && foundValueAsVarExp
+                                .getMathTypeValue() instanceof MTNamed) {
+                    String foundValueName =
+                            foundValueAsVarExp.getName().getName();
                     String foundTypeValueAsString =
-                            ((MTNamed) foundValueAsVarExp.getMathTypeValue()).getName();
+                            ((MTNamed) foundValueAsVarExp.getMathTypeValue())
+                                    .getName();
                     result = foundTypeValueAsString.equals(foundValueName)
                             && foundType.isSubtypeOf(expectedType);
                 }
@@ -4360,7 +4895,9 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         /**
-         * <p>This method returns a string description for each type comparison.</p>
+         * <p>
+         * This method returns a string description for each type comparison.
+         * </p>
          *
          * @return A string.
          */

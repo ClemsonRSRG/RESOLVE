@@ -1,7 +1,7 @@
 /*
  * TreeWalkerVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -204,7 +204,8 @@ public abstract class TreeWalkerVisitor {
 
     public void preBetweenExpLessExps(BetweenExp data) {}
 
-    public void midBetweenExpLessExps(BetweenExp node, Exp previous, Exp next) {}
+    public void midBetweenExpLessExps(BetweenExp node, Exp previous,
+            Exp next) {}
 
     public void postBetweenExpLessExps(BetweenExp data) {}
 
@@ -372,7 +373,8 @@ public abstract class TreeWalkerVisitor {
             ConceptBodyModuleDec data) {}
 
     // ConceptBodyModuleDecConventions
-    public boolean walkConceptBodyModuleDecConventions(ConceptBodyModuleDec data) {
+    public boolean
+            walkConceptBodyModuleDecConventions(ConceptBodyModuleDec data) {
         return false;
     }
 
@@ -381,7 +383,8 @@ public abstract class TreeWalkerVisitor {
     public void midConceptBodyModuleDecConventions(ConceptBodyModuleDec node,
             Exp previous, Exp next) {}
 
-    public void postConceptBodyModuleDecConventions(ConceptBodyModuleDec data) {}
+    public void
+            postConceptBodyModuleDecConventions(ConceptBodyModuleDec data) {}
 
     // ConceptBodyModuleDecCorrs
     public boolean walkConceptBodyModuleDecCorrs(ConceptBodyModuleDec data) {
@@ -522,7 +525,8 @@ public abstract class TreeWalkerVisitor {
 
     public void preConstructedTyArgs(ConstructedTy data) {}
 
-    public void midConstructedTyArgs(ConstructedTy node, Ty previous, Ty next) {}
+    public void midConstructedTyArgs(ConstructedTy node, Ty previous,
+            Ty next) {}
 
     public void postConstructedTyArgs(ConstructedTy data) {}
 
@@ -713,30 +717,34 @@ public abstract class TreeWalkerVisitor {
             EnhancementBodyModuleDec data) {}
 
     // EnhancementBodyModuleDecCorrs
-    public boolean walkEnhancementBodyModuleDecCorrs(
-            EnhancementBodyModuleDec data) {
+    public boolean
+            walkEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec data) {
         return false;
     }
 
-    public void preEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec data) {}
+    public void
+            preEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec data) {}
 
     public void midEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec node,
             Exp previous, Exp next) {}
 
-    public void postEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec data) {}
+    public void
+            postEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec data) {}
 
     // EnhancementBodyModuleDecDecs
-    public boolean walkEnhancementBodyModuleDecDecs(
-            EnhancementBodyModuleDec data) {
+    public boolean
+            walkEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec data) {
         return false;
     }
 
-    public void preEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec data) {}
+    public void
+            preEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec data) {}
 
     public void midEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec node,
             Dec previous, Dec next) {}
 
-    public void postEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec data) {}
+    public void
+            postEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec data) {}
 
     // EnhancementItem
     public boolean walkEnhancementItem(EnhancementItem data) {
@@ -907,7 +915,8 @@ public abstract class TreeWalkerVisitor {
     public void postFacilityOperationDec(FacilityOperationDec data) {}
 
     // FacilityOperationDecParameters
-    public boolean walkFacilityOperationDecParameters(FacilityOperationDec data) {
+    public boolean
+            walkFacilityOperationDecParameters(FacilityOperationDec data) {
         return false;
     }
 
@@ -919,7 +928,8 @@ public abstract class TreeWalkerVisitor {
     public void postFacilityOperationDecParameters(FacilityOperationDec data) {}
 
     // FacilityOperationDecStateVars
-    public boolean walkFacilityOperationDecStateVars(FacilityOperationDec data) {
+    public boolean
+            walkFacilityOperationDecStateVars(FacilityOperationDec data) {
         return false;
     }
 
@@ -931,7 +941,8 @@ public abstract class TreeWalkerVisitor {
     public void postFacilityOperationDecStateVars(FacilityOperationDec data) {}
 
     // FacilityOperationDecFacilities
-    public boolean walkFacilityOperationDecFacilities(FacilityOperationDec data) {
+    public boolean
+            walkFacilityOperationDecFacilities(FacilityOperationDec data) {
         return false;
     }
 
@@ -943,7 +954,8 @@ public abstract class TreeWalkerVisitor {
     public void postFacilityOperationDecFacilities(FacilityOperationDec data) {}
 
     // FacilityOperationDecVariables
-    public boolean walkFacilityOperationDecVariables(FacilityOperationDec data) {
+    public boolean
+            walkFacilityOperationDecVariables(FacilityOperationDec data) {
         return false;
     }
 
@@ -955,20 +967,23 @@ public abstract class TreeWalkerVisitor {
     public void postFacilityOperationDecVariables(FacilityOperationDec data) {}
 
     // FacilityOperationDecAuxVariables
-    public boolean walkFacilityOperationDecAuxVariables(
-            FacilityOperationDec data) {
+    public boolean
+            walkFacilityOperationDecAuxVariables(FacilityOperationDec data) {
         return false;
     }
 
-    public void preFacilityOperationDecAuxVariables(FacilityOperationDec data) {}
+    public void
+            preFacilityOperationDecAuxVariables(FacilityOperationDec data) {}
 
     public void midFacilityOperationDecAuxVariables(FacilityOperationDec node,
             AuxVarDec previous, AuxVarDec next) {}
 
-    public void postFacilityOperationDecAuxVariables(FacilityOperationDec data) {}
+    public void
+            postFacilityOperationDecAuxVariables(FacilityOperationDec data) {}
 
     // FacilityOperationDecStatements
-    public boolean walkFacilityOperationDecStatements(FacilityOperationDec data) {
+    public boolean
+            walkFacilityOperationDecStatements(FacilityOperationDec data) {
         return false;
     }
 
@@ -1298,7 +1313,8 @@ public abstract class TreeWalkerVisitor {
 
     public void preInitItemVariables(InitItem data) {}
 
-    public void midInitItemVariables(InitItem node, VarDec previous, VarDec next) {}
+    public void midInitItemVariables(InitItem node, VarDec previous,
+            VarDec next) {}
 
     public void postInitItemVariables(InitItem data) {}
 
@@ -1513,7 +1529,8 @@ public abstract class TreeWalkerVisitor {
 
     public void preMathModuleDecDecs(MathModuleDec data) {}
 
-    public void midMathModuleDecDecs(MathModuleDec node, Dec previous, Dec next) {}
+    public void midMathModuleDecDecs(MathModuleDec node, Dec previous,
+            Dec next) {}
 
     public void postMathModuleDecDecs(MathModuleDec data) {}
 
@@ -1734,20 +1751,23 @@ public abstract class TreeWalkerVisitor {
     public void postPerformanceCModuleDec(PerformanceCModuleDec data) {}
 
     // PerformanceCModuleDecParameters
-    public boolean walkPerformanceCModuleDecParameters(
-            PerformanceCModuleDec data) {
+    public boolean
+            walkPerformanceCModuleDecParameters(PerformanceCModuleDec data) {
         return false;
     }
 
-    public void prePerformanceCModuleDecParameters(PerformanceCModuleDec data) {}
+    public void
+            prePerformanceCModuleDecParameters(PerformanceCModuleDec data) {}
 
     public void midPerformanceCModuleDecParameters(PerformanceCModuleDec node,
             ModuleParameterDec previous, ModuleParameterDec next) {}
 
-    public void postPerformanceCModuleDecParameters(PerformanceCModuleDec data) {}
+    public void
+            postPerformanceCModuleDecParameters(PerformanceCModuleDec data) {}
 
     // PerformanceCModuleDecUsesItems
-    public boolean walkPerformanceCModuleDecUsesItems(PerformanceCModuleDec data) {
+    public boolean
+            walkPerformanceCModuleDecUsesItems(PerformanceCModuleDec data) {
         return false;
     }
 
@@ -1756,20 +1776,23 @@ public abstract class TreeWalkerVisitor {
     public void midPerformanceCModuleDecUsesItems(PerformanceCModuleDec node,
             UsesItem previous, UsesItem next) {}
 
-    public void postPerformanceCModuleDecUsesItems(PerformanceCModuleDec data) {}
+    public void
+            postPerformanceCModuleDecUsesItems(PerformanceCModuleDec data) {}
 
     // PerformanceCModuleDecConstraints
-    public boolean walkPerformanceCModuleDecConstraints(
-            PerformanceCModuleDec data) {
+    public boolean
+            walkPerformanceCModuleDecConstraints(PerformanceCModuleDec data) {
         return false;
     }
 
-    public void prePerformanceCModuleDecConstraints(PerformanceCModuleDec data) {}
+    public void
+            prePerformanceCModuleDecConstraints(PerformanceCModuleDec data) {}
 
     public void midPerformanceCModuleDecConstraints(PerformanceCModuleDec node,
             Exp previous, Exp next) {}
 
-    public void postPerformanceCModuleDecConstraints(PerformanceCModuleDec data) {}
+    public void
+            postPerformanceCModuleDecConstraints(PerformanceCModuleDec data) {}
 
     // PerformanceCModuleDecDecs
     public boolean walkPerformanceCModuleDecDecs(PerformanceCModuleDec data) {
@@ -1796,20 +1819,23 @@ public abstract class TreeWalkerVisitor {
     public void postPerformanceEModuleDec(PerformanceEModuleDec data) {}
 
     // PerformanceEModuleDecParameters
-    public boolean walkPerformanceEModuleDecParameters(
-            PerformanceEModuleDec data) {
+    public boolean
+            walkPerformanceEModuleDecParameters(PerformanceEModuleDec data) {
         return false;
     }
 
-    public void prePerformanceEModuleDecParameters(PerformanceEModuleDec data) {}
+    public void
+            prePerformanceEModuleDecParameters(PerformanceEModuleDec data) {}
 
     public void midPerformanceEModuleDecParameters(PerformanceEModuleDec node,
             ModuleParameterDec previous, ModuleParameterDec next) {}
 
-    public void postPerformanceEModuleDecParameters(PerformanceEModuleDec data) {}
+    public void
+            postPerformanceEModuleDecParameters(PerformanceEModuleDec data) {}
 
     // PerformanceEModuleDecUsesItems
-    public boolean walkPerformanceEModuleDecUsesItems(PerformanceEModuleDec data) {
+    public boolean
+            walkPerformanceEModuleDecUsesItems(PerformanceEModuleDec data) {
         return false;
     }
 
@@ -1818,7 +1844,8 @@ public abstract class TreeWalkerVisitor {
     public void midPerformanceEModuleDecUsesItems(PerformanceEModuleDec node,
             UsesItem previous, UsesItem next) {}
 
-    public void postPerformanceEModuleDecUsesItems(PerformanceEModuleDec data) {}
+    public void
+            postPerformanceEModuleDecUsesItems(PerformanceEModuleDec data) {}
 
     // PerformanceEModuleDecDecs
     public boolean walkPerformanceEModuleDecDecs(PerformanceEModuleDec data) {
@@ -1845,7 +1872,8 @@ public abstract class TreeWalkerVisitor {
     public void postPerformanceFinalItem(PerformanceFinalItem data) {}
 
     // PerformanceFinalItemStateVars
-    public boolean walkPerformanceFinalItemStateVars(PerformanceFinalItem data) {
+    public boolean
+            walkPerformanceFinalItemStateVars(PerformanceFinalItem data) {
         return false;
     }
 
@@ -1857,7 +1885,8 @@ public abstract class TreeWalkerVisitor {
     public void postPerformanceFinalItemStateVars(PerformanceFinalItem data) {}
 
     // PerformanceFinalItemFacilities
-    public boolean walkPerformanceFinalItemFacilities(PerformanceFinalItem data) {
+    public boolean
+            walkPerformanceFinalItemFacilities(PerformanceFinalItem data) {
         return false;
     }
 
@@ -1869,7 +1898,8 @@ public abstract class TreeWalkerVisitor {
     public void postPerformanceFinalItemFacilities(PerformanceFinalItem data) {}
 
     // PerformanceFinalItemVariables
-    public boolean walkPerformanceFinalItemVariables(PerformanceFinalItem data) {
+    public boolean
+            walkPerformanceFinalItemVariables(PerformanceFinalItem data) {
         return false;
     }
 
@@ -1881,20 +1911,23 @@ public abstract class TreeWalkerVisitor {
     public void postPerformanceFinalItemVariables(PerformanceFinalItem data) {}
 
     // PerformanceFinalItemAuxVariables
-    public boolean walkPerformanceFinalItemAuxVariables(
-            PerformanceFinalItem data) {
+    public boolean
+            walkPerformanceFinalItemAuxVariables(PerformanceFinalItem data) {
         return false;
     }
 
-    public void prePerformanceFinalItemAuxVariables(PerformanceFinalItem data) {}
+    public void
+            prePerformanceFinalItemAuxVariables(PerformanceFinalItem data) {}
 
     public void midPerformanceFinalItemAuxVariables(PerformanceFinalItem node,
             AuxVarDec previous, AuxVarDec next) {}
 
-    public void postPerformanceFinalItemAuxVariables(PerformanceFinalItem data) {}
+    public void
+            postPerformanceFinalItemAuxVariables(PerformanceFinalItem data) {}
 
     // PerformanceFinalItemStatements
-    public boolean walkPerformanceFinalItemStatements(PerformanceFinalItem data) {
+    public boolean
+            walkPerformanceFinalItemStatements(PerformanceFinalItem data) {
         return false;
     }
 
@@ -1954,7 +1987,8 @@ public abstract class TreeWalkerVisitor {
     public void postPerformanceInitItemVariables(PerformanceInitItem data) {}
 
     // PerformanceInitItemAuxVariables
-    public boolean walkPerformanceInitItemAuxVariables(PerformanceInitItem data) {
+    public boolean
+            walkPerformanceInitItemAuxVariables(PerformanceInitItem data) {
         return false;
     }
 
@@ -2006,15 +2040,17 @@ public abstract class TreeWalkerVisitor {
             PerformanceOperationDec data) {}
 
     // PerformanceOperationDecStateVars
-    public boolean walkPerformanceOperationDecStateVars(
-            PerformanceOperationDec data) {
+    public boolean
+            walkPerformanceOperationDecStateVars(PerformanceOperationDec data) {
         return false;
     }
 
-    public void prePerformanceOperationDecStateVars(PerformanceOperationDec data) {}
+    public void
+            prePerformanceOperationDecStateVars(PerformanceOperationDec data) {}
 
     public void midPerformanceOperationDecStateVars(
-            PerformanceOperationDec node, AffectsItem previous, AffectsItem next) {}
+            PerformanceOperationDec node, AffectsItem previous,
+            AffectsItem next) {}
 
     public void postPerformanceOperationDecStateVars(
             PerformanceOperationDec data) {}
@@ -2134,8 +2170,8 @@ public abstract class TreeWalkerVisitor {
 
     public void preProcedureDecStatements(ProcedureDec data) {}
 
-    public void midProcedureDecStatements(ProcedureDec node,
-            Statement previous, Statement next) {}
+    public void midProcedureDecStatements(ProcedureDec node, Statement previous,
+            Statement next) {}
 
     public void postProcedureDecStatements(ProcedureDec data) {}
 
@@ -2300,7 +2336,8 @@ public abstract class TreeWalkerVisitor {
 
     public void preProofDecInductiveCase(ProofDec data) {}
 
-    public void midProofDecInductiveCase(ProofDec node, Exp previous, Exp next) {}
+    public void midProofDecInductiveCase(ProofDec node, Exp previous,
+            Exp next) {}
 
     public void postProofDecInductiveCase(ProofDec data) {}
 
@@ -2407,7 +2444,8 @@ public abstract class TreeWalkerVisitor {
 
     public void preRecordTyFields(RecordTy data) {}
 
-    public void midRecordTyFields(RecordTy node, VarDec previous, VarDec next) {}
+    public void midRecordTyFields(RecordTy node, VarDec previous,
+            VarDec next) {}
 
     public void postRecordTyFields(RecordTy data) {}
 
@@ -2592,7 +2630,8 @@ public abstract class TreeWalkerVisitor {
     public void postSuppositionDeductionExp(SuppositionDeductionExp data) {}
 
     // SuppositionDeductionExpBody
-    public boolean walkSuppositionDeductionExpBody(SuppositionDeductionExp data) {
+    public boolean
+            walkSuppositionDeductionExpBody(SuppositionDeductionExp data) {
         return false;
     }
 

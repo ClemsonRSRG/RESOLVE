@@ -1,7 +1,7 @@
 /*
  * PerVCProverModel.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,8 +13,11 @@
 package edu.clemson.cs.rsrg.prover.output;
 
 /**
- * <p>This class contains all the different information on each {@code VC}
- * that comes from the automated prover.</p>
+ * <p>
+ * This class contains all the different information on each {@code VC} that
+ * comes from the
+ * automated prover.
+ * </p>
  *
  * @author Hampton Smith
  * @version 2.0

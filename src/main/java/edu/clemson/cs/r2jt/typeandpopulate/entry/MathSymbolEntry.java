@@ -1,7 +1,7 @@
 /*
  * MathSymbolEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -46,13 +46,17 @@ public class MathSymbolEntry extends SymbolTableEntry {
     private final Quantification myQuantification;
 
     /**
-     * <p>Math symbols that represent definitions can take parameters, which may
-     * contain implicit type parameters that cause the definition's true type
-     * to change based on the type of arguments that end up actually passed.
-     * These parameters are represented in this map, with the key giving the
+     * <p>
+     * Math symbols that represent definitions can take parameters, which may
+     * contain implicit type
+     * parameters that cause the definition's true type to change based on the
+     * type of arguments that
+     * end up actually passed. These parameters are represented in this map,
+     * with the key giving the
      * name of the type parameter (which will then behave as a normal, bound,
-     * named type within the definition's type) and the value giving the type
-     * bounds of the parameter.</p>
+     * named type within the
+     * definition's type) and the value giving the type bounds of the parameter.
+     * </p>
      */
     private final Map<String, MTType> mySchematicTypes =
             new HashMap<String, MTType>();
@@ -68,10 +72,11 @@ public class MathSymbolEntry extends SymbolTableEntry {
      * @param type
      * @param typeValue
      * @param schematicTypes A map from the names of implicit type parameters
-     *              contained in the definition to their bounding types.  May be
-     *              <code>null</code>, which will be interpreted as the empty 
-     *              map.
-     * @param sourceModule 
+     *        contained in the
+     *        definition to their bounding types. May be <code>null</code>,
+     *        which will be interpreted
+     *        as the empty map.
+     * @param sourceModule
      */
     public MathSymbolEntry(TypeGraph g, String name, Quantification q,
             ResolveConceptualElement definingElement, MTType type,
@@ -95,9 +100,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
             myTypeValue = typeValue;
         }
         else if (type.isKnownToContainOnlyMTypes()) {
-            myTypeValue =
-                    new MTProper(g, type, type
-                            .membersKnownToContainOnlyMTypes(), name);
+            myTypeValue = new MTProper(g, type,
+                    type.membersKnownToContainOnlyMTypes(), name);
         }
         else {
             myTypeValue = null;
@@ -117,39 +121,55 @@ public class MathSymbolEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>Assuming this symbol represents a symbol with function type, returns
-     * a new entry representing a "version" of this function in which all
-     * <code>MTNamed</code> types that are components of its type have been
-     * filled in based on the provided arguments.  This is accomplished in two
-     * phases: first, any explicit type parameters are filled in (i.e., if the
-     * function takes a type as a parameter and then that type is used later,
-     * later usages will be correctly substituted with whatever type was 
-     * passed); then, implicit type parameters are filled in by binding the
-     * types of each actual argument to the expected type of the formal 
-     * parameter, then performing replacements in the remaining argument types.
-     * Any formal parameter that is <em>not</em> schematized (i.e., does not 
-     * contain an <code>MTNamed</code>) will not attempt to bind to its 
-     * argument (thus permitting later type flexibility via type theorem).  As a
-     * result, simply because a call to this method succeeds <em>does not 
-     * mean</em> the arguments are valid for the types of the parameters of
-     * this function: the types of arguments corresponding to non-schematized 
-     * formal parameters may not match even if a call to this method succeeds.
+     * <p>
+     * Assuming this symbol represents a symbol with function type, returns a
+     * new entry representing a
+     * "version" of this function in which all <code>MTNamed</code> types that
+     * are components of its
+     * type have been filled in based on the provided arguments. This is
+     * accomplished in two phases:
+     * first, any explicit type parameters are filled in (i.e., if the function
+     * takes a type as a
+     * parameter and then that type is used later, later usages will be
+     * correctly substituted with
+     * whatever type was passed); then, implicit type parameters are filled in
+     * by binding the types of
+     * each actual argument to the expected type of the formal parameter, then
+     * performing replacements
+     * in the remaining argument types. Any formal parameter that is
+     * <em>not</em> schematized (i.e.,
+     * does not contain an <code>MTNamed</code>) will not attempt to bind to its
+     * argument (thus
+     * permitting later type flexibility via type theorem). As a result, simply
+     * because a call to this
+     * method succeeds <em>does not mean</em> the arguments are valid for the
+     * types of the parameters
+     * of this function: the types of arguments corresponding to non-schematized
+     * formal parameters may
+     * not match even if a call to this method succeeds.
      * </p>
      * 
-     * <p>If the provided arguments will not deschematize against the formal
-     * parameter types, this method will throw a {@link NoSolutionException 
-     *   NoSolutionException}.  This may occur because the argument count is not
-     * correct, because an actual argument corresponding to a formal parameter
+     * <p>
+     * If the provided arguments will not deschematize against the formal
+     * parameter types, this method
+     * will throw a {@link NoSolutionException NoSolutionException}. This may
+     * occur because the
+     * argument count is not correct, because an actual argument corresponding
+     * to a formal parameter
      * that expects an explicit type parameter is not a type, because the type
-     * of an actual argument does not bind against its corresponding formal
-     * parameter, or because one of the types inferred during that binding is 
-     * not within its bounds.  If a call to this method yields a 
+     * of an actual argument
+     * does not bind against its corresponding formal parameter, or because one
+     * of the types inferred
+     * during that binding is not within its bounds. If a call to this method
+     * yields a
      * <code>NoSolutionException</code>, the provided arguments are definitely
-     * unacceptable for a call to this function.</p>
+     * unacceptable for a call
+     * to this function.
+     * </p>
      * 
      * @param arguments
      * @return
-     * @throws NoSolutionException 
+     * @throws NoSolutionException
      */
     public MathSymbolEntry deschematize(List<Exp> arguments,
             Scope callingContext, Map<String, MTType> definitionSchematicTypes)
@@ -174,8 +194,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
 
         MathSymbolEntry mathGeneric;
         for (ProgramTypeEntry e : callingContextProgramGenerics) {
-            //This is guaranteed not to fail--all program types can be coerced 
-            //to math types, so the passed location is irrelevant
+            // This is guaranteed not to fail--all program types can be coerced
+            // to math types, so the passed location is irrelevant
             mathGeneric = e.toMathSymbolEntry(null);
 
             callingContextMathGenerics.put(mathGeneric.getName(),
@@ -188,26 +208,22 @@ public class MathSymbolEntry extends SymbolTableEntry {
         MTType argumentType;
         try {
             for (MTType formalParameterType : formalParameterTypes) {
-                formalParameterType =
-                        formalParameterType
-                                .getCopyWithVariablesSubstituted(bindingsSoFar);
+                formalParameterType = formalParameterType
+                        .getCopyWithVariablesSubstituted(bindingsSoFar);
 
-                //We know arguments and formalParameterTypes are the same 
-                //length, see above
+                // We know arguments and formalParameterTypes are the same
+                // length, see above
                 argumentType = argumentTypeIter.next();
 
                 if (containsSchematicType(formalParameterType)) {
-                    //try{
-                    iterationBindings =
-                            argumentType.bindTo(formalParameterType,
-                                    callingContextMathGenerics,
-                                    mySchematicTypes);
+                    // try{
+                    iterationBindings = argumentType.bindTo(formalParameterType,
+                            callingContextMathGenerics, mySchematicTypes);
 
                     bindingsSoFar.putAll(iterationBindings);
-                    /*}
-                    catch (NoSuchElementException nsee) {
-                        int i = 0;
-                    }*/
+                    /*
+                     * } catch (NoSuchElementException nsee) { int i = 0; }
+                     */
                 }
             }
         }
@@ -222,9 +238,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
                     myTypeValue.getCopyWithVariablesSubstituted(bindingsSoFar);
         }
 
-        MTType newType =
-                ((MTFunction) myType
-                        .getCopyWithVariablesSubstituted(bindingsSoFar))
+        MTType newType = ((MTFunction) myType
+                .getCopyWithVariablesSubstituted(bindingsSoFar))
                         .deschematize(arguments);
 
         return new MathSymbolEntry(myType.getTypeGraph(), getName(),
@@ -322,8 +337,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        //Any type that appears in our list of schematic types shadows any 
-        //possible reference to a generic type
+        // Any type that appears in our list of schematic types shadows any
+        // possible reference to a generic type
         genericInstantiations =
                 new HashMap<String, PTType>(genericInstantiations);
         for (String schematicType : mySchematicTypes.keySet()) {
@@ -348,12 +363,12 @@ public class MathSymbolEntry extends SymbolTableEntry {
 
         Map<String, MTType> newGenericsInDefiningContext =
                 new HashMap<String, MTType>(myGenericsInDefiningContext);
-        newGenericsInDefiningContext.keySet().removeAll(
-                genericInstantiations.keySet());
+        newGenericsInDefiningContext.keySet()
+                .removeAll(genericInstantiations.keySet());
 
         return new MathSymbolEntry(myType.getTypeGraph(), getName(),
-                getQuantification(), getDefiningElement(), typeSubstitutor
-                        .getFinalExpression(), instantiatedTypeValue,
+                getQuantification(), getDefiningElement(),
+                typeSubstitutor.getFinalExpression(), instantiatedTypeValue,
                 mySchematicTypes, newGenericsInDefiningContext,
                 getSourceModuleIdentifier());
     }

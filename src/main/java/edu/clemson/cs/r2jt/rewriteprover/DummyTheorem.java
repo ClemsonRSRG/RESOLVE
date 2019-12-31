@@ -1,7 +1,7 @@
 /*
  * DummyTheorem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>Simply provides a way to construct a theorem that will return a particular
- * transformation.</p>
+ * <p>
+ * Simply provides a way to construct a theorem that will return a particular
+ * transformation.
+ * </p>
  */
 public class DummyTheorem extends Theorem {
 

@@ -1,7 +1,7 @@
 /*
  * IfStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class for all the {@code if-else} statement objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the {@code if-else} statement objects that the
+ * compiler builds using
+ * the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,13 +32,25 @@ public class IfStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The if part of this statement</p> */
+    /**
+     * <p>
+     * The if part of this statement
+     * </p>
+     */
     private final IfConditionItem myIfClause;
 
-    /** <p>The else-if part of this statement</p> */
+    /**
+     * <p>
+     * The else-if part of this statement
+     * </p>
+     */
     private final List<IfConditionItem> myElseIfs;
 
-    /** <p>The else part of this statement</p> */
+    /**
+     * <p>
+     * The else part of this statement
+     * </p>
+     */
     private final List<Statement> myElseStatements;
 
     // ===========================================================
@@ -43,14 +58,16 @@ public class IfStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs an if-elseif-else statement.</p>
+     * <p>
+     * This constructs an if-elseif-else statement.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param ifClause A {@link IfConditionItem} representing if block.
-     * @param elseifpairs A list of {@link IfConditionItem} representing all
-     *                    the else-if pairs.
-     * @param elseStatements The list of {@link Statement}s that are in
-     *                       the else block.
+     * @param elseifpairs A list of {@link IfConditionItem} representing all the
+     *        else-if pairs.
+     * @param elseStatements The list of {@link Statement}s that are in the else
+     *        block.
      */
     public IfStmt(Location l, IfConditionItem ifClause,
             List<IfConditionItem> elseifpairs, List<Statement> elseStatements) {
@@ -121,7 +138,9 @@ public class IfStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the statements in this else block</p>
+     * <p>
+     * This method returns the statements in this else block
+     * </p>
      *
      * @return The list of {@link Statement} representation objects.
      */
@@ -130,8 +149,9 @@ public class IfStmt extends Statement {
     }
 
     /**
-     * <p>This method returns all the else-if blocks in
-     * this {@link IfStmt}.</p>
+     * <p>
+     * This method returns all the else-if blocks in this {@link IfStmt}.
+     * </p>
      *
      * @return The list of {@link IfConditionItem} representation objects.
      */
@@ -140,8 +160,9 @@ public class IfStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the if block in
-     * this {@link IfStmt}.</p>
+     * <p>
+     * This method returns the if block in this {@link IfStmt}.
+     * </p>
      *
      * @return The {@link IfConditionItem} representation object.
      */
@@ -165,8 +186,10 @@ public class IfStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
+     * <p>
+     * Implemented by this concrete subclass of {@link Statement} to manufacture
+     * a copy of themselves.
+     * </p>
      *
      * @return A new {@link Statement} that is a deep copy of the original.
      */

@@ -1,7 +1,7 @@
 /*
  * FuncAssignStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the function assignment statement objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the function assignment statement objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,10 +31,18 @@ public class FuncAssignStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The variable expression to be assigned</p> */
+    /**
+     * <p>
+     * The variable expression to be assigned
+     * </p>
+     */
     private final ProgramVariableExp myVariableExp;
 
-    /** <p>The programming expression to be assigned</p> */
+    /**
+     * <p>
+     * The programming expression to be assigned
+     * </p>
+     */
     private final ProgramExp myAssignExp;
 
     // ===========================================================
@@ -39,13 +50,16 @@ public class FuncAssignStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a function assignment statement.</p>
+     * <p>
+     * This constructs a function assignment statement.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param var A {@link ProgramVariableExp} representing the variable
-     *            expression we want to assign to.
+     *        expression we want to assign
+     *        to.
      * @param exp A {@link ProgramExp} representing the expression we are
-     *            assigning.
+     *        assigning.
      */
     public FuncAssignStmt(Location l, ProgramVariableExp var, ProgramExp exp) {
         super(l);
@@ -91,8 +105,10 @@ public class FuncAssignStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the assigned expression in
-     * this function assignment statement.</p>
+     * <p>
+     * This method returns the assigned expression in this function assignment
+     * statement.
+     * </p>
      *
      * @return The {@link ProgramExp} representation object.
      */
@@ -101,8 +117,10 @@ public class FuncAssignStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the variable expression in
-     * this function assignment statement.</p>
+     * <p>
+     * This method returns the variable expression in this function assignment
+     * statement.
+     * </p>
      *
      * @return The {@link ProgramVariableExp} representation object.
      */
@@ -130,7 +148,8 @@ public class FuncAssignStmt extends Statement {
     @Override
     protected final Statement copy() {
         return new FuncAssignStmt(cloneLocation(),
-                (ProgramVariableExp) myVariableExp.clone(), myAssignExp.clone());
+                (ProgramVariableExp) myVariableExp.clone(),
+                myAssignExp.clone());
     }
 
 }

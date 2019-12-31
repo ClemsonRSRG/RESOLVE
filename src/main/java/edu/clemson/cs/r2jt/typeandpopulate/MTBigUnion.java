@@ -1,7 +1,7 @@
 /*
  * MTBigUnion.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,9 +22,11 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
 
 /**
- * <p>A constructed type consisting of the union over one or more quantified
- * types.  For example U{t, r : MType}{t intersect r} is the type of all 
- * intersections.</p>
+ * <p>
+ * A constructed type consisting of the union over one or more quantified types.
+ * For example U{t, r
+ * : MType}{t intersect r} is the type of all intersections.
+ * </p>
  */
 public class MTBigUnion extends MTAbstract<MTBigUnion> {
 
@@ -55,16 +57,21 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This provides a small optimization for working with 
-     * {@link SyntacticSubtypeChecker SyntacticSubtypeChecker}.  In the case
-     * where we're just going to have <em>n</em> variables whose names are
-     * meant to be guaranteed not to appear in <code>expression</code>, we just
-     * pass in the number of variables this union is meant to be quantified over
-     * rather than going through the trouble of giving them names and types and
-     * putting them in a map.</p>
+     * <p>
+     * This provides a small optimization for working with
+     * {@link SyntacticSubtypeChecker
+     * SyntacticSubtypeChecker}. In the case where we're just going to have
+     * <em>n</em> variables whose
+     * names are meant to be guaranteed not to appear in
+     * <code>expression</code>, we just pass in the
+     * number of variables this union is meant to be quantified over rather than
+     * going through the
+     * trouble of giving them names and types and putting them in a map.
+     * </p>
+     * 
      * @param g
      * @param uniqueVariableCount
-     * @param expression 
+     * @param expression
      */
     MTBigUnion(TypeGraph g, int uniqueVariableCount, MTType expression) {
         super(g);
@@ -197,7 +204,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
 
         int result = BASE_HASH;
 
-        //Note that order of these MTTypes doesn't matter
+        // Note that order of these MTTypes doesn't matter
         for (MTType t : myQuantifiedVariables.values()) {
             result += t.hashCode();
         }
@@ -216,9 +223,12 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>Converts us from a "enh, some number of unique variables" big union to
-     * a "specific named unique variables" big union if one of the methods is
-     * called that requires such a thing.</p>
+     * <p>
+     * Converts us from a "enh, some number of unique variables" big union to a
+     * "specific named unique
+     * variables" big union if one of the methods is called that requires such a
+     * thing.
+     * </p>
      */
     private void ensureQuantifiedTypes() {
         if (myQuantifiedVariables == null) {

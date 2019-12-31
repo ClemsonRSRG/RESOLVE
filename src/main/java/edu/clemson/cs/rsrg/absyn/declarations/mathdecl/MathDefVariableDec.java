@@ -1,7 +1,7 @@
 /*
  * MathDefVariableDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.items.mathitems.DefinitionBodyItem;
 
 /**
- * <p>This is the class for all the mathematical definition variable declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical definition variable declarations
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,10 +32,18 @@ public class MathDefVariableDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The math variable declaration</p> */
+    /**
+     * <p>
+     * The math variable declaration
+     * </p>
+     */
     private final MathVarDec myVariable;
 
-    /** <p>The definition body.</p> */
+    /**
+     * <p>
+     * The definition body.
+     * </p>
+     */
     private final DefinitionBodyItem myBodyItem;
 
     // ===========================================================
@@ -40,12 +51,15 @@ public class MathDefVariableDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical definition variable.</p>
+     * <p>
+     * This constructs a mathematical definition variable.
+     * </p>
      *
      * @param variable The mathematical variable we are defining.
      * @param bodyItem The definition body (if any).
      */
-    public MathDefVariableDec(MathVarDec variable, DefinitionBodyItem bodyItem) {
+    public MathDefVariableDec(MathVarDec variable,
+            DefinitionBodyItem bodyItem) {
         super(variable.getLocation(), variable.getName());
         myVariable = variable;
         myBodyItem = bodyItem;
@@ -97,26 +111,34 @@ public class MathDefVariableDec extends Dec {
     }
 
     /**
-     * <p>This method returns the definition expression of a standard definition.</p>
+     * <p>
+     * This method returns the definition expression of a standard definition.
+     * </p>
      *
-     * @return An {@code Exp} representing the definition expression or {@code null}.
+     * @return An {@code Exp} representing the definition expression or
+     *         {@code null}.
      */
     public final Exp getDefinitionAsExp() {
         return myBodyItem == null ? null : myBodyItem.getDefinition();
     }
 
     /**
-     * <p>This method returns the definition expression of a standard definition.</p>
+     * <p>
+     * This method returns the definition expression of a standard definition.
+     * </p>
      *
-     * @return An {@code Exp} representing the definition expression or {@code null}.
+     * @return An {@code Exp} representing the definition expression or
+     *         {@code null}.
      */
     public final DefinitionBodyItem getDefinitionItem() {
         return myBodyItem;
     }
 
     /**
-     * <p>This method returns the math variable associated with this
-     * definition declaration.</p>
+     * <p>
+     * This method returns the math variable associated with this definition
+     * declaration.
+     * </p>
      *
      * @return A {@link MathVarDec} representation object.
      */

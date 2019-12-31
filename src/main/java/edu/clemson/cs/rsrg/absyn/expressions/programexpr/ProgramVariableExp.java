@@ -1,7 +1,7 @@
 /*
  * ProgramVariableExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the abstract base class for all the programming variable expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the programming variable expression
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,11 @@ public abstract class ProgramVariableExp extends ProgramExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's qualifier</p> */
+    /**
+     * <p>
+     * The expression's qualifier
+     * </p>
+     */
     private PosSymbol myQualifier;
 
     // ===========================================================
@@ -36,9 +43,11 @@ public abstract class ProgramVariableExp extends ProgramExp {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location and
-     * qualifier (if any) of any objects created from a class that inherits
-     * from {@code ProgramVariableExp}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location and qualifier
+     * (if any) of any objects
+     * created from a class that inherits from {@code ProgramVariableExp}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param qual A {@link PosSymbol} representing the expression's qualifier.
@@ -87,7 +96,9 @@ public abstract class ProgramVariableExp extends ProgramExp {
     }
 
     /**
-     * <p>This method returns the qualifier name.</p>
+     * <p>
+     * This method returns the qualifier name.
+     * </p>
      *
      * @return The {@link PosSymbol} representation object.
      */
@@ -101,14 +112,15 @@ public abstract class ProgramVariableExp extends ProgramExp {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result =
-                31 * result
-                        + (myQualifier != null ? myQualifier.hashCode() : 0);
+        result = 31 * result
+                + (myQualifier != null ? myQualifier.hashCode() : 0);
         return result;
     }
 
     /**
-     * <p>Sets the qualifier for this expression.</p>
+     * <p>
+     * Sets the qualifier for this expression.
+     * </p>
      *
      * @param qualifier The qualifier for this expression.
      */

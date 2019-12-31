@@ -1,7 +1,7 @@
 /*
  * MTSetRestriction.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -79,8 +79,8 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
 
     @Override
     public List<MTType> getComponentTypes() {
-        return Collections.unmodifiableList(Collections
-                .singletonList(myBaseType));
+        return Collections
+                .unmodifiableList(Collections.singletonList(myBaseType));
     }
 
     @Override
@@ -95,10 +95,10 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
 
     @Override
     public int getHashCode() {
-        //This is fun.  At the moment MTSetRestrictions are not alpha-equivalent
-        //to anything, including themselves, so the best thing we can do is
-        //provide an integer that is maximally unlikely to be equal to any 
-        //object's (including this one's!) hash.
+        // This is fun. At the moment MTSetRestrictions are not alpha-equivalent
+        // to anything, including themselves, so the best thing we can do is
+        // provide an integer that is maximally unlikely to be equal to any
+        // object's (including this one's!) hash.
         return (new Random()).nextInt();
     }
 }

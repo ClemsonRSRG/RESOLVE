@@ -1,7 +1,7 @@
 /*
  * TheoremPrioritizer.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,10 @@ import edu.clemson.cs.rsrg.prover.utilities.expressions.NormalizedAtomicExpressi
 import java.util.*;
 
 /**
- * <p>This class allows us to prioritize which <em>Theorems</em> to use in
- * proving a {@code VC}.</p>
+ * <p>
+ * This class allows us to prioritize which <em>Theorems</em> to use in proving
+ * a {@code VC}.
+ * </p>
  *
  * @author Mike Kabbani
  * @version 2.0
@@ -30,16 +32,32 @@ public class TheoremPrioritizer {
     // Member Fields
     // ===========================================================
 
-    /** <p>A map of non-quantified symbols</p> */
+    /**
+     * <p>
+     * A map of non-quantified symbols
+     * </p>
+     */
     private final Map<String, Integer> myNonQuantifiedSymbolMap;
 
-    /** <p>The current immutable VC.</p> */
+    /**
+     * <p>
+     * The current immutable VC.
+     * </p>
+     */
     private final ImmutableVC myVC;
 
-    /** <p>A priority queue for selecting theorems.</p> */
+    /**
+     * <p>
+     * A priority queue for selecting theorems.
+     * </p>
+     */
     private final PriorityQueue<TheoremWithScore> myTheoremPriorityQueue;
 
-    /** <p>A symbol registry.</p> */
+    /**
+     * <p>
+     * A symbol registry.
+     * </p>
+     */
     private final Registry myVCRegistry;
 
     // ===========================================================
@@ -47,17 +65,22 @@ public class TheoremPrioritizer {
     // ===========================================================
 
     /**
-     * <p>This class organizes the theorems into a particular
-     * priority.</p>
+     * <p>
+     * This class organizes the theorems into a particular priority.
+     * </p>
      *
      * @param theoremList List of available theorems.
-     * @param theoremAppliedCountMap A map of how many times theorems were selected.
+     * @param theoremAppliedCountMap A map of how many times theorems were
+     *        selected.
      * @param vc The current vc we are processing.
-     * @param nonQuantifiedTheoremSymbols A set of non-quantified theorem symbols.
+     * @param nonQuantifiedTheoremSymbols A set of non-quantified theorem
+     *        symbols.
      * @param smallEndEquations A set of small equation theorems.
      */
-    public TheoremPrioritizer(List<Theorem> theoremList, Map<String, Integer> theoremAppliedCountMap,
-            ImmutableVC vc, Set<String> nonQuantifiedTheoremSymbols, Set<Theorem> smallEndEquations) {
+    public TheoremPrioritizer(List<Theorem> theoremList,
+            Map<String, Integer> theoremAppliedCountMap, ImmutableVC vc,
+            Set<String> nonQuantifiedTheoremSymbols,
+            Set<Theorem> smallEndEquations) {
         myTheoremPriorityQueue = new PriorityQueue<>(theoremList.size());
         myVCRegistry = vc.getRegistry();
         myVC = vc;
@@ -75,9 +98,8 @@ public class TheoremPrioritizer {
             TheoremWithScore tws = new TheoremWithScore(t);
             int score;
             if (!shouldExclude(t.getNonQuantifiedSymbols())) {
-                score =
-                        calculateScoreMinimum(t.getNonQuantifiedSymbols(),
-                                myVCRegistry.mySymbolToIndex.keySet().size());
+                score = calculateScoreMinimum(t.getNonQuantifiedSymbols(),
+                        myVCRegistry.mySymbolToIndex.keySet().size());
                 if (theoremAppliedCountMap.containsKey(t.getName())) {
                     score += theoremAppliedCountMap.get(t.getName());
                 }
@@ -99,8 +121,10 @@ public class TheoremPrioritizer {
     // ===========================================================
 
     /**
-     * <p>This method returns a new theorem if there are more
-     * that can be considered.</p>
+     * <p>
+     * This method returns a new theorem if there are more that can be
+     * considered.
+     * </p>
      *
      * @return A {@link Theorem} object.
      */
@@ -114,15 +138,17 @@ public class TheoremPrioritizer {
     // ===========================================================
 
     /**
-     * <p>An helper method that computes a minimum score based
-     * on the theorem symbols.</p>
+     * <p>
+     * An helper method that computes a minimum score based on the theorem
+     * symbols.
+     * </p>
      *
      * @param theorem_symbols Set of symbols in the theorem.
      * @param not_contained_penalty A penalty score (if any).
      *
      * @return A score.
      */
-    //  minimum of symbol scores in both vc and theorem
+    // minimum of symbol scores in both vc and theorem
     private int calculateScoreMinimum(Set<String> theorem_symbols,
             int not_contained_penalty) {
         if (theorem_symbols.isEmpty()) {
@@ -149,14 +175,17 @@ public class TheoremPrioritizer {
     }
 
     /**
-     * <p>An helper method that returns a value
-     * based on whether or not if we found the symbol
-     * to be {@code true}.</p>
+     * <p>
+     * An helper method that returns a value based on whether or not if we found
+     * the symbol to be
+     * {@code true}.
+     * </p>
      *
      * @param s A string to be searched.
      *
      * @return 0 if it is an exact match, 1 if we found an equivalence
-     * relationship with another symbol, -1 otherwise.
+     *         relationship with another
+     *         symbol, -1 otherwise.
      */
     private int goalArg(String s) {
         int si = myVCRegistry.getIndexForSymbol(s);
@@ -171,7 +200,8 @@ public class TheoremPrioritizer {
                 return 0;
             }
 
-            for (NormalizedAtomicExpression ng : myVC.getConjunct().getUses(gi)) {
+            for (NormalizedAtomicExpression ng : myVC.getConjunct()
+                    .getUses(gi)) {
                 if (ng.readRoot() != gi) {
                     continue;
                 }
@@ -186,13 +216,16 @@ public class TheoremPrioritizer {
     }
 
     /**
-     * <p>An helper method for determining if our registry
-     * contains any of the symbols required by the VC.</p>
+     * <p>
+     * An helper method for determining if our registry contains any of the
+     * symbols required by the
+     * VC.
+     * </p>
      *
      * @param vcMustContainThese A set of symbols.
      *
      * @return {@code true} if our registry contains one of the symbols,
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     private boolean shouldExclude(Set<String> vcMustContainThese) {
         for (String s : vcMustContainThese) {

@@ -1,7 +1,7 @@
 /*
  * AlphaEquivalencyChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,9 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     private static final int POOL_SIZE = 3;
 
     /**
-     * <p>An object pool to cut down on the creation of 
-     * AlphaEquivalencyCheckers.</p>
+     * <p>
+     * An object pool to cut down on the creation of AlphaEquivalencyCheckers.
+     * </p>
      */
     private final Deque<AlphaEquivalencyChecker> myCheckerPool;
 
@@ -58,7 +59,7 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     public boolean beginMTFunctionApplication(MTFunctionApplication t1,
             MTFunctionApplication t2) {
 
-        //myResult = (t1.getName().equals(t2.getName()));
+        // myResult = (t1.getName().equals(t2.getName()));
 
         // Not sure if this is the right fix.... -BD
         myResult = (t1.getHashCode() == t2.getHashCode());
@@ -68,8 +69,8 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
 
     @Override
     public boolean beginMTNamed(MTNamed t1, MTNamed t2) {
-        //TODO: This doesn't deal correctly with multiple appearances of a
-        //variable
+        // TODO: This doesn't deal correctly with multiple appearances of a
+        // variable
 
         if (!t1.name.equals(t2.name)) {
             MTType t1Value;
@@ -84,8 +85,8 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
                 returnChecker(alphaEq);
             }
             catch (NoSuchElementException nsee) {
-                //We have no information about the named types--but we know they
-                //aren't named the same, so...
+                // We have no information about the named types--but we know they
+                // aren't named the same, so...
                 myResult = false;
             }
         }
@@ -106,12 +107,12 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     public boolean beginMTSetRestriction(MTSetRestriction t1,
             MTSetRestriction t2) {
 
-        //TODO:
-        //We really need a way to check the expression embedded in each set
-        //restriction for alpha-equivalency.  We don't have one, so for the
-        //moment, we throw an exception
-        throw new RuntimeException("Can't check set restrictions for "
-                + "alpha equivalency.");
+        // TODO:
+        // We really need a way to check the expression embedded in each set
+        // restriction for alpha-equivalency. We don't have one, so for the
+        // moment, we throw an exception
+        throw new RuntimeException(
+                "Can't check set restrictions for " + "alpha equivalency.");
     }
 
     @Override

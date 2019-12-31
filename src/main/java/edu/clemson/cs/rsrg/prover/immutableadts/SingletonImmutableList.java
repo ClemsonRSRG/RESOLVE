@@ -1,7 +1,7 @@
 /*
  * SingletonImmutableList.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,9 @@ import edu.clemson.cs.rsrg.prover.iterators.SingletonIterator;
 import java.util.Iterator;
 
 /**
- * <p>This class implements a singleton element immutable list.</p>
+ * <p>
+ * This class implements a singleton element immutable list.
+ * </p>
  *
  * @param <E> Type of element stored inside this list.
  *
@@ -29,10 +31,18 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
     // Member Fields
     // ===========================================================
 
-    /** <p>An empty immutable list.</p> */
+    /**
+     * <p>
+     * An empty immutable list.
+     * </p>
+     */
     private final EmptyImmutableList<E> EMPTY;
 
-    /** <p>The element stored inside this singleton list</p> */
+    /**
+     * <p>
+     * The element stored inside this singleton list
+     * </p>
+     */
     private final E myElement;
 
     // ===========================================================
@@ -40,8 +50,10 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>This creates a new immutable list that only contains
-     * the element {@code e}.</p>
+     * <p>
+     * This creates a new immutable list that only contains the element
+     * {@code e}.
+     * </p>
      *
      * @param e Element to be inserted.
      */
@@ -55,7 +67,9 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>This method returns the element at the specified index.</p>
+     * <p>
+     * This method returns the element at the specified index.
+     * </p>
      *
      * @param index An index position.
      *
@@ -71,8 +85,10 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from the head
-     * to the specified index.</p>
+     * <p>
+     * This method returns a new immutable sub-list from the head to the
+     * specified index.
+     * </p>
      *
      * @param length Length of the sub-list.
      *
@@ -105,8 +121,9 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns the number of elements in
-     * this list.</p>
+     * <p>
+     * This method returns the number of elements in this list.
+     * </p>
      *
      * @return Number of elements.
      */
@@ -116,11 +133,13 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from the
-     * specified start index to the end of our list.</p>
+     * <p>
+     * This method returns a new immutable sub-list from the specified start
+     * index to the end of our
+     * list.
+     * </p>
      *
-     * @param startIndex An index position to start building
-     *                   our sub-list.
+     * @param startIndex An index position to start building our sub-list.
      *
      * @return An immutable sub-list of the original list.
      */

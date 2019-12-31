@@ -1,7 +1,7 @@
 /*
  * FinalizeVarStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,11 +18,15 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 
 /**
- * <p>This is the class that builds a special kind of statement
- * that acts as a placeholder for finalizing a variable declaration.
- * Since the user cannot supply their own {@code _Finalize} statements,
- * any instances of this class will solely be created by the
- * {@link VCGenerator} and/or by our various different {@code proof rules}.</p>
+ * <p>
+ * This is the class that builds a special kind of statement that acts as a
+ * placeholder for
+ * finalizing a variable declaration. Since the user cannot supply their own
+ * {@code _Finalize}
+ * statements, any instances of this class will solely be created by the
+ * {@link VCGenerator} and/or
+ * by our various different {@code proof rules}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -33,12 +37,19 @@ public class FinalizeVarStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The variable declaration we are applying the rule to.</p> */
+    /**
+     * <p>
+     * The variable declaration we are applying the rule to.
+     * </p>
+     */
     private final VarDec myVarDec;
 
     /**
-     * <p>The symbol table entry representing program type associated
-     * with the variable we are trying to finalize.</p>
+     * <p>
+     * The symbol table entry representing program type associated with the
+     * variable we are trying to
+     * finalize.
+     * </p>
      */
     private final SymbolTableEntry myVarTypeEntry;
 
@@ -47,11 +58,15 @@ public class FinalizeVarStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs an helper statement that indicates
-     * finalization logic for a variable with known type happens here.</p>
+     * <p>
+     * This constructs an helper statement that indicates finalization logic for
+     * a variable with known
+     * type happens here.
+     * </p>
      *
      * @param varDec A variable declaration with known type.
-     * @param symbolTableEntry The program type entry associated with {@code varDec}.
+     * @param symbolTableEntry The program type entry associated with
+     *        {@code varDec}.
      */
     public FinalizeVarStmt(VarDec varDec, SymbolTableEntry symbolTableEntry) {
         super(varDec.getLocation());
@@ -97,8 +112,9 @@ public class FinalizeVarStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the program variable we are
-     * trying to finalize.</p>
+     * <p>
+     * This method returns the program variable we are trying to finalize.
+     * </p>
      *
      * @return A {@link VarDec}.
      */
@@ -107,9 +123,11 @@ public class FinalizeVarStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the symbol table entry associated
-     * with the program type for the variable declaration we are
-     * trying to finalize.</p>
+     * <p>
+     * This method returns the symbol table entry associated with the program
+     * type for the variable
+     * declaration we are trying to finalize.
+     * </p>
      *
      * @return A {@link SymbolTableEntry}.
      */

@@ -1,7 +1,7 @@
 /*
  * FunctionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical function expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical function expression objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,13 +36,25 @@ public class FunctionExp extends AbstractFunctionExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The mathematical name expression for this function.</p> */
+    /**
+     * <p>
+     * The mathematical name expression for this function.
+     * </p>
+     */
     private final VarExp myFuncNameExp;
 
-    /** <p>Some functions have an exponent-like part to the name.</p> */
+    /**
+     * <p>
+     * Some functions have an exponent-like part to the name.
+     * </p>
+     */
     private final Exp myFuncNameCaratExp;
 
-    /** <p>The expression's argument fields</p> */
+    /**
+     * <p>
+     * The expression's argument fields
+     * </p>
+     */
     private final List<Exp> myArguments;
 
     // ===========================================================
@@ -47,15 +62,18 @@ public class FunctionExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a function expression with its associated
-     * arguments.</p>
+     * <p>
+     * This constructs a function expression with its associated arguments.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name A {@link VarExp} name expression object.
-     * @param caratExp A {@link Exp} indicating the exponent-like part to the name.
+     * @param caratExp A {@link Exp} indicating the exponent-like part to the
+     *        name.
      * @param argList A list of {@link Exp} argument objects.
      */
-    public FunctionExp(Location l, VarExp name, Exp caratExp, List<Exp> argList) {
+    public FunctionExp(Location l, VarExp name, Exp caratExp,
+            List<Exp> argList) {
         super(l, name.getQualifier());
 
         // The qualifier should be part of the function expression
@@ -118,9 +136,8 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     public final boolean containsExp(Exp exp) {
-        boolean found =
-                myFuncNameExp.containsExp(exp)
-                        && myFuncNameCaratExp.containsExp(exp);
+        boolean found = myFuncNameExp.containsExp(exp)
+                && myFuncNameCaratExp.containsExp(exp);
         if (!found && myArguments != null) {
             Iterator<Exp> i = myArguments.iterator();
             while (i.hasNext() && !found) {
@@ -141,9 +158,8 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     public final boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found =
-                myFuncNameExp.containsVar(varName, IsOldExp)
-                        && myFuncNameCaratExp.containsVar(varName, IsOldExp);
+        boolean found = myFuncNameExp.containsVar(varName, IsOldExp)
+                && myFuncNameCaratExp.containsVar(varName, IsOldExp);
         if (!found && myArguments != null) {
             Iterator<Exp> i = myArguments.iterator();
             while (i.hasNext() && !found) {
@@ -175,8 +191,8 @@ public class FunctionExp extends AbstractFunctionExp {
 
         if (!myFuncNameExp.equals(that.myFuncNameExp))
             return false;
-        if (myFuncNameCaratExp != null ? !myFuncNameCaratExp
-                .equals(that.myFuncNameCaratExp)
+        if (myFuncNameCaratExp != null
+                ? !myFuncNameCaratExp.equals(that.myFuncNameCaratExp)
                 : that.myFuncNameCaratExp != null)
             return false;
         return myArguments.equals(that.myArguments);
@@ -191,23 +207,21 @@ public class FunctionExp extends AbstractFunctionExp {
 
         if (retval) {
             FunctionExp eAsFunction = (FunctionExp) e;
-            retval =
-                    posSymbolEquivalent(myQualifier, eAsFunction.myQualifier)
-                            && equivalent(myFuncNameExp,
-                                    eAsFunction.myFuncNameExp)
-                            && equivalent(myFuncNameCaratExp,
-                                    eAsFunction.myFuncNameCaratExp)
-                            && argsEquivalent(myArguments,
-                                    eAsFunction.myArguments)
-                            && myQuantification == eAsFunction.myQuantification;
+            retval = posSymbolEquivalent(myQualifier, eAsFunction.myQualifier)
+                    && equivalent(myFuncNameExp, eAsFunction.myFuncNameExp)
+                    && equivalent(myFuncNameCaratExp,
+                            eAsFunction.myFuncNameCaratExp)
+                    && argsEquivalent(myArguments, eAsFunction.myArguments)
+                    && myQuantification == eAsFunction.myQuantification;
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns the exponent-like expression for the
-     * function name.</p>
+     * <p>
+     * This method returns the exponent-like expression for the function name.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -216,7 +230,9 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the function name expression.</p>
+     * <p>
+     * This method returns the function name expression.
+     * </p>
      *
      * @return The {@link VarExp} representation object.
      */
@@ -225,7 +241,9 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the operator name.</p>
+     * <p>
+     * This method returns the operator name.
+     * </p>
      *
      * @return A {@link PosSymbol} object containing the operator.
      */
@@ -235,7 +253,9 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the operator name.</p>
+     * <p>
+     * This method returns the operator name.
+     * </p>
      *
      * @return The operator as a string.
      */
@@ -245,7 +265,9 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns all the argument expressions.</p>
+     * <p>
+     * This method returns all the argument expressions.
+     * </p>
      *
      * @return A list containing all the argument {@link Exp}s.
      */
@@ -274,17 +296,17 @@ public class FunctionExp extends AbstractFunctionExp {
     public final int hashCode() {
         int result = super.hashCode();
         result = 31 * result + myFuncNameExp.hashCode();
-        result =
-                31
-                        * result
-                        + (myFuncNameCaratExp != null ? myFuncNameCaratExp
-                                .hashCode() : 0);
+        result = 31 * result
+                + (myFuncNameCaratExp != null ? myFuncNameCaratExp.hashCode()
+                        : 0);
         result = 31 * result + myArguments.hashCode();
         return result;
     }
 
     /**
-     * <p>Sets the quantification for this expression.</p>
+     * <p>
+     * Sets the quantification for this expression.
+     * </p>
      *
      * @param q The quantification type for this expression.
      */
@@ -306,9 +328,8 @@ public class FunctionExp extends AbstractFunctionExp {
             newCaratExp = myFuncNameCaratExp.clone();
         }
 
-        FunctionExp newFunctionExp =
-                new FunctionExp(cloneLocation(),
-                        (VarExp) myFuncNameExp.clone(), newCaratExp, copyExps());
+        FunctionExp newFunctionExp = new FunctionExp(cloneLocation(),
+                (VarExp) myFuncNameExp.clone(), newCaratExp, copyExps());
 
         // Copy any qualifiers
         if (myQualifier != null) {
@@ -344,10 +365,11 @@ public class FunctionExp extends AbstractFunctionExp {
 
                 // We first check to see if the qualifiers match.
                 // If they don't match, we don't need to do anything else.
-                if (nextKeyAsVarExp.getQualifier() != null &&
-                        nextKeyAsVarExp.getQualifier().equals(myQualifier)) {
+                if (nextKeyAsVarExp.getQualifier() != null
+                        && nextKeyAsVarExp.getQualifier().equals(myQualifier)) {
                     // Check if the var expression matches our name
-                    if (nextKeyAsVarExp.getName().equals(myFuncNameExp.getName())) {
+                    if (nextKeyAsVarExp.getName()
+                            .equals(myFuncNameExp.getName())) {
                         // We found a key that is equivalent to our name
                         substitutionKey = nextKey;
                     }
@@ -368,9 +390,8 @@ public class FunctionExp extends AbstractFunctionExp {
                 newArgs.add(substitute(f, substitutions));
             }
 
-            FunctionExp newFunctionExp =
-                    new FunctionExp(cloneLocation(), (VarExp) myFuncNameExp.clone(),
-                            newCaratExp, newArgs);
+            FunctionExp newFunctionExp = new FunctionExp(cloneLocation(),
+                    (VarExp) myFuncNameExp.clone(), newCaratExp, newArgs);
 
             // Copy any qualifiers
             if (myQualifier != null) {
@@ -393,8 +414,10 @@ public class FunctionExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes checks for argument
-     * equivalency of the.</p>
+     * <p>
+     * This is a helper method that makes checks for argument equivalency of
+     * the.
+     * </p>
      *
      * @return True if all arguments are equivalent, false otherwise.
      */
@@ -411,8 +434,10 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the argument expressions.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * argument expressions.
+     * </p>
      *
      * @return A list containing {@link Exp}s.
      */

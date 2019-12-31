@@ -1,7 +1,7 @@
 /*
  * GenericProgramTypeQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,9 +19,13 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.Facility
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 
 /**
- * <p>A <code>GenericProgramTypeQuery</code> returns all {@link ProgramTypeEntry}
- * in our current scope. The search is performed using {@link ImportStrategy#IMPORT_NAMED}
- * and {@link FacilityStrategy#FACILITY_IGNORE} using the {@link GenericProgramTypeSearcher#INSTANCE}.</p>
+ * <p>
+ * A <code>GenericProgramTypeQuery</code> returns all {@link ProgramTypeEntry}
+ * in our current scope.
+ * The search is performed using {@link ImportStrategy#IMPORT_NAMED} and
+ * {@link FacilityStrategy#FACILITY_IGNORE} using the
+ * {@link GenericProgramTypeSearcher#INSTANCE}.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,7 +37,11 @@ public class GenericProgramTypeQuery
     // Member Fields
     // ===========================================================
 
-    /** <p>A singleton instance for this query.</p> */
+    /**
+     * <p>
+     * A singleton instance for this query.
+     * </p>
+     */
     public static final GenericProgramTypeQuery INSTANCE =
             new GenericProgramTypeQuery();
 
@@ -42,7 +50,9 @@ public class GenericProgramTypeQuery
     // ===========================================================
 
     /**
-     * <p>This query searches for all the generic program types in scope.</p>
+     * <p>
+     * This query searches for all the generic program types in scope.
+     * </p>
      */
     private GenericProgramTypeQuery() {
         super(new UnqualifiedPath(ImportStrategy.IMPORT_NAMED,

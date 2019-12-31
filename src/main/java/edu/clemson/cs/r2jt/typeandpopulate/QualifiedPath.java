@@ -1,7 +1,7 @@
 /*
  * QualifiedPath.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,17 +23,22 @@ import edu.clemson.cs.r2jt.misc.SourceErrorException;
 import java.util.List;
 
 /**
- * <p>Defines the search path when a symbol is fully qualified.  Namely:</p>
+ * <p>
+ * Defines the search path when a symbol is fully qualified. Namely:
+ * </p>
  * 
  * <ul>
- * 		<li>If the qualifier matches a facility defined in the same module as
- *          the source scope, open the corresponding module and search for the
- *          symbol there.</li>
- *      <li>Otherwise, look for a module with that name and search there.</li>
+ * <li>If the qualifier matches a facility defined in the same module as the
+ * source scope, open the
+ * corresponding module and search for the symbol there.</li>
+ * <li>Otherwise, look for a module with that name and search there.</li>
  * </ul>
  * 
- * <p>Instances of this class can be parameterized to determine how generics are
- * handled if the qualifier refers to a facility.</p>
+ * <p>
+ * Instances of this class can be parameterized to determine how generics are
+ * handled if the
+ * qualifier refers to a facility.
+ * </p>
  */
 public class QualifiedPath implements ScopeSearchPath {
 
@@ -45,7 +50,8 @@ public class QualifiedPath implements ScopeSearchPath {
      * @param qualifier
      * @param facilityStrategy The FACILITY_IGNORE strategy is not permitted.
      */
-    public QualifiedPath(PosSymbol qualifier, FacilityStrategy facilityStrategy) {
+    public QualifiedPath(PosSymbol qualifier,
+            FacilityStrategy facilityStrategy) {
 
         if (facilityStrategy == FacilityStrategy.FACILITY_IGNORE) {
             throw new IllegalArgumentException("Can't use FACILITY_IGNORE");
@@ -63,19 +69,16 @@ public class QualifiedPath implements ScopeSearchPath {
         List<E> result;
 
         try {
-            //Note that this will throw the appropriate SourceErrorException if
-            //the returned symbol identifies anything other than a facility
-            FacilityEntry facility =
-                    source.queryForOne(
+            // Note that this will throw the appropriate SourceErrorException if
+            // the returned symbol identifies anything other than a facility
+            FacilityEntry facility = source
+                    .queryForOne(
                             new UnqualifiedNameQuery(myQualifier.getName()))
-                            .toFacilityEntry(myQualifier.getLocation());
+                    .toFacilityEntry(myQualifier.getLocation());
 
             Scope facilityScope =
-                    facility
-                            .getFacility()
-                            .getSpecification()
-                            .getScope(
-                                    myFacilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE);
+                    facility.getFacility().getSpecification().getScope(
+                            myFacilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE);
 
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
 
@@ -88,15 +91,12 @@ public class QualifiedPath implements ScopeSearchPath {
                 List<E> tempResult;
                 for (ModuleParameterization facEnh : enhancementList) {
                     // Obtain the scope for the enhancement
-                    facilityScope =
-                            facEnh
-                                    .getScope(myFacilityStrategy
-                                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+                    facilityScope = facEnh.getScope(myFacilityStrategy
+                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
 
                     // Search for matches
-                    tempResult =
-                            facilityScope.getMatches(searcher,
-                                    SearchContext.FACILITY);
+                    tempResult = facilityScope.getMatches(searcher,
+                            SearchContext.FACILITY);
 
                     // Check to see if we have results or not
                     if (tempResult.size() != 0) {
@@ -112,12 +112,11 @@ public class QualifiedPath implements ScopeSearchPath {
             }
         }
         catch (NoSuchSymbolException nsse) {
-            //There's nothing by that name in local scope, so it must be the
-            //name of a module
+            // There's nothing by that name in local scope, so it must be the
+            // name of a module
             try {
-                ModuleScope moduleScope =
-                        repo.getModuleScope(new ModuleIdentifier(myQualifier
-                                .getName()));
+                ModuleScope moduleScope = repo.getModuleScope(
+                        new ModuleIdentifier(myQualifier.getName()));
 
                 result = moduleScope.getMatches(searcher, SearchContext.IMPORT);
             }
@@ -127,7 +126,7 @@ public class QualifiedPath implements ScopeSearchPath {
             }
         }
         catch (DuplicateSymbolException dse) {
-            //Not possible--UnqualifiedNameQuery can't throw this
+            // Not possible--UnqualifiedNameQuery can't throw this
             throw new RuntimeException(dse);
         }
 

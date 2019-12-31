@@ -1,7 +1,7 @@
 /*
  * QuantExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -62,8 +62,9 @@ public class QuantExp extends Exp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new QuantExp(location, operator, vars, substitute(where,
-                substitutions), substitute(body, substitutions));
+        return new QuantExp(location, operator, vars,
+                substitute(where, substitutions),
+                substitute(body, substitutions));
     }
 
     // ===========================================================
@@ -164,8 +165,8 @@ public class QuantExp extends Exp {
     }
 
     public String toString(int indent) {
-        //Environment   env	= Environment.getInstance();
-        //if(env.isabelle()){return toIsabelleString(indent);};
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
 
         StringBuffer sb = new StringBuffer();
         printSpace(indent, sb);
@@ -232,8 +233,9 @@ public class QuantExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         if (where != null && where.containsVar(varName, IsOldExp)) {
             return true;
@@ -274,18 +276,18 @@ public class QuantExp extends Exp {
                 Exp bdy = Exp.replace(body, old, replacement);
                 if (bdy != null)
                     this.setBody(bdy);
-                // Not used anywhere below. - YS 
-                //String str = bdy.toString(0, 0);
+                // Not used anywhere below. - YS
+                // String str = bdy.toString(0, 0);
             }
             if (vars != null && old instanceof VarExp
                     && replacement instanceof VarExp) {
-                //What if Replacement isn't VarExp?
+                // What if Replacement isn't VarExp?
                 List<MathVarDec> newVars = new List<MathVarDec>();
                 Iterator<MathVarDec> i = vars.iterator();
                 while (i.hasNext()) {
                     MathVarDec tmp = i.next();
-                    if (tmp.getName().toString().equals(
-                            ((VarExp) old).getName().toString())) {
+                    if (tmp.getName().toString()
+                            .equals(((VarExp) old).getName().toString())) {
                         tmp.setName(((VarExp) replacement).getName());
                     }
 

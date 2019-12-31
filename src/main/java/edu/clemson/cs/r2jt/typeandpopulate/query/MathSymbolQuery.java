@@ -1,7 +1,7 @@
 /*
  * MathSymbolQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -31,10 +31,11 @@ public class MathSymbolQuery
     }
 
     public MathSymbolQuery(PosSymbol qualifier, String name, Location nameLoc) {
-        super(new BaseSymbolQuery<SymbolTableEntry>(new PossiblyQualifiedPath(
-                qualifier, ImportStrategy.IMPORT_NAMED,
-                FacilityStrategy.FACILITY_IGNORE, true), new NameSearcher(name,
-                true)), new MapToMathSymbol(nameLoc));
+        super(new BaseSymbolQuery<SymbolTableEntry>(
+                new PossiblyQualifiedPath(qualifier,
+                        ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_IGNORE, true),
+                new NameSearcher(name, true)), new MapToMathSymbol(nameLoc));
     }
 
     private static class MapToMathSymbol

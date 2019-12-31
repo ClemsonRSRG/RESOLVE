@@ -1,7 +1,7 @@
 /*
  * ExpandAntecedentByImplication.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,23 +36,34 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>A transformation that applies "A and B and C implies D" by first seeing
- * if all antecedents (A, B, and C) can be directly matched against givens or
- * global theorems, and if so, adding a new given matching the form of D, with 
- * variables appropriately replaced based on the matching of the antecedents.
+ * <p>
+ * A transformation that applies "A and B and C implies D" by first seeing if
+ * all antecedents (A, B,
+ * and C) can be directly matched against givens or global theorems, and if so,
+ * adding a new given
+ * matching the form of D, with variables appropriately replaced based on the
+ * matching of the
+ * antecedents.
  * </p>
  * 
- * <p><strong>Random Quirk:</strong> Because the intention of this class is to
- * extend available assumptions based on local contextual data, at least one
- * variable binding when matching the theorem antecedent against known facts
- * must come from the prover state's antecedent.  That is, the prover state will
- * not be extended with applications of this conditional theorem entirely to 
- * global facts--those "extensions" should themselves be listed as global 
- * theorems.</p>
+ * <p>
+ * <strong>Random Quirk:</strong> Because the intention of this class is to
+ * extend available
+ * assumptions based on local contextual data, at least one variable binding
+ * when matching the
+ * theorem antecedent against known facts must come from the prover state's
+ * antecedent. That is, the
+ * prover state will not be extended with applications of this conditional
+ * theorem entirely to
+ * global facts--those "extensions" should themselves be listed as global
+ * theorems.
+ * </p>
  * 
- * <p><strong>Example:</strong>  Given the theorem 
- * <code>|S| &gt; 0 implies S /= Empty_String</code>, consider the following
- * VC:</p>
+ * <p>
+ * <strong>Example:</strong> Given the theorem
+ * <code>|S| &gt; 0 implies S /= Empty_String</code>,
+ * consider the following VC:
+ * </p>
  * 
  * <pre>
  * |T| > 0
@@ -211,8 +222,10 @@ public class ExpandAntecedentByImplication implements Transformation {
 
             for (PExp a : newAntecedents) {
                 LocalTheorem t =
-                        m.addLocalTheorem(a, new TheoremApplication(
-                                ExpandAntecedentByImplication.this), false);
+                        m.addLocalTheorem(a,
+                                new TheoremApplication(
+                                        ExpandAntecedentByImplication.this),
+                                false);
 
                 myAddedSites.add(new Site(m, t, a));
 

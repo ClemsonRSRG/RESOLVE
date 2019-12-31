@@ -1,7 +1,7 @@
 /*
  * MTSetRestriction.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * <p>An set restriction type that is restricted to an
- * {@link Exp}.</p>
+ * <p>
+ * An set restriction type that is restricted to an {@link Exp}.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,13 +32,25 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     // Member Fields
     // ===========================================================
 
-    /** <p>A base type to be restricted.</p> */
+    /**
+     * <p>
+     * A base type to be restricted.
+     * </p>
+     */
     private final MTType myBaseType;
 
-    /** <p>The variable representing an element of the set.</p> */
+    /**
+     * <p>
+     * The variable representing an element of the set.
+     * </p>
+     */
     private final String mySetVar;
 
-    /** <p>The restriction condition expression.</p> */
+    /**
+     * <p>
+     * The restriction condition expression.
+     * </p>
+     */
     private final Exp myRestriction;
 
     // ===========================================================
@@ -45,9 +58,11 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     // ===========================================================
 
     /**
-     * <p>This constructs a set restriction type for a base type,
-     * a variable that represents an element of the set and the
-     * restriction condition expression.</p>
+     * <p>
+     * This constructs a set restriction type for a base type, a variable that
+     * represents an element
+     * of the set and the restriction condition expression.
+     * </p>
      *
      * @param g The current type graph.
      * @param baseType The {@link MTType} to be restricted.
@@ -67,8 +82,11 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     // ===========================================================
 
     /**
-     * <p>This method is the {@code accept()} method in a visitor pattern
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method is the {@code accept()} method in a visitor pattern for
+     * invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -84,8 +102,10 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     }
 
     /**
-     * <p>This method implements the post-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the post-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -97,8 +117,10 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     }
 
     /**
-     * <p>This method implements the pre-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the pre-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -110,21 +132,27 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     }
 
     /**
-     * <p>This method returns a list of containing the
-     * base {@link MTType} for this type.</p>
+     * <p>
+     * This method returns a list of containing the base {@link MTType} for this
+     * type.
+     * </p>
      *
      * @return A singleton list with the base {@link MTType}.
      */
     @Override
     public final List<MTType> getComponentTypes() {
-        return Collections.unmodifiableList(Collections
-                .singletonList(myBaseType));
+        return Collections
+                .unmodifiableList(Collections.singletonList(myBaseType));
     }
 
     /**
-     * <p>Indicates that this type is known to contain only elements <em>that
-     * are themselves</em> types. Practically, this answers the question, "can
-     * an instance of this type itself be used as a type?"</p>
+     * <p>
+     * Indicates that this type is known to contain only elements <em>that are
+     * themselves</em> types.
+     * Practically, this answers the question, "can an instance of this type
+     * itself be used as a
+     * type?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
@@ -134,10 +162,13 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     }
 
     /**
-     * <p>Indicates that every instance of this type is itself known to contain
-     * only elements that are types. Practically, this answers the question,
-     * "if a function returns an instance of this type, can that instance itself
-     * be said to contain only types?"</p>
+     * <p>
+     * Indicates that every instance of this type is itself known to contain
+     * only elements that are
+     * types. Practically, this answers the question, "if a function returns an
+     * instance of this type,
+     * can that instance itself be said to contain only types?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
@@ -147,7 +178,9 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */
@@ -158,14 +191,17 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     }
 
     /**
-     * <p>This method attempts to replace a component type at the specified
-     * index.</p>
+     * <p>
+     * This method attempts to replace a component type at the specified index.
+     * </p>
      *
      * @param index Index to a component type.
-     * @param newType The {@link MTType} to replace the one in our component list.
+     * @param newType The {@link MTType} to replace the one in our component
+     *        list.
      *
-     * @return A new {@link MTSetRestriction} with the type at the specified index
-     * replaced with {@code newType}.
+     * @return A new {@link MTSetRestriction} with the type at the specified
+     *         index replaced with
+     *         {@code newType}.
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
@@ -182,20 +218,23 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     // ===========================================================
 
     /**
-     * <p>This is just a template method to <em>force</em> all concrete
-     * subclasses of {@link MTType} to implement <code>hashCode()</code>,
-     * as the type resolution algorithm depends on it being implemented
-     * sensibly.</p>
+     * <p>
+     * This is just a template method to <em>force</em> all concrete subclasses
+     * of {@link MTType} to
+     * implement <code>hashCode()</code>, as the type resolution algorithm
+     * depends on it being
+     * implemented sensibly.
+     * </p>
      *
      * @return A hashcode consistent with <code>equals()</code> and thus
-     * alpha-equivalency.
+     *         alpha-equivalency.
      */
     @Override
     protected final int getHashCode() {
-        //This is fun.  At the moment MTSetRestrictions are not alpha-equivalent
-        //to anything, including themselves, so the best thing we can do is
-        //provide an integer that is maximally unlikely to be equal to any
-        //object's (including this one's!) hash.
+        // This is fun. At the moment MTSetRestrictions are not alpha-equivalent
+        // to anything, including themselves, so the best thing we can do is
+        // provide an integer that is maximally unlikely to be equal to any
+        // object's (including this one's!) hash.
         return (new Random()).nextInt();
     }
 

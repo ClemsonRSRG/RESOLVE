@@ -1,7 +1,7 @@
 /*
  * ProverPipeline.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.ArrayList;
 
 /**
- * <p>This is pipeline that invokes an automated prover to
- * verify verification conditions (VCs) using the symbol table.</p>
+ * <p>
+ * This is pipeline that invokes an automated prover to verify verification
+ * conditions (VCs) using
+ * the symbol table.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -35,7 +38,9 @@ public class ProverPipeline extends AbstractPipeline {
     // ===========================================================
 
     /**
-     * <p>This generates a pipeline to prove VCs.</p>
+     * <p>
+     * This generates a pipeline to prove VCs.
+     * </p>
      *
      * @param ce The current compilation environment.
      * @param symbolTable The symbol table.

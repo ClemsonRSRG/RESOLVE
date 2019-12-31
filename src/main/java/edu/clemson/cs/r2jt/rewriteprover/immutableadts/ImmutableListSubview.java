@@ -1,7 +1,7 @@
 /*
  * ImmutableListSubview.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,11 +21,11 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
     private final int mySubviewLength;
     private final int myFirstAfterIndex;
 
-    public ImmutableListSubview(ArrayBackedImmutableList<E> baseList,
-            int start, int length) {
+    public ImmutableListSubview(ArrayBackedImmutableList<E> baseList, int start,
+            int length) {
 
-        //TODO : These defensive checks can be taken out for efficiency once
-        //       we're satisfied that ImmutableLists works correctly.
+        // TODO : These defensive checks can be taken out for efficiency once
+        // we're satisfied that ImmutableLists works correctly.
         if (start + length > baseList.size()) {
             throw new IllegalArgumentException("View exceeds source bounds.");
         }
@@ -78,8 +78,8 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
             throw new IndexOutOfBoundsException();
         }
 
-        return new ImmutableListSubview<E>(myBaseList, startIndex
-                + mySubviewStart, mySubviewLength - startIndex);
+        return new ImmutableListSubview<E>(myBaseList,
+                startIndex + mySubviewStart, mySubviewLength - startIndex);
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * ConceptSharedStateExtractor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,9 +18,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>This class extracts all the {@link SharedStateDec} introduced by
- * a {@code Concept}. This visitor logic is implemented as
- * a {@link TreeWalkerVisitor}.</p>
+ * <p>
+ * This class extracts all the {@link SharedStateDec} introduced by a
+ * {@code Concept}. This visitor
+ * logic is implemented as a {@link TreeWalkerVisitor}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -31,7 +33,11 @@ public class ConceptSharedStateExtractor extends TreeWalkerVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of {@link SharedStateDec} encountered.</p> */
+    /**
+     * <p>
+     * The list of {@link SharedStateDec} encountered.
+     * </p>
+     */
     private final List<SharedStateDec> mySharedStateDecs;
 
     // ===========================================================
@@ -39,8 +45,11 @@ public class ConceptSharedStateExtractor extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This creates an object that extracts all the {@link SharedStateDec}
-     * while walking a {@code Concept} module.</p>
+     * <p>
+     * This creates an object that extracts all the {@link SharedStateDec} while
+     * walking a
+     * {@code Concept} module.
+     * </p>
      */
     public ConceptSharedStateExtractor() {
         mySharedStateDecs = new LinkedList<>();
@@ -51,7 +60,9 @@ public class ConceptSharedStateExtractor extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>Code that gets executed after visiting a {@link SharedStateDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link SharedStateDec}.
+     * </p>
      *
      * @param dec A shared state declared in a {@code Concept}.
      */
@@ -65,8 +76,11 @@ public class ConceptSharedStateExtractor extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns the list of {@link SharedStateDec} that
-     * we encountered after walking a {@code Concept}.</p>
+     * <p>
+     * This method returns the list of {@link SharedStateDec} that we
+     * encountered after walking a
+     * {@code Concept}.
+     * </p>
      *
      * @return A list of {@link SharedStateDec}.
      */

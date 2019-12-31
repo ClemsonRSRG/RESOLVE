@@ -1,7 +1,7 @@
 /*
  * VisitorGenModuleDecDot.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,25 +34,25 @@ public class VisitorGenModuleDecDot extends TreeWalkerStackVisitor {
         if (parent != null) {
             parentList.add(nodeNum, parent);
             int p = parentList.indexOf(parent) - 1;
-            arrowList.append("n" + p + " -> n" + nodeNum + " //" + className
-                    + "\n");
+            arrowList.append(
+                    "n" + p + " -> n" + nodeNum + " //" + className + "\n");
         }
         else {
             parentList.add(0, null);
         }
         nodeList.append("n" + (nodeNum++) + " [label=\"" + className);
         if (data instanceof VarExp) {
-            nodeList
-                    .append("\\n(" + ((VarExp) data).getName().toString() + ")");
+            nodeList.append(
+                    "\\n(" + ((VarExp) data).getName().toString() + ")");
         }
         else if (data instanceof NameTy) {
-            nodeList
-                    .append("\\n(" + ((NameTy) data).getName().toString() + ")");
+            nodeList.append(
+                    "\\n(" + ((NameTy) data).getName().toString() + ")");
         }
         else if (data instanceof Object) {
             try {
-                if ((data.getClass()).getMethod("toString").getDeclaringClass() == data
-                        .getClass()) {
+                if ((data.getClass()).getMethod("toString")
+                        .getDeclaringClass() == data.getClass()) {
                     nodeList.append("\\n("
                             + ((Object) data).toString().toString() + ")");
                 }
@@ -71,7 +71,7 @@ public class VisitorGenModuleDecDot extends TreeWalkerStackVisitor {
 
     @Override
     public void postAnyStack(ResolveConceptualElement data) {
-    //--indent;
+        // --indent;
     }
 
     public StringBuffer getNodeList() {

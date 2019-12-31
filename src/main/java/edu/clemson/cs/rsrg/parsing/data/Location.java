@@ -1,7 +1,7 @@
 /*
  * Location.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,7 +15,9 @@ package edu.clemson.cs.rsrg.parsing.data;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 
 /**
- * <p>This class points to the location within a {@link ResolveFile}.</p>
+ * <p>
+ * This class points to the location within a {@link ResolveFile}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -26,10 +28,18 @@ public class Location implements Cloneable {
     // Member Fields
     // ===========================================================
 
-    /** <p>The file that this location points to.</p> */
+    /**
+     * <p>
+     * The file that this location points to.
+     * </p>
+     */
     private final ResolveFile myFile;
 
-    /** <p>The position that this location points to.</p> */
+    /**
+     * <p>
+     * The position that this location points to.
+     * </p>
+     */
     private final Pos myPosition;
 
     // ===========================================================
@@ -37,8 +47,11 @@ public class Location implements Cloneable {
     // ===========================================================
 
     /**
-     * <p>This constructor takes all the information relevant
-     * in identifying a particular location in the file.</p>
+     * <p>
+     * This constructor takes all the information relevant in identifying a
+     * particular location in the
+     * file.
+     * </p>
      *
      * @param file File that this location points to.
      * @param lineNumber Line number inside the file.
@@ -54,8 +67,10 @@ public class Location implements Cloneable {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link Location} class.</p>
+     * <p>
+     * This method overrides the default clone method implementation for the
+     * {@link Location} class.
+     * </p>
      *
      * @return A deep copy of the object.
      */
@@ -66,11 +81,14 @@ public class Location implements Cloneable {
     }
 
     /**
-     * <p>Equals method to compare two locations.</p>
+     * <p>
+     * Equals method to compare two locations.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -86,7 +104,9 @@ public class Location implements Cloneable {
     }
 
     /**
-     * <p>Getter for the current column.</p>
+     * <p>
+     * Getter for the current column.
+     * </p>
      *
      * @return Column number
      */
@@ -95,7 +115,9 @@ public class Location implements Cloneable {
     }
 
     /**
-     * <p>Getter for the current file.</p>
+     * <p>
+     * Getter for the current file.
+     * </p>
      *
      * @return <code>ResolveFile</code> object
      */
@@ -104,7 +126,9 @@ public class Location implements Cloneable {
     }
 
     /**
-     * <p>Getter for the current filename.</p>
+     * <p>
+     * Getter for the current filename.
+     * </p>
      *
      * @return Filename as a String.
      */
@@ -113,7 +137,9 @@ public class Location implements Cloneable {
     }
 
     /**
-     * <p>Getter for the current line.</p>
+     * <p>
+     * Getter for the current line.
+     * </p>
      *
      * @return Line number
      */
@@ -122,8 +148,11 @@ public class Location implements Cloneable {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation
-     * for the {@code Location} class.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation
+     * for the
+     * {@code Location} class.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -135,7 +164,9 @@ public class Location implements Cloneable {
     }
 
     /**
-     * <p>Returns the location in string format.</p>
+     * <p>
+     * Returns the location in string format.
+     * </p>
      *
      * @return Location as a string.
      */
@@ -163,7 +194,9 @@ public class Location implements Cloneable {
     // ===========================================================
 
     /**
-     * <p>Private inner class to store the position in the file.</p>
+     * <p>
+     * Private inner class to store the position in the file.
+     * </p>
      */
     private class Pos {
 
@@ -171,10 +204,18 @@ public class Location implements Cloneable {
         // Member Fields
         // ===========================================================
 
-        /** <p>Current line number.</p> */
+        /**
+         * <p>
+         * Current line number.
+         * </p>
+         */
         private final int myCurrline;
 
-        /** <p>Current column number.</p> */
+        /**
+         * <p>
+         * Current column number.
+         * </p>
+         */
         private final int myCurrColumn;
 
         // ===========================================================
@@ -182,8 +223,11 @@ public class Location implements Cloneable {
         // ===========================================================
 
         /**
-         * <p>This constructor converts the two integers corresponding
-         * to the line and column numbers into an object representation.</p>
+         * <p>
+         * This constructor converts the two integers corresponding to the line
+         * and column numbers into
+         * an object representation.
+         * </p>
          *
          * @param line Current line number.
          * @param column Current column number.
@@ -194,7 +238,9 @@ public class Location implements Cloneable {
         }
 
         /**
-         * <p>Copy constructor</p>
+         * <p>
+         * Copy constructor
+         * </p>
          *
          * @param p The position object to copy.
          */
@@ -208,11 +254,14 @@ public class Location implements Cloneable {
         // ===========================================================
 
         /**
-         * <p>Equals method to compare two positions.</p>
+         * <p>
+         * Equals method to compare two positions.
+         * </p>
          *
          * @param o Object to be compared.
          *
-         * @return {@code true} if all the fields are equal, {@code false} otherwise.
+         * @return {@code true} if all the fields are equal, {@code false}
+         *         otherwise.
          */
         @Override
         public final boolean equals(Object o) {
@@ -228,8 +277,11 @@ public class Location implements Cloneable {
         }
 
         /**
-         * <p>This method overrides the default {@code hashCode} method implementation
-         * for the {@code Pos} class.</p>
+         * <p>
+         * This method overrides the default {@code hashCode} method
+         * implementation for the {@code Pos}
+         * class.
+         * </p>
          *
          * @return The hash code associated with the object.
          */
@@ -241,7 +293,9 @@ public class Location implements Cloneable {
         }
 
         /**
-         * <p>Returns the position in string format.</p>
+         * <p>
+         * Returns the position in string format.
+         * </p>
          *
          * @return Position as a string.
          */

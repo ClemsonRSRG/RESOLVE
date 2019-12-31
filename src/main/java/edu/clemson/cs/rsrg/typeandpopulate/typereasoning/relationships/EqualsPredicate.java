@@ -1,7 +1,7 @@
 /*
  * EqualsPredicate.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.VariableReplacingVisitor;
 import java.util.Map;
 
 /**
- * <p>This class establishes that two {@link MTType}s can be established
- * to be "equals".</p>
+ * <p>
+ * This class establishes that two {@link MTType}s can be established to be
+ * "equals".
+ * </p>
  *
  * @version 2.0
  */
@@ -30,13 +32,25 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
     // Member Fields
     // ===========================================================
 
-    /** <p>The first {@link MTType} object in this equals predicate.</p> */
+    /**
+     * <p>
+     * The first {@link MTType} object in this equals predicate.
+     * </p>
+     */
     private final MTType myType1;
 
-    /** <p>The second {@link MTType} object in this equals predicate.</p> */
+    /**
+     * <p>
+     * The second {@link MTType} object in this equals predicate.
+     * </p>
+     */
     private final MTType myType2;
 
-    /** <p>The current type graph object in use.</p> */
+    /**
+     * <p>
+     * The current type graph object in use.
+     * </p>
+     */
     private final TypeGraph myTypeGraph;
 
     // ===========================================================
@@ -44,7 +58,9 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
     // ===========================================================
 
     /**
-     * <p>This creates a new "equals" predicate for two types.</p>
+     * <p>
+     * This creates a new "equals" predicate for two types.
+     * </p>
      *
      * @param g The current type graph.
      * @param type1 First {@link MTType} object.
@@ -61,15 +77,19 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
     // ===========================================================
 
     /**
-     * <p>Given two types, we attempt to statically demonstrate if
-     * their type relationship can be established statically.</p>
+     * <p>
+     * Given two types, we attempt to statically demonstrate if their type
+     * relationship can be
+     * established statically.
+     * </p>
      *
      * @param canonical1 The first {@link MTType} object.
      * @param canonical2 The second {@link MTType} object.
      * @param typeBindings Map of established type bindings.
      * @param expressionBindings Map of established expression bindings.
      *
-     * @return {@code true} if it can be demonstrated statically, {@code false} otherwise.
+     * @return {@code true} if it can be demonstrated statically, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean canBeDemonstratedStatically(MTType canonical1,
@@ -80,25 +100,27 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
         MTType substituted2 =
                 myType2.getCopyWithVariablesSubstituted(typeBindings);
 
-        //TODO : This was not well considered, it just made some fun stuff work
-        //       out right.  So think about if it's ok to make this a "subset
-        //       of" predicate rather than an "equals" predicate.
+        // TODO : This was not well considered, it just made some fun stuff work
+        // out right. So think about if it's ok to make this a "subset
+        // of" predicate rather than an "equals" predicate.
 
         return myTypeGraph.isSubtype(substituted1, substituted2);
-        //return substituted1.equals(substituted2);
+        // return substituted1.equals(substituted2);
     }
 
     /**
-     * <p>Given a map of substitutions, we attempt to replace any
-     * unbound variables in types.</p>
+     * <p>
+     * Given a map of substitutions, we attempt to replace any unbound variables
+     * in types.
+     * </p>
      *
      * @param substitutions Map of substitutions for unbound variables.
      *
      * @return A {@code TypeRelationshipPredicate} after the substitution.
      */
     @Override
-    public final TypeRelationshipPredicate replaceUnboundVariablesInTypes(
-            Map<String, String> substitutions) {
+    public final TypeRelationshipPredicate
+            replaceUnboundVariablesInTypes(Map<String, String> substitutions) {
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitutions, myTypeGraph);
 
@@ -114,7 +136,9 @@ public class EqualsPredicate implements TypeRelationshipPredicate {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */

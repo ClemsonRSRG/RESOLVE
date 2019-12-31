@@ -1,7 +1,7 @@
 /*
  * TypeTheoremDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -54,7 +54,7 @@ public class TypeTheoremDec extends Dec {
 
     @Override
     public void accept(ResolveConceptualVisitor v) {
-    // don't need this with the new walker
+        // don't need this with the new walker
     }
 
     @Override
@@ -76,8 +76,7 @@ public class TypeTheoremDec extends Dec {
     }
 
     public boolean hasBindingCondition() {
-        return myAssertion instanceof InfixExp
-                && ((InfixExp) myAssertion).getOperatorAsString().equals(
-                        "implies");
+        return myAssertion instanceof InfixExp && ((InfixExp) myAssertion)
+                .getOperatorAsString().equals("implies");
     }
 }

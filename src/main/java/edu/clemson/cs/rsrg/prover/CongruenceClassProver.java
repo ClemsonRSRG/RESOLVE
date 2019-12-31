@@ -1,7 +1,7 @@
 /*
  * CongruenceClassProver.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,8 +24,10 @@ import java.util.List;
 import static edu.clemson.cs.rsrg.vcgeneration.VCGenerator.FLAG_VERIFY_VC;
 
 /**
- * <p>This class is an {@code Congruence Closure} automated prover
- * that verifies {@code VCs}.</p>
+ * <p>
+ * This class is an {@code Congruence Closure} automated prover that verifies
+ * {@code VCs}.
+ * </p>
  *
  * @author Mike Kabbani
  * @version 2.0
@@ -37,32 +39,54 @@ public class CongruenceClassProver {
     // ===========================================================
 
     /**
-     * <p>The current job's compilation environment
-     * that stores all necessary objects and flags.</p>
+     * <p>
+     * The current job's compilation environment that stores all necessary
+     * objects and flags.
+     * </p>
      */
     private final CompileEnvironment myCompileEnvironment;
 
     /**
-     * <p>The module scope for the file we are generating automated proofs for.</p>
+     * <p>
+     * The module scope for the file we are generating automated proofs for.
+     * </p>
      */
     private final ModuleScope myCurrentModuleScope;
 
-    /** <p>The number of tries before halting the automated prover</p> */
+    /**
+     * <p>
+     * The number of tries before halting the automated prover
+     * </p>
+     */
     private final int myNumTriesBeforeHalting;
 
-    /** <p>The various different output listeners that are expecting an update.</p> */
+    /**
+     * <p>
+     * The various different output listeners that are expecting an update.
+     * </p>
+     */
     private List<OutputListener> myOutputListeners;
 
-    /** <p>The number of milliseconds before stopping the prove for a VC.</p> */
+    /**
+     * <p>
+     * The number of milliseconds before stopping the prove for a VC.
+     * </p>
+     */
     private final long myTimeout;
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
-    /** <p>The array of VC models.</p> */
+    /**
+     * <p>
+     * The array of VC models.
+     * </p>
+     */
     private final PerVCProverModel[] myVCModels;
 
     // -----------------------------------------------------------
@@ -88,27 +112,35 @@ public class CongruenceClassProver {
     // ===========================================================
 
     /**
-     * <p>Tells the compiler to prove VCs.</p>
+     * <p>
+     * Tells the compiler to prove VCs.
+     * </p>
      */
     public static final Flag FLAG_PROVE =
             new Flag(FLAG_SECTION_NAME, "ccprove", FLAG_DESC_CC_PROVER);
 
     /**
-     * <p>Specifies number of milliseconds before skipping proving a VC.</p>
+     * <p>
+     * Specifies number of milliseconds before skipping proving a VC.
+     * </p>
      */
     private static final Flag FLAG_TIMEOUT =
             new Flag(FLAG_SECTION_NAME, "timeout", FLAG_DESC_PROVER_TIMEOUT,
                     FLAG_TIMEOUT_ARGS, Flag.Type.HIDDEN);
 
     /**
-     * <p>Specify number of failed VCs before halting the prover.</p>
+     * <p>
+     * Specify number of failed VCs before halting the prover.
+     * </p>
      */
-    private static final Flag FLAG_NUMTRIES =
-            new Flag("Proving", "num_tries", FLAG_DESC_PROVER_NUMTRIES,
-                    NUMTRIES_ARGS, Flag.Type.HIDDEN);
+    private static final Flag FLAG_NUMTRIES = new Flag("Proving", "num_tries",
+            FLAG_DESC_PROVER_NUMTRIES, NUMTRIES_ARGS, Flag.Type.HIDDEN);
 
     /**
-     * <p>Add all the required and implied flags for the {@code CongruenceClassProver}.</p>
+     * <p>
+     * Add all the required and implied flags for the
+     * {@code CongruenceClassProver}.
+     * </p>
      */
     public static void setUpFlags() {
         FlagDependencies.addImplies(FLAG_PROVE, FLAG_VERIFY_VC);
@@ -121,16 +153,19 @@ public class CongruenceClassProver {
     // ===========================================================
 
     /**
-     * <p>This creates an instance of the {@code Congruence Closure}
-     * automated prover.</p>
+     * <p>
+     * This creates an instance of the {@code Congruence Closure} automated
+     * prover.
+     * </p>
      *
      * @param vcs The list of VCs to be proven.
      * @param moduleScope The module scope associated with {@code name}.
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
+     * @param compileEnvironment The current job's compilation environment that
+     *        stores all necessary
+     *        objects and flags.
      */
-    public CongruenceClassProver(List<ImmutableVC> vcs,
-            ModuleScope moduleScope, CompileEnvironment compileEnvironment) {
+    public CongruenceClassProver(List<ImmutableVC> vcs, ModuleScope moduleScope,
+            CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
         myCurrentModuleScope = moduleScope;
         myOutputListeners = myCompileEnvironment.getOutputListeners();
@@ -139,9 +174,8 @@ public class CongruenceClassProver {
 
         // Timeout
         if (myCompileEnvironment.flags.isFlagSet(FLAG_TIMEOUT)) {
-            myTimeout =
-                    Long.parseLong(myCompileEnvironment.flags.getFlagArgument(
-                            FLAG_TIMEOUT, "milliseconds"));
+            myTimeout = Long.parseLong(myCompileEnvironment.flags
+                    .getFlagArgument(FLAG_TIMEOUT, "milliseconds"));
         }
         else {
             myTimeout = 5000;

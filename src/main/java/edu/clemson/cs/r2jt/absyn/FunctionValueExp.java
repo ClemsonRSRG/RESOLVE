@@ -1,7 +1,7 @@
 /*
  * FunctionValueExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,13 +18,15 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 
 /**
- * <p>A <code>FunctionValueExp</code> represents </p>
+ * <p>
+ * A <code>FunctionValueExp</code> represents
+ * </p>
  */
 public class FunctionValueExp extends Exp {
 
     @Override
     public void accept(ResolveConceptualVisitor v) {
-    // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
 
     }
 
@@ -54,7 +56,7 @@ public class FunctionValueExp extends Exp {
 
     @Override
     public void setSubExpression(int index, Exp e) {
-    // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
 
     }
 

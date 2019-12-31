@@ -1,7 +1,7 @@
 /*
  * VirtualListNode.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -79,7 +79,7 @@ public class VirtualListNode extends ResolveConceptualElement {
 
     @Override
     public Location getLocation() {
-        throw new UnsupportedOperationException(this.getClass()
-                + " has no location by definition.");
+        throw new UnsupportedOperationException(
+                this.getClass() + " has no location by definition.");
     }
 }

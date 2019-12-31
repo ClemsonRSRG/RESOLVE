@@ -1,7 +1,7 @@
 /*
  * ErrorHandler.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,8 +26,9 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
 /**
- * A class through which all messages to the user pass. Contains
- * support for informational, error, warning and panic messages.
+ * A class through which all messages to the user pass. Contains support for
+ * informational, error,
+ * warning and panic messages.
  *
  * @author Steven Atkinson
  */
@@ -37,20 +38,25 @@ public class ErrorHandler {
     // Variables
     // ===========================================================
 
-    //private static StatusHandler instance = new StatusHandler();
+    // private static StatusHandler instance = new StatusHandler();
 
     private final CompileEnvironment myInstanceEnvironment;
 
-    /* The "true" argument indicates that calls to out.println() will
-     * flush the buffer. */
+    /*
+     * The "true" argument indicates that calls to out.println() will flush the
+     * buffer.
+     */
     private static PrintWriter err = new PrintWriter(System.err, true);
 
     private int errorCount = 0;
 
     private int warningCount = 0;
 
-    /* The file being checked for errors (if any). Eventually, we want
-       to make this a java.io.File type. */
+    /*
+     * The file being checked for errors (if any). Eventually, we want to make
+     * this a java.io.File
+     * type.
+     */
     private String filename = new String("");
 
     private File myFile = null;
@@ -63,8 +69,8 @@ public class ErrorHandler {
     // Constructors
     // ===========================================================
 
-    //private StatusHandler() {
-    //myInstanceEnvironment = null; }
+    // private StatusHandler() {
+    // myInstanceEnvironment = null; }
 
     public ErrorHandler(CompileEnvironment env) {
         myInstanceEnvironment = env;
@@ -104,9 +110,9 @@ public class ErrorHandler {
     // ===========================================================
 
     /** Returns the unique instance of this error handler. */
-    //public static StatusHandler getInstance() {
-    //return instance;
-    //}
+    // public static StatusHandler getInstance() {
+    // return instance;
+    // }
 
     // -----------------------------------------------------------
     // Message Output Methods
@@ -124,21 +130,21 @@ public class ErrorHandler {
             updateErrorCount();
         }
 
-        /*if (Environment.getInstance().errorsOnStdOut()) {
-        	System.out.println(msg);
-        }
-        else {*/
+        /*
+         * if (Environment.getInstance().errorsOnStdOut()) {
+         * System.out.println(msg); } else {
+         */
         err.println(msg);
-        //}
-        //}
+        // }
+        // }
     }
 
     /**
      * 
      * @param fileName
      * @param lineNum
-     * @param msg
-     * Outputs the error information to the compiler report (for web interface use)
+     * @param msg Outputs the error information to the compiler report (for web
+     *        interface use)
      */
     private void doError(String fileName, int lineNum, String msg) {
         if (!ignoreErrors) {
@@ -155,7 +161,7 @@ public class ErrorHandler {
 
     /** Outputs an error message. */
     public void error(String msg) {
-        //doError("Error:" + filename + ":" + msg);
+        // doError("Error:" + filename + ":" + msg);
         if (webOutput) {
 
         }
@@ -183,17 +189,15 @@ public class ErrorHandler {
         }
         else {
             if (webOutput) {
-                String newMsg =
-                        msg
-                                + "\n"
-                                + printErrorLine(location.getFile(), location
-                                        .getPos());
+                String newMsg = msg + "\n"
+                        + printErrorLine(location.getFile(), location.getPos());
                 doError(location.getFilename(), location.getPos().getLine(),
                         newMsg);
             }
             else {
                 doError("Error: " + location.toString() + ":\n" + msg + "\n"
-                        + printErrorLine(location.getFile(), location.getPos()));
+                        + printErrorLine(location.getFile(),
+                                location.getPos()));
             }
         }
     }
@@ -205,28 +209,20 @@ public class ErrorHandler {
         }
         else {
             if (webOutput) {
-                String newMsg =
-                        msg
-                                + "\n"
-                                + printErrorLine(location1.getFile(), location1
-                                        .getPos())
-                                + "\n"
-                                + printErrorLine(location2.getFile(), location2
-                                        .getPos());
+                String newMsg = msg + "\n"
+                        + printErrorLine(location1.getFile(),
+                                location1.getPos())
+                        + "\n" + printErrorLine(location2.getFile(),
+                                location2.getPos());
                 doError(location1.getFilename(), location1.getPos().getLine(),
                         newMsg);
             }
             else {
-                doError("Error: "
-                        + location1.toString()
-                        + ":\n"
-                        + msg
-                        + "\n"
-                        + printErrorLine(location1.getFile(), location1
-                                .getPos())
-                        + "\n"
-                        + printErrorLine(location2.getFile(), location2
-                                .getPos()));
+                doError("Error: " + location1.toString() + ":\n" + msg + "\n"
+                        + printErrorLine(location1.getFile(),
+                                location1.getPos())
+                        + "\n" + printErrorLine(location2.getFile(),
+                                location2.getPos()));
             }
         }
     }
@@ -277,16 +273,17 @@ public class ErrorHandler {
     // -----------------------------------------------------------
 
     /**
-     * Called when a mismatched token exception occurs.
-     * This routine investigates the info in the MMTE object
-     * and constructs a nice error message.  This over-rides 
-     * the default antlr.MismatchedTokenException.toString()
-     * routine, and is therefore a little bit of a HACK.
+     * Called when a mismatched token exception occurs. This routine
+     * investigates the info in the MMTE
+     * object and constructs a nice error message. This over-rides the default
+     * antlr.MismatchedTokenException.toString() routine, and is therefore a
+     * little bit of a HACK.
      *
-     * Note that MismatchedTokenExceptions arise during
-     * parsing and tree parsing.  This routine handles both
-     * situations, under the assumption that both the token
-     * types and nodes contain line and column information.
+     * Note that MismatchedTokenExceptions arise during parsing and tree
+     * parsing. This routine handles
+     * both situations, under the assumption that both the token types and nodes
+     * contain line and
+     * column information.
      *
      * @see MismatchedTokenException
      */
@@ -296,7 +293,7 @@ public class ErrorHandler {
         Tree node = (Tree) ex.node;
         String str = ex.toString();
         if (token != null) { // we are parsing
-            // grab the <msg> part of the exception's message 
+            // grab the <msg> part of the exception's message
             String msg = str.substring(3 + str.indexOf("), "), str.length());
             this.error(new Pos(token.getLine(), token.getCharPositionInLine()),
                     msg);
@@ -307,27 +304,28 @@ public class ErrorHandler {
             }
             else if (node instanceof BaseTree) {
                 CommonTree colsNode = (CommonTree) node;
-                this.error(new Pos(colsNode.getLine(), colsNode
-                        .getCharPositionInLine()), str);
-                //colsNode.getColumn()), str);
+                this.error(new Pos(colsNode.getLine(),
+                        colsNode.getCharPositionInLine()), str);
+                // colsNode.getColumn()), str);
             }
-            else { //antlr has some kind of antlr.ASTNULLType
+            else { // antlr has some kind of antlr.ASTNULLType
                 this.error("Error at (empty_subtree): " + str);
             }
         }
     }
 
     /**
-     * Called when a noViableAlt exception occurs.
-     * This routine investigates the info in the NVAE object
-     * and constructs a nice error message.  This over-rides
-     * the default antlr.NoViableAltException.toString()
-     * routine, and is therefore a little bit of a HACK.
+     * Called when a noViableAlt exception occurs. This routine investigates the
+     * info in the NVAE
+     * object and constructs a nice error message. This over-rides the default
+     * antlr.NoViableAltException.toString() routine, and is therefore a little
+     * bit of a HACK.
      *
-     * Note that NoViableAltExceptions arise during both
-     * parsing and tree parsing.  This routine handles both
-     * situations, under the assumption that both the token
-     * types and nodes contain line and column information.
+     * Note that NoViableAltExceptions arise during both parsing and tree
+     * parsing. This routine
+     * handles both situations, under the assumption that both the token types
+     * and nodes contain line
+     * and column information.
      *
      * @see NoViableAltException
      */
@@ -336,8 +334,11 @@ public class ErrorHandler {
         Token token = ex.token;
         Tree node = (Tree) ex.node;
         String str = ex.toString();
-        /* Grab the message part of the string. No matter what caused
-         * the exception, this starts with the string "unexpected". */
+        /*
+         * Grab the message part of the string. No matter what caused the
+         * exception, this starts with
+         * the string "unexpected".
+         */
         String msg = str.substring(str.indexOf("unexpected"), str.length());
         if (token != null) { // we are parsing
             this.error(new Pos(token.getLine(), token.getCharPositionInLine()),
@@ -349,18 +350,19 @@ public class ErrorHandler {
             }
             else if (node instanceof BaseTree) {
                 CommonTree colsNode = (CommonTree) node;
-                this.error(new Pos(colsNode.getLine(), colsNode
-                        .getCharPositionInLine()), str);
+                this.error(new Pos(colsNode.getLine(),
+                        colsNode.getCharPositionInLine()), str);
             }
-            else { //antlr has some kind of antlr.ASTNULLType
+            else { // antlr has some kind of antlr.ASTNULLType
                 this.error("Error at (empty_subtree): " + str);
             }
         }
     }
 
     /**
-     * Dispatch the parser exception to one of the two handlers. If
-     * this cannot be done, issue a bug report.
+     * Dispatch the parser exception to one of the two handlers. If this cannot
+     * be done, issue a bug
+     * report.
      */
     public void syntaxError(java.lang.Exception ex) {
         if (ex instanceof MismatchedTokenException) {
@@ -379,11 +381,12 @@ public class ErrorHandler {
     // Error Count Methods
     // -----------------------------------------------------------
 
-    //FIX: Figure out how to do the 100 error abort, and do something
-    //     like this for warnings too.
+    // FIX: Figure out how to do the 100 error abort, and do something
+    // like this for warnings too.
     /**
-     * Updates the error count. If this is the first error, a new
-     * line is printed. If this is error 101, the program is aborted.
+     * Updates the error count. If this is the first error, a new line is
+     * printed. If this is error
+     * 101, the program is aborted.
      */
     public void updateErrorCount() {
         if (errorCount == 0) {
@@ -396,16 +399,18 @@ public class ErrorHandler {
     }
 
     /**
-     * Returns the number of errors since this handler was created or
-     * since the last time resetCounts() was called.
+     * Returns the number of errors since this handler was created or since the
+     * last time
+     * resetCounts() was called.
      */
     public int getErrorCount() {
         return errorCount;
     }
 
     /**
-     * Returns the number of warnings since this handler was created or
-     * since the last time resetCounts() was called.
+     * Returns the number of warnings since this handler was created or since
+     * the last time
+     * resetCounts() was called.
      */
     public int getWarningCount() {
         return warningCount;
@@ -436,29 +441,31 @@ public class ErrorHandler {
         sb.append(lineOfCode);
         sb.append("\n");
 
-        //Print the aligning whitespace, taking into account tabs.
-        //Note that we must convert from "columns", which are 1-indexed, to
-        //a string index, which is 0-indexed
+        // Print the aligning whitespace, taking into account tabs.
+        // Note that we must convert from "columns", which are 1-indexed, to
+        // a string index, which is 0-indexed
         sb.append(printAligningSpace(lineOfCode, posColumn - 1));
 
-        //Print the caret
+        // Print the caret
         sb.append("^\n");
         return sb.toString();
     }
 
     /*
-     * This method returns a string consisting of the correct white-space to 
-     * visually align (i.e., in the presence of the '\t' character) any 
-     * immediately following character with the character in the text at the 
-     * index provided.
+     * This method returns a string consisting of the correct white-space to
+     * visually align (i.e., in
+     * the presence of the '\t' character) any immediately following character
+     * with the character in
+     * the text at the index provided.
      * 
      * @param text The text against which to align the character.
+     * 
      * @param targetIndex The index in the text against which to align the
-     *                    character.
-     *                    
-     * @return A <code>String</code> of whitespace that will align an 
-     *         immediately following character with the given index of the 
-     *         given text.
+     * character.
+     * 
+     * @return A <code>String</code> of whitespace that will align an
+     * immediately following character
+     * with the given index of the given text.
      */
     private String printAligningSpace(String text, int targetIndex) {
         StringBuffer buffer = new StringBuffer(targetIndex);
@@ -480,11 +487,11 @@ public class ErrorHandler {
         String fileName = file.getName();
         fileName = fileName.substring(0, fileName.indexOf("."));
         String pkg = file.getParentFile().getName();
-        //System.out.println("compilePosModule: "+targetFile.getName().getLocation());
+        // System.out.println("compilePosModule: "+targetFile.getName().getLocation());
         String key = pkg + "." + fileName;
-        //System.out.println("Checking UserFileMap for: " + key + " (StatusHandler(522)");
+        // System.out.println("Checking UserFileMap for: " + key + " (StatusHandler(522)");
         if (myInstanceEnvironment.isUserFile(key)) {
-            //System.out.println("found: "+key);
+            // System.out.println("found: "+key);
             MetaFile inputFile = myInstanceEnvironment.getUserFileFromMap(key);
             String source = inputFile.getMyFileSource();
             StringReader sr = new StringReader(source);

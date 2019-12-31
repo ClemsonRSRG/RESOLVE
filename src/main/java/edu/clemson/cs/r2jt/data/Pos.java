@@ -1,7 +1,7 @@
 /*
  * Pos.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,8 +13,8 @@
 package edu.clemson.cs.r2jt.data;
 
 /**
- * This class stores two integers representing the line and column
- * position in an input file.
+ * This class stores two integers representing the line and column position in
+ * an input file.
  */
 public class Pos {
 

@@ -1,7 +1,7 @@
 /*
  * MTProper.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,10 @@ import java.util.Map;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>A proper type.  Any type that does not depend on other types.  I.e., it
- * is atomic.</p>
+ * <p>
+ * A proper type. Any type that does not depend on other types. I.e., it is
+ * atomic.
+ * </p>
  */
 public class MTProper extends MTType {
 

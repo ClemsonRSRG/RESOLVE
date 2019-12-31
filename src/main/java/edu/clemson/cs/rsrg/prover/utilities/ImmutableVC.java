@@ -1,7 +1,7 @@
 /*
  * ImmutableVC.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,8 +26,11 @@ import edu.clemson.cs.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.*;
 
 /**
- * <p>This class represents an immutable <em>verification condition</em>,
- * which takes the form of a mathematical implication.</p>
+ * <p>
+ * This class represents an immutable <em>verification condition</em>, which
+ * takes the form of a
+ * mathematical implication.
+ * </p>
  *
  * @author Hampton Smith
  * @author Mike Kabbani
@@ -41,7 +44,9 @@ public class ImmutableVC {
     // ===========================================================
 
     /**
-     * <p>An enumeration for the current VC prove status.</p>
+     * <p>
+     * An enumeration for the current VC prove status.
+     * </p>
      */
     public enum STATUS {
         FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
@@ -51,35 +56,65 @@ public class ImmutableVC {
     // Member Fields
     // ===========================================================
 
-    /** <p>A conjunction of post-processed expressions.</p> */
+    /**
+     * <p>
+     * A conjunction of post-processed expressions.
+     * </p>
+     */
     private final ConjunctionOfNormalizedAtomicExpressions myConjunction;
 
-    /** <p>Name is a human-readable name for the VC used for debugging purposes.</p */
+    /**
+     * <p>
+     * Name is a human-readable name for the VC used for debugging purposes.</p
+     */
     private final String myName;
 
-    /** <p>Registry for symbols that we have encountered so far.</p> */
+    /**
+     * <p>
+     * Registry for symbols that we have encountered so far.
+     * </p>
+     */
     private final Registry myRegistry;
 
     /**
-     * <p>This is the math type graph that indicates relationship
-     * between different math types.</p>
+     * <p>
+     * This is the math type graph that indicates relationship between different
+     * math types.
+     * </p>
      */
     private final TypeGraph myTypeGraph;
 
-    /** <p>A copy of the VC generated from {@link edu.clemson.cs.rsrg.vcgeneration.VCGenerator}.</p> */
+    /**
+     * <p>
+     * A copy of the VC generated from
+     * {@link edu.clemson.cs.rsrg.vcgeneration.VCGenerator}.
+     * </p>
+     */
     private final VerificationCondition myVCCopy;
 
-    /** <p>A {@code VC} goal as set of strings.</p> */
+    /**
+     * <p>
+     * A {@code VC} goal as set of strings.
+     * </p>
+     */
     public final Set<String> VCGoalStrings;
 
     // -----------------------------------------------------------
     // N and Z
     // -----------------------------------------------------------
 
-    /** <p>A mathematical type representing {@code N}.</p> */
+    /**
+     * <p>
+     * A mathematical type representing {@code N}.
+     * </p>
+     */
     private final MTType N;
 
-    /** <p>A mathematical type representing {@code Z}.</p> */
+    /**
+     * <p>
+     * A mathematical type representing {@code Z}.
+     * </p>
+     */
     private final MTType Z;
 
     // ===========================================================
@@ -87,15 +122,17 @@ public class ImmutableVC {
     // ===========================================================
 
     /**
-     * <p>This creates an immutable <em>verification condition</em> for
-     * the prover.</p>
+     * <p>
+     * This creates an immutable <em>verification condition</em> for the prover.
+     * </p>
      *
      * @param vc Sequent VC with mutable expressions.
      * @param g The mathematical type graph.
      * @param nType The mathematical type "N".
      * @param zType The mathematical type "Z".
      */
-    public ImmutableVC(VerificationCondition vc, TypeGraph g, MTType nType, MTType zType) {
+    public ImmutableVC(VerificationCondition vc, TypeGraph g, MTType nType,
+            MTType zType) {
         myName = vc.getName();
         myTypeGraph = g;
         myVCCopy = vc.clone();
@@ -122,7 +159,9 @@ public class ImmutableVC {
     // ===========================================================
 
     /**
-     * <p>This method adds a new goal to prove.</p>
+     * <p>
+     * This method adds a new goal to prove.
+     * </p>
      *
      * @param a A goal represented using a string.
      */
@@ -136,8 +175,9 @@ public class ImmutableVC {
     }
 
     /**
-     * <p>This method returns the conjunction of post-processed
-     * antecedents.</p>
+     * <p>
+     * This method returns the conjunction of post-processed antecedents.
+     * </p>
      *
      * @return A {@link ConjunctionOfNormalizedAtomicExpressions}.
      */
@@ -146,7 +186,9 @@ public class ImmutableVC {
     }
 
     /**
-     * <p>This method returns the current registry of symbols.</p>
+     * <p>
+     * This method returns the current registry of symbols.
+     * </p>
      *
      * @return A {@link Registry}.
      */
@@ -155,8 +197,9 @@ public class ImmutableVC {
     }
 
     /**
-     * <p>This method returns the current proving status for
-     * this VC.</p>
+     * <p>
+     * This method returns the current proving status for this VC.
+     * </p>
      *
      * @return A status enumeration.
      */
@@ -173,7 +216,9 @@ public class ImmutableVC {
     }
 
     /**
-     * <p>This method returns this immutable VC in string format.</p>
+     * <p>
+     * This method returns this immutable VC in string format.
+     * </p>
      *
      * @return A string.
      */
@@ -201,7 +246,9 @@ public class ImmutableVC {
     // ===========================================================
 
     /**
-     * <p>An helper method for processing the sequent in a {@code VC}.</p>
+     * <p>
+     * An helper method for processing the sequent in a {@code VC}.
+     * </p>
      *
      * @param sequent Sequent VC.
      */
@@ -215,9 +262,8 @@ public class ImmutableVC {
         Iterator<PExp> antecedentIt =
                 auxiliaryVCRepresentation.myAntecedents.iterator();
         while (antecedentIt.hasNext() && !myConjunction.evaluatesToFalse()) {
-            PExp curr =
-                    Utilities.replacePExp(antecedentIt.next(), myTypeGraph, Z,
-                            N);
+            PExp curr = Utilities.replacePExp(antecedentIt.next(), myTypeGraph,
+                    Z, N);
             myConjunction.addExpression(curr);
 
         }
@@ -226,9 +272,8 @@ public class ImmutableVC {
         Iterator<PExp> consequentIt =
                 auxiliaryVCRepresentation.myConsequents.iterator();
         while (consequentIt.hasNext() && !myConjunction.evaluatesToFalse()) {
-            PExp curr =
-                    Utilities.replacePExp(consequentIt.next(), myTypeGraph, Z,
-                            N);
+            PExp curr = Utilities.replacePExp(consequentIt.next(), myTypeGraph,
+                    Z, N);
 
             // Temp: replace with eliminate()
             if (curr.getTopLevelOperation().equals("orB")) {
@@ -245,8 +290,9 @@ public class ImmutableVC {
     }
 
     /**
-     * <p>An helper method for adding default theorems for proving
-     * a {@code VC}.</p>
+     * <p>
+     * An helper method for adding default theorems for proving a {@code VC}.
+     * </p>
      */
     private void seedDefaultTheorems() {
         // seed with (true = false) = false
@@ -263,7 +309,7 @@ public class ImmutableVC {
         args.clear();
         myConjunction.addExpression(trEqFEqF);
 
-        // seed with true and true.  Need this for search: x and y, when x and y are both true
+        // seed with true and true. Need this for search: x and y, when x and y are both true
         args.add(tr);
         args.add(tr);
         PSymbol tandt = new PSymbol(myTypeGraph.BOOLEAN, null, "andB", args);
@@ -301,9 +347,12 @@ public class ImmutableVC {
     // ===========================================================
 
     /**
-     * <p>When building an {@link ImmutableVC}, both Mike and Hampton did a bunch of
-     * conversions. This class allows us to keep the same logic, but not have a separate
-     * Java class.</p>
+     * <p>
+     * When building an {@link ImmutableVC}, both Mike and Hampton did a bunch
+     * of conversions. This
+     * class allows us to keep the same logic, but not have a separate Java
+     * class.
+     * </p>
      */
     private class AuxiliaryVCRepresentation {
 
@@ -311,35 +360,71 @@ public class ImmutableVC {
         // Member Fields
         // ===========================================================
 
-        /** <p>A list of antecedents.</p> */
+        /**
+         * <p>
+         * A list of antecedents.
+         * </p>
+         */
         private List<PExp> myAntecedents;
 
-        /** <p>A list of consequents.</p> */
+        /**
+         * <p>
+         * A list of consequents.
+         * </p>
+         */
         private List<PExp> myConsequents;
 
         // -----------------------------------------------------------
         // Conversion-Related
         // -----------------------------------------------------------
 
-        /** <p>A set of condition expressions.</p> */
+        /**
+         * <p>
+         * A set of condition expressions.
+         * </p>
+         */
         private Set<PExp> myConditions;
 
-        /** <p>A map used for reverse lookup when lifting lambda expressions.</p> */
+        /**
+         * <p>
+         * A map used for reverse lookup when lifting lambda expressions.
+         * </p>
+         */
         private final Map<String, PLambda> myLambdaCodes;
 
-        /** <p>A counter for keeping track of all lambda expressions.</p> */
+        /**
+         * <p>
+         * A counter for keeping track of all lambda expressions.
+         * </p>
+         */
         private int myLambdaTag;
 
-        /** <p>A map used for lifting lambda expressions.</p> */
+        /**
+         * <p>
+         * A map used for lifting lambda expressions.
+         * </p>
+         */
         private final Map<PLambda, String> myLiftedLambdas;
 
-        /** <p>A list of lifted lambda predicates.</p> */
+        /**
+         * <p>
+         * A list of lifted lambda predicates.
+         * </p>
+         */
         private List<PSymbol> myLiftedLambdaPredicates;
 
-        /** <p>A counter for keeping track of all quantified variables.</p> */
+        /**
+         * <p>
+         * A counter for keeping track of all quantified variables.
+         * </p>
+         */
         private int myQVarTag;
 
-        /** <p>A map used for the right hand side of lambda predicates.</p> */
+        /**
+         * <p>
+         * A map used for the right hand side of lambda predicates.
+         * </p>
+         */
         private final Map<String, PSymbol> myRhsOfLamPredsToLamPreds;
 
         // ===========================================================
@@ -347,7 +432,9 @@ public class ImmutableVC {
         // ===========================================================
 
         /**
-         * <p>This constructs an auxiliary VC representation.</p>
+         * <p>
+         * This constructs an auxiliary VC representation.
+         * </p>
          *
          * @param sequent Sequent VC.
          */
@@ -379,17 +466,17 @@ public class ImmutableVC {
         // ===========================================================
 
         /**
-         * <p>This method returns this object in string format.</p>
+         * <p>
+         * This method returns this object in string format.
+         * </p>
          *
          * @return A string.
          */
         @Override
         public final String toString() {
-            StringBuilder retval =
-                    new StringBuilder("========== " + myName + " ==========\n"
-                            + convertExpressionToString(myAntecedents)
-                            + "  -->\n"
-                            + convertExpressionToString(myConsequents));
+            StringBuilder retval = new StringBuilder("========== " + myName
+                    + " ==========\n" + convertExpressionToString(myAntecedents)
+                    + "  -->\n" + convertExpressionToString(myConsequents));
 
             if (!myLiftedLambdaPredicates.isEmpty()) {
                 retval.append("lifted lambda predicates:\n");
@@ -406,7 +493,9 @@ public class ImmutableVC {
         // ===========================================================
 
         /**
-         * <p>An helper method for converting {@link PAlternatives}.</p>
+         * <p>
+         * An helper method for converting {@link PAlternatives}.
+         * </p>
          */
         private void convertPAlternativesToCF() {
             List<PSymbol> converted = new ArrayList<>();
@@ -420,11 +509,14 @@ public class ImmutableVC {
                     List<PExp> args = new ArrayList<>();
                     PAlternatives asPa = (PAlternatives) rhs;
                     if (asPa.myAlternatives.size() > 1) {
-                        throw new MiscErrorException("[Prover] Only 1 alternative supported", new RuntimeException());
+                        throw new MiscErrorException(
+                                "[Prover] Only 1 alternative supported",
+                                new RuntimeException());
                     }
 
                     PAlternatives.Alternative alt = asPa.myAlternatives.get(0);
-                    PExp quantVar = lhs.getQuantifiedVariables().iterator().next();
+                    PExp quantVar =
+                            lhs.getQuantifiedVariables().iterator().next();
                     PExp cond = alt.condition;
                     PExp conFunc = orderPlusOne(cond, quantVar, converted);
                     PExp posChoice = alt.result;
@@ -437,19 +529,18 @@ public class ImmutableVC {
                     args.add(posChoiceFun);
                     args.add(negChoiceFun);
                     // remember to type this as Z->Entity
-                    PSymbol cf =
-                            new PSymbol(posChoiceFun.getMathType(), null, "CF", args);
+                    PSymbol cf = new PSymbol(posChoiceFun.getMathType(), null,
+                            "CF", args);
                     args.clear();
                     if (!myRhsOfLamPredsToLamPreds.containsKey(cf.toString())) {
-                        PSymbol lhsPsym =
-                                new PSymbol(myTypeGraph.BOOLEAN, null, lhs
-                                        .getTopLevelOperation(),
-                                        PSymbol.Quantification.NONE);
+                        PSymbol lhsPsym = new PSymbol(myTypeGraph.BOOLEAN, null,
+                                lhs.getTopLevelOperation(),
+                                PSymbol.Quantification.NONE);
                         args.add(lhsPsym);
                         args.add(cf);
 
-                        PSymbol cfPred =
-                                new PSymbol(myTypeGraph.BOOLEAN, null, "=", args);
+                        PSymbol cfPred = new PSymbol(myTypeGraph.BOOLEAN, null,
+                                "=", args);
                         if (cfPred.getQuantifiedVariables().size() > 0) {
                             converted.add(cfPred);
                         }
@@ -470,91 +561,69 @@ public class ImmutableVC {
 
         // Assumes lambdas lifted first
         // Assumes all remaining PAlternatives are in m_liftedLambdaPredicates
-        /*public void convertPAlternativesToImplications() {
-            ArrayList<PSymbol> converted = new ArrayList<PSymbol>();
-            for (PSymbol p : m_liftedLambdaPredicates) {
-                if (p.arguments.size() == 2) {
-                    // lhs can't be a PALT
-                    PExp lhs = p.arguments.get(0);
-                    PExp rhs = p.arguments.get(1);
-                    if (rhs instanceof PAlternatives) {
-                        PAlternatives asPa = (PAlternatives) rhs;
-                        ArrayList<PExp> conditions = new ArrayList<PExp>();
-                        for (PAlternatives.Alternative pa : asPa.myAlternatives) {
-                            conditions.add(pa.condition);
-                            ArrayList<PExp> args = new ArrayList<PExp>();
-                            args.add(lhs);
-                            args.add(pa.result);
-                            PSymbol ant =
-                                    new PSymbol(m_typegraph.BOOLEAN, null, "=",
-                                            args);
-
-                            args.clear();
-                            args.add(pa.condition);
-                            args.add(ant);
-                            PSymbol pc =
-                                    new PSymbol(m_typegraph.BOOLEAN, null,
-                                            "implies", args);
-                            converted.add(pc);
-                            m_conditions.add(pa.condition);
-                        }
-
-                        // do otherwise clause
-                        if (conditions.size() > 1) {
-                            // make conjunction
-                        }
-                        else {
-                            ArrayList<PExp> args = new ArrayList<PExp>();
-                            args.add(conditions.get(0));
-                            PExp neg =
-                                    new PSymbol(m_typegraph.BOOLEAN, null, "not",
-                                            args);
-                            args.clear();
-
-                            args.add(lhs);
-                            args.add(asPa.myOtherwiseClauseResult);
-                            PExp eq =
-                                    new PSymbol(m_typegraph.BOOLEAN, null, "=",
-                                            args);
-                            args.clear();
-                            args.add(neg);
-                            args.add(eq);
-                            converted.add(new PSymbol(m_typegraph.BOOLEAN, null,
-                                    "implies", args));
-                            //m_conditions.add(neg);
-                        }
-
-                    }
-                    // No PAlt
-                    else {
-                        converted.add(p);
-                    }
-                }
-
-            }
-            m_liftedLambdaPredicates = converted;
-        }*/
+        /*
+         * public void convertPAlternativesToImplications() { ArrayList<PSymbol>
+         * converted = new
+         * ArrayList<PSymbol>(); for (PSymbol p : m_liftedLambdaPredicates) { if
+         * (p.arguments.size() ==
+         * 2) { // lhs can't be a PALT PExp lhs = p.arguments.get(0); PExp rhs =
+         * p.arguments.get(1); if
+         * (rhs instanceof PAlternatives) { PAlternatives asPa = (PAlternatives)
+         * rhs; ArrayList<PExp>
+         * conditions = new ArrayList<PExp>(); for (PAlternatives.Alternative pa
+         * : asPa.myAlternatives)
+         * { conditions.add(pa.condition); ArrayList<PExp> args = new
+         * ArrayList<PExp>(); args.add(lhs);
+         * args.add(pa.result); PSymbol ant = new PSymbol(m_typegraph.BOOLEAN,
+         * null, "=", args);
+         * 
+         * args.clear(); args.add(pa.condition); args.add(ant); PSymbol pc = new
+         * PSymbol(m_typegraph.BOOLEAN, null, "implies", args);
+         * converted.add(pc);
+         * m_conditions.add(pa.condition); }
+         * 
+         * // do otherwise clause if (conditions.size() > 1) { // make
+         * conjunction } else {
+         * ArrayList<PExp> args = new ArrayList<PExp>();
+         * args.add(conditions.get(0)); PExp neg = new
+         * PSymbol(m_typegraph.BOOLEAN, null, "not", args); args.clear();
+         * 
+         * args.add(lhs); args.add(asPa.myOtherwiseClauseResult); PExp eq = new
+         * PSymbol(m_typegraph.BOOLEAN, null, "=", args); args.clear();
+         * args.add(neg); args.add(eq);
+         * converted.add(new PSymbol(m_typegraph.BOOLEAN, null, "implies",
+         * args));
+         * //m_conditions.add(neg); }
+         * 
+         * } // No PAlt else { converted.add(p); } }
+         * 
+         * } m_liftedLambdaPredicates = converted; }
+         */
 
         /**
-         * <p>An helper method for processing the sequent in a {@code VC}.</p>
+         * <p>
+         * An helper method for processing the sequent in a {@code VC}.
+         * </p>
          *
          * @param sequent Sequent VC.
          */
         private void convertSequentVC(Sequent sequent) {
             for (Exp exp1 : sequent.getAntecedents()) {
-                myAntecedents.add(Utilities.replacePExp(PExp.buildPExp(
-                        myTypeGraph, exp1), myTypeGraph, Z, N));
+                myAntecedents.add(Utilities.replacePExp(
+                        PExp.buildPExp(myTypeGraph, exp1), myTypeGraph, Z, N));
 
             }
 
             for (Exp exp : sequent.getConcequents()) {
-                myConsequents.add(Utilities.replacePExp(PExp.buildPExp(
-                        myTypeGraph, exp), myTypeGraph, Z, N));
+                myConsequents.add(Utilities.replacePExp(
+                        PExp.buildPExp(myTypeGraph, exp), myTypeGraph, Z, N));
             }
         }
 
         /**
-         * <p>An helper method for lifting lambda expressions.</p>
+         * <p>
+         * An helper method for lifting lambda expressions.
+         * </p>
          */
         private void liftLambdas() {
             // Convert the antecedents expressions
@@ -576,21 +645,22 @@ public class ImmutableVC {
             for (PLambda p : myLiftedLambdas.keySet()) {
                 String name = myLiftedLambdas.get(p);
                 PExp body = p.getBody();
-                PSymbol lhs =
-                        new PSymbol(p.getMathType(), p.getMathTypeValue(), name, p
-                                .getParameters());
+                PSymbol lhs = new PSymbol(p.getMathType(), p.getMathTypeValue(),
+                        name, p.getParameters());
 
                 List<PExp> args = new ArrayList<>();
                 args.add(lhs);
                 args.add(body);
-                myLiftedLambdaPredicates.add(new PSymbol(myTypeGraph.BOOLEAN, null,
-                        "=", args));
+                myLiftedLambdaPredicates
+                        .add(new PSymbol(myTypeGraph.BOOLEAN, null, "=", args));
             }
         }
 
         /**
-         * <p>An helper method for normalizing condition and ensures that
-         * they are unique.</p>
+         * <p>
+         * An helper method for normalizing condition and ensures that they are
+         * unique.
+         * </p>
          */
         private void normalizeConditions() {
             Set<PExp> replacement = new HashSet<>();
@@ -601,9 +671,9 @@ public class ImmutableVC {
                 Map<PExp, PExp> substMap = new HashMap<>();
                 for (PSymbol pq : qVars) {
                     PSymbol repP =
-                            new PSymbol(pq.getMathType(), pq.getMathTypeValue(), pq
-                                    .getMathType().toString()
-                                    + myQVarTag++, pq.quantification);
+                            new PSymbol(pq.getMathType(), pq.getMathTypeValue(),
+                                    pq.getMathType().toString() + myQVarTag++,
+                                    pq.quantification);
                     substMap.put(pq, repP);
                 }
 
@@ -623,67 +693,77 @@ public class ImmutableVC {
         }
 
         /**
-         * <p>An helper method for dealing with quantified symbols.</p
-         * >
-         * @param thingToHigherOrder An expression that contains the quantified variable.
+         * <p>
+         * An helper method for dealing with quantified symbols.
+         * </p >
+         * 
+         * @param thingToHigherOrder An expression that contains the quantified
+         *        variable.
          * @param quantVar A quantified variable
          * @param sideList A list of prover symbols
          *
          * @return A new name for the quantified variable.
          */
-        private PExp orderPlusOne(PExp thingToHigherOrder, PExp quantVar, List<PSymbol> sideList) {
-            Set<PSymbol> qVarSet =
-                    thingToHigherOrder.getQuantifiedVariables();
+        private PExp orderPlusOne(PExp thingToHigherOrder, PExp quantVar,
+                List<PSymbol> sideList) {
+            Set<PSymbol> qVarSet = thingToHigherOrder.getQuantifiedVariables();
             if (qVarSet.size() > 1) {
-                throw new MiscErrorException("[Prover] Only 1 quantified var. supported", new RuntimeException());
+                throw new MiscErrorException(
+                        "[Prover] Only 1 quantified var. supported",
+                        new RuntimeException());
             }
 
             // no need to always make a new function
             if (qVarSet.size() == 1 && qVarSet.contains(quantVar)
                     && thingToHigherOrder.getSubExpressions().size() == 1) {
-                MTFunction hoType =
-                        new MTFunction(myTypeGraph, thingToHigherOrder.getMathType(),
-                                quantVar.getMathType());
+                MTFunction hoType = new MTFunction(myTypeGraph,
+                        thingToHigherOrder.getMathType(),
+                        quantVar.getMathType());
 
-                return new PSymbol(hoType, null, thingToHigherOrder
-                        .getTopLevelOperation());
+                return new PSymbol(hoType, null,
+                        thingToHigherOrder.getTopLevelOperation());
             }
 
             PSymbol funName;
-            if (myRhsOfLamPredsToLamPreds.containsKey(thingToHigherOrder.toString())) {
-                String fStr =
-                        myRhsOfLamPredsToLamPreds.get(thingToHigherOrder.toString())
-                                .getSubExpressions().get(0).getTopLevelOperation();
+            if (myRhsOfLamPredsToLamPreds
+                    .containsKey(thingToHigherOrder.toString())) {
+                String fStr = myRhsOfLamPredsToLamPreds
+                        .get(thingToHigherOrder.toString()).getSubExpressions()
+                        .get(0).getTopLevelOperation();
 
-                return new PSymbol(new MTFunction(myTypeGraph, thingToHigherOrder
-                        .getMathType(), quantVar.getMathType()), null, fStr);
+                return new PSymbol(new MTFunction(myTypeGraph,
+                        thingToHigherOrder.getMathType(),
+                        quantVar.getMathType()), null, fStr);
             }
             else {
-                funName =
-                        new PSymbol(new MTFunction(myTypeGraph, thingToHigherOrder
-                                .getMathType(), quantVar.getMathType()), null, "lambda"
-                                + (myLambdaTag++));
+                funName = new PSymbol(
+                        new MTFunction(myTypeGraph,
+                                thingToHigherOrder.getMathType(),
+                                quantVar.getMathType()),
+                        null, "lambda" + (myLambdaTag++));
                 List<PExp> args = new ArrayList<>();
                 args.add(quantVar);
-                PSymbol funAppl =
-                        new PSymbol(thingToHigherOrder.getMathType(), null, funName
-                                .getTopLevelOperation(), args,
-                                PSymbol.Quantification.NONE);
+                PSymbol funAppl = new PSymbol(thingToHigherOrder.getMathType(),
+                        null, funName.getTopLevelOperation(), args,
+                        PSymbol.Quantification.NONE);
                 args.clear();
                 args.add(funAppl);
                 args.add(thingToHigherOrder);
                 PSymbol conQuant =
                         new PSymbol(myTypeGraph.BOOLEAN, null, "=", args);
                 sideList.add(conQuant);
-                myRhsOfLamPredsToLamPreds
-                        .put(thingToHigherOrder.toString(), conQuant);
+                myRhsOfLamPredsToLamPreds.put(thingToHigherOrder.toString(),
+                        conQuant);
             }
 
             return funName;
         }
 
         /**
-         * <p>An helper method for printing list of antecedents or consequent expressions.</p>
+         * <p>
+         * An helper method for printing list of antecedents or consequent
+         * expressions.
+         * </p>
          *
          * @param pExps A list of {@link PExp PExps}.
          *
@@ -711,7 +791,9 @@ public class ImmutableVC {
         }
 
         /**
-         * <p>An helper method for recursively lift any lambda expressions.</p>
+         * <p>
+         * An helper method for recursively lift any lambda expressions.
+         * </p>
          *
          * @param p A {@link PExp}
          *
@@ -727,17 +809,18 @@ public class ImmutableVC {
                 // replace lam(x).F(x) wth F
                 PLambda pl = (PLambda) p;
                 PExp body = pl.getBody();
-                if ((pl.getParameters().size() == 1 && body
-                        .getQuantifiedVariables().size() == 1)
-                        && pl.getParameters().get(0).toString().equals(
-                        body.getQuantifiedVariables().iterator().next()
-                                .toString())
+                if ((pl.getParameters().size() == 1
+                        && body.getQuantifiedVariables().size() == 1)
+                        && pl.getParameters().get(0).toString()
+                                .equals(body.getQuantifiedVariables().iterator()
+                                        .next().toString())
                         && body.getSubExpressions().size() == 1
                         && body.getSubExpressions().get(0).isVariable()) {
 
-                    return new PSymbol(new MTFunction(myTypeGraph, body.getMathType(),
-                            pl.getParameters().get(0).getMathType()), null,
-                            body.getTopLevelOperation());
+                    return new PSymbol(
+                            new MTFunction(myTypeGraph, body.getMathType(),
+                                    pl.getParameters().get(0).getMathType()),
+                            null, body.getTopLevelOperation());
                 }
 
                 // Normalize parameters here
@@ -754,16 +837,19 @@ public class ImmutableVC {
                     lname = myLiftedLambdas.get(foundLamb);
                 }
 
-                return new PSymbol(normP.getMathType(), normP.getMathTypeValue(), lname);
+                return new PSymbol(normP.getMathType(),
+                        normP.getMathTypeValue(), lname);
 
             }
 
-            return new PSymbol(p.getMathType(), p.getMathTypeValue(), p
-                    .getTopLevelOperation(), newArgList);
+            return new PSymbol(p.getMathType(), p.getMathTypeValue(),
+                    p.getTopLevelOperation(), newArgList);
         }
 
         /**
-         * <p>An helper method for replacing lambda symbols.</p>
+         * <p>
+         * An helper method for replacing lambda symbols.
+         * </p>
          */
         private void replaceLambdaSymbols() {
             Map<PExp, PExp> substMap = new HashMap<>();
@@ -778,7 +864,8 @@ public class ImmutableVC {
                         if (args0.getTopLevelOperation().contains("lambda")) {
                             substMap.put(args0, args1);
                         }
-                        else if (args1.getTopLevelOperation().contains("lambda")) {
+                        else if (args1.getTopLevelOperation()
+                                .contains("lambda")) {
                             substMap.put(args1, args0);
                         }
                     }
@@ -812,7 +899,9 @@ public class ImmutableVC {
         }
 
         /**
-         * <p>An helper method for creating unique named quantifiers.</p>
+         * <p>
+         * An helper method for creating unique named quantifiers.
+         * </p>
          */
         private void uniquelyNameQuantifiers() {
             Set<PExp> replacement = new HashSet<>();
@@ -821,10 +910,10 @@ public class ImmutableVC {
                 Set<PSymbol> qVars = p.getQuantifiedVariables();
                 Map<PExp, PExp> substMap = new HashMap<>();
                 for (PSymbol pq : qVars) {
-                    PSymbol repP =
-                            new PSymbol(pq.getMathType(), pq.getMathTypeValue(), "¢vl"
-                                    + pq.getMathType().toString() + myQVarTag++,
-                                    pq.quantification);
+                    PSymbol repP = new PSymbol(pq.getMathType(),
+                            pq.getMathTypeValue(),
+                            "¢vl" + pq.getMathType().toString() + myQVarTag++,
+                            pq.quantification);
                     substMap.put(pq, repP);
                 }
 

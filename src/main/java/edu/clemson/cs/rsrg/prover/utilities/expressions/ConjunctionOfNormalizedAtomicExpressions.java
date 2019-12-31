@@ -1,7 +1,7 @@
 /*
  * ConjunctionOfNormalizedAtomicExpressions.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,7 +23,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.*;
 
 /**
- * <p>This class represents a conjunction of normalized atomic expression.</p>
+ * <p>
+ * This class represents a conjunction of normalized atomic expression.
+ * </p>
  *
  * @author Mike Khabbani
  * @version 2.0
@@ -34,22 +36,48 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // Member Fields
     // ===========================================================
 
-    /** <p>A mapping of normalized atomic expressions.</p> */
+    /**
+     * <p>
+     * A mapping of normalized atomic expressions.
+     * </p>
+     */
     private final Map<NormalizedAtomicExpression, NormalizedAtomicExpression> myExpressionSet;
 
-    /** <p>A flag that indicates if the current expression evaluates to {@code false}.</p> */
+    /**
+     * <p>
+     * A flag that indicates if the current expression evaluates to
+     * {@code false}.
+     * </p>
+     */
     private boolean myEvaluatesToFalseFlag;
 
-    /** <p>Registry for symbols that we have encountered so far.</p> */
+    /**
+     * <p>
+     * Registry for symbols that we have encountered so far.
+     * </p>
+     */
     private final Registry myRegistry;
 
-    /** <p>A timer that indicates how long to search for a proof.</p> */
+    /**
+     * <p>
+     * A timer that indicates how long to search for a proof.
+     * </p>
+     */
     private long myTimeToEnd = -1;
 
-    /** <p>A mapping of integer values used to represent a set of {@link NormalizedAtomicExpression}.</p> */
+    /**
+     * <p>
+     * A mapping of integer values used to represent a set of
+     * {@link NormalizedAtomicExpression}.
+     * </p>
+     */
     private final Map<Integer, Map<Integer, Set<NormalizedAtomicExpression>>> myUseMap;
 
-    /** <p>A reference to the immutable {@code VC} we are currently processing.</p> */
+    /**
+     * <p>
+     * A reference to the immutable {@code VC} we are currently processing.
+     * </p>
+     */
     private final ImmutableVC myVC;
 
     // ===========================================================
@@ -57,12 +85,15 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // ===========================================================
 
     /**
-     * <p>This constructs a conjunction of normalized atomic expressions.</p>
+     * <p>
+     * This constructs a conjunction of normalized atomic expressions.
+     * </p>
      *
      * @param vc An immutable copy of a {@code VC}.
      * @param registry A registry of symbols encountered so far.
      */
-    public ConjunctionOfNormalizedAtomicExpressions(ImmutableVC vc, Registry registry) {
+    public ConjunctionOfNormalizedAtomicExpressions(ImmutableVC vc,
+            Registry registry) {
         myExpressionSet = new HashMap<>(2048, .5f);
         myEvaluatesToFalseFlag = false;
         myRegistry = registry;
@@ -75,16 +106,18 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // ===========================================================
 
     /**
-     * <p>This method adds an expression to this conjunction as a new
-     * {@link NormalizedAtomicExpression}.</p>
+     * <p>
+     * This method adds an expression to this conjunction as a new
+     * {@link NormalizedAtomicExpression}.
+     * </p>
      *
      * @param expression A prover expression.
      *
      * @return A string representation of the expression added.
      */
     public final String addExpression(PExp expression) {
-        if (myEvaluatesToFalseFlag
-                || (myTimeToEnd > 0 && System.currentTimeMillis() > myTimeToEnd)) {
+        if (myEvaluatesToFalseFlag || (myTimeToEnd > 0
+                && System.currentTimeMillis() > myTimeToEnd)) {
             return "";
         }
 
@@ -120,10 +153,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>This method adds an expression and begins to track changes.</p>
+     * <p>
+     * This method adds an expression and begins to track changes.
+     * </p>
      *
      * @param expression A prover expression.
-     * @param timeToEnd A value that indicates when we will stop proving this expression.
+     * @param timeToEnd A value that indicates when we will stop proving this
+     *        expression.
      *
      * @return A string representation of the expression added.
      */
@@ -137,17 +173,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>This method adds a new formula expression.</p>
+     * <p>
+     * This method adds a new formula expression.
+     * </p>
      *
      * @param formula A prover expression representing a formula.
      *
      * @return A string representation of the formula added.
      */
     public final int addFormula(PExp formula) {
-        /* experimentally handling =
-           i.e.: (|?S| = 0) = (?S = Empty_String))
-           is broken down by addExpression so (|?S| = 0) is an argument
-           should return int for true if known to be equal, otherwise return root representative.
+        /*
+         * experimentally handling = i.e.: (|?S| = 0) = (?S = Empty_String)) is
+         * broken down by
+         * addExpression so (|?S| = 0) is an argument should return int for true
+         * if known to be equal,
+         * otherwise return root representative.
          */
         if (formula.getTopLevelOperation().equals("=B")) {
             int lhs = addFormula(formula.getSubExpressions().get(0));
@@ -157,16 +197,15 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             rhs = myRegistry.findAndCompress(rhs);
 
             // This prevents matching of (i=i)=true, which is not built in
-            /*if (lhs == rhs) {
-                return m_registry.getIndexForSymbol("true");
-            }
-            else {*/
+            /*
+             * if (lhs == rhs) { return m_registry.getIndexForSymbol("true"); }
+             * else {
+             */
             // insert =(lhs,rhs) = someNewRoot
 
             int questEq = myRegistry.getIndexForSymbol("=B");
-            NormalizedAtomicExpression pred =
-                    new NormalizedAtomicExpression(myRegistry, new int[] {
-                            questEq, lhs, rhs });
+            NormalizedAtomicExpression pred = new NormalizedAtomicExpression(
+                    myRegistry, new int[] { questEq, lhs, rhs });
             return addAtomicFormula(pred);
             // }
         }
@@ -207,26 +246,33 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>This method clears all stored expressions.</p>
+     * <p>
+     * This method clears all stored expressions.
+     * </p>
      */
     public final void clear() {
         myExpressionSet.clear();
     }
 
     /**
-     * <p>This method returns whether or not this {@code VC}
-     * evaluates to {@code false}.</p>
+     * <p>
+     * This method returns whether or not this {@code VC} evaluates to
+     * {@code false}.
+     * </p>
      *
-     * @return {@code true} if the prover has determined that
-     * this {@code VC} evaluates to {@code false}, {@code false} otherwise.
+     * @return {@code true} if the prover has determined that this {@code VC}
+     *         evaluates to
+     *         {@code false}, {@code false} otherwise.
      */
     public final boolean evaluatesToFalse() {
         return myEvaluatesToFalseFlag;
     }
 
     /**
-     * <p>This method attempts to locate the specified expression
-     * in this conjunction.</p>
+     * <p>
+     * This method attempts to locate the specified expression in this
+     * conjunction.
+     * </p>
      *
      * @param exp A prover expression.
      *
@@ -234,14 +280,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      */
     public final PExp find(PExp exp) {
         if (exp.getSubExpressions().size() == 0) {
-            String s =
-                    myRegistry.getRootSymbolForSymbol(exp
-                            .getTopLevelOperation());
+            String s = myRegistry
+                    .getRootSymbolForSymbol(exp.getTopLevelOperation());
             if (s.equals("")) {
                 return exp;
             }
             else {
-                return new PSymbol(exp.getMathType(), exp.getMathTypeValue(), s);
+                return new PSymbol(exp.getMathType(), exp.getMathTypeValue(),
+                        s);
             }
         }
 
@@ -252,8 +298,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             PExp cur = it.next();
             PExp fcur = find(cur);
             if (fcur.getSubExpressions().size() > 0
-                    || !myRegistry.mySymbolToIndex.containsKey(fcur
-                            .getTopLevelOperation())) {
+                    || !myRegistry.mySymbolToIndex
+                            .containsKey(fcur.getTopLevelOperation())) {
                 irreducible = true;
             }
 
@@ -267,39 +313,42 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             ia = new int[args.size() + 1];
             ia[0] = myRegistry.getIndexForSymbol(op);
             for (int i = 1; i < ia.length; ++i) {
-                ia[i] =
-                        myRegistry.getIndexForSymbol(args.get(i - 1)
-                                .getTopLevelOperation());
+                ia[i] = myRegistry.getIndexForSymbol(
+                        args.get(i - 1).getTopLevelOperation());
             }
 
             NormalizedAtomicExpression na =
                     new NormalizedAtomicExpression(myRegistry, ia);
-            if (myExpressionSet.containsKey(na) && myExpressionSet.get(na).readRoot() >= 0) {
+            if (myExpressionSet.containsKey(na)
+                    && myExpressionSet.get(na).readRoot() >= 0) {
                 int r = myExpressionSet.get(na).readRoot();
                 String rs = myRegistry.getSymbolForIndex(r);
 
                 return new PSymbol(myRegistry.getTypeByIndex(r), null, rs);
             }
             else {
-                return new PSymbol(exp.getMathType(), exp.getMathTypeValue(), exp
-                        .getTopLevelOperation(), args);
+                return new PSymbol(exp.getMathType(), exp.getMathTypeValue(),
+                        exp.getTopLevelOperation(), args);
             }
         }
         else {
-            return new PSymbol(exp.getMathType(), exp.getMathTypeValue(), exp
-                    .getTopLevelOperation(), args);
+            return new PSymbol(exp.getMathType(), exp.getMathTypeValue(),
+                    exp.getTopLevelOperation(), args);
         }
     }
 
     /**
-     * <p>This method returns matches from an expression using the override set.</p>
+     * <p>
+     * This method returns matches from an expression using the override set.
+     * </p>
      *
      * @param expr A {@link NormalizedAtomicExpression}.
      * @param foreignSymbolOverrideSet A set containing symbols to override.
      *
      * @return A set containing proper mappings.
      */
-    public final Set<Map<String, String>> getMatchesForOverrideSet(NormalizedAtomicExpression expr,
+    public final Set<Map<String, String>> getMatchesForOverrideSet(
+            NormalizedAtomicExpression expr,
             Set<Map<String, String>> foreignSymbolOverrideSet) {
         Set<Map<String, String>> rSet = new HashSet<>();
         for (Map<String, String> fs_m : foreignSymbolOverrideSet) {
@@ -314,26 +363,29 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>This method returns the set of normalized atomic expressions
-     * used as keys in this conjunction.</p>
+     * <p>
+     * This method returns the set of normalized atomic expressions used as keys
+     * in this conjunction.
+     * </p>
      *
      * @return A set of {@link NormalizedAtomicExpression}.
      */
-    public final Set<NormalizedAtomicExpression> getNormalizedAtomicExpressionKeys() {
+    public final Set<NormalizedAtomicExpression>
+            getNormalizedAtomicExpressionKeys() {
         return myExpressionSet.keySet();
     }
 
     /**
-     * <p>This method returns the set of expressions based on the
-     * symbol number.</p>
+     * <p>
+     * This method returns the set of expressions based on the symbol number.
+     * </p>
      *
      * @param symk A symbol number.
      *
      * @return A set of {@link NormalizedAtomicExpression}.
      */
     public final Set<NormalizedAtomicExpression> getUses(int symk) {
-        HashSet<NormalizedAtomicExpression> rSet =
-                new HashSet<>();
+        HashSet<NormalizedAtomicExpression> rSet = new HashSet<>();
         Map<Integer, Set<NormalizedAtomicExpression>> usesByPos =
                 myUseMap.get(symk);
         for (Map.Entry<Integer, Set<NormalizedAtomicExpression>> me : usesByPos
@@ -345,8 +397,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>This method returns the current number of expressions
-     * in this conjunction.</p>
+     * <p>
+     * This method returns the current number of expressions in this
+     * conjunction.
+     * </p>
      *
      * @return Number of expressions.
      */
@@ -355,7 +409,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */
@@ -383,11 +439,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // ===========================================================
 
     /**
-     * <p>An helper method for adding an atomic formula.</p>
+     * <p>
+     * An helper method for adding an atomic formula.
+     * </p>
      *
      * @param atomicFormula One sided expression. (= new root) is appended and
-     *                      expression is inserted if no match of the side is found. Otherwise
-     *                      current root is returned.
+     *        expression is inserted
+     *        if no match of the side is found. Otherwise current root is
+     *        returned.
      *
      * @return Current integer value of root symbol that represents the input.
      */
@@ -426,7 +485,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for adding an expression to the conjunction set.</p>
+     * <p>
+     * An helper method for adding an expression to the conjunction set.
+     * </p>
      *
      * @param nae A {@link NormalizedAtomicExpression}.
      */
@@ -442,8 +503,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for associating a symbol number with
-     * an expression.</p>
+     * <p>
+     * An helper method for associating a symbol number with an expression.
+     * </p>
      *
      * @param symk A symbol number.
      * @param nae A {@link NormalizedAtomicExpression}.
@@ -468,7 +530,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for applying the prover's built-in logic.</p>
+     * <p>
+     * An helper method for applying the prover's built-in logic.
+     * </p>
      *
      * @param nm A {@link NormalizedAtomicExpression}.
      * @param tank A stack of built-in operators.
@@ -494,7 +558,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
         int tr = myRegistry.getIndexForSymbol("true");
         int fl = myRegistry.getIndexForSymbol("false");
-        // =,true,false,not.  recorded first in reg. logic relation args (and, or, =) are ordered.
+        // =,true,false,not. recorded first in reg. logic relation args (and, or, =) are ordered.
 
         int arg2 = nm.readPosition(2);
         // arity 2 guard: return if all constant
@@ -578,7 +642,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
 
             // x or some goal g = some goal g
-            if (myVC.VCGoalStrings.contains(myRegistry.getSymbolForIndex(rhs))) {
+            if (myVC.VCGoalStrings
+                    .contains(myRegistry.getSymbolForIndex(rhs))) {
                 if (rhs == arg1) {
                     myVC.addGoal(myRegistry.getSymbolForIndex(arg2));
                 }
@@ -670,7 +735,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for adding a particular symbol to the registry.</p>
+     * <p>
+     * An helper method for adding a particular symbol to the registry.
+     * </p>
      *
      * @param ps A prover symbol.
      *
@@ -687,8 +754,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
         }
-        else if (ps.isFunction()
-                || ps.getMathType().getClass().getSimpleName().equals("MTFunction")) {
+        else if (ps.isFunction() || ps.getMathType().getClass().getSimpleName()
+                .equals("MTFunction")) {
             if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
             }
@@ -719,10 +786,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An method that helps us choose literals over variables for theorem
-     * matching purposes.</p>
+     * <p>
+     * An method that helps us choose literals over variables for theorem
+     * matching purposes.
+     * </p>
      *
-     * <p><em>i.e.</em> The theorem expression should keep the literals.</p>
+     * <p>
+     * <em>i.e.</em> The theorem expression should keep the literals.
+     * </p>
      *
      * @param a An integer value representing some symbol.
      * @param b Another integer value representing some symbol.
@@ -744,7 +815,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for computing a set of bindings.</p>
+     * <p>
+     * An helper method for computing a set of bindings.
+     * </p>
      *
      * @param filteredSet A set of filtered {@link NormalizedAtomicExpression}.
      * @param baseMap A map containing base symbols.
@@ -753,16 +826,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      *
      * @return A set containing mappings for symbols.
      */
-    private Set<Map<String, String>> computeBindings(Set<NormalizedAtomicExpression> filteredSet,
-            Map<String, String> baseMap, String[] unmappedWildcards, Registry searchReg) {
+    private Set<Map<String, String>> computeBindings(
+            Set<NormalizedAtomicExpression> filteredSet,
+            Map<String, String> baseMap, String[] unmappedWildcards,
+            Registry searchReg) {
         Set<Map<String, String>> rSet = new HashSet<>(filteredSet.size(), .5f);
         next: for (NormalizedAtomicExpression e : filteredSet) {
             Map<String, String> bmap = new HashMap<>(baseMap);
             for (int i = 0; i < unmappedWildcards.length; ++i) {
                 String wc = unmappedWildcards[i];
-                String ac =
-                        (i < unmappedWildcards.length - 1 ? e.readSymbol(i)
-                                : myRegistry.getSymbolForIndex(e.readRoot()));
+                String ac = (i < unmappedWildcards.length - 1 ? e.readSymbol(i)
+                        : myRegistry.getSymbolForIndex(e.readRoot()));
                 if (wc.equals("")) {
                     continue;
                 }
@@ -771,12 +845,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     continue next; // this clause ensures usage of same symbol where required.
                 }
 
-                MTType wildType =
-                        searchReg.getTypeByIndex(searchReg
-                                .getIndexForSymbol(wc));
-                MTType localType =
-                        myRegistry.getTypeByIndex(myRegistry
-                                .getIndexForSymbol(ac));
+                MTType wildType = searchReg
+                        .getTypeByIndex(searchReg.getIndexForSymbol(wc));
+                MTType localType = myRegistry
+                        .getTypeByIndex(myRegistry.getIndexForSymbol(ac));
                 if (!myRegistry.isSubtype(localType, wildType)) {
                     continue next;
                 }
@@ -791,7 +863,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for obtaining the bindings for an expression.</p>
+     * <p>
+     * An helper method for obtaining the bindings for an expression.
+     * </p>
      *
      * @param expr A {@link NormalizedAtomicExpression}.
      * @param foreignSymbolOverride A mapping of symbols to override.
@@ -827,26 +901,25 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
                     return computeBindings(
                             getExprsMatchingAtPosition(searchKeys),
-                            foreignSymbolOverride, unMappedWildCards, expr
-                                    .getRegistry());
+                            foreignSymbolOverride, unMappedWildCards,
+                            expr.getRegistry());
                 }
             }
             else {
                 // only one blank. 2 searches
-                rSet =
-                        computeBindings(getExprsMatchingAtPosition(searchKeys),
-                                foreignSymbolOverride, unMappedWildCards, expr
-                                        .getRegistry());
+                rSet = computeBindings(getExprsMatchingAtPosition(searchKeys),
+                        foreignSymbolOverride, unMappedWildCards,
+                        expr.getRegistry());
                 int t = searchKeys[1];
                 String s = unMappedWildCards[1];
                 searchKeys[1] = searchKeys[2];
                 unMappedWildCards[1] = unMappedWildCards[2];
                 searchKeys[2] = t;
                 unMappedWildCards[2] = s;
-                rSet.addAll(computeBindings(
-                        getExprsMatchingAtPosition(searchKeys),
-                        foreignSymbolOverride, unMappedWildCards, expr
-                                .getRegistry()));
+                rSet.addAll(
+                        computeBindings(getExprsMatchingAtPosition(searchKeys),
+                                foreignSymbolOverride, unMappedWildCards,
+                                expr.getRegistry()));
 
                 return rSet;
             }
@@ -857,21 +930,27 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for searching for expressions that match the specified positions.</p>
+     * <p>
+     * An helper method for searching for expressions that match the specified
+     * positions.
+     * </p>
      *
-     * @param searchKey An array of search keys represented using integer values.
+     * @param searchKey An array of search keys represented using integer
+     *        values.
      *
-     * @return A set of {@link NormalizedAtomicExpression} matching the
-     * search key.
+     * @return A set of {@link NormalizedAtomicExpression} matching the search
+     *         key.
      */
-    private Set<NormalizedAtomicExpression> getExprsMatchingAtPosition(int[] searchKey) {
+    private Set<NormalizedAtomicExpression>
+            getExprsMatchingAtPosition(int[] searchKey) {
         Set<NormalizedAtomicExpression> rSet = new HashSet<>();
         for (int p = 0; p < searchKey.length; ++p) {
             int k = searchKey[p];
             if (k < 0)
                 continue;
             if (!myUseMap.containsKey(k)) {
-                return rSet; // k is not used in the conjunction, but is still in Registry. Can happen with =, not, etc.
+                return rSet; // k is not used in the conjunction, but is still in Registry. Can happen with
+                             // =, not, etc.
             }
 
             int x = (p < searchKey.length - 1) ? p : -1;
@@ -889,7 +968,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (p == 0) {
                 rSet.addAll(myUseMap.get(k).get(p));
             }
-            else if (p == searchKey.length - 1) { //last element which is root class
+            else if (p == searchKey.length - 1) { // last element which is root class
                 rSet.retainAll(getUses(k, -1));
             }
             else {
@@ -901,24 +980,31 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for getting the set of expressions located at
-     * the current position./p>
+     * <p>
+     * An helper method for getting the set of expressions located at the
+     * current position./p>
      *
      * @param symk A symbol number.
      * @param pos A position number.
      *
      * @return A set of {@link NormalizedAtomicExpression} referenced by
-     * {@code symk} and located at {@code pos}.
+     *         {@code symk} and located at
+     *         {@code pos}.
      */
     private Set<NormalizedAtomicExpression> getUses(int symk, int pos) {
         return new HashSet<>(myUseMap.get(symk).get(pos));
     }
 
     /**
-     * <p>An helper method that returns a list of modified predicates by their position.
-     * Only these can cause new merges.</p>
+     * <p>
+     * An helper method that returns a list of modified predicates by their
+     * position. Only these can
+     * cause new merges.
+     * </p>
      *
-     * <p><em>e.g.</em> {@code b} is replaced by {@code a}</p>
+     * <p>
+     * <em>e.g.</em> {@code b} is replaced by {@code a}
+     * </p>
      *
      * @param a An integer value representing some symbol.
      * @param b Another integer value representing some symbol.
@@ -926,8 +1012,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      * @return A stack containing modified predicates.
      */
     private Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
-        if (myEvaluatesToFalseFlag
-                || (myTimeToEnd > 0 && System.currentTimeMillis() > myTimeToEnd)) {
+        if (myEvaluatesToFalseFlag || (myTimeToEnd > 0
+                && System.currentTimeMillis() > myTimeToEnd)) {
             return null;
         }
 
@@ -957,8 +1043,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 if (myExpressionSet.containsKey(ne)) {
                     ne = myExpressionSet.get(ne);
                     int neroot = ne.readRoot();
-                    if (oldRoot != neroot
-                            && !((oldRoot == a || oldRoot == b) && (neroot == a || neroot == b))) {
+                    if (oldRoot != neroot && !((oldRoot == a || oldRoot == b)
+                            && (neroot == a || neroot == b))) {
                         // dont put a and b on stack, already doing a/b
                         coincidentalMergeHoldingTank.push(oldRoot);
                         coincidentalMergeHoldingTank.push(neroot);
@@ -976,7 +1062,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for merging operators.</p>
+     * <p>
+     * An helper method for merging operators.
+     * </p>
      *
      * @param a An integer value representing some operator.
      * @param b Another integer value representing some operator.
@@ -988,8 +1076,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int f = myRegistry.getIndexForSymbol("false");
 
         StringBuilder rString = new StringBuilder();
-        if (myEvaluatesToFalseFlag
-                || (myTimeToEnd > 0 && System.currentTimeMillis() > myTimeToEnd)) {
+        if (myEvaluatesToFalseFlag || (myTimeToEnd > 0
+                && System.currentTimeMillis() > myTimeToEnd)) {
             return rString.toString();
         }
 
@@ -1003,8 +1091,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         holdingTank.push(a);
         holdingTank.push(b);
         while (!holdingTank.empty()) {
-            if (myEvaluatesToFalseFlag
-                    || (myTimeToEnd > 0 && System.currentTimeMillis() > myTimeToEnd)) {
+            if (myEvaluatesToFalseFlag || (myTimeToEnd > 0
+                    && System.currentTimeMillis() > myTimeToEnd)) {
                 return rString.toString();
             }
 
@@ -1028,7 +1116,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 return "contradiction detected " + rString;
             }
 
-            rString.append(myRegistry.getSymbolForIndex(opA)).append("/").append(myRegistry.getSymbolForIndex(opB)).append(",");
+            rString.append(myRegistry.getSymbolForIndex(opA)).append("/")
+                    .append(myRegistry.getSymbolForIndex(opB)).append(",");
             Stack<Integer> mResult = mergeOnlyArgumentOperators(opA, opB);
             String bstring = myRegistry.getSymbolForIndex(opB);
             if (myVC != null && myVC.VCGoalStrings.contains(bstring)) {
@@ -1047,8 +1136,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method that removes an expression from this
-     * conjunction.</p>
+     * <p>
+     * An helper method that removes an expression from this conjunction.
+     * </p>
      *
      * @param nae A {@link NormalizedAtomicExpression}.
      */
@@ -1062,8 +1152,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * <p>An helper method for removing an expression from
-     * our use map.</p>
+     * <p>
+     * An helper method for removing an expression from our use map.
+     * </p>
      *
      * @param symK A symbol number.
      * @param nae A {@link NormalizedAtomicExpression}.

@@ -1,7 +1,7 @@
 /*
  * FacilityFormalToActuals.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,17 +23,32 @@ import java.util.Set;
  */
 public class FacilityFormalToActuals {
 
-    /** <p>This maps all concept formal arguments to their actuals</p> */
+    /**
+     * <p>
+     * This maps all concept formal arguments to their actuals
+     * </p>
+     */
     private final Map<Exp, Exp> myConceptArgMap;
 
-    /** <p>This maps all concept realization formal arguments to their actuals</p> */
+    /**
+     * <p>
+     * This maps all concept realization formal arguments to their actuals
+     * </p>
+     */
     private final Map<Exp, Exp> myConceptRealizArgMap;
 
-    /** <p>This is a map from enhancement [realization] to a map of formal arguments to their actuals</p> */
+    /**
+     * <p>
+     * This is a map from enhancement [realization] to a map of formal arguments
+     * to their actuals
+     * </p>
+     */
     private final Map<PosSymbol, Map<Exp, Exp>> myEnhancementArgMaps;
 
     /**
-     * <p>This creates a collection of formals to facility actuals.</p>
+     * <p>
+     * This creates a collection of formals to facility actuals.
+     * </p>
      *
      * @param cArgMap Concept argument mapping.
      * @param crArgMap Concept realization argument mapping.
@@ -47,8 +62,9 @@ public class FacilityFormalToActuals {
     }
 
     /**
-     * <p>Returns a map containing the concept formal and
-     * actual arguments.</p>
+     * <p>
+     * Returns a map containing the concept formal and actual arguments.
+     * </p>
      *
      * @return A {@link Map}.
      */
@@ -57,8 +73,10 @@ public class FacilityFormalToActuals {
     }
 
     /**
-     * <p>Returns a map containing the concept realization formal and
-     * actual arguments.</p>
+     * <p>
+     * Returns a map containing the concept realization formal and actual
+     * arguments.
+     * </p>
      *
      * @return A {@link Map}.
      */
@@ -67,8 +85,10 @@ public class FacilityFormalToActuals {
     }
 
     /**
-     * <p>Returns the names of enhancement and enhancement realizations
-     * for this facility declaration.</p>
+     * <p>
+     * Returns the names of enhancement and enhancement realizations for this
+     * facility declaration.
+     * </p>
      *
      * @return A {@link Set}
      */
@@ -77,8 +97,10 @@ public class FacilityFormalToActuals {
     }
 
     /**
-     * <p>Returns a map containing the enhancement [realization] formal
-     * and actual arguments.</p>
+     * <p>
+     * Returns a map containing the enhancement [realization] formal and actual
+     * arguments.
+     * </p>
      *
      * @param name Name of the enhancement or enhancement realization
      *

@@ -1,7 +1,7 @@
 /*
  * NameSearcher.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.List;
 
 /**
- * <p>A <code>NameSearcher</code> returns entries in a {@link SymbolTable SymbolTable}
- * that have the specified name.</p>
+ * <p>
+ * A <code>NameSearcher</code> returns entries in a {@link SymbolTable
+ * SymbolTable} that have the
+ * specified name.
+ * </p>
  */
 public class NameSearcher implements MultimatchTableSearcher<SymbolTableEntry> {
 
@@ -44,8 +47,8 @@ public class NameSearcher implements MultimatchTableSearcher<SymbolTableEntry> {
         if (result) {
             SymbolTableEntry e = entries.get(mySearchString);
 
-            //Parameters of imported modules or facility instantiations ar not
-            //exported and therefore should not be considered for results
+            // Parameters of imported modules or facility instantiations ar not
+            // exported and therefore should not be considered for results
             if (l.equals(SearchContext.SOURCE_MODULE)
                     || !(e instanceof ProgramParameterEntry)) {
                 matches.add(entries.get(mySearchString));

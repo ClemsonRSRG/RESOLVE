@@ -1,7 +1,7 @@
 /*
  * TupleExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,12 +21,16 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian.Element;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 /**
- * <p>Making TupleExp extend from AbstractFunctionExp was considered and
- * explicitly decided against during the great math-type-overhaul of 2012.
- * If we chose to admit the presence of some function that builds tuples for us,
- * how would we pass it its parameters if not via a tuple?  Thus, TupleExp is
- * a built-in notion, and not imagined as the result of the application of a
- * function.</p>
+ * <p>
+ * Making TupleExp extend from AbstractFunctionExp was considered and explicitly
+ * decided against
+ * during the great math-type-overhaul of 2012. If we chose to admit the
+ * presence of some function
+ * that builds tuples for us, how would we pass it its parameters if not via a
+ * tuple? Thus, TupleExp
+ * is a built-in notion, and not imagined as the result of the application of a
+ * function.
+ * </p>
  */
 public class TupleExp extends Exp {
 
@@ -64,7 +68,7 @@ public class TupleExp extends Exp {
 
     private TupleExp(Location l, Exp[] fields, int elementCount) {
         if (elementCount < 2) {
-            //We assert this isn't possible, but who knows?
+            // We assert this isn't possible, but who knows?
             throw new IllegalArgumentException(
                     "Unexpected cartesian product size.");
         }
@@ -140,7 +144,7 @@ public class TupleExp extends Exp {
         }
         else {
             if (mySize == 2) {
-                //ASSERT: !(myElements.get(0) instanceof MTCartesian)
+                // ASSERT: !(myElements.get(0) instanceof MTCartesian)
                 if (index != 0) {
                     throw new IndexOutOfBoundsException("" + index);
                 }
@@ -148,7 +152,7 @@ public class TupleExp extends Exp {
                 result = fields.get(0);
             }
             else {
-                //ASSERT: myElements.get(0) instanceof MTCartesian
+                // ASSERT: myElements.get(0) instanceof MTCartesian
                 result = ((TupleExp) fields.get(0)).getField(index);
             }
         }
@@ -183,19 +187,18 @@ public class TupleExp extends Exp {
         boolean soFar = true;
 
         for (Exp field : fields) {
-            soFar =
-                    soFar
-                            && ((field instanceof VarExp && ((VarExp) field)
-                                    .getQuantification() == VarExp.FORALL) || (field instanceof TupleExp && ((TupleExp) field)
-                                    .isUniversallyQuantified()));
+            soFar = soFar && ((field instanceof VarExp
+                    && ((VarExp) field).getQuantification() == VarExp.FORALL)
+                    || (field instanceof TupleExp
+                            && ((TupleExp) field).isUniversallyQuantified()));
         }
 
         return soFar;
     }
 
-    /*public void addField(Exp field) {
-    	fields.add(field);
-    }*/
+    /*
+     * public void addField(Exp field) { fields.add(field); }
+     */
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
@@ -217,8 +220,9 @@ public class TupleExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<Exp> i = fields.iterator();
         while (i.hasNext()) {

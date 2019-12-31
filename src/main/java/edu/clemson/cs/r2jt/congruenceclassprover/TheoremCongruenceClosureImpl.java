@@ -1,7 +1,7 @@
 /*
  * TheoremCongruenceClosureImpl.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -56,18 +56,16 @@ public class TheoremCongruenceClosureImpl {
         m_theoremRegistry = new Registry(g);
         m_bindings = new ArrayList<Map<String, String>>(128);
         m_selectedBindings = new HashSet<Map<String, String>>(128);
-        m_matchConj =
-                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
-                        null);
+        m_matchConj = new ConjunctionOfNormalizedAtomicExpressions(
+                m_theoremRegistry, null);
         if (mustMatch.getSubExpressions().size() > 0) {
             if (enterToMatchAndBindAsEquivalentToTrue)
                 m_matchConj.addExpression(mustMatch);
             else
                 m_matchConj.addFormula(mustMatch);
         }
-        m_matchRequired =
-                new ArrayList<NormalizedAtomicExpression>(m_matchConj.m_expSet
-                        .keySet());
+        m_matchRequired = new ArrayList<NormalizedAtomicExpression>(
+                m_matchConj.m_expSet.keySet());
         Collections.sort(m_matchRequired,
                 new NormalizedAtomicExpression.numQuantsComparator());
         m_insertExpr = toInsert;
@@ -77,9 +75,9 @@ public class TheoremCongruenceClosureImpl {
         }
         if (!mustMatch.equals(restOfExp)
                 && restOfExp.getSubExpressions().size() > 1
-                && (!mustMatch.getQuantifiedVariablesNoCache().containsAll(
-                        restOfExp.getQuantifiedVariablesNoCache()) || mustMatch
-                        .getSubExpressions().size() == 0)) {
+                && (!mustMatch.getQuantifiedVariablesNoCache()
+                        .containsAll(restOfExp.getQuantifiedVariablesNoCache())
+                        || mustMatch.getSubExpressions().size() == 0)) {
             m_matchConj.addFormula(restOfExp);
         }
         m_noMatchRequired = new ArrayList<NormalizedAtomicExpression>();
@@ -143,9 +141,9 @@ public class TheoremCongruenceClosureImpl {
         }
         if (m_noQuants)
             return 1;
-        if (m_matchRequired.size() == 0
-                || ((m_allowNewSymbols && m_theorem.getQuantifiedVariables()
-                        .size() == 1) && isEquality)) {
+        if (m_matchRequired.size() == 0 || ((m_allowNewSymbols
+                && m_theorem.getQuantifiedVariables().size() == 1)
+                && isEquality)) {
             sResults = findValidBindingsByType(vc, endTime);
         }
         else
@@ -218,32 +216,32 @@ public class TheoremCongruenceClosureImpl {
             if (curBinding.containsKey(thKey)) {
                 thVal = curBinding.get(thKey);
             }
-            else if (curBinding.containsKey(m_theoremRegistry
-                    .getRootSymbolForSymbol(thKey))) {
-                thVal =
-                        curBinding.get(m_theoremRegistry
-                                .getRootSymbolForSymbol(thKey));
+            else if (curBinding.containsKey(
+                    m_theoremRegistry.getRootSymbolForSymbol(thKey))) {
+                thVal = curBinding
+                        .get(m_theoremRegistry.getRootSymbolForSymbol(thKey));
             }
             if (thVal.equals(""))
                 return getNext();
-            MTType quanType =
-                    m_theoremRegistry.getTypeByIndex(m_theoremRegistry
-                            .getIndexForSymbol(thKey));
-            quantToLit.put(new PSymbol(quanType, null, thKey,
-                    PSymbol.Quantification.FOR_ALL), new PSymbol(quanType,
-                    null, thVal, PSymbol.Quantification.NONE));
+            MTType quanType = m_theoremRegistry
+                    .getTypeByIndex(m_theoremRegistry.getIndexForSymbol(thKey));
+            quantToLit.put(
+                    new PSymbol(quanType, null, thKey,
+                            PSymbol.Quantification.FOR_ALL),
+                    new PSymbol(quanType, null, thVal,
+                            PSymbol.Quantification.NONE));
         }
 
         PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
         modifiedInsert = m_lastVC.getConjunct().find(modifiedInsert);
         // Discard s = s
         if ((modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
-                .getSubExpressions().get(0).toString().equals(
-                        modifiedInsert.getSubExpressions().get(1).toString()))) {
+                .getSubExpressions().get(0).toString().equals(modifiedInsert
+                        .getSubExpressions().get(1).toString()))) {
             return getNext();
         }
-        return new PExpWithScore(modifiedInsert, curBinding, m_theorem
-                .toString());
+        return new PExpWithScore(modifiedInsert, curBinding,
+                m_theorem.toString());
     }
 
     // variables to bind are the quantified vars the quantified statement
@@ -287,10 +285,10 @@ public class TheoremCongruenceClosureImpl {
                     if (ch.isEmpty())
                         return null;
                     for (String c : ch) {
-                        if (!m_theoremRegistry.getUsage(c).equals(
-                                Registry.Usage.FORALL)
-                                || !m_theoremRegistry.getUsage(c).equals(
-                                        Registry.Usage.CREATED)) {
+                        if (!m_theoremRegistry.getUsage(c)
+                                .equals(Registry.Usage.FORALL)
+                                || !m_theoremRegistry.getUsage(c)
+                                        .equals(Registry.Usage.CREATED)) {
                             wildToActual.put(wild, c);
                             break;
                         }
@@ -307,9 +305,8 @@ public class TheoremCongruenceClosureImpl {
         if (foralls.size() != 1)
             return null;
         String wild = foralls.iterator().next();
-        MTType t =
-                m_theoremRegistry.getTypeByIndex(m_theoremRegistry
-                        .getIndexForSymbol(wild));
+        MTType t = m_theoremRegistry
+                .getTypeByIndex(m_theoremRegistry.getIndexForSymbol(wild));
 
         for (String actual : vc.getRegistry().getParentsByType(t)) {
             HashMap<String, String> wildToActual =

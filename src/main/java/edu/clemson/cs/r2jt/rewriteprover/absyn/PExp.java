@@ -1,7 +1,7 @@
 /*
  * PExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,11 +25,15 @@ import edu.clemson.cs.r2jt.rewriteprover.Utilities;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p><code>PExp</code> is the root of the prover abstract syntax tree 
- * hierarchy.  Unlike {@link edu.clemson.cs.r2jt.absyn.Exp Exp}s, 
- * <code>PExp</code>s are immutable and exist without the complications 
- * introduced by control structures.  <code>PExp</code>s exist to represent
- * mathematical expressions only.</p>
+ * <p>
+ * <code>PExp</code> is the root of the prover abstract syntax tree hierarchy.
+ * Unlike
+ * {@link edu.clemson.cs.r2jt.absyn.Exp Exp}s, <code>PExp</code>s are immutable
+ * and exist without
+ * the complications introduced by control structures. <code>PExp</code>s exist
+ * to represent
+ * mathematical expressions only.
+ * </p>
  */
 public abstract class PExp {
 
@@ -50,7 +54,8 @@ public abstract class PExp {
         this(hashes.structureHash, hashes.valueHash, type, typeValue);
     }
 
-    public PExp(int structureHash, int valueHash, MTType type, MTType typeValue) {
+    public PExp(int structureHash, int valueHash, MTType type,
+            MTType typeValue) {
         myType = type;
         myTypeValue = typeValue;
         this.structureHash = structureHash;
@@ -85,8 +90,8 @@ public abstract class PExp {
         while (path.hasNext()) {
             integerPath.push(path.next());
 
-            pexpPath.push(pexpPath.peek().getSubExpressions().get(
-                    integerPath.peek()));
+            pexpPath.push(pexpPath.peek().getSubExpressions()
+                    .get(integerPath.peek()));
         }
 
         pexpPath.pop();
@@ -94,8 +99,8 @@ public abstract class PExp {
 
         while (pexpPath.size() > 1) {
             newValue = pexpPath.pop();
-            pexpPath.push(pexpPath.pop().withSubExpressionReplaced(
-                    integerPath.pop(), newValue));
+            pexpPath.push(pexpPath.pop()
+                    .withSubExpressionReplaced(integerPath.pop(), newValue));
         }
 
         return pexpPath.peek();
@@ -111,9 +116,8 @@ public abstract class PExp {
         PExp working = this;
 
         for (Map.Entry<Integer, PExp> entry : e.entrySet()) {
-            working =
-                    working.withSubExpressionReplaced(entry.getKey(), entry
-                            .getValue());
+            working = working.withSubExpressionReplaced(entry.getKey(),
+                    entry.getValue());
         }
 
         return working;
@@ -142,142 +146,138 @@ public abstract class PExp {
     public abstract PExp flipQuantifiers();
 
     /**
-     * <p>For testing purposes, building a PExp is a pain in the ass.  This 
-     * method presents a relatively easy way of 'describing' the PExp you'd like
-     * as a string, rather than resorting to building complex types and object
-     * trees manually.  The string is interpreted using a stack-based, postfix
-     * style language, as follows:</p>
+     * <p>
+     * For testing purposes, building a PExp is a pain in the ass. This method
+     * presents a relatively
+     * easy way of 'describing' the PExp you'd like as a string, rather than
+     * resorting to building
+     * complex types and object trees manually. The string is interpreted using
+     * a stack-based, postfix
+     * style language, as follows:
+     * </p>
      * 
-     * <p>All tokens are separated by whitespace.  A {@link PSymbol PSymbol} can
-     * be pushed on the stack using two tokens: a name, which is any sequence of
-     * characters except "(" or "forall", and then a reference to one of the 
-     * following built-in types:</p>
+     * <p>
+     * All tokens are separated by whitespace. A {@link PSymbol PSymbol} can be
+     * pushed on the stack
+     * using two tokens: a name, which is any sequence of characters except "("
+     * or "forall", and then
+     * a reference to one of the following built-in types:
+     * </p>
      * 
      * <ul>
-     *      <li>Z</li>
-     *      <li>B</li>
-     *      <li>SSet</li>
+     * <li>Z</li>
+     * <li>B</li>
+     * <li>SSet</li>
      * </ul>
      * 
-     * <p>So, the string "0 Z x B" would push two PSymbols on the stack: "0", of
-     * type Z, and "x", of type B.</p>
+     * <p>
+     * So, the string "0 Z x B" would push two PSymbols on the stack: "0", of
+     * type Z, and "x", of type
+     * B.
+     * </p>
      * 
-     * <p>Function applications are introduced by an open paren token, followed 
-     * by a name, followed by a number of parameters to be taken from the stack, 
-     * a single character indicating if it is infix ("i"), outfix ("o"), or 
-     * prefix ("p"), and finally the return type.  Parameters will be applied in
-     * the reverse order they are taken off the stack.</p>
+     * <p>
+     * Function applications are introduced by an open paren token, followed by
+     * a name, followed by a
+     * number of parameters to be taken from the stack, a single character
+     * indicating if it is infix
+     * ("i"), outfix ("o"), or prefix ("p"), and finally the return type.
+     * Parameters will be applied
+     * in the reverse order they are taken off the stack.
+     * </p>
      * 
-     * <p>So, the string "0 Z x B ( foo 2 p B" would form "foo(0, x)", where foo
-     * is of type (Z * B) -> B.</p>
+     * <p>
+     * So, the string "0 Z x B ( foo 2 p B" would form "foo(0, x)", where foo is
+     * of type (Z * B) -> B.
+     * </p>
      * 
-     * <p>Either a symbol or function can be preceded by the token "forall" to
-     * flag its quantification as "for all".  So 
-     * "0 Z forall x B ( foo 2 p B" would form "foo(0, x)", where "x" is a 
-     * universally quantified variable.</p>
+     * <p>
+     * Either a symbol or function can be preceded by the token "forall" to flag
+     * its quantification as
+     * "for all". So "0 Z forall x B ( foo 2 p B" would form "foo(0, x)", where
+     * "x" is a universally
+     * quantified variable.
+     * </p>
      * 
-     * <p>Following parsing, there must be exactly one PExp left on the stack,
-     * which will be returned.  If there are more or less, an 
-     * <code>IllegalArgumentException</code> will be thrown.</p>
+     * <p>
+     * Following parsing, there must be exactly one PExp left on the stack,
+     * which will be returned. If
+     * there are more or less, an <code>IllegalArgumentException</code> will be
+     * thrown.
+     * </p>
      * 
      * @param description
-     * @return 
+     * @return
      */
     /*
-    public static PExp buildPExp(String description, TypeGraph g) {
-        Deque<PExp> stack = new LinkedList<PExp>();
-
-        PSymbol.Quantification quant = PSymbol.Quantification.NONE;
-        Iterator<String> tokens =
-                Arrays.asList(description.split(" ")).iterator();
-        String token;
-        while (tokens.hasNext()) {
-            token = tokens.next();
-
-            if (token.equals("forall")) {
-                quant = PSymbol.Quantification.FOR_ALL;
-            }
-            else if (token.equals("(")) {
-                String functionName = tokens.next();
-                int parameterCount = Integer.parseInt(tokens.next());
-                String displayTypeDesc = tokens.next();
-                String typeDesc = tokens.next();
-
-                PSymbol.DisplayType displayType;
-                if (displayTypeDesc.equals("i")) {
-                    displayType = PSymbol.DisplayType.INFIX;
-                }
-                else if (displayTypeDesc.equals("o")) {
-                    displayType = PSymbol.DisplayType.OUTFIX;
-                }
-                else if (displayTypeDesc.equals("p")) {
-                    displayType = PSymbol.DisplayType.PREFIX;
-                }
-                else {
-                    throw new IllegalArgumentException("Unknown display type: "
-                            + displayTypeDesc);
-                }
-
-                MTType type = typeFromDesc(typeDesc, g);
-
-                List<PExp> parameters = new LinkedList<PExp>();
-                List<MTType> parameterTypes = new LinkedList<MTType>();
-                for (int i = 0; i < parameterCount; i++) {
-                    if (stack.isEmpty()) {
-                        throw new IllegalArgumentException(
-                                "Not enough parameters on stack: "
-                                        + parameterCount);
-                    }
-
-                    parameters.add(0, stack.pop());
-                    parameterTypes.add(0, parameters.get(0).getType());
-                }
-
-                MTType functionType = new MTFunction(g, type, parameterTypes);
-
-                stack.push(new PSymbol(functionType, null, functionName,
-                        parameters, quant, displayType));
-                quant = PSymbol.Quantification.NONE;
-            }
-            else {
-                String name = token;
-                MTType type = typeFromDesc(tokens.next(), g);
-
-                stack.push(new PSymbol(type, null, name, quant));
-                quant = PSymbol.Quantification.NONE;
-            }
-        }
-
-        if (stack.size() != 1) {
-            throw new IllegalArgumentException(
-                    "Must set up stack with exactly one PExp on it.  "
-                            + "Left with: " + stack.size());
-        }
-
-        return stack.pop();
-    }
+     * public static PExp buildPExp(String description, TypeGraph g) {
+     * Deque<PExp> stack = new
+     * LinkedList<PExp>();
+     * 
+     * PSymbol.Quantification quant = PSymbol.Quantification.NONE;
+     * Iterator<String> tokens =
+     * Arrays.asList(description.split(" ")).iterator(); String token; while
+     * (tokens.hasNext()) {
+     * token = tokens.next();
+     * 
+     * if (token.equals("forall")) { quant = PSymbol.Quantification.FOR_ALL; }
+     * else if
+     * (token.equals("(")) { String functionName = tokens.next(); int
+     * parameterCount =
+     * Integer.parseInt(tokens.next()); String displayTypeDesc = tokens.next();
+     * String typeDesc =
+     * tokens.next();
+     * 
+     * PSymbol.DisplayType displayType; if (displayTypeDesc.equals("i")) {
+     * displayType =
+     * PSymbol.DisplayType.INFIX; } else if (displayTypeDesc.equals("o")) {
+     * displayType =
+     * PSymbol.DisplayType.OUTFIX; } else if (displayTypeDesc.equals("p")) {
+     * displayType =
+     * PSymbol.DisplayType.PREFIX; } else { throw new
+     * IllegalArgumentException("Unknown display type: " + displayTypeDesc); }
+     * 
+     * MTType type = typeFromDesc(typeDesc, g);
+     * 
+     * List<PExp> parameters = new LinkedList<PExp>(); List<MTType>
+     * parameterTypes = new
+     * LinkedList<MTType>(); for (int i = 0; i < parameterCount; i++) { if
+     * (stack.isEmpty()) { throw
+     * new IllegalArgumentException( "Not enough parameters on stack: " +
+     * parameterCount); }
+     * 
+     * parameters.add(0, stack.pop()); parameterTypes.add(0,
+     * parameters.get(0).getType()); }
+     * 
+     * MTType functionType = new MTFunction(g, type, parameterTypes);
+     * 
+     * stack.push(new PSymbol(functionType, null, functionName, parameters,
+     * quant, displayType));
+     * quant = PSymbol.Quantification.NONE; } else { String name = token; MTType
+     * type =
+     * typeFromDesc(tokens.next(), g);
+     * 
+     * stack.push(new PSymbol(type, null, name, quant)); quant =
+     * PSymbol.Quantification.NONE; } }
+     * 
+     * if (stack.size() != 1) { throw new IllegalArgumentException(
+     * "Must set up stack with exactly one PExp on it.  " + "Left with: " +
+     * stack.size()); }
+     * 
+     * return stack.pop(); }
      */
 
     /*
-    private static MTType typeFromDesc(String desc, TypeGraph g) {
-        MTType result;
-
-        if (desc.equals("B")) {
-            result = g.BOOLEAN;
-        }
-        else if (desc.equals("Z")) {
-            result = g.Z;
-        }
-        else if (desc.equals("SSet")) {
-            result = g.SET;
-        }
-        else {
-            throw new IllegalArgumentException("Unknown type: " + desc);
-        }
-
-        return result;
-    }
-
+     * private static MTType typeFromDesc(String desc, TypeGraph g) { MTType
+     * result;
+     * 
+     * if (desc.equals("B")) { result = g.BOOLEAN; } else if (desc.equals("Z"))
+     * { result = g.Z; } else
+     * if (desc.equals("SSet")) { result = g.SET; } else { throw new
+     * IllegalArgumentException("Unknown type: " + desc); }
+     * 
+     * return result; }
+     * 
      */
     public static PExp buildPExp(Exp e) {
         return buildPExp(null, e);
@@ -285,12 +285,12 @@ public abstract class PExp {
 
     public static PExp buildPExp(TypeGraph g, Exp e) {
         PExp retval;
-        //g = null;
+        // g = null;
         e = Utilities.applyQuantification(e);
 
         if (e == null) {
-            throw new IllegalArgumentException("Prover does not accept null "
-                    + "as an expression.");
+            throw new IllegalArgumentException(
+                    "Prover does not accept null " + "as an expression.");
         }
 
         if (e instanceof FunctionExp) {
@@ -307,21 +307,18 @@ public abstract class PExp {
             if (g != null) {
                 MTFunction fullType =
                         new MTFunction(g, e.getMathType(), paramTypes);
-                retval =
-                        new PSymbol(fullType, e.getMathTypeValue(), fullName(
-                                eAsFunctionExp.getQualifier(), eAsFunctionExp
-                                        .getName().getName()), arguments,
-                                convertExpQuantification(eAsFunctionExp
-                                        .getQuantification()));
+                retval = new PSymbol(fullType, e.getMathTypeValue(),
+                        fullName(eAsFunctionExp.getQualifier(),
+                                eAsFunctionExp.getName().getName()),
+                        arguments, convertExpQuantification(
+                                eAsFunctionExp.getQuantification()));
             }
             else {
-                retval =
-                        new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                                fullName(eAsFunctionExp.getQualifier(),
-                                        eAsFunctionExp.getName().getName()),
-                                arguments,
-                                convertExpQuantification(eAsFunctionExp
-                                        .getQuantification()));
+                retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                        fullName(eAsFunctionExp.getQualifier(),
+                                eAsFunctionExp.getName().getName()),
+                        arguments, convertExpQuantification(
+                                eAsFunctionExp.getQuantification()));
             }
         }
         else if (e instanceof PrefixExp) {
@@ -330,9 +327,8 @@ public abstract class PExp {
             List<PExp> arguments = new LinkedList<PExp>();
             arguments.add(PExp.buildPExp(g, eAsPrefixExp.getArgument()));
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsPrefixExp.getSymbol().getName(), arguments);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsPrefixExp.getSymbol().getName(), arguments);
         }
         else if (e instanceof InfixExp) {
             InfixExp eAsInfixExp = (InfixExp) e;
@@ -341,10 +337,9 @@ public abstract class PExp {
             arguments.add(PExp.buildPExp(g, eAsInfixExp.getLeft()));
             arguments.add(PExp.buildPExp(g, eAsInfixExp.getRight()));
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsInfixExp.getOpName().getName(), arguments,
-                            PSymbol.DisplayType.INFIX);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsInfixExp.getOpName().getName(), arguments,
+                    PSymbol.DisplayType.INFIX);
         }
         else if (e instanceof IsInExp) {
             IsInExp eAsIsInExp = (IsInExp) e;
@@ -353,9 +348,8 @@ public abstract class PExp {
             arguments.add(PExp.buildPExp(g, eAsIsInExp.getLeft()));
             arguments.add(PExp.buildPExp(g, eAsIsInExp.getRight()));
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(), "is_in",
-                            arguments, PSymbol.DisplayType.INFIX);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), "is_in",
+                    arguments, PSymbol.DisplayType.INFIX);
         }
         else if (e instanceof OutfixExp) {
             OutfixExp eAsOutfixExp = (OutfixExp) e;
@@ -363,11 +357,10 @@ public abstract class PExp {
             List<PExp> arguments = new LinkedList<PExp>();
             arguments.add(PExp.buildPExp(g, eAsOutfixExp.getArgument()));
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsOutfixExp.getLeftDelimiter(), eAsOutfixExp
-                                    .getRightDelimiter(), arguments,
-                            PSymbol.DisplayType.OUTFIX);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsOutfixExp.getLeftDelimiter(),
+                    eAsOutfixExp.getRightDelimiter(), arguments,
+                    PSymbol.DisplayType.OUTFIX);
         }
         else if (e instanceof EqualsExp) {
             EqualsExp eAsEqualsExp = (EqualsExp) e;
@@ -376,10 +369,9 @@ public abstract class PExp {
             arguments.add(PExp.buildPExp(g, eAsEqualsExp.getLeft()));
             arguments.add(PExp.buildPExp(g, eAsEqualsExp.getRight()));
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsEqualsExp.getOperatorAsString(), arguments,
-                            PSymbol.DisplayType.INFIX);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsEqualsExp.getOperatorAsString(), arguments,
+                    PSymbol.DisplayType.INFIX);
         }
         else if (e instanceof CharExp) {
             CharExp eAsCharExp = (CharExp) e;
@@ -398,9 +390,8 @@ public abstract class PExp {
         else if (e instanceof StringExp) {
             StringExp eAsStringExp = (StringExp) e;
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsStringExp.getValue());
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsStringExp.getValue());
         }
         else if (e instanceof DotExp) {
             DotExp eAsDotExp = (DotExp) e;
@@ -435,19 +426,17 @@ public abstract class PExp {
                 symbol += PExp.buildPExp(g, eAsDotExp.getSemanticExp());
             }
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol,
-                            arguments);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol,
+                    arguments);
         }
         else if (e instanceof VarExp) {
             VarExp eAsVarExp = (VarExp) e;
 
-            retval =
-                    new PSymbol(eAsVarExp.getMathType(), eAsVarExp
-                            .getMathTypeValue(), fullName(eAsVarExp
-                            .getQualifier(), eAsVarExp.getName().getName()),
-                            convertExpQuantification(eAsVarExp
-                                    .getQuantification()));
+            retval = new PSymbol(eAsVarExp.getMathType(),
+                    eAsVarExp.getMathTypeValue(),
+                    fullName(eAsVarExp.getQualifier(),
+                            eAsVarExp.getName().getName()),
+                    convertExpQuantification(eAsVarExp.getQuantification()));
         }
         else if (e instanceof VariableDotExp) {
             VariableDotExp eAsDotExp = (VariableDotExp) e;
@@ -459,10 +448,8 @@ public abstract class PExp {
 
             finalName += eAsDotExp.getSemanticExp().toString(0);
 
-            retval =
-                    new PSymbol(eAsDotExp.getSemanticExp().getMathType(),
-                            eAsDotExp.getSemanticExp().getMathTypeValue(),
-                            finalName);
+            retval = new PSymbol(eAsDotExp.getSemanticExp().getMathType(),
+                    eAsDotExp.getSemanticExp().getMathTypeValue(), finalName);
         }
         else if (e instanceof LambdaExp) {
             LambdaExp eAsLambdaExp = (LambdaExp) e;
@@ -470,13 +457,12 @@ public abstract class PExp {
             List<PLambda.Parameter> parameters =
                     new LinkedList<PLambda.Parameter>();
             for (MathVarDec p : eAsLambdaExp.getParameters()) {
-                parameters.add(new PLambda.Parameter(p.getName().getName(), p
-                        .getTy().getMathTypeValue()));
+                parameters.add(new PLambda.Parameter(p.getName().getName(),
+                        p.getTy().getMathTypeValue()));
             }
 
-            retval =
-                    new PLambda(new ArrayBackedImmutableList(parameters), PExp
-                            .buildPExp(g, eAsLambdaExp.getBody()));
+            retval = new PLambda(new ArrayBackedImmutableList(parameters),
+                    PExp.buildPExp(g, eAsLambdaExp.getBody()));
         }
         else if (e instanceof AlternativeExp) {
             AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
@@ -488,15 +474,14 @@ public abstract class PExp {
                     + " are not accepted by the prover." + e.getLocation());
         }
 
-        //The Analyzer doesn't work consistently.  Fail early if we don't have
-        //typing information
+        // The Analyzer doesn't work consistently. Fail early if we don't have
+        // typing information
         if (retval.getType() == null) {
 
             String varExpAdditional = "";
             if (e instanceof VarExp) {
-                varExpAdditional =
-                        " = \"" + ((VarExp) e).getName().getName() + "\", "
-                                + ((VarExp) e).getName().getLocation();
+                varExpAdditional = " = \"" + ((VarExp) e).getName().getName()
+                        + "\", " + ((VarExp) e).getName().getLocation();
             }
 
             throw new UnsupportedOperationException(
@@ -531,7 +516,7 @@ public abstract class PExp {
 
     public final Set<String> getSymbolNames() {
         if (myCachedSymbolNames == null) {
-            //We're immutable, so only do this once
+            // We're immutable, so only do this once
             myCachedSymbolNames =
                     Collections.unmodifiableSet(getSymbolNamesNoCache());
         }
@@ -543,10 +528,9 @@ public abstract class PExp {
 
     public final Set<PSymbol> getQuantifiedVariables() {
         if (myCachedQuantifiedVariables == null) {
-            //We're immutable, so only do this once
-            myCachedQuantifiedVariables =
-                    Collections
-                            .unmodifiableSet(getQuantifiedVariablesNoCache());
+            // We're immutable, so only do this once
+            myCachedQuantifiedVariables = Collections
+                    .unmodifiableSet(getQuantifiedVariablesNoCache());
         }
 
         return myCachedQuantifiedVariables;
@@ -556,7 +540,7 @@ public abstract class PExp {
 
     public final List<PExp> getFunctionApplications() {
         if (myCachedFunctionApplications == null) {
-            //We're immutable, so only do this once
+            // We're immutable, so only do this once
             myCachedFunctionApplications = getFunctionApplicationsNoCache();
         }
 
@@ -571,7 +555,8 @@ public abstract class PExp {
 
     public abstract boolean isLiteral();
 
-    private final static PSymbol.Quantification convertExpQuantification(int q) {
+    private final static PSymbol.Quantification
+            convertExpQuantification(int q) {
 
         PSymbol.Quantification retval;
 

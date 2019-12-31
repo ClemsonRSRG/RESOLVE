@@ -1,7 +1,7 @@
 /*
  * VCConfirmStmtRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,9 +23,11 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for replacing the {@link VerificationCondition} in
- * the current {@link AssertiveCodeBlock} with those stored inside a
- * {@link VCConfirmStmt}.</p>
+ * <p>
+ * This class contains the logic for replacing the {@link VerificationCondition}
+ * in the current
+ * {@link AssertiveCodeBlock} with those stored inside a {@link VCConfirmStmt}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -38,7 +40,11 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@link VCConfirmStmt} we are applying the rule to.</p> */
+    /**
+     * <p>
+     * The {@link VCConfirmStmt} we are applying the rule to.
+     * </p>
+     */
     private final VCConfirmStmt myVCConfirmStmt;
 
     // ===========================================================
@@ -46,15 +52,17 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates an application rule that deals with
-     * {@link VCConfirmStmt}.</p>
+     * <p>
+     * This creates an application rule that deals with {@link VCConfirmStmt}.
+     * </p>
      *
-     * @param vcConfirmStmt The {@link VCConfirmStmt} we are applying
-     *                      the rule to.
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
-     * @param context The verification context that contains all
-     *                the information we have collected so far.
+     * @param vcConfirmStmt The {@link VCConfirmStmt} we are applying the rule
+     *        to.
+     * @param block The assertive code block that the subclasses are applying
+     *        the rule to.
+     * @param context The verification context that contains all the information
+     *        we have collected so
+     *        far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
@@ -70,7 +78,9 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Proof Rule}.</p>
+     * <p>
+     * This method applies the {@code Proof Rule}.
+     * </p>
      */
     @Override
     public final void applyRule() {
@@ -88,14 +98,15 @@ public class VCConfirmStmtRule extends AbstractProofRuleApplication
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-        stepModel.add("proofRuleName", getRuleDescription()).add(
-                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        stepModel.add("proofRuleName", getRuleDescription())
+                .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Proof Rule}.</p>
+     * <p>
+     * This method returns a description associated with the {@code Proof Rule}.
+     * </p>
      *
      * @return A string.
      */

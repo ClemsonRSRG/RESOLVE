@@ -1,7 +1,7 @@
 /*
  * FacilityInitStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,11 +17,15 @@ import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 
 /**
- * <p>This is the class that builds a special kind of statement
- * that acts as a placeholder for initialize a facility declaration.
- * Since the user cannot supply their own {@code _Facility_Init} statements,
- * any instances of this class will solely be created by the
- * {@link VCGenerator} and/or by our various different {@code proof rules}.</p>
+ * <p>
+ * This is the class that builds a special kind of statement that acts as a
+ * placeholder for
+ * initialize a facility declaration. Since the user cannot supply their own
+ * {@code _Facility_Init}
+ * statements, any instances of this class will solely be created by the
+ * {@link VCGenerator} and/or
+ * by our various different {@code proof rules}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -32,7 +36,11 @@ public class FacilityInitStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The facility declaration we are applying the rule to.</p> */
+    /**
+     * <p>
+     * The facility declaration we are applying the rule to.
+     * </p>
+     */
     private final FacilityDec myInstantiatedFacilityDec;
 
     // ===========================================================
@@ -40,8 +48,11 @@ public class FacilityInitStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs an helper statement that indicates
-     * initialization logic for a facility happens here.</p>
+     * <p>
+     * This constructs an helper statement that indicates initialization logic
+     * for a facility happens
+     * here.
+     * </p>
      *
      * @param facilityDec A processed instantiated facility declaration.
      */
@@ -85,7 +96,9 @@ public class FacilityInitStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the instantiated {@code Facility} declaration.</p>
+     * <p>
+     * This method returns the instantiated {@code Facility} declaration.
+     * </p>
      *
      * @return A {@link FacilityDec}.
      */
@@ -110,7 +123,7 @@ public class FacilityInitStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new FacilityInitStmt((FacilityDec) myInstantiatedFacilityDec
-                .clone());
+        return new FacilityInitStmt(
+                (FacilityDec) myInstantiatedFacilityDec.clone());
     }
 }

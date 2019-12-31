@@ -1,7 +1,7 @@
 /*
  * PTFamily.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,9 +24,11 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>Represents a <em>type family</em> as would be introduced inside a concept.
- * This is an abstract program type without a realization and without parameters
- * instantiated.</p>
+ * <p>
+ * Represents a <em>type family</em> as would be introduced inside a concept.
+ * This is an abstract
+ * program type without a realization and without parameters instantiated.
+ * </p>
  */
 public class PTFamily extends PTType {
 
@@ -43,12 +45,12 @@ public class PTFamily extends PTType {
             Exp constraint, Exp initializationRequires,
             Exp initializationEnsures, Exp finalizationRequires,
             Exp finalizationEnsures) {
-        this(model, familyName, exemplarName, normalize(model.getTypeGraph(),
-                constraint), normalize(model.getTypeGraph(),
-                initializationRequires), normalize(model.getTypeGraph(),
-                initializationEnsures), normalize(model.getTypeGraph(),
-                finalizationRequires), normalize(model.getTypeGraph(),
-                finalizationEnsures));
+        this(model, familyName, exemplarName,
+                normalize(model.getTypeGraph(), constraint),
+                normalize(model.getTypeGraph(), initializationRequires),
+                normalize(model.getTypeGraph(), initializationEnsures),
+                normalize(model.getTypeGraph(), finalizationRequires),
+                normalize(model.getTypeGraph(), finalizationEnsures));
     }
 
     private static PExp normalize(TypeGraph g, Exp original) {
@@ -111,8 +113,7 @@ public class PTFamily extends PTType {
     }
 
     @Override
-    public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
+    public PTType instantiateGenerics(Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
         Map<String, MTType> stringToMathType =
@@ -120,8 +121,8 @@ public class PTFamily extends PTType {
 
         @SuppressWarnings("unchecked")
         Map<MTType, MTType> mathTypeToMathType =
-                (Map<MTType, MTType>) (Map<?, MTType>) MTNamed.toMTNamedMap(
-                        getTypeGraph(), stringToMathType);
+                (Map<MTType, MTType>) (Map<?, MTType>) MTNamed
+                        .toMTNamedMap(getTypeGraph(), stringToMathType);
 
         MTType newModel =
                 myModel.getCopyWithVariablesSubstituted(stringToMathType);
@@ -129,13 +130,11 @@ public class PTFamily extends PTType {
         PExp newConstraint =
                 myConstraint.withTypesSubstituted(mathTypeToMathType);
 
-        PExp newInitializationRequires =
-                myInitializationRequires
-                        .withTypesSubstituted(mathTypeToMathType);
+        PExp newInitializationRequires = myInitializationRequires
+                .withTypesSubstituted(mathTypeToMathType);
 
-        PExp newInitializationEnsures =
-                myInitializationEnsures
-                        .withTypesSubstituted(mathTypeToMathType);
+        PExp newInitializationEnsures = myInitializationEnsures
+                .withTypesSubstituted(mathTypeToMathType);
 
         PExp newFinalizationRequires =
                 myFinalizationRequires.withTypesSubstituted(mathTypeToMathType);
@@ -155,20 +154,18 @@ public class PTFamily extends PTType {
         if (result) {
             PTFamily oAsPTFamily = (PTFamily) o;
 
-            result =
-                    (myModel.equals(oAsPTFamily.myModel))
-                            && (myName.equals(oAsPTFamily.myName))
-                            && (myExemplarName
-                                    .equals(oAsPTFamily.myExemplarName))
-                            && (myConstraint.equals(oAsPTFamily.myConstraint))
-                            && (myInitializationRequires
-                                    .equals(oAsPTFamily.myInitializationRequires))
-                            && (myInitializationEnsures
-                                    .equals(oAsPTFamily.myInitializationEnsures))
-                            && (myFinalizationRequires
-                                    .equals(oAsPTFamily.myFinalizationRequires))
-                            && (myFinalizationEnsures
-                                    .equals(oAsPTFamily.myFinalizationEnsures));
+            result = (myModel.equals(oAsPTFamily.myModel))
+                    && (myName.equals(oAsPTFamily.myName))
+                    && (myExemplarName.equals(oAsPTFamily.myExemplarName))
+                    && (myConstraint.equals(oAsPTFamily.myConstraint))
+                    && (myInitializationRequires
+                            .equals(oAsPTFamily.myInitializationRequires))
+                    && (myInitializationEnsures
+                            .equals(oAsPTFamily.myInitializationEnsures))
+                    && (myFinalizationRequires
+                            .equals(oAsPTFamily.myFinalizationRequires))
+                    && (myFinalizationEnsures
+                            .equals(oAsPTFamily.myFinalizationEnsures));
         }
 
         return result;

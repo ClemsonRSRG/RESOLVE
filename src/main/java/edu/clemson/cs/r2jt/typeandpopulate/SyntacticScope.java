@@ -1,7 +1,7 @@
 /*
  * SyntacticScope.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -29,28 +29,43 @@ import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
 
 /**
- * <p>A <code>SyntacticScope</code> corresponds to a RESOLVE scope that
- * arises because of a concrete piece of source code (rather than, for example,
- * the built-in global scope, or the top-level dummy scope), represented by
- * a {@link edu.clemson.cs.r2jt.absyn.ResolveConceptualElement 
- *     ResolveConceptualElement} called its <em>defining element</em>.  Such a
- * scope therefore exists in a <em>lexical hierarchy</em> of those scopes
- * introduced by its defining element's parent elements, necessarily passing
- * through a {@link ModuleScope ModuleScope} (belonging to this scope's 
- * <em>source module</em>) before reaching the top-level dummy scope.  If this
- * scope corresponds to a module, it is its own source module.</p>
- *     
- * <p>The symbols in this scope's lexical parents are therefore implicitly 
- * available from within this scope.  Optionally, symbols from the transitive
- * closure of all modules imported by this scope's source module (its 
- * <em>recursive imports</em>) are available, as are any symbols found in 
- * facilities defined in the source module or any modules directly imported by
- * the source module (its <em>named imports</em>, which do not recursively 
- * include any modules imported from within named imports).</p>
+ * <p>
+ * A <code>SyntacticScope</code> corresponds to a RESOLVE scope that arises
+ * because of a concrete
+ * piece of source code (rather than, for example, the built-in global scope, or
+ * the top-level dummy
+ * scope), represented by a
+ * {@link edu.clemson.cs.r2jt.absyn.ResolveConceptualElement
+ * ResolveConceptualElement} called its <em>defining element</em>. Such a scope
+ * therefore exists in
+ * a <em>lexical hierarchy</em> of those scopes introduced by its defining
+ * element's parent
+ * elements, necessarily passing through a {@link ModuleScope ModuleScope}
+ * (belonging to this
+ * scope's <em>source module</em>) before reaching the top-level dummy scope. If
+ * this scope
+ * corresponds to a module, it is its own source module.
+ * </p>
  * 
- * <p>Note that this class has no public constructor.  Instances of this class
- * can be retrieved from a {@link ScopeRepository SymbolTable} or constructed via
- * some of the methods of {@link MathSymbolTableBuilder MathSymbolTableBuilder}.
+ * <p>
+ * The symbols in this scope's lexical parents are therefore implicitly
+ * available from within this
+ * scope. Optionally, symbols from the transitive closure of all modules
+ * imported by this scope's
+ * source module (its <em>recursive imports</em>) are available, as are any
+ * symbols found in
+ * facilities defined in the source module or any modules directly imported by
+ * the source module
+ * (its <em>named imports</em>, which do not recursively include any modules
+ * imported from within
+ * named imports).
+ * </p>
+ * 
+ * <p>
+ * Note that this class has no public constructor. Instances of this class can
+ * be retrieved from a
+ * {@link ScopeRepository SymbolTable} or constructed via some of the methods of
+ * {@link MathSymbolTableBuilder MathSymbolTableBuilder}.
  * </p>
  */
 public abstract class SyntacticScope extends AbstractScope {
@@ -61,7 +76,7 @@ public abstract class SyntacticScope extends AbstractScope {
     protected final BaseSymbolTable myBindings;
     private final ScopeRepository mySource;
 
-    /*package private*/SyntacticScope(ScopeRepository source,
+    /* package private */ SyntacticScope(ScopeRepository source,
             ResolveConceptualElement definingElement, Scope parent,
             ModuleIdentifier enclosingModule, BaseSymbolTable bindings) {
 
@@ -73,8 +88,8 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     @Override
-    public <E extends SymbolTableEntry> List<E> query(
-            MultimatchSymbolQuery<E> query) {
+    public <E extends SymbolTableEntry> List<E>
+            query(MultimatchSymbolQuery<E> query) {
 
         return query.searchFromContext(this, mySource);
     }
@@ -97,7 +112,9 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     /**
-     * <p>Returns this scopes defining element.</p>
+     * <p>
+     * Returns this scopes defining element.
+     * </p>
      * 
      * @return The defining element.
      */
@@ -105,7 +122,7 @@ public abstract class SyntacticScope extends AbstractScope {
         return myDefiningElement;
     }
 
-    /*package private*/final Scope getParent() {
+    /* package private */final Scope getParent() {
         return myParent;
     }
 
@@ -133,19 +150,16 @@ public abstract class SyntacticScope extends AbstractScope {
             SymbolTable symbolTableView = myBindings;
 
             if (instantiatingFacility != null) {
-                symbolTableView =
-                        new InstantiatedSymbolTable(myBindings,
-                                genericInstantiations, instantiatingFacility);
+                symbolTableView = new InstantiatedSymbolTable(myBindings,
+                        genericInstantiations, instantiatingFacility);
             }
 
             finished = searcher.addMatches(symbolTableView, matches, l);
 
             if (!finished) {
-                finished =
-                        myParent
-                                .addMatches(searcher, matches, searchedScopes,
-                                        genericInstantiations,
-                                        instantiatingFacility, l);
+                finished = myParent.addMatches(searcher, matches,
+                        searchedScopes, genericInstantiations,
+                        instantiatingFacility, l);
             }
         }
 

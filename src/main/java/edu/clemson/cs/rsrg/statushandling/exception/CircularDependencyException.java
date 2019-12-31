@@ -1,7 +1,7 @@
 /*
  * CircularDependencyException.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,8 +13,11 @@
 package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
- * <p>An {@code CircularDependencyException} indicates an unresolvable
- * circular dependency between two (or more) modules.</p>
+ * <p>
+ * An {@code CircularDependencyException} indicates an unresolvable circular
+ * dependency between two
+ * (or more) modules.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -26,7 +29,11 @@ public class CircularDependencyException extends CompilerException {
     // Member Fields
     // ===========================================================
 
-    /** <p>Serial version for Serializable objects</p> */
+    /**
+     * <p>
+     * Serial version for Serializable objects
+     * </p>
+     */
     private static final long serialVersionUID = 1L;
 
     // ==========================================================
@@ -34,8 +41,10 @@ public class CircularDependencyException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a message
-     * that caused a circular dependency exception to be thrown.</p>
+     * <p>
+     * This constructor takes in a message that caused a circular dependency
+     * exception to be thrown.
+     * </p>
      *
      * @param message Message to be displayed when the exception is thrown.
      */

@@ -1,7 +1,7 @@
 /*
  * VariableDotExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -146,8 +146,9 @@ public class VariableDotExp extends VariableExp {
         return toString(0);
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<VariableExp> i = segments.iterator();
         while (i.hasNext()) {
@@ -181,7 +182,7 @@ public class VariableDotExp extends VariableExp {
 
     private String segmentsToString(List<VariableExp> segments) {
         StringBuffer sb = new StringBuffer();
-        //Environment env = Environment.getInstance();
+        // Environment env = Environment.getInstance();
         if (segments != null) {
             Iterator<VariableExp> i = segments.iterator();
 
@@ -195,9 +196,8 @@ public class VariableDotExp extends VariableExp {
     }
 
     public Exp copy() {
-        Exp copy =
-                new VariableDotExp(location, new List<VariableExp>(segments),
-                        semanticExp);
+        Exp copy = new VariableDotExp(location, new List<VariableExp>(segments),
+                semanticExp);
 
         copy.setMathType(myMathType);
         copy.setMathTypeValue(myMathTypeValue);
@@ -222,8 +222,8 @@ public class VariableDotExp extends VariableExp {
             if (it.hasNext()) {
                 Exp name = it.next();
                 if (old instanceof VarExp && name instanceof VarExp) {
-                    if (((VarExp) old).getName().toString().equals(
-                            ((VarExp) name).getName().toString())) {
+                    if (((VarExp) old).getName().toString()
+                            .equals(((VarExp) name).getName().toString())) {
                         segments.remove(0);
                         segments.add(0, (VariableExp) (Exp.clone(replacement)));
 

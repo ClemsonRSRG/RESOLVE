@@ -1,7 +1,7 @@
 /*
  * ShortFacilityEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 import java.util.Map;
 
 /**
- * <p>This creates a symbol table entry for a short facility module
- * that only contains a facility declaration.</p>
+ * <p>
+ * This creates a symbol table entry for a short facility module that only
+ * contains a facility
+ * declaration.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,7 +33,11 @@ public class ShortFacilityEntry extends ModuleEntry {
     // Member Fields
     // ===========================================================
 
-    /** <p>Facility entry located inside this entry.</p> */
+    /**
+     * <p>
+     * Facility entry located inside this entry.
+     * </p>
+     */
     private final FacilityEntry myEnclosedFacility;
 
     // ===========================================================
@@ -38,7 +45,9 @@ public class ShortFacilityEntry extends ModuleEntry {
     // ===========================================================
 
     /**
-     * <p>This creates a symbol table entry for a {@link ShortFacilityModuleDec}.</p>
+     * <p>
+     * This creates a symbol table entry for a {@link ShortFacilityModuleDec}.
+     * </p>
      *
      * @param name Name associated with this entry.
      * @param definingElement The element that created this entry.
@@ -56,8 +65,11 @@ public class ShortFacilityEntry extends ModuleEntry {
     // ===========================================================
 
     /**
-     * <p>A short facility module contains exactly one facility declaration.
-     * This method returns the entry corresponding to that declaration.</p>
+     * <p>
+     * A short facility module contains exactly one facility declaration. This
+     * method returns the
+     * entry corresponding to that declaration.
+     * </p>
      *
      * @return The entry corresponding to the single facility enclosed in the
      *         short facility module.
@@ -67,7 +79,9 @@ public class ShortFacilityEntry extends ModuleEntry {
     }
 
     /**
-     * <p>This method returns a description associated with this entry.</p>
+     * <p>
+     * This method returns a description associated with this entry.
+     * </p>
      *
      * @return A string.
      */
@@ -77,9 +91,11 @@ public class ShortFacilityEntry extends ModuleEntry {
     }
 
     /**
-     * <p>This method converts a generic {@link SymbolTableEntry} to an entry
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link SymbolTableEntry} to an entry that
+     * has all the generic
+     * types and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -97,13 +113,15 @@ public class ShortFacilityEntry extends ModuleEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ShortFacilityEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ShortFacilityEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ShortFacilityEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ShortFacilityEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final ShortFacilityEntry toShortFacilityEntry(Location l) {

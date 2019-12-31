@@ -1,7 +1,7 @@
 /*
  * AtLeastOneLocalTheoremBinder.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,20 +34,19 @@ public class AtLeastOneLocalTheoremBinder extends AbstractBinder {
 
         boolean includeGlobal = true;
         if (boundSitesSoFar.size() == (myTotalBindingCount - 1)) {
-            //We are the last binding.  If all other bindings are to global
-            //theorems, then we must bind to something local
+            // We are the last binding. If all other bindings are to global
+            // theorems, then we must bind to something local
             includeGlobal = false;
             Iterator<Site> boundSitesSoFarIter = boundSitesSoFar.iterator();
             while (!includeGlobal && boundSitesSoFarIter.hasNext()) {
-                includeGlobal =
-                        (boundSitesSoFarIter.next().conjunct instanceof LocalTheorem);
+                includeGlobal = (boundSitesSoFarIter
+                        .next().conjunct instanceof LocalTheorem);
             }
         }
 
         if (includeGlobal) {
-            result =
-                    new ChainingIterator<Site>(result, m
-                            .topLevelGlobalTheoremsIterator());
+            result = new ChainingIterator<Site>(result,
+                    m.topLevelGlobalTheoremsIterator());
         }
 
         return result;

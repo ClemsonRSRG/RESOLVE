@@ -1,7 +1,7 @@
 /*
  * DummyIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * <p>This class serves as a dummy iterator.</p>
+ * <p>
+ * This class serves as a dummy iterator.
+ * </p>
  *
  * @param <T> Element to to be iterated.
  *
@@ -29,16 +31,21 @@ public class DummyIterator<T> implements Iterator<T> {
     // Member Fields
     // ===========================================================
 
-    /** <p>A singleton instance of this class.</p> */
-    private final static DummyIterator<Object> INSTANCE =
-            new DummyIterator<>();
+    /**
+     * <p>
+     * A singleton instance of this class.
+     * </p>
+     */
+    private final static DummyIterator<Object> INSTANCE = new DummyIterator<>();
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>Creates a dummy iterator.</p>
+     * <p>
+     * Creates a dummy iterator.
+     * </p>
      */
     private DummyIterator() {}
 
@@ -47,7 +54,9 @@ public class DummyIterator<T> implements Iterator<T> {
     // ===========================================================
 
     /**
-     * <p>Returns an instance of this iterator.</p>
+     * <p>
+     * Returns an instance of this iterator.
+     * </p>
      *
      * @param i An iterator.
      * @param <T> Element to to be iterated.
@@ -60,7 +69,9 @@ public class DummyIterator<T> implements Iterator<T> {
     }
 
     /**
-     * <p>Returns an instance of this iterator.</p>
+     * <p>
+     * Returns an instance of this iterator.
+     * </p>
      *
      * @param <T> Element to to be iterated.
      *

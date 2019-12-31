@@ -1,7 +1,7 @@
 /*
  * AntlrParserErrorListener.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
 import org.antlr.v4.runtime.*;
 
 /**
- * <p>A custom listener class for the compiler that adds carrot-pointer style
- * reporting for syntax (and semantic) errors.</p>
+ * <p>
+ * A custom listener class for the compiler that adds carrot-pointer style
+ * reporting for syntax (and
+ * semantic) errors.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -31,7 +34,9 @@ public class AntlrParserErrorListener extends BaseErrorListener {
     // ==========================================================
 
     /**
-     * <p>This is the status handler for the RESOLVE compiler.</p>
+     * <p>
+     * This is the status handler for the RESOLVE compiler.
+     * </p>
      */
     private final StatusHandler myStatusHandler;
 
@@ -40,10 +45,13 @@ public class AntlrParserErrorListener extends BaseErrorListener {
     // ==========================================================
 
     /**
-     * <p>This creates an ANTLR4 error listener with the current
-     * error handler deployed by the compiler.</p>
+     * <p>
+     * This creates an ANTLR4 error listener with the current error handler
+     * deployed by the compiler.
+     * </p>
      *
-     * @param statusHandler An status handler to display debug or error messages.
+     * @param statusHandler An status handler to display debug or error
+     *        messages.
      */
     public AntlrParserErrorListener(StatusHandler statusHandler) {
         myStatusHandler = statusHandler;
@@ -54,13 +62,16 @@ public class AntlrParserErrorListener extends BaseErrorListener {
     // ===========================================================
 
     /**
-     * <p>This is thrown when we encounter an syntax error when
-     * parsing the input string.</p>
+     * <p>
+     * This is thrown when we encounter an syntax error when parsing the input
+     * string.
+     * </p>
      *
      * @param recognizer A recognizer provided by the ANTLR4.
      * @param offendingSymbol The offending token.
      * @param line The line number where the error occurred.
-     * @param charPositionInLine The position in the line where the error occurred.
+     * @param charPositionInLine The position in the line where the error
+     *        occurred.
      * @param msg The message to be displayed.
      * @param e The exception thrown.
      */
@@ -96,9 +107,11 @@ public class AntlrParserErrorListener extends BaseErrorListener {
     // ===========================================================
 
     /**
-     * <p>Uses the location, original line that caused the error and
-     * the ANTLR4 provided message, build the adequate error message
-     * to be displayed to the user.</p>
+     * <p>
+     * Uses the location, original line that caused the error and the ANTLR4
+     * provided message, build
+     * the adequate error message to be displayed to the user.
+     * </p>
      *
      * @param charPositionInLine The error position in the line.
      * @param line The text from the line that caused the error.
@@ -106,7 +119,8 @@ public class AntlrParserErrorListener extends BaseErrorListener {
      *
      * @return The formatted error message as a String.
      */
-    private String buildErrorMsg(int charPositionInLine, String line, String msg) {
+    private String buildErrorMsg(int charPositionInLine, String line,
+            String msg) {
         StringBuilder sb = new StringBuilder();
         sb.append(line);
         sb.append("\n");

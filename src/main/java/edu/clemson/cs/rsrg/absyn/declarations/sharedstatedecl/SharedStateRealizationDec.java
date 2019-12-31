@@ -1,7 +1,7 @@
 /*
  * SharedStateRealizationDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.List;
 
 /**
- * <p>This is the class for all the shared state representation declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the shared state representation declaration objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -33,10 +36,18 @@ public class SharedStateRealizationDec
     // Member Fields
     // ===========================================================
 
-    /** <p>The correspondence clause for the new shared state.</p> */
+    /**
+     * <p>
+     * The correspondence clause for the new shared state.
+     * </p>
+     */
     private final AssertionClause myCorrespondence;
 
-    /** <p>The initialization block for the new shared state.</p> */
+    /**
+     * <p>
+     * The initialization block for the new shared state.
+     * </p>
+     */
     private final RealizInitFinalItem myTypeInitItem;
 
     // ===========================================================
@@ -44,10 +55,13 @@ public class SharedStateRealizationDec
     // ===========================================================
 
     /**
-     * <p>This constructs a shared state representation declaration.</p>
+     * <p>
+     * This constructs a shared state representation declaration.
+     * </p>
      *
      * @param name Name of the new shared state.
-     * @param stateVarDecs The list of {@link VarDec}s that are in the new shared state.
+     * @param stateVarDecs The list of {@link VarDec}s that are in the new
+     *        shared state.
      * @param convention Shared state convention.
      * @param correspondence Shared state correspondence.
      * @param initItem Initialization block for this new shared state.
@@ -128,7 +142,9 @@ public class SharedStateRealizationDec
     }
 
     /**
-     * <p>Returns the correspondence for this shared state representation.</p>
+     * <p>
+     * Returns the correspondence for this shared state representation.
+     * </p>
      *
      * @return The type correspondence in {@link AssertionClause} format.
      */
@@ -137,10 +153,12 @@ public class SharedStateRealizationDec
     }
 
     /**
-     * <p>Returns the initialization block for this shared state representation.</p>
+     * <p>
+     * Returns the initialization block for this shared state representation.
+     * </p>
      *
-     * @return The code block used for initialization
-     * in {@link RealizInitFinalItem} format.
+     * @return The code block used for initialization in
+     *         {@link RealizInitFinalItem} format.
      */
     public final RealizInitFinalItem getInitItem() {
         return myTypeInitItem;
@@ -167,8 +185,8 @@ public class SharedStateRealizationDec
     @Override
     protected final SharedStateRealizationDec copy() {
         return new SharedStateRealizationDec(myName.clone(), copyStateVars(),
-                myConvention.clone(), myCorrespondence.clone(), myTypeInitItem
-                        .clone());
+                myConvention.clone(), myCorrespondence.clone(),
+                myTypeInitItem.clone());
     }
 
 }

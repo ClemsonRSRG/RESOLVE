@@ -1,7 +1,7 @@
 /*
  * PerformanceOperationDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameter;
 
 /**
- * <p>This is the class for all the performance operation declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the performance operation declaration objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,13 +31,25 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
     // Member Fields
     // ===========================================================
 
-    /** <p>The wrapped operation declaration</p> */
+    /**
+     * <p>
+     * The wrapped operation declaration
+     * </p>
+     */
     private final OperationDec myWrappedOpDec;
 
-    /** <p>The duration expression</p> */
+    /**
+     * <p>
+     * The duration expression
+     * </p>
+     */
     private final AssertionClause myDuration;
 
-    /** <p>The manip_disp expression</p> */
+    /**
+     * <p>
+     * The manip_disp expression
+     * </p>
+     */
     private final AssertionClause myManipDisp;
 
     // ===========================================================
@@ -42,17 +57,21 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
     // ===========================================================
 
     /**
-     * <p>This constructs a performance operation declaration.</p>
+     * <p>
+     * This constructs a performance operation declaration.
+     * </p>
      *
-     * @param opDec An {@link OperationDec} containing all the operation
-     *              related items.
-     * @param duration A {@link AssertionClause} representing the
-     *                 performance operation's duration clause.
-     * @param manip_disp A {@link AssertionClause} representing the
-     *                   performance operation's manipulation displacement clause.
+     * @param opDec An {@link OperationDec} containing all the operation related
+     *        items.
+     * @param duration A {@link AssertionClause} representing the performance
+     *        operation's duration
+     *        clause.
+     * @param manip_disp A {@link AssertionClause} representing the performance
+     *        operation's
+     *        manipulation displacement clause.
      */
-    public PerformanceOperationDec(OperationDec opDec,
-            AssertionClause duration, AssertionClause manip_disp) {
+    public PerformanceOperationDec(OperationDec opDec, AssertionClause duration,
+            AssertionClause manip_disp) {
         super(opDec.getLocation(), opDec.getName());
         myWrappedOpDec = opDec;
         myDuration = duration;
@@ -115,8 +134,10 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the duration clause
-     * for this performance operation declaration.</p>
+     * <p>
+     * This method returns the duration clause for this performance operation
+     * declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -125,8 +146,11 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the manipulation displacement clause
-     * for this performance operation declaration.</p>
+     * <p>
+     * This method returns the manipulation displacement clause for this
+     * performance operation
+     * declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -135,8 +159,11 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method returns the wrapped operation declaration
-     * for this performance operation declaration.</p>
+     * <p>
+     * This method returns the wrapped operation declaration for this
+     * performance operation
+     * declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -152,9 +179,8 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
         int result = super.hashCode();
         result = 31 * result + myWrappedOpDec.hashCode();
         result = 31 * result + (myDuration != null ? myDuration.hashCode() : 0);
-        result =
-                31 * result
-                        + (myManipDisp != null ? myManipDisp.hashCode() : 0);
+        result = 31 * result
+                + (myManipDisp != null ? myManipDisp.hashCode() : 0);
         return result;
     }
 
@@ -177,8 +203,9 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
             newManipDisp = myManipDisp.clone();
         }
 
-        return new PerformanceOperationDec((OperationDec) myWrappedOpDec
-                .clone(), newDuration, newManipDisp);
+        return new PerformanceOperationDec(
+                (OperationDec) myWrappedOpDec.clone(), newDuration,
+                newManipDisp);
     }
 
 }

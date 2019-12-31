@@ -1,7 +1,7 @@
 /*
  * UnboundTypeAccumulator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -46,23 +46,20 @@ public class UnboundTypeAccumulator extends BoundVariableVisitor {
         catch (NoSuchElementException e) {
 
             try {
-                //We cast rather than call toMathSymbolEntry() because this 
-                //would represent an error in the compiler code rather than the
-                //RESOLVE source: we're looking at math things here only
-                MathSymbolEntry entry =
-                        (MathSymbolEntry) myEnvironment
-                                .queryForOne(new UnqualifiedNameQuery(
-                                        namedType.name));
-                universal =
-                        entry.getQuantification().equals(
-                                MathSymbolEntry.Quantification.UNIVERSAL);
+                // We cast rather than call toMathSymbolEntry() because this
+                // would represent an error in the compiler code rather than the
+                // RESOLVE source: we're looking at math things here only
+                MathSymbolEntry entry = (MathSymbolEntry) myEnvironment
+                        .queryForOne(new UnqualifiedNameQuery(namedType.name));
+                universal = entry.getQuantification()
+                        .equals(MathSymbolEntry.Quantification.UNIVERSAL);
             }
             catch (NoSuchSymbolException nsse) {
-                //Shouldn't be possible--we'd have dealt with it by now
+                // Shouldn't be possible--we'd have dealt with it by now
                 throw new RuntimeException(nsse);
             }
             catch (DuplicateSymbolException dse) {
-                //Shouldn't be possible--we'd have dealt with it by now
+                // Shouldn't be possible--we'd have dealt with it by now
                 throw new RuntimeException(dse);
             }
         }

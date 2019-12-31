@@ -1,7 +1,7 @@
 /*
  * TypeFunctionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -185,8 +185,9 @@ public class TypeFunctionExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<Exp> i = params.iterator();
         while (i.hasNext()) {
@@ -238,12 +239,13 @@ public class TypeFunctionExp extends Exp {
         }
         if (qualifier != null
                 && (((TypeFunctionExp) e2).getQualifier() != null)) {
-            if (!(qualifier.equals(((TypeFunctionExp) e2).getQualifier()
-                    .getName()))) {
+            if (!(qualifier
+                    .equals(((TypeFunctionExp) e2).getQualifier().getName()))) {
                 return false;
             }
         }
-        if (!(typeName.equals(((TypeFunctionExp) e2).getTypeName().getName()))) {
+        if (!(typeName
+                .equals(((TypeFunctionExp) e2).getTypeName().getName()))) {
             return false;
         }
         if (function != ((TypeFunctionExp) e2).getFunction()) {

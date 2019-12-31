@@ -1,7 +1,7 @@
 /*
  * ProgramVariableEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -31,12 +31,11 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
         myType = type;
 
-        //TODO: Probably need to recajigger this to correctly account for any
-        //      generics in the defining context
-        myMathSymbolAlterEgo =
-                new MathSymbolEntry(type.getTypeGraph(), name,
-                        Quantification.NONE, definingElement, type.toMath(),
-                        null, null, null, sourceModule);
+        // TODO: Probably need to recajigger this to correctly account for any
+        // generics in the defining context
+        myMathSymbolAlterEgo = new MathSymbolEntry(type.getTypeGraph(), name,
+                Quantification.NONE, definingElement, type.toMath(), null, null,
+                null, sourceModule);
     }
 
     public PTType getProgramType() {
@@ -55,14 +54,12 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
         SymbolTableEntry result;
 
-        PTType instantiatedType =
-                myType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility);
+        PTType instantiatedType = myType.instantiateGenerics(
+                genericInstantiations, instantiatingFacility);
 
         if (instantiatedType != myType) {
-            result =
-                    new ProgramVariableEntry(getName(), getDefiningElement(),
-                            getSourceModuleIdentifier(), instantiatedType);
+            result = new ProgramVariableEntry(getName(), getDefiningElement(),
+                    getSourceModuleIdentifier(), instantiatedType);
         }
         else {
             result = this;

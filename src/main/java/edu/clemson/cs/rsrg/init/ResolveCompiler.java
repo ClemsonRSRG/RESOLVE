@@ -1,7 +1,7 @@
 /*
  * ResolveCompiler.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,8 +36,11 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * <p>This class takes care of all argument processing and creates
- * a {@link CompileEnvironment} for the current job.</p>
+ * <p>
+ * This class takes care of all argument processing and creates a
+ * {@link CompileEnvironment} for the
+ * current job.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -50,19 +53,23 @@ public class ResolveCompiler {
     // ===========================================================
 
     /**
-     * <p>This stores all the arguments received by the RESOLVE
-     * compiler.</p>
+     * <p>
+     * This stores all the arguments received by the RESOLVE compiler.
+     * </p>
      */
     private final String[] myCompilerArgs;
 
     /**
-     * <p>This indicates the current compiler version.</p>
+     * <p>
+     * This indicates the current compiler version.
+     * </p>
      */
-    private final String myCompilerVersion = "Summer 2018";
+    private final String myCompilerVersion = "Spring 2020";
 
     /**
-     * <p>This stores all the file names specified in the argument
-     * list.</p>
+     * <p>
+     * This stores all the file names specified in the argument list.
+     * </p>
      */
     private final List<String> myArgumentFileList;
 
@@ -71,24 +78,29 @@ public class ResolveCompiler {
     // ===========================================================
 
     /**
-     * <p>The list of files that we automatically import to any {@code Concept},
-     * {@code Concept Realization}, {@code Enhancement}, {@code Enhancement Realizations},
-     * {@code Facilities}. If you don't want this behavior to happen to a specific file,
-     * add it to {@link #NO_AUTO_IMPORT_EXCEPTION_LIST}</p>
+     * <p>
+     * The list of files that we automatically import to any {@code Concept},
+     * {@code Concept Realization}, {@code Enhancement},
+     * {@code Enhancement Realizations},
+     * {@code Facilities}. If you don't want this behavior to happen to a
+     * specific file, add it to
+     * {@link #NO_AUTO_IMPORT_EXCEPTION_LIST}
+     * </p>
      */
     public static final List<String> AUTO_IMPORT_FILES =
-            Collections
-                    .unmodifiableList(Arrays.asList("Std_Boolean_Fac",
-                            "Std_Integer_Fac", "Std_Character_Fac",
-                            "Std_Char_Str_Fac"));
+            Collections.unmodifiableList(
+                    Arrays.asList("Std_Boolean_Fac", "Std_Integer_Fac",
+                            "Std_Character_Fac", "Std_Char_Str_Fac"));
 
     /**
-     * <p>The list of files that we ignore the {@link #AUTO_IMPORT_FILES} list.</p>
+     * <p>
+     * The list of files that we ignore the {@link #AUTO_IMPORT_FILES} list.
+     * </p>
      */
     public static final List<String> NO_AUTO_IMPORT_EXCEPTION_LIST =
-            Collections.unmodifiableList(Arrays.asList("Boolean_Template",
-                    "Integer_Template", "Character_Template",
-                    "Char_Str_Template"));
+            Collections.unmodifiableList(
+                    Arrays.asList("Boolean_Template", "Integer_Template",
+                            "Character_Template", "Char_Str_Template"));
 
     // ===========================================================
     // Flag Strings
@@ -114,78 +126,91 @@ public class ResolveCompiler {
     // ===========================================================
 
     /**
-     * <p>Tells the compiler to print out a general help message and
-     * all the flags.</p>
+     * <p>
+     * Tells the compiler to print out a general help message and all the flags.
+     * </p>
      */
-    private static final Flag FLAG_HELP =
-            new Flag(FLAG_SECTION_GENERAL, "help",
-                    "Displays this help information.");
+    private static final Flag FLAG_HELP = new Flag(FLAG_SECTION_GENERAL, "help",
+            "Displays this help information.");
 
     /**
-     * <p>Tells the compiler to print out all the flags.</p>
+     * <p>
+     * Tells the compiler to print out all the flags.
+     * </p>
      */
-    private static final Flag FLAG_EXTENDED_HELP =
-            new Flag(FLAG_SECTION_GENERAL, "xhelp",
-                    "Displays all flags, including development flags and many others "
-                            + "not relevant to most users.");
+    private static final Flag FLAG_EXTENDED_HELP = new Flag(
+            FLAG_SECTION_GENERAL, "xhelp",
+            "Displays all flags, including development flags and many others "
+                    + "not relevant to most users.");
 
     /**
-     * <p>Tells the compiler to print debugging messages from the compiler
-     * output.</p>
+     * <p>
+     * Tells the compiler to print debugging messages from the compiler output.
+     * </p>
      */
     public static final Flag FLAG_DEBUG =
             new Flag(FLAG_SECTION_DEBUG, "debug", FLAG_DESC_DEBUG);
 
     /**
-     * <p>Tells the compiler to print debugging messages from the compiler
-     * output to a file.</p>
+     * <p>
+     * Tells the compiler to print debugging messages from the compiler output
+     * to a file.
+     * </p>
      */
     static final Flag FLAG_DEBUG_FILE_OUT =
             new Flag(FLAG_SECTION_DEBUG, "debugOutToFile", FLAG_DESC_DEBUG);
 
     /**
-     * <p>Tells the compiler to print compiler exception's stack traces.</p>
+     * <p>
+     * Tells the compiler to print compiler exception's stack traces.
+     * </p>
      */
-    static final Flag FLAG_DEBUG_STACK_TRACE =
-            new Flag(FLAG_SECTION_DEBUG, "stacktrace", FLAG_DESC_DEBUG,
-                    Flag.Type.HIDDEN);
+    static final Flag FLAG_DEBUG_STACK_TRACE = new Flag(FLAG_SECTION_DEBUG,
+            "stacktrace", FLAG_DESC_DEBUG, Flag.Type.HIDDEN);
     /**
-     * <p>Tells the compiler not to output anything to file.</p>
+     * <p>
+     * Tells the compiler not to output anything to file.
+     * </p>
      */
-    static final Flag FLAG_NO_FILE_OUTPUT =
-            new Flag(FLAG_SECTION_GENERAL, "noFileOutput",
-                    FLAG_DESC_NO_FILE_OUTPUT);
+    static final Flag FLAG_NO_FILE_OUTPUT = new Flag(FLAG_SECTION_GENERAL,
+            "noFileOutput", FLAG_DESC_NO_FILE_OUTPUT);
 
     /**
-     * <p>Tells the compiler to print the module we are compiling.</p>
+     * <p>
+     * Tells the compiler to print the module we are compiling.
+     * </p>
      */
-    static final Flag FLAG_PRINT_MODULE =
-            new Flag(FLAG_SECTION_DEBUG, "printModule", FLAG_DESC_PRINT_MODULE,
-                    Flag.Type.HIDDEN);
+    static final Flag FLAG_PRINT_MODULE = new Flag(FLAG_SECTION_DEBUG,
+            "printModule", FLAG_DESC_PRINT_MODULE, Flag.Type.HIDDEN);
 
     /**
-     * <p>Tell the compiler to output a Graphviz model for our AST.</p>
+     * <p>
+     * Tell the compiler to output a Graphviz model for our AST.
+     * </p>
      */
-    static final Flag FLAG_EXPORT_AST =
-            new Flag(FLAG_SECTION_GENERAL, "exportAST", FLAG_DESC_EXPORT_AST,
-                    Flag.Type.HIDDEN);
+    static final Flag FLAG_EXPORT_AST = new Flag(FLAG_SECTION_GENERAL,
+            "exportAST", FLAG_DESC_EXPORT_AST, Flag.Type.HIDDEN);
 
     /**
-     * <p>Tells the compiler the RESOLVE workspace directory path.</p>
+     * <p>
+     * Tells the compiler the RESOLVE workspace directory path.
+     * </p>
      */
-    static final Flag FLAG_WORKSPACE_DIR =
-            new Flag(FLAG_SECTION_GENERAL, "workspaceDir",
-                    FLAG_DESC_WORKSPACE_DIR, WORKSPACE_DIR_ARG_NAME);
+    static final Flag FLAG_WORKSPACE_DIR = new Flag(FLAG_SECTION_GENERAL,
+            "workspaceDir", FLAG_DESC_WORKSPACE_DIR, WORKSPACE_DIR_ARG_NAME);
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates a "handler" type object for RESOLVE
-     * compiler arguments. This constructor takes care of
-     * all possible flag dependencies and will work for both
-     * invoking from the command line and from the WebIDE/WebAPI.</p>
+     * <p>
+     * This creates a "handler" type object for RESOLVE compiler arguments. This
+     * constructor takes
+     * care of all possible flag dependencies and will work for both invoking
+     * from the command line
+     * and from the WebIDE/WebAPI.
+     * </p>
      *
      * @param args The specified compiler arguments array.
      */
@@ -202,8 +227,11 @@ public class ResolveCompiler {
     // ===========================================================
 
     /**
-     * <p>This invokes the RESOLVE compiler. Usually this method
-     * is called by running the compiler from the command line.</p>
+     * <p>
+     * This invokes the RESOLVE compiler. Usually this method is called by
+     * running the compiler from
+     * the command line.
+     * </p>
      */
     public void invokeCompiler() {
         // Create a status handler
@@ -229,11 +257,16 @@ public class ResolveCompiler {
     }
 
     /**
-     * <p>This invokes the RESOLVE compiler. Usually this method
-     * is called by running the compiler from the WebAPI/WebIDE.</p>
+     * <p>
+     * This invokes the RESOLVE compiler. Usually this method is called by
+     * running the compiler from
+     * the WebAPI/WebIDE.
+     * </p>
      *
-     * @param compilingFiles A map containing all the "meta" files we are going to compile.
-     * @param userFilesMap A map containing all "meta" files that are provided by the user.
+     * @param compilingFiles A map containing all the "meta" files we are going
+     *        to compile.
+     * @param userFilesMap A map containing all "meta" files that are provided
+     *        by the user.
      * @param statusHandler A status handler to display debug or error messages.
      * @param listener An output listener object.
      */
@@ -271,26 +304,33 @@ public class ResolveCompiler {
     // ===========================================================
 
     /**
-     * <p>Attempts to compile all "meta" files files specified by the
-     * argument list. If the "meta" file is not supplied, attempt to
-     * search for it as a physical file.</p>
+     * <p>
+     * Attempts to compile all "meta" files files specified by the argument
+     * list. If the "meta" file
+     * is not supplied, attempt to search for it as a physical file.
+     * </p>
      *
-     * @param compilingFiles A map containing all the user "meta" files we are going to compile.
+     * @param compilingFiles A map containing all the user "meta" files we are
+     *        going to compile.
      * @param fileArgList List of strings representing the name of the file.
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
+     * @param compileEnvironment The current job's compilation environment that
+     *        stores all necessary
+     *        objects and flags.
      *
      * @throws CompilerException This catches all sorts of exceptions thrown by
-     * the compiler.
+     *         the compiler.
      */
-    private void compileArbitraryFiles(List<String> fileArgList, Map<String, ResolveFile> compilingFiles,
-            CompileEnvironment compileEnvironment) throws CompilerException {
+    private void compileArbitraryFiles(List<String> fileArgList,
+            Map<String, ResolveFile> compilingFiles,
+            CompileEnvironment compileEnvironment)
+            throws CompilerException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // First check if this is a "meta" file
             if (compilingFiles.containsKey(fileString)) {
                 // Invoke the compiler on this file
-                compileMainFile(compilingFiles.get(fileString), compileEnvironment);
+                compileMainFile(compilingFiles.get(fileString),
+                        compileEnvironment);
             }
             // If not, it must be a physical file. Use the compileRealFile method.
             else {
@@ -303,13 +343,18 @@ public class ResolveCompiler {
     }
 
     /**
-     * <p>This method will instantiate the controller and
-     * begin the compilation process for the specified file.</p>
+     * <p>
+     * This method will instantiate the controller and begin the compilation
+     * process for the specified
+     * file.
+     * </p>
      *
-     * @param file The current <code>ResolveFile</code> specified by
-     *             the argument list we wish to compile.
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
+     * @param file The current <code>ResolveFile</code> specified by the
+     *        argument list we wish to
+     *        compile.
+     * @param compileEnvironment The current job's compilation environment that
+     *        stores all necessary
+     *        objects and flags.
      */
     private void compileMainFile(ResolveFile file,
             CompileEnvironment compileEnvironment) {
@@ -318,18 +363,21 @@ public class ResolveCompiler {
     }
 
     /**
-     * <p>Attempts to compile all physical files specified by the
-     * argument list.</p>
+     * <p>
+     * Attempts to compile all physical files specified by the argument list.
+     * </p>
      *
      * @param fileArgList List of strings representing the name of the file.
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
+     * @param compileEnvironment The current job's compilation environment that
+     *        stores all necessary
+     *        objects and flags.
      *
      * @throws CompilerException This catches all sorts of exceptions thrown by
-     * the compiler.
+     *         the compiler.
      */
     private void compileRealFiles(List<String> fileArgList,
-            CompileEnvironment compileEnvironment) throws CompilerException {
+            CompileEnvironment compileEnvironment)
+            throws CompilerException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // Convert to a file object
@@ -337,9 +385,8 @@ public class ResolveCompiler {
             // 2) Find the file in the current directory.
             File file;
             if (compileEnvironment.flags.isFlagSet(FLAG_WORKSPACE_DIR)) {
-                file =
-                        Utilities.getAbsoluteFile(compileEnvironment
-                                .getWorkspaceDir(), fileString);
+                file = Utilities.getAbsoluteFile(
+                        compileEnvironment.getWorkspaceDir(), fileString);
             }
             else {
                 file = Utilities.getAbsoluteFile(fileString);
@@ -347,15 +394,15 @@ public class ResolveCompiler {
 
             // Error if we can't locate the file
             if (!file.isFile()) {
-                throw new MiscErrorException("Cannot find the file "
-                        + file.getName() + " in this directory.",
+                throw new MiscErrorException(
+                        "Cannot find the file " + file.getName()
+                                + " in this directory.",
                         new FileNotFoundException());
             }
             // Recursively compile all RESOLVE files in the specified directory
             else if (file.isDirectory()) {
-                throw new MiscErrorException(
-                        file.getName()
-                                + " is an directory. Directories cannot be specified as an argument to the RESOLVE compiler.",
+                throw new MiscErrorException(file.getName()
+                        + " is an directory. Directories cannot be specified as an argument to the RESOLVE compiler.",
                         new IllegalArgumentException());
             }
             // Process this file
@@ -364,25 +411,24 @@ public class ResolveCompiler {
 
                 // Print error message if it is not a valid RESOLVE file
                 if (moduleType == null) {
-                    throw new MiscErrorException("The file " + file.getName()
-                            + " is not a RESOLVE file.",
+                    throw new MiscErrorException(
+                            "The file " + file.getName()
+                                    + " is not a RESOLVE file.",
                             new IllegalArgumentException());
                 }
                 else {
                     try {
-                        String workspacePath =
-                                compileEnvironment.getWorkspaceDir()
-                                        .getAbsolutePath();
-                        ResolveFile f =
-                                Utilities.convertToResolveFile(file,
-                                        moduleType, workspacePath);
+                        String workspacePath = compileEnvironment
+                                .getWorkspaceDir().getAbsolutePath();
+                        ResolveFile f = Utilities.convertToResolveFile(file,
+                                moduleType, workspacePath);
 
                         // Invoke the compiler
                         compileMainFile(f, compileEnvironment);
                     }
                     catch (IOException ioe) {
-                        throw new MiscErrorException(ioe.getMessage(), ioe
-                                .getCause());
+                        throw new MiscErrorException(ioe.getMessage(),
+                                ioe.getCause());
                     }
                 }
             }
@@ -390,9 +436,11 @@ public class ResolveCompiler {
     }
 
     /**
-     * <p>Method that handles the basic arguments and returns a
-     * <code>CompileEnvironment</code> that includes information
-     * on the current compilation job.</p>
+     * <p>
+     * Method that handles the basic arguments and returns a
+     * <code>CompileEnvironment</code> that
+     * includes information on the current compilation job.
+     * </p>
      *
      * @param statusHandler A status handler to display debug or error messages.
      *
@@ -404,9 +452,8 @@ public class ResolveCompiler {
             // Instantiate a new compile environment that will store
             // all the necessary information needed throughout the compilation
             // process.
-            compileEnvironment =
-                    new CompileEnvironment(myCompilerArgs, myCompilerVersion,
-                            statusHandler);
+            compileEnvironment = new CompileEnvironment(myCompilerArgs,
+                    myCompilerVersion, statusHandler);
 
             if (compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
                 printHelpMessage(compileEnvironment);
@@ -433,10 +480,12 @@ public class ResolveCompiler {
         }
         catch (FlagDependencyException fde) {
             // YS - Check to see if we have a status handler.
-            if (compileEnvironment != null && compileEnvironment.getStatusHandler() != null) {
+            if (compileEnvironment != null
+                    && compileEnvironment.getStatusHandler() != null) {
                 statusHandler = compileEnvironment.getStatusHandler();
                 statusHandler.error(null, fde.getMessage());
-                if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
+                if (compileEnvironment.flags
+                        .isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
                     statusHandler.printStackTrace(fde);
                 }
                 statusHandler.stopLogging();
@@ -453,10 +502,13 @@ public class ResolveCompiler {
     }
 
     /**
-     * <p>This prints the help message that prints out all the optional flags.</p>
+     * <p>
+     * This prints the help message that prints out all the optional flags.
+     * </p>
      *
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
+     * @param compileEnvironment The current job's compilation environment that
+     *        stores all necessary
+     *        objects and flags.
      */
     private void printHelpMessage(CompileEnvironment compileEnvironment) {
         if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG)) {
@@ -464,24 +516,26 @@ public class ResolveCompiler {
             debugHandler.info(null,
                     "Usage: java -jar RESOLVE.jar [options] <files>");
             debugHandler.info(null, "where options include:");
-            debugHandler.info(null, FlagDependencies
-                    .getListingString(compileEnvironment.flags
-                            .isFlagSet(FLAG_EXTENDED_HELP)));
+            debugHandler.info(null, FlagDependencies.getListingString(
+                    compileEnvironment.flags.isFlagSet(FLAG_EXTENDED_HELP)));
         }
     }
 
     /**
-     * <p>This method sets up dependencies between compiler flags. If you are
-     * integrating your module into the compiler flag management system, this is
-     * where to do it.</p>
+     * <p>
+     * This method sets up dependencies between compiler flags. If you are
+     * integrating your module
+     * into the compiler flag management system, this is where to do it.
+     * </p>
      */
     private synchronized void setUpFlagDependencies() {
         if (!FlagDependencies.isSealed()) {
             setUpFlags();
-            /*Prover.setUpFlags();
-            Archiver.setUpFlags();
-            AlgebraicProver.setUpFlags();
-            CongruenceClassProver.setUpFlags();*/
+            /*
+             * Prover.setUpFlags(); Archiver.setUpFlags();
+             * AlgebraicProver.setUpFlags();
+             * CongruenceClassProver.setUpFlags();
+             */
             CTranslator.setUpFlags();
             JavaTranslator.setUpFlags();
             Populator.setUpFlags();
@@ -492,8 +546,10 @@ public class ResolveCompiler {
     }
 
     /**
-     * <p>Add all the required and implied flags. Including those needed
-     * by the WebIDE.</p>
+     * <p>
+     * Add all the required and implied flags. Including those needed by the
+     * WebIDE.
+     * </p>
      */
     private void setUpFlags() {
         // Extended help implies that the general help is also on.

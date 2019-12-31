@@ -1,7 +1,7 @@
 /*
  * MapOfLists.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,10 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A map from K to Lists of E.  The getList method will always return a 
- * list--even if no element has previously been added for that key. In this cas
- * it will return the empty list.  The putElement method will create lists as
- * necessary, even if no list already exists for the current key.</p>
+ * <p>
+ * A map from K to Lists of E. The getList method will always return a
+ * list--even if no element has
+ * previously been added for that key. In this cas it will return the empty
+ * list. The putElement
+ * method will create lists as necessary, even if no list already exists for the
+ * current key.
+ * </p>
  */
 public class MapOfLists<K, E> {
 

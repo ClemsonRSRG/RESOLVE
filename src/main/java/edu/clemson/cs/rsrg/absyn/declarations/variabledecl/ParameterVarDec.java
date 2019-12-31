@@ -1,7 +1,7 @@
 /*
  * ParameterVarDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 
 /**
- * <p>This is the class for all the programming parameter variable declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the programming parameter variable declaration
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,11 @@ public class ParameterVarDec extends AbstractVarDec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The object's mode representation.</p> */
+    /**
+     * <p>
+     * The object's mode representation.
+     * </p>
+     */
     private final ProgramParameterEntry.ParameterMode myMode;
 
     // ===========================================================
@@ -36,9 +43,12 @@ public class ParameterVarDec extends AbstractVarDec {
     // ===========================================================
 
     /**
-     * <p>This constructs a program parameter variable.</p>
+     * <p>
+     * This constructs a program parameter variable.
+     * </p>
      *
-     * @param mode A {@link ProgramParameterEntry.ParameterMode} representing the parameter mode.
+     * @param mode A {@link ProgramParameterEntry.ParameterMode} representing
+     *        the parameter mode.
      * @param name A {@link PosSymbol} representing the variable's name.
      * @param ty A {@link Ty} representing the variable's raw type.
      */
@@ -84,7 +94,9 @@ public class ParameterVarDec extends AbstractVarDec {
     }
 
     /**
-     * <p>Returns the mode of this parameter variable.</p>
+     * <p>
+     * Returns the mode of this parameter variable.
+     * </p>
      *
      * @return The mode in {@link ProgramParameterEntry.ParameterMode} format.
      */

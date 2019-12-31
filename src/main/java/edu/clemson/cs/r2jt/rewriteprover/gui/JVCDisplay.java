@@ -1,7 +1,7 @@
 /*
  * JVCDisplay.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -103,8 +103,8 @@ public class JVCDisplay extends JTextPane {
         PExp p = id.getRoot();
 
         if (!myHighlightedNodes.containsKey(p)) {
-            myHighlightedNodes.put(id.getRoot(), new IdentifiedNodes<Color>(id
-                    .getRoot()));
+            myHighlightedNodes.put(id.getRoot(),
+                    new IdentifiedNodes<Color>(id.getRoot()));
         }
 
         myHighlightedNodes.get(p).put(id, c);
@@ -162,7 +162,7 @@ public class JVCDisplay extends JTextPane {
                         pexpIDAttr);
             }
             catch (BadLocationException e) {
-                //Shouldn't be possible
+                // Shouldn't be possible
                 throw new RuntimeException(e);
             }
 

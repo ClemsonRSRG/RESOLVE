@@ -1,7 +1,7 @@
 /*
  * TypeNode.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.relationships.TypeRelat
 import java.util.*;
 
 /**
- * <p>Generates a new node in our {@link TypeGraph} for the specified
- * {@link MTType}.</p>
+ * <p>
+ * Generates a new node in our {@link TypeGraph} for the specified
+ * {@link MTType}.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,21 +34,41 @@ public class TypeNode {
     // Member Fields
     // ===========================================================
 
-    /** <p>Search strategy for {@link Exp}s.</p> */
+    /**
+     * <p>
+     * Search strategy for {@link Exp}s.
+     * </p>
+     */
     private static final ExpValuePathStrategy EXP_VALUE_PATH =
             new ExpValuePathStrategy();
 
-    /** <p>Search strategy for {@link MTType}s.</p> */
+    /**
+     * <p>
+     * Search strategy for {@link MTType}s.
+     * </p>
+     */
     private static final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
             new MTTypeValuePathStrategy();
 
-    /** <p>The {@link MTType} for the new node.</p> */
+    /**
+     * <p>
+     * The {@link MTType} for the new node.
+     * </p>
+     */
     private final MTType myType;
 
-    /** <p>A map from math types to relationships.</p> */
+    /**
+     * <p>
+     * A map from math types to relationships.
+     * </p>
+     */
     private final Map<MTType, Set<TypeRelationship>> myRelationships;
 
-    /** <p>The current type graph object in use.</p> */
+    /**
+     * <p>
+     * The current type graph object in use.
+     * </p>
+     */
     private final TypeGraph myTypeGraph;
 
     // ===========================================================
@@ -54,8 +76,9 @@ public class TypeNode {
     // ===========================================================
 
     /**
-     * <p>This constructs a node for the {@link MTType} object
-     * in our type graph.</p>
+     * <p>
+     * This constructs a node for the {@link MTType} object in our type graph.
+     * </p>
      *
      * @param g The current type graph.
      * @param type The type we are adding to our type graph.
@@ -71,7 +94,9 @@ public class TypeNode {
     // ===========================================================
 
     /**
-     * <p>Returns the type stored inside this node.</p>
+     * <p>
+     * Returns the type stored inside this node.
+     * </p>
      *
      * @return The {@link MTType} type object.
      */
@@ -80,8 +105,11 @@ public class TypeNode {
     }
 
     /**
-     * <p>This generates an {@link Exp} that establishes the relationship
-     * between the {@link Exp} value and the destination {@link MTType}.</p>
+     * <p>
+     * This generates an {@link Exp} that establishes the relationship between
+     * the {@link Exp} value
+     * and the destination {@link MTType}.
+     * </p>
      *
      * @param value The {@link Exp} to be evaluated.
      * @param dst The type that we are trying to establish a relationship to.
@@ -90,17 +118,22 @@ public class TypeNode {
      * @return An {@link Exp} establishing the relationship.
      *
      * @throws TypeMismatchException A type mismatch between what we are trying
-     * to find the valid type conditions to.
+     *         to find the valid type
+     *         conditions to.
      */
     public final Exp getValidTypeConditionsTo(Exp value, MTType dst,
-            Map<String, MTType> bindings) throws TypeMismatchException {
+            Map<String, MTType> bindings)
+            throws TypeMismatchException {
 
         return getValidTypeConditionsTo(value, dst, bindings, EXP_VALUE_PATH);
     }
 
     /**
-     * <p>This generates an {@link Exp} that establishes the relationship
-     * between the {@link MTType} value and the destination {@link MTType}.</p>
+     * <p>
+     * This generates an {@link Exp} that establishes the relationship between
+     * the {@link MTType}
+     * value and the destination {@link MTType}.
+     * </p>
      *
      * @param value The {@link MTType} to be evaluated.
      * @param dst The type that we are trying to establish a relationship to.
@@ -109,16 +142,21 @@ public class TypeNode {
      * @return An {@link Exp} establishing the relationship.
      *
      * @throws TypeMismatchException A type mismatch between what we are trying
-     * to find the valid type conditions to.
+     *         to find the valid type
+     *         conditions to.
      */
     public final Exp getValidTypeConditionsTo(MTType value, MTType dst,
-            Map<String, MTType> bindings) throws TypeMismatchException {
+            Map<String, MTType> bindings)
+            throws TypeMismatchException {
 
-        return getValidTypeConditionsTo(value, dst, bindings, MTTYPE_VALUE_PATH);
+        return getValidTypeConditionsTo(value, dst, bindings,
+                MTTYPE_VALUE_PATH);
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */
@@ -145,11 +183,13 @@ public class TypeNode {
     // ===========================================================
 
     /**
-     * <p>Add a relationship to this type node.</p>
+     * <p>
+     * Add a relationship to this type node.
+     * </p>
      *
      * @param relationship Type relationship to be added.
      */
-    //XXX : Can we do this so that analyzer isn't setting up TypeRelationship objects?
+    // XXX : Can we do this so that analyzer isn't setting up TypeRelationship objects?
     void addRelationship(TypeRelationship relationship) {
         Set<TypeRelationship> bucket =
                 myRelationships.get(relationship.getDestinationType());
@@ -166,8 +206,11 @@ public class TypeNode {
     // ===========================================================
 
     /**
-     * <p>An helper method for generating an {@link Exp} that establishes the relationship
-     * between the value and the destination {@link MTType}.</p>
+     * <p>
+     * An helper method for generating an {@link Exp} that establishes the
+     * relationship between the
+     * value and the destination {@link MTType}.
+     * </p>
      *
      * @param value The value to be evaluated.
      * @param dst The type that we are trying to establish a relationship to.
@@ -206,10 +249,9 @@ public class TypeNode {
                 foundTrivialPath =
                         (MathExp.isLiteralTrue(relationshipConditions));
 
-                finalConditions =
-                        MathExp.formDisjunct(relationshipConditions
-                                .getLocation(), relationshipConditions,
-                                finalConditions);
+                finalConditions = MathExp.formDisjunct(
+                        relationshipConditions.getLocation(),
+                        relationshipConditions, finalConditions);
             }
             catch (NoSolutionException nse) {}
         }
@@ -226,15 +268,18 @@ public class TypeNode {
     // ===========================================================
 
     /**
-     * <p>Search strategy for type relationships.</p>
+     * <p>
+     * Search strategy for type relationships.
+     * </p>
      *
      * @param <V> This could either be a {@link MTType} or a {@link Exp}.
      */
     interface RelationshipPathStrategy<V> {
 
         /**
-         * <p>This generates a new expression generated from the
-         * binding condition.</p>
+         * <p>
+         * This generates a new expression generated from the binding condition.
+         * </p>
          *
          * @param relationship A type relationship.
          * @param value The value to be evaluated.
@@ -245,18 +290,22 @@ public class TypeNode {
          * @throws NoSolutionException
          */
         Exp getValidTypeConditionsAlong(TypeRelationship relationship, V value,
-                Map<String, MTType> bindings) throws NoSolutionException;
+                Map<String, MTType> bindings)
+                throws NoSolutionException;
 
     }
 
     /**
-     * <p>Search strategy for {@link Exp} type relationships.</p>
+     * <p>
+     * Search strategy for {@link Exp} type relationships.
+     * </p>
      */
     static class ExpValuePathStrategy implements RelationshipPathStrategy<Exp> {
 
         /**
-         * <p>This generates a new expression generated from the
-         * binding condition.</p>
+         * <p>
+         * This generates a new expression generated from the binding condition.
+         * </p>
          *
          * @param relationship A type relationship.
          * @param value The {@link Exp} to be evaluated.
@@ -277,15 +326,18 @@ public class TypeNode {
     }
 
     /**
-     * <p>Search strategy for {@link MTType} type relationships.</p>
+     * <p>
+     * Search strategy for {@link MTType} type relationships.
+     * </p>
      */
     static class MTTypeValuePathStrategy
             implements
                 RelationshipPathStrategy<MTType> {
 
         /**
-         * <p>This generates a new expression generated from the
-         * binding condition.</p>
+         * <p>
+         * This generates a new expression generated from the binding condition.
+         * </p>
          *
          * @param relationship A type relationship.
          * @param value The {@link MTType} to be evaluated.

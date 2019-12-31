@@ -1,7 +1,7 @@
 /*
  * PTType.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -45,14 +45,17 @@ public abstract class PTType {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> an value of this type
-     * would be acceptable where one of type <code>t</code> were required.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> an value of this type
+     * would be acceptable where
+     * one of type <code>t</code> were required.
+     * </p>
      * 
      * @param t The required type.
      * 
      * @return <code>true</code> <strong>iff</strong> an value of this type
-     *         would be acceptable where one of type <code>t</code> were 
-     *         required.
+     *         would be acceptable where
+     *         one of type <code>t</code> were required.
      */
     public boolean acceptableFor(PTType t) {
         return equals(t);

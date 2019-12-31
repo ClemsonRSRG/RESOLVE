@@ -1,7 +1,7 @@
 /*
  * PSymbolArgumentIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,10 @@ import edu.clemson.cs.rsrg.prover.absyn.expressions.PSymbol;
 import java.util.Iterator;
 
 /**
- * <p>An implementation that allows the user to iterate over a {@link PSymbol PSymbol's}
- * arguments.</p>
+ * <p>
+ * An implementation that allows the user to iterate over a {@link PSymbol
+ * PSymbol's} arguments.
+ * </p>
  *
  * @author Hampton Smith
  * @version 2.0
@@ -29,13 +31,25 @@ public class PSymbolArgumentIterator implements PExpSubexpressionIterator {
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@link PSymbol} whose arguments are being iterated.</p> */
+    /**
+     * <p>
+     * The {@link PSymbol} whose arguments are being iterated.
+     * </p>
+     */
     private final PSymbol myOriginalSymbol;
 
-    /** <p>An inner iterator for arguments.</p> */
+    /**
+     * <p>
+     * An inner iterator for arguments.
+     * </p>
+     */
     private final Iterator<PExp> myArgumentIterator;
 
-    /** <p>An index representing that last returned argument.</p> */
+    /**
+     * <p>
+     * An index representing that last returned argument.
+     * </p>
+     */
     private int myLastReturnedIndex = -1;
 
     // ===========================================================
@@ -43,7 +57,9 @@ public class PSymbolArgumentIterator implements PExpSubexpressionIterator {
     // ===========================================================
 
     /**
-     * <p>This creates an iterator for visiting {@code s}'s arguments (if any).</p>
+     * <p>
+     * This creates an iterator for visiting {@code s}'s arguments (if any).
+     * </p>
      *
      * @param s A {@link PSymbol}.
      */
@@ -57,13 +73,16 @@ public class PSymbolArgumentIterator implements PExpSubexpressionIterator {
     // ===========================================================
 
     /**
-     * <p>This method returns {@code true} <strong>iff</strong> there are additional
-     * sub-expressions. I.e., returns {@code true} <strong>iff</strong>
-     * {@link #next()} would return an element rather than throwing an
-     * exception.</p>
+     * <p>
+     * This method returns {@code true} <strong>iff</strong> there are
+     * additional sub-expressions.
+     * I.e., returns {@code true} <strong>iff</strong> {@link #next()} would
+     * return an element rather
+     * than throwing an exception.
+     * </p>
      *
-     * @return {@code true} if the iterator has more elements,
-     * {@code false} otherwise.
+     * @return {@code true} if the iterator has more elements, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean hasNext() {
@@ -71,7 +90,8 @@ public class PSymbolArgumentIterator implements PExpSubexpressionIterator {
     }
 
     /**
-     * <p>This method returns the next sub-expression./p>
+     * <p>
+     * This method returns the next sub-expression./p>
      *
      * @return The next element in the iteration.
      */
@@ -84,13 +104,16 @@ public class PSymbolArgumentIterator implements PExpSubexpressionIterator {
     }
 
     /**
-     * <p>This method returns a version of the original {@link PExp} (i.e., the
-     * {@code PExp} over whose sub-expressions we are iterating) with the
-     * sub-expression most recently returned by {@link #next()} replaced with
-     * {@code newExpression}.</p>
+     * <p>
+     * This method returns a version of the original {@link PExp} (i.e., the
+     * {@code PExp} over whose
+     * sub-expressions we are iterating) with the sub-expression most recently
+     * returned by
+     * {@link #next()} replaced with {@code newExpression}.
+     * </p>
      *
      * @param newExpression The argument to replace the most recently returned
-     *                      one with.
+     *        one with.
      *
      * @return The new version.
      */

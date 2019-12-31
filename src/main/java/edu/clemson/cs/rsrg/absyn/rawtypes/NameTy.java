@@ -1,7 +1,7 @@
 /*
  * NameTy.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the raw named type objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the raw named type objects that the compiler builds
+ * using the ANTLR4
+ * AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -27,10 +30,18 @@ public class NameTy extends Ty {
     // Member Fields
     // ===========================================================
 
-    /** <p>The raw type's qualifier</p> */
+    /**
+     * <p>
+     * The raw type's qualifier
+     * </p>
+     */
     private PosSymbol myQualifier;
 
-    /** <p>The raw type's name</p> */
+    /**
+     * <p>
+     * The raw type's name
+     * </p>
+     */
     private final PosSymbol myName;
 
     // ===========================================================
@@ -38,7 +49,9 @@ public class NameTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>This constructs a raw name type.</p>
+     * <p>
+     * This constructs a raw name type.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param qualifier A {@link PosSymbol} qualifier object.
@@ -93,7 +106,9 @@ public class NameTy extends Ty {
     }
 
     /**
-     * <p>This method returns the name.</p>
+     * <p>
+     * This method returns the name.
+     * </p>
      *
      * @return The {@link PosSymbol} representation object.
      */
@@ -102,7 +117,9 @@ public class NameTy extends Ty {
     }
 
     /**
-     * <p>This method returns the qualifier name.</p>
+     * <p>
+     * This method returns the qualifier name.
+     * </p>
      *
      * @return The {@link PosSymbol} representation object.
      */
@@ -116,15 +133,16 @@ public class NameTy extends Ty {
     @Override
     public final int hashCode() {
         int result = super.hashCode();
-        result =
-                31 * result
-                        + (myQualifier != null ? myQualifier.hashCode() : 0);
+        result = 31 * result
+                + (myQualifier != null ? myQualifier.hashCode() : 0);
         result = 31 * result + myName.hashCode();
         return result;
     }
 
     /**
-     * <p>Sets the qualifier for this raw type.</p>
+     * <p>
+     * Sets the qualifier for this raw type.
+     * </p>
      *
      * @param qualifier The {@link PosSymbol} representation object.
      */

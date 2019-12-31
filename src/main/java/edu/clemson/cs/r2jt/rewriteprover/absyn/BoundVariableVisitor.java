@@ -1,7 +1,7 @@
 /*
  * BoundVariableVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,10 +24,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class BoundVariableVisitor extends PExpVisitor {
 
-    //For now, this does nothing.  This is just a copy-paste of code from
-    //mathtype.BoundVariableVisitor.  Eventually, we will have PQuantifiers and
-    //then this class will need to be updated to keep track of universal 
-    //variables introduced there
+    // For now, this does nothing. This is just a copy-paste of code from
+    // mathtype.BoundVariableVisitor. Eventually, we will have PQuantifiers and
+    // then this class will need to be updated to keep track of universal
+    // variables introduced there
 
     private Deque<Map<String, BindingInfo>> myBoundVariables =
             new LinkedList<Map<String, BindingInfo>>();
@@ -54,7 +54,8 @@ public class BoundVariableVisitor extends PExpVisitor {
         return getInnermostBindingInfo(name).type;
     }
 
-    public void annotateInnermostBinding(String name, Object key, Object value) {
+    public void annotateInnermostBinding(String name, Object key,
+            Object value) {
 
         getInnermostBindingInfo(name).annotations.put(key, value);
     }
@@ -77,7 +78,8 @@ public class BoundVariableVisitor extends PExpVisitor {
         return binding;
     }
 
-    protected Map<String, BindingInfo> toBindingInfoMap(Map<String, MTType> vars) {
+    protected Map<String, BindingInfo>
+            toBindingInfoMap(Map<String, MTType> vars) {
 
         Map<String, BindingInfo> result = new HashMap<String, BindingInfo>();
 

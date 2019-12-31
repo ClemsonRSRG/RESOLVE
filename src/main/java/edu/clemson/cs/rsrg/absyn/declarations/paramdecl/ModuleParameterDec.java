@@ -1,7 +1,7 @@
 /*
  * ModuleParameterDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is a wrapper class for all the different module parameter
- * declaration objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is a wrapper class for all the different module parameter declaration
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -27,7 +30,11 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The actual module parameter declaration</p> */
+    /**
+     * <p>
+     * The actual module parameter declaration
+     * </p>
+     */
     private final T myWrappedDec;
 
     // ===========================================================
@@ -35,8 +42,10 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
     // ===========================================================
 
     /**
-     * <p>Given a declaration, we wrap it to indicate that this
-     * is a module level parameter declaration.</p>
+     * <p>
+     * Given a declaration, we wrap it to indicate that this is a module level
+     * parameter declaration.
+     * </p>
      *
      * @param dec The declaration to be wrapped.
      */
@@ -80,7 +89,9 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
     }
 
     /**
-     * <p>Returns the symbol representation of this class.</p>
+     * <p>
+     * Returns the symbol representation of this class.
+     * </p>
      *
      * @return A {@link PosSymbol} representation of the name.
      */
@@ -90,7 +101,9 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
     }
 
     /**
-     * <p>Returns the inner wrapped declaration.</p>
+     * <p>
+     * Returns the inner wrapped declaration.
+     * </p>
      *
      * @return A {@link Dec} object.
      */

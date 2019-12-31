@@ -1,7 +1,7 @@
 /*
  * PresumeStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -109,8 +109,8 @@ public class PresumeStmt extends Statement {
     }
 
     public PresumeStmt clone() {
-        return new PresumeStmt((Location) myLocation.clone(), Exp
-                .copy(myAssertion));
+        return new PresumeStmt((Location) myLocation.clone(),
+                Exp.copy(myAssertion));
     }
 
 }

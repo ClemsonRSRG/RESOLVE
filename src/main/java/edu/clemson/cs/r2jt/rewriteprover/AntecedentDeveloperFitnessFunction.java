@@ -1,7 +1,7 @@
 /*
  * AntecedentDeveloperFitnessFunction.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -53,8 +53,8 @@ public class AntecedentDeveloperFitnessFunction
             PExp replacement = tAsSIPIC.getTransformationTemplate();
             if (pattern.getFunctionApplications().isEmpty()
                     && pattern.getQuantifiedVariables().size() == 1
-                    && replacement.getQuantifiedVariables().contains(
-                            pattern.getQuantifiedVariables().iterator().next())) {
+                    && replacement.getQuantifiedVariables().contains(pattern
+                            .getQuantifiedVariables().iterator().next())) {
                 result = -1;
             }
         }

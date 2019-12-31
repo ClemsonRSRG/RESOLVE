@@ -1,7 +1,7 @@
 /*
  * GenerateGraphvizModel.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -38,9 +38,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * <p>This class generates a Graphviz model file object using the provided
- * RESOLVE abstract syntax tree. This visitor logic is implemented as a
- * a {@link TreeWalkerStackVisitor}.</p>
+ * <p>
+ * This class generates a Graphviz model file object using the provided RESOLVE
+ * abstract syntax
+ * tree. This visitor logic is implemented as a a
+ * {@link TreeWalkerStackVisitor}.
+ * </p>
  *
  * @author Chuck Cook
  * @author Yu-Shan Sun
@@ -52,16 +55,32 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>Map from each element in the tree to its associated node number.</p> */
+    /**
+     * <p>
+     * Map from each element in the tree to its associated node number.
+     * </p>
+     */
     private final Map<ResolveConceptualElement, Integer> myElementToNodeNumMap;
 
-    /** <p>Current node number.</p> */
+    /**
+     * <p>
+     * Current node number.
+     * </p>
+     */
     private int myNodeNum;
 
-    /** <p>String template for the base Graphviz model.</p> */
+    /**
+     * <p>
+     * String template for the base Graphviz model.
+     * </p>
+     */
     private final ST myModel;
 
-    /** <p>String template groups for generating the Graphviz model.</p> */
+    /**
+     * <p>
+     * String template groups for generating the Graphviz model.
+     * </p>
+     */
     private final STGroup mySTGroup;
 
     // ===========================================================
@@ -69,8 +88,10 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
-     * <p>This creates an object that overrides methods to generate
-     * a Graphviz model file.</p>
+     * <p>
+     * This creates an object that overrides methods to generate a Graphviz
+     * model file.
+     * </p>
      *
      * @param stGroup The string template file.
      * @param model The model we are going be generating.
@@ -91,8 +112,10 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all nodes that have a parent, add an edge from its
-     * parent node to itself.</p>
+     * <p>
+     * For all nodes that have a parent, add an edge from its parent node to
+     * itself.
+     * </p>
      *
      * @param data Current {@link ResolveConceptualElement} we are visiting.
      */
@@ -107,10 +130,8 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
             int parentNum = myElementToNodeNumMap.get(parent);
 
             // Add a new edge using our string template
-            ST edge =
-                    mySTGroup.getInstanceOf("outputGraphvizEdges").add(
-                            "parentNodeNum", parentNum).add("nodeNum",
-                            myNodeNum);
+            ST edge = mySTGroup.getInstanceOf("outputGraphvizEdges")
+                    .add("parentNodeNum", parentNum).add("nodeNum", myNodeNum);
             myModel.add("edges", edge);
         }
 
@@ -119,7 +140,9 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link VirtualListNode} nodes, create a new node.</p>
+     * <p>
+     * For all {@link VirtualListNode} nodes, create a new node.
+     * </p>
      *
      * @param data Current {@link ResolveConceptualElement} we are visiting.
      */
@@ -127,12 +150,11 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     public void postAnyStack(ResolveConceptualElement data) {
         // Add a new node using our string template
         if (data instanceof VirtualListNode) {
-            ST node =
-                    createNode(myElementToNodeNumMap.get(data), data.getClass()
-                            .getSimpleName(), true);
+            ST node = createNode(myElementToNodeNumMap.get(data),
+                    data.getClass().getSimpleName(), true);
 
-            node.add("nodeData", ((VirtualListNode) data).getListType()
-                    .getSimpleName());
+            node.add("nodeData",
+                    ((VirtualListNode) data).getListType().getSimpleName());
             myModel.add("nodes", node);
         }
     }
@@ -142,23 +164,23 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link Dec} nodes, create a new node and
-     * add the declaration's name field.</p>
+     * <p>
+     * For all {@link Dec} nodes, create a new node and add the declaration's
+     * name field.
+     * </p>
      *
      * @param e Current {@link Dec} we are visiting.
      */
     @Override
     public void postDec(Dec e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
         String data;
 
         if (e instanceof MathAssertionDec) {
-            data =
-                    ((MathAssertionDec) e).getAssertionType().name() + " "
-                            + e.getName().getName();
+            data = ((MathAssertionDec) e).getAssertionType().name() + " "
+                    + e.getName().getName();
         }
         else if (e instanceof FacilityDec) {
             FacilityDec dec = (FacilityDec) e;
@@ -196,17 +218,18 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link DefinitionBodyItem} nodes, create a new node and
-     * add the "=" as the operator.</p>
+     * <p>
+     * For all {@link DefinitionBodyItem} nodes, create a new node and add the
+     * "=" as the operator.
+     * </p>
      *
      * @param e Current {@link DefinitionBodyItem} we are visiting.
      */
     @Override
     public void postDefinitionBodyItem(DefinitionBodyItem e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         node.add("nodeData", "=");
         myModel.add("nodes", node);
@@ -217,17 +240,18 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link UsesItem} nodes, create a new node and
-     * add the name of the imported module.</p>
+     * <p>
+     * For all {@link UsesItem} nodes, create a new node and add the name of the
+     * imported module.
+     * </p>
      *
      * @param e Current {@link UsesItem} we are visiting.
      */
     @Override
     public void postUsesItem(UsesItem e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         // Add the imported module name
         node.add("nodeData", e.getName().getName());
@@ -240,17 +264,19 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link PerformanceSpecInitFinalItem} nodes, create a new node and
-     * add the item type.</p>
+     * <p>
+     * For all {@link PerformanceSpecInitFinalItem} nodes, create a new node and
+     * add the item type.
+     * </p>
      *
      * @param e Current {@link PerformanceSpecInitFinalItem} we are visiting.
      */
     @Override
-    public void postPerformanceSpecInitFinalItem(PerformanceSpecInitFinalItem e) {
+    public void
+            postPerformanceSpecInitFinalItem(PerformanceSpecInitFinalItem e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         // Add the item type
         node.add("nodeData", e.getClauseType().name());
@@ -259,17 +285,18 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link SpecInitFinalItem} nodes, create a new node and
-     * add the item type.</p>
+     * <p>
+     * For all {@link SpecInitFinalItem} nodes, create a new node and add the
+     * item type.
+     * </p>
      *
      * @param e Current {@link SpecInitFinalItem} we are visiting.
      */
     @Override
     public void postSpecInitFinalItem(SpecInitFinalItem e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         // Add the item type
         node.add("nodeData", e.getClauseType().name());
@@ -282,17 +309,18 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link FacilityInitFinalItem} nodes, create a new node and
-     * add the item type.</p>
+     * <p>
+     * For all {@link FacilityInitFinalItem} nodes, create a new node and add
+     * the item type.
+     * </p>
      *
      * @param e Current {@link FacilityInitFinalItem} we are visiting.
      */
     @Override
     public void postFacilityInitFinalItem(FacilityInitFinalItem e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         // Add the item type
         node.add("nodeData", e.getItemType().name());
@@ -301,17 +329,18 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link RealizInitFinalItem} nodes, create a new node and
-     * add the item type.</p>
+     * <p>
+     * For all {@link RealizInitFinalItem} nodes, create a new node and add the
+     * item type.
+     * </p>
      *
      * @param e Current {@link RealizInitFinalItem} we are visiting.
      */
     @Override
     public void postRealizInitFinalItem(RealizInitFinalItem e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         // Add the item type
         node.add("nodeData", e.getItemType().name());
@@ -325,15 +354,17 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link LoopVerificationItem} nodes, we create a new node
-     * with its simple class name.</p>
+     * <p>
+     * For all {@link LoopVerificationItem} nodes, we create a new node with its
+     * simple class name.
+     * </p>
      *
      * @param e Current {@link LoopVerificationItem} we are visiting.
      */
     @Override
     public void postLoopVerificationItem(LoopVerificationItem e) {
-        myModel.add("nodes", createNode(myElementToNodeNumMap.get(e), e
-                .getClass().getSimpleName(), false));
+        myModel.add("nodes", createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), false));
     }
 
     // -----------------------------------------------------------
@@ -341,29 +372,33 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link ModuleArgumentItem} nodes, we create a new node
-     * with its simple class name.</p>
+     * <p>
+     * For all {@link ModuleArgumentItem} nodes, we create a new node with its
+     * simple class name.
+     * </p>
      *
      * @param e Current {@link ModuleArgumentItem} we are visiting.
      */
     @Override
     public void postModuleArgumentItem(ModuleArgumentItem e) {
-        myModel.add("nodes", createNode(myElementToNodeNumMap.get(e), e
-                .getClass().getSimpleName(), false));
+        myModel.add("nodes", createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), false));
     }
 
     /**
-     * <p>For all {@link EnhancementSpecItem} nodes, we create a new node
-     * with its simple class name and the name of the concept enhancement.</p>
+     * <p>
+     * For all {@link EnhancementSpecItem} nodes, we create a new node with its
+     * simple class name and
+     * the name of the concept enhancement.
+     * </p>
      *
      * @param e Current {@link EnhancementSpecItem} we are visiting.
      */
     @Override
     public void postEnhancementSpecItem(EnhancementSpecItem e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         StringBuffer sb = new StringBuffer();
         sb.append("Concept Enhancement: ");
@@ -374,17 +409,19 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link EnhancementSpecRealizItem} nodes, we create a new node
-     * with its simple class name, the name of the enhancement/realization.</p>
+     * <p>
+     * For all {@link EnhancementSpecRealizItem} nodes, we create a new node
+     * with its simple class
+     * name, the name of the enhancement/realization.
+     * </p>
      *
      * @param e Current {@link EnhancementSpecItem} we are visiting.
      */
     @Override
     public void postEnhancementSpecRealizItem(EnhancementSpecRealizItem e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         StringBuffer sb = new StringBuffer();
         sb.append("Enhancement: ");
@@ -401,8 +438,11 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link Ty} nodes, create a new node. If this node
-     * is a {@link NameTy}, we add in the name.</p>
+     * <p>
+     * For all {@link Ty} nodes, create a new node. If this node is a
+     * {@link NameTy}, we add in the
+     * name.
+     * </p>
      *
      * @param e Current {@link Ty} we are visiting.
      */
@@ -420,15 +460,13 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
                 data = ty.getQualifier() + "::" + data;
             }
 
-            node =
-                    createNode(myElementToNodeNumMap.get(e), e.getClass()
-                            .getSimpleName(), true);
+            node = createNode(myElementToNodeNumMap.get(e),
+                    e.getClass().getSimpleName(), true);
             node.add("nodeData", data);
         }
         else {
-            node =
-                    createNode(myElementToNodeNumMap.get(e), e.getClass()
-                            .getSimpleName(), false);
+            node = createNode(myElementToNodeNumMap.get(e),
+                    e.getClass().getSimpleName(), false);
         }
 
         myModel.add("nodes", node);
@@ -439,18 +477,20 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link AssertionClause} nodes, we create a new node
-     * with its simple class name and indicates what type of clause
-     * this is and if it has an {@code which_entails}.</p>
+     * <p>
+     * For all {@link AssertionClause} nodes, we create a new node with its
+     * simple class name and
+     * indicates what type of clause this is and if it has an
+     * {@code which_entails}.
+     * </p>
      *
      * @param e Current {@link AssertionClause} we are visiting.
      */
     @Override
     public void postAssertionClause(AssertionClause e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         StringBuffer sb = new StringBuffer();
         sb.append(e.getClauseType().name());
@@ -467,10 +507,13 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link Statement} nodes, create a new node and add the simple name.
-     * If this node is a {@link ConfirmStmt}, we add the simplify flag ({code true}/{code false})
-     * to the data. If this node is a {@link MemoryStmt}, we add the statement type
-     * to the data.</p>
+     * <p>
+     * For all {@link Statement} nodes, create a new node and add the simple
+     * name. If this node is a
+     * {@link ConfirmStmt}, we add the simplify flag ({code true}/{code false})
+     * to the data. If this
+     * node is a {@link MemoryStmt}, we add the statement type to the data.
+     * </p>
      *
      * @param e Current {@link Statement} we are visiting.
      */
@@ -480,25 +523,21 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
         ST node;
 
         if (e instanceof ConfirmStmt) {
-            node =
-                    createNode(myElementToNodeNumMap.get(e), e.getClass()
-                            .getSimpleName(), true);
+            node = createNode(myElementToNodeNumMap.get(e),
+                    e.getClass().getSimpleName(), true);
 
-            node
-                    .add("nodeData", "SIMPLIFY: "
-                            + ((ConfirmStmt) e).getSimplify());
+            node.add("nodeData",
+                    "SIMPLIFY: " + ((ConfirmStmt) e).getSimplify());
         }
         else if (e instanceof MemoryStmt) {
-            node =
-                    createNode(myElementToNodeNumMap.get(e), e.getClass()
-                            .getSimpleName(), true);
+            node = createNode(myElementToNodeNumMap.get(e),
+                    e.getClass().getSimpleName(), true);
 
             node.add("nodeData", ((MemoryStmt) e).getStatementType().name());
         }
         else {
-            node =
-                    createNode(myElementToNodeNumMap.get(e), e.getClass()
-                            .getSimpleName(), false);
+            node = createNode(myElementToNodeNumMap.get(e),
+                    e.getClass().getSimpleName(), false);
         }
 
         myModel.add("nodes", node);
@@ -509,17 +548,19 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link CrossTypeExp} nodes, create a new node and
-     * add all the variables in this expression.</p>
+     * <p>
+     * For all {@link CrossTypeExp} nodes, create a new node and add all the
+     * variables in this
+     * expression.
+     * </p>
      *
      * @param e Current {@link CrossTypeExp} we are visiting.
      */
     @Override
     public void postCrossTypeExp(CrossTypeExp e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         StringBuffer sb = new StringBuffer();
 
@@ -543,18 +584,21 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link FunctionExp} nodes, create a new node and
-     * add the function's name (with qualifier if it is not {@code null}
-     * and/or with the carat expression if it is not {@code null}).</p>
+     * <p>
+     * For all {@link FunctionExp} nodes, create a new node and add the
+     * function's name (with
+     * qualifier if it is not {@code null} and/or with the carat expression if
+     * it is not
+     * {@code null}).
+     * </p>
      *
      * @param e Current {@link FunctionExp} we are visiting.
      */
     @Override
     public void postFunctionExp(FunctionExp e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         String data = e.getOperatorAsString();
         if (e.getQualifier() != null) {
@@ -570,17 +614,19 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link InfixExp} nodes, create a new node and
-     * add the operator's name (with qualifier if it is not {@code null}).</p>
+     * <p>
+     * For all {@link InfixExp} nodes, create a new node and add the operator's
+     * name (with qualifier
+     * if it is not {@code null}).
+     * </p>
      *
      * @param e Current {@link InfixExp} we are visiting.
      */
     @Override
     public void postInfixExp(InfixExp e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         String data = escapeSpecialChars(e.getOperatorAsString().toCharArray());
         if (e.getQualifier() != null) {
@@ -592,17 +638,18 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link OutfixExp} nodes, create a new node and
-     * add the operator as a string.</p>
+     * <p>
+     * For all {@link OutfixExp} nodes, create a new node and add the operator
+     * as a string.
+     * </p>
      *
      * @param e Current {@link OutfixExp} we are visiting.
      */
     @Override
     public void postOutfixExp(OutfixExp e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         StringBuffer sb = new StringBuffer();
         sb.append("&nbsp;");
@@ -614,43 +661,48 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>For all {@link QuantExp} nodes, create a new node and
-     * add the appropriate quantification.</p>
+     * <p>
+     * For all {@link QuantExp} nodes, create a new node and add the appropriate
+     * quantification.
+     * </p>
      *
      * @param e Current {@link QuantExp} we are visiting.
      */
     @Override
     public void postQuantExp(QuantExp e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         node.add("nodeData", e.getQuantification().name());
         myModel.add("nodes", node);
     }
 
     /**
-     * <p>For all {@link TypeAssertionExp} nodes, create a new node and
-     * add its operator as a string.</p>
+     * <p>
+     * For all {@link TypeAssertionExp} nodes, create a new node and add its
+     * operator as a string.
+     * </p>
      *
      * @param e Current {@link TypeAssertionExp} we are visiting.
      */
     @Override
     public void postTypeAssertionExp(TypeAssertionExp e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
         node.add("nodeData", ":");
         myModel.add("nodes", node);
     }
 
     /**
-     * <p>For all {@link MathExp} nodes that we didn't add special
-     * override logic, we create a new node with its simple class name
-     * and the string retrieved from {@link MathExp#asString}.</p>
+     * <p>
+     * For all {@link MathExp} nodes that we didn't add special override logic,
+     * we create a new node
+     * with its simple class name and the string retrieved from
+     * {@link MathExp#asString}.
+     * </p>
      *
      * @param e Current {@link MathExp} we are visiting.
      */
@@ -660,12 +712,11 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
                 && !(e instanceof QuantExp) && !(e instanceof FunctionExp)
                 && !(e instanceof OutfixExp) && !(e instanceof CrossTypeExp)) {
             // Create the new node
-            ST node =
-                    createNode(myElementToNodeNumMap.get(e), e.getClass()
-                            .getSimpleName(), true);
+            ST node = createNode(myElementToNodeNumMap.get(e),
+                    e.getClass().getSimpleName(), true);
 
-            node.add("nodeData", escapeSpecialChars(e.asString(0, 0)
-                    .toCharArray()));
+            node.add("nodeData",
+                    escapeSpecialChars(e.asString(0, 0).toCharArray()));
             myModel.add("nodes", node);
         }
     }
@@ -675,22 +726,22 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>For all {@link ProgramExp} nodes, we create a new node
-     * with its simple class name and the string retrieved from
-     * {@link ProgramExp#asString}.</p>
+     * <p>
+     * For all {@link ProgramExp} nodes, we create a new node with its simple
+     * class name and the
+     * string retrieved from {@link ProgramExp#asString}.
+     * </p>
      *
      * @param e Current {@link ProgramExp} we are visiting.
      */
     @Override
     public void postProgramExp(ProgramExp e) {
         // Create the new node
-        ST node =
-                createNode(myElementToNodeNumMap.get(e), e.getClass()
-                        .getSimpleName(), true);
+        ST node = createNode(myElementToNodeNumMap.get(e),
+                e.getClass().getSimpleName(), true);
 
-        node
-                .add("nodeData", escapeSpecialChars(e.asString(0, 0)
-                        .toCharArray()));
+        node.add("nodeData",
+                escapeSpecialChars(e.asString(0, 0).toCharArray()));
         myModel.add("nodes", node);
     }
 
@@ -699,8 +750,9 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns the completed model with all the
-     * nodes and edges.</p>
+     * <p>
+     * This method returns the completed model with all the nodes and edges.
+     * </p>
      *
      * @return String template rendering of the model.
      */
@@ -713,21 +765,27 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
-     * <p>An helper method to create a new node using string template.</p>
+     * <p>
+     * An helper method to create a new node using string template.
+     * </p>
      *
      * @param nodeNum The associated node number.
      * @param nodeName The node's simple class name.
-     * @param hasData {@code true} if the node has data, {@code false} otherwise.
+     * @param hasData {@code true} if the node has data, {@code false}
+     *        otherwise.
      *
      * @return The newly created ST for "node".
      */
     private ST createNode(int nodeNum, String nodeName, boolean hasData) {
-        return mySTGroup.getInstanceOf("outputGraphvizNodes").add("nodeNum",
-                nodeNum).add("nodeName", nodeName).add("hasNodeData", hasData);
+        return mySTGroup.getInstanceOf("outputGraphvizNodes")
+                .add("nodeNum", nodeNum).add("nodeName", nodeName)
+                .add("hasNodeData", hasData);
     }
 
     /**
-     * <p>An helper method to escape special characters.</p>
+     * <p>
+     * An helper method to escape special characters.
+     * </p>
      *
      * @param stringArray Original text.
      *

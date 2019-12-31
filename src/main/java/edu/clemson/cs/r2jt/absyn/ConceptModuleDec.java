@@ -1,7 +1,7 @@
 /*
  * ConceptModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,20 +36,21 @@ public class ConceptModuleDec extends AbstractParameterizedModuleDec {
     /** The decs member. */
     private List<Dec> decs;
 
-    /** The constraints member. 
-     * Note that placing this down here means it is processed last by the 
-     * treewalker, and so we will have access to any definitions in the
-     * body of the concept. */
+    /**
+     * The constraints member. Note that placing this down here means it is
+     * processed last by the
+     * treewalker, and so we will have access to any definitions in the body of
+     * the concept.
+     */
     private List<Exp> constraints;
 
     public ConceptModuleDec() {
-    // Empty
+        // Empty
     }
 
-    public ConceptModuleDec(PosSymbol name,
-            List<ModuleParameterDec> parameters, List<UsesItem> usesItems,
-            Exp requirement, List<Exp> constraints, InitItem facilityInit,
-            FinalItem facilityFinal, List<Dec> decs) {
+    public ConceptModuleDec(PosSymbol name, List<ModuleParameterDec> parameters,
+            List<UsesItem> usesItems, Exp requirement, List<Exp> constraints,
+            InitItem facilityInit, FinalItem facilityFinal, List<Dec> decs) {
         this.name = name;
         this.parameters = parameters;
         this.usesItems = usesItems;

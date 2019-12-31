@@ -1,7 +1,7 @@
 /*
  * MathSymbolTable.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,80 +22,120 @@ import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>A <code>MathSymbolTable</code> represents an immutable mapping from
- * those nodes in the AST that define a scope to {@link FinalizedScope Scope} objects
- * representing those scopes and containing the symbols defined therein.</p>
+ * <p>
+ * A <code>MathSymbolTable</code> represents an immutable mapping from those
+ * nodes in the AST that
+ * define a scope to {@link FinalizedScope Scope} objects representing those
+ * scopes and containing
+ * the symbols defined therein.
+ * </p>
  * 
- * <p><code>Scope</code>s that were introduced at the module-level (e.g.,
- * the scope defined by a 
+ * <p>
+ * <code>Scope</code>s that were introduced at the module-level (e.g., the scope
+ * defined by a
  * {@link edu.clemson.cs.r2jt.absyn.MathModuleDec MathModuleDec}) will have an
- * associated <code>Scope</code> that is further refined into an instance of
- * {@link FinalizedModuleScope ModuleScope}.  As a convenience, such module scopes may
- * be retrieved in a type-safe way with a call to 
- * {@link #getModuleScope(ModuleIdentifier) getModuleScope()}.</p>
+ * associated
+ * <code>Scope</code> that is further refined into an instance of
+ * {@link FinalizedModuleScope
+ * ModuleScope}. As a convenience, such module scopes may be retrieved in a
+ * type-safe way with a
+ * call to {@link #getModuleScope(ModuleIdentifier) getModuleScope()}.
+ * </p>
  * 
- * <p>Note that there are no public constructors for 
- * <code>MathSymbolTable</code>.  New instances should be acquired from a call 
- * to {@link MathSymbolTableBuilder#seal() MathSymbolTableBuilder.seal()}.</p>
+ * <p>
+ * Note that there are no public constructors for <code>MathSymbolTable</code>.
+ * New instances should
+ * be acquired from a call to {@link MathSymbolTableBuilder#seal()
+ * MathSymbolTableBuilder.seal()}.
+ * </p>
  */
 public class MathSymbolTable extends ScopeRepository {
 
     /**
-     * <p>When starting a search from a particular scope, specifies how any
-     * available facilities should be searched.</p>
+     * <p>
+     * When starting a search from a particular scope, specifies how any
+     * available facilities should
+     * be searched.
+     * </p>
      * 
-     * <p>Available facilities are those facilities defined in a module searched
-     * by the search's <code>ImportStrategy</code> (which necessarily always
-     * includes the source module).</p>
+     * <p>
+     * Available facilities are those facilities defined in a module searched by
+     * the search's
+     * <code>ImportStrategy</code> (which necessarily always includes the source
+     * module).
+     * </p>
      * 
-     * <p>Note that facilities cannot be recursively searched.  Imports and
-     * facilities appearing in available facilities will not be searched.</p>
+     * <p>
+     * Note that facilities cannot be recursively searched. Imports and
+     * facilities appearing in
+     * available facilities will not be searched.
+     * </p>
      */
     public static enum FacilityStrategy {
 
         /**
-         * <p>Indicates that available facilities should not be searched.  The
-         * default strategy.</p>
+         * <p>
+         * Indicates that available facilities should not be searched. The
+         * default strategy.
+         * </p>
          */
         FACILITY_IGNORE,
 
         /**
-         * <p>Indicates that available facilities should be searched with 
-         * generic types instantiated.  That is, any types used by symbols 
-         * inside the facility should be updated to reflect the particular
-         * instantiation of the generic types.</p>
+         * <p>
+         * Indicates that available facilities should be searched with generic
+         * types instantiated. That
+         * is, any types used by symbols inside the facility should be updated
+         * to reflect the particular
+         * instantiation of the generic types.
+         * </p>
          */
         FACILITY_INSTANTIATE,
 
         /**
-         * <p>Indicates that available facilities should be searched with 
-         * generic types intact.  That is, any types used by symbols inside the
-         * facility will appear exactly as listed in the source file--including
-         * references to generics--even if we could use information from the
-         * facility to "fill them in."</p>
+         * <p>
+         * Indicates that available facilities should be searched with generic
+         * types intact. That is,
+         * any types used by symbols inside the facility will appear exactly as
+         * listed in the source
+         * file--including references to generics--even if we could use
+         * information from the facility to
+         * "fill them in."
+         * </p>
          */
         FACILITY_GENERIC
     }
 
     /**
-     * <p>When starting a search from a particular scope, specifies which 
-     * additional modules should be searched, based on any imported modules.</p>
+     * <p>
+     * When starting a search from a particular scope, specifies which
+     * additional modules should be
+     * searched, based on any imported modules.
+     * </p>
      * 
-     * <p>Imported modules are those listed in the <em>uses</em> clause of the 
-     * source module scope in which the scope is introduced.  For searches 
-     * originating directly in a module scope, the source module scope is the 
-     * scope itself.  In addition to those scopes directly imported in the 
-     * <em>uses</em> clause, any modules implicitly imported will also be 
-     * searched.  Implicitly imported modules include the standard modules 
-     * (<code>Std_Boolean_Fac</code>, etc.), and any modules named in the header
-     * of the source module (e.g., an enhancement realization implicitly imports
-     * it's associate enhancement and concept.)</p>
+     * <p>
+     * Imported modules are those listed in the <em>uses</em> clause of the
+     * source module scope in
+     * which the scope is introduced. For searches originating directly in a
+     * module scope, the source
+     * module scope is the scope itself. In addition to those scopes directly
+     * imported in the
+     * <em>uses</em> clause, any modules implicitly imported will also be
+     * searched. Implicitly
+     * imported modules include the standard modules
+     * (<code>Std_Boolean_Fac</code>, etc.), and any
+     * modules named in the header of the source module (e.g., an enhancement
+     * realization implicitly
+     * imports it's associate enhancement and concept.)
+     * </p>
      */
     public static enum ImportStrategy {
 
         /**
-         * <p>Indicates that imported modules should not be searched. The
-         * default strategy.</p>
+         * <p>
+         * Indicates that imported modules should not be searched. The default
+         * strategy.
+         * </p>
          */
         IMPORT_NONE {
 
@@ -109,8 +149,11 @@ public class MathSymbolTable extends ScopeRepository {
         },
 
         /**
-         * <p>Indicates that only those modules imported directly from the 
-         * source module should be searched.</p>
+         * <p>
+         * Indicates that only those modules imported directly from the source
+         * module should be
+         * searched.
+         * </p>
          */
         IMPORT_NAMED {
 
@@ -124,8 +167,11 @@ public class MathSymbolTable extends ScopeRepository {
         },
 
         /**
-         * <p>Indicates that the search should recursively search the closure
-         * of all imports and their own imports.</p>
+         * <p>
+         * Indicates that the search should recursively search the closure of
+         * all imports and their own
+         * imports.
+         * </p>
          */
         IMPORT_RECURSIVE {
 
@@ -139,8 +185,10 @@ public class MathSymbolTable extends ScopeRepository {
         };
 
         /**
-         * <p>Returns the strategy that should be used to recursively search
-         * any imported modules.</p>
+         * <p>
+         * Returns the strategy that should be used to recursively search any
+         * imported modules.
+         * </p>
          * 
          * @return The strategy that should be used to recursively search any
          *         imported modules.
@@ -148,11 +196,15 @@ public class MathSymbolTable extends ScopeRepository {
         public abstract ImportStrategy cascadingStrategy();
 
         /**
-         * <p>Returns <code>true</code> <strong>iff</strong> this strategy
-         * requires searching directly imported modules.</p>
+         * <p>
+         * Returns <code>true</code> <strong>iff</strong> this strategy requires
+         * searching directly
+         * imported modules.
+         * </p>
          * 
-         * @return <code>true</code> <strong>iff</strong> this strategy
-         *         requires searching directly imported modules.
+         * @return <code>true</code> <strong>iff</strong> this strategy requires
+         *         searching directly
+         *         imported modules.
          */
         public abstract boolean considerImports();
     }
@@ -165,9 +217,10 @@ public class MathSymbolTable extends ScopeRepository {
 
     private final TypeGraph myTypeGraph;
 
-    /*package private*/MathSymbolTable(TypeGraph typeGraph,
+    /* package private */ MathSymbolTable(TypeGraph typeGraph,
             Map<ResolveConceptualElement, ScopeBuilder> scopes,
-            ScopeBuilder root) throws NoSuchModuleException {
+            ScopeBuilder root)
+            throws NoSuchModuleException {
 
         myTypeGraph = typeGraph;
 
@@ -195,8 +248,8 @@ public class MathSymbolTable extends ScopeRepository {
 
             if (result instanceof FinalizedModuleScope) {
                 resultAsModuleScope = (FinalizedModuleScope) result;
-                resultIdentifier =
-                        new ModuleIdentifier((ModuleDec) b.getDefiningElement());
+                resultIdentifier = new ModuleIdentifier(
+                        (ModuleDec) b.getDefiningElement());
 
                 myModuleScopes.put(resultIdentifier, resultAsModuleScope);
 
@@ -229,17 +282,20 @@ public class MathSymbolTable extends ScopeRepository {
     }
 
     /**
-     * <p>Returns the <code>Scope</code> associated with <code>e</code>.  If
-     * there is not associated scope, throws a 
-     * {@link NoSuchScopeException NoSuchScopeException}.</p>
+     * <p>
+     * Returns the <code>Scope</code> associated with <code>e</code>. If there
+     * is not associated
+     * scope, throws a {@link NoSuchScopeException NoSuchScopeException}.
+     * </p>
      * 
-     * @param e The node in the AST for which to retrieve an associated 
-     *          <code>Scope</code>.
-     *          
+     * @param e The node in the AST for which to retrieve an associated
+     *        <code>Scope</code>.
+     * 
      * @return The associated scope.
      * 
      * @throws NoSuchScopeException If there is no <code>Scope</code> associated
-     *                              with the given AST node.
+     *         with the given AST
+     *         node.
      */
     public FinalizedScope getScope(ResolveConceptualElement e) {
         if (!myScopes.containsKey(e)) {
@@ -250,23 +306,29 @@ public class MathSymbolTable extends ScopeRepository {
     }
 
     /**
-     * <p>Returns the <code>ModuleScope</code> associated with 
-     * <code>module</code>.  If there is no module by that name, throws a 
-     * {@link NoSuchSymbolException NoSuchSymbolException}.</p>
+     * <p>
+     * Returns the <code>ModuleScope</code> associated with <code>module</code>.
+     * If there is no module
+     * by that name, throws a {@link NoSuchSymbolException
+     * NoSuchSymbolException}.
+     * </p>
      * 
-     * <p>Barring the type of the <code>Exception</code> thrown, for all
-     * <code>ModuleDec</code>s, <em>d</em>, if 
-     * <code>module.equals(new ModuleIdentifier(d))<code>, then 
+     * <p>
+     * Barring the type of the <code>Exception</code> thrown, for all
+     * <code>ModuleDec</code>s,
+     * <em>d</em>, if <code>module.equals(new ModuleIdentifier(d))<code>, then 
      * <code>getModuleScope(module)</code> is equivalent to
-     * <code>(ModuleScope) getScope(d)</code>.</p>
+     * <code>(ModuleScope) getScope(d)</code>.
+     * </p>
      * 
-     * @param e The node in the AST for which to retrieve an associated 
-     *          <code>Scope</code>.
-     *          
+     * @param e The node in the AST for which to retrieve an associated
+     *        <code>Scope</code>.
+     * 
      * @return The associated scope.
      * 
      * @throws NoSuchScopeException If there is no <code>Scope</code> associated
-     *                              with the given AST node.
+     *         with the given AST
+     *         node.
      */
     public FinalizedModuleScope getModuleScope(ModuleIdentifier module)
             throws NoSuchSymbolException {
@@ -283,7 +345,8 @@ public class MathSymbolTable extends ScopeRepository {
         public final ModuleIdentifier sourceModule;
         public final ModuleIdentifier importedModule;
 
-        public ImportRequest(ModuleIdentifier source, ModuleIdentifier imported) {
+        public ImportRequest(ModuleIdentifier source,
+                ModuleIdentifier imported) {
 
             sourceModule = source;
             importedModule = imported;

@@ -1,7 +1,7 @@
 /*
  * ProgramVariableEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,7 +20,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
 
 /**
- * <p>This creates a symbol table entry for a program variable.</p>
+ * <p>
+ * This creates a symbol table entry for a program variable.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,10 +32,18 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     // Member Fields
     // ===========================================================
 
-    /** <p>The program type assigned to this entry.</p> */
+    /**
+     * <p>
+     * The program type assigned to this entry.
+     * </p>
+     */
     private final PTType myType;
 
-    /** <p>The mathematical symbol entry associated with this entry.</p> */
+    /**
+     * <p>
+     * The mathematical symbol entry associated with this entry.
+     * </p>
+     */
     private final MathSymbolEntry myMathSymbolAlterEgo;
 
     // ===========================================================
@@ -41,7 +51,9 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This creates a symbol table entry for a program variable.</p>
+     * <p>
+     * This creates a symbol table entry for a program variable.
+     * </p>
      *
      * @param name Name associated with this entry.
      * @param definingElement The element that created this entry.
@@ -55,12 +67,11 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
         myType = type;
 
-        //TODO: Probably need to recajigger this to correctly account for any
-        //      generics in the defining context
-        myMathSymbolAlterEgo =
-                new MathSymbolEntry(type.getTypeGraph(), name,
-                        Quantification.NONE, definingElement, type.toMath(),
-                        null, null, null, sourceModule);
+        // TODO: Probably need to recajigger this to correctly account for any
+        // generics in the defining context
+        myMathSymbolAlterEgo = new MathSymbolEntry(type.getTypeGraph(), name,
+                Quantification.NONE, definingElement, type.toMath(), null, null,
+                null, sourceModule);
     }
 
     // ===========================================================
@@ -68,7 +79,9 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This method returns a description associated with this entry.</p>
+     * <p>
+     * This method returns a description associated with this entry.
+     * </p>
      *
      * @return A string.
      */
@@ -78,7 +91,9 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the program type associated with this entry.</p>
+     * <p>
+     * This method returns the program type associated with this entry.
+     * </p>
      *
      * @return A {@link PTType} representation object.
      */
@@ -87,9 +102,11 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method converts a generic {@link SymbolTableEntry} to an entry
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link SymbolTableEntry} to an entry that
+     * has all the generic
+     * types and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -102,14 +119,12 @@ public class ProgramVariableEntry extends SymbolTableEntry {
             FacilityEntry instantiatingFacility) {
         SymbolTableEntry result;
 
-        PTType instantiatedType =
-                myType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility);
+        PTType instantiatedType = myType.instantiateGenerics(
+                genericInstantiations, instantiatingFacility);
 
         if (instantiatedType != myType) {
-            result =
-                    new ProgramVariableEntry(getName(), getDefiningElement(),
-                            getSourceModuleIdentifier(), instantiatedType);
+            result = new ProgramVariableEntry(getName(), getDefiningElement(),
+                    getSourceModuleIdentifier(), instantiatedType);
         }
         else {
             result = this;
@@ -119,13 +134,15 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link MathSymbolEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link MathSymbolEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link MathSymbolEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link MathSymbolEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final MathSymbolEntry toMathSymbolEntry(Location l) {
@@ -133,13 +150,16 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ProgramVariableEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ProgramVariableEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ProgramVariableEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ProgramVariableEntry} if possible. Otherwise, it throws
+     *         a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final ProgramVariableEntry toProgramVariableEntry(Location l) {

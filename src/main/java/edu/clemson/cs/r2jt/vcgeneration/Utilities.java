@@ -1,7 +1,7 @@
 /*
  * Utilities.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -46,9 +46,8 @@ public class Utilities {
     }
 
     public static void expNotHandled(Exp exp, Location l) {
-        String message =
-                "(VCGenerator) Exp type not handled: "
-                        + exp.getClass().getCanonicalName();
+        String message = "(VCGenerator) Exp type not handled: "
+                + exp.getClass().getCanonicalName();
         throw new SourceErrorException(message, l);
     }
 
@@ -67,9 +66,8 @@ public class Utilities {
     }
 
     public static void notInFreeVarList(PosSymbol name, Location l) {
-        String message =
-                "(VCGenerator) State variable " + name
-                        + " not in free variable list";
+        String message = "(VCGenerator) State variable " + name
+                + " not in free variable list";
         throw new SourceErrorException(message, l);
     }
 
@@ -88,9 +86,8 @@ public class Utilities {
             message = "(VCGenerator) No such symbol: " + symbolName;
         }
         else {
-            message =
-                    "(VCGenerator) No such symbol in module: "
-                            + qualifier.getName() + "." + symbolName;
+            message = "(VCGenerator) No such symbol in module: "
+                    + qualifier.getName() + "." + symbolName;
         }
 
         throw new SourceErrorException(message, l);
@@ -106,9 +103,12 @@ public class Utilities {
     // -----------------------------------------------------------
 
     /**
-     * <p>This method checks to see if this the expression we passed
-     * is either a variable expression or a dotted expression that
-     * contains a variable expression in the last position.</p>
+     * <p>
+     * This method checks to see if this the expression we passed is either a
+     * variable expression or a
+     * dotted expression that contains a variable expression in the last
+     * position.
+     * </p>
      *
      * @param exp The checking expression.
      *
@@ -125,17 +125,18 @@ public class Utilities {
         else if (exp instanceof DotExp) {
             DotExp dotExp = (DotExp) exp;
             List<Exp> dotExpList = dotExp.getSegments();
-            retVal =
-                    containsReplaceableExp(dotExpList
-                            .get(dotExpList.size() - 1));
+            retVal = containsReplaceableExp(
+                    dotExpList.get(dotExpList.size() - 1));
         }
 
         return retVal;
     }
 
     /**
-     * <p>Converts the different types of <code>Exp</code> to the
-     * ones used by the VC Generator.</p>
+     * <p>
+     * Converts the different types of <code>Exp</code> to the ones used by the
+     * VC Generator.
+     * </p>
      *
      * @param oldExp The expression to be converted.
      * @param scope The module scope to start our search.
@@ -232,7 +233,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Convert an operation entry into the absyn node representation.</p>
+     * <p>
+     * Convert an operation entry into the absyn node representation.
+     * </p>
      *
      * @param opEntry The operation entry in the symbol table.
      *
@@ -248,21 +251,21 @@ public class Utilities {
         else {
             FacilityOperationDec fOpDec =
                     (FacilityOperationDec) opEntry.getDefiningElement();
-            opDec =
-                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
-                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
-                                    .getRequires(), fOpDec.getEnsures());
+            opDec = new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
+                    fOpDec.getReturnTy(), fOpDec.getStateVars(),
+                    fOpDec.getRequires(), fOpDec.getEnsures());
         }
 
         return opDec;
     }
 
     /**
-     * <p>Creates conceptual variable expression from the
-     * given name.</p>
+     * <p>
+     * Creates conceptual variable expression from the given name.
+     * </p>
      *
-     * @param location Location that wants to create
-     *                 this conceptual variable expression.
+     * @param location Location that wants to create this conceptual variable
+     *        expression.
      * @param name Name of the variable expression.
      * @param concType Mathematical type of the conceptual variable.
      * @param booleanType Mathematical boolean type.
@@ -272,9 +275,8 @@ public class Utilities {
     public static DotExp createConcVarExp(Location location, VarExp name,
             MTType concType, MTType booleanType) {
         // Create a variable that refers to the conceptual exemplar
-        VarExp cName =
-                Utilities.createVarExp(null, null, Utilities
-                        .createPosSymbol("Conc"), booleanType, null);
+        VarExp cName = Utilities.createVarExp(null, null,
+                Utilities.createPosSymbol("Conc"), booleanType, null);
 
         // Create Conc.[Exemplar] dotted expression
         edu.clemson.cs.r2jt.collections.List<Exp> dotExpList =
@@ -287,19 +289,20 @@ public class Utilities {
     }
 
     /**
-     * <p>Creates dotted expression with the specified list of
-     * expressions.</p>
+     * <p>
+     * Creates dotted expression with the specified list of expressions.
+     * </p>
      *
-     * @param location Location that wants to create
-     *                 this dotted expression.
-     * @param dotExpList The list of expressions that form part of
-     *                   the dotted expression.
+     * @param location Location that wants to create this dotted expression.
+     * @param dotExpList The list of expressions that form part of the dotted
+     *        expression.
      * @param dotType Mathematical type of the dotted expression.
      *
      * @return The created <code>DotExp</code>.
      */
     public static DotExp createDotExp(Location location,
-            edu.clemson.cs.r2jt.collections.List<Exp> dotExpList, MTType dotType) {
+            edu.clemson.cs.r2jt.collections.List<Exp> dotExpList,
+            MTType dotType) {
         // Create the DotExp
         DotExp exp = new DotExp(location, dotExpList, null);
         exp.setMathType(dotType);
@@ -307,8 +310,10 @@ public class Utilities {
     }
 
     /**
-     * <p>Creates function expression "Dur_Call" with a specified number
-     * of parameters</p>
+     * <p>
+     * Creates function expression "Dur_Call" with a specified number of
+     * parameters
+     * </p>
      *
      * @param loc The location where we are creating this expression.
      * @param numArg Number of Arguments.
@@ -320,9 +325,8 @@ public class Utilities {
     public static FunctionExp createDurCallExp(Location loc, String numArg,
             MTType integerType, MTType realType) {
         // Obtain the necessary information from the variable
-        VarExp param =
-                createVarExp(loc, null, createPosSymbol(numArg), integerType,
-                        null);
+        VarExp param = createVarExp(loc, null, createPosSymbol(numArg),
+                integerType, null);
 
         // Create the list of arguments to the function
         edu.clemson.cs.r2jt.collections.List<Exp> params =
@@ -330,16 +334,16 @@ public class Utilities {
         params.add(param);
 
         // Create the duration call exp
-        FunctionExp durCallExp =
-                createFunctionExp(loc, null, createPosSymbol("Dur_Call"),
-                        params, realType);
+        FunctionExp durCallExp = createFunctionExp(loc, null,
+                createPosSymbol("Dur_Call"), params, realType);
 
         return durCallExp;
     }
 
     /**
-     * <p>Creates function expression "F_Dur" for a specified
-     * variable.</p>
+     * <p>
+     * Creates function expression "F_Dur" for a specified variable.
+     * </p>
      *
      * @param var Local Variable.
      * @param realType Mathematical real type.
@@ -350,13 +354,11 @@ public class Utilities {
         // Obtain the necessary information from the variable
         Ty varTy = var.getTy();
         NameTy varNameTy = (NameTy) varTy;
-        VarExp param =
-                createVarExp(var.getLocation(), null, var.getName(), var
-                        .getTy().getMathTypeValue(), null);
-        VarExp param1 =
-                createVarExp(varNameTy.getLocation(), null,
-                        createPosSymbol(varNameTy.getName().getName()), var
-                                .getTy().getMathTypeValue(), null);
+        VarExp param = createVarExp(var.getLocation(), null, var.getName(),
+                var.getTy().getMathTypeValue(), null);
+        VarExp param1 = createVarExp(varNameTy.getLocation(), null,
+                createPosSymbol(varNameTy.getName().getName()),
+                var.getTy().getMathTypeValue(), null);
 
         // Create the list of arguments to the function
         edu.clemson.cs.r2jt.collections.List<Exp> params =
@@ -365,16 +367,16 @@ public class Utilities {
         params.add(param);
 
         // Create the final duration
-        FunctionExp finalDurAnyExp =
-                createFunctionExp(var.getLocation(), null,
-                        createPosSymbol("F_Dur"), params, realType);
+        FunctionExp finalDurAnyExp = createFunctionExp(var.getLocation(), null,
+                createPosSymbol("F_Dur"), params, realType);
 
         return finalDurAnyExp;
     }
 
     /**
-     * <p>Creates function expression "F_Dur" for a specified
-     * variable expression.</p>
+     * <p>
+     * Creates function expression "F_Dur" for a specified variable expression.
+     * </p>
      *
      * @param varExp A Variable Expression.
      * @param realType Mathematical real type.
@@ -387,10 +389,9 @@ public class Utilities {
         if (varExp.getProgramType() instanceof PTFamily) {
             PTFamily type = (PTFamily) varExp.getProgramType();
             Exp param = convertExp(varExp, scope);
-            VarExp param1 =
-                    createVarExp(varExp.getLocation(), null,
-                            createPosSymbol(type.getName()), varExp
-                                    .getMathType(), varExp.getMathTypeValue());
+            VarExp param1 = createVarExp(varExp.getLocation(), null,
+                    createPosSymbol(type.getName()), varExp.getMathType(),
+                    varExp.getMathTypeValue());
 
             // Create the list of arguments to the function
             edu.clemson.cs.r2jt.collections.List<Exp> params =
@@ -399,9 +400,8 @@ public class Utilities {
             params.add(param);
 
             // Create the final duration
-            FunctionExp finalDurAnyExp =
-                    createFunctionExp(varExp.getLocation(), null,
-                            createPosSymbol("F_Dur"), params, realType);
+            FunctionExp finalDurAnyExp = createFunctionExp(varExp.getLocation(),
+                    null, createPosSymbol("F_Dur"), params, realType);
 
             return finalDurAnyExp;
         }
@@ -411,11 +411,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Creates function expression with the specified
-     * name and arguments.</p>
+     * <p>
+     * Creates function expression with the specified name and arguments.
+     * </p>
      *
-     * @param location Location that wants to create
-     *                 this function expression.
+     * @param location Location that wants to create this function expression.
      * @param qualifier Qualifier for the function expression.
      * @param name Name of the function expression.
      * @param argExpList List of arguments to the function expression.
@@ -436,17 +436,17 @@ public class Utilities {
         functionArgLists.add(argList);
 
         // Create the function expression
-        FunctionExp exp =
-                new FunctionExp(location, qualifier, name, null,
-                        functionArgLists);
+        FunctionExp exp = new FunctionExp(location, qualifier, name, null,
+                functionArgLists);
         exp.setMathType(funcType);
 
         return exp;
     }
 
     /**
-     * <p>Creates function expression "I_Dur" for a specified
-     * variable.</p>
+     * <p>
+     * Creates function expression "I_Dur" for a specified variable.
+     * </p>
      *
      * @param var Local Variable.
      * @param realType Mathematical real type.
@@ -455,11 +455,9 @@ public class Utilities {
      */
     public static FunctionExp createInitAnyDur(VarDec var, MTType realType) {
         // Obtain the necessary information from the variable
-        VarExp param =
-                createVarExp(var.getLocation(), null,
-                        createPosSymbol(((NameTy) var.getTy()).getName()
-                                .getName()), var.getTy().getMathTypeValue(),
-                        null);
+        VarExp param = createVarExp(var.getLocation(), null,
+                createPosSymbol(((NameTy) var.getTy()).getName().getName()),
+                var.getTy().getMathTypeValue(), null);
 
         // Create the list of arguments to the function
         edu.clemson.cs.r2jt.collections.List<Exp> params =
@@ -467,16 +465,18 @@ public class Utilities {
         params.add(param);
 
         // Create the final duration
-        FunctionExp initDurExp =
-                createFunctionExp(var.getLocation(), null,
-                        createPosSymbol("I_Dur"), params, realType);
+        FunctionExp initDurExp = createFunctionExp(var.getLocation(), null,
+                createPosSymbol("I_Dur"), params, realType);
 
         return initDurExp;
     }
 
     /**
-     * <p>Returns an <code>DotExp</code> with the <code>VarDec</code>
-     * and its initialization ensures clause.</p>
+     * <p>
+     * Returns an <code>DotExp</code> with the <code>VarDec</code> and its
+     * initialization ensures
+     * clause.
+     * </p>
      *
      * @param var The declared variable.
      * @param mType CLS type.
@@ -487,9 +487,8 @@ public class Utilities {
     public static DotExp createInitExp(VarDec var, MTType mType,
             MTType booleanType) {
         // Convert the declared variable into a VarExp
-        VarExp varExp =
-                createVarExp(var.getLocation(), null, var.getName(), var
-                        .getTy().getMathTypeValue(), null);
+        VarExp varExp = createVarExp(var.getLocation(), null, var.getName(),
+                var.getTy().getMathTypeValue(), null);
 
         // Left hand side of the expression
         VarExp left = null;
@@ -497,9 +496,8 @@ public class Utilities {
         // NameTy
         if (var.getTy() instanceof NameTy) {
             NameTy ty = (NameTy) var.getTy();
-            left =
-                    createVarExp(ty.getLocation(), ty.getQualifier(), ty
-                            .getName(), mType, null);
+            left = createVarExp(ty.getLocation(), ty.getQualifier(),
+                    ty.getName(), mType, null);
         }
         else {
             tyNotHandled(var.getTy(), var.getTy().getLocation());
@@ -509,9 +507,8 @@ public class Utilities {
         edu.clemson.cs.r2jt.collections.List<Exp> expList =
                 new edu.clemson.cs.r2jt.collections.List<Exp>();
         expList.add(varExp);
-        FunctionExp right =
-                createFunctionExp(var.getLocation(), null,
-                        createPosSymbol("Is_Initial"), expList, booleanType);
+        FunctionExp right = createFunctionExp(var.getLocation(), null,
+                createPosSymbol("Is_Initial"), expList, booleanType);
 
         // Create the DotExp
         edu.clemson.cs.r2jt.collections.List<Exp> exps =
@@ -524,7 +521,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Creates a less than equal infix expression.</p>
+     * <p>
+     * Creates a less than equal infix expression.
+     * </p>
      *
      * @param location Location for the new infix expression.
      * @param left The left hand side of the less than equal expression.
@@ -536,15 +535,16 @@ public class Utilities {
     public static InfixExp createLessThanEqExp(Location location, Exp left,
             Exp right, MTType booleanType) {
         // Create the "Less Than Equal" InfixExp
-        InfixExp exp =
-                new InfixExp(location, left, Utilities.createPosSymbol("<="),
-                        right);
+        InfixExp exp = new InfixExp(location, left,
+                Utilities.createPosSymbol("<="), right);
         exp.setMathType(booleanType);
         return exp;
     }
 
     /**
-     * <p>Creates a less than infix expression.</p>
+     * <p>
+     * Creates a less than infix expression.
+     * </p>
      *
      * @param location Location for the new infix expression.
      * @param left The left hand side of the less than expression.
@@ -556,16 +556,16 @@ public class Utilities {
     public static InfixExp createLessThanExp(Location location, Exp left,
             Exp right, MTType booleanType) {
         // Create the "Less Than" InfixExp
-        InfixExp exp =
-                new InfixExp(location, left, Utilities.createPosSymbol("<"),
-                        right);
+        InfixExp exp = new InfixExp(location, left,
+                Utilities.createPosSymbol("<"), right);
         exp.setMathType(booleanType);
         return exp;
     }
 
     /**
-     * <p>Returns a newly created <code>PosSymbol</code>
-     * with the string provided.</p>
+     * <p>
+     * Returns a newly created <code>PosSymbol</code> with the string provided.
+     * </p>
      *
      * @param name String of the new <code>PosSymbol</code>.
      *
@@ -579,11 +579,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Creates a variable expression with the name
-     * "P_val" and has type "N".</p>
+     * <p>
+     * Creates a variable expression with the name "P_val" and has type "N".
+     * </p>
      *
-     * @param location Location that wants to create
-     *                 this variable.
+     * @param location Location that wants to create this variable.
      * @param scope The module scope to start our search.
      *
      *
@@ -594,8 +594,8 @@ public class Utilities {
         MathSymbolEntry mse = searchMathSymbol(location, "N", scope);
         try {
             // Create a variable with the name P_val
-            return createVarExp(location, null, createPosSymbol("P_val"), mse
-                    .getTypeValue(), null);
+            return createVarExp(location, null, createPosSymbol("P_val"),
+                    mse.getTypeValue(), null);
         }
         catch (SymbolNotOfKindTypeException e) {
             notAType(mse, location);
@@ -605,19 +605,20 @@ public class Utilities {
     }
 
     /**
-     * <p>Create a question mark variable with the oldVar
-     * passed in.</p>
+     * <p>
+     * Create a question mark variable with the oldVar passed in.
+     * </p>
      *
      * @param exp The full expression clause.
      * @param oldVar The old variable expression.
      *
-     * @return A new variable with the question mark in <code>VarExp</code> form.
+     * @return A new variable with the question mark in <code>VarExp</code>
+     *         form.
      */
     public static VarExp createQuestionMarkVariable(Exp exp, VarExp oldVar) {
         // Add an extra question mark to the front of oldVar
-        VarExp newOldVar =
-                new VarExp(null, null, createPosSymbol("?"
-                        + oldVar.getName().getName()));
+        VarExp newOldVar = new VarExp(null, null,
+                createPosSymbol("?" + oldVar.getName().getName()));
         newOldVar.setMathType(oldVar.getMathType());
         newOldVar.setMathTypeValue(oldVar.getMathTypeValue());
 
@@ -641,8 +642,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Returns a newly created <code>VarExp</code>
-     * with the <code>PosSymbol</code> and math type provided.</p>
+     * <p>
+     * Returns a newly created <code>VarExp</code> with the
+     * <code>PosSymbol</code> and math type
+     * provided.
+     * </p>
      *
      * @param loc Location of the new <code>VarExp</code>.
      * @param qualifier Qualifier of the <code>VarExp</code>.
@@ -662,8 +666,10 @@ public class Utilities {
     }
 
     /**
-     * <p>Gets the current "Cum_Dur" expression. We should only have one in
-     * the current scope.</p>
+     * <p>
+     * Gets the current "Cum_Dur" expression. We should only have one in the
+     * current scope.
+     * </p>
      *
      * @param searchingExp The expression we are searching for "Cum_Dur"
      *
@@ -681,7 +687,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Returns the math type for "Z".</p>
+     * <p>
+     * Returns the math type for "Z".
+     * </p>
      *
      * @param location Current location in the AST.
      * @param scope The module scope to start our search.
@@ -704,7 +712,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Gets all the unique symbols in an expression.</p>
+     * <p>
+     * Gets all the unique symbols in an expression.
+     * </p>
      *
      * @param exp The searching <code>Exp</code>.
      *
@@ -716,7 +726,8 @@ public class Utilities {
 
         // Not CharExp, DoubleExp, IntegerExp or StringExp
         if (!(exp instanceof CharExp) && !(exp instanceof DoubleExp)
-                && !(exp instanceof IntegerExp) && !(exp instanceof StringExp)) {
+                && !(exp instanceof IntegerExp)
+                && !(exp instanceof StringExp)) {
             // AlternativeExp
             if (exp instanceof AlternativeExp) {
                 List<AltItemExp> alternativesList =
@@ -874,8 +885,10 @@ public class Utilities {
     }
 
     /**
-     * <p>Get the <code>PosSymbol</code> associated with the
-     * <code>VariableExp</code> left.</p>
+     * <p>
+     * Get the <code>PosSymbol</code> associated with the
+     * <code>VariableExp</code> left.
+     * </p>
      *
      * @param left The variable expression.
      *
@@ -898,10 +911,8 @@ public class Utilities {
                     name = tempName;
                 }
                 else {
-                    name =
-                            new PosSymbol(name.getLocation(), Symbol
-                                    .symbol(name.getName() + "_"
-                                            + tempName.getName()));
+                    name = new PosSymbol(name.getLocation(), Symbol
+                            .symbol(name.getName() + "_" + tempName.getName()));
                 }
             }
         }
@@ -920,8 +931,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Given the name of an operation check to see if it is a
-     * local operation</p>
+     * <p>
+     * Given the name of an operation check to see if it is a local operation
+     * </p>
      *
      * @param name The name of the operation.
      * @param scope The module scope we are searching.
@@ -932,14 +944,9 @@ public class Utilities {
         boolean isIn;
 
         // Query for the corresponding operation
-        List<SymbolTableEntry> entries =
-                scope
-                        .query(new NameQuery(
-                                null,
-                                name,
-                                MathSymbolTable.ImportStrategy.IMPORT_NONE,
-                                MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
-                                true));
+        List<SymbolTableEntry> entries = scope.query(new NameQuery(null, name,
+                MathSymbolTable.ImportStrategy.IMPORT_NONE,
+                MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true));
 
         // Not found
         if (entries.size() == 0) {
@@ -958,8 +965,8 @@ public class Utilities {
         }
         // Found more than one
         else {
-            //This should be caught earlier, when the duplicate symbol is
-            //created
+            // This should be caught earlier, when the duplicate symbol is
+            // created
             throw new RuntimeException();
         }
 
@@ -967,9 +974,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Checks to see if the expression passed in is a
-     * verification variable or not. A verification variable
-     * is either "P_val" or starts with "?".</p>
+     * <p>
+     * Checks to see if the expression passed in is a verification variable or
+     * not. A verification
+     * variable is either "P_val" or starts with "?".
+     * </p>
      *
      * @param name Expression that we want to check
      *
@@ -1001,7 +1010,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Negate the incoming expression.</p>
+     * <p>
+     * Negate the incoming expression.
+     * </p>
      *
      * @param exp Expression to be negated.
      * @param booleanType Mathematical boolean type.
@@ -1034,7 +1045,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Copy and replace the old <code>Exp</code>.</p>
+     * <p>
+     * Copy and replace the old <code>Exp</code>.
+     * </p>
      *
      * @param exp The <code>Exp</code> to be replaced.
      * @param old The old sub-expression of <code>exp</code>.
@@ -1054,8 +1067,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Replace the formal with the actual variables from the facility declaration to
-     * the passed in clause.</p>
+     * <p>
+     * Replace the formal with the actual variables from the facility
+     * declaration to the passed in
+     * clause.
+     * </p>
      *
      * @param opLoc Location of the calling statement.
      * @param clause The requires/ensures clause.
@@ -1085,10 +1101,10 @@ public class Utilities {
                 for (VarExp v : instantiatedFacilityArgMap.keySet()) {
                     FacilityFormalToActuals temp = null;
                     if (tyQualifier != null) {
-                        if (tyQualifier.getName().equals(
-                                v.getQualifier().getName())
-                                && tyName.getName().equals(
-                                        v.getName().getName())) {
+                        if (tyQualifier.getName()
+                                .equals(v.getQualifier().getName())
+                                && tyName.getName()
+                                        .equals(v.getName().getName())) {
                             temp = instantiatedFacilityArgMap.get(v);
                         }
                     }
@@ -1115,18 +1131,16 @@ public class Utilities {
                     Map<Exp, Exp> conceptMap =
                             formalToActuals.getConceptArgMap();
                     for (Exp e : conceptMap.keySet()) {
-                        newClause =
-                                Utilities.replace(newClause, e, conceptMap
-                                        .get(e));
+                        newClause = Utilities.replace(newClause, e,
+                                conceptMap.get(e));
                     }
 
                     // Replace all concept realization formal arguments with their actuals
                     Map<Exp, Exp> conceptRealizMap =
                             formalToActuals.getConceptRealizArgMap();
                     for (Exp e : conceptRealizMap.keySet()) {
-                        newClause =
-                                Utilities.replace(newClause, e,
-                                        conceptRealizMap.get(e));
+                        newClause = Utilities.replace(newClause, e,
+                                conceptRealizMap.get(e));
                     }
 
                     // Replace all enhancement [realization] formal arguments with their actuals
@@ -1135,9 +1149,8 @@ public class Utilities {
                                 formalToActuals.getEnhancementArgMap(p);
 
                         for (Exp e : enhancementMap.keySet()) {
-                            newClause =
-                                    Utilities.replace(newClause, e,
-                                            enhancementMap.get(e));
+                            newClause = Utilities.replace(newClause, e,
+                                    enhancementMap.get(e));
                         }
                     }
                 }
@@ -1148,19 +1161,15 @@ public class Utilities {
 
                         // Check to see if the type of this variable is from an imported
                         // concept type family definition. If we find one, we simply ignore this type.
-                        Iterator<SymbolTableEntry> programTypeDefIt =
-                                scope
-                                        .query(
-                                                new EntryTypeQuery<SymbolTableEntry>(
-                                                        ProgramTypeDefinitionEntry.class,
-                                                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
-                                        .iterator();
+                        Iterator<SymbolTableEntry> programTypeDefIt = scope
+                                .query(new EntryTypeQuery<SymbolTableEntry>(
+                                        ProgramTypeDefinitionEntry.class,
+                                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
+                                .iterator();
                         while (programTypeDefIt.hasNext() && !found) {
-                            ProgramTypeDefinitionEntry entry =
-                                    programTypeDefIt
-                                            .next()
-                                            .toProgramTypeDefinitionEntry(opLoc);
+                            ProgramTypeDefinitionEntry entry = programTypeDefIt
+                                    .next().toProgramTypeDefinitionEntry(opLoc);
 
                             if (entry.getName().equals(tyName.getName())) {
                                 found = true;
@@ -1171,12 +1180,11 @@ public class Utilities {
                             // Check to see if the type of this variable is from an local
                             // type representation. If we find one, we simply ignore this type.
                             Iterator<SymbolTableEntry> representationTypeIt =
-                                    scope
-                                            .query(
-                                                    new EntryTypeQuery<SymbolTableEntry>(
-                                                            RepresentationTypeEntry.class,
-                                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
+                                    scope.query(
+                                            new EntryTypeQuery<SymbolTableEntry>(
+                                                    RepresentationTypeEntry.class,
+                                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
                                             .iterator();
                             while (representationTypeIt.hasNext() && !found) {
                                 RepresentationTypeEntry entry =
@@ -1191,8 +1199,8 @@ public class Utilities {
 
                             // Throw an error if can't find one.
                             if (!found) {
-                                Utilities.noSuchSymbol(tyQualifier, tyName
-                                        .getName(), opLoc);
+                                Utilities.noSuchSymbol(tyQualifier,
+                                        tyName.getName(), opLoc);
                             }
                         }
                     }
@@ -1204,8 +1212,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Given a programming type, locate its constraint from the
-     * Symbol Table.</p>
+     * <p>
+     * Given a programming type, locate its constraint from the Symbol Table.
+     * </p>
      *
      * @param location Location for the searching type.
      * @param typeAsExp The raw type as a variable expression.
@@ -1219,18 +1228,16 @@ public class Utilities {
         Exp constraint = null;
 
         // Query for the type entry in the symbol table
-        SymbolTableEntry ste =
-                Utilities.searchProgramType(location, typeAsExp.getQualifier(),
-                        typeAsExp.getName(), scope);
+        SymbolTableEntry ste = Utilities.searchProgramType(location,
+                typeAsExp.getQualifier(), typeAsExp.getName(), scope);
 
         ProgramTypeEntry typeEntry;
         if (ste instanceof ProgramTypeEntry) {
             typeEntry = ste.toProgramTypeEntry(location);
         }
         else {
-            typeEntry =
-                    ste.toRepresentationTypeEntry(location)
-                            .getDefiningTypeEntry();
+            typeEntry = ste.toRepresentationTypeEntry(location)
+                    .getDefiningTypeEntry();
         }
 
         // Make sure we don't have a generic type
@@ -1239,9 +1246,8 @@ public class Utilities {
             TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
             // Create a variable expression from the type exemplar
-            VarExp exemplar =
-                    Utilities.createVarExp(type.getLocation(), null, type
-                            .getExemplar(), typeEntry.getModelType(), null);
+            VarExp exemplar = Utilities.createVarExp(type.getLocation(), null,
+                    type.getExemplar(), typeEntry.getModelType(), null);
 
             constraint =
                     replace(Exp.copy(type.getConstraint()), exemplar, varName);
@@ -1254,38 +1260,34 @@ public class Utilities {
     }
 
     /**
-     * <p>Given a math symbol name, locate and return
-     * the <code>MathSymbolEntry</code> stored in the
-     * symbol table.</p>
+     * <p>
+     * Given a math symbol name, locate and return the
+     * <code>MathSymbolEntry</code> stored in the
+     * symbol table.
+     * </p>
      *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
+     * @param loc The location in the AST that we are currently visiting.
      * @param name The string name of the math symbol.
      * @param scope The module scope to start our search.
      *
-     * @return An <code>MathSymbolEntry</code> from the
-     *         symbol table.
+     * @return An <code>MathSymbolEntry</code> from the symbol table.
      */
     public static MathSymbolEntry searchMathSymbol(Location loc, String name,
             ModuleScope scope) {
         // Query for the corresponding math symbol
         MathSymbolEntry ms = null;
         try {
-            ms =
-                    scope
-                            .queryForOne(
-                                    new UnqualifiedNameQuery(
-                                            name,
-                                            MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
-                                            true, true)).toMathSymbolEntry(loc);
+            ms = scope.queryForOne(new UnqualifiedNameQuery(name,
+                    MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true,
+                    true)).toMathSymbolEntry(loc);
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, name, loc);
         }
         catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate symbol is
-            //created
+            // This should be caught earlier, when the duplicate symbol is
+            // created
             throw new RuntimeException(dse);
         }
 
@@ -1293,19 +1295,19 @@ public class Utilities {
     }
 
     /**
-     * <p>Given the qualifier, name and the list of argument
-     * types, locate and return the <code>OperationEntry</code>
-     * stored in the symbol table.</p>
+     * <p>
+     * Given the qualifier, name and the list of argument types, locate and
+     * return the
+     * <code>OperationEntry</code> stored in the symbol table.
+     * </p>
      *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
+     * @param loc The location in the AST that we are currently visiting.
      * @param qualifier The qualifier of the operation.
      * @param name The name of the operation.
      * @param argTypes The list of argument types.
      * @param scope The module scope to start our search.
      *
-     * @return An <code>OperationEntry</code> from the
-     *         symbol table.
+     * @return An <code>OperationEntry</code> from the symbol table.
      */
     public static OperationEntry searchOperation(Location loc,
             PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
@@ -1313,16 +1315,15 @@ public class Utilities {
         // Query for the corresponding operation
         OperationEntry op = null;
         try {
-            op =
-                    scope.queryForOne(new OperationQuery(qualifier, name,
-                            argTypes));
+            op = scope
+                    .queryForOne(new OperationQuery(qualifier, name, argTypes));
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, name.getName(), loc);
         }
         catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate operation is
-            //created
+            // This should be caught earlier, when the duplicate operation is
+            // created
             throw new RuntimeException(dse);
         }
 
@@ -1330,19 +1331,19 @@ public class Utilities {
     }
 
     /**
-     * <p>Given the qualifier, name and the list of argument
-     * types, locate and return the <code>OperationProfileEntry</code>
-     * stored in the symbol table.</p>
+     * <p>
+     * Given the qualifier, name and the list of argument types, locate and
+     * return the
+     * <code>OperationProfileEntry</code> stored in the symbol table.
+     * </p>
      *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
+     * @param loc The location in the AST that we are currently visiting.
      * @param qualifier The qualifier of the operation.
      * @param name The name of the operation.
      * @param argTypes The list of argument types.
      * @param scope The module scope to start our search.
      *
-     * @return An <code>OperationProfileEntry</code> from the
-     *         symbol table.
+     * @return An <code>OperationProfileEntry</code> from the symbol table.
      */
     public static OperationProfileEntry searchOperationProfile(Location loc,
             PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
@@ -1350,9 +1351,8 @@ public class Utilities {
         // Query for the corresponding operation profile
         OperationProfileEntry ope = null;
         try {
-            ope =
-                    scope.queryForOne(new OperationProfileQuery(qualifier,
-                            name, argTypes));
+            ope = scope.queryForOne(
+                    new OperationProfileQuery(qualifier, name, argTypes));
         }
         catch (NoSuchSymbolException nsse) {
             noSuchModule(loc);
@@ -1367,28 +1367,26 @@ public class Utilities {
     }
 
     /**
-     * <p>Given the name of the type locate and return
-     * the <code>SymbolTableEntry</code> stored in the
-     * symbol table.</p>
+     * <p>
+     * Given the name of the type locate and return the
+     * <code>SymbolTableEntry</code> stored in the
+     * symbol table.
+     * </p>
      *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
+     * @param loc The location in the AST that we are currently visiting.
      * @param qualifier The qualifier of the type.
      * @param name The name of the type.
      * @param scope The module scope to start our search.
      *
-     * @return A <code>SymbolTableEntry</code> from the
-     *         symbol table.
+     * @return A <code>SymbolTableEntry</code> from the symbol table.
      */
     public static SymbolTableEntry searchProgramType(Location loc,
             PosSymbol qualifier, PosSymbol name, ModuleScope scope) {
         SymbolTableEntry retEntry = null;
 
-        List<SymbolTableEntry> entries =
-                scope.query(new NameQuery(qualifier, name,
-                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                        false));
+        List<SymbolTableEntry> entries = scope.query(new NameQuery(qualifier,
+                name, MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE, false));
 
         if (entries.size() == 0) {
             noSuchSymbol(qualifier, name.getName(), loc);
@@ -1410,8 +1408,8 @@ public class Utilities {
             // Throw duplicate symbol error if we don't have a type
             // representation
             if (retEntry == null) {
-                //This should be caught earlier, when the duplicate type is
-                //created
+                // This should be caught earlier, when the duplicate type is
+                // created
                 throw new RuntimeException();
             }
         }
@@ -1420,8 +1418,9 @@ public class Utilities {
     }
 
     /**
-     * <p>Changes the <code>Exp</code> with the new
-     * <code>Location</code>.</p>
+     * <p>
+     * Changes the <code>Exp</code> with the new <code>Location</code>.
+     * </p>
      *
      * @param exp The <code>Exp</code> that needs to be modified.
      * @param loc The new <code>Location</code>.

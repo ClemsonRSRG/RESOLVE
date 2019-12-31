@@ -1,7 +1,7 @@
 /*
  * EliminateTrueConjunctInConsequent.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -45,10 +45,8 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
 
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
-        Iterator<BindResult> results =
-                m.bind(Collections
-                        .singleton((Binder) new TopLevelConsequentBinder(m
-                                .getTrue())));
+        Iterator<BindResult> results = m.bind(Collections
+                .singleton((Binder) new TopLevelConsequentBinder(m.getTrue())));
 
         return new LazyMappingIterator<BindResult, Application>(results,
                 BIND_RESULT_TO_APPLICATION);
@@ -117,11 +115,11 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
 
         @Override
         public void apply(PerVCProverModel m) {
-            m.addProofStep(new RemoveConsequentStep(
-                    (Consequent) mySite.conjunct, m
-                            .getConjunctIndex(mySite.conjunct),
-                    EliminateTrueConjunctInConsequent.this, this, Collections
-                            .singleton(mySite)));
+            m.addProofStep(
+                    new RemoveConsequentStep((Consequent) mySite.conjunct,
+                            m.getConjunctIndex(mySite.conjunct),
+                            EliminateTrueConjunctInConsequent.this, this,
+                            Collections.singleton(mySite)));
 
             m.removeConjunct(mySite.conjunct);
         }

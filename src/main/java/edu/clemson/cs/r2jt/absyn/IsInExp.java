@@ -1,7 +1,7 @@
 /*
  * IsInExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -142,9 +142,8 @@ public class IsInExp extends AbstractFunctionExp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        Exp retval =
-                new EqualsExp(location, substitute(left, substitutions),
-                        operator, substitute(right, substitutions));
+        Exp retval = new EqualsExp(location, substitute(left, substitutions),
+                operator, substitute(right, substitutions));
         return retval;
     }
 
@@ -177,8 +176,8 @@ public class IsInExp extends AbstractFunctionExp {
 
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
-        //Environment   env	= Environment.getInstance();
-        //if(env.isabelle()){return toIsabelleString(indent);};    	
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
 
         StringBuffer sb = new StringBuffer();
 
@@ -244,8 +243,9 @@ public class IsInExp extends AbstractFunctionExp {
         return this;
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Boolean found = false;
         if (left != null) {

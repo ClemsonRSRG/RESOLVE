@@ -1,7 +1,7 @@
 /*
  * UsesItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class that functions as a reference to the name of the
- * imported module used by a module the compiler is currently compiling.</p>
+ * <p>
+ * This is the class that functions as a reference to the name of the imported
+ * module used by a
+ * module the compiler is currently compiling.
+ * </p>
  *
  * @version 2.0
  */
@@ -27,7 +30,11 @@ public class UsesItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>Name of this imported module.</p> */
+    /**
+     * <p>
+     * Name of this imported module.
+     * </p>
+     */
     private final PosSymbol myName;
 
     // ===========================================================
@@ -35,7 +42,9 @@ public class UsesItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>Constructs an item that represents a imported module.</p>
+     * <p>
+     * Constructs an item that represents a imported module.
+     * </p>
      *
      * @param name Name of the imported module.
      */
@@ -84,7 +93,9 @@ public class UsesItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the symbol representation of this class.</p>
+     * <p>
+     * Returns the symbol representation of this class.
+     * </p>
      *
      * @return A {@link PosSymbol} representation of the name.
      */
