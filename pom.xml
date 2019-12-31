@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>Summer19a</version>
+    <version>Spring20a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -33,20 +33,6 @@
         <developer>
             <name>Dan Welch</name>
             <email>dtw.welch@gmail.com</email>
-            <roles>
-                <role>Developer</role>
-            </roles>
-        </developer>
-        <developer>
-            <name>Blair Durkee</name>
-            <email>bdurkee@g.clemson.edu</email>
-            <roles>
-                <role>Developer</role>
-            </roles>
-        </developer>
-        <developer>
-            <name>Mike Kabanni</name>
-            <email>nkabban@g.clemson.edu</email>
             <roles>
                 <role>Developer</role>
             </roles>
@@ -99,7 +85,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>ST4</artifactId>
-            <version>4.1</version>
+            <version>4.2</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
@@ -138,25 +124,6 @@
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>developer.properties</file>
-                            </files>
-                            <quiet>true</quiet>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -221,7 +188,7 @@
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <properties>
-                        <year>2019</year>
+                        <year>2020</year>
                     </properties>
                 </configuration>
                 <executions>
@@ -235,14 +202,18 @@
             </plugin>
             <!-- Plugin to format the Java code. -->
             <plugin>
-                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-                <artifactId>maven-java-formatter-plugin</artifactId>
-                <version>0.3.1</version>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>2.11.0</version>
                 <configuration>
                     <configFile>
                         ${project.basedir}/rsrg-format.xml
                     </configFile>
+                    <directories>
+                        <directory>${project.build.testSourceDirectory}</directory>
+                    </directories>
                     <lineEnding>LF</lineEnding>
+                    <encoding>UTF-8</encoding>
                 </configuration>
                 <executions>
                     <execution>
