@@ -1,7 +1,7 @@
 /*
  * ImportScanner.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,10 @@ import java.util.Set;
 
 /**
  * This class scans the module dec for imported modules: associates, uses items,
- * and modules used in facility declarations. It adds the modules (and their
- * location) to a list of imports that is returned to the controller.
+ * and modules used in
+ * facility declarations. It adds the modules (and their location) to a list of
+ * imports that is
+ * returned to the controller.
  */
 public class ImportScanner extends ResolveConceptualVisitor {
 
@@ -31,8 +33,8 @@ public class ImportScanner extends ResolveConceptualVisitor {
     // Variables
     // ===========================================================
 
-    //Modules with names matching a name in this set will not get any default
-    //imports
+    // Modules with names matching a name in this set will not get any default
+    // imports
     public static final Set<String> NO_DEFAULT_IMPORT_MODULES;
 
     static {
@@ -48,7 +50,7 @@ public class ImportScanner extends ResolveConceptualVisitor {
 
     private final CompileEnvironment myInstanceEnvironment;
 
-    //private Environment env = Environment.getInstance();
+    // private Environment env = Environment.getInstance();
 
     // ===========================================================
     // Constructors
@@ -74,7 +76,8 @@ public class ImportScanner extends ResolveConceptualVisitor {
         // Std_Fac should be automatically included in the dec's UsesList and
         // annexes them to be added to the ImportList based on whether it is a
         // dependency of the Std_Fac
-        // NOTE: If you are adding more Std_Facs they should be added to the stdUses array in CompileEnvironment
+        // NOTE: If you are adding more Std_Facs they should be added to the stdUses array in
+        // CompileEnvironment
         // TODO: This mechanism is a duplicated in Populator.visitModuleDec(),
         // perhaps combine these somehow? -JCK
         String[] stdUses = myInstanceEnvironment.getStdUses();
@@ -92,8 +95,8 @@ public class ImportScanner extends ResolveConceptualVisitor {
                     if (decName.equals(stdUses[i] + "_Template")
                             || decName.equals(stdUses[i] + "_Theory")) {
                         // Set the dependencies
-                        listOfDependLists.get(i).addAllUnique(
-                                (dec.getUsesItems()));
+                        listOfDependLists.get(i)
+                                .addAllUnique((dec.getUsesItems()));
                         myInstanceEnvironment
                                 .setStdUsesDepends(listOfDependLists);
                     }
@@ -107,8 +110,8 @@ public class ImportScanner extends ResolveConceptualVisitor {
                         if (dependencies != null) {
                             Iterator<UsesItem> it = dependencies.iterator();
                             while (it.hasNext()) {
-                                if (it.next().getName().getName().equals(
-                                        decName)) {
+                                if (it.next().getName().getName()
+                                        .equals(decName)) {
                                     // This is a dependency do NOT annex/add
                                     dec.accept(this);
                                     return;
@@ -117,16 +120,15 @@ public class ImportScanner extends ResolveConceptualVisitor {
                         }
                     }
                     // Update the dec's UsesItemList
-                    PosSymbol facSymbol =
-                            new PosSymbol(null, Symbol.symbol("Std_"
-                                    + stdUses[i] + "_Fac"));
+                    PosSymbol facSymbol = new PosSymbol(null,
+                            Symbol.symbol("Std_" + stdUses[i] + "_Fac"));
                     List<UsesItem> decUses = dec.getUsesItems();
                     if (decUses == null) {
                         decUses = new List<UsesItem>();
                     }
                     for (int j = 0; j < decUses.size(); j++) {
-                        if (decUses.get(j).getName().getName().equals(
-                                facSymbol.getName())) {
+                        if (decUses.get(j).getName().getName()
+                                .equals(facSymbol.getName())) {
                             decUses.remove(j);
                         }
                     }
@@ -134,8 +136,8 @@ public class ImportScanner extends ResolveConceptualVisitor {
                     dec.setUsesItems(decUses);
 
                     // Add the StdDec to the ImportList by annexing
-                    annexUsesItem(new PosSymbol(null, Symbol.symbol("Std_"
-                            + stdUses[i] + "_Fac")));
+                    annexUsesItem(new PosSymbol(null,
+                            Symbol.symbol("Std_" + stdUses[i] + "_Fac")));
                 }
             }
         }
@@ -192,8 +194,8 @@ public class ImportScanner extends ResolveConceptualVisitor {
         visitModuleParameterList(dec.getParameters());
         annexEnhancementModule(dec.getEnhancementName(), dec.getConceptName());
         annexConceptModule(dec.getConceptName());
-        visitEnhancementBodyItemList(dec.getEnhancementBodies(), dec
-                .getConceptName());
+        visitEnhancementBodyItemList(dec.getEnhancementBodies(),
+                dec.getConceptName());
         visitUsesItemList(dec.getUsesItems());
         if (dec.getFacilityInit() != null) {
             visitInitItem(dec.getFacilityInit());
@@ -314,11 +316,11 @@ public class ImportScanner extends ResolveConceptualVisitor {
             annexConceptBodyModule(dec.getBodyName(), dec.getConceptName());
         }
 
-        //if(dec.getProfileName() != null){
-        //annexPerformanceProfile(dec.getProfileName());
-        //}
-        visitEnhancementBodyItemList(dec.getEnhancementBodies(), dec
-                .getConceptName());
+        // if(dec.getProfileName() != null){
+        // annexPerformanceProfile(dec.getProfileName());
+        // }
+        visitEnhancementBodyItemList(dec.getEnhancementBodies(),
+                dec.getConceptName());
     }
 
     // -----------------------------------------------------------
@@ -370,9 +372,9 @@ public class ImportScanner extends ResolveConceptualVisitor {
         while (i.hasNext()) {
             EnhancementBodyItem item = i.next();
             assert item != null : "item is null";
-            //if(item.getProfileName() != null){
-            //annexPerformanceProfile(item.getProfileName());
-            //}
+            // if(item.getProfileName() != null){
+            // annexPerformanceProfile(item.getProfileName());
+            // }
             annexEnhancementModule(item.getName(), cName);
             annexEnhancementBodyModule(item.getBodyName(), item.getName(),
                     cName);

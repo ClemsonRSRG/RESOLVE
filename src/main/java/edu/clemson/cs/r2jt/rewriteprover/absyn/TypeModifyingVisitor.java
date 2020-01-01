@@ -1,7 +1,7 @@
 /*
  * TypeModifyingVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -38,8 +38,8 @@ public class TypeModifyingVisitor extends MutatingVisitor {
         if (eType instanceof MTNamed) {
             try {
                 getInnermostBinding(((MTNamed) eType).name);
-                //The type name is bound to some shadowing scope, so we don't
-                //want to apply the replacement
+                // The type name is bound to some shadowing scope, so we don't
+                // want to apply the replacement
                 typeReplacement = null;
             }
             catch (NoSuchElementException nsee) {}
@@ -53,8 +53,8 @@ public class TypeModifyingVisitor extends MutatingVisitor {
         if (eTypeValue instanceof MTNamed) {
             try {
                 getInnermostBinding(((MTNamed) eTypeValue).name);
-                //The type name is bound to some shadowing scope, so we don't
-                //want to apply the replacement
+                // The type name is bound to some shadowing scope, so we don't
+                // want to apply the replacement
                 typeValueReplacement = null;
             }
             catch (NoSuchElementException nsee) {}
@@ -65,8 +65,8 @@ public class TypeModifyingVisitor extends MutatingVisitor {
         }
 
         if (finalValue != e) {
-            //We do this once at the end both for efficiency and fear that 
-            //mutating visitor might break down if we do a double-replace
+            // We do this once at the end both for efficiency and fear that
+            // mutating visitor might break down if we do a double-replace
             replaceWith(e);
         }
     }

@@ -1,7 +1,7 @@
 /*
  * GeneralApplication.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,14 +36,14 @@ import java.util.Set;
  */
 public class GeneralApplication implements Application {
 
-    //This is stuff we're initialized with
+    // This is stuff we're initialized with
     private final Map<Conjunct, PExp> myConjunctsToUpdate;
     private final List<PExp> myLocalTheoremsToAdd;
     private final List<Integer> myLocalTheoremsToAddIndecis;
     private final Collection<Site> myInvolvedSubExpressions;
 
-    //This is stuff that gets filled in after apply() that helps our proof
-    //step perform an undo()
+    // This is stuff that gets filled in after apply() that helps our proof
+    // step perform an undo()
     private List<Conjunct> myRemovedConjuncts = new LinkedList<Conjunct>();
     private List<Integer> myRemovedConjunctsIndecis = new LinkedList<Integer>();
 
@@ -90,7 +90,7 @@ public class GeneralApplication implements Application {
 
     @Override
     public void apply(PerVCProverModel m) {
-        //First, do any adding
+        // First, do any adding
         List<LocalTheorem> mLocalTheoremList = m.getLocalTheoremList();
         LocalTheorem addedTheorem;
 
@@ -104,15 +104,13 @@ public class GeneralApplication implements Application {
                 index = mLocalTheoremList.size();
             }
 
-            addedTheorem =
-                    m.addLocalTheorem(newTheoremIter.next(),
-                            new TheoremApplication(myTransformation), false,
-                            index);
+            addedTheorem = m.addLocalTheorem(newTheoremIter.next(),
+                    new TheoremApplication(myTransformation), false, index);
             myAddedConjuncts.add(addedTheorem);
             myAffectedSites.add(addedTheorem.toSite(m));
         }
 
-        //Now, make any changes and removals
+        // Now, make any changes and removals
         Set<Conjunct> removed = new HashSet<Conjunct>();
         int removedIndex;
         for (Map.Entry<Conjunct, PExp> toUpdate : myConjunctsToUpdate
@@ -136,11 +134,11 @@ public class GeneralApplication implements Application {
             }
         }
 
-        //Finally, add a proof step that represents this application
-        m.addProofStep(new GeneralStep(myRemovedConjuncts,
-                myRemovedConjunctsIndecis, myOriginalConjunctValues,
-                myAddedConjuncts, myTransformation, this,
-                myInvolvedSubExpressions));
+        // Finally, add a proof step that represents this application
+        m.addProofStep(
+                new GeneralStep(myRemovedConjuncts, myRemovedConjunctsIndecis,
+                        myOriginalConjunctValues, myAddedConjuncts,
+                        myTransformation, this, myInvolvedSubExpressions));
     }
 
     @Override

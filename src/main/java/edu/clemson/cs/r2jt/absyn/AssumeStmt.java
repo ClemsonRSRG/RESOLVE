@@ -1,7 +1,7 @@
 /*
  * AssumeStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -126,7 +126,7 @@ public class AssumeStmt extends Statement {
     }
 
     public AssumeStmt clone() {
-        return new AssumeStmt((Location) myLocation.clone(), Exp
-                .copy(myAssertion), myIsStipulate);
+        return new AssumeStmt((Location) myLocation.clone(),
+                Exp.copy(myAssertion), myIsStipulate);
     }
 }

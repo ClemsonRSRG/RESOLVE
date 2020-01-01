@@ -1,7 +1,7 @@
 /*
  * TypeDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -44,8 +44,8 @@ public class TypeDec extends Dec {
 
     public TypeDec() {};
 
-    public TypeDec(PosSymbol name, Ty model, PosSymbol exemplar,
-            Exp constraint, InitItem initialization, FinalItem finalization) {
+    public TypeDec(PosSymbol name, Ty model, PosSymbol exemplar, Exp constraint,
+            InitItem initialization, FinalItem finalization) {
         this.name = name;
         this.model = model;
         this.exemplar = exemplar;

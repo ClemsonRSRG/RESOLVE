@@ -1,7 +1,7 @@
 /*
  * BindingExpression.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -61,13 +61,13 @@ public class BindingExpression {
             throws TypeMismatchException,
                 BindingException {
 
-        //TODO : Ultimately, in theory, one of the arguments THEMSELVES could 
-        //       involve a reference to a named type.  We don't deal with that 
-        //       case (only the case where the TYPE of the argument involves a 
-        //       named type.)
+        // TODO : Ultimately, in theory, one of the arguments THEMSELVES could
+        // involve a reference to a named type. We don't deal with that
+        // case (only the case where the TYPE of the argument involves a
+        // named type.)
 
-        //Either type might actually be a named type that's already been mapped,
-        //so perform the substitution if necessary
+        // Either type might actually be a named type that's already been mapped,
+        // so perform the substitution if necessary
         MTType expr1Type =
                 getTypeUnderBinding(expr1.getMathType(), typeBindings);
         MTType expr2Type =
@@ -113,9 +113,8 @@ public class BindingExpression {
 
             if (funExpr1.getQuantification() == VarExp.FORALL) {
                 if (accumulator.containsKey(fun1Name)) {
-                    fun1Name =
-                            ((AbstractFunctionExp) accumulator.get(fun1Name))
-                                    .getOperatorAsString();
+                    fun1Name = ((AbstractFunctionExp) accumulator.get(fun1Name))
+                            .getOperatorAsString();
 
                     if (!fun1Name.equals(funExpr2.getOperatorAsString())) {
                         throw new BindingException(expr1, expr2);
@@ -124,13 +123,13 @@ public class BindingExpression {
                 else {
                     accumulator.put(fun1Name, expr2);
 
-                    /*if (myTypeGraph.isSubtype(expr2Type, expr1Type)) {
-                    	accumulator.put(fun1Name, expr2);
-                    }
-                    else {
-                    	throw new TypeMismatchException(expr1.getMathType(), 
-                    			expr2.getMathType());
-                    }*/
+                    /*
+                     * if (myTypeGraph.isSubtype(expr2Type, expr1Type)) {
+                     * accumulator.put(fun1Name, expr2); }
+                     * else { throw new
+                     * TypeMismatchException(expr1.getMathType(),
+                     * expr2.getMathType()); }
+                     */
                 }
             }
             else {
@@ -139,16 +138,17 @@ public class BindingExpression {
                 }
             }
 
-            /*if (!myTypeGraph.isSubtype(expr2Type, expr1Type)) {
-            	throw new TypeMismatchException(expr1.getMathType(), 
-            			expr2.getMathType());
-            }*/
+            /*
+             * if (!myTypeGraph.isSubtype(expr2Type, expr1Type)) { throw new
+             * TypeMismatchException(expr1.getMathType(), expr2.getMathType());
+             * }
+             */
 
             Iterator<Exp> fun1Args = funExpr1.getParameters().iterator();
             Iterator<Exp> fun2Args = funExpr2.getParameters().iterator();
 
-            //There must be the same number of parameters, otherwise the 
-            //original typecheck would have failed
+            // There must be the same number of parameters, otherwise the
+            // original typecheck would have failed
             while (fun1Args.hasNext()) {
                 bindTo(fun1Args.next(), fun2Args.next(), typeBindings,
                         accumulator);
@@ -158,20 +158,20 @@ public class BindingExpression {
 
             TupleExp expr1AsTupleExp = (TupleExp) expr1;
 
-            //TODO : Do we need to somehow "descend" (into what is in all 
-            //likelihood a DummyExp) and match universal fields to sub 
-            //components of expr2?
+            // TODO : Do we need to somehow "descend" (into what is in all
+            // likelihood a DummyExp) and match universal fields to sub
+            // components of expr2?
 
-            //We checked earlier that it's a subtype.  So, if it's universally
-            //quantified--we're done here.
+            // We checked earlier that it's a subtype. So, if it's universally
+            // quantified--we're done here.
             if (!expr1AsTupleExp.isUniversallyQuantified()) {
                 Iterator<Exp> tuple1Fields =
                         ((TupleExp) expr1).getFields().iterator();
                 Iterator<Exp> tuple2Fields =
                         ((TupleExp) expr2).getFields().iterator();
 
-                //There must be the same number of fields, otherwise the above
-                //typecheck would have failed
+                // There must be the same number of fields, otherwise the above
+                // typecheck would have failed
                 while (tuple1Fields.hasNext()) {
                     bindTo(tuple1Fields.next(), tuple2Fields.next(),
                             typeBindings, accumulator);
@@ -182,9 +182,9 @@ public class BindingExpression {
             LambdaExp expr1AsLambdaExp = (LambdaExp) expr1;
             LambdaExp expr2AsLambdaExp = (LambdaExp) expr2;
 
-            //Note that we don't have to worry about parameters counts or types:
-            //the original type check would have kicked us out if those didn't
-            //match
+            // Note that we don't have to worry about parameters counts or types:
+            // the original type check would have kicked us out if those didn't
+            // match
 
             bindTo(expr1AsLambdaExp.getBody(), expr2AsLambdaExp.getBody(),
                     typeBindings, accumulator);

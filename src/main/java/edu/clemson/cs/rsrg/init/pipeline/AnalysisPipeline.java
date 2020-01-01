@@ -1,7 +1,7 @@
 /*
  * AnalysisPipeline.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 /**
- * <p>This is pipeline that populates, sanity checks and type checks
- * the RESOLVE AST.</p>
+ * <p>
+ * This is pipeline that populates, sanity checks and type checks the RESOLVE
+ * AST.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -34,8 +36,10 @@ public class AnalysisPipeline extends AbstractPipeline {
     // ===========================================================
 
     /**
-     * <p>This generates a pipeline to populate new symbols and
-     * perform semantic analysis.</p>
+     * <p>
+     * This generates a pipeline to populate new symbols and perform semantic
+     * analysis.
+     * </p>
      *
      * @param ce The current compilation environment.
      * @param symbolTable The symbol table.
@@ -66,8 +70,8 @@ public class AnalysisPipeline extends AbstractPipeline {
             StringBuffer sb = new StringBuffer();
             sb.append("\n---------------Current Type Graph---------------\n\n");
             sb.append(mySymbolTable.getTypeGraph().toString());
-            sb
-                    .append("\n---------------End Current Type Graph---------------\n");
+            sb.append(
+                    "\n---------------End Current Type Graph---------------\n");
             statusHandler.info(null, sb.toString());
         }
     }

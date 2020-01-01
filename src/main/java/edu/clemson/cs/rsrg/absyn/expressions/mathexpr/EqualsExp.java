@@ -1,7 +1,7 @@
 /*
  * EqualsExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical equality/inequality expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical equality/inequality expression
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,11 +33,14 @@ public class EqualsExp extends InfixExp {
     // ===========================================================
 
     /**
-     * <p>This defines both the equals and not equals operator.</p>
+     * <p>
+     * This defines both the equals and not equals operator.
+     * </p>
      *
      * @version 2.0
      */
     public enum Operator {
+
         EQUAL {
 
             @Override
@@ -53,7 +59,9 @@ public class EqualsExp extends InfixExp {
         };
 
         /**
-         * <p>This method returns a deep copy of the operator name.</p>
+         * <p>
+         * This method returns a deep copy of the operator name.
+         * </p>
          *
          * @param l A {@link Location} representation object.
          *
@@ -68,7 +76,11 @@ public class EqualsExp extends InfixExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's operation.</p> */
+    /**
+     * <p>
+     * The expression's operation.
+     * </p>
+     */
     private final Operator myOperator;
 
     // ===========================================================
@@ -76,7 +88,9 @@ public class EqualsExp extends InfixExp {
     // ===========================================================
 
     /**
-     * <p>This constructs an equality/inequality expression.</p>
+     * <p>
+     * This constructs an equality/inequality expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param left A {@link Exp} representing the left hand side.
@@ -120,19 +134,18 @@ public class EqualsExp extends InfixExp {
         boolean retval = e instanceof EqualsExp;
         if (retval) {
             EqualsExp eAsEquals = (EqualsExp) e;
-            retval =
-                    (myOperator == eAsEquals.myOperator)
-                            && (myLeftHandSide
-                                    .equivalent(eAsEquals.myLeftHandSide))
-                            && (myRightHandSide
-                                    .equivalent(eAsEquals.myRightHandSide));
+            retval = (myOperator == eAsEquals.myOperator)
+                    && (myLeftHandSide.equivalent(eAsEquals.myLeftHandSide))
+                    && (myRightHandSide.equivalent(eAsEquals.myRightHandSide));
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns the operator.</p>
+     * <p>
+     * This method returns the operator.
+     * </p>
      *
      * @return A {@link Operator} object containing the operator.
      */
@@ -178,9 +191,9 @@ public class EqualsExp extends InfixExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(cloneLocation(), substitute(myLeftHandSide,
-                substitutions), newOpQualifier, myOperator, substitute(
-                myRightHandSide, substitutions));
+        return new EqualsExp(cloneLocation(),
+                substitute(myLeftHandSide, substitutions), newOpQualifier,
+                myOperator, substitute(myRightHandSide, substitutions));
     }
 
 }

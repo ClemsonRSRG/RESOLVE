@@ -1,7 +1,7 @@
 /*
  * AltItemExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -31,7 +31,7 @@ public class AltItemExp extends Exp {
     // Constructors
 
     public AltItemExp() {
-    // Empty
+        // Empty
     }
 
     public AltItemExp(Location location, Exp test, Exp assignment) {
@@ -133,8 +133,9 @@ public class AltItemExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Boolean found = false;
         if (test != null) {
@@ -157,10 +158,10 @@ public class AltItemExp extends Exp {
     public void setSubExpression(int index, Exp e) {
         switch (index) {
         case 0:
-            //edu.clemson.cs.r2jt.data.List was written by crazed monkies and
-            //silently ignores adding null elements (in violation of 
-            //java.util.List's contract), so if test is null, index 0 is the
-            //assignment subexpression, otherwise it's the test subexpression.
+            // edu.clemson.cs.r2jt.data.List was written by crazed monkies and
+            // silently ignores adding null elements (in violation of
+            // java.util.List's contract), so if test is null, index 0 is the
+            // assignment subexpression, otherwise it's the test subexpression.
             if (test == null) {
                 setAssignment(e);
             }

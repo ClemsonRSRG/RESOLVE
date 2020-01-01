@@ -1,7 +1,7 @@
 /*
  * CallStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the call statement objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the call statement objects that the compiler builds
+ * using the ANTLR4
+ * AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -27,7 +30,11 @@ public class CallStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The programming function expression</p> */
+    /**
+     * <p>
+     * The programming function expression
+     * </p>
+     */
     private final ProgramFunctionExp myFunctionExp;
 
     // ===========================================================
@@ -35,11 +42,13 @@ public class CallStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a call statement.</p>
+     * <p>
+     * This constructs a call statement.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param exp A {@link ProgramFunctionExp} representing the function
-     *            we are calling.
+     * @param exp A {@link ProgramFunctionExp} representing the function we are
+     *        calling.
      */
     public CallStmt(Location l, ProgramFunctionExp exp) {
         super(l);
@@ -79,8 +88,9 @@ public class CallStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the function expression in
-     * this calling statement.</p>
+     * <p>
+     * This method returns the function expression in this calling statement.
+     * </p>
      *
      * @return The {@link ProgramFunctionExp} representation object.
      */
@@ -105,8 +115,8 @@ public class CallStmt extends Statement {
      */
     @Override
     protected final Statement copy() {
-        return new CallStmt(cloneLocation(), (ProgramFunctionExp) myFunctionExp
-                .clone());
+        return new CallStmt(cloneLocation(),
+                (ProgramFunctionExp) myFunctionExp.clone());
     }
 
 }

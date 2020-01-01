@@ -1,7 +1,7 @@
 /*
  * GuiWrapper.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -39,7 +39,7 @@ public class GuiWrapper {
         this.type = type;
         String facilityFileName =
                 analyzeTargetFile(targetFile, workspaceDir) + ".fa";
-        //String facilityFileName = analyzeManifest(manifestContents) + ".fa";
+        // String facilityFileName = analyzeManifest(manifestContents) + ".fa";
 
         javaLocation =
                 targetFile.replaceAll(facilityFileName, guiName + ".java");
@@ -50,7 +50,7 @@ public class GuiWrapper {
         else {
             programFacilityName = facilityName;
         }
-        //System.out.println(facilityName);
+        // System.out.println(facilityName);
     }
 
     public void setJavaLocation(String java, String name) {
@@ -71,9 +71,8 @@ public class GuiWrapper {
     }
 
     private void generateSwing() {
-        SwingGui sg =
-                new SwingGui(guiName, facilityName, programFacilityName,
-                        packageName, gui);
+        SwingGui sg = new SwingGui(guiName, facilityName, programFacilityName,
+                packageName, gui);
         sb = sg.generateCode();
     }
 

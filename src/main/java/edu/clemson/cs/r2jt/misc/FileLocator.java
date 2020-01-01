@@ -1,7 +1,7 @@
 /*
  * FileLocator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,9 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Traverses a tree of directories. Each file encountered is reported via the
- * <code>visitFile</code> method and each directory via an optional
- * <code>visitDirectory</code> method (override others as needed).</p>
+ * <p>
+ * Traverses a tree of directories. Each file encountered is reported via the
+ * <code>visitFile</code>
+ * method and each directory via an optional <code>visitDirectory</code> method
+ * (override others as
+ * needed).
+ * </p>
  */
 public class FileLocator extends SimpleFileVisitor<Path> {
 
@@ -34,26 +38,27 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     private List<File> myMatches = new ArrayList<File>();
 
     /**
-     * <p>Constructs a new <code>FileLocator</code> that will match based on the
-     * <code>pattern</code> (or, name) and <code>extension</code> pair
-     * provided.</p>
+     * <p>
+     * Constructs a new <code>FileLocator</code> that will match based on the
+     * <code>pattern</code>
+     * (or, name) and <code>extension</code> pair provided.
+     * </p>
      *
      * @param pattern An <em>extensionless</em> pattern.
      * @param extensions An list of valid extensions to choose from after a
-     *        pattern is matched (i.e. ["java", "cpp", "groovy"]).
+     *        pattern is matched (i.e.
+     *        ["java", "cpp", "groovy"]).
      */
     public FileLocator(String pattern, List<String> extensions) {
         myPattern = pattern;
 
-        myMatcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:" + pattern + parseExtensions(extensions));
+        myMatcher = FileSystems.getDefault().getPathMatcher(
+                "glob:" + pattern + parseExtensions(extensions));
     }
 
     public FileLocator(String extension) {
-        myMatcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:*.{" + extension + "}");
+        myMatcher = FileSystems.getDefault()
+                .getPathMatcher("glob:*.{" + extension + "}");
     }
 
     @Override
@@ -66,7 +71,10 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     }
 
     /**
-     * <p>Returns a single file matching <code>myPattern</code>.</p>
+     * <p>
+     * Returns a single file matching <code>myPattern</code>.
+     * </p>
+     * 
      * @throws NoSuchFileException If a file matching <code>myPattern</code>
      *         could not be found.
      *

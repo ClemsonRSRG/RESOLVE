@@ -1,7 +1,7 @@
 /*
  * Map.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -38,8 +38,9 @@ public class Map<A, B> extends java.util.HashMap<A, B> implements Copyable {
     }
 
     /**
-     * Returns a deep copy of the current map. If an element does
-     * not implement the Copyable interface, the program will abort.
+     * Returns a deep copy of the current map. If an element does not implement
+     * the Copyable
+     * interface, the program will abort.
      */
     public Map<A, B> copy() {
         Map<A, B> result = new Map<A, B>();

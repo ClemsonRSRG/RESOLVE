@@ -1,7 +1,7 @@
 /*
  * Ty.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,12 +16,17 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 
 /**
- * <p>A <code>Ty</code> represents the <em>description</em> of a 
- * <code>Type</code>, as it is found in the RESOLVE source code.  That is, it is
- * representation of a type in the abstract syntax tree before it is translated 
- * into a true <code>Type</code>.</p>
+ * <p>
+ * A <code>Ty</code> represents the <em>description</em> of a <code>Type</code>,
+ * as it is found in
+ * the RESOLVE source code. That is, it is representation of a type in the
+ * abstract syntax tree
+ * before it is translated into a true <code>Type</code>.
+ * </p>
  * 
- * <p>It can be converted into a <code>Type</code> by a type.TypeConverter.</p>
+ * <p>
+ * It can be converted into a <code>Type</code> by a type.TypeConverter.
+ * </p>
  */
 public abstract class Ty extends ResolveConceptualElement implements Cloneable {
 
@@ -70,8 +75,8 @@ public abstract class Ty extends ResolveConceptualElement implements Cloneable {
     }
 
     protected Ty copy() {
-        throw new RuntimeException("Shouldn't be calling Ty.copy()!  Type: "
-                + this.getClass());
+        throw new RuntimeException(
+                "Shouldn't be calling Ty.copy()!  Type: " + this.getClass());
     }
 
     public void prettyPrint() {

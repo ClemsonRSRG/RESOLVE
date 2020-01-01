@@ -1,7 +1,7 @@
 /*
  * WalkerCodeGenerator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -31,8 +31,11 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 /**
- * <p>This class generates a Java abstract class containing dummy implementations
- * for each node in the RESOLVE AST hierarchy.</p>
+ * <p>
+ * This class generates a Java abstract class containing dummy implementations
+ * for each node in the
+ * RESOLVE AST hierarchy.
+ * </p>
  *
  * @author Blair Durkee
  * @author Yu-Shan Sun
@@ -45,7 +48,11 @@ public class WalkerCodeGenerator {
     // Member Fields
     // ===========================================================
 
-    /** <p>String template for generating the tree.</p> */
+    /**
+     * <p>
+     * String template for generating the tree.
+     * </p>
+     */
     private static final STGroup GROUP =
             new STGroupFile("templates/Treewalker.stg");
 
@@ -54,18 +61,26 @@ public class WalkerCodeGenerator {
     // ===========================================================
 
     /**
-     * <p>Generates a tree walker.</p>
+     * <p>
+     * Generates a tree walker.
+     * </p>
      *
-     * <p>Two optional arguments in the array:</p>
+     * <p>
+     * Two optional arguments in the array:
+     * </p>
      * <ul>
-     * <li>The desired name of the walker (default: {@code TreeWalkerVisitor})</li>
-     * <li>The desired name of the stack walker (default: {@code TreeWalkerStackVisitor})</li>
-     * <li>The input package directory (default: {@code edu/clemson/cs/rsrg/absyn}</li>
-     * <li>The output package directory (default: {@code edu/clemson/cs/rsrg/treewalk})</li>
+     * <li>The desired name of the walker (default:
+     * {@code TreeWalkerVisitor})</li>
+     * <li>The desired name of the stack walker (default:
+     * {@code TreeWalkerStackVisitor})</li>
+     * <li>The input package directory (default:
+     * {@code edu/clemson/cs/rsrg/absyn}</li>
+     * <li>The output package directory (default:
+     * {@code edu/clemson/cs/rsrg/treewalk})</li>
      * </ul>
      *
-     * @param args Arguments required to perform the tree walker
-     *             generation process.
+     * @param args Arguments required to perform the tree walker generation
+     *        process.
      */
     public static void main(String[] args) {
         String walkerName;
@@ -86,18 +101,15 @@ public class WalkerCodeGenerator {
             outputPackageDir = args[3];
             break;
         default:
-            throw new IllegalArgumentException(
-                    "usage:\n"
-                            + "\tSupply the following args: [walker name, stack walker name, input directory, output directory]\n"
-                            + "\tor use the built-in default args.\n");
+            throw new IllegalArgumentException("usage:\n"
+                    + "\tSupply the following args: [walker name, stack walker name, input directory, output directory]\n"
+                    + "\tor use the built-in default args.\n");
         }
 
-        ST visitor =
-                createDefaultVisitor(walkerName, inputPackageDir,
-                        outputPackageDir);
-        ST stackVisitor =
-                createStackVisitor(stackWalkerName, walkerName,
-                        inputPackageDir, outputPackageDir);
+        ST visitor = createDefaultVisitor(walkerName, inputPackageDir,
+                outputPackageDir);
+        ST stackVisitor = createStackVisitor(stackWalkerName, walkerName,
+                inputPackageDir, outputPackageDir);
         try {
             // Generate the output directory string
             String javaSrcDir = "/src/main/java/";
@@ -124,8 +136,8 @@ public class WalkerCodeGenerator {
             writer.write(stackVisitor.render());
             writer.close();
 
-            System.out.println("Successfully created: " + stackWalkerName
-                    + ".java");
+            System.out.println(
+                    "Successfully created: " + stackWalkerName + ".java");
         }
         catch (IOException ioe) {
             ioe.printStackTrace();
@@ -137,8 +149,10 @@ public class WalkerCodeGenerator {
     // ===========================================================
 
     /**
-     * <p>This method uses {@code StringTemplate} to generate the default
-     * tree walker.</p>
+     * <p>
+     * This method uses {@code StringTemplate} to generate the default tree
+     * walker.
+     * </p>
      *
      * @param className Name for the new default tree walker.
      * @param inputDirectory The source files directory.
@@ -146,7 +160,8 @@ public class WalkerCodeGenerator {
      *
      * @return A completed {@code StringTemplate}.
      */
-    private static ST createDefaultVisitor(String className, String inputDirectory, String outputDirectory) {
+    private static ST createDefaultVisitor(String className,
+            String inputDirectory, String outputDirectory) {
         // Replace with the correct file separator.
         String inputPkg = convertDirToPkg(inputDirectory);
         String outputPkg = convertDirToPkg(outputDirectory);
@@ -157,9 +172,8 @@ public class WalkerCodeGenerator {
                 reflections.getSubTypesOf(ResolveConceptualElement.class);
 
         // Create the walker class with the general information
-        ST walkerClass =
-                GROUP.getInstanceOf("walkerImplementation").add("pkgName",
-                        outputPkg).add("className", className);
+        ST walkerClass = GROUP.getInstanceOf("walkerImplementation")
+                .add("pkgName", outputPkg).add("className", className);
 
         // Add in methods for each of the classes.
         // Also add in new imports if needed.
@@ -171,17 +185,17 @@ public class WalkerCodeGenerator {
                 // Add to walker and to our set.
                 pkgNames.add(pkgName);
 
-                ST imports = GROUP.getInstanceOf("walkerImports").add("importItem", pkgName);
+                ST imports = GROUP.getInstanceOf("walkerImports")
+                        .add("importItem", pkgName);
                 walkerClass.add("imports", imports);
             }
 
             // Add the default implementations for each class and
             // add to walker.
-            ST defaultImplementations =
-                    GROUP.getInstanceOf("walkerMethods").add("name",
-                            e.getSimpleName()).add("qualName",
-                            e.getCanonicalName()).add("isMember",
-                            e.isMemberClass());
+            ST defaultImplementations = GROUP.getInstanceOf("walkerMethods")
+                    .add("name", e.getSimpleName())
+                    .add("qualName", e.getCanonicalName())
+                    .add("isMember", e.isMemberClass());
             walkerClass.add("methods", defaultImplementations);
 
             // Generate methods for before visiting a list of items.
@@ -198,14 +212,21 @@ public class WalkerCodeGenerator {
                             Class<?> listOf =
                                     (Class<?>) ((ParameterizedType) field
                                             .getGenericType())
-                                            .getActualTypeArguments()[0];
-                            if (ResolveConceptualElement.class.isAssignableFrom(listOf)) {
-                                ST listDefaultImplementations =
-                                        GROUP.getInstanceOf("walkerVirtualListMethods").add("name",
-                                                e.getSimpleName() + toCamelCase(field.getName())).add("qualClassName",
-                                                e.getCanonicalName()).add("className", e.getSimpleName()).add("isMember",
-                                                e.isMemberClass());
-                                walkerClass.add("methods", listDefaultImplementations);
+                                                    .getActualTypeArguments()[0];
+                            if (ResolveConceptualElement.class
+                                    .isAssignableFrom(listOf)) {
+                                ST listDefaultImplementations = GROUP
+                                        .getInstanceOf(
+                                                "walkerVirtualListMethods")
+                                        .add("name",
+                                                e.getSimpleName() + toCamelCase(
+                                                        field.getName()))
+                                        .add("qualClassName",
+                                                e.getCanonicalName())
+                                        .add("className", e.getSimpleName())
+                                        .add("isMember", e.isMemberClass());
+                                walkerClass.add("methods",
+                                        listDefaultImplementations);
                             }
                         }
                     }
@@ -220,8 +241,11 @@ public class WalkerCodeGenerator {
     }
 
     /**
-     * <p>This method uses {@code StringTemplate} to generate a
-     * stack-based tree walker that inherits from the default walker.</p>
+     * <p>
+     * This method uses {@code StringTemplate} to generate a stack-based tree
+     * walker that inherits
+     * from the default walker.
+     * </p>
      *
      * @param className Name for the new stack tree walker.
      * @param parentWalkerName Name for the default walker.
@@ -238,22 +262,22 @@ public class WalkerCodeGenerator {
         String outputPkg = convertDirToPkg(outputDirectory);
 
         // Create the stack walker class with the general information
-        ST walkerClass =
-                GROUP.getInstanceOf("walkerStackImplementation").add("pkgName",
-                        outputPkg).add("className", className).add(
-                        "parentClassName", parentWalkerName);
+        ST walkerClass = GROUP.getInstanceOf("walkerStackImplementation")
+                .add("pkgName", outputPkg).add("className", className)
+                .add("parentClassName", parentWalkerName);
 
         // Add in the import for ResolveConceptualElement
-        ST imports =
-                GROUP.getInstanceOf("walkerImports")
-                        .add("importItem", inputPkg);
+        ST imports = GROUP.getInstanceOf("walkerImports").add("importItem",
+                inputPkg);
         walkerClass.add("imports", imports);
 
         return walkerClass;
     }
 
     /**
-     * <p>This method converts the directory path to package names.</p>
+     * <p>
+     * This method converts the directory path to package names.
+     * </p>
      *
      * @param dir Directory path.
      *
@@ -275,7 +299,9 @@ public class WalkerCodeGenerator {
     }
 
     /**
-     * <p>Applies proper camel casing to the string passed in.</p>
+     * <p>
+     * Applies proper camel casing to the string passed in.
+     * </p>
      *
      * @param s Original string.
      *

@@ -1,7 +1,7 @@
 /*
  * GeneralStep.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -58,7 +58,7 @@ public class GeneralStep extends AbstractProofStep {
 
     @Override
     public void undo(PerVCProverModel m) {
-        //Reintroduce removed conjuncts
+        // Reintroduce removed conjuncts
         Iterator<Conjunct> removedConjunctIter = myRemovedConjuncts.iterator();
         Iterator<Integer> removedConjunctIndexIter =
                 myRemovedConjunctsIndecis.iterator();
@@ -68,13 +68,13 @@ public class GeneralStep extends AbstractProofStep {
                     removedConjunctIndexIter.next());
         }
 
-        //Restore original values
+        // Restore original values
         for (Map.Entry<Conjunct, PExp> originalValue : myOriginalValues
                 .entrySet()) {
             m.alterConjunct(originalValue.getKey(), originalValue.getValue());
         }
 
-        //Remove introduced conjuncts
+        // Remove introduced conjuncts
         for (Conjunct introducedConjunct : myIntroducedConjuncts) {
             m.removeConjunct(introducedConjunct);
         }

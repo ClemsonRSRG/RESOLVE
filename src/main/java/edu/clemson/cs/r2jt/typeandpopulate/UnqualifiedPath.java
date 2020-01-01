@@ -1,7 +1,7 @@
 /*
  * UnqualifiedPath.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -29,29 +29,40 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>Defines the search path used when a symbol is referenced in an 
- * unqualified way, along with some parameters for tweaking how the search is
- * accomplished.  In general, the path is as follows:</p>
+ * <p>
+ * Defines the search path used when a symbol is referenced in an unqualified
+ * way, along with some
+ * parameters for tweaking how the search is accomplished. In general, the path
+ * is as follows:
+ * </p>
  * 
  * <ol>
- * 		<li>Search the local scope.</li>
- * 		<li>Search any facilities declared in the local scope.</li>
- * 		<li>Search any imports in a depth-first manner, skipping any 
- * 		    already-searched scopes.</li>
- * 		<ul>
- * 			<li>For each searched import, search any facilities declared
- * 			    inside.</li>
- * 		</ul>
+ * <li>Search the local scope.</li>
+ * <li>Search any facilities declared in the local scope.</li>
+ * <li>Search any imports in a depth-first manner, skipping any already-searched
+ * scopes.</li>
+ * <ul>
+ * <li>For each searched import, search any facilities declared inside.</li>
+ * </ul>
  * </ol>
  *
- * <p>Instance of this class can be parameterized to search only direct imports
- * or to exclude all imports, as well as to exclude searching facilities, or 
- * change how generics are handled when searching facilities.</p>
+ * <p>
+ * Instance of this class can be parameterized to search only direct imports or
+ * to exclude all
+ * imports, as well as to exclude searching facilities, or change how generics
+ * are handled when
+ * searching facilities.
+ * </p>
  * 
- * <p>Additionally, by setting the <code>localPriority</code> flag, the search
- * can be made to stop without considering imports (regardless of the import
- * strategy) if at least one local match is found.  Note that any local 
- * facilities will still be searched if the facility strategy requires it.</p>
+ * <p>
+ * Additionally, by setting the <code>localPriority</code> flag, the search can
+ * be made to stop
+ * without considering imports (regardless of the import strategy) if at least
+ * one local match is
+ * found. Note that any local facilities will still be searched if the facility
+ * strategy requires
+ * it.
+ * </p>
  */
 public class UnqualifiedPath implements ScopeSearchPath {
 
@@ -88,23 +99,23 @@ public class UnqualifiedPath implements ScopeSearchPath {
             List<E> results, Set<Scope> searchedScopes,
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility, ImportStrategy importStrategy,
-            int depth) throws DuplicateSymbolException {
+            int depth)
+            throws DuplicateSymbolException {
 
-        //First we search locally
-        boolean finished =
-                source.addMatches(searcher, results, searchedScopes,
-                        genericInstantiations, instantiatingFacility,
-                        SearchContext.SOURCE_MODULE);
+        // First we search locally
+        boolean finished = source.addMatches(searcher, results, searchedScopes,
+                genericInstantiations, instantiatingFacility,
+                SearchContext.SOURCE_MODULE);
 
-        //Next, if requested, we search any local facilities.
-        if (!finished && myFacilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
+        // Next, if requested, we search any local facilities.
+        if (!finished
+                && myFacilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
 
-            finished =
-                    searchFacilities(searcher, results, source,
-                            genericInstantiations, searchedScopes, repo);
+            finished = searchFacilities(searcher, results, source,
+                    genericInstantiations, searchedScopes, repo);
         }
 
-        //Finally, if requested, we search imports
+        // Finally, if requested, we search imports
         if ((results.isEmpty() || !myLocalPriorityFlag)
                 && source instanceof SyntacticScope
                 && myImportStrategy != ImportStrategy.IMPORT_NONE) {
@@ -112,9 +123,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
             SyntacticScope sourceAsSyntacticScope = (SyntacticScope) source;
 
             try {
-                ModuleScope module =
-                        repo.getModuleScope(sourceAsSyntacticScope
-                                .getRootModule());
+                ModuleScope module = repo
+                        .getModuleScope(sourceAsSyntacticScope.getRootModule());
                 List<ModuleIdentifier> imports = module.getImports();
 
                 Iterator<ModuleIdentifier> importsIter = imports.iterator();
@@ -122,15 +132,14 @@ public class UnqualifiedPath implements ScopeSearchPath {
                 while (!finished && importsIter.hasNext()) {
                     importScope = repo.getModuleScope(importsIter.next());
 
-                    finished =
-                            searchModule(searcher, importScope, repo, results,
-                                    searchedScopes, genericInstantiations,
-                                    instantiatingFacility, importStrategy
-                                            .cascadingStrategy(), depth + 1);
+                    finished = searchModule(searcher, importScope, repo,
+                            results, searchedScopes, genericInstantiations,
+                            instantiatingFacility,
+                            importStrategy.cascadingStrategy(), depth + 1);
                 }
             }
             catch (NoSuchSymbolException nsse) {
-                //This shouldn't be possible--we'd've caught it by now
+                // This shouldn't be possible--we'd've caught it by now
                 throw new RuntimeException(nsse);
             }
         }
@@ -158,14 +167,12 @@ public class UnqualifiedPath implements ScopeSearchPath {
             facility = facilitiesIter.next();
             facilityConcept = facility.getFacility().getSpecification();
 
-            facilityScope =
-                    facilityConcept.getScope(myFacilityStrategy
-                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+            facilityScope = facilityConcept.getScope(myFacilityStrategy
+                    .equals(FacilityStrategy.FACILITY_INSTANTIATE));
 
-            finished =
-                    facilityScope.addMatches(searcher, result, searchedScopes,
-                            new HashMap<String, PTType>(), null,
-                            SearchContext.FACILITY);
+            finished = facilityScope.addMatches(searcher, result,
+                    searchedScopes, new HashMap<String, PTType>(), null,
+                    SearchContext.FACILITY);
 
             // YS Edits
             // Search any enhancements in this facility declaration
@@ -174,16 +181,12 @@ public class UnqualifiedPath implements ScopeSearchPath {
                         facility.getEnhancements();
                 for (ModuleParameterization facEnh : enhancementList) {
                     // Obtain the scope for the enhancement
-                    facilityScope =
-                            facEnh
-                                    .getScope(myFacilityStrategy
-                                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+                    facilityScope = facEnh.getScope(myFacilityStrategy
+                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
                     // Search and add matches.
-                    finished =
-                            facilityScope.addMatches(searcher, result,
-                                    searchedScopes,
-                                    new HashMap<String, PTType>(), null,
-                                    SearchContext.FACILITY);
+                    finished = facilityScope.addMatches(searcher, result,
+                            searchedScopes, new HashMap<String, PTType>(), null,
+                            SearchContext.FACILITY);
                 }
             }
         }

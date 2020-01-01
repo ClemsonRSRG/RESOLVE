@@ -1,7 +1,7 @@
 /*
  * SimpleArrayList.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,14 +17,19 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * <p>Not a true {@link java.util.List List}.  Simply provides the minimum of
- * functionality required by 
- * {@link edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel PerVCProverModel}.
- * We don't use an existing list because we want to explicitly allow the 
- * collection to be modified out from under iterators derived from it--with
- * modifiers fulfilling the contract that by time Iterator.next() is called,
- * the collection will be restored to the exact state it was in when the 
- * iterator was last used.</p>
+ * <p>
+ * Not a true {@link java.util.List List}. Simply provides the minimum of
+ * functionality required by
+ * {@link edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel
+ * PerVCProverModel}. We don't use
+ * an existing list because we want to explicitly allow the collection to be
+ * modified out from under
+ * iterators derived from it--with modifiers fulfilling the contract that by
+ * time Iterator.next() is
+ * called, the collection will be restored to the exact state it was in when the
+ * iterator was last
+ * used.
+ * </p>
  */
 public class SimpleArrayList<E> implements Iterable<E> {
 
@@ -45,8 +50,8 @@ public class SimpleArrayList<E> implements Iterable<E> {
 
         resizeAsNecessary();
 
-        System.arraycopy(myData, index, myData, index + 1, myFirstEmptyIndex
-                - index);
+        System.arraycopy(myData, index, myData, index + 1,
+                myFirstEmptyIndex - index);
 
         myData[index] = e;
         myFirstEmptyIndex++;
@@ -105,8 +110,8 @@ public class SimpleArrayList<E> implements Iterable<E> {
 
         E result = myData[index];
 
-        System.arraycopy(myData, index + 1, myData, index, myFirstEmptyIndex
-                - index - 1);
+        System.arraycopy(myData, index + 1, myData, index,
+                myFirstEmptyIndex - index - 1);
 
         myFirstEmptyIndex--;
 

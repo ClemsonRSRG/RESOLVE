@@ -1,7 +1,7 @@
 /*
  * VerificationConditionCongruenceClosureImpl.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -42,7 +42,8 @@ public class VerificationConditionCongruenceClosureImpl {
         FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
     }
 
-    public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from this
+    public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from
+                                             // this
 
     // currently support only unchained equalities, so each sublist is size 2.
     public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc,
@@ -75,7 +76,7 @@ public class VerificationConditionCongruenceClosureImpl {
         args.clear();
         m_conjunction.addExpression(trEqFEqF);
 
-        // seed with true and true.  Need this for search: x and y, when x and y are both true
+        // seed with true and true. Need this for search: x and y, when x and y are both true
         args.add(tr);
         args.add(tr);
         PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);

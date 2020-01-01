@@ -1,7 +1,7 @@
 /*
  * BaseMultimatchSymbolQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,9 +21,12 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
 import java.util.List;
 
 /**
- * <p>The most basic implementation of {@link MultimatchSymbolQuery}, which
- * pairs a {@link ScopeSearchPath} with a {@link MultimatchTableSearcher} to
- * define a fully parameterized strategy for searching a set of scopes.</p>
+ * <p>
+ * The most basic implementation of {@link MultimatchSymbolQuery}, which pairs a
+ * {@link ScopeSearchPath} with a {@link MultimatchTableSearcher} to define a
+ * fully parameterized
+ * strategy for searching a set of scopes.
+ * </p>
  *
  * @param <E> The return type of the base <code>MultimatchSymbolQuery</code>.
  *
@@ -37,10 +40,18 @@ abstract class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
     // Member Fields
     // ===========================================================
 
-    /** <p>Search path.</p> */
+    /**
+     * <p>
+     * Search path.
+     * </p>
+     */
     private final ScopeSearchPath mySearchPath;
 
-    /** <p>Symbol table searcher.</p> */
+    /**
+     * <p>
+     * Symbol table searcher.
+     * </p>
+     */
     private final MultimatchTableSearcher<E> mySearcher;
 
     // ===========================================================
@@ -48,8 +59,11 @@ abstract class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
     // ===========================================================
 
     /**
-     * <p>This is an helper constructor for storing the search path
-     * and a multimatch symbol table search strategy.</p>
+     * <p>
+     * This is an helper constructor for storing the search path and a
+     * multimatch symbol table search
+     * strategy.
+     * </p>
      *
      * @param path Search path.
      * @param searcher Multimatch symbol table searcher.
@@ -65,8 +79,12 @@ abstract class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
     // ===========================================================
 
     /**
-     * <p>Behaves just as {@link SymbolQuery#searchFromContext(Scope, ScopeRepository)},
-     * except that it cannot throw a {@link DuplicateSymbolException}.</p>
+     * <p>
+     * Behaves just as
+     * {@link SymbolQuery#searchFromContext(Scope, ScopeRepository)}, except
+     * that it
+     * cannot throw a {@link DuplicateSymbolException}.
+     * </p>
      *
      * @param source The source scope from which the search was spawned.
      * @param repo A repository of any referenced modules.

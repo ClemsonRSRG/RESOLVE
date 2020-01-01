@@ -1,7 +1,7 @@
 /*
  * ShortFacilityEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -35,8 +35,11 @@ public class ShortFacilityEntry extends ModuleEntry {
     }
 
     /**
-     * <p>A short facility module contains exactly one facility declaration.
-     * This method returns the entry corresponding to that declaration.</p>
+     * <p>
+     * A short facility module contains exactly one facility declaration. This
+     * method returns the
+     * entry corresponding to that declaration.
+     * </p>
      * 
      * @return The entry corresponding to the single facility enclosed in the
      *         short facility module.

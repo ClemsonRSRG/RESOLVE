@@ -1,7 +1,7 @@
 /*
  * AssertiveCode.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,28 +28,33 @@ import java.util.*;
 public class AssertiveCode {
 
     // ===========================================================
-    // Global Variables 
+    // Global Variables
     // ===========================================================
 
     /**
-     * <p>Our current final confirm statement.</p>
+     * <p>
+     * Our current final confirm statement.
+     * </p>
      */
     private ConfirmStmt myConfirm;
 
     /**
-     * <p>The list of free variables.</p>
+     * <p>
+     * The list of free variables.
+     * </p>
      */
     private List<Exp> myFreeVars;
 
     /**
-     * <p>The <code>ResolveConceptualElement</code> that created
-     * this object.</p>
+     * <p>
+     * The <code>ResolveConceptualElement</code> that created this object.
+     * </p>
      */
     private ResolveConceptualElement myInstantiatingElement;
 
     /**
-     * <p>List of verification statements that we
-     * need to apply proof rules to./p>
+     * <p>
+     * List of verification statements that we need to apply proof rules to./p>
      */
     private List<VerificationStatement> myVerificationStmtList;
 
@@ -59,9 +64,8 @@ public class AssertiveCode {
 
     public AssertiveCode(CompileEnvironment env,
             ResolveConceptualElement instantiatingElement) {
-        myConfirm =
-                new ConfirmStmt(null, Exp.getTrueVarExp(env.getTypeGraph()),
-                        true);
+        myConfirm = new ConfirmStmt(null, Exp.getTrueVarExp(env.getTypeGraph()),
+                true);
         myFreeVars = new ArrayList<Exp>();
         myVerificationStmtList = new ArrayList<VerificationStatement>();
         myInstantiatingElement = instantiatingElement;
@@ -85,13 +89,14 @@ public class AssertiveCode {
     // ===========================================================
 
     /**
-     * <p>Add the <code>Exp</code> containing a new assumes
-     * clause.</p>
+     * <p>
+     * Add the <code>Exp</code> containing a new assumes clause.
+     * </p>
      *
      * @param l The location for this assume clause.
      * @param e The corresponding assume <code>Exp</code>.
-     * @param b Boolean to determine if this is a stipulate assume clause
-     *          or not.
+     * @param b Boolean to determine if this is a stipulate assume clause or
+     *        not.
      */
     public void addAssume(Location l, Exp e, boolean b) {
         // Creates a new AssumeStmt
@@ -102,7 +107,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Add the changing clause to the list</p>
+     * <p>
+     * Add the changing clause to the list
+     * </p>
      */
     public void addChange(List<VariableExp> changeList) {
         myVerificationStmtList.add(new VerificationStatement(
@@ -110,23 +117,25 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Add a new <code>VerificationStatement</code> to the list</p>
+     * <p>
+     * Add a new <code>VerificationStatement</code> to the list
+     * </p>
      *
      * @param stmt The corresponding <code>Statement</code>.
      */
     public void addCode(Statement stmt) {
-        myVerificationStmtList.add(new VerificationStatement(
-                VerificationStatement.CODE, stmt));
+        myVerificationStmtList.add(
+                new VerificationStatement(VerificationStatement.CODE, stmt));
     }
 
     /**
-     * <p>Add the <code>Exp</code> containing a new confirm
-     * clause.</p>
+     * <p>
+     * Add the <code>Exp</code> containing a new confirm clause.
+     * </p>
      *
      * @param l The location for this confirm clause.
      * @param e The corresponding confirm <code>Exp</code>.
-     * @param b Boolean to determine if we simplify this confirm clause
-     *          or not.
+     * @param b Boolean to determine if we simplify this confirm clause or not.
      */
     public void addConfirm(Location l, Exp e, boolean b) {
         // Creates a new ConfirmStmt
@@ -137,8 +146,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Add the <code>Exp</code> containing the name of the
-     * variable.</p>
+     * <p>
+     * Add the <code>Exp</code> containing the name of the variable.
+     * </p>
      *
      * @param var The name of the variable.
      */
@@ -160,8 +170,10 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Loop through the list of <code>Statement</code> to the
-     * list of verification statements</p>
+     * <p>
+     * Loop through the list of <code>Statement</code> to the list of
+     * verification statements
+     * </p>
      *
      * @param statementList The corresponding <code>Statement</code>.
      */
@@ -174,11 +186,13 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Loop through the list of <code>VarDec</code> and add
-     * them to the list of verification statements</p>
+     * <p>
+     * Loop through the list of <code>VarDec</code> and add them to the list of
+     * verification
+     * statements
+     * </p>
      *
-     * @param variableList List of the all variables as
-     *                     <code>VarDec</code>.
+     * @param variableList List of the all variables as <code>VarDec</code>.
      */
     public void addVariableDecs(List<VarDec> variableList) {
         Iterator<VarDec> i = variableList.iterator();
@@ -190,8 +204,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Returns a string containing the assertion formatted for
-     * output.</p>
+     * <p>
+     * Returns a string containing the assertion formatted for output.
+     * </p>
      *
      * @return Readable <code>String</code> form of the assertion.
      */
@@ -205,9 +220,8 @@ public class AssertiveCode {
         Iterator<Exp> freeVarIt = myFreeVars.iterator();
         while (freeVarIt.hasNext()) {
             Exp current = freeVarIt.next();
-            retStr =
-                    retStr.concat(current.toString(0) + " : "
-                            + current.getMathType().toString());
+            retStr = retStr.concat(current.toString(0) + " : "
+                    + current.getMathType().toString());
 
             if (freeVarIt.hasNext())
                 retStr = retStr.concat(", ");
@@ -238,20 +252,15 @@ public class AssertiveCode {
                 break;
             // Code Verification Statements
             case VerificationStatement.CODE:
-                retStr =
-                        retStr.concat(((Statement) current.getAssertion())
-                                .toString(6));
+                retStr = retStr.concat(
+                        ((Statement) current.getAssertion()).toString(6));
                 break;
             // Variable Verification Statements
             case VerificationStatement.VARIABLE:
                 VarDec varDec = (VarDec) current.getAssertion();
-                retStr =
-                        retStr
-                                .concat("      Var "
-                                        + varDec.getName().getName()
-                                        + " : "
-                                        + ((NameTy) varDec.getTy()).getName()
-                                                .getName());
+                retStr = retStr.concat("      Var " + varDec.getName().getName()
+                        + " : "
+                        + ((NameTy) varDec.getTy()).getName().getName());
                 break;
             }
             retStr = retStr.concat(";\n");
@@ -263,8 +272,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Returns a deep copy of the final confirm
-     * statement.</p>
+     * <p>
+     * Returns a deep copy of the final confirm statement.
+     * </p>
      *
      * @return <code>ConfirmStmt</code> confirm clause.
      */
@@ -273,7 +283,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Returns the instantiating element that created this object.</p>
+     * <p>
+     * Returns the instantiating element that created this object.
+     * </p>
      *
      * @return <code>ResolveConceptualElement</code>
      */
@@ -282,8 +294,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Returns the free variable with the
-     * specified name.</p>
+     * <p>
+     * Returns the free variable with the specified name.
+     * </p>
      *
      * @param name Name of the variable.
      * @param isGlobal Check all global free variables.
@@ -296,9 +309,8 @@ public class AssertiveCode {
             // Global free variables
             if (isGlobal && v instanceof DotExp) {
                 DotExp dotExp = (DotExp) v;
-                Exp lastExp =
-                        dotExp.getSegments().get(
-                                dotExp.getSegments().size() - 1);
+                Exp lastExp = dotExp.getSegments()
+                        .get(dotExp.getSegments().size() - 1);
                 if (lastExp.containsVar(name.getName(), false)) {
                     exp = v;
                     break;
@@ -316,7 +328,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Returns the last <code>VerificationStatement</code> from the list</p>
+     * <p>
+     * Returns the last <code>VerificationStatement</code> from the list
+     * </p>
      *
      * @return <code>VerificationStatement</code> from the list
      */
@@ -329,7 +343,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Checks if the assertion list is empty or not</p>
+     * <p>
+     * Checks if the assertion list is empty or not
+     * </p>
      *
      * @return Boolean
      */
@@ -338,7 +354,9 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Set the final confirm clause</p>
+     * <p>
+     * Set the final confirm clause
+     * </p>
      *
      * @param confirm <code>Exp</code> containing the final confirm clause.
      * @param simplify True if we can simplify the confirm, false otherwise.

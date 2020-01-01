@@ -1,7 +1,7 @@
 /*
  * BindingException.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.statushandling.exception.CompilerException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
- * <p>A {@code BindingException} indicates we encountered an
- * error while attempting to bind an expression to a {@link MTType}.</p>
+ * <p>
+ * A {@code BindingException} indicates we encountered an error while attempting
+ * to bind an
+ * expression to a {@link MTType}.
+ * </p>
  *
  * @version 2.0
  */
@@ -27,13 +30,25 @@ public class BindingException extends CompilerException {
     // Member Fields
     // ===========================================================
 
-    /** <p>Serial version for Serializable objects</p> */
+    /**
+     * <p>
+     * Serial version for Serializable objects
+     * </p>
+     */
     private static final long serialVersionUID = 1L;
 
-    /** <p>The object we are attempting to bind.</p> */
+    /**
+     * <p>
+     * The object we are attempting to bind.
+     * </p>
+     */
     public final Object found;
 
-    /** <p>The object we expect to bind to.</p> */
+    /**
+     * <p>
+     * The object we expect to bind to.
+     * </p>
+     */
     public final Object expected;
 
     // ==========================================================
@@ -41,8 +56,11 @@ public class BindingException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor takes both the expected object and the
-     * found object and forms the appropriate exception message.</p>
+     * <p>
+     * This constructor takes both the expected object and the found object and
+     * forms the appropriate
+     * exception message.
+     * </p>
      *
      * @param found The object we are attempting to bind.
      * @param expected The object we expect to bind to.

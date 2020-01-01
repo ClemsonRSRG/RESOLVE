@@ -1,7 +1,7 @@
 /*
  * LambdaExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -138,17 +138,17 @@ public class LambdaExp extends Exp {
             Iterator<MathVarDec> eParameterIterator =
                     eAsLambdaExp.parameters.iterator();
             while (parameterIterator.hasNext() && result) {
-                result =
-                        parameterIterator.next().equals(
-                                eParameterIterator.next());
+                result = parameterIterator.next()
+                        .equals(eParameterIterator.next());
             }
         }
 
         return result;
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         boolean result = false;
 
@@ -187,9 +187,8 @@ public class LambdaExp extends Exp {
                 e2AsLambdaExp.parameters.iterator();
 
         while (result && parameterIter.hasNext()) {
-            result =
-                    parameterIter.next().getName().equals(
-                            e2ParameterIter.next().getName());
+            result = parameterIter.next().getName()
+                    .equals(e2ParameterIter.next().getName());
         }
 
         return result;
@@ -200,7 +199,7 @@ public class LambdaExp extends Exp {
             LambdaExp result = (LambdaExp) Exp.copy(this);
             result.body = Exp.replace(result.body, old, replace);
 
-            //replace is idiotically implemented, so we have to do this
+            // replace is idiotically implemented, so we have to do this
             if (result.body == null) {
                 result.body = Exp.copy(body);
             }
@@ -212,8 +211,8 @@ public class LambdaExp extends Exp {
                 while (parameterIter.hasNext()) {
                     param = parameterIter.next();
 
-                    if (((VarExp) old).getName().toString().equals(
-                            param.getName().toString())) {
+                    if (((VarExp) old).getName().toString()
+                            .equals(param.getName().toString())) {
 
                         param.setName(((VarExp) replace).getName());
                     }

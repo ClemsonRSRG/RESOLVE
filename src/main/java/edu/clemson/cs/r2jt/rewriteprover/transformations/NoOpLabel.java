@@ -1,7 +1,7 @@
 /*
  * NoOpLabel.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -38,8 +38,9 @@ public class NoOpLabel implements Transformation {
 
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
-        return Collections.singletonList(
-                (Application) new NoOpLabelApplication()).iterator();
+        return Collections
+                .singletonList((Application) new NoOpLabelApplication())
+                .iterator();
     }
 
     @Override
@@ -93,9 +94,9 @@ public class NoOpLabel implements Transformation {
         public void apply(PerVCProverModel m) {
             m.addProofStep(new LabelStep(myLabel, NoOpLabel.this, this));
 
-            //Useful for debugging--pauses automated prover when a label is 
-            //reached
-            //myProver.markToPause();
+            // Useful for debugging--pauses automated prover when a label is
+            // reached
+            // myProver.markToPause();
         }
 
         @Override

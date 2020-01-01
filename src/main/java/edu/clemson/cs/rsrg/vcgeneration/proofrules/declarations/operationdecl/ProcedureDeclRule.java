@@ -1,7 +1,7 @@
 /*
  * ProcedureDeclRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -52,8 +52,9 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for the {@code procedure}
- * declaration rule.</p>
+ * <p>
+ * This class contains the logic for the {@code procedure} declaration rule.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -67,24 +68,36 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
     // ===========================================================
 
     /**
-     * <p>If we are in a {@code Procedure} and it is an recursive
-     * operation implementation, then this stores the decreasing clause
-     * expression.</p>
+     * <p>
+     * If we are in a {@code Procedure} and it is an recursive operation
+     * implementation, then this
+     * stores the decreasing clause expression.
+     * </p>
      */
     private final Exp myCurrentProcedureDecreasingExp;
 
     /**
-     * <p>The {@link OperationEntry} associated with this {@code If}
-     * statement if we are inside a {@code ProcedureDec}.</p>
+     * <p>
+     * The {@link OperationEntry} associated with this {@code If} statement if
+     * we are inside a
+     * {@code ProcedureDec}.
+     * </p>
      */
     private final OperationEntry myCurrentProcedureOperationEntry;
 
-    /** <p>The {@link ProcedureDec} we are applying the rule to.</p> */
+    /**
+     * <p>
+     * The {@link ProcedureDec} we are applying the rule to.
+     * </p>
+     */
     private final ProcedureDec myProcedureDec;
 
     /**
-     * <p>While walking a procedure, this stores all the local {@link VarDec VarDec's}
-     * program type entry.</p>
+     * <p>
+     * While walking a procedure, this stores all the local {@link VarDec
+     * VarDec's} program type
+     * entry.
+     * </p>
      */
     private final Map<VarDec, SymbolTableEntry> myVariableTypeEntries;
 
@@ -93,18 +106,20 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
     // ===========================================================
 
     /**
-     * <p>This creates a new application for the {@code procedure}
-     * declaration rule.</p>
+     * <p>
+     * This creates a new application for the {@code procedure} declaration
+     * rule.
+     * </p>
      *
-     * @param procedureDec The {@link ProcedureDec} we are applying
-     *                     the rule to.
+     * @param procedureDec The {@link ProcedureDec} we are applying the rule to.
      * @param procVarTypeEntries This block's local variable declarations.
      * @param symbolTableBuilder The current symbol table.
      * @param moduleScope The current module scope we are visiting.
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
-     * @param context The verification context that contains all
-     *                the information we have collected so far.
+     * @param block The assertive code block that the subclasses are applying
+     *        the rule to.
+     * @param context The verification context that contains all the information
+     *        we have collected so
+     *        far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
@@ -115,9 +130,8 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
             STGroup stGroup, ST blockModel) {
         super(block, block.getCorrespondingOperation().getName(),
                 symbolTableBuilder, moduleScope, context, stGroup, blockModel);
-        myCurrentProcedureDecreasingExp =
-                myCurrentAssertiveCodeBlock
-                        .getCorrespondingOperationDecreasingExp();
+        myCurrentProcedureDecreasingExp = myCurrentAssertiveCodeBlock
+                .getCorrespondingOperationDecreasingExp();
         myCurrentProcedureOperationEntry =
                 myCurrentAssertiveCodeBlock.getCorrespondingOperation();
         myProcedureDec = procedureDec;
@@ -152,34 +166,35 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Proof Rule}.</p>
+     * <p>
+     * This method applies the {@code Proof Rule}.
+     * </p>
      */
     @Override
     public final void applyRule() {
         // Check to see if this a local operation
-        boolean isLocal =
-                Utilities.isLocationOperation(myProcedureDec.getName()
-                        .getName(), myCurrentModuleScope);
+        boolean isLocal = Utilities.isLocationOperation(
+                myProcedureDec.getName().getName(), myCurrentModuleScope);
 
         // Check to see if we are in a concept realization
-        boolean inConceptRealiz =
-                myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec;
+        boolean inConceptRealiz = myCurrentModuleScope
+                .getDefiningElement() instanceof ConceptRealizModuleDec;
 
         // Check to see if this is a recursive procedure.
         // If yes, we will need to add an additional assume clause
         // (P_Val = <decreasing clause>).
         if (myCurrentProcedureDecreasingExp != null) {
             // Create P_Val and add it as a free variable
-            VarExp pValExp =
-                    Utilities.createPValExp(myCurrentProcedureDecreasingExp
-                            .getLocation().clone(), myCurrentModuleScope);
+            VarExp pValExp = Utilities.createPValExp(
+                    myCurrentProcedureDecreasingExp.getLocation().clone(),
+                    myCurrentModuleScope);
             myCurrentAssertiveCodeBlock.addFreeVar(pValExp);
 
             // Generate progress metric recursive call: P_Val = P_Exp
-            EqualsExp equalsExp =
-                    new EqualsExp(myCurrentProcedureDecreasingExp.getLocation()
-                            .clone(), pValExp.clone(), null, Operator.EQUAL,
-                            myCurrentProcedureDecreasingExp.clone());
+            EqualsExp equalsExp = new EqualsExp(
+                    myCurrentProcedureDecreasingExp.getLocation().clone(),
+                    pValExp.clone(), null, Operator.EQUAL,
+                    myCurrentProcedureDecreasingExp.clone());
             equalsExp.setMathType(myTypeGraph.BOOLEAN);
 
             // Store the location detail for the recursive operation's
@@ -190,19 +205,19 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                     "Progress Metric for Recursive Procedure"));
 
             // Add this expression as something we can assume to be true.
-            AssumeStmt progressMetricAssume =
-                    new AssumeStmt(myCurrentProcedureDecreasingExp
-                            .getLocation().clone(), equalsExp, false);
+            AssumeStmt progressMetricAssume = new AssumeStmt(
+                    myCurrentProcedureDecreasingExp.getLocation().clone(),
+                    equalsExp, false);
             myCurrentAssertiveCodeBlock.addStatement(progressMetricAssume);
         }
 
         // Add all the statements
-        myCurrentAssertiveCodeBlock.addStatements(myProcedureDec
-                .getStatements());
+        myCurrentAssertiveCodeBlock
+                .addStatements(myProcedureDec.getStatements());
 
         // YS: Simply create a finalization statement for each variable that
-        //     allow us to deal with generating question mark variables
-        //     and duration logic when we backtrack through the code.
+        // allow us to deal with generating question mark variables
+        // and duration logic when we backtrack through the code.
         List<VarDec> varDecs = myProcedureDec.getVariables();
         for (VarDec dec : varDecs) {
             // Only need to finalize non-generic type variables.
@@ -221,18 +236,14 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
 
             // Replace any facility declaration instantiation arguments
             // in the correct operation hypothesis expression.
-            correctOpHyp =
-                    Utilities
-                            .replaceFacilityFormalWithActual(correctOpHyp,
-                                    myProcedureDec.getParameters(),
-                                    myCurrentModuleScope.getDefiningElement()
-                                            .getName(),
-                                    myCurrentVerificationContext);
+            correctOpHyp = Utilities.replaceFacilityFormalWithActual(
+                    correctOpHyp, myProcedureDec.getParameters(),
+                    myCurrentModuleScope.getDefiningElement().getName(),
+                    myCurrentVerificationContext);
 
             // Use the expression to create a confirm statement if it is not "true"
-            ConfirmStmt correctOpHypStmt =
-                    new ConfirmStmt(myProcedureDec.getLocation().clone(),
-                            correctOpHyp, true);
+            ConfirmStmt correctOpHypStmt = new ConfirmStmt(
+                    myProcedureDec.getLocation().clone(), correctOpHyp, true);
             myCurrentAssertiveCodeBlock.addStatement(correctOpHypStmt);
 
             // Add an assume with the correspondences. Rather than doing direct replacement,
@@ -243,13 +254,10 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
 
             // Replace any facility declaration instantiation arguments
             // in the correct operation hypothesis expression.
-            correspondenceExp =
-                    Utilities
-                            .replaceFacilityFormalWithActual(correspondenceExp,
-                                    myProcedureDec.getParameters(),
-                                    myCurrentModuleScope.getDefiningElement()
-                                            .getName(),
-                                    myCurrentVerificationContext);
+            correspondenceExp = Utilities.replaceFacilityFormalWithActual(
+                    correspondenceExp, myProcedureDec.getParameters(),
+                    myCurrentModuleScope.getDefiningElement().getName(),
+                    myCurrentVerificationContext);
 
             // Use the expression to create an assume statement if it is not "true"
             AssumeStmt correspondenceStmt =
@@ -263,11 +271,10 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
 
         // Replace any facility declaration instantiation arguments
         // in the ensures clause.
-        finalConfirmExp =
-                Utilities.replaceFacilityFormalWithActual(finalConfirmExp,
-                        myProcedureDec.getParameters(), myCurrentModuleScope
-                                .getDefiningElement().getName(),
-                        myCurrentVerificationContext);
+        finalConfirmExp = Utilities.replaceFacilityFormalWithActual(
+                finalConfirmExp, myProcedureDec.getParameters(),
+                myCurrentModuleScope.getDefiningElement().getName(),
+                myCurrentVerificationContext);
 
         // Use the ensures clause to create a final confirm statement
         ConfirmStmt finalConfirmStmt =
@@ -277,14 +284,15 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-        stepModel.add("proofRuleName", getRuleDescription()).add(
-                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        stepModel.add("proofRuleName", getRuleDescription())
+                .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Proof Rule}.</p>
+     * <p>
+     * This method returns a description associated with the {@code Proof Rule}.
+     * </p>
      *
      * @return A string.
      */
@@ -298,26 +306,29 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
     // ===========================================================
 
     /**
-     * <p>An helper method that uses the {@code Shared Variable} and any parameter type
-     * {@code conventions} to build the appropriate expression that must be established
-     * for a {@code Concept Realization} operation to be correct.</p>
+     * <p>
+     * An helper method that uses the {@code Shared Variable} and any parameter
+     * type
+     * {@code conventions} to build the appropriate expression that must be
+     * established for a
+     * {@code Concept Realization} operation to be correct.
+     * </p>
      *
      * @return The correct operation hypothesis expression.
      */
     private Exp createCorrectOpHypExp() {
         // Add all shared state realization conventions
         Location loc = myProcedureDec.getLocation().clone();
-        Exp retExp =
-                myCurrentVerificationContext
-                        .createSharedStateRealizConventionExp(loc);
+        Exp retExp = myCurrentVerificationContext
+                .createSharedStateRealizConventionExp(loc);
 
         // YS: Append the procedure name to the location detail model if there is one.
         if (retExp.getLocationDetailModel() != null) {
             LocationDetailModel model = retExp.getLocationDetailModel().clone();
-            retExp.setLocationDetailModel(new LocationDetailModel(model
-                    .getSourceLoc(), model.getDestinationLoc(), model
-                    .getDetailMessage()
-                    + " Generated by " + myProcedureDec.getName().getName()));
+            retExp.setLocationDetailModel(new LocationDetailModel(
+                    model.getSourceLoc(), model.getDestinationLoc(),
+                    model.getDetailMessage() + " Generated by "
+                            + myProcedureDec.getName().getName()));
         }
 
         // Add the conventions of parameters that have representation types.
@@ -338,33 +349,26 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                             Utilities.getTypeConventionClause(
                                     ((TypeRepresentationDec) ste
                                             .getDefiningElement())
-                                            .getConvention(), loc.clone(),
-                                    parameterVarDec.getName(), new PosSymbol(
-                                            loc.clone(), representationType
-                                                    .getFamily().getExemplar()
-                                                    .getName()), nameTy
-                                            .getMathType(), null);
+                                                    .getConvention(),
+                                    loc.clone(), parameterVarDec.getName(),
+                                    new PosSymbol(loc.clone(),
+                                            representationType.getFamily()
+                                                    .getExemplar().getName()),
+                                    nameTy.getMathType(), null);
                     LocationDetailModel conventionDetailModel =
                             new LocationDetailModel(loc.clone(), loc.clone(),
                                     "Type Convention for "
                                             + nameTy.getName().getName()
-                                            + " Generated by "
-                                            + myProcedureDec.getName()
-                                                    .getName());
+                                            + " Generated by " + myProcedureDec
+                                                    .getName().getName());
 
                     if (VarExp.isLiteralTrue(retExp)) {
-                        retExp =
-                                Utilities
-                                        .formConjunct(loc, null,
-                                                conventionClause,
-                                                conventionDetailModel);
+                        retExp = Utilities.formConjunct(loc, null,
+                                conventionClause, conventionDetailModel);
                     }
                     else {
-                        retExp =
-                                Utilities
-                                        .formConjunct(loc, retExp,
-                                                conventionClause,
-                                                conventionDetailModel);
+                        retExp = Utilities.formConjunct(loc, retExp,
+                                conventionClause, conventionDetailModel);
                     }
                 }
                 else {
@@ -372,7 +376,8 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                     Utilities.notAType(ste, parameterVarDec.getLocation());
                 }
             }
-            else if (nameTy.getProgramType() instanceof PTFacilityRepresentation) {
+            else if (nameTy
+                    .getProgramType() instanceof PTFacilityRepresentation) {
                 // Add the conventions of parameters that have representation types.
                 // TODO: Figure out where the exemplar for local types is located.
                 throw new RuntimeException(); // Remove this once we figure out how to add the convention.
@@ -383,25 +388,27 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
     }
 
     /**
-     * <p>An helper method that uses the {@code Shared Variable} and any parameter type
-     * {@code correspondence} to build the appropriate expression.</p>
+     * <p>
+     * An helper method that uses the {@code Shared Variable} and any parameter
+     * type
+     * {@code correspondence} to build the appropriate expression.
+     * </p>
      *
      * @return An {@link Exp}.
      */
     private Exp createCorrespondenceExp() {
         // Add all shared state realization correspondence
         Location loc = myProcedureDec.getLocation().clone();
-        Exp retExp =
-                myCurrentVerificationContext
-                        .createSharedStateRealizCorrespondenceExp(loc);
+        Exp retExp = myCurrentVerificationContext
+                .createSharedStateRealizCorrespondenceExp(loc);
 
         // YS: Append the procedure name to the location detail model if there is one.
         if (retExp.getLocationDetailModel() != null) {
             LocationDetailModel model = retExp.getLocationDetailModel().clone();
-            retExp.setLocationDetailModel(new LocationDetailModel(model
-                    .getSourceLoc(), model.getDestinationLoc(), model
-                    .getDetailMessage()
-                    + " Generated by " + myProcedureDec.getName().getName()));
+            retExp.setLocationDetailModel(new LocationDetailModel(
+                    model.getSourceLoc(), model.getDestinationLoc(),
+                    model.getDetailMessage() + " Generated by "
+                            + myProcedureDec.getName().getName()));
         }
 
         // Add the correspondence of parameters that have representation types.
@@ -423,8 +430,9 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                             Utilities.getTypeCorrespondenceClause(
                                     ((TypeRepresentationDec) ste
                                             .getDefiningElement())
-                                            .getCorrespondence(), loc.clone(),
-                                    parameterVarDec.getName(), nameTy,
+                                                    .getCorrespondence(),
+                                    loc.clone(), parameterVarDec.getName(),
+                                    nameTy,
                                     new PosSymbol(loc.clone(),
                                             representationType.getFamily()
                                                     .getExemplar().getName()),
@@ -434,21 +442,18 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                             new LocationDetailModel(loc.clone(), loc.clone(),
                                     "Type Correspondence for "
                                             + nameTy.getName().getName()
-                                            + " Generated by "
-                                            + myProcedureDec.getName()
-                                                    .getName());
+                                            + " Generated by " + myProcedureDec
+                                                    .getName().getName());
 
                     if (VarExp.isLiteralTrue(retExp)) {
-                        retExp =
-                                Utilities.formConjunct(loc, null,
-                                        correspondenceClause,
-                                        correspondenceDetailModel);
+                        retExp = Utilities.formConjunct(loc, null,
+                                correspondenceClause,
+                                correspondenceDetailModel);
                     }
                     else {
-                        retExp =
-                                Utilities.formConjunct(loc, retExp,
-                                        correspondenceClause,
-                                        correspondenceDetailModel);
+                        retExp = Utilities.formConjunct(loc, retExp,
+                                correspondenceClause,
+                                correspondenceDetailModel);
                     }
                 }
                 else {
@@ -456,7 +461,8 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                     Utilities.notAType(ste, parameterVarDec.getLocation());
                 }
             }
-            else if (nameTy.getProgramType() instanceof PTFacilityRepresentation) {
+            else if (nameTy
+                    .getProgramType() instanceof PTFacilityRepresentation) {
                 // Add the conventions of parameters that have representation types.
                 // TODO: Figure out where the exemplar for local types is located.
                 throw new RuntimeException(); // Remove this once we figure out how to add the convention.
@@ -467,18 +473,26 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
     }
 
     /**
-     * <p>An helper method that uses the {@code ensures} clause from the operation entry
-     * and adds in additional {@code ensures} clauses for different parameter modes
-     * and builds the appropriate {@code ensures} clause that will be an
-     * {@link AssertiveCodeBlock AssertiveCodeBlock's} final {@code confirm} statement.</p>
+     * <p>
+     * An helper method that uses the {@code ensures} clause from the operation
+     * entry and adds in
+     * additional {@code ensures} clauses for different parameter modes and
+     * builds the appropriate
+     * {@code ensures} clause that will be an {@link AssertiveCodeBlock
+     * AssertiveCodeBlock's} final
+     * {@code confirm} statement.
+     * </p>
      *
-     * @param inConceptRealiz A flag that indicates whether or not this {@link ProcedureDec}
-     *                        is inside a {@code Concept Realization}.
-     * @param isLocal A flag that indicates whether or not this is a local operation.
+     * @param inConceptRealiz A flag that indicates whether or not this
+     *        {@link ProcedureDec} is inside
+     *        a {@code Concept Realization}.
+     * @param isLocal A flag that indicates whether or not this is a local
+     *        operation.
      *
      * @return The final confirm expression.
      */
-    private Exp createFinalConfirmExp(boolean inConceptRealiz, boolean isLocal) {
+    private Exp createFinalConfirmExp(boolean inConceptRealiz,
+            boolean isLocal) {
         Exp retExp;
         Location procedureLoc = myProcedureDec.getLocation();
 
@@ -493,7 +507,7 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                 myProcedureDec.getParameters().iterator();
         Exp paramEnsuresExp =
                 VarExp.getTrueVarExp(procedureLoc.clone(), myTypeGraph);
-        while (specParamVarDecIt.hasNext())  {
+        while (specParamVarDecIt.hasNext()) {
             // Information from the operation specification
             ProgramParameterEntry entry = specParamVarDecIt.next();
             ParameterVarDec parameterVarDec =
@@ -506,27 +520,28 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
             ParameterVarDec realizParamVarDec = realizParamVarDecIt.next();
 
             // Parameter variable and incoming parameter variable
-            VarExp parameterExp =
-                    Utilities.createVarExp(parameterVarDec.getLocation().clone(),
-                            null, parameterVarDec.getName().clone(),
-                            nameTy.getMathTypeValue(), null);
+            VarExp parameterExp = Utilities.createVarExp(
+                    parameterVarDec.getLocation().clone(), null,
+                    parameterVarDec.getName().clone(),
+                    nameTy.getMathTypeValue(), null);
             OldExp oldParameterExp =
-                    new OldExp(parameterVarDec.getLocation().clone(), parameterExp.clone());
+                    new OldExp(parameterVarDec.getLocation().clone(),
+                            parameterExp.clone());
             oldParameterExp.setMathType(nameTy.getMathTypeValue());
 
             // Query for the type entry in the symbol table
-            SymbolTableEntry ste =
-                    Utilities.searchProgramType(procedureLoc, nameTy.getQualifier(),
-                            nameTy.getName(), myCurrentModuleScope);
+            SymbolTableEntry ste = Utilities.searchProgramType(procedureLoc,
+                    nameTy.getQualifier(), nameTy.getName(),
+                    myCurrentModuleScope);
 
             ProgramTypeEntry typeEntry;
             if (ste instanceof ProgramTypeEntry) {
                 typeEntry = ste.toProgramTypeEntry(nameTy.getLocation());
-            } else {
+            }
+            else {
                 // TODO: Figure out how to handle local program types.
-                typeEntry =
-                        ste.toTypeRepresentationEntry(nameTy.getLocation())
-                                .getDefiningTypeEntry();
+                typeEntry = ste.toTypeRepresentationEntry(nameTy.getLocation())
+                        .getDefiningTypeEntry();
             }
 
             // The restores mode adds an additional ensures
@@ -542,17 +557,19 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                 if (typeEntry.getModelType() instanceof MTCartesian) {
                     MTCartesian cartesian =
                             (MTCartesian) typeEntry.getModelType();
-                    List<MTType> elementTypes =
-                            cartesian.getComponentTypes();
+                    List<MTType> elementTypes = cartesian.getComponentTypes();
 
                     for (int i = 0; i < cartesian.size(); i++) {
                         // Create an Exp for the Cartesian product element
-                        VarExp elementExp = Utilities.createVarExp(restoresLoc.clone(), null,
-                                new PosSymbol(restoresLoc.clone(), cartesian.getTag(i)),
+                        VarExp elementExp = Utilities.createVarExp(
+                                restoresLoc.clone(), null,
+                                new PosSymbol(restoresLoc.clone(),
+                                        cartesian.getTag(i)),
                                 elementTypes.get(i), null);
 
                         // Create a list of segments. The first element should be the original
-                        // parameterExp and oldParameterExp and the second element the cartesian product element.
+                        // parameterExp and oldParameterExp and the second element the cartesian product
+                        // element.
                         List<Exp> segments = new ArrayList<>();
                         List<Exp> oldSegments = new ArrayList<>();
                         segments.add(parameterExp);
@@ -561,14 +578,17 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                         oldSegments.add(elementExp.clone());
 
                         // Create the dotted expressions
-                        DotExp elementDotExp = new DotExp(restoresLoc.clone(), segments);
+                        DotExp elementDotExp =
+                                new DotExp(restoresLoc.clone(), segments);
                         elementDotExp.setMathType(elementExp.getMathType());
-                        DotExp oldElementDotExp = new DotExp(restoresLoc.clone(), oldSegments);
+                        DotExp oldElementDotExp =
+                                new DotExp(restoresLoc.clone(), oldSegments);
                         oldElementDotExp.setMathType(elementExp.getMathType());
 
                         // Create an equality expression
-                        EqualsExp equalsExp = new EqualsExp(restoresLoc.clone(), elementDotExp, null,
-                                Operator.EQUAL, oldElementDotExp);
+                        EqualsExp equalsExp = new EqualsExp(restoresLoc.clone(),
+                                elementDotExp, null, Operator.EQUAL,
+                                oldElementDotExp);
                         equalsExp.setMathType(myTypeGraph.BOOLEAN);
 
                         // Add this to our final equals expression
@@ -576,36 +596,43 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                             restoresConditionExp = equalsExp;
                         }
                         else {
-                            restoresConditionExp = InfixExp.formConjunct(restoresLoc.clone(),
-                                    restoresConditionExp, equalsExp);
+                            restoresConditionExp =
+                                    InfixExp.formConjunct(restoresLoc.clone(),
+                                            restoresConditionExp, equalsExp);
                         }
                     }
                 }
                 else {
                     // Construct an expression using the expression and it's
                     // old expression equivalent.
-                    restoresConditionExp =
-                            new EqualsExp(restoresLoc.clone(), parameterExp.clone(), null,
-                                    Operator.EQUAL, oldParameterExp.clone());
+                    restoresConditionExp = new EqualsExp(restoresLoc.clone(),
+                            parameterExp.clone(), null, Operator.EQUAL,
+                            oldParameterExp.clone());
                     restoresConditionExp.setMathType(myTypeGraph.BOOLEAN);
                 }
 
                 // Generate the restores parameter ensures clause and
                 // store the new location detail.
                 if (restoresConditionExp != null) {
-                    restoresConditionExp.setLocationDetailModel(new LocationDetailModel(
-                            parameterVarDec.getLocation().clone(), realizParamVarDec.getLocation().clone(),
-                            "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
-                                    + " (Condition from \"" + parameterMode + "\" parameter mode)"));
+                    restoresConditionExp
+                            .setLocationDetailModel(new LocationDetailModel(
+                                    parameterVarDec.getLocation().clone(),
+                                    realizParamVarDec.getLocation().clone(),
+                                    "Ensures Clause of "
+                                            + myCurrentProcedureOperationEntry
+                                                    .getName()
+                                            + " (Condition from \""
+                                            + parameterMode
+                                            + "\" parameter mode)"));
 
                     // Form a conjunct if needed.
                     if (VarExp.isLiteralTrue(paramEnsuresExp)) {
                         paramEnsuresExp = restoresConditionExp;
                     }
                     else {
-                        paramEnsuresExp =
-                                InfixExp.formConjunct(paramEnsuresExp.getLocation(),
-                                        paramEnsuresExp, restoresConditionExp);
+                        paramEnsuresExp = InfixExp.formConjunct(
+                                paramEnsuresExp.getLocation(), paramEnsuresExp,
+                                restoresConditionExp);
                     }
                 }
             }
@@ -619,39 +646,47 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                             (TypeFamilyDec) typeEntry.getDefiningElement();
                     AssertionClause initEnsures =
                             type.getInitialization().getEnsures();
-                    modifiedInitEnsures =
-                            Utilities.getTypeInitEnsuresClause(initEnsures,
-                                    procedureLoc.clone(), null,
-                                    parameterVarDec.getName(), type.getExemplar(),
-                                    typeEntry.getModelType(), null);
+                    modifiedInitEnsures = Utilities.getTypeInitEnsuresClause(
+                            initEnsures, procedureLoc.clone(), null,
+                            parameterVarDec.getName(), type.getExemplar(),
+                            typeEntry.getModelType(), null);
                 }
-                else if (typeEntry.getDefiningElement() instanceof TypeRepresentationDec) {
+                else if (typeEntry
+                        .getDefiningElement() instanceof TypeRepresentationDec) {
                     // Obtain the type family declaration and obtain it's initialization ensures.
-                    PTRepresentation representationType = (PTRepresentation) typeEntry.getProgramType();
-                    TypeFamilyDec type = (TypeFamilyDec) representationType.getFamily().getDefiningElement();
+                    PTRepresentation representationType =
+                            (PTRepresentation) typeEntry.getProgramType();
+                    TypeFamilyDec type = (TypeFamilyDec) representationType
+                            .getFamily().getDefiningElement();
                     AssertionClause initEnsures =
                             type.getInitialization().getEnsures();
-                    modifiedInitEnsures =
-                            Utilities.getTypeInitEnsuresClause(initEnsures,
-                                    procedureLoc.clone(), null,
-                                    parameterVarDec.getName(), type.getExemplar(),
-                                    typeEntry.getModelType(), null);
+                    modifiedInitEnsures = Utilities.getTypeInitEnsuresClause(
+                            initEnsures, procedureLoc.clone(), null,
+                            parameterVarDec.getName(), type.getExemplar(),
+                            typeEntry.getModelType(), null);
                 }
                 else {
-                    VarDec parameterAsVarDec =
-                            new VarDec(parameterVarDec.getName(), parameterVarDec.getTy());
-                    modifiedInitEnsures =
-                            new AssertionClause(procedureLoc.clone(), ClauseType.ENSURES,
-                                    Utilities.createInitExp(parameterAsVarDec, myTypeGraph.BOOLEAN));
+                    VarDec parameterAsVarDec = new VarDec(
+                            parameterVarDec.getName(), parameterVarDec.getTy());
+                    modifiedInitEnsures = new AssertionClause(
+                            procedureLoc.clone(), ClauseType.ENSURES,
+                            Utilities.createInitExp(parameterAsVarDec,
+                                    myTypeGraph.BOOLEAN));
                 }
 
                 // Generate the clears parameter ensures clause and
                 // store the new location detail.
-                Exp clearsConditionExp = modifiedInitEnsures.getAssertionExp().clone();
-                clearsConditionExp.setLocationDetailModel(new LocationDetailModel(
-                        parameterVarDec.getLocation().clone(), realizParamVarDec.getLocation().clone(),
-                        "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()
-                                + " (Condition from \"" + parameterMode + "\" parameter mode)"));
+                Exp clearsConditionExp =
+                        modifiedInitEnsures.getAssertionExp().clone();
+                clearsConditionExp
+                        .setLocationDetailModel(new LocationDetailModel(
+                                parameterVarDec.getLocation().clone(),
+                                realizParamVarDec.getLocation().clone(),
+                                "Ensures Clause of "
+                                        + myCurrentProcedureOperationEntry
+                                                .getName()
+                                        + " (Condition from \"" + parameterMode
+                                        + "\" parameter mode)"));
 
                 // Form a conjunct if needed.
                 if (VarExp.isLiteralTrue(paramEnsuresExp)) {
@@ -668,14 +703,14 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
             // should really say something about the conceptual type and not
             // the variable. Must also be in a concept realization and not a
             // local operation.
-            if (ste.getDefiningElement() instanceof TypeRepresentationDec && inConceptRealiz && !isLocal) {
-                DotExp concVarExp =
-                        Utilities.createConcVarExp(
-                                new VarDec(realizParamVarDec.getName(), realizParamVarDec.getTy()),
-                                parameterVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                substitutionParamToConc =
-                        addConceptualVariables(parameterExp, oldParameterExp,
-                                concVarExp, substitutionParamToConc);
+            if (ste.getDefiningElement() instanceof TypeRepresentationDec
+                    && inConceptRealiz && !isLocal) {
+                DotExp concVarExp = Utilities.createConcVarExp(
+                        new VarDec(realizParamVarDec.getName(),
+                                realizParamVarDec.getTy()),
+                        parameterVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                substitutionParamToConc = addConceptualVariables(parameterExp,
+                        oldParameterExp, concVarExp, substitutionParamToConc);
             }
         }
 
@@ -683,9 +718,10 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
         AssertionClause ensuresClause =
                 myCurrentProcedureOperationEntry.getEnsuresClause();
         Exp ensuresExp = ensuresClause.getAssertionExp().clone();
-        ensuresExp.setLocationDetailModel(new LocationDetailModel(
-                ensuresExp.getLocation().clone(), procedureLoc.clone(),
-                "Ensures Clause of " + myCurrentProcedureOperationEntry.getName()));
+        ensuresExp.setLocationDetailModel(
+                new LocationDetailModel(ensuresExp.getLocation().clone(),
+                        procedureLoc.clone(), "Ensures Clause of "
+                                + myCurrentProcedureOperationEntry.getName()));
 
         // Form a conjunct if needed.
         if (VarExp.isLiteralTrue(ensuresExp)) {
@@ -694,10 +730,10 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
         else {
             if (VarExp.isLiteralTrue(paramEnsuresExp)) {
                 retExp = ensuresExp;
-            } else {
-                retExp =
-                        InfixExp.formConjunct(ensuresExp.getLocation(),
-                                ensuresExp, paramEnsuresExp);
+            }
+            else {
+                retExp = InfixExp.formConjunct(ensuresExp.getLocation(),
+                        ensuresExp, paramEnsuresExp);
             }
         }
 
@@ -705,20 +741,22 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
         // loop through all shared variable declared from the
         // associated concept.
         // Note: If we are in a facility, "getConceptSharedVars()" will return
-        //       an empty list.
+        // an empty list.
         List<SharedStateDec> sharedStateDecs =
                 myCurrentVerificationContext.getConceptSharedVars();
         for (SharedStateDec stateDec : sharedStateDecs) {
             for (MathVarDec mathVarDec : stateDec.getAbstractStateVars()) {
                 // Convert the math variables to variable expressions
-                VarExp stateVarExp =
-                        Utilities.createVarExp(procedureLoc.clone(), null,
-                                mathVarDec.getName(), mathVarDec.getMathType(), null);
-                OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
+                VarExp stateVarExp = Utilities.createVarExp(
+                        procedureLoc.clone(), null, mathVarDec.getName(),
+                        mathVarDec.getMathType(), null);
+                OldExp oldStateVarExp =
+                        new OldExp(procedureLoc.clone(), stateVarExp);
                 oldStateVarExp.setMathType(stateVarExp.getMathType());
 
                 // Add a "restores" mode to any shared variables not being affected
-                if (!Utilities.containsEquivalentExp(myAffectedExps, stateVarExp)) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps,
+                        stateVarExp)) {
                     retExp = createRestoresExpForSharedVars(procedureLoc,
                             stateVarExp, oldStateVarExp, retExp);
                 }
@@ -729,10 +767,10 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                 if (inConceptRealiz && !isLocal) {
                     // Create the appropriate conceptual versions of the shared variables
                     // and add them to our substitution maps.
-                    DotExp concVarExp =
-                            Utilities.createConcVarExp(
-                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    DotExp concVarExp = Utilities.createConcVarExp(
+                            new VarDec(mathVarDec.getName(),
+                                    mathVarDec.getTy()),
+                            mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
                     substitutionParamToConc =
                             addConceptualVariables(stateVarExp, oldStateVarExp,
                                     concVarExp, substitutionParamToConc);
@@ -742,18 +780,22 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
 
         // Loop through all concept declared types and generate a "restores" ensures
         // clause for non-affected definition variables.
-        for (TypeFamilyDec typeFamilyDec : myCurrentVerificationContext.getConceptDeclaredTypes()) {
-            for (MathDefVariableDec mathDefVariableDec : typeFamilyDec.getDefinitionVarList()) {
+        for (TypeFamilyDec typeFamilyDec : myCurrentVerificationContext
+                .getConceptDeclaredTypes()) {
+            for (MathDefVariableDec mathDefVariableDec : typeFamilyDec
+                    .getDefinitionVarList()) {
                 // Convert the math definition variables to variable expressions
                 MathVarDec mathVarDec = mathDefVariableDec.getVariable();
-                VarExp defVarExp =
-                        Utilities.createVarExp(procedureLoc.clone(), null,
-                                mathVarDec.getName(), mathVarDec.getMathType(), null);
-                OldExp oldDefVarExp = new OldExp(procedureLoc.clone(), defVarExp);
+                VarExp defVarExp = Utilities.createVarExp(procedureLoc.clone(),
+                        null, mathVarDec.getName(), mathVarDec.getMathType(),
+                        null);
+                OldExp oldDefVarExp =
+                        new OldExp(procedureLoc.clone(), defVarExp);
                 oldDefVarExp.setMathType(defVarExp.getMathType());
 
                 // Add a "restores" mode to any definition variables not being affected
-                if (!Utilities.containsEquivalentExp(myAffectedExps, defVarExp)) {
+                if (!Utilities.containsEquivalentExp(myAffectedExps,
+                        defVarExp)) {
                     retExp = createRestoresExpForDefVars(procedureLoc,
                             defVarExp, oldDefVarExp, retExp);
                 }
@@ -764,20 +806,20 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule
                 if (inConceptRealiz && !isLocal) {
                     // Create the appropriate conceptual versions of the definition variables
                     // and add them to our substitution maps.
-                    DotExp concVarExp =
-                            Utilities.createConcVarExp(
-                                    new VarDec(mathVarDec.getName(), mathVarDec.getTy()),
-                                    mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
-                    substitutionParamToConc =
-                            addConceptualVariables(defVarExp, oldDefVarExp,
-                                    concVarExp, substitutionParamToConc);
+                    DotExp concVarExp = Utilities.createConcVarExp(
+                            new VarDec(mathVarDec.getName(),
+                                    mathVarDec.getTy()),
+                            mathVarDec.getMathType(), myTypeGraph.BOOLEAN);
+                    substitutionParamToConc = addConceptualVariables(defVarExp,
+                            oldDefVarExp, concVarExp, substitutionParamToConc);
                 }
             }
         }
 
         // Loop through all instantiated facility's and generate a "restores" ensures clause
         // for non-affected shared variables/math definition variables.
-        retExp = createFacilitySharedVarRestoresEnsuresExp(procedureLoc, retExp);
+        retExp = createFacilitySharedVarRestoresEnsuresExp(procedureLoc,
+                retExp);
 
         // Apply any substitution and return the modified expression
         return retExp.substitute(substitutionParamToConc);

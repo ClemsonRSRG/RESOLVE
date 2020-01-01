@@ -1,7 +1,7 @@
 /*
  * FileLocator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,10 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Traverses a tree of directories. Each file encountered is reported via the
+ * <p>
+ * Traverses a tree of directories. Each file encountered is reported via the
  * {@link #visitFile(Path, BasicFileAttributes)} method and each directory via
- * optional {@link #preVisitDirectory} or {@link #postVisitDirectory} methods.
- * Override others as needed.</p>
+ * optional
+ * {@link #preVisitDirectory} or {@link #postVisitDirectory} methods. Override
+ * others as needed.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -35,13 +38,25 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     // Member Fields
     // ===========================================================
 
-    /** <p>The search path matcher currently used.</p> */
+    /**
+     * <p>
+     * The search path matcher currently used.
+     * </p>
+     */
     private final PathMatcher myPathMatcher;
 
-    /** <p>The name of the file.</p> */
+    /**
+     * <p>
+     * The name of the file.
+     * </p>
+     */
     private String myPattern = null;
 
-    /** <p>The list of resulting matches.</p> */
+    /**
+     * <p>
+     * The list of resulting matches.
+     * </p>
+     */
     private List<File> myMatches = new ArrayList<>();
 
     // ===========================================================
@@ -50,17 +65,18 @@ public class FileLocator extends SimpleFileVisitor<Path> {
 
     /**
      * Constructs a new {@code FileLocator} that will match based on the
-     * {@code (pattern, extensions)} pair provided.
+     * {@code (pattern, extensions)}
+     * pair provided.
      *
      * @param pattern An extensionless pattern.
      * @param extensions An list of valid extensions to choose from after a
-     *                   myPattern is matched (e.g. {@code ["java", "cpp", "groovy"]}).
+     *        myPattern is matched (e.g.
+     *        {@code ["java", "cpp", "groovy"]}).
      */
     public FileLocator(String pattern, List<String> extensions) {
         myPattern = pattern;
-        myPathMatcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:" + pattern + "." + parseExtensions(extensions));
+        myPathMatcher = FileSystems.getDefault().getPathMatcher(
+                "glob:" + pattern + "." + parseExtensions(extensions));
     }
 
     /**
@@ -68,12 +84,12 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      * {@code extensions} provided.
      *
      * @param extension An list of valid extensions to choose from after a
-     *                  myPattern is matched (e.g. {@code ["java", "cpp", "groovy"]}).
+     *        myPattern is matched (e.g.
+     *        {@code ["java", "cpp", "groovy"]}).
      */
     public FileLocator(String extension) {
-        myPathMatcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:*.{" + extension + "}");
+        myPathMatcher = FileSystems.getDefault()
+                .getPathMatcher("glob:*.{" + extension + "}");
     }
 
     // ===========================================================
@@ -81,10 +97,13 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     // ===========================================================
 
     /**
-     * <p>Returns a single file matching the supplied pattern.</p>
+     * <p>
+     * Returns a single file matching the supplied pattern.
+     * </p>
      *
-     * @throws FileSystemException If a file matching pattern could
-     * not be found or if we found more than one file.
+     * @throws FileSystemException If a file matching pattern could not be found
+     *         or if we found more
+     *         than one file.
      *
      * @return The matching file.
      */
@@ -94,15 +113,18 @@ public class FileLocator extends SimpleFileVisitor<Path> {
                     + "' could not be found");
         }
         else if (myMatches.size() > 1) {
-            throw new FileSystemException("Found more than one file matching the name '"
-                    + myPattern + "'.");
+            throw new FileSystemException(
+                    "Found more than one file matching the name '" + myPattern
+                            + "'.");
         }
 
         return myMatches.get(0);
     }
 
     /**
-     * <p>Returns a single file matching the supplied pattern.</p>
+     * <p>
+     * Returns a single file matching the supplied pattern.
+     * </p>
      *
      * @return The matching file.
      */
@@ -111,8 +133,10 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     }
 
     /**
-     * <p>Using a path and the basic file attributes, attempt to find
-     * the file that matches.</p>
+     * <p>
+     * Using a path and the basic file attributes, attempt to find the file that
+     * matches.
+     * </p>
      *
      * @param file The current visiting path.
      * @param attr The file attributes.
@@ -120,7 +144,8 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      * @return Always continue searching until done.
      */
     @Override
-    public final FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
+    public final FileVisitResult visitFile(Path file,
+            BasicFileAttributes attr) {
         Path name = file.getFileName();
         if (name != null && myPathMatcher.matches(name)) {
             myMatches.add(file.toFile());
@@ -134,8 +159,9 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     // ===========================================================
 
     /**
-     * <p>Converts the module types into a search string for
-     * extensions.</p>
+     * <p>
+     * Converts the module types into a search string for extensions.
+     * </p>
      *
      * @param extensions The list of searching extensions.
      *

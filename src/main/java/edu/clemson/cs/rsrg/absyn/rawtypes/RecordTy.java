@@ -1,7 +1,7 @@
 /*
  * RecordTy.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class for all the raw record type objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the raw record type objects that the compiler
+ * builds using the ANTLR4
+ * AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,7 +32,11 @@ public class RecordTy extends Ty {
     // Member Fields
     // ===========================================================
 
-    /** <p>The raw type's fields</p> */
+    /**
+     * <p>
+     * The raw type's fields
+     * </p>
+     */
     private final List<VarDec> myInnerFields;
 
     // ===========================================================
@@ -37,11 +44,13 @@ public class RecordTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>This constructs a raw record type.</p>
+     * <p>
+     * This constructs a raw record type.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param fields A list of {@link VarDec} representing the fields
-     *               inside this raw record type.
+     * @param fields A list of {@link VarDec} representing the fields inside
+     *        this raw record type.
      */
     public RecordTy(Location l, List<VarDec> fields) {
         super(l);
@@ -89,8 +98,9 @@ public class RecordTy extends Ty {
     }
 
     /**
-     * <p>This method returns list containing all the field
-     * elements.</p>
+     * <p>
+     * This method returns list containing all the field elements.
+     * </p>
      *
      * @return A list of {@link VarDec} representation objects.
      */

@@ -1,7 +1,7 @@
 /*
  * ModuleRecord.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,20 +21,22 @@ import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.Symbol;
 
 /**
- * A record of a module's compilation history. It consists of two main
- * data structures: The module dec, and the symbol table. A module
- * record can be in any of three mutually exclusive states: begin,
- * final, or error. When a record is created it is in an error state.
- * When a non-null module dec is added the record is placed in a begin
- * state.  When a non-null symbol table is added the record is placed
- * in a final state. If an error occurs anytime after the module dec
- * is added, the record is put back into an error state and
- * compilation aborts.
+ * A record of a module's compilation history. It consists of two main data
+ * structures: The module
+ * dec, and the symbol table. A module record can be in any of three mutually
+ * exclusive states:
+ * begin, final, or error. When a record is created it is in an error state.
+ * When a non-null module
+ * dec is added the record is placed in a begin state. When a non-null symbol
+ * table is added the
+ * record is placed in a final state. If an error occurs anytime after the
+ * module dec is added, the
+ * record is put back into an error state and compilation aborts.
  */
 public class ModuleRecord {
 
     // ==========================================================
-    // Variables 
+    // Variables
     // ==========================================================
 
     private ModuleID id;

@@ -1,7 +1,7 @@
 /*
  * PSymbol.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,10 +24,13 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.*;
 
 /**
- * <p>A {@code PSymbol} represents a reference to a named element such as
- * a variable, constant, or function.  More specifically, all three are
- * represented as function calls, with the former two represented as functions
- * with no arguments.</p>
+ * <p>
+ * A {@code PSymbol} represents a reference to a named element such as a
+ * variable, constant, or
+ * function. More specifically, all three are represented as function calls,
+ * with the former two
+ * represented as functions with no arguments.
+ * </p>
  *
  * @author Hampton Smith
  * @author Mike Kabbani
@@ -40,12 +43,15 @@ public class PSymbol extends PExp {
     // ===========================================================
 
     /**
-     * <p>This defines the various different assertion clause types.</p>
+     * <p>
+     * This defines the various different assertion clause types.
+     * </p>
      *
      * @author Hampton Smith
      * @version 2.0
      */
     public enum Quantification {
+
         NONE {
 
             @Override
@@ -69,7 +75,9 @@ public class PSymbol extends PExp {
         };
 
         /**
-         * <p>This method returns the inverse quantification.</p>
+         * <p>
+         * This method returns the inverse quantification.
+         * </p>
          *
          * @return A quantifier.
          */
@@ -77,12 +85,15 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This indicates how a {@link PExp} will be displayed.</p>
+     * <p>
+     * This indicates how a {@link PExp} will be displayed.
+     * </p>
      *
      * @author Hampton Smith
      * @version 2.0
      */
     public enum DisplayType {
+
         PREFIX {
 
             @Override
@@ -119,8 +130,7 @@ public class PSymbol extends PExp {
 
             @Override
             protected String toString(PSymbol s) {
-                return "("
-                        + delimit(s.arguments.iterator(), " " + s.name + " ")
+                return "(" + delimit(s.arguments.iterator(), " " + s.name + " ")
                         + ")";
             }
 
@@ -192,7 +202,9 @@ public class PSymbol extends PExp {
         };
 
         /**
-         * <p>This method returns a {@code PSymbol} in string format.</p>
+         * <p>
+         * This method returns a {@code PSymbol} in string format.
+         * </p>
          *
          * @param s A prover symbol expression.
          *
@@ -201,8 +213,11 @@ public class PSymbol extends PExp {
         protected abstract String toString(PSymbol s);
 
         /**
-         * <p>This method is called to before visiting a {@link PSymbol}
-         * using the specified {@link PExpVisitor}.</p>
+         * <p>
+         * This method is called to before visiting a {@link PSymbol} using the
+         * specified
+         * {@link PExpVisitor}.
+         * </p>
          *
          * @param v A prover expression visitor.
          * @param s A prover symbol expression.
@@ -210,8 +225,12 @@ public class PSymbol extends PExp {
         protected abstract void beginAccept(PExpVisitor v, PSymbol s);
 
         /**
-         * <p>This method is called right before we end the visit for
-         * a {@link PSymbol} using the specified {@link PExpVisitor}.</p></p>
+         * <p>
+         * This method is called right before we end the visit for a
+         * {@link PSymbol} using the specified
+         * {@link PExpVisitor}.
+         * </p>
+         * </p>
          *
          * @param v A prover expression visitor.
          * @param s A prover symbol expression.
@@ -219,8 +238,11 @@ public class PSymbol extends PExp {
         protected abstract void fencepostAccept(PExpVisitor v, PSymbol s);
 
         /**
-         * <p>This method is called to after visiting a {@link PSymbol}
-         * using the specified {@link PExpVisitor}.</p>
+         * <p>
+         * This method is called to after visiting a {@link PSymbol} using the
+         * specified
+         * {@link PExpVisitor}.
+         * </p>
          *
          * @param v A prover expression visitor.
          * @param s A prover symbol expression.
@@ -232,28 +254,60 @@ public class PSymbol extends PExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's name.</p> */
+    /**
+     * <p>
+     * The expression's name.
+     * </p>
+     */
     public final String name;
 
-    /** <p>The expression's arguments.</p> */
+    /**
+     * <p>
+     * The expression's arguments.
+     * </p>
+     */
     public final ImmutableList<PExp> arguments;
 
-    /** <p>The expression's quantification.</p> */
+    /**
+     * <p>
+     * The expression's quantification.
+     * </p>
+     */
     public final Quantification quantification;
 
-    /** <p>The expression's display type.</p> */
+    /**
+     * <p>
+     * The expression's display type.
+     * </p>
+     */
     private final DisplayType displayType;
 
-    /** <p>The left and right hand side of the expression.</p> */
+    /**
+     * <p>
+     * The left and right hand side of the expression.
+     * </p>
+     */
     public final String leftPrint, rightPrint;
 
-    /** <p>The expression's pre-application mathematical type.</p> */
+    /**
+     * <p>
+     * The expression's pre-application mathematical type.
+     * </p>
+     */
     private MTType myPreApplicationType;
 
-    /** <p>The expression's number of arguments size.</p> */
+    /**
+     * <p>
+     * The expression's number of arguments size.
+     * </p>
+     */
     private int myArgumentsSize;
 
-    /** <p>The expression's scratch space used internally.</p> */
+    /**
+     * <p>
+     * The expression's scratch space used internally.
+     * </p>
+     */
     private final PExp[] myScratchSpace;
 
     // ===========================================================
@@ -261,8 +315,11 @@ public class PSymbol extends PExp {
     // ===========================================================
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
@@ -281,8 +338,11 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
@@ -318,8 +378,11 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
@@ -329,14 +392,18 @@ public class PSymbol extends PExp {
      * @param display The expression's display type.
      */
     public PSymbol(MTType type, MTType typeValue, String leftPrint,
-            String rightPrint, Collection<PExp> arguments, DisplayType display) {
+            String rightPrint, Collection<PExp> arguments,
+            DisplayType display) {
         this(type, typeValue, leftPrint, rightPrint, arguments,
                 Quantification.NONE, display);
     }
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
@@ -351,8 +418,11 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
@@ -366,8 +436,11 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
@@ -380,8 +453,11 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
@@ -394,8 +470,11 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
@@ -408,15 +487,18 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a prover representation of a reference to a
-     * named element such as a variable, constant, or function.</p>
+     * <p>
+     * This creates a prover representation of a reference to a named element
+     * such as a variable,
+     * constant, or function.
+     * </p>
      *
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
      */
     public PSymbol(MTType type, MTType typeValue, String name) {
-        this(type, typeValue, name, new LinkedList<PExp>(),
-                Quantification.NONE, DisplayType.PREFIX);
+        this(type, typeValue, name, new LinkedList<PExp>(), Quantification.NONE,
+                DisplayType.PREFIX);
     }
 
     // ===========================================================
@@ -464,15 +546,15 @@ public class PSymbol extends PExp {
             sTarget = (PSymbol) target;
         }
         catch (ClassCastException e) {
-            //We can only bind against other instances of PSymbol
+            // We can only bind against other instances of PSymbol
             throw BINDING_EXCEPTION;
         }
 
-        //Note that at this point we're guaranteed that target is of the same
-        //type as us
+        // Note that at this point we're guaranteed that target is of the same
+        // type as us
         if (quantification == Quantification.FOR_ALL) {
             if (!typeMatches(target)) {
-                //We can only bind against something in a subset of us
+                // We can only bind against something in a subset of us
                 throw BINDING_EXCEPTION;
             }
 
@@ -481,8 +563,8 @@ public class PSymbol extends PExp {
             }
             else {
                 if (myArgumentsSize != sTarget.arguments.size()) {
-                    //If we're a function, we can only bind against another
-                    //function with the same number of arguments
+                    // If we're a function, we can only bind against another
+                    // function with the same number of arguments
                     throw BINDING_EXCEPTION;
                 }
 
@@ -494,18 +576,18 @@ public class PSymbol extends PExp {
                 Iterator<PExp> targetArgumentsIter =
                         sTarget.arguments.iterator();
                 while (thisArgumentsIter.hasNext()) {
-                    thisArgumentsIter.next().substitute(accumulator).bindTo(
-                            targetArgumentsIter.next(), accumulator);
+                    thisArgumentsIter.next().substitute(accumulator)
+                            .bindTo(targetArgumentsIter.next(), accumulator);
                 }
             }
         }
         else {
-            //TODO : This isn't right.  The real logic should be "is the
-            //       expression I represent is in the type of target", but right
-            //       now "isKnownToBeIn" in TypeGraph doesn't operate on PExps
-            if (!(myMathType.isSubtypeOf(target.getMathType()) || target
-                    .getMathType().isSubtypeOf(myMathType))) {
-                //We can only match something we're a subset of
+            // TODO : This isn't right. The real logic should be "is the
+            // expression I represent is in the type of target", but right
+            // now "isKnownToBeIn" in TypeGraph doesn't operate on PExps
+            if (!(myMathType.isSubtypeOf(target.getMathType())
+                    || target.getMathType().isSubtypeOf(myMathType))) {
+                // We can only match something we're a subset of
                 throw BINDING_EXCEPTION;
             }
 
@@ -514,15 +596,15 @@ public class PSymbol extends PExp {
             }
 
             if (myArgumentsSize != sTarget.arguments.size()) {
-                //We aren't a "for all", so everything better be exact
+                // We aren't a "for all", so everything better be exact
                 throw BINDING_EXCEPTION;
             }
 
             Iterator<PExp> thisArgumentsIter = arguments.iterator();
             Iterator<PExp> targetArgumentsIter = sTarget.arguments.iterator();
             while (thisArgumentsIter.hasNext()) {
-                thisArgumentsIter.next().substitute(accumulator).bindTo(
-                        targetArgumentsIter.next(), accumulator);
+                thisArgumentsIter.next().substitute(accumulator)
+                        .bindTo(targetArgumentsIter.next(), accumulator);
             }
         }
     }
@@ -567,9 +649,8 @@ public class PSymbol extends PExp {
         if (retval) {
             PSymbol oAsPSymbol = (PSymbol) o;
 
-            retval =
-                    (oAsPSymbol.valueHash == valueHash)
-                            && name.equals(oAsPSymbol.name);
+            retval = (oAsPSymbol.valueHash == valueHash)
+                    && name.equals(oAsPSymbol.name);
 
             if (retval) {
                 Iterator<PExp> localArgs = arguments.iterator();
@@ -589,8 +670,10 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This method attempts to flip all quantifiers to generate
-     * a new expression.</p>
+     * <p>
+     * This method attempts to flip all quantifiers to generate a new
+     * expression.
+     * </p>
      *
      * @return A new {@link PExp}.
      */
@@ -613,10 +696,9 @@ public class PSymbol extends PExp {
         }
 
         if (argumentChanged) {
-            retval =
-                    new PSymbol(myMathType, myMathTypeValue, leftPrint,
-                            rightPrint, Arrays.asList(myScratchSpace),
-                            quantification.flipped(), displayType);
+            retval = new PSymbol(myMathType, myMathTypeValue, leftPrint,
+                    rightPrint, Arrays.asList(myScratchSpace),
+                    quantification.flipped(), displayType);
         }
         else {
             Quantification flipped = quantification.flipped();
@@ -625,9 +707,8 @@ public class PSymbol extends PExp {
                 retval = this;
             }
             else {
-                retval =
-                        new PSymbol(myMathType, myMathTypeValue, leftPrint,
-                                rightPrint, arguments, flipped, displayType);
+                retval = new PSymbol(myMathType, myMathTypeValue, leftPrint,
+                        rightPrint, arguments, flipped, displayType);
             }
         }
 
@@ -635,7 +716,9 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This method returns a set of symbols that are not quantified.</p>
+     * <p>
+     * This method returns a set of symbols that are not quantified.
+     * </p>
      *
      * @return A set of symbol names.
      */
@@ -689,11 +772,13 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This method checks to see if this expression represents
-     * some kind of function.</p>
+     * <p>
+     * This method checks to see if this expression represents some kind of
+     * function.
+     * </p>
      *
      * @return {@code true} if it is some kind of function expression,
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     public final boolean isFunction() {
         // Function symbols do not always have arguments
@@ -705,14 +790,14 @@ public class PSymbol extends PExp {
      */
     @Override
     public final boolean isLiteral() {
-        //XXX : All PExps originally come from Exps.  Currently there is no way
-        //      to tell if an Exp is a literal.  I.e., in an expression like
-        //      "S'' = empty_string", the left and right sides of the equality
-        //      are indistinguishable except for their names.  Until this
-        //      situation is resolved, literals should be hard coded here.
+        // XXX : All PExps originally come from Exps. Currently there is no way
+        // to tell if an Exp is a literal. I.e., in an expression like
+        // "S'' = empty_string", the left and right sides of the equality
+        // are indistinguishable except for their names. Until this
+        // situation is resolved, literals should be hard coded here.
         return (name.equalsIgnoreCase("empty_string"))
-                || (name.equals("0") || name.equals("1") || name.equals("true") || name
-                        .equals("false"));
+                || (name.equals("0") || name.equals("1") || name.equals("true")
+                        || name.equals("false"));
     }
 
     /**
@@ -721,8 +806,8 @@ public class PSymbol extends PExp {
     @Override
     public final boolean isObviouslyTrue() {
         return (myArgumentsSize == 0 && name.equalsIgnoreCase("true"))
-                || (myArgumentsSize == 2 && name.equals("=") && arguments
-                        .get(0).equals(arguments.get(1)));
+                || (myArgumentsSize == 2 && name.equals("=")
+                        && arguments.get(0).equals(arguments.get(1)));
     }
 
     /**
@@ -734,8 +819,10 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a new {@link PSymbol} by replacing the specified
-     * index with the new argument.</p>
+     * <p>
+     * This creates a new {@link PSymbol} by replacing the specified index with
+     * the new argument.
+     * </p>
      *
      * @param index The index to be replaced.
      * @param newArgument A new argument expression.
@@ -750,7 +837,9 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a new {@link PSymbol} by replacing all the arguments.</p>
+     * <p>
+     * This creates a new {@link PSymbol} by replacing all the arguments.
+     * </p>
      *
      * @param newArguments A new list of arguments.
      *
@@ -762,7 +851,9 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This creates a new {@link PSymbol} by replacing its name.</p>
+     * <p>
+     * This creates a new {@link PSymbol} by replacing its name.
+     * </p>
      *
      * @param newName A new name.
      *
@@ -784,10 +875,10 @@ public class PSymbol extends PExp {
             String newLeft = leftPrint, newRight = rightPrint;
             Quantification newQuantification = quantification;
 
-            if (arguments.size() > 0 && displayType.equals(DisplayType.PREFIX)) {
-                PExp asVar =
-                        new PSymbol(getMathType(), getMathTypeValue(), leftPrint,
-                                quantification);
+            if (arguments.size() > 0
+                    && displayType.equals(DisplayType.PREFIX)) {
+                PExp asVar = new PSymbol(getMathType(), getMathTypeValue(),
+                        leftPrint, quantification);
 
                 PExp functionSubstitution = substitutions.get(asVar);
 
@@ -814,17 +905,15 @@ public class PSymbol extends PExp {
             }
 
             if (argumentChanged) {
-                retval =
-                        new PSymbol(myMathType, myMathTypeValue, newLeft, newRight,
-                                new ArrayBackedImmutableList<>(
-                                        myScratchSpace), newQuantification,
-                                displayType);
+                retval = new PSymbol(myMathType, myMathTypeValue, newLeft,
+                        newRight,
+                        new ArrayBackedImmutableList<>(myScratchSpace),
+                        newQuantification, displayType);
             }
             else {
                 // changed this to handle case where func name changes but args don't -- mike
-                retval =
-                        new PSymbol(myMathType, myMathTypeValue, newLeft, newRight,
-                                arguments, newQuantification, displayType);
+                retval = new PSymbol(myMathType, myMathTypeValue, newLeft,
+                        newRight, arguments, newQuantification, displayType);
             }
         }
 
@@ -851,8 +940,8 @@ public class PSymbol extends PExp {
      */
     @Override
     public final PSymbol withTypeReplaced(MTType t) {
-        return new PSymbol(t, myMathTypeValue, leftPrint, rightPrint,
-                arguments, quantification, displayType);
+        return new PSymbol(t, myMathTypeValue, leftPrint, rightPrint, arguments,
+                quantification, displayType);
     }
 
     /**
@@ -901,7 +990,8 @@ public class PSymbol extends PExp {
                 result.add(this);
             }
             else {
-                result.add(new PSymbol(getMathType(), null, name, quantification));
+                result.add(
+                        new PSymbol(getMathType(), null, name, quantification));
             }
         }
 
@@ -941,8 +1031,10 @@ public class PSymbol extends PExp {
     // ===========================================================
 
     /**
-     * <p>An helper method that computes a structure and value hash given
-     * the specified arguments.</p>
+     * <p>
+     * An helper method that computes a structure and value hash given the
+     * specified arguments.
+     * </p>
      *
      * @param left The expression's left hand side as a string.
      * @param right The expression's right hand side as a string.
@@ -985,8 +1077,9 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>This helper method creates a string output with
-     * the delimiter.</p>
+     * <p>
+     * This helper method creates a string output with the delimiter.
+     * </p>
      *
      * @param i An iterator.
      * @param delimiter The delimiter symbol.
@@ -1012,7 +1105,9 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>An helper method for retrieving this expression's canonical name.</p>
+     * <p>
+     * An helper method for retrieving this expression's canonical name.
+     * </p>
      *
      * @return A canonical representation of this expression.
      */
@@ -1030,8 +1125,11 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * <p>An helper method that gets the pre-application mathematical type
-     * associated with this expression.</p>
+     * <p>
+     * An helper method that gets the pre-application mathematical type
+     * associated with this
+     * expression.
+     * </p>
      *
      * @return A {@link MTType} type object.
      */
@@ -1042,9 +1140,8 @@ public class PSymbol extends PExp {
                 argTypes.add(arg.getMathType());
             }
 
-            myPreApplicationType =
-                    new MTFunction(getMathType().getTypeGraph(), getMathType(),
-                            argTypes);
+            myPreApplicationType = new MTFunction(getMathType().getTypeGraph(),
+                    getMathType(), argTypes);
         }
 
         return myPreApplicationType;

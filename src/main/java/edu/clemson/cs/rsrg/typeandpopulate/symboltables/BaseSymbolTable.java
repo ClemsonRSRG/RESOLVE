@@ -1,7 +1,7 @@
 /*
  * BaseSymbolTable.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,9 +16,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import java.util.*;
 
 /**
- * <p>An helper class to factor out some logic repeated in {@link ScopeBuilder}
- * and {@link Scope} and remove the temptation to muck about with the
- * entry map directly.</p>
+ * <p>
+ * An helper class to factor out some logic repeated in {@link ScopeBuilder} and
+ * {@link Scope} and
+ * remove the temptation to muck about with the entry map directly.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,23 +30,36 @@ class BaseSymbolTable implements SymbolTable {
     // Member Fields
     // ===========================================================
 
-    /** <p>The collection of entries in this table.</p> */
+    /**
+     * <p>
+     * The collection of entries in this table.
+     * </p>
+     */
     private final Map<String, SymbolTableEntry> myEntries = new HashMap<>();
 
-    /** <p>The collection of entries grouped by type.</p> */
-    private final Map<Class<?>, List<SymbolTableEntry>> myEntriesByType = new HashMap<>();
+    /**
+     * <p>
+     * The collection of entries grouped by type.
+     * </p>
+     */
+    private final Map<Class<?>, List<SymbolTableEntry>> myEntriesByType =
+            new HashMap<>();
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This creates an empty symbol table.</p>
+     * <p>
+     * This creates an empty symbol table.
+     * </p>
      */
     BaseSymbolTable() {}
 
     /**
-     * <p>This creates a symbol table from an existing source.</p>
+     * <p>
+     * This creates a symbol table from an existing source.
+     * </p>
      *
      * @param source An existing source {@code BaseSymbolTable}.
      */
@@ -57,13 +72,15 @@ class BaseSymbolTable implements SymbolTable {
     // ===========================================================
 
     /**
-     * <p>This method checks to see if there is an entry
-     * with the given <code>name</code>.</p>
+     * <p>
+     * This method checks to see if there is an entry with the given
+     * <code>name</code>.
+     * </p>
      *
      * @param name A string name.
      *
-     * @return {@code true} if there is an entry with this name,
-     * {@code false} otherwise.
+     * @return {@code true} if there is an entry with this name, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean containsKey(String name) {
@@ -71,8 +88,9 @@ class BaseSymbolTable implements SymbolTable {
     }
 
     /**
-     * <p>This method returns the entry specified by the
-     * name.</p>
+     * <p>
+     * This method returns the entry specified by the name.
+     * </p>
      *
      * @param name Name of an entry.
      *
@@ -84,7 +102,9 @@ class BaseSymbolTable implements SymbolTable {
     }
 
     /**
-     * <p>This method creates an iterator for the type <code>T</code>.</p>
+     * <p>
+     * This method creates an iterator for the type <code>T</code>.
+     * </p>
      *
      * @param type A type name.
      * @param <T> A {@link SymbolTableEntry} type.
@@ -92,7 +112,8 @@ class BaseSymbolTable implements SymbolTable {
      * @return An {@link Iterator}.
      */
     @Override
-    public final <T extends SymbolTableEntry> Iterator<T> iterateByType(Class<T> type) {
+    public final <T extends SymbolTableEntry> Iterator<T>
+            iterateByType(Class<T> type) {
         List<Class<T>> types = new LinkedList<>();
         types.add(type);
 
@@ -100,8 +121,10 @@ class BaseSymbolTable implements SymbolTable {
     }
 
     /**
-     * <p>This method creates an iterator for to iterate over
-     * a collection of <code>T</code>.</p>
+     * <p>
+     * This method creates an iterator for to iterate over a collection of
+     * <code>T</code>.
+     * </p>
      *
      * @param types A type name.
      * @param <T> A {@link SymbolTableEntry} type.
@@ -110,7 +133,8 @@ class BaseSymbolTable implements SymbolTable {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public final <T extends SymbolTableEntry> Iterator<T> iterateByType(Collection<Class<T>> types) {
+    public final <T extends SymbolTableEntry> Iterator<T>
+            iterateByType(Collection<Class<T>> types) {
         List<T> result = new LinkedList<>();
 
         List<T> typeList;
@@ -126,18 +150,22 @@ class BaseSymbolTable implements SymbolTable {
     }
 
     /**
-     * <p>This method returns an iterator over the elements of type
-     * {@code T}.</p>
+     * <p>
+     * This method returns an iterator over the elements of type {@code T}.
+     * </p>
      *
      * @return An {@link Iterator}.
      */
     @Override
     public final Iterator<SymbolTableEntry> iterator() {
-        return Collections.unmodifiableCollection(myEntries.values()).iterator();
+        return Collections.unmodifiableCollection(myEntries.values())
+                .iterator();
     }
 
     /**
-     * <p>This method puts an entry into the symbol table.</p>
+     * <p>
+     * This method puts an entry into the symbol table.
+     * </p>
      *
      * @param name Name of an entry.
      * @param entry The entry to be put into the table.
@@ -165,8 +193,9 @@ class BaseSymbolTable implements SymbolTable {
     }
 
     /**
-     * <p>This method puts all the entries from the source
-     * into the symbol table.</p>
+     * <p>
+     * This method puts all the entries from the source into the symbol table.
+     * </p>
      *
      * @param source A source map of entries.
      */
@@ -178,7 +207,9 @@ class BaseSymbolTable implements SymbolTable {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */

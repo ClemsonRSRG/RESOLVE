@@ -1,7 +1,7 @@
 /*
  * FlagDependencyException.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,9 +13,12 @@
 package edu.clemson.cs.r2jt.misc;
 
 /**
- * <p>A <code>FlagDependencyException</code> indicates that the user-provided
- * flag configuration is not acceptable for some reason.  The reason for the
- * exception is provided in the exception's message.</p>
+ * <p>
+ * A <code>FlagDependencyException</code> indicates that the user-provided flag
+ * configuration is not
+ * acceptable for some reason. The reason for the exception is provided in the
+ * exception's message.
+ * </p>
  */
 public class FlagDependencyException extends Exception {
 

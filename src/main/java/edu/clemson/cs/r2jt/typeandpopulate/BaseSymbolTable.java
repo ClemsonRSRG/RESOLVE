@@ -1,7 +1,7 @@
 /*
  * BaseSymbolTable.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,9 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A helper class to factor out some logic repeated in 
- * <code>ScopeBuilder</code> and <code>Scope</code> and remove the temptation
- * to muck about with the entry map directly.</p>
+ * <p>
+ * A helper class to factor out some logic repeated in <code>ScopeBuilder</code>
+ * and
+ * <code>Scope</code> and remove the temptation to muck about with the entry map
+ * directly.
+ * </p>
  */
 class BaseSymbolTable implements SymbolTable {
 
@@ -85,7 +88,8 @@ class BaseSymbolTable implements SymbolTable {
     }
 
     @Override
-    public <T extends SymbolTableEntry> Iterator<T> iterateByType(Class<T> type) {
+    public <T extends SymbolTableEntry> Iterator<T>
+            iterateByType(Class<T> type) {
 
         List<Class<T>> types = new LinkedList<Class<T>>();
         types.add(type);
@@ -95,8 +99,8 @@ class BaseSymbolTable implements SymbolTable {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends SymbolTableEntry> Iterator<T> iterateByType(
-            Collection<Class<T>> types) {
+    public <T extends SymbolTableEntry> Iterator<T>
+            iterateByType(Collection<Class<T>> types) {
         List<T> result = new LinkedList<T>();
 
         List<T> typeList;

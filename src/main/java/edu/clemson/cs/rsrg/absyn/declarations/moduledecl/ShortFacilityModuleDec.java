@@ -1,7 +1,7 @@
 /*
  * ShortFacilityModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the class for the short facility module declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for the short facility module declarations that the
+ * compiler builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -34,21 +37,25 @@ public class ShortFacilityModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>This constructor creates a short facility module representation.</p>
+     * <p>
+     * This constructor creates a short facility module representation.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
      * @param facilityDec A {@link FacilityDec} representation object.
      * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
-     *                           externally realized flags that indicates
-     *                           all the modules that this module declaration depends on.
+     *        externally realized flags
+     *        that indicates all the modules that this module declaration
+     *        depends on.
      */
     public ShortFacilityModuleDec(Location l, PosSymbol name,
             FacilityDec facilityDec,
             Map<ResolveFileBasicInfo, Boolean> moduleDependencies) {
         super(l, name, new ArrayList<ModuleParameterDec>(),
-                new ArrayList<UsesItem>(), new ArrayList<Dec>(Collections
-                        .singletonList(facilityDec)), moduleDependencies);
+                new ArrayList<UsesItem>(),
+                new ArrayList<Dec>(Collections.singletonList(facilityDec)),
+                moduleDependencies);
     }
 
     // ===========================================================
@@ -70,7 +77,9 @@ public class ShortFacilityModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>Returns the facility declaration.</p>
+     * <p>
+     * Returns the facility declaration.
+     * </p>
      *
      * @return A {@link FacilityDec} representation object.
      */

@@ -1,7 +1,7 @@
 /*
  * JustificationExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,8 +34,9 @@ public class JustificationExp extends Exp {
     /** The rule member. */
     private PosSymbol rule;
 
-    /** The index of the rule if referencing a part of an inductive 
-     *  definition.*/
+    /**
+     * The index of the rule if referencing a part of an inductive definition.
+     */
     private PosSymbol index;
 
     /** The name of the source module from which to receive the definition. */
@@ -74,9 +75,10 @@ public class JustificationExp extends Exp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new JustificationExp(location, (HypDesigExp) substitute(
-                hypDesig1, substitutions), (HypDesigExp) substitute(hypDesig2,
-                substitutions), rule, index, sourceModule, isDef);
+        return new JustificationExp(location,
+                (HypDesigExp) substitute(hypDesig1, substitutions),
+                (HypDesigExp) substitute(hypDesig2, substitutions), rule, index,
+                sourceModule, isDef);
     }
 
     // ===========================================================

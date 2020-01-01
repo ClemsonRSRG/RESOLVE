@@ -1,7 +1,7 @@
 /*
  * SpecInitFinalItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the specification initialization/finalization
- * block objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the specification initialization/finalization block
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,7 +33,9 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This defines the various different specification item types.</p>
+     * <p>
+     * This defines the various different specification item types.
+     * </p>
      *
      * @version 2.0
      */
@@ -57,13 +62,25 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The affects clause.</p> */
+    /**
+     * <p>
+     * The affects clause.
+     * </p>
+     */
     private final AffectsClause myAffects;
 
-    /** <p>The type of clause</p> */
+    /**
+     * <p>
+     * The type of clause
+     * </p>
+     */
     private final ItemType myItemType;
 
-    /** <p>The ensures expression</p> */
+    /**
+     * <p>
+     * The ensures expression
+     * </p>
+     */
     private final AssertionClause myEnsures;
 
     // ===========================================================
@@ -71,14 +88,18 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a specification initialization/finalization block.</p>
+     * <p>
+     * This constructs a specification initialization/finalization block.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates if it is an initialization or finalization block.
-     * @param affects A {@link AffectsClause} representing the initialization's/finalization's
-     *                affects clause.
-     * @param ensures A {@link AssertionClause} representing the initialization's/finalization's
-     *                ensures clause.
+     * @param affects A {@link AffectsClause} representing the
+     *        initialization's/finalization's affects
+     *        clause.
+     * @param ensures A {@link AssertionClause} representing the
+     *        initialization's/finalization's
+     *        ensures clause.
      */
     public SpecInitFinalItem(Location l, ItemType type, AffectsClause affects,
             AssertionClause ensures) {
@@ -152,8 +173,11 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the affects clause
-     * in this type initialization/finalization verification block.</p>
+     * <p>
+     * This method returns the affects clause in this type
+     * initialization/finalization verification
+     * block.
+     * </p>
      *
      * @return The {@link AffectsClause} representation object.
      */
@@ -162,8 +186,11 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the type that indicates
-     * if this is an initialization or finalization verification block.</p>
+     * <p>
+     * This method returns the type that indicates if this is an initialization
+     * or finalization
+     * verification block.
+     * </p>
      *
      * @return The {@link ItemType} object.
      */
@@ -172,8 +199,11 @@ public class SpecInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the ensures clause
-     * in this type initialization/finalization verification block.</p>
+     * <p>
+     * This method returns the ensures clause in this type
+     * initialization/finalization verification
+     * block.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */

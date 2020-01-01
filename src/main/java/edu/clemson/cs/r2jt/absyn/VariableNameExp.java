@@ -1,7 +1,7 @@
 /*
  * VariableNameExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -143,8 +143,9 @@ public class VariableNameExp extends VariableExp {
         return name.getName();
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         return false;
     }
@@ -167,7 +168,8 @@ public class VariableNameExp extends VariableExp {
     public Exp replace(Exp old, Exp replacement) {
         if (name != null) {
             if (old instanceof VarExp) {
-                if (((VarExp) old).getName().toString().equals(name.toString())) {
+                if (((VarExp) old).getName().toString()
+                        .equals(name.toString())) {
                     return (Exp) Exp.clone(replacement);
                 }
             }
@@ -195,9 +197,8 @@ public class VariableNameExp extends VariableExp {
         if (retval) {
             VariableNameExp eAsVNE = (VariableNameExp) e;
 
-            retval =
-                    posSymbolEquivalent(qualifier, eAsVNE.qualifier)
-                            && posSymbolEquivalent(name, eAsVNE.name);
+            retval = posSymbolEquivalent(qualifier, eAsVNE.qualifier)
+                    && posSymbolEquivalent(name, eAsVNE.name);
         }
 
         return retval;

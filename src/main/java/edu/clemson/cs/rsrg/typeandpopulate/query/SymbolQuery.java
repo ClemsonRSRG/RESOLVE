@@ -1,7 +1,7 @@
 /*
  * SymbolQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,22 +19,27 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.Scope;
 import java.util.List;
 
 /**
- * <p>A <code>SymbolQuery</code> defines a strategy for returning a list of
- * {@link SymbolTableEntry}s that meet a certain set of
- * criteria starting from some <em>source scope</em>.
+ * <p>
+ * A <code>SymbolQuery</code> defines a strategy for returning a list of
+ * {@link SymbolTableEntry}s
+ * that meet a certain set of criteria starting from some <em>source scope</em>.
  */
 public interface SymbolQuery<E extends SymbolTableEntry> {
 
     /**
-     * <p>Given a source {@link Scope} and a
-     * {@link ScopeRepository} containing any imports, from
-     * which <code>source</code> is drawn, searches them appropriately,
-     * returning a list of matching {@link SymbolTableEntry}s
-     * that are subtypes of <code>E</code>.</p>
+     * <p>
+     * Given a source {@link Scope} and a {@link ScopeRepository} containing any
+     * imports, from which
+     * <code>source</code> is drawn, searches them appropriately, returning a
+     * list of matching
+     * {@link SymbolTableEntry}s that are subtypes of <code>E</code>.
+     * </p>
      *
-     * <p>If there are no matches, returns an empty list. If more than one
-     * match is found where no more than one was expected, throws a
-     * {@link DuplicateSymbolException}.</p>
+     * <p>
+     * If there are no matches, returns an empty list. If more than one match is
+     * found where no more
+     * than one was expected, throws a {@link DuplicateSymbolException}.
+     * </p>
      *
      * @param source The source scope from which the search was spawned.
      * @param repo A repository of any referenced modules.

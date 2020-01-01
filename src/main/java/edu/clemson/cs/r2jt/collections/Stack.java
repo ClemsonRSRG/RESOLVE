@@ -1,7 +1,7 @@
 /*
  * Stack.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,8 +33,7 @@ public class Stack<A> {
     // ===========================================================
 
     /**
-     * Returns an iterator that goes through the stack from
-     * bottom to top.
+     * Returns an iterator that goes through the stack from bottom to top.
      */
     public Iterator<A> iterator() {
         return s.iterator();

@@ -1,7 +1,7 @@
 /*
  * OperationProfileSearcher.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,7 +33,8 @@ public class OperationProfileSearcher
     private final Location myQueryLocation;
     private final List<PTType> myActualArgumentTypes;
 
-    public OperationProfileSearcher(PosSymbol name, List<PTType> argumentTypes) {
+    public OperationProfileSearcher(PosSymbol name,
+            List<PTType> argumentTypes) {
         myQueryName = name.getName();
         myQueryLocation = name.getLocation();
         myActualArgumentTypes = new LinkedList<PTType>(argumentTypes);
@@ -47,12 +48,12 @@ public class OperationProfileSearcher
         if (entries.containsKey(myQueryName)) {
             try {
                 OperationProfileEntry operationProfile =
-                        entries.get(myQueryName).toOperationProfileEntry(
-                                myQueryLocation);
+                        entries.get(myQueryName)
+                                .toOperationProfileEntry(myQueryLocation);
 
                 if (argumentsMatch(operationProfile.getCorrespondingOperation()
                         .getParameters())) {
-                    //We have a match at this point
+                    // We have a match at this point
                     if (!matches.isEmpty()) {
                         throw new DuplicateSymbolException();
                     }
@@ -61,7 +62,7 @@ public class OperationProfileSearcher
                 }
             }
             catch (SourceErrorException see) {
-                //No problem, just don't include it in the result
+                // No problem, just don't include it in the result
             }
         }
 

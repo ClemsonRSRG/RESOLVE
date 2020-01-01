@@ -1,7 +1,7 @@
 /*
  * FileLocator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,11 +33,12 @@ public class FileLocator {
     // ===========================================================
 
     /**
-     * Recursively searches the specified directory tree for a file
-     * with the specified name. If exactly one file is found, it
-     * returns that file. If no file is found a file-not-found
-     * exception is thrown, if more than one file is found, a
-     * multi-files-found exception is thrown.
+     * Recursively searches the specified directory tree for a file with the
+     * specified name. If
+     * exactly one file is found, it returns that file. If no file is found a
+     * file-not-found exception
+     * is thrown, if more than one file is found, a multi-files-found exception
+     * is thrown.
      */
     public File locateFileInTree(String name, File dir)
             throws FileLocatorException {
@@ -57,14 +58,16 @@ public class FileLocator {
     }
 
     /**
-     * Recursively searches the specified directory tree for a file
-     * with any of the specified names. If exactly one file is
-     * found, it returns that file. If no file is found a
-     * file-not-found exception is thrown, if more than one file is
-     * found, a multi-files-found exception is thrown.
+     * Recursively searches the specified directory tree for a file with any of
+     * the specified names.
+     * If exactly one file is found, it returns that file. If no file is found a
+     * file-not-found
+     * exception is thrown, if more than one file is found, a multi-files-found
+     * exception is thrown.
      */
     public File locateFileInTree(String name1, String name2, String name3,
-            String name4, File dir) throws FileLocatorException {
+            String name4, File dir)
+            throws FileLocatorException {
         List<File> files = new List<File>();
         files.addAll(recursivelyLocateFiles(name1, dir));
         files.addAll(recursivelyLocateFiles(name2, dir));
@@ -79,25 +82,24 @@ public class FileLocator {
             return files.get(0);
         }
         else { // files.size() > 1
-            String msg =
-                    multiFilesMessage4(name1, name2, name3, name4, dir
-                            .getName(), files.toString());
+            String msg = multiFilesMessage4(name1, name2, name3, name4,
+                    dir.getName(), files.toString());
             throw new FileLocatorException(msg);
         }
     }
 
     /**
-     * Searches the specified directory for a file with the specified
-     * name and returns that file. If no file is found a
-     * file-not-found exception is thrown.
+     * Searches the specified directory for a file with the specified name and
+     * returns that file. If
+     * no file is found a file-not-found exception is thrown.
      */
     public File locateFileInDir(String name, File dir)
             throws FileLocatorException {
-        //System.out.println("locating: "+name+" : "+dir.getAbsolutePath());
+        // System.out.println("locating: "+name+" : "+dir.getAbsolutePath());
         File resultFile = null;
         File[] fileArray = dir.listFiles();
         List<File> files = new List<File>();
-        //JMH avoid problems with 1.5 generics files.addAll(fileArray);
+        // JMH avoid problems with 1.5 generics files.addAll(fileArray);
         for (int i = 0; i < fileArray.length; i++) {
             files.add(fileArray[i]);
         }
@@ -127,7 +129,7 @@ public class FileLocator {
         List<File> resultFiles = new List<File>();
         File[] fileArray = dir.listFiles();
         List<File> files = new List<File>();
-        //JMH avoid problems with 1.5 generics files.addAll(fileArray);
+        // JMH avoid problems with 1.5 generics files.addAll(fileArray);
         for (int i = 0; i < fileArray.length; i++) {
             files.add(fileArray[i]);
         }
@@ -149,10 +151,8 @@ public class FileLocator {
     // -----------------------------------------------------------
 
     private String noFileMessage(String name, String dir) {
-        String msg =
-                "Could not find a file with name " + name
-                        + " in the directory " + dir
-                        + " or any of its subdirectories.";
+        String msg = "Could not find a file with name " + name
+                + " in the directory " + dir + " or any of its subdirectories.";
         return msg;
     }
 
@@ -164,29 +164,24 @@ public class FileLocator {
     }
 
     private String noFileInDirMessage(String name, String dir) {
-        String msg =
-                "Could not find a file with name " + name
-                        + " in the directory " + dir + ".";
+        String msg = "Could not find a file with name " + name
+                + " in the directory " + dir + ".";
         return msg;
     }
 
     private String noFileMessage4(String name1, String name2, String name3,
             String name4, String dir) {
-        String msg =
-                "Could not find a file with name " + name1 + " or " + name2
-                        + " or " + name3 + " or " + name4
-                        + " in the directory " + dir
-                        + " or any of its subdirectories.";
+        String msg = "Could not find a file with name " + name1 + " or " + name2
+                + " or " + name3 + " or " + name4 + " in the directory " + dir
+                + " or any of its subdirectories.";
         return msg;
     }
 
     private String multiFilesMessage4(String name1, String name2, String name3,
             String name4, String dir, String files) {
-        String msg =
-                "Found multiple files with name " + name1 + " or " + name2
-                        + " or " + name3 + " or " + name4
-                        + " in the directory " + dir
-                        + " or its subdirectories: " + files;
+        String msg = "Found multiple files with name " + name1 + " or " + name2
+                + " or " + name3 + " or " + name4 + " in the directory " + dir
+                + " or its subdirectories: " + files;
         return msg;
     }
 

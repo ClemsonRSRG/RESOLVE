@@ -1,7 +1,7 @@
 /*
  * WriterStatusHandler.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,9 +18,11 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * <p>This class outputs all debugging, errors and/or
- * other information coming from the compiler to the specified
- * writer.</p>
+ * <p>
+ * This class outputs all debugging, errors and/or other information coming from
+ * the compiler to the
+ * specified writer.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -31,13 +33,25 @@ public class WriterStatusHandler implements StatusHandler {
     // Member Fields
     // ===========================================================
 
-    /** <p>Writer for information output.</p> */
+    /**
+     * <p>
+     * Writer for information output.
+     * </p>
+     */
     private final Writer myOutputWriter;
 
-    /** <p>Writer for warning and error output.</p> */
+    /**
+     * <p>
+     * Writer for warning and error output.
+     * </p>
+     */
     private final Writer myErrorWriter;
 
-    /** <p>Boolean flag to check to see if we are still logging.</p> */
+    /**
+     * <p>
+     * Boolean flag to check to see if we are still logging.
+     * </p>
+     */
     protected boolean stopLogging;
 
     // ===========================================================
@@ -45,9 +59,11 @@ public class WriterStatusHandler implements StatusHandler {
     // ===========================================================
 
     /**
-     * <p>This constructor takes in two {@link Writer} objects
-     * that will be used to display the various information, warning
-     * and error messages provided by the compiler.</p>
+     * <p>
+     * This constructor takes in two {@link Writer} objects that will be used to
+     * display the various
+     * information, warning and error messages provided by the compiler.
+     * </p>
      *
      * @param outWriter A writer for general information output.
      * @param errorWriter A writer for warning/error output.
@@ -63,7 +79,9 @@ public class WriterStatusHandler implements StatusHandler {
     // ===========================================================
 
     /**
-     * <p>Outputs a critical error message.</p>
+     * <p>
+     * Outputs a critical error message.
+     * </p>
      *
      * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
@@ -89,14 +107,16 @@ public class WriterStatusHandler implements StatusHandler {
             }
         }
         catch (IOException e) {
-            System.err
-                    .println("Error writing information to the specified output.");
+            System.err.println(
+                    "Error writing information to the specified output.");
             e.printStackTrace();
         }
     }
 
     /**
-     * <p>Checks to see if we are still logging information.</p>
+     * <p>
+     * Checks to see if we are still logging information.
+     * </p>
      *
      * @return True if we are done logging, false otherwise.
      */
@@ -106,7 +126,9 @@ public class WriterStatusHandler implements StatusHandler {
     }
 
     /**
-     * <p>Outputs an informational message, not an error or warning.</p>
+     * <p>
+     * Outputs an informational message, not an error or warning.
+     * </p>
      *
      * @param l The location where we encountered the error.
      * @param msg A compilation message.
@@ -130,15 +152,16 @@ public class WriterStatusHandler implements StatusHandler {
             }
         }
         catch (IOException e) {
-            System.err
-                    .println("Error writing information to the specified output.");
+            System.err.println(
+                    "Error writing information to the specified output.");
             e.printStackTrace();
         }
     }
 
     /**
-     * <p>This method prints the stack trace to the desired output
-     * stream.</p>
+     * <p>
+     * This method prints the stack trace to the desired output stream.
+     * </p>
      *
      * @param e The encountered compiler exception.
      */
@@ -179,17 +202,20 @@ public class WriterStatusHandler implements StatusHandler {
             }
         }
         catch (IOException ioe) {
-            System.err
-                    .println("Error writing information to the specified output.");
+            System.err.println(
+                    "Error writing information to the specified output.");
             ioe.printStackTrace();
         }
     }
 
     /**
-     * <p>Stop logging anymore information.
+     * <p>
+     * Stop logging anymore information.
      *
-     * (Note: Should only be called when the compile process
-     * is over or has been aborted due to an error.)</p>
+     * (Note: Should only be called when the compile process is over or has been
+     * aborted due to an
+     * error.)
+     * </p>
      */
     @Override
     public synchronized void stopLogging() {
@@ -206,7 +232,9 @@ public class WriterStatusHandler implements StatusHandler {
     }
 
     /**
-     * <p>Outputs a warning message.</p>
+     * <p>
+     * Outputs a warning message.
+     * </p>
      *
      * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
@@ -232,8 +260,8 @@ public class WriterStatusHandler implements StatusHandler {
             }
         }
         catch (IOException e) {
-            System.err
-                    .println("Error writing information to the specified output.");
+            System.err.println(
+                    "Error writing information to the specified output.");
             e.printStackTrace();
         }
     }

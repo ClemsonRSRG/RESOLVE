@@ -1,7 +1,7 @@
 /*
  * NestedPExpVisitors.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.prover.absyn.PExp;
 import edu.clemson.cs.rsrg.prover.absyn.expressions.*;
 
 /**
- * <p>This is a visitor that uses both an external and internal
- * visitor to perform actions simultaneously.</p>
+ * <p>
+ * This is a visitor that uses both an external and internal visitor to perform
+ * actions
+ * simultaneously.
+ * </p>
  *
  * @author Hampton Smith
  * @author Mike Kabbani
@@ -30,10 +33,18 @@ public class NestedPExpVisitors extends PExpVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>This is an external visitor for {@link PExp} expressions.</p> */
+    /**
+     * <p>
+     * This is an external visitor for {@link PExp} expressions.
+     * </p>
+     */
     private final PExpVisitor myOuterVisitor;
 
-    /** <p>This is an internal visitor for {@link PExp} expressions.</p> */
+    /**
+     * <p>
+     * This is an internal visitor for {@link PExp} expressions.
+     * </p>
+     */
     private final PExpVisitor myInnerVisitor;
 
     // ===========================================================
@@ -41,8 +52,11 @@ public class NestedPExpVisitors extends PExpVisitor {
     // ===========================================================
 
     /**
-     * <p>This creates a visitor with both external and internal
-     * visitors to perform actions simultaneously.</p>
+     * <p>
+     * This creates a visitor with both external and internal visitors to
+     * perform actions
+     * simultaneously.
+     * </p>
      *
      * @param outer An external visitor.
      * @param inner An internal visitor.
@@ -57,7 +71,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     // ===========================================================
 
     /**
-     * <p>This method is called before visiting a {@link PExp}.</p>
+     * <p>
+     * This method is called before visiting a {@link PExp}.
+     * </p>
      *
      * @param p A prover expression.
      */
@@ -68,7 +84,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting a {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -79,8 +97,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a prefix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting a prefix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -91,8 +110,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting an infix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting an infix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -103,8 +123,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting an outfix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting an outfix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -115,8 +136,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a postfix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called before visiting a postfix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -127,7 +149,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a {@link PAlternatives}.</p>
+     * <p>
+     * This method is called before visiting a {@link PAlternatives}.
+     * </p>
      *
      * @param p A prover alternative expression.
      */
@@ -138,7 +162,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called before visiting a {@link PLambda}.</p>
+     * <p>
+     * This method is called before visiting a {@link PLambda}.
+     * </p>
      *
      * @param p A prover lambda expression.
      */
@@ -149,8 +175,10 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * a {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for a
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -161,8 +189,10 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * a prefix form {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for a prefix form
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -173,8 +203,10 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * an infix form {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for an infix form
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -185,8 +217,10 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * an outfix form {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for an outfix form
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -197,8 +231,10 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * a postfix form {@link PSymbol}.</p>
+     * <p>
+     * This method is called right before we end the visit for a postfix form
+     * {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -209,8 +245,10 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called right before we end the visit for
-     * a {@link PAlternatives}.</p>
+     * <p>
+     * This method is called right before we end the visit for a
+     * {@link PAlternatives}.
+     * </p>
      *
      * @param p A prover alternative expression.
      */
@@ -221,7 +259,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a {@link PExp}.</p>
+     * <p>
+     * This method is called after visiting a {@link PExp}.
+     * </p>
      *
      * @param p A prover expression.
      */
@@ -232,7 +272,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting a {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -243,8 +285,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a prefix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting a prefix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -255,8 +298,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting an infix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting an infix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -267,8 +311,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting an outfix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting an outfix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -279,8 +324,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a postfix form
-     * {@link PSymbol}.</p>
+     * <p>
+     * This method is called after visiting a postfix form {@link PSymbol}.
+     * </p>
      *
      * @param p A prover symbol expression.
      */
@@ -291,7 +337,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a {@link PAlternatives}.</p>
+     * <p>
+     * This method is called after visiting a {@link PAlternatives}.
+     * </p>
      *
      * @param p A prover alternative expression.
      */
@@ -302,7 +350,9 @@ public class NestedPExpVisitors extends PExpVisitor {
     }
 
     /**
-     * <p>This method is called after visiting a {@link PLambda}.</p>
+     * <p>
+     * This method is called after visiting a {@link PLambda}.
+     * </p>
      *
      * @param p A prover lambda expression.
      */

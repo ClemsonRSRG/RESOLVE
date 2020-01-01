@@ -1,7 +1,7 @@
 /*
  * PLambda.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,8 +25,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.*;
 
 /**
- * <p>A {@code PLambda} represents a reference to a lambda
- * expression.</p>
+ * <p>
+ * A {@code PLambda} represents a reference to a lambda expression.
+ * </p>
  *
  * @author Hampton Smith
  * @author Mike Kabbani
@@ -39,7 +40,9 @@ public class PLambda extends PExp {
     // ===========================================================
 
     /**
-     * <p>An helper class for creating a lambda parameter.</p>
+     * <p>
+     * An helper class for creating a lambda parameter.
+     * </p>
      *
      * @author Hampton Smith
      * @version 2.0
@@ -50,10 +53,18 @@ public class PLambda extends PExp {
         // Member Fields
         // ===========================================================
 
-        /** <p>Parameter name</p> */
+        /**
+         * <p>
+         * Parameter name
+         * </p>
+         */
         public final String name;
 
-        /** <p>Parameter type</p> */
+        /**
+         * <p>
+         * Parameter type
+         * </p>
+         */
         public final MTType type;
 
         // ===========================================================
@@ -61,7 +72,9 @@ public class PLambda extends PExp {
         // ===========================================================
 
         /**
-         * <p>This represents a parameter for a lambda expression.</p>
+         * <p>
+         * This represents a parameter for a lambda expression.
+         * </p>
          *
          * @param name Parameter name.
          * @param type Parameter type.
@@ -84,7 +97,9 @@ public class PLambda extends PExp {
         // ===========================================================
 
         /**
-         * <p>This method returns the current parameter in string format.</p>
+         * <p>
+         * This method returns the current parameter in string format.
+         * </p>
          *
          * @return Current {@link Parameter} as a string.
          */
@@ -99,10 +114,18 @@ public class PLambda extends PExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>An immutable list of lambda parameters.</p> */
+    /**
+     * <p>
+     * An immutable list of lambda parameters.
+     * </p>
+     */
     public final ImmutableList<Parameter> parameters;
 
-    /** <p>An expression representing the lambda expression's body.</p> */
+    /**
+     * <p>
+     * An expression representing the lambda expression's body.
+     * </p>
+     */
     private final PExp myBody;
 
     // ===========================================================
@@ -110,15 +133,18 @@ public class PLambda extends PExp {
     // ===========================================================
 
     /**
-     * <p>This creates a prover representation of a lambda expression.</p>
+     * <p>
+     * This creates a prover representation of a lambda expression.
+     * </p>
      *
      * @param parameters An immutable list of lambda parameters.
      * @param body An expression representing the lambda expression's body.
      */
     public PLambda(ImmutableList<Parameter> parameters, PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
-                new MTFunction(body.getMathType().getTypeGraph(), body
-                        .getMathType(), parameterTypes(parameters)), null);
+                new MTFunction(body.getMathType().getTypeGraph(),
+                        body.getMathType(), parameterTypes(parameters)),
+                null);
 
         this.parameters = parameters;
         myBody = body;
@@ -209,7 +235,9 @@ public class PLambda extends PExp {
     }
 
     /**
-     * <p>This method returns the lambda body expression.</p>
+     * <p>
+     * This method returns the lambda body expression.
+     * </p>
      *
      * @return A {@link PExp}.
      */
@@ -218,7 +246,9 @@ public class PLambda extends PExp {
     }
 
     /**
-     * <p>This method returns the list of parameters.</p>
+     * <p>
+     * This method returns the list of parameters.
+     * </p>
      *
      * @return A list of {@link PExp PExps}.
      */
@@ -307,8 +337,9 @@ public class PLambda extends PExp {
     }
 
     /**
-     * <p>This method returns a new expression with the parameter names
-     * normalized.</p>
+     * <p>
+     * This method returns a new expression with the parameter names normalized.
+     * </p>
      *
      * @return A new {@link PLambda} with normalized names.
      */
@@ -319,9 +350,8 @@ public class PLambda extends PExp {
         ArrayList<Parameter> normParams = new ArrayList<>();
         for (PExp p : plist) {
             String name = p.getMathType().toString().toLowerCase() + argNum++;
-            PExp norm =
-                    new PSymbol(p.getMathType(), p.getMathTypeValue(), name,
-                            PSymbol.Quantification.FOR_ALL);
+            PExp norm = new PSymbol(p.getMathType(), p.getMathTypeValue(), name,
+                    PSymbol.Quantification.FOR_ALL);
             substMap.put(p, norm);
             normParams.add(new Parameter(name, p.getMathType()));
         }
@@ -346,8 +376,8 @@ public class PLambda extends PExp {
      */
     @Override
     public final PLambda withTypeReplaced(MTType t) {
-        throw new UnsupportedOperationException("Cannot set the type "
-                + "value on a " + this.getClass() + ".");
+        throw new UnsupportedOperationException(
+                "Cannot set the type " + "value on a " + this.getClass() + ".");
     }
 
     /**
@@ -355,8 +385,8 @@ public class PLambda extends PExp {
      */
     @Override
     public final PLambda withTypeValueReplaced(MTType t) {
-        throw new UnsupportedOperationException("Cannot set the type "
-                + "value on a " + this.getClass() + ".");
+        throw new UnsupportedOperationException(
+                "Cannot set the type " + "value on a " + this.getClass() + ".");
     }
 
     // ===========================================================
@@ -401,7 +431,9 @@ public class PLambda extends PExp {
     // ===========================================================
 
     /**
-     * <p>An helper method for retrieving the parameter's mathematical types.</p>
+     * <p>
+     * An helper method for retrieving the parameter's mathematical types.
+     * </p>
      *
      * @param parameters An immutable list of lambda parameters.
      *
@@ -418,8 +450,9 @@ public class PLambda extends PExp {
     }
 
     /**
-     * <p>An helper method that computes an hash code for
-     * the specified parameter.</p>
+     * <p>
+     * An helper method that computes an hash code for the specified parameter.
+     * </p>
      *
      * @param parameters An immutable list of lambda parameters.
      *
@@ -448,7 +481,9 @@ public class PLambda extends PExp {
     // ===========================================================
 
     /**
-     * <p>An helper class for iterating over the lambda expression's body.</p>
+     * <p>
+     * An helper class for iterating over the lambda expression's body.
+     * </p>
      *
      * @author Hampton Smith
      * @version 2.0
@@ -459,7 +494,11 @@ public class PLambda extends PExp {
         // Member Fields
         // ===========================================================
 
-        /** <p>This flag indicates if we are done visiting the body.</p> */
+        /**
+         * <p>
+         * This flag indicates if we are done visiting the body.
+         * </p>
+         */
         private boolean myReturnedBodyFlag = false;
 
         // ===========================================================
@@ -467,13 +506,16 @@ public class PLambda extends PExp {
         // ===========================================================
 
         /**
-         * <p>This method returns {@code true} <strong>iff</strong> there are additional
-         * sub-expressions. I.e., returns {@code true} <strong>iff</strong>
-         * {@link #next()} would return an element rather than throwing an
-         * exception.</p>
+         * <p>
+         * This method returns {@code true} <strong>iff</strong> there are
+         * additional sub-expressions.
+         * I.e., returns {@code true} <strong>iff</strong> {@link #next()} would
+         * return an element
+         * rather than throwing an exception.
+         * </p>
          *
-         * @return {@code true} if the iterator has more elements,
-         * {@code false} otherwise.
+         * @return {@code true} if the iterator has more elements, {@code false}
+         *         otherwise.
          */
         @Override
         public final boolean hasNext() {
@@ -481,7 +523,8 @@ public class PLambda extends PExp {
         }
 
         /**
-         * <p>This method returns the next sub-expression./p>
+         * <p>
+         * This method returns the next sub-expression./p>
          *
          * @return The next element in the iteration.
          */
@@ -495,13 +538,16 @@ public class PLambda extends PExp {
         }
 
         /**
-         * <p>This method returns a version of the original {@link PExp} (i.e., the
-         * {@code PExp} over whose sub-expressions we are iterating) with the
-         * sub-expression most recently returned by {@link #next()} replaced with
-         * {@code newExpression}.</p>
+         * <p>
+         * This method returns a version of the original {@link PExp} (i.e., the
+         * {@code PExp} over whose
+         * sub-expressions we are iterating) with the sub-expression most
+         * recently returned by
+         * {@link #next()} replaced with {@code newExpression}.
+         * </p>
          *
-         * @param newExpression The argument to replace the most recently returned
-         *                      one with.
+         * @param newExpression The argument to replace the most recently
+         *        returned one with.
          *
          * @return The new version.
          */

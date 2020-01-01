@@ -1,7 +1,7 @@
 /*
  * BaseSymbolQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,9 +21,12 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.ScopeRepository;
 import java.util.List;
 
 /**
- * <p>The most basic implementation of {@link SymbolQuery}, which
- * pairs a {@link ScopeSearchPath} with a {@link TableSearcher} to
- * define a fully parameterized strategy for searching a set of scopes.</p>
+ * <p>
+ * The most basic implementation of {@link SymbolQuery}, which pairs a
+ * {@link ScopeSearchPath} with
+ * a {@link TableSearcher} to define a fully parameterized strategy for
+ * searching a set of scopes.
+ * </p>
  *
  * @param <E> The return type of the base <code>SymbolQuery</code>.
  *
@@ -37,10 +40,18 @@ abstract class BaseSymbolQuery<E extends SymbolTableEntry>
     // Member Fields
     // ===========================================================
 
-    /** <p>Search path.</p> */
+    /**
+     * <p>
+     * Search path.
+     * </p>
+     */
     private final ScopeSearchPath mySearchPath;
 
-    /** <p>Symbol table searcher.</p> */
+    /**
+     * <p>
+     * Symbol table searcher.
+     * </p>
+     */
     private final TableSearcher<E> mySearcher;
 
     // ===========================================================
@@ -48,8 +59,10 @@ abstract class BaseSymbolQuery<E extends SymbolTableEntry>
     // ===========================================================
 
     /**
-     * <p>This is an helper constructor for storing the search path
-     * and symbol table search strategy.</p>
+     * <p>
+     * This is an helper constructor for storing the search path and symbol
+     * table search strategy.
+     * </p>
      *
      * @param path Search path.
      * @param searcher Symbol table searcher.
@@ -64,15 +77,19 @@ abstract class BaseSymbolQuery<E extends SymbolTableEntry>
     // ===========================================================
 
     /**
-     * <p>Given a source {@link Scope} and a
-     * {@link ScopeRepository} containing any imports, from
-     * which <code>source</code> is drawn, searches them appropriately,
-     * returning a list of matching {@link SymbolTableEntry}s
-     * that are subtypes of <code>E</code>.</p>
+     * <p>
+     * Given a source {@link Scope} and a {@link ScopeRepository} containing any
+     * imports, from which
+     * <code>source</code> is drawn, searches them appropriately, returning a
+     * list of matching
+     * {@link SymbolTableEntry}s that are subtypes of <code>E</code>.
+     * </p>
      *
-     * <p>If there are no matches, returns an empty list. If more than one
-     * match is found where no more than one was expected, throws a
-     * {@link DuplicateSymbolException}.</p>
+     * <p>
+     * If there are no matches, returns an empty list. If more than one match is
+     * found where no more
+     * than one was expected, throws a {@link DuplicateSymbolException}.
+     * </p>
      *
      * @param source The source scope from which the search was spawned.
      * @param repo A repository of any referenced modules.

@@ -1,7 +1,7 @@
 /*
  * LeftOrRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This class contains the logic for applying the {@code left or}
- * rule.</p>
+ * <p>
+ * This class contains the logic for applying the {@code left or} rule.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -36,11 +37,12 @@ public class LeftOrRule extends AbstractReductionRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application of the {@code left or}
-     * rule.</p>
+     * <p>
+     * This creates a new application of the {@code left or} rule.
+     * </p>
      *
-     * @param originalSequent The original {@link Sequent} that contains
-     *                        the expression to be reduced.
+     * @param originalSequent The original {@link Sequent} that contains the
+     *        expression to be reduced.
      * @param originalExp The {@link Exp} to be reduced.
      */
     public LeftOrRule(Sequent originalSequent, Exp originalExp) {
@@ -52,10 +54,12 @@ public class LeftOrRule extends AbstractReductionRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Sequent Reduction Rule}.</p>
+     * <p>
+     * This method applies the {@code Sequent Reduction Rule}.
+     * </p>
      *
-     * @return A list of {@link Sequent Sequents} that resulted
-     * from applying the rule.
+     * @return A list of {@link Sequent Sequents} that resulted from applying
+     *         the rule.
      */
     @Override
     public final List<Sequent> applyRule() {
@@ -66,10 +70,13 @@ public class LeftOrRule extends AbstractReductionRuleApplication
             for (Exp exp : myOriginalSequent.getAntecedents()) {
                 if (exp.equals(originalExpAsInfixExp)) {
                     // Add the left and right into the different antecedent lists
-                    if (originalExpAsInfixExp.getOperatorAsString().equals("or")) {
-                        newAntecedents1.add(copyExp(originalExpAsInfixExp.getLeft(),
+                    if (originalExpAsInfixExp.getOperatorAsString()
+                            .equals("or")) {
+                        newAntecedents1.add(copyExp(
+                                originalExpAsInfixExp.getLeft(),
                                 myOriginalExp.getLocationDetailModel()));
-                        newAntecedents2.add(copyExp(originalExpAsInfixExp.getRight(),
+                        newAntecedents2.add(copyExp(
+                                originalExpAsInfixExp.getRight(),
                                 myOriginalExp.getLocationDetailModel()));
                     }
                     // This must be an error!
@@ -86,13 +93,15 @@ public class LeftOrRule extends AbstractReductionRuleApplication
 
             // Construct new sequents
             // YS: We just need to prove either resultingSequent1 or resultingSequent2,
-            //     therefore it is just the same VC. Don't pass a location detail model
-            //     so we don't accidentally change a goal's location detail model
-            Sequent resultingSequent1 = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents1, copyExpList(myOriginalSequent.getConcequents(), null));
+            // therefore it is just the same VC. Don't pass a location detail model
+            // so we don't accidentally change a goal's location detail model
+            Sequent resultingSequent1 = new Sequent(
+                    myOriginalSequent.getLocation(), newAntecedents1,
+                    copyExpList(myOriginalSequent.getConcequents(), null));
             myResultingSequents.add(resultingSequent1);
-            Sequent resultingSequent2 = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents2, copyExpList(myOriginalSequent.getConcequents(), null));
+            Sequent resultingSequent2 = new Sequent(
+                    myOriginalSequent.getLocation(), newAntecedents2,
+                    copyExpList(myOriginalSequent.getConcequents(), null));
             myResultingSequents.add(resultingSequent2);
 
             // Indicate that this is an impacting reduction
@@ -107,8 +116,10 @@ public class LeftOrRule extends AbstractReductionRuleApplication
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Sequent Reduction Rule}.</p>
+     * <p>
+     * This method returns a description associated with the
+     * {@code Sequent Reduction Rule}.
+     * </p>
      *
      * @return A string.
      */

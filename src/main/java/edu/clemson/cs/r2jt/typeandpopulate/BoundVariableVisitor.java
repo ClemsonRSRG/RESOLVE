@@ -1,7 +1,7 @@
 /*
  * BoundVariableVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -48,7 +48,8 @@ public class BoundVariableVisitor extends TypeVisitor {
         return getInnermostBindingInfo(name).type;
     }
 
-    public void annotateInnermostBinding(String name, Object key, Object value) {
+    public void annotateInnermostBinding(String name, Object key,
+            Object value) {
 
         getInnermostBindingInfo(name).annotations.put(key, value);
     }
@@ -71,7 +72,8 @@ public class BoundVariableVisitor extends TypeVisitor {
         return binding;
     }
 
-    protected Map<String, BindingInfo> toBindingInfoMap(Map<String, MTType> vars) {
+    protected Map<String, BindingInfo>
+            toBindingInfoMap(Map<String, MTType> vars) {
 
         Map<String, BindingInfo> result = new HashMap<String, BindingInfo>();
 

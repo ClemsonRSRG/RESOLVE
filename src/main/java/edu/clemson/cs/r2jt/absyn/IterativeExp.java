@@ -1,7 +1,7 @@
 /*
  * IterativeExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -128,8 +128,9 @@ public class IterativeExp extends Exp {
     // ===========================================================
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new IterativeExp(location, operator, var, substitute(where,
-                substitutions), substitute(body, substitutions));
+        return new IterativeExp(location, operator, var,
+                substitute(where, substitutions),
+                substitute(body, substitutions));
     }
 
     /** Accepts a ResolveConceptualVisitor. */
@@ -163,8 +164,9 @@ public class IterativeExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Boolean found = false;
         if (where != null) {
@@ -302,8 +304,8 @@ public class IterativeExp extends Exp {
                 Exp bdy = Exp.replace(body, old, replacement);
                 if (bdy != null)
                     this.setBody(bdy);
-                // Not used anywhere below. - YS 
-                //String str = bdy.toString(0, 0);
+                // Not used anywhere below. - YS
+                // String str = bdy.toString(0, 0);
             }
             return this;
         }

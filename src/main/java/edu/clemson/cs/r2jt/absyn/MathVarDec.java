@@ -1,7 +1,7 @@
 /*
  * MathVarDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -112,8 +112,8 @@ public class MathVarDec extends Dec {
     }
 
     public String toString(int indent) {
-        //Environment   env	= Environment.getInstance();
-        //if(env.isabelle()){return toIsabelleString(indent);};
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
 
         String str = new String();
 
@@ -142,17 +142,15 @@ public class MathVarDec extends Dec {
         return str;
     }
 
-    /*public String toIsabelleString(int indent) {
-       
-        VarExp tmp = new VarExp(null, null, name);
-    	 String str = tmp.toIsabelleString(0);
-        str = str.concat(":");
-        if(ty instanceof NameTy)
-        	str = str.concat(((NameTy)ty).getName().toString());
-        else
-        	str = str.concat(ty.toString(0));
-        return str;    
-    }*/
+    /*
+     * public String toIsabelleString(int indent) {
+     * 
+     * VarExp tmp = new VarExp(null, null, name); String str =
+     * tmp.toIsabelleString(0); str =
+     * str.concat(":"); if(ty instanceof NameTy) str =
+     * str.concat(((NameTy)ty).getName().toString());
+     * else str = str.concat(ty.toString(0)); return str; }
+     */
 
     public void prettyPrint() {
         System.out.print(name.getName() + ": ");

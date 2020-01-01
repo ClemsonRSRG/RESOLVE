@@ -1,7 +1,7 @@
 /*
  * FacilityTypeRepresentationEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,7 +26,8 @@ public class FacilityTypeRepresentationEntry extends RepresentationTypeEntry {
 
     public FacilityTypeRepresentationEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, PTType representation, Exp convention) {
+            ModuleIdentifier sourceModule, PTType representation,
+            Exp convention) {
         super(g, name, definingElement, sourceModule, null, representation,
                 convention, g.getTrueVarExp());
         // TODO : According to murali, facility types might also have
@@ -47,8 +48,8 @@ public class FacilityTypeRepresentationEntry extends RepresentationTypeEntry {
     }
 
     @Override
-    public FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
-            Location l) {
+    public FacilityTypeRepresentationEntry
+            toFacilityTypeRepresentationEntry(Location l) {
         return this;
     }
 }

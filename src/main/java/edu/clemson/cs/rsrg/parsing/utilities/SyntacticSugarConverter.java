@@ -1,7 +1,7 @@
 /*
  * SyntacticSugarConverter.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -40,9 +40,12 @@ import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.*;
 
 /**
- * <p>This class performs the various different syntactic sugar conversions
- * using part of the RESOLVE abstract syntax tree. This visitor logic is
- * implemented as a {@link TreeWalkerVisitor}.</p>
+ * <p>
+ * This class performs the various different syntactic sugar conversions using
+ * part of the RESOLVE
+ * abstract syntax tree. This visitor logic is implemented as a
+ * {@link TreeWalkerVisitor}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -54,65 +57,95 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This map provides a mapping between the newly declared array name types
-     * to the types of elements in the array.</p>
+     * <p>
+     * This map provides a mapping between the newly declared array name types
+     * to the types of
+     * elements in the array.
+     * </p>
      */
     private final Map<NameTy, NameTy> myArrayNameTyToInnerTyMap;
 
     /**
-     * <p>This is a deep copy of all the type representations created during the
-     * tree building process. Note that the list contains either all
-     * {@link TypeRepresentationDec}s or all {@link FacilityTypeRepresentationDec}s.</p>
+     * <p>
+     * This is a deep copy of all the type representations created during the
+     * tree building process.
+     * Note that the list contains either all {@link TypeRepresentationDec}s or
+     * all
+     * {@link FacilityTypeRepresentationDec}s.
+     * </p>
      */
     private final List<AbstractTypeRepresentationDec> myCopyTRList;
 
     /**
-     * <p>This is a deep copy of all the shared state representations created during the
-     * tree building process. Note that the list contains all
-     * {@link SharedStateRealizationDec}s.</p>
+     * <p>
+     * This is a deep copy of all the shared state representations created
+     * during the tree building
+     * process. Note that the list contains all
+     * {@link SharedStateRealizationDec}s.
+     * </p>
      */
     private final List<AbstractSharedStateRealizationDec> myCopySSRList;
 
     /**
-     * <p>Once we are done walking the tree, the top most node will create
-     * the new element.</p>
+     * <p>
+     * Once we are done walking the tree, the top most node will create the new
+     * element.
+     * </p>
      */
     private ResolveConceptualElement myFinalProcessedElement;
 
     /**
-     * <p>Since we don't have symbol table, we really don't know if
-     * we are generating a new object with the same name. In order to avoid
-     * problems, all of our objects will have a name that starts with "_" and
-     * end the current new element counter. This number increases by 1 each
-     * time we create a new element.</p>
+     * <p>
+     * Since we don't have symbol table, we really don't know if we are
+     * generating a new object with
+     * the same name. In order to avoid problems, all of our objects will have a
+     * name that starts with
+     * "_" and end the current new element counter. This number increases by 1
+     * each time we create a
+     * new element.
+     * </p>
      */
     private int myNewElementCounter;
 
     /**
-     * <p>This stores the new statements created by current statement
-     * we are visiting.</p>
+     * <p>
+     * This stores the new statements created by current statement we are
+     * visiting.
+     * </p>
      */
     private NewStatementsContainer myNewStatementsContainer;
 
     /**
-     * <p>This stores the {@link ParameterVarDec}, {@link FacilityDec} and
-     * {@link VarDec} obtained from the parent node.</p>
+     * <p>
+     * This stores the {@link ParameterVarDec}, {@link FacilityDec} and
+     * {@link VarDec} obtained from
+     * the parent node.
+     * </p>
      */
     private ParentNodeElementsContainer myParentNodeElementsContainer;
 
     /**
-     * <p>This is a map from the original {@link ResolveConceptualElement} to
-     * the replacing {@link ResolveConceptualElement}.</p>
+     * <p>
+     * This is a map from the original {@link ResolveConceptualElement} to the
+     * replacing
+     * {@link ResolveConceptualElement}.
+     * </p>
      */
     private final Map<ResolveConceptualElement, ResolveConceptualElement> myReplacingElementsMap;
 
     /**
-     * <p>Once we are done walking an element that could have a syntactic
-     * sugar conversion, we add that element into the top-most collector.</p>
+     * <p>
+     * Once we are done walking an element that could have a syntactic sugar
+     * conversion, we add that
+     * element into the top-most collector.
+     * </p>
      *
-     * <p>When we are done walking a {@link ResolveConceptualElement} that
-     * can contain a list of {@link Statement}s, we build a new instance
-     * of the object using the elements in the collector.</p>
+     * <p>
+     * When we are done walking a {@link ResolveConceptualElement} that can
+     * contain a list of
+     * {@link Statement}s, we build a new instance of the object using the
+     * elements in the collector.
+     * </p>
      */
     private final Stack<ResolveConceptualElementCollector> myResolveElementCollectorStack;
 
@@ -121,15 +154,21 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This class attempts to convert all syntactic sugar before we
-     * generate the final RESOLVE AST.</p>
+     * <p>
+     * This class attempts to convert all syntactic sugar before we generate the
+     * final RESOLVE AST.
+     * </p>
      *
-     * @param arrayNameTyToInnerTyMap A map that provides mapping from newly declared
-     *                                array name types to the types of elements in the array.
-     * @param typeRepresentationDecList The list of type representation declarations.
-     * @param sharedStateRealizationDecs The list of shared state representation declarations.
-     * @param newElementCounter A counter that indicates the number of elements created
-     *                          by the tree building process.
+     * @param arrayNameTyToInnerTyMap A map that provides mapping from newly
+     *        declared array name types
+     *        to the types of elements in the array.
+     * @param typeRepresentationDecList The list of type representation
+     *        declarations.
+     * @param sharedStateRealizationDecs The list of shared state representation
+     *        declarations.
+     * @param newElementCounter A counter that indicates the number of elements
+     *        created by the tree
+     *        building process.
      */
     public SyntacticSugarConverter(Map<NameTy, NameTy> arrayNameTyToInnerTyMap,
             List<AbstractTypeRepresentationDec> typeRepresentationDecList,
@@ -153,19 +192,20 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>This should be the top-most node that we start with
-     * when processing syntactic sugar conversions inside a
-     * {@link FacilityInitFinalItem}.</p>
+     * <p>
+     * This should be the top-most node that we start with when processing
+     * syntactic sugar conversions
+     * inside a {@link FacilityInitFinalItem}.
+     * </p>
      *
      * @param e Current {@link FacilityInitFinalItem} we are visiting.
      */
     @Override
     public void preFacilityInitFinalItem(FacilityInitFinalItem e) {
         // Store the params, facility and variable declarations
-        myParentNodeElementsContainer =
-                new ParentNodeElementsContainer(
-                        new ArrayList<ParameterVarDec>(), e.getFacilities(), e
-                                .getVariables());
+        myParentNodeElementsContainer = new ParentNodeElementsContainer(
+                new ArrayList<ParameterVarDec>(), e.getFacilities(),
+                e.getVariables());
 
         // Create a new collector
         myResolveElementCollectorStack
@@ -173,9 +213,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This should be the last element we walk. All syntactic
-     * sugar should have been performed and we can safely create
-     * the new {@link FacilityInitFinalItem} to be returned.</p>
+     * <p>
+     * This should be the last element we walk. All syntactic sugar should have
+     * been performed and we
+     * can safely create the new {@link FacilityInitFinalItem} to be returned.
+     * </p>
      *
      * @param e Current {@link FacilityInitFinalItem} we are visiting.
      */
@@ -190,30 +232,31 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // Build the new ProcedureDec
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
-        myFinalProcessedElement =
-                new FacilityInitFinalItem(e.getLocation().clone(), e
-                        .getItemType(), affectsClause, e.getRequires().clone(),
-                        e.getEnsures().clone(),
-                        myParentNodeElementsContainer.facilityDecs,
-                        myParentNodeElementsContainer.varDecs, collector.stmts);
+        myFinalProcessedElement = new FacilityInitFinalItem(
+                e.getLocation().clone(), e.getItemType(), affectsClause,
+                e.getRequires().clone(), e.getEnsures().clone(),
+                myParentNodeElementsContainer.facilityDecs,
+                myParentNodeElementsContainer.varDecs, collector.stmts);
 
         // Just in case
         myParentNodeElementsContainer = null;
     }
 
     /**
-     * <p>This should be the top-most node that we start with
-     * when processing syntactic sugar conversions inside a
-     * {@link OperationProcedureDec}.</p>
+     * <p>
+     * This should be the top-most node that we start with when processing
+     * syntactic sugar conversions
+     * inside a {@link OperationProcedureDec}.
+     * </p>
      *
      * @param e Current {@link OperationProcedureDec} we are visiting.
      */
     @Override
     public void preOperationProcedureDec(OperationProcedureDec e) {
         // Store the params, facility and variable declarations
-        myParentNodeElementsContainer =
-                new ParentNodeElementsContainer(e.getWrappedOpDec()
-                        .getParameters(), e.getFacilities(), e.getVariables());
+        myParentNodeElementsContainer = new ParentNodeElementsContainer(
+                e.getWrappedOpDec().getParameters(), e.getFacilities(),
+                e.getVariables());
 
         // Create a new collector
         myResolveElementCollectorStack
@@ -221,9 +264,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This should be the last element we walk. All syntactic
-     * sugar should have been performed and we can safely create
-     * the new {@link OperationProcedureDec} to be returned.</p>
+     * <p>
+     * This should be the last element we walk. All syntactic sugar should have
+     * been performed and we
+     * can safely create the new {@link OperationProcedureDec} to be returned.
+     * </p>
      *
      * @param e Current {@link OperationProcedureDec} we are visiting.
      */
@@ -245,11 +290,10 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         // New OperationDec
-        OperationDec newOperationDec =
-                new OperationDec(opDec.getName().clone(),
-                        myParentNodeElementsContainer.parameterVarDecs,
-                        returnTy, affectsClause, opDec.getRequires().clone(),
-                        opDec.getEnsures().clone());
+        OperationDec newOperationDec = new OperationDec(opDec.getName().clone(),
+                myParentNodeElementsContainer.parameterVarDecs, returnTy,
+                affectsClause, opDec.getRequires().clone(),
+                opDec.getEnsures().clone());
 
         // Decreasing clause (if any)
         AssertionClause decreasingClause = null;
@@ -262,29 +306,29 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // Build the new OperationProcedureDec
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
-        myFinalProcessedElement =
-                new OperationProcedureDec(newOperationDec, decreasingClause,
-                        myParentNodeElementsContainer.facilityDecs,
-                        myParentNodeElementsContainer.varDecs, collector.stmts,
-                        recursiveFlag);
+        myFinalProcessedElement = new OperationProcedureDec(newOperationDec,
+                decreasingClause, myParentNodeElementsContainer.facilityDecs,
+                myParentNodeElementsContainer.varDecs, collector.stmts,
+                recursiveFlag);
 
         // Just in case
         myParentNodeElementsContainer = null;
     }
 
     /**
-     * <p>This should be the top-most node that we start with
-     * when processing syntactic sugar conversions inside a
-     * {@link ProcedureDec}.</p>
+     * <p>
+     * This should be the top-most node that we start with when processing
+     * syntactic sugar conversions
+     * inside a {@link ProcedureDec}.
+     * </p>
      *
      * @param e Current {@link ProcedureDec} we are visiting.
      */
     @Override
     public void preProcedureDec(ProcedureDec e) {
         // Store the params, facility and variable declarations
-        myParentNodeElementsContainer =
-                new ParentNodeElementsContainer(e.getParameters(), e
-                        .getFacilities(), e.getVariables());
+        myParentNodeElementsContainer = new ParentNodeElementsContainer(
+                e.getParameters(), e.getFacilities(), e.getVariables());
 
         // Create a new collector
         myResolveElementCollectorStack
@@ -292,9 +336,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This should be the last element we walk. All syntactic
-     * sugar should have been performed and we can safely create
-     * the new {@link ProcedureDec} to be returned.</p>
+     * <p>
+     * This should be the last element we walk. All syntactic sugar should have
+     * been performed and we
+     * can safely create the new {@link ProcedureDec} to be returned.
+     * </p>
      *
      * @param e Current {@link ProcedureDec} we are visiting.
      */
@@ -323,32 +369,32 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // Build the new ProcedureDec
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
-        myFinalProcessedElement =
-                new ProcedureDec(e.getName().clone(),
-                        myParentNodeElementsContainer.parameterVarDecs,
-                        returnTy, affectsClause, decreasingClause,
-                        myParentNodeElementsContainer.facilityDecs,
-                        myParentNodeElementsContainer.varDecs, collector.stmts,
-                        recursiveFlag);
+        myFinalProcessedElement = new ProcedureDec(e.getName().clone(),
+                myParentNodeElementsContainer.parameterVarDecs, returnTy,
+                affectsClause, decreasingClause,
+                myParentNodeElementsContainer.facilityDecs,
+                myParentNodeElementsContainer.varDecs, collector.stmts,
+                recursiveFlag);
 
         // Just in case
         myParentNodeElementsContainer = null;
     }
 
     /**
-     * <p>This should be the top-most node that we start with
-     * when processing syntactic sugar conversions inside a
-     * {@link RealizInitFinalItem}.</p>
+     * <p>
+     * This should be the top-most node that we start with when processing
+     * syntactic sugar conversions
+     * inside a {@link RealizInitFinalItem}.
+     * </p>
      *
      * @param e Current {@link RealizInitFinalItem} we are visiting.
      */
     @Override
     public void preRealizInitFinalItem(RealizInitFinalItem e) {
         // Store the params, facility and variable declarations
-        myParentNodeElementsContainer =
-                new ParentNodeElementsContainer(
-                        new ArrayList<ParameterVarDec>(), e.getFacilities(), e
-                                .getVariables());
+        myParentNodeElementsContainer = new ParentNodeElementsContainer(
+                new ArrayList<ParameterVarDec>(), e.getFacilities(),
+                e.getVariables());
 
         // Create a new collector
         myResolveElementCollectorStack
@@ -356,9 +402,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This should be the last element we walk. All syntactic
-     * sugar should have been performed and we can safely create
-     * the new {@link RealizInitFinalItem} to be returned.</p>
+     * <p>
+     * This should be the last element we walk. All syntactic sugar should have
+     * been performed and we
+     * can safely create the new {@link RealizInitFinalItem} to be returned.
+     * </p>
      *
      * @param e Current {@link RealizInitFinalItem} we are visiting.
      */
@@ -373,11 +421,10 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // Build the new ProcedureDec
         ResolveConceptualElementCollector collector =
                 myResolveElementCollectorStack.pop();
-        myFinalProcessedElement =
-                new RealizInitFinalItem(e.getLocation().clone(), e
-                        .getItemType(), affectsClause,
-                        myParentNodeElementsContainer.facilityDecs,
-                        myParentNodeElementsContainer.varDecs, collector.stmts);
+        myFinalProcessedElement = new RealizInitFinalItem(
+                e.getLocation().clone(), e.getItemType(), affectsClause,
+                myParentNodeElementsContainer.facilityDecs,
+                myParentNodeElementsContainer.varDecs, collector.stmts);
 
         // Just in case
         myParentNodeElementsContainer = null;
@@ -388,9 +435,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>This statement could have syntactic sugar conversions, so
-     * we will need to have a way to store the new {@link Statement}s that get
-     * generated.</p>
+     * <p>
+     * This statement could have syntactic sugar conversions, so we will need to
+     * have a way to store
+     * the new {@link Statement}s that get generated.
+     * </p>
      *
      * @param e Current {@link CallStmt} we are visiting.
      */
@@ -400,9 +449,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This statement could have syntactic sugar conversions, so it checks to see
-     * if we have generated new {@link Statement}s and place those in the appropriate
-     * location.</p>
+     * <p>
+     * This statement could have syntactic sugar conversions, so it checks to
+     * see if we have generated
+     * new {@link Statement}s and place those in the appropriate location.
+     * </p>
      *
      * @param e Current {@link CallStmt} we are visiting.
      */
@@ -416,9 +467,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // Rebuild the new call statement with the new args (if necessary)
         ProgramFunctionExp exp;
         if (myReplacingElementsMap.containsKey(e.getFunctionExp())) {
-            exp =
-                    (ProgramFunctionExp) myReplacingElementsMap.remove(e
-                            .getFunctionExp());
+            exp = (ProgramFunctionExp) myReplacingElementsMap
+                    .remove(e.getFunctionExp());
         }
         else {
             exp = (ProgramFunctionExp) e.getFunctionExp().clone();
@@ -427,16 +477,19 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
         // Add any statements that need to appear after this one.
         while (!myNewStatementsContainer.newPostStmts.isEmpty()) {
-            addToInnerMostCollector(myNewStatementsContainer.newPostStmts
-                    .remove());
+            addToInnerMostCollector(
+                    myNewStatementsContainer.newPostStmts.remove());
         }
 
         myNewStatementsContainer = null;
     }
 
     /**
-     * <p>This statement doesn't need to do any syntactic sugar conversions,
-     * therefore we create a new {@link ConfirmStmt} for future use.</p>
+     * <p>
+     * This statement doesn't need to do any syntactic sugar conversions,
+     * therefore we create a new
+     * {@link ConfirmStmt} for future use.
+     * </p>
      *
      * @param e Current {@link ConfirmStmt} we are visiting.
      */
@@ -446,9 +499,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This statement could have syntactic sugar conversions, so
-     * we will need to have a way to store the new {@link Statement}s that get
-     * generated.</p>
+     * <p>
+     * This statement could have syntactic sugar conversions, so we will need to
+     * have a way to store
+     * the new {@link Statement}s that get generated.
+     * </p>
      *
      * @param e Current {@link FuncAssignStmt} we are visiting.
      */
@@ -458,9 +513,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This statement could have syntactic sugar conversions, so it checks to see
-     * if we have generated new {@link Statement}s and place those in the appropriate
-     * location.</p>
+     * <p>
+     * This statement could have syntactic sugar conversions, so it checks to
+     * see if we have generated
+     * new {@link Statement}s and place those in the appropriate location.
+     * </p>
      *
      * @param e Current {@link FuncAssignStmt} we are visiting.
      */
@@ -496,9 +553,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                     ArrayConversionUtilities.getArrayIndexExp(rightExp);
             NameTy arrayTy = findArrayType(arrayNameExp);
 
-            newStatement = new FuncAssignStmt(l.clone(), (ProgramVariableExp) leftExp.clone(),
-                    ArrayConversionUtilities.buildEntryReplicaCall(l, arrayTy.getQualifier(),
-                            arrayNameExp, arrayIndexExp));
+            newStatement = new FuncAssignStmt(l.clone(),
+                    (ProgramVariableExp) leftExp.clone(),
+                    ArrayConversionUtilities.buildEntryReplicaCall(l,
+                            arrayTy.getQualifier(), arrayNameExp,
+                            arrayIndexExp));
         }
         // Case #2: Right expression is not an expression that is a ProgramVariableArrayExp,
         // but the left is a ProgramVariableArrayExp.
@@ -512,8 +571,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                     ArrayConversionUtilities.getArrayIndexExp(leftExp);
             NameTy arrayTy = findArrayType(arrayNameExp);
 
-            newStatement = ArrayConversionUtilities.buildAssignEntryCall(l.clone(),
-                    rightExp.clone(), arrayTy.getQualifier(), arrayNameExp, arrayIndexExp);
+            newStatement = ArrayConversionUtilities.buildAssignEntryCall(
+                    l.clone(), rightExp.clone(), arrayTy.getQualifier(),
+                    arrayNameExp, arrayIndexExp);
         }
         // Case #3: Both left and right expressions are ProgramVariableArrayExp
         // expressions.
@@ -533,10 +593,12 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             NameTy leftArrayTy = findArrayType(leftArrayNameExp);
             NameTy rightArrayTy = findArrayType(rightArrayNameExp);
 
-            ProgramFunctionExp newEntryReplicaCall = ArrayConversionUtilities.buildEntryReplicaCall(l,
-                    rightArrayTy.getQualifier(), rightArrayNameExp, rightArrayIndexExp);
-            newStatement = ArrayConversionUtilities.buildAssignEntryCall(l.clone(),
-                    newEntryReplicaCall, leftArrayTy.getQualifier(), leftArrayNameExp, leftArrayIndexExp);
+            ProgramFunctionExp newEntryReplicaCall = ArrayConversionUtilities
+                    .buildEntryReplicaCall(l, rightArrayTy.getQualifier(),
+                            rightArrayNameExp, rightArrayIndexExp);
+            newStatement = ArrayConversionUtilities.buildAssignEntryCall(
+                    l.clone(), newEntryReplicaCall, leftArrayTy.getQualifier(),
+                    leftArrayNameExp, leftArrayIndexExp);
         }
         // Case #4: If it is not cases 1-4, then we build a regular
         // FuncAssignStmt.
@@ -544,7 +606,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             ProgramExp newRightExp;
             if (rightExp instanceof ProgramFunctionExp) {
                 if (myReplacingElementsMap.containsKey(rightExp)) {
-                    newRightExp = (ProgramExp) myReplacingElementsMap.remove(rightExp);
+                    newRightExp = (ProgramExp) myReplacingElementsMap
+                            .remove(rightExp);
                 }
                 else {
                     newRightExp = rightExp.clone();
@@ -555,8 +618,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                 List<ProgramExp> args = new ArrayList<>();
                 args.add(rightExp.clone());
 
-                newRightExp = new ProgramFunctionExp(rightExp.getLocation().clone(),
-                        null, new PosSymbol(rightExp.getLocation().clone(), "Replica"), args);
+                newRightExp = new ProgramFunctionExp(
+                        rightExp.getLocation().clone(), null,
+                        new PosSymbol(rightExp.getLocation().clone(),
+                                "Replica"),
+                        args);
             }
 
             newStatement = new FuncAssignStmt(l.clone(),
@@ -566,17 +632,19 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
         // Add any statements that need to appear after this one.
         while (!myNewStatementsContainer.newPostStmts.isEmpty()) {
-            addToInnerMostCollector(myNewStatementsContainer.newPostStmts
-                    .remove());
+            addToInnerMostCollector(
+                    myNewStatementsContainer.newPostStmts.remove());
         }
 
         myNewStatementsContainer = null;
     }
 
     /**
-     * <p>This statement could have syntactic sugar conversions, so
-     * we will need to have a way to store the new {@link Statement}s that get
-     * generated.</p>
+     * <p>
+     * This statement could have syntactic sugar conversions, so we will need to
+     * have a way to store
+     * the new {@link Statement}s that get generated.
+     * </p>
      *
      * @param e Current {@link IfStmt} we are visiting.
      */
@@ -589,8 +657,10 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>We are done visiting this node, therefore we create a
-     * new {@link IfStmt} for future use.</p>
+     * <p>
+     * We are done visiting this node, therefore we create a new {@link IfStmt}
+     * for future use.
+     * </p>
      *
      * @param e Current {@link IfStmt} we are visiting.
      */
@@ -608,14 +678,17 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         // Retrieve the new IfConditionItem
-        IfConditionItem newIfConditionItem = (IfConditionItem) myReplacingElementsMap.remove(e.getIfClause());
+        IfConditionItem newIfConditionItem =
+                (IfConditionItem) myReplacingElementsMap
+                        .remove(e.getIfClause());
 
         // Retrieve all the Else-If's IfConditionItems
         // Note: Right now there shouldn't be any.
         List<IfConditionItem> newElseIfItems = new ArrayList<>();
         List<IfConditionItem> elseIfPairs = e.getElseifpairs();
         for (IfConditionItem item : elseIfPairs) {
-            newElseIfItems.add((IfConditionItem) myReplacingElementsMap.remove(item));
+            newElseIfItems
+                    .add((IfConditionItem) myReplacingElementsMap.remove(item));
         }
 
         // Build the new IfStmt and add it to the 'next' collector.
@@ -624,8 +697,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This statement doesn't need to do any syntactic sugar conversions,
-     * therefore we create a new {@link MemoryStmt} for future use.</p>
+     * <p>
+     * This statement doesn't need to do any syntactic sugar conversions,
+     * therefore we create a new
+     * {@link MemoryStmt} for future use.
+     * </p>
      *
      * @param e Current {@link MemoryStmt} we are visiting.
      */
@@ -635,8 +711,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This statement doesn't need to do any syntactic sugar conversions,
-     * therefore we create a new {@link PresumeStmt} for future use.</p>
+     * <p>
+     * This statement doesn't need to do any syntactic sugar conversions,
+     * therefore we create a new
+     * {@link PresumeStmt} for future use.
+     * </p>
      *
      * @param e Current {@link PresumeStmt} we are visiting.
      */
@@ -646,8 +725,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This statement could have syntactic sugar conversions, so it generates
-     * the appropriate "swap" call.</p>
+     * <p>
+     * This statement could have syntactic sugar conversions, so it generates
+     * the appropriate "swap"
+     * call.
+     * </p>
      *
      * @param e Current {@link SwapStmt} we are visiting.
      */
@@ -679,11 +761,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             NameTy arrayTy = findArrayType(arrayNameExp);
 
             // New "Swap_Entry" call
-            newStatement =
-                    ArrayConversionUtilities
-                            .buildSwapEntryCall(l, leftExp, arrayTy
-                                    .getQualifier(), arrayNameExp,
-                                    arrayIndexExp);
+            newStatement = ArrayConversionUtilities.buildSwapEntryCall(l,
+                    leftExp, arrayTy.getQualifier(), arrayNameExp,
+                    arrayIndexExp);
         }
         // Case #2: Right expression is not an expression that is a ProgramVariableArrayExp,
         // but the left is a ProgramVariableArrayExp.
@@ -698,11 +778,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             NameTy arrayTy = findArrayType(arrayNameExp);
 
             // New "Swap_Entry" call
-            newStatement =
-                    ArrayConversionUtilities
-                            .buildSwapEntryCall(l, rightExp, arrayTy
-                                    .getQualifier(), arrayNameExp,
-                                    arrayIndexExp);
+            newStatement = ArrayConversionUtilities.buildSwapEntryCall(l,
+                    rightExp, arrayTy.getQualifier(), arrayNameExp,
+                    arrayIndexExp);
         }
         // Case #3: Both left and right expressions are ProgramVariableArrayExp
         // expressions.
@@ -742,9 +820,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                         }
                     }
 
-                    rightArrayNameAsPosSymbol =
-                            new PosSymbol(rightArrayNameExp.getLocation()
-                                    .clone(), sb.toString());
+                    rightArrayNameAsPosSymbol = new PosSymbol(
+                            rightArrayNameExp.getLocation().clone(),
+                            sb.toString());
                 }
 
                 throw new SourceErrorException(
@@ -754,26 +832,27 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
 
             // New "Swap_Two_Entries" call
             NameTy arrayTy = findArrayType(leftArrayNameExp);
-            newStatement =
-                    ArrayConversionUtilities.buildSwapTwoEntriesCall(l, arrayTy
-                            .getQualifier(), leftArrayNameExp,
-                            leftArrayIndexExp, rightArrayIndexExp);
+            newStatement = ArrayConversionUtilities.buildSwapTwoEntriesCall(l,
+                    arrayTy.getQualifier(), leftArrayNameExp, leftArrayIndexExp,
+                    rightArrayIndexExp);
         }
         // Case #4: If it is not cases 1-4, then we build a regular
         // SwapStmt.
         else {
-            newStatement =
-                    new SwapStmt(l.clone(), (ProgramVariableExp) leftExp
-                            .clone(), (ProgramVariableExp) rightExp.clone());
+            newStatement = new SwapStmt(l.clone(),
+                    (ProgramVariableExp) leftExp.clone(),
+                    (ProgramVariableExp) rightExp.clone());
         }
 
         addToInnerMostCollector(newStatement);
     }
 
     /**
-     * <p>This loop condition could have syntactic sugar conversions, so
-     * we will need to have a way to store the new {@link Statement}s that get
-     * generated.</p>
+     * <p>
+     * This loop condition could have syntactic sugar conversions, so we will
+     * need to have a way to
+     * store the new {@link Statement}s that get generated.
+     * </p>
      *
      * @param e Current {@link WhileStmt} we are visiting.
      */
@@ -789,8 +868,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>After visiting the loop condition, we could have generated new {@link Statement}s, so
-     * we will need to place those in the appropriate locations.</p>
+     * <p>
+     * After visiting the loop condition, we could have generated new
+     * {@link Statement}s, so we will
+     * need to place those in the appropriate locations.
+     * </p>
      *
      * @param e Current {@link WhileStmt} we are visiting.
      * @param previous The previous {@link ResolveConceptualElement} visited.
@@ -816,16 +898,16 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             }
 
             while (!myNewStatementsContainer.newPreStmts.empty()) {
-                addToInnerMostCollector(myNewStatementsContainer.newPreStmts
-                        .pop());
+                addToInnerMostCollector(
+                        myNewStatementsContainer.newPreStmts.pop());
             }
 
             // Put the collector stack back the way it was and
             // Add any statements that need to appear after this WhileStmt.
             myResolveElementCollectorStack.push(whileStmtCollector);
             while (!myNewStatementsContainer.newPostStmts.isEmpty()) {
-                addToInnerMostCollector(myNewStatementsContainer.newPostStmts
-                        .remove());
+                addToInnerMostCollector(
+                        myNewStatementsContainer.newPostStmts.remove());
             }
 
             // Set myNewStatementsContainer to null if we are done visiting the loop condition
@@ -834,8 +916,10 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>We are done visiting this node, therefore we create a
-     * new {@link WhileStmt} for future use.</p>
+     * <p>
+     * We are done visiting this node, therefore we create a new
+     * {@link WhileStmt} for future use.
+     * </p>
      *
      * @param e Current {@link WhileStmt} we are visiting.
      */
@@ -883,9 +967,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>This if-condition could have syntactic sugar conversions, so
-     * we will need to have a way to store the new {@link Statement}s that get
-     * generated.</p>
+     * <p>
+     * This if-condition could have syntactic sugar conversions, so we will need
+     * to have a way to
+     * store the new {@link Statement}s that get generated.
+     * </p>
      *
      * @param e Current {@link IfConditionItem} we are visiting.
      */
@@ -901,8 +987,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>After visiting the if-condition, we could have generated new {@link Statement}s, so
-     * we will need to place those in the appropriate locations.</p>
+     * <p>
+     * After visiting the if-condition, we could have generated new
+     * {@link Statement}s, so we will
+     * need to place those in the appropriate locations.
+     * </p>
      *
      * @param e Current {@link IfConditionItem} we are visiting.
      * @param previous The previous {@link ResolveConceptualElement} visited.
@@ -912,7 +1001,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     public void midIfConditionItem(IfConditionItem e,
             ResolveConceptualElement previous, ResolveConceptualElement next) {
         // Check to see if the condition item has any syntactic sugar conversions.
-        // If yes, we will need to add it back to both the statements inside the if and also inside the else.
+        // If yes, we will need to add it back to both the statements inside the if and also inside the
+        // else.
         if (previous instanceof ProgramExp && next instanceof VirtualListNode) {
             // Obtain the container for IfConditionItem and the container for a IfStmt.
             ResolveConceptualElementCollector ifConditionItemCollector =
@@ -937,8 +1027,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             // Add all the new statements generated by the if-condition to the collector
             // that will contain this IfStmt.
             while (!myNewStatementsContainer.newPreStmts.empty()) {
-                addToInnerMostCollector(myNewStatementsContainer.newPreStmts
-                        .pop());
+                addToInnerMostCollector(
+                        myNewStatementsContainer.newPreStmts.pop());
             }
 
             // Add all the new statements generated by the if-condition to both the
@@ -960,8 +1050,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>We are done visiting this node, therefore we create a
-     * new {@link IfConditionItem} for future use.</p>
+     * <p>
+     * We are done visiting this node, therefore we create a new
+     * {@link IfConditionItem} for future
+     * use.
+     * </p>
      *
      * @param e Current {@link IfConditionItem} we are visiting.
      */
@@ -990,13 +1083,16 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         // Build the new IfConditionItem and add it to our new items map.
-        myReplacingElementsMap.put(e, new IfConditionItem(e.getLocation()
-                .clone(), newConditionExp, collector.stmts));
+        myReplacingElementsMap.put(e, new IfConditionItem(
+                e.getLocation().clone(), newConditionExp, collector.stmts));
     }
 
     /**
-     * <p>The user might not have supplied a {@code changing} clause,
-     * therefore we will need to generate one.</p>
+     * <p>
+     * The user might not have supplied a {@code changing} clause, therefore we
+     * will need to generate
+     * one.
+     * </p>
      *
      * @param e Current {@link LoopVerificationItem} we are visiting.
      */
@@ -1012,10 +1108,10 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             AssertionClause newDecreasingClause =
                     e.getDecreasingClause().clone();
 
-            myReplacingElementsMap.put(e, new LoopVerificationItem(e
-                    .getLocation().clone(), formChangingClause(),
-                    newMaintainingClause, newDecreasingClause,
-                    newElapsedTimeClause));
+            myReplacingElementsMap.put(e,
+                    new LoopVerificationItem(e.getLocation().clone(),
+                            formChangingClause(), newMaintainingClause,
+                            newDecreasingClause, newElapsedTimeClause));
         }
     }
 
@@ -1024,9 +1120,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>This replaces the {@link ProgramVariableArrayExp} inside
-     * the calling arguments with appropriate swapping operation from
-     * {@code Static_Array_Template}.</p>
+     * <p>
+     * This replaces the {@link ProgramVariableArrayExp} inside the calling
+     * arguments with appropriate
+     * swapping operation from {@code Static_Array_Template}.
+     * </p>
      *
      * @param e Current {@link ProgramFunctionExp} we are visiting.
      */
@@ -1038,24 +1136,31 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             // Check each of the args to see if we have ProgramVariableArrayExp.
             if (ArrayConversionUtilities.isProgArrayExp(arg)) {
                 // Create a new variable to store the contents of the array expression
-                ProgramVariableExp arrayNameExp = ArrayConversionUtilities.getArrayNameExp(arg);
+                ProgramVariableExp arrayNameExp =
+                        ArrayConversionUtilities.getArrayNameExp(arg);
                 NameTy arrayTy = findArrayType(arrayNameExp);
                 NameTy arrayContentsTy = myArrayNameTyToInnerTyMap.get(arrayTy);
-                VarDec newArrayVarDec =
-                        ArrayConversionUtilities.buildTempArrayNameVarDec(arrayNameExp,
-                                arrayContentsTy, ++myNewElementCounter);
+                VarDec newArrayVarDec = ArrayConversionUtilities
+                        .buildTempArrayNameVarDec(arrayNameExp, arrayContentsTy,
+                                ++myNewElementCounter);
                 myParentNodeElementsContainer.varDecs.add(newArrayVarDec);
 
                 // Array index expression
-                ProgramExp arrayIndexExp = ArrayConversionUtilities.getArrayIndexExp(arg);
+                ProgramExp arrayIndexExp =
+                        ArrayConversionUtilities.getArrayIndexExp(arg);
 
                 // Create the new call to "Swap_Entry" and add it to the pre/post
                 ProgramVariableNameExp newArrayVarDecAsProgramExp =
-                        new ProgramVariableNameExp(newArrayVarDec.getLocation().clone(),
-                                null, newArrayVarDec.getName());
-                CallStmt swapEntryCall = ArrayConversionUtilities.buildSwapEntryCall(arg.getLocation(),
-                        newArrayVarDecAsProgramExp, arrayTy.getQualifier(), arrayNameExp, arrayIndexExp);
-                myNewStatementsContainer.newPreStmts.push(swapEntryCall.clone());
+                        new ProgramVariableNameExp(
+                                newArrayVarDec.getLocation().clone(), null,
+                                newArrayVarDec.getName());
+                CallStmt swapEntryCall =
+                        ArrayConversionUtilities.buildSwapEntryCall(
+                                arg.getLocation(), newArrayVarDecAsProgramExp,
+                                arrayTy.getQualifier(), arrayNameExp,
+                                arrayIndexExp);
+                myNewStatementsContainer.newPreStmts
+                        .push(swapEntryCall.clone());
                 myNewStatementsContainer.newPostStmts.offer(swapEntryCall);
 
                 // Store the newArrayVarDecAsProgramExp as an arg
@@ -1065,10 +1170,13 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             else if (arg instanceof ProgramFunctionExp) {
                 // Check to see if we have created a replacement expression
                 if (myReplacingElementsMap.containsKey(arg)) {
-                    newArgs.add((ProgramExp) myReplacingElementsMap.remove(arg));
+                    newArgs.add(
+                            (ProgramExp) myReplacingElementsMap.remove(arg));
                 }
                 else {
-                    throw new MiscErrorException("Could not locate the replacement expression for: " + arg.toString(),
+                    throw new MiscErrorException(
+                            "Could not locate the replacement expression for: "
+                                    + arg.toString(),
                             new IllegalStateException());
                 }
             }
@@ -1084,8 +1192,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
             qualifier = e.getQualifier().clone();
         }
 
-        myReplacingElementsMap.put(e, new ProgramFunctionExp(e.getLocation().clone(),
-                qualifier, e.getName().clone(), newArgs));
+        myReplacingElementsMap.put(e,
+                new ProgramFunctionExp(e.getLocation().clone(), qualifier,
+                        e.getName().clone(), newArgs));
     }
 
     // ===========================================================
@@ -1093,8 +1202,10 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns the current integer value for the
-     * new element counter.</p>
+     * <p>
+     * This method returns the current integer value for the new element
+     * counter.
+     * </p>
      *
      * @return The counter integer.
      */
@@ -1103,8 +1214,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method returns the new (and potentially modified) element
-     * that includes the syntactic sugar conversions.</p>
+     * <p>
+     * This method returns the new (and potentially modified) element that
+     * includes the syntactic
+     * sugar conversions.
+     * </p>
      *
      * @return A {@link ResolveConceptualElement} object.
      */
@@ -1123,8 +1237,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>An helper method to add a {@link Statement} to the top-most
-     * collector.</p>
+     * <p>
+     * An helper method to add a {@link Statement} to the top-most collector.
+     * </p>
      *
      * @param statement A {@link Statement} object.
      */
@@ -1139,15 +1254,17 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method that retrieves the static array type for
-     * the array expression.</p>
+     * <p>
+     * An helper method that retrieves the static array type for the array
+     * expression.
+     * </p>
      *
      * @param exp The array expression name.
      *
      * @return The {@link Ty} for the array.
      *
-     * @exception MiscErrorException Could not find the array's
-     * instantiating type.
+     * @exception MiscErrorException Could not find the array's instantiating
+     *            type.
      */
     private NameTy findArrayType(ProgramVariableExp exp) {
         ProgramVariableExp expCopy = (ProgramVariableExp) exp.clone();
@@ -1184,9 +1301,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                 for (ProgramVariableExp variableExp : segments) {
                     ProgramVariableNameExp variableNameExp =
                             (ProgramVariableNameExp) variableExp;
-                    recordTy =
-                            searchRecords(recordTy, variableNameExp.getName()
-                                    .getName());
+                    recordTy = searchRecords(recordTy,
+                            variableNameExp.getName().getName());
                 }
 
                 // When are done, the recordTy should contain what we are searching for.
@@ -1224,14 +1340,18 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         else {
             throw new MiscErrorException(
                     "Cannot locate the content type for the array: "
-                            + expCopy.toString(), new NullPointerException());
+                            + expCopy.toString(),
+                    new NullPointerException());
         }
 
         return contentTy;
     }
 
     /**
-     * <p>An helper method that adds all the variables in scope as {@code changing}.</p>
+     * <p>
+     * An helper method that adds all the variables in scope as
+     * {@code changing}.
+     * </p>
      *
      * @return A list of {@link ProgramVariableExp} that are changing.
      */
@@ -1243,33 +1363,39 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         for (AbstractSharedStateRealizationDec realizationDec : myCopySSRList) {
             List<VarDec> stateVars = realizationDec.getStateVars();
             for (VarDec v : stateVars) {
-                changingList.add(new ProgramVariableNameExp(v.getLocation().clone(), null, v.getName().clone()));
+                changingList.add(new ProgramVariableNameExp(
+                        v.getLocation().clone(), null, v.getName().clone()));
             }
         }
 
         // Add all the parameter variables
         for (ParameterVarDec v : myParentNodeElementsContainer.parameterVarDecs) {
-            changingList.add(new ProgramVariableNameExp(v.getLocation().clone(), null, v.getName().clone()));
+            changingList.add(new ProgramVariableNameExp(v.getLocation().clone(),
+                    null, v.getName().clone()));
         }
 
         // Add all the local variables
         for (VarDec v : myParentNodeElementsContainer.varDecs) {
-            changingList.add(new ProgramVariableNameExp(v.getLocation().clone(), null, v.getName().clone()));
+            changingList.add(new ProgramVariableNameExp(v.getLocation().clone(),
+                    null, v.getName().clone()));
         }
 
         return changingList;
     }
 
     /**
-     * <p>An helper method to try to locate a {@link ParameterVarDec} based on
-     * the string name passed in.</p>
+     * <p>
+     * An helper method to try to locate a {@link ParameterVarDec} based on the
+     * string name passed in.
+     * </p>
      *
      * @param name Name of the variable we are trying to find.
      *
-     * @return A copy of the {@link ParameterVarDec} if found, else {@code null}.
+     * @return A copy of the {@link ParameterVarDec} if found, else
+     *         {@code null}.
      *
      * @exception MiscErrorException Encountered two parameter variables with
-     * the same name.
+     *            the same name.
      */
     private ParameterVarDec searchParameterVarDecs(String name) {
         ParameterVarDec parameterVarDec = null;
@@ -1290,9 +1416,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method to try to locate a {@link NameTy} in all of our
-     * {@link AbstractTypeRepresentationDec} based on the {@link NameTy}
-     * and the name.</p>
+     * <p>
+     * An helper method to try to locate a {@link NameTy} in all of our
+     * {@link AbstractTypeRepresentationDec} based on the {@link NameTy} and the
+     * name.
+     * </p>
      *
      * @param rawTy The {@link NameTy} for a type representation.
      * @param name Name of the variable we are trying to find.
@@ -1300,7 +1428,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * @return A copy of the {@link Ty} if found, else {@code null}.
      *
      * @exception MiscErrorException Encountered some kind of error while
-     * searching for the proper record type.
+     *            searching for the proper
+     *            record type.
      */
     private NameTy searchRecords(NameTy rawTy, String name) {
         NameTy returnTy = null;
@@ -1326,10 +1455,8 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                     }
                 }
                 else {
-                    throw new MiscErrorException(
-                            "Variable ["
-                                    + name
-                                    + "] does not point to a type that contains a record",
+                    throw new MiscErrorException("Variable [" + name
+                            + "] does not point to a type that contains a record",
                             new NullPointerException());
                 }
             }
@@ -1339,8 +1466,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method to try to locate a {@link VarDec} in all of our
-     * {@link AbstractSharedStateRealizationDec} based on the string name passed in.</p>
+     * <p>
+     * An helper method to try to locate a {@link VarDec} in all of our
+     * {@link AbstractSharedStateRealizationDec} based on the string name passed
+     * in.
+     * </p>
      *
      * @param name Name of the variable we are trying to find.
      *
@@ -1372,8 +1502,10 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>An helper method to try to locate a {@link VarDec} based on
-     * the string name passed in.</p>
+     * <p>
+     * An helper method to try to locate a {@link VarDec} based on the string
+     * name passed in.
+     * </p>
      *
      * @param name Name of the variable we are trying to find.
      *
@@ -1389,8 +1521,9 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
                     varDec = (VarDec) v.clone();
                 }
                 else {
-                    throw new MiscErrorException("Found two variables for: "
-                            + name, new IllegalStateException());
+                    throw new MiscErrorException(
+                            "Found two variables for: " + name,
+                            new IllegalStateException());
                 }
             }
         }
@@ -1403,8 +1536,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This holds a copy of the {@link ParameterVarDec}, {@link VarDec} and
-     * {@link FacilityDec} for the incoming parent node.</p>
+     * <p>
+     * This holds a copy of the {@link ParameterVarDec}, {@link VarDec} and
+     * {@link FacilityDec} for
+     * the incoming parent node.
+     * </p>
      */
     private class ParentNodeElementsContainer {
 
@@ -1413,17 +1549,23 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>List of parameter variable declaration objects.</p>
+         * <p>
+         * List of parameter variable declaration objects.
+         * </p>
          */
         final List<ParameterVarDec> parameterVarDecs;
 
         /**
-         * <p>List of variable declaration objects.</p>
+         * <p>
+         * List of variable declaration objects.
+         * </p>
          */
         final List<FacilityDec> facilityDecs;
 
         /**
-         * <p>List of variable declaration objects.</p>
+         * <p>
+         * List of variable declaration objects.
+         * </p>
          */
         final List<VarDec> varDecs;
 
@@ -1432,8 +1574,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>This constructs a temporary structure to store the elements from
-         * the incoming parent node we are walking.</p>
+         * <p>
+         * This constructs a temporary structure to store the elements from the
+         * incoming parent node we
+         * are walking.
+         * </p>
          *
          * @param params List of parameter variables.
          * @param facs List of facility declarations.
@@ -1451,8 +1596,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>An helper method to create a new list of {@link FacilityDec}s
-         * that is a deep copy of the one passed in.</p>
+         * <p>
+         * An helper method to create a new list of {@link FacilityDec}s that is
+         * a deep copy of the one
+         * passed in.
+         * </p>
          *
          * @param facilityDecs The original list of {@link FacilityDec}s.
          *
@@ -1468,14 +1616,19 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         /**
-         * <p>An helper method to create a new list of {@link ParameterVarDec}s
-         * that is a deep copy of the one passed in.</p>
+         * <p>
+         * An helper method to create a new list of {@link ParameterVarDec}s
+         * that is a deep copy of the
+         * one passed in.
+         * </p>
          *
-         * @param parameterVarDecs The original list of {@link ParameterVarDec}s.
+         * @param parameterVarDecs The original list of
+         *        {@link ParameterVarDec}s.
          *
          * @return A list of {@link ParameterVarDec}s.
          */
-        private List<ParameterVarDec> copyParamDecls(List<ParameterVarDec> parameterVarDecs) {
+        private List<ParameterVarDec>
+                copyParamDecls(List<ParameterVarDec> parameterVarDecs) {
             List<ParameterVarDec> copyParamDecs = new ArrayList<>();
             for (ParameterVarDec parameterVarDec : parameterVarDecs) {
                 copyParamDecs.add((ParameterVarDec) parameterVarDec.clone());
@@ -1485,8 +1638,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         }
 
         /**
-         * <p>An helper method to create a new list of {@link VarDec}s
-         * that is a deep copy of the one passed in.</p>
+         * <p>
+         * An helper method to create a new list of {@link VarDec}s that is a
+         * deep copy of the one
+         * passed in.
+         * </p>
          *
          * @param varDecs The original list of {@link VarDec}s.
          *
@@ -1503,13 +1659,17 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>As we walk though the various different nodes that can contain
-     * a list of {@link Statement}s, once we are done with a particular
-     * {@link Statement}, it will be added to this class. Once we are done
-     * walking all the statements and we are back to the
-     * {@link ResolveConceptualElement} that contains the list of
-     * {@link Statement}s, we will use the elements
-     * stored in this class to create the new object.</p>
+     * <p>
+     * As we walk though the various different nodes that can contain a list of
+     * {@link Statement}s,
+     * once we are done with a particular {@link Statement}, it will be added to
+     * this class. Once we
+     * are done walking all the statements and we are back to the
+     * {@link ResolveConceptualElement}
+     * that contains the list of {@link Statement}s, we will use the elements
+     * stored in this class to
+     * create the new object.
+     * </p>
      */
     private class ResolveConceptualElementCollector {
 
@@ -1518,12 +1678,16 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>The {@link ResolveConceptualElement} that created this collector.</p>
+         * <p>
+         * The {@link ResolveConceptualElement} that created this collector.
+         * </p>
          */
         final ResolveConceptualElement instantiatingElement;
 
         /**
-         * <p>List of statement objects.</p>
+         * <p>
+         * List of statement objects.
+         * </p>
          */
         final List<Statement> stmts;
 
@@ -1532,8 +1696,10 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>This constructs a temporary structure to store the list of
-         * {@link Statement}s.</p>
+         * <p>
+         * This constructs a temporary structure to store the list of
+         * {@link Statement}s.
+         * </p>
          *
          * @param e The element that created this object.
          */
@@ -1544,8 +1710,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This holds new {@link Statement}s related to syntactic sugar conversions for
-     * {@link ProgramVariableArrayExp}.</p>
+     * <p>
+     * This holds new {@link Statement}s related to syntactic sugar conversions
+     * for
+     * {@link ProgramVariableArrayExp}.
+     * </p>
      */
     private class NewStatementsContainer {
 
@@ -1554,21 +1723,34 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>A stack of new statements that needs to be inserted before the code
-         * that contains a program array expression.</p>
+         * <p>
+         * A stack of new statements that needs to be inserted before the code
+         * that contains a program
+         * array expression.
+         * </p>
          *
-         * <p><strong>Note:</strong> The only statements generated at the moment are
-         * either new function assignment statements from indexes in
-         * program array expressions or call statements to swap elements in the array(s).</p>
+         * <p>
+         * <strong>Note:</strong> The only statements generated at the moment
+         * are either new function
+         * assignment statements from indexes in program array expressions or
+         * call statements to swap
+         * elements in the array(s).
+         * </p>
          */
         final Stack<Statement> newPreStmts;
 
         /**
-         * <p>A queue of new statements that needs to be inserted after the code
-         * that contains a program array expression.</p>
+         * <p>
+         * A queue of new statements that needs to be inserted after the code
+         * that contains a program
+         * array expression.
+         * </p>
          *
-         * <p><strong>Note:</strong> The only statements generated at the moment are
-         * call statements to swap elements in the array(s).</p>
+         * <p>
+         * <strong>Note:</strong> The only statements generated at the moment
+         * are call statements to
+         * swap elements in the array(s).
+         * </p>
          */
         final Queue<Statement> newPostStmts;
 
@@ -1577,8 +1759,11 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
         // ===========================================================
 
         /**
-         * <p>This constructs a temporary structure to store all the new statements that
-         * resulted from syntactic sugar conversions for {@link ProgramVariableArrayExp}.</p>
+         * <p>
+         * This constructs a temporary structure to store all the new statements
+         * that resulted from
+         * syntactic sugar conversions for {@link ProgramVariableArrayExp}.
+         * </p>
          */
         NewStatementsContainer() {
             newPreStmts = new Stack<>();

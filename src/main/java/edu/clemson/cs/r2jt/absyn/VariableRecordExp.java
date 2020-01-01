@@ -1,7 +1,7 @@
 /*
  * VariableRecordExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -147,26 +147,23 @@ public class VariableRecordExp extends VariableExp {
 
         StringBuffer sb = new StringBuffer();
         /*
-         printSpace(indent, sb);
-         sb.append("VariableRecordExp\n");
-
-         if (qualifier != null) {
-         sb.append(qualifier.asString(indent+increment,increment));
-         }
-
-         if (name != null) {
-         sb.append(name.asString(indent+increment,increment));
-         }
-
-         if (fields != null) {
-         sb.append(fields.asString(indent+increment,increment));
-         }
+         * printSpace(indent, sb); sb.append("VariableRecordExp\n");
+         * 
+         * if (qualifier != null) {
+         * sb.append(qualifier.asString(indent+increment,increment)); }
+         * 
+         * if (name != null) {
+         * sb.append(name.asString(indent+increment,increment)); }
+         * 
+         * if (fields != null) {
+         * sb.append(fields.asString(indent+increment,increment)); }
          */
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<VariableExp> i = fields.iterator();
         while (i.hasNext()) {

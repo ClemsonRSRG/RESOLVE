@@ -1,7 +1,7 @@
 /*
  * VC.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,21 +24,29 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>Represents an immutable <em>verification condition</em>, which takes the
- * form of a mathematical implication.</p>
+ * <p>
+ * Represents an immutable <em>verification condition</em>, which takes the form
+ * of a mathematical
+ * implication.
+ * </p>
  */
 public class VC {
 
     /**
-     * <p>Name is a human-readable name for the VC used for debugging purposes.
+     * <p>
+     * Name is a human-readable name for the VC used for debugging purposes.
      * </p>
      */
     private final String myName;
 
     /**
-     * <p>myDerivedFlag is set to true to indicate that this VC is not the
-     * original version of the VC with myName--rather it was derived from a
-     * VC named myName (or derived from a VC derived from a VC named myName)</p>
+     * <p>
+     * myDerivedFlag is set to true to indicate that this VC is not the original
+     * version of the VC
+     * with myName--rather it was derived from a VC named myName (or derived
+     * from a VC derived from a
+     * VC named myName)
+     * </p>
      */
     private final boolean myDerivedFlag;
 
@@ -46,7 +54,8 @@ public class VC {
     private Consequent myConsequent;
 
     private java.util.HashMap<PLambda, String> m_liftedLamdas;
-    // PLambda objects aren't hashing correctly.  would have to get into haschode/eq methods of PExp heirarchy
+    // PLambda objects aren't hashing correctly. would have to get into haschode/eq methods of PExp
+    // heirarchy
     private java.util.HashMap<String, PLambda> m_lamdaCodes;
     public java.util.List<PSymbol> m_liftedLambdaPredicates;
     public java.util.HashMap<String, PSymbol> rhsOfLamPredsToLamPreds;
@@ -102,10 +111,9 @@ public class VC {
             java.util.Set<PSymbol> qVars = p.getQuantifiedVariables();
             HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
             for (PSymbol pq : qVars) {
-                PSymbol repP =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), pq
-                                .getType().toString()
-                                + m_qVarTag++, pq.quantification);
+                PSymbol repP = new PSymbol(pq.getType(), pq.getTypeValue(),
+                        pq.getType().toString() + m_qVarTag++,
+                        pq.quantification);
                 substMap.put(pq, repP);
             }
             if (!substMap.isEmpty()) {
@@ -127,17 +135,16 @@ public class VC {
             java.util.Set<PSymbol> qVars = p.getQuantifiedVariables();
             HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
             for (PSymbol pq : qVars) {
-                PSymbol repP =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), "¢vl"
-                                + pq.getType().toString() + m_qVarTag++,
-                                pq.quantification);
+                PSymbol repP = new PSymbol(pq.getType(), pq.getTypeValue(),
+                        "¢vl" + pq.getType().toString() + m_qVarTag++,
+                        pq.quantification);
                 substMap.put(pq, repP);
             }
             if (!substMap.isEmpty()) {
                 p = (PSymbol) p.substitute(substMap);
             }
             replacement.add(p);
-            //m_qVarTag = 0;
+            // m_qVarTag = 0;
         }
         m_conditions = replacement;
     }
@@ -208,10 +215,9 @@ public class VC {
 
                 }
                 else {
-                    PSymbol lhsPsym =
-                            new PSymbol(m_typegraph.BOOLEAN, null, lhs
-                                    .getTopLevelOperation(),
-                                    PSymbol.Quantification.NONE);
+                    PSymbol lhsPsym = new PSymbol(m_typegraph.BOOLEAN, null,
+                            lhs.getTopLevelOperation(),
+                            PSymbol.Quantification.NONE);
                     args.add(lhsPsym);
                     args.add(cf);
                     PSymbol cfPred =
@@ -242,39 +248,39 @@ public class VC {
         String funStr = "";
         if (qVarSet.size() == 1 && qVarSet.contains(quantVar)
                 && thingToHigherOrder.getSubExpressions().size() == 1) {
-            MTFunction hoType =
-                    new MTFunction(m_typegraph, thingToHigherOrder.getType(),
-                            quantVar.getType());
-            return new PSymbol(hoType, null, thingToHigherOrder
-                    .getTopLevelOperation());
+            MTFunction hoType = new MTFunction(m_typegraph,
+                    thingToHigherOrder.getType(), quantVar.getType());
+            return new PSymbol(hoType, null,
+                    thingToHigherOrder.getTopLevelOperation());
         }
         PSymbol funName;
-        if (rhsOfLamPredsToLamPreds.containsKey(thingToHigherOrder.toString())) {
+        if (rhsOfLamPredsToLamPreds
+                .containsKey(thingToHigherOrder.toString())) {
             String fStr =
                     rhsOfLamPredsToLamPreds.get(thingToHigherOrder.toString())
                             .getSubExpressions().get(0).getTopLevelOperation();
-            return new PSymbol(new MTFunction(m_typegraph, thingToHigherOrder
-                    .getType(), quantVar.getType()), null, fStr);
+            return new PSymbol(new MTFunction(m_typegraph,
+                    thingToHigherOrder.getType(), quantVar.getType()), null,
+                    fStr);
         }
         else {
-            funName =
-                    new PSymbol(new MTFunction(m_typegraph, thingToHigherOrder
-                            .getType(), quantVar.getType()), null, "lambda"
-                            + (m_lambdaTag++));
+            funName = new PSymbol(
+                    new MTFunction(m_typegraph, thingToHigherOrder.getType(),
+                            quantVar.getType()),
+                    null, "lambda" + (m_lambdaTag++));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(quantVar);
-            PSymbol funAppl =
-                    new PSymbol(thingToHigherOrder.getType(), null, funName
-                            .getTopLevelOperation(), args,
-                            PSymbol.Quantification.NONE);
+            PSymbol funAppl = new PSymbol(thingToHigherOrder.getType(), null,
+                    funName.getTopLevelOperation(), args,
+                    PSymbol.Quantification.NONE);
             args.clear();
             args.add(funAppl);
             args.add(thingToHigherOrder);
             PSymbol conQuant =
                     new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
             sideList.add(conQuant);
-            rhsOfLamPredsToLamPreds
-                    .put(thingToHigherOrder.toString(), conQuant);
+            rhsOfLamPredsToLamPreds.put(thingToHigherOrder.toString(),
+                    conQuant);
         }
         return funName;
     }
@@ -296,16 +302,14 @@ public class VC {
                         ArrayList<PExp> args = new ArrayList<PExp>();
                         args.add(lhs);
                         args.add(pa.result);
-                        PSymbol ant =
-                                new PSymbol(m_typegraph.BOOLEAN, null, "=",
-                                        args);
+                        PSymbol ant = new PSymbol(m_typegraph.BOOLEAN, null,
+                                "=", args);
 
                         args.clear();
                         args.add(pa.condition);
                         args.add(ant);
-                        PSymbol pc =
-                                new PSymbol(m_typegraph.BOOLEAN, null,
-                                        "implies", args);
+                        PSymbol pc = new PSymbol(m_typegraph.BOOLEAN, null,
+                                "implies", args);
                         converted.add(pc);
                         m_conditions.add(pa.condition);
                     }
@@ -317,22 +321,20 @@ public class VC {
                     else {
                         ArrayList<PExp> args = new ArrayList<PExp>();
                         args.add(conditions.get(0));
-                        PExp neg =
-                                new PSymbol(m_typegraph.BOOLEAN, null, "not",
-                                        args);
+                        PExp neg = new PSymbol(m_typegraph.BOOLEAN, null, "not",
+                                args);
                         args.clear();
 
                         args.add(lhs);
                         args.add(asPa.myOtherwiseClauseResult);
-                        PExp eq =
-                                new PSymbol(m_typegraph.BOOLEAN, null, "=",
-                                        args);
+                        PExp eq = new PSymbol(m_typegraph.BOOLEAN, null, "=",
+                                args);
                         args.clear();
                         args.add(neg);
                         args.add(eq);
                         converted.add(new PSymbol(m_typegraph.BOOLEAN, null,
                                 "implies", args));
-                        //m_conditions.add(neg);
+                        // m_conditions.add(neg);
                     }
 
                 }
@@ -364,14 +366,13 @@ public class VC {
         for (PLambda p : m_liftedLamdas.keySet()) {
             String name = m_liftedLamdas.get(p);
             PExp body = p.getBody();
-            PSymbol lhs =
-                    new PSymbol(p.getType(), p.getTypeValue(), name, p
-                            .getParameters());
+            PSymbol lhs = new PSymbol(p.getType(), p.getTypeValue(), name,
+                    p.getParameters());
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(lhs);
             args.add(body);
-            m_liftedLambdaPredicates.add(new PSymbol(m_typegraph.BOOLEAN, null,
-                    "=", args));
+            m_liftedLambdaPredicates
+                    .add(new PSymbol(m_typegraph.BOOLEAN, null, "=", args));
         }
     }
 
@@ -384,17 +385,17 @@ public class VC {
             // replace lam(x).F(x) wth F
             PLambda pl = (PLambda) p;
             PExp body = pl.getBody();
-            if ((pl.getParameters().size() == 1 && body
-                    .getQuantifiedVariables().size() == 1)
-                    && pl.getParameters().get(0).toString().equals(
-                            body.getQuantifiedVariables().iterator().next()
-                                    .toString())
+            if ((pl.getParameters().size() == 1
+                    && body.getQuantifiedVariables().size() == 1)
+                    && pl.getParameters().get(0).toString()
+                            .equals(body.getQuantifiedVariables().iterator()
+                                    .next().toString())
                     && body.getSubExpressions().size() == 1
                     && body.getSubExpressions().get(0).isVariable()) {
-                PSymbol funName =
-                        new PSymbol(new MTFunction(m_typegraph, body.getType(),
-                                pl.getParameters().get(0).getType()), null,
-                                body.getTopLevelOperation());
+                PSymbol funName = new PSymbol(
+                        new MTFunction(m_typegraph, body.getType(),
+                                pl.getParameters().get(0).getType()),
+                        null, body.getTopLevelOperation());
                 return funName;
             }
             String lname = "";
@@ -413,8 +414,8 @@ public class VC {
             return new PSymbol(normP.getType(), normP.getTypeValue(), lname);
 
         }
-        return new PSymbol(p.getType(), p.getTypeValue(), p
-                .getTopLevelOperation(), newArgList);
+        return new PSymbol(p.getType(), p.getTypeValue(),
+                p.getTopLevelOperation(), newArgList);
     }
 
     public String getSourceName() {
@@ -432,9 +433,8 @@ public class VC {
     @Override
     public String toString() {
 
-        String retval =
-                "========== " + getName() + " ==========\n" + myAntecedent
-                        + "  -->\n" + myConsequent;
+        String retval = "========== " + getName() + " ==========\n"
+                + myAntecedent + "  -->\n" + myConsequent;
 
         if (!m_liftedLambdaPredicates.isEmpty()) {
             retval += "lifted lambda predicates:\n";

@@ -1,7 +1,7 @@
 /*
  * ImportException.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,8 +13,10 @@
 package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
- * <p>An {@code ImportException} indicates we encountered an error
- * while trying to import a new module.</p>
+ * <p>
+ * An {@code ImportException} indicates we encountered an error while trying to
+ * import a new module.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 2.0
@@ -25,7 +27,11 @@ public class ImportException extends CompilerException {
     // Member Fields
     // ===========================================================
 
-    /** <p>Serial version for Serializable objects</p> */
+    /**
+     * <p>
+     * Serial version for Serializable objects
+     * </p>
+     */
     private static final long serialVersionUID = 1L;
 
     // ==========================================================
@@ -33,8 +39,10 @@ public class ImportException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a message
-     * that caused an import exception to be thrown.</p>
+     * <p>
+     * This constructor takes in a message that caused an import exception to be
+     * thrown.
+     * </p>
      *
      * @param message Message to be displayed when the exception is thrown.
      */

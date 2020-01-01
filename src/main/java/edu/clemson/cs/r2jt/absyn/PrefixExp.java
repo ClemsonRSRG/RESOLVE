@@ -1,7 +1,7 @@
 /*
  * PrefixExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -54,9 +54,8 @@ public class PrefixExp extends AbstractFunctionExp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        PrefixExp retval =
-                new PrefixExp(location, symbol, substitute(argument,
-                        substitutions));
+        PrefixExp retval = new PrefixExp(location, symbol,
+                substitute(argument, substitutions));
         return retval;
     }
 
@@ -156,8 +155,9 @@ public class PrefixExp extends AbstractFunctionExp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         if (argument != null) {
             return argument.containsVar(varName, IsOldExp);
@@ -190,9 +190,8 @@ public class PrefixExp extends AbstractFunctionExp {
 
         if (retval) {
             PrefixExp eAsPrefixExp = (PrefixExp) e;
-            retval =
-                    Exp.posSymbolEquivalent(symbol, eAsPrefixExp.symbol)
-                            && Exp.equivalent(argument, eAsPrefixExp.argument);
+            retval = Exp.posSymbolEquivalent(symbol, eAsPrefixExp.symbol)
+                    && Exp.equivalent(argument, eAsPrefixExp.argument);
         }
 
         return retval;
@@ -223,8 +222,8 @@ public class PrefixExp extends AbstractFunctionExp {
                 }
             }
             if (this.symbol != null && old instanceof VarExp)
-                if (symbol.toString().equals(
-                        ((VarExp) old).getName().toString())) {
+                if (symbol.toString()
+                        .equals(((VarExp) old).getName().toString())) {
                     if (replacement instanceof VarExp)
                         symbol = ((VarExp) replacement).getName();
                 }

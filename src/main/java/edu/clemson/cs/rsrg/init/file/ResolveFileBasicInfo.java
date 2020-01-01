@@ -1,7 +1,7 @@
 /*
  * ResolveFileBasicInfo.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,8 +13,10 @@
 package edu.clemson.cs.rsrg.init.file;
 
 /**
- * <p>This class contains all the basic information for describing
- * a {@link ResolveFile}.</p>
+ * <p>
+ * This class contains all the basic information for describing a
+ * {@link ResolveFile}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -25,10 +27,18 @@ public class ResolveFileBasicInfo {
     // Member Fields
     // ===========================================================
 
-    /** <p>File's name.</p> */
+    /**
+     * <p>
+     * File's name.
+     * </p>
+     */
     private final String myModuleFileName;
 
-    /** <p>File's "parent" directory name.</p> */
+    /**
+     * <p>
+     * File's "parent" directory name.
+     * </p>
+     */
     private final String myModuleParentDirName;
 
     // ===========================================================
@@ -36,13 +46,16 @@ public class ResolveFileBasicInfo {
     // ===========================================================
 
     /**
-     * <p>This constructor takes all the information relevant
-     * from the original source object and stores the basic information
-     * about the "file".</p>
+     * <p>
+     * This constructor takes all the information relevant from the original
+     * source object and stores
+     * the basic information about the "file".
+     * </p>
      *
      * @param name Filename.
-     * @param parentDirName The parent directory name if it is known.
-     *                      Otherwise, this can be {@code ""}.
+     * @param parentDirName The parent directory name if it is known. Otherwise,
+     *        this can be
+     *        {@code ""}.
      */
     public ResolveFileBasicInfo(String name, String parentDirName) {
         myModuleFileName = name;
@@ -54,11 +67,14 @@ public class ResolveFileBasicInfo {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default equals method implementation.</p>
+     * <p>
+     * This method overrides the default equals method implementation.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -75,7 +91,9 @@ public class ResolveFileBasicInfo {
     }
 
     /**
-     * <p>This is the actual name of the file.</p>
+     * <p>
+     * This is the actual name of the file.
+     * </p>
      *
      * @return Filename
      */
@@ -84,7 +102,9 @@ public class ResolveFileBasicInfo {
     }
 
     /**
-     * <p>This name of the parent directory.</p>
+     * <p>
+     * This name of the parent directory.
+     * </p>
      *
      * @return File's parent directory name.
      */
@@ -93,7 +113,9 @@ public class ResolveFileBasicInfo {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -105,7 +127,9 @@ public class ResolveFileBasicInfo {
     }
 
     /**
-     * <p>Returns the name of the file in string format.</p>
+     * <p>
+     * Returns the name of the file in string format.
+     * </p>
      *
      * @return File as a string.
      */

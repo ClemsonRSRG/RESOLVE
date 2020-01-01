@@ -1,7 +1,7 @@
 /*
  * ReceptaclesExpExtractor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,9 +20,11 @@ import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.treewalk.TreeWalkerVisitor;
 
 /**
- * <p>This class determines if an {@link Exp} is contains any {@link RecpExp} or
+ * <p>
+ * This class determines if an {@link Exp} is contains any {@link RecpExp} or
  * {@link TypeReceptaclesExp}. This visitor logic is implemented as a
- * {@link TreeWalkerVisitor}.</p>
+ * {@link TreeWalkerVisitor}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -50,7 +52,9 @@ public class ReceptaclesExpExtractor extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ProgramExp}.
+     * </p>
      *
      * @param exp A programming expression.
      */
@@ -58,8 +62,9 @@ public class ReceptaclesExpExtractor extends TreeWalkerVisitor {
     public final void preProgramExp(ProgramExp exp) {
         // This is an error! We should have converted all ProgramExp to their
         // MathExp counterparts.
-        throw new SourceErrorException("[VCGenerator] Found: " + exp
-                + " in a formal specification!", exp.getLocation());
+        throw new SourceErrorException(
+                "[VCGenerator] Found: " + exp + " in a formal specification!",
+                exp.getLocation());
     }
 
     // ===========================================================

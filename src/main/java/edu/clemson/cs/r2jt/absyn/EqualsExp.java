@@ -1,7 +1,7 @@
 /*
  * EqualsExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -60,10 +60,9 @@ public class EqualsExp extends AbstractFunctionExp {
 
         if (retval) {
             EqualsExp eAsEquals = (EqualsExp) e;
-            retval =
-                    (operator == eAsEquals.operator)
-                            && (left.equivalent(eAsEquals.left))
-                            && (right.equivalent(eAsEquals.right));
+            retval = (operator == eAsEquals.operator)
+                    && (left.equivalent(eAsEquals.left))
+                    && (right.equivalent(eAsEquals.right));
         }
 
         return retval;
@@ -154,9 +153,8 @@ public class EqualsExp extends AbstractFunctionExp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        Exp retval =
-                new EqualsExp(location, substitute(left, substitutions),
-                        operator, substitute(right, substitutions));
+        Exp retval = new EqualsExp(location, substitute(left, substitutions),
+                operator, substitute(right, substitutions));
         return retval;
     }
 
@@ -189,8 +187,8 @@ public class EqualsExp extends AbstractFunctionExp {
 
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
-        //Environment   env	= Environment.getInstance();
-        //if(env.isabelle()){return toIsabelleString(indent);};    	
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
 
         StringBuffer sb = new StringBuffer();
 
@@ -256,8 +254,9 @@ public class EqualsExp extends AbstractFunctionExp {
         return this;
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Boolean found = false;
         if (left != null) {
@@ -363,13 +362,12 @@ public class EqualsExp extends AbstractFunctionExp {
         return simplified;
     }
 
-    /* Commented out because it is not used locally.
-     * - YS
-    private PosSymbol createPosSymbol(String name){
-    	PosSymbol posSym = new PosSymbol();
-    	posSym.setSymbol(Symbol.symbol(name));
-    	return posSym; 	
-    }
+    /*
+     * Commented out because it is not used locally. - YS private PosSymbol
+     * createPosSymbol(String
+     * name){ PosSymbol posSym = new PosSymbol();
+     * posSym.setSymbol(Symbol.symbol(name)); return
+     * posSym; }
      */
 
     public boolean equals(Exp exp) {

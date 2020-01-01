@@ -1,7 +1,7 @@
 /*
  * SymmetricBoundVariableVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -91,8 +91,8 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
         return getInnermostBinding(myBoundVariables2, name);
     }
 
-    private static MTType getInnermostBinding(
-            Deque<Map<String, MTType>> scopes, String name)
+    private static MTType getInnermostBinding(Deque<Map<String, MTType>> scopes,
+            String name)
             throws NoSuchElementException {
 
         MTType result = null;

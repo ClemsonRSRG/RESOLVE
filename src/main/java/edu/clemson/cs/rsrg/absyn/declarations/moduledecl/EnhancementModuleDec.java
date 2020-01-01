@@ -1,7 +1,7 @@
 /*
  * EnhancementModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the class for the enhancement module declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for the enhancement module declarations that the compiler
+ * builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,10 +36,18 @@ public class EnhancementModuleDec extends ModuleDec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The concept module associated with this module</p> */
+    /**
+     * <p>
+     * The concept module associated with this module
+     * </p>
+     */
     private final PosSymbol myConceptName;
 
-    /** <p>The requires expression</p> */
+    /**
+     * <p>
+     * The requires expression
+     * </p>
+     */
     private final AssertionClause myRequires;
 
     // ===========================================================
@@ -44,7 +55,9 @@ public class EnhancementModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>This constructor creates a "Enhancement" module representation.</p>
+     * <p>
+     * This constructor creates a "Enhancement" module representation.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
@@ -52,11 +65,12 @@ public class EnhancementModuleDec extends ModuleDec {
      * @param conceptName The concept name in {@link PosSymbol} format.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param requires A {@link AssertionClause} representing the concept's
-     *                 requires clause.
+     *        requires clause.
      * @param decs The list of {@link Dec} objects.
      * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
-     *                           externally realized flags that indicates
-     *                           all the modules that this module declaration depends on.
+     *        externally realized flags
+     *        that indicates all the modules that this module declaration
+     *        depends on.
      */
     public EnhancementModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol conceptName,
@@ -113,8 +127,9 @@ public class EnhancementModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the symbol representation
-     * of for the concept name.</p>
+     * <p>
+     * This method returns the symbol representation of for the concept name.
+     * </p>
      *
      * @return The name in {@link PosSymbol} format.
      */
@@ -123,8 +138,9 @@ public class EnhancementModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the requires clause
-     * for this enhancement declaration.</p>
+     * <p>
+     * This method returns the requires clause for this enhancement declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -153,16 +169,18 @@ public class EnhancementModuleDec extends ModuleDec {
     @Override
     protected final EnhancementModuleDec copy() {
         // Copy all the items in the lists
-        List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
+        List<ModuleParameterDec> newParameterDecs =
+                new ArrayList<>(myParameterDecs.size());
         Collections.copy(newParameterDecs, myParameterDecs);
         List<UsesItem> newUsesItems = new ArrayList<>(myUsesItems.size());
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies = copyModuleDependencies();
+        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies =
+                copyModuleDependencies();
 
-        return new EnhancementModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
-                myConceptName.clone(), newUsesItems, myRequires.clone(),
-                newDecs, newModuleDependencies);
+        return new EnhancementModuleDec(cloneLocation(), myName.clone(),
+                newParameterDecs, myConceptName.clone(), newUsesItems,
+                myRequires.clone(), newDecs, newModuleDependencies);
     }
 }

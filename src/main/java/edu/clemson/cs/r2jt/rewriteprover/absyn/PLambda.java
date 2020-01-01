@@ -1,7 +1,7 @@
 /*
  * PLambda.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -30,7 +30,8 @@ public class PLambda extends PExp {
     public PLambda(ImmutableList<Parameter> parameters, PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
                 new MTFunction(body.getType().getTypeGraph(), body.getType(),
-                        parameterTypes(parameters)), null);
+                        parameterTypes(parameters)),
+                null);
 
         this.parameters = parameters;
         myBody = body;
@@ -92,14 +93,14 @@ public class PLambda extends PExp {
 
     @Override
     public PLambda withTypeReplaced(MTType t) {
-        throw new UnsupportedOperationException("Cannot set the type "
-                + "value on a " + this.getClass() + ".");
+        throw new UnsupportedOperationException(
+                "Cannot set the type " + "value on a " + this.getClass() + ".");
     }
 
     @Override
     public PLambda withTypeValueReplaced(MTType t) {
-        throw new UnsupportedOperationException("Cannot set the type "
-                + "value on a " + this.getClass() + ".");
+        throw new UnsupportedOperationException(
+                "Cannot set the type " + "value on a " + this.getClass() + ".");
     }
 
     @Override
@@ -263,9 +264,8 @@ public class PLambda extends PExp {
         ArrayList<Parameter> normParams = new ArrayList<Parameter>();
         for (PExp p : plist) {
             String name = p.getType().toString().toLowerCase() + argNum++;
-            PExp norm =
-                    new PSymbol(p.getType(), p.getTypeValue(), name,
-                            PSymbol.Quantification.FOR_ALL);
+            PExp norm = new PSymbol(p.getType(), p.getTypeValue(), name,
+                    PSymbol.Quantification.FOR_ALL);
             substMap.put(p, norm);
             normParams.add(new Parameter(name, p.getType()));
         }

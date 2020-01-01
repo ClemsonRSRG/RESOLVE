@@ -1,7 +1,7 @@
 /*
  * MathTypeTheoremDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the mathematical type theorem declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical type theorem declarations that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,10 +36,18 @@ public class MathTypeTheoremDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of universally quantified variable declarations</p> */
+    /**
+     * <p>
+     * The list of universally quantified variable declarations
+     * </p>
+     */
     private final List<MathVarDec> myUniversalVars;
 
-    /** <p>The assertion that applies to all variables in this type theorem</p> */
+    /**
+     * <p>
+     * The assertion that applies to all variables in this type theorem
+     * </p>
+     */
     private final Exp myAssertion;
 
     // ===========================================================
@@ -44,11 +55,15 @@ public class MathTypeTheoremDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical type theorem.</p>
+     * <p>
+     * This constructs a mathematical type theorem.
+     * </p>
      *
      * @param name Name of the type theorem.
-     * @param universalVars List of universally quantified variables for this type theorem.
-     * @param assertion The expression that relates all variables in this type theorem.
+     * @param universalVars List of universally quantified variables for this
+     *        type theorem.
+     * @param assertion The expression that relates all variables in this type
+     *        theorem.
      */
     public MathTypeTheoremDec(PosSymbol name, List<MathVarDec> universalVars,
             Exp assertion) {
@@ -84,8 +99,8 @@ public class MathTypeTheoremDec extends Dec {
         }
         sb.append("\n");
 
-        sb.append(myAssertion.asString(indentSize + innerIndentInc
-                + innerIndentInc, innerIndentInc));
+        sb.append(myAssertion.asString(
+                indentSize + innerIndentInc + innerIndentInc, innerIndentInc));
         sb.append(";");
 
         return sb.toString();
@@ -111,8 +126,10 @@ public class MathTypeTheoremDec extends Dec {
     }
 
     /**
-     * <p>This method returns all universally quantified math variables in
-     * this type theorem.</p>
+     * <p>
+     * This method returns all universally quantified math variables in this
+     * type theorem.
+     * </p>
      *
      * @return A list of {@link MathVarDec} representation objects.
      */
@@ -121,8 +138,10 @@ public class MathTypeTheoremDec extends Dec {
     }
 
     /**
-     * <p>This method returns the assertion that relates the variables
-     * this type theorem.</p>
+     * <p>
+     * This method returns the assertion that relates the variables this type
+     * theorem.
+     * </p>
      *
      * @return An {@link Exp} representation object.
      */
@@ -131,15 +150,17 @@ public class MathTypeTheoremDec extends Dec {
     }
 
     /**
-     * <p>This method checks to see if the assertion we have is a binding
-     * condition.</p>
+     * <p>
+     * This method checks to see if the assertion we have is a binding
+     * condition.
+     * </p>
      *
-     * @return {@code true} if the assertion is an {@code implies}, {@code false} otherwise.
+     * @return {@code true} if the assertion is an {@code implies},
+     *         {@code false} otherwise.
      */
     public final boolean hasBindingCondition() {
-        return myAssertion instanceof InfixExp
-                && ((InfixExp) myAssertion).getOperatorAsString().equals(
-                        "implies");
+        return myAssertion instanceof InfixExp && ((InfixExp) myAssertion)
+                .getOperatorAsString().equals("implies");
     }
 
     /**
@@ -167,6 +188,7 @@ public class MathTypeTheoremDec extends Dec {
             newVars.add((MathVarDec) varDec.clone());
         }
 
-        return new MathTypeTheoremDec(myName.clone(), newVars, myAssertion.clone());
+        return new MathTypeTheoremDec(myName.clone(), newVars,
+                myAssertion.clone());
     }
 }

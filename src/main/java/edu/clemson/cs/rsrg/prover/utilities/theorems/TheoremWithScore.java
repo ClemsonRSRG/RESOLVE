@@ -1,7 +1,7 @@
 /*
  * TheoremWithScore.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,7 +13,9 @@
 package edu.clemson.cs.rsrg.prover.utilities.theorems;
 
 /**
- * <p>This class represents a <em>Theorem</em> with a score attached to it.</p>
+ * <p>
+ * This class represents a <em>Theorem</em> with a score attached to it.
+ * </p>
  *
  * @author Mike Kabbani
  * @version 2.0
@@ -24,10 +26,18 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     // Member Fields
     // ===========================================================
 
-    /** <p>A <em>Theorem</em></p> */
+    /**
+     * <p>
+     * A <em>Theorem</em>
+     * </p>
+     */
     private final Theorem myTheorem;
 
-    /** <p>An integer score ranking the theorem.</p> */
+    /**
+     * <p>
+     * An integer score ranking the theorem.
+     * </p>
+     */
     private Integer myScore;
 
     // ===========================================================
@@ -35,8 +45,9 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     // ===========================================================
 
     /**
-     * <p>This objects stores a <em>Theorem</em> and assigns it
-     * with a score of 1.</p>
+     * <p>
+     * This objects stores a <em>Theorem</em> and assigns it with a score of 1.
+     * </p>
      *
      * @param t A theorem.
      */
@@ -50,12 +61,15 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     // ===========================================================
 
     /**
-     * <p>This method implements the method in {@link Comparable}.</p>
+     * <p>
+     * This method implements the method in {@link Comparable}.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return A negative integer, zero, or a positive integer as this object
-     *         is less than, equal to, or greater than the specified object.
+     * @return A negative integer, zero, or a positive integer as this object is
+     *         less than, equal to,
+     *         or greater than the specified object.
      */
     @Override
     public final int compareTo(TheoremWithScore o) {
@@ -63,12 +77,16 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     }
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to override the default equals method implementation.</p>
+     * <p>
+     * This method must be implemented by all inherited classes to override the
+     * default equals method
+     * implementation.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -85,7 +103,9 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     }
 
     /**
-     * <p>This method returns the inner representation of a <em>Theorem</em>.</p>
+     * <p>
+     * This method returns the inner representation of a <em>Theorem</em>.
+     * </p>
      *
      * @return A theorem.
      */
@@ -94,7 +114,9 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     }
 
     /**
-     * <p>This method returns the current score assigned to the <em>Theorem</em>.</p>
+     * <p>
+     * This method returns the current score assigned to the <em>Theorem</em>.
+     * </p>
      *
      * @return An integer score.
      */
@@ -103,7 +125,9 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -115,7 +139,9 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     }
 
     /**
-     * <p>This method returns the current expression in string format.</p>
+     * <p>
+     * This method returns the current expression in string format.
+     * </p>
      *
      * @return Current {@link TheoremWithScore} as a string.
      */
@@ -126,7 +152,9 @@ public class TheoremWithScore implements Comparable<TheoremWithScore> {
     }
 
     /**
-     * <p>This method updates the <em>Theorem</em>'s score.</p>
+     * <p>
+     * This method updates the <em>Theorem</em>'s score.
+     * </p>
      *
      * @param score An updated value for the integer score.
      */

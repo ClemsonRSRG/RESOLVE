@@ -1,7 +1,7 @@
 /*
  * OperationQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,10 +22,14 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
 import java.util.List;
 
 /**
- * <p>An <code>OperationQuery</code> searched for a (possibly-qualified)
- * operation. If a qualifier is provided, the named facility or module is
- * searched. Otherwise, the operation is searched for in any directly imported
- * modules and in instantiated versions of any available facilities.</p>
+ * <p>
+ * An <code>OperationQuery</code> searched for a (possibly-qualified) operation.
+ * If a qualifier is
+ * provided, the named facility or module is searched. Otherwise, the operation
+ * is searched for in
+ * any directly imported modules and in instantiated versions of any available
+ * facilities.
+ * </p>
  *
  * @version 2.0
  */
@@ -36,11 +40,13 @@ public class OperationQuery extends BaseSymbolQuery<OperationEntry> {
     // ===========================================================
 
     /**
-     * <p>This query searches for an operation entry that matches
-     * the provided arguments.</p>
+     * <p>
+     * This query searches for an operation entry that matches the provided
+     * arguments.
+     * </p>
      *
      * @param qualifier A qualifier symbol that indicates the instantiating
-     *                  facility or module.
+     *        facility or module.
      * @param name An operation name to query for.
      * @param argumentTypes The list of program types for this operation.
      */
@@ -51,11 +57,13 @@ public class OperationQuery extends BaseSymbolQuery<OperationEntry> {
     }
 
     /**
-     * <p>This query searches for an operation entry that matches
-     * the provided arguments.</p>
+     * <p>
+     * This query searches for an operation entry that matches the provided
+     * arguments.
+     * </p>
      *
      * @param qualifier A qualifier symbol that indicates the instantiating
-     *                  facility or module.
+     *        facility or module.
      * @param name An operation name to query for.
      * @param argumentTypes The list of program types for this operation.
      * @param importStrategy The import strategy to use.
@@ -65,8 +73,8 @@ public class OperationQuery extends BaseSymbolQuery<OperationEntry> {
             List<PTType> argumentTypes, ImportStrategy importStrategy,
             FacilityStrategy facilityStrategy) {
         super(new PossiblyQualifiedPath(qualifier, importStrategy,
-                facilityStrategy, false), new OperationSearcher(name,
-                argumentTypes));
+                facilityStrategy, false),
+                new OperationSearcher(name, argumentTypes));
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * SwapStmtRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,8 +33,9 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for applying the {@code swap}
- * rule.</p>
+ * <p>
+ * This class contains the logic for applying the {@code swap} rule.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -48,12 +49,17 @@ public class SwapStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>The module scope for the file we are generating
-     * {@code VCs} for.</p>
+     * <p>
+     * The module scope for the file we are generating {@code VCs} for.
+     * </p>
      */
     private final ModuleScope myCurrentModuleScope;
 
-    /** <p>The {@link SwapStmt} we are applying the rule to.</p> */
+    /**
+     * <p>
+     * The {@link SwapStmt} we are applying the rule to.
+     * </p>
+     */
     private final SwapStmt mySwapStmt;
 
     // ===========================================================
@@ -61,16 +67,17 @@ public class SwapStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application of the {@code swap}
-     * rule.</p>
+     * <p>
+     * This creates a new application of the {@code swap} rule.
+     * </p>
      *
-     * @param swapStmt The {@link SwapStmt} we are applying
-     *                 the rule to.
+     * @param swapStmt The {@link SwapStmt} we are applying the rule to.
      * @param moduleScope The current module scope we are visiting.
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
-     * @param context The verification context that contains all
-     *                the information we have collected so far.
+     * @param block The assertive code block that the subclasses are applying
+     *        the rule to.
+     * @param context The verification context that contains all the information
+     *        we have collected so
+     *        far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
@@ -87,7 +94,9 @@ public class SwapStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Proof Rule}.</p>
+     * <p>
+     * This method applies the {@code Proof Rule}.
+     * </p>
      */
     @Override
     public final void applyRule() {
@@ -97,7 +106,8 @@ public class SwapStmtRule extends AbstractProofRuleApplication
         List<VerificationCondition> newVCs = new ArrayList<>(vcs.size());
         for (VerificationCondition vc : vcs) {
             newVCs.add(new VerificationCondition(vc.getLocation(), vc.getName(),
-                    performSwap(vc.getSequent()), vc.getHasImpactingReductionFlag(),
+                    performSwap(vc.getSequent()),
+                    vc.getHasImpactingReductionFlag(),
                     vc.getLocationDetailModel()));
         }
 
@@ -109,14 +119,15 @@ public class SwapStmtRule extends AbstractProofRuleApplication
 
         // Add the different details to the various different output models
         ST stepModel = mySTGroup.getInstanceOf("outputVCGenStep");
-        stepModel.add("proofRuleName", getRuleDescription()).add(
-                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        stepModel.add("proofRuleName", getRuleDescription())
+                .add("currentStateOfBlock", myCurrentAssertiveCodeBlock);
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Proof Rule}.</p>
+     * <p>
+     * This method returns a description associated with the {@code Proof Rule}.
+     * </p>
      *
      * @return A string.
      */
@@ -130,10 +141,12 @@ public class SwapStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>An helper method that {@code swap} the expression on
-     * the left of a {@link SwapStmt} with the right to all
-     * antecedents and consequents of {@code s} and generate
-     * a replacement sequent.</p>
+     * <p>
+     * An helper method that {@code swap} the expression on the left of a
+     * {@link SwapStmt} with the
+     * right to all antecedents and consequents of {@code s} and generate a
+     * replacement sequent.
+     * </p>
      *
      * @param s The original {@link Sequent}.
      *
@@ -161,7 +174,8 @@ public class SwapStmtRule extends AbstractProofRuleApplication
         // Temp variable
         PosSymbol tmpLeftName = Utilities.getVarName(stmtLeft);
         VarExp tmp = Utilities.createVarExp(stmtLeft.getLocation(), null,
-                new PosSymbol(stmtLeft.getLocation(), "_" + tmpLeftName.getName()),
+                new PosSymbol(stmtLeft.getLocation(),
+                        "_" + tmpLeftName.getName()),
                 stmtLeft.getMathType(), stmtRight.getMathTypeValue());
 
         // Map 1: expLeft ~> tmp

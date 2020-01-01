@@ -1,7 +1,7 @@
 /*
  * NodeIdentifier.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,14 +19,20 @@ import java.util.List;
 import edu.clemson.cs.r2jt.misc.ImmutableIterator;
 
 /**
- * <p><code>PExp</code>s are an inductive data structure and the same 
- * <code>PExp</code> instance may appear multiple times in a larger
- * <code>PExp</code> tree.  It becomes necessary, sometimes, to indicate a
- * particular <em>node</em> in such a tree, in which case a <code>PExp</code>
- * reference may not be unique.  A <code>NodeIdentifier</code> solves this 
- * problem by providing a mechanism for uniquely identifying a particular node 
- * of a <code>PExp</code> tree by indicating the root of the tree and then an
- * index path (0-indexed) of which child to follow at each level.</p>
+ * <p>
+ * <code>PExp</code>s are an inductive data structure and the same
+ * <code>PExp</code> instance may
+ * appear multiple times in a larger <code>PExp</code> tree. It becomes
+ * necessary, sometimes, to
+ * indicate a particular <em>node</em> in such a tree, in which case a
+ * <code>PExp</code> reference
+ * may not be unique. A <code>NodeIdentifier</code> solves this problem by
+ * providing a mechanism for
+ * uniquely identifying a particular node of a <code>PExp</code> tree by
+ * indicating the root of the
+ * tree and then an index path (0-indexed) of which child to follow at each
+ * level.
+ * </p>
  */
 public class NodeIdentifier implements Iterable<Integer> {
 

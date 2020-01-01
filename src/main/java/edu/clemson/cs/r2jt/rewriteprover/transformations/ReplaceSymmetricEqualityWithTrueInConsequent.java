@@ -1,7 +1,7 @@
 /*
  * ReplaceSymmetricEqualityWithTrueInConsequent.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -43,8 +43,9 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         return new LazyMappingIterator<Site, Application>(
-                new SymmetricEqualityIterator(m
-                        .topLevelConsequentSiteIterator()), SITE_TO_APPLICATION);
+                new SymmetricEqualityIterator(
+                        m.topLevelConsequentSiteIterator()),
+                SITE_TO_APPLICATION);
     }
 
     @Override
@@ -108,7 +109,8 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
         private final Site mySite;
         private Site myFinalSite;
 
-        public ReplaceSymmetricEqualityWithTrueInConsequentApplication(Site site) {
+        public ReplaceSymmetricEqualityWithTrueInConsequentApplication(
+                Site site) {
             mySite = site;
         }
 

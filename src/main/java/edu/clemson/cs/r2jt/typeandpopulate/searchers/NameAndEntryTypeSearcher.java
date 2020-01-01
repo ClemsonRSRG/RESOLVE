@@ -1,7 +1,7 @@
 /*
  * NameAndEntryTypeSearcher.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -45,9 +45,8 @@ public class NameAndEntryTypeSearcher<E extends SymbolTableEntry>
             SearchContext l) {
         SymbolTableEntry match = entries.get(myTargetName);
 
-        boolean foundOne =
-                (match != null)
-                        && myTargetClass.isAssignableFrom(match.getClass());
+        boolean foundOne = (match != null)
+                && myTargetClass.isAssignableFrom(match.getClass());
 
         if (foundOne) {
             matches.add((E) match);

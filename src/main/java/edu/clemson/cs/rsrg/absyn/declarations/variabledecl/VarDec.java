@@ -1,7 +1,7 @@
 /*
  * VarDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the regular programming variable declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the regular programming variable declaration
+ * objects that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,9 @@ public class VarDec extends AbstractVarDec {
     // ===========================================================
 
     /**
-     * <p>This constructs a regular program variable.</p>
+     * <p>
+     * This constructs a regular program variable.
+     * </p>
      *
      * @param name A {@link PosSymbol} representing the variable's name.
      * @param ty A {@link Ty} representing the variable's raw type.

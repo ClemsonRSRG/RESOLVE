@@ -1,7 +1,7 @@
 /*
  * UniversalVariableQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -35,11 +35,10 @@ public class UniversalVariableQuery
     private final BaseSymbolQuery<MathSymbolEntry> myBaseQuery;
 
     private UniversalVariableQuery() {
-        myBaseQuery =
-                new BaseSymbolQuery<MathSymbolEntry>(new UnqualifiedPath(
-                        ImportStrategy.IMPORT_NONE,
+        myBaseQuery = new BaseSymbolQuery<MathSymbolEntry>(
+                new UnqualifiedPath(ImportStrategy.IMPORT_NONE,
                         FacilityStrategy.FACILITY_IGNORE, false),
-                        new UniversalVariableSearcher());
+                new UniversalVariableSearcher());
     }
 
     @Override
@@ -51,7 +50,7 @@ public class UniversalVariableQuery
             result = myBaseQuery.searchFromContext(source, repo);
         }
         catch (DuplicateSymbolException dse) {
-            //Can't happen--our base query is a name matcher
+            // Can't happen--our base query is a name matcher
             throw new RuntimeException(dse);
         }
 
@@ -73,7 +72,8 @@ public class UniversalVariableQuery
             while (mathSymbols.hasNext()) {
                 curSymbol = mathSymbols.next();
 
-                if (curSymbol.getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) {
+                if (curSymbol
+                        .getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) {
                     matches.add(curSymbol);
                 }
             }

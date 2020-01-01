@@ -1,7 +1,7 @@
 /*
  * RParserSuper.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -32,9 +32,9 @@ public class RParserSuper extends Parser {
     }
 
     /*
-     * Variables to tell us what type of module we are
-     * parsing.  Used for semantic predicates of rules or productions
-     * which are only applicable to particular modules.
+     * Variables to tell us what type of module we are parsing. Used for
+     * semantic predicates of rules
+     * or productions which are only applicable to particular modules.
      */
     protected boolean theoryModule = false;
     protected boolean conceptModule = false;
@@ -57,7 +57,7 @@ public class RParserSuper extends Parser {
         this.facilityModule = false;
     }
 
-    //protected StatusHandler err = StatusHandler.getInstance();
+    // protected StatusHandler err = StatusHandler.getInstance();
     protected ErrorHandler err;
 
     protected boolean otherwise = false;
@@ -65,9 +65,8 @@ public class RParserSuper extends Parser {
     protected void checkOtherwiseItem(RuleReturnScope ast) {
         CommonTree astTree = (CommonTree) ast.getTree();
         if (otherwise) {
-            String msg =
-                    "Cannot add an alternative after "
-                            + "an \"otherwise\" clause.";
+            String msg = "Cannot add an alternative after "
+                    + "an \"otherwise\" clause.";
             err.error(getPos(astTree), msg);
         }
     }
@@ -94,10 +93,9 @@ public class RParserSuper extends Parser {
                 && !astTree.getText().equals("Concatenation")
                 && !astTree.getText().equals("Intersection")
                 && !astTree.getText().equals("Union")) {
-            String msg =
-                    "Expecting iteration identifier "
-                            + "(Sum, Product, Concatenation, Intersection, Union),"
-                            + "but found " + astTree.getText();
+            String msg = "Expecting iteration identifier "
+                    + "(Sum, Product, Concatenation, Intersection, Union),"
+                    + "but found " + astTree.getText();
             err.error(getPos(astTree), msg);
         }
     }
@@ -126,18 +124,15 @@ public class RParserSuper extends Parser {
     }
 
     public String getErrorMessage(RecognitionException e, String[] tokenNames) {
-        java.util.List stack =
-                (java.util.List) getRuleInvocationStack(e, this.getClass()
-                        .getName());
+        java.util.List stack = (java.util.List) getRuleInvocationStack(e,
+                this.getClass().getName());
         String msg = null;
         if (e instanceof NoViableAltException) {
             NoViableAltException nvae = (NoViableAltException) e;
-            msg =
-                    " no viable alt; token=" + e.token + " (decision="
-                            + nvae.decisionNumber + " state "
-                            + nvae.stateNumber + ")" + " input " + nvae.input
-                            + ")" + " decision=<<"
-                            + nvae.grammarDecisionDescription + ">>";
+            msg = " no viable alt; token=" + e.token + " (decision="
+                    + nvae.decisionNumber + " state " + nvae.stateNumber + ")"
+                    + " input " + nvae.input + ")" + " decision=<<"
+                    + nvae.grammarDecisionDescription + ">>";
         }
         if (e instanceof MismatchedTokenException) {
             MismatchedTokenException mte = (MismatchedTokenException) e;
@@ -157,7 +152,7 @@ public class RParserSuper extends Parser {
         // For debugging changes to the grammar change this to return
         // both the stack (lists the rules visited) and the msg
         return msg;
-        //return "Parser: "+stack + " " + msg;
+        // return "Parser: "+stack + " " + msg;
     }
 
     public String getTokenErrorDisplay(Token t) {
@@ -179,42 +174,38 @@ public class RParserSuper extends Parser {
         CommonTree id1Tree = (CommonTree) id1.getTree();
         CommonTree id2Tree = (CommonTree) id2.getTree();
         if (!id1Tree.getText().equals(id2Tree.getText())) {
-            String msg =
-                    "End name " + id2Tree.getText()
-                            + " does not match module name "
-                            + id1Tree.getText();
+            String msg = "End name " + id2Tree.getText()
+                    + " does not match module name " + id1Tree.getText();
             err.error(getPos(id2Tree), msg);
         }
     }
 
-    protected void matchOperationIdent(RuleReturnScope id2, RuleReturnScope id1) {
+    protected void matchOperationIdent(RuleReturnScope id2,
+            RuleReturnScope id1) {
         CommonTree id1Tree = (CommonTree) id1.getTree();
         CommonTree id2Tree = (CommonTree) id2.getTree();
         if (!id1Tree.getText().equals(id2Tree.getText())) {
-            String msg =
-                    "End name " + id2Tree.getText()
-                            + " does not match operation name "
-                            + id1Tree.getText();
+            String msg = "End name " + id2Tree.getText()
+                    + " does not match operation name " + id1Tree.getText();
             err.error(getPos(id2Tree), msg);
         }
     }
 
     protected void matchMathItemIdent(Tree id2, Tree id1) {
         if (!id1.getText().equals(id2.getText())) {
-            String msg =
-                    "End name " + id2.getText() + " does not match proof name "
-                            + id1.getText();
+            String msg = "End name " + id2.getText()
+                    + " does not match proof name " + id1.getText();
             err.error(getPos(id2), msg);
         }
     }
 
     protected Pos getPos(Tree ast) {
-        //return new Pos(ast.getLine(), ast.getColumn());
+        // return new Pos(ast.getLine(), ast.getColumn());
         return new Pos(ast.getLine(), ast.getCharPositionInLine());
     }
 
     protected Pos getPos(Token ast) {
-        //return new Pos(ast.getLine(), ast.getColumn());
+        // return new Pos(ast.getLine(), ast.getColumn());
         return new Pos(ast.getLine(), ast.getCharPositionInLine());
     }
 

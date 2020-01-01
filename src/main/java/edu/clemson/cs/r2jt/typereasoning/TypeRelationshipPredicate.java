@@ -1,7 +1,7 @@
 /*
  * TypeRelationshipPredicate.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,8 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public interface TypeRelationshipPredicate {
 
-    public TypeRelationshipPredicate replaceUnboundVariablesInTypes(
-            Map<String, String> substitions);
+    public TypeRelationshipPredicate
+            replaceUnboundVariablesInTypes(Map<String, String> substitions);
 
     public boolean canBeDemonstratedStatically(MTType canonical1,
             MTType canonical2, Map<String, MTType> typeBindings,

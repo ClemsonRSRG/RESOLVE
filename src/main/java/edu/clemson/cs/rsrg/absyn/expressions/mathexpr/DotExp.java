@@ -1,7 +1,7 @@
 /*
  * DotExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical dotted expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical dotted expression objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,7 +35,11 @@ public class DotExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's collection of inner expressions.</p> */
+    /**
+     * <p>
+     * The expression's collection of inner expressions.
+     * </p>
+     */
     private final List<Exp> mySegmentExps;
 
     // ===========================================================
@@ -40,8 +47,10 @@ public class DotExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a dotted expression to keep track
-     * of all the inner expressions.</p>
+     * <p>
+     * This constructs a dotted expression to keep track of all the inner
+     * expressions.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param segments A list of {@link Exp} object.
@@ -150,15 +159,13 @@ public class DotExp extends MathExp {
                 while (result && thisSegmentExps.hasNext()
                         && eSegmentExps.hasNext()) {
 
-                    result &=
-                            thisSegmentExps.next().equivalent(
-                                    eSegmentExps.next());
+                    result &= thisSegmentExps.next()
+                            .equivalent(eSegmentExps.next());
                 }
 
-                //Both had better have run out at the same time
-                result &=
-                        (!thisSegmentExps.hasNext())
-                                && (!eSegmentExps.hasNext());
+                // Both had better have run out at the same time
+                result &= (!thisSegmentExps.hasNext())
+                        && (!eSegmentExps.hasNext());
             }
         }
 
@@ -166,7 +173,9 @@ public class DotExp extends MathExp {
     }
 
     /**
-     * <p>This method returns all the inner expressions.</p>
+     * <p>
+     * This method returns all the inner expressions.
+     * </p>
      *
      * @return A list containing all the segmented {@link Exp}s.
      */
@@ -214,21 +223,22 @@ public class DotExp extends MathExp {
         // Make sure we have segments to replace
         if (!mySegmentExps.isEmpty()) {
             // YS: This substitution should be thought of as longest common
-            //     prefix string substitution. If our DotExp happens to be: "S.Contents",
-            //     we don't want to apply a substitution from "Contents" -> "Apple".
-            //     However, if there is a substitution from "S" to "T", we do want to apply
-            //     that substitution. Note that at any point if we detect it is a receptacle
-            //     of some form, we don't apply any substitutions.
+            // prefix string substitution. If our DotExp happens to be: "S.Contents",
+            // we don't want to apply a substitution from "Contents" -> "Apple".
+            // However, if there is a substitution from "S" to "T", we do want to apply
+            // that substitution. Note that at any point if we detect it is a receptacle
+            // of some form, we don't apply any substitutions.
             Exp substitutionKey = null;
             FunctionExp innerFunctionExp = null;
             int lastGoodIndex = -1;
             boolean matchedFunctionName = false;
-            for (int i = 0; i < mySegmentExps.size() && !matchedFunctionName; i++) {
+            for (int i = 0; i < mySegmentExps.size()
+                    && !matchedFunctionName; i++) {
                 Exp e = mySegmentExps.get(i);
 
                 // YS: We form a new DotExp up to ith position and compare it to see
-                //     if there is a key that matches this new expression. If yes,
-                //     it means it is part of something that can be substituted.
+                // if there is a key that matches this new expression. If yes,
+                // it means it is part of something that can be substituted.
                 Exp toCompareExp;
                 Exp toCompareFunctionNameExp = null;
                 if (i == 0) {
@@ -242,12 +252,15 @@ public class DotExp extends MathExp {
                 else {
                     // Special handling for FunctionExp
                     if (e instanceof FunctionExp) {
-                        List<Exp> functionSegmentList = new ArrayList<>(mySegmentExps.subList(0, i));
+                        List<Exp> functionSegmentList =
+                                new ArrayList<>(mySegmentExps.subList(0, i));
                         functionSegmentList.add(((FunctionExp) e).getName());
-                        toCompareFunctionNameExp = new DotExp(myLoc.clone(), functionSegmentList);
+                        toCompareFunctionNameExp =
+                                new DotExp(myLoc.clone(), functionSegmentList);
                     }
 
-                    List<Exp> newSubSegmentList = new ArrayList<>(mySegmentExps.subList(0, i + 1));
+                    List<Exp> newSubSegmentList =
+                            new ArrayList<>(mySegmentExps.subList(0, i + 1));
                     toCompareExp = new DotExp(myLoc.clone(), newSubSegmentList);
                 }
 
@@ -283,12 +296,13 @@ public class DotExp extends MathExp {
 
                 // YS: If we only matched the function name, then we need to do something special.
                 if (innerFunctionExp != null) {
-                    return substituteFunctionExp(innerFunctionExp, replacementExp, substitutions);
+                    return substituteFunctionExp(innerFunctionExp,
+                            replacementExp, substitutions);
                 }
                 // YS: Make a copy of "replacementExp" if it is a VCVarExp
-                //     and it matches the whole expression.
-                else if (replacementExp instanceof VCVarExp &&
-                        (lastGoodIndex + 1 == mySegmentExps.size())) {
+                // and it matches the whole expression.
+                else if (replacementExp instanceof VCVarExp
+                        && (lastGoodIndex + 1 == mySegmentExps.size())) {
                     return replacementExp.clone();
                 }
                 // YS: Else create a new DotExp with the proper replacements.
@@ -300,7 +314,8 @@ public class DotExp extends MathExp {
                     // Case #2: "replacementExp" is a DotExp
                     else if (replacementExp instanceof DotExp) {
                         DotExp replacementExpAsDotExp = (DotExp) replacementExp;
-                        List<Exp> segments = replacementExpAsDotExp.getSegments();
+                        List<Exp> segments =
+                                replacementExpAsDotExp.getSegments();
 
                         // Copy the segments
                         for (Exp segment : segments) {
@@ -317,13 +332,15 @@ public class DotExp extends MathExp {
                     }
                     // Everything else is an error!
                     else {
-                        throw new SourceErrorException("Cannot substitute: "
-                                + this.toString() + " with: "
-                                + replacementExp.toString(), replacementExp.getLocation());
+                        throw new SourceErrorException(
+                                "Cannot substitute: " + this.toString()
+                                        + " with: " + replacementExp.toString(),
+                                replacementExp.getLocation());
                     }
 
                     // Copy the rest of the segments if any
-                    for (int i = lastGoodIndex + 1; i < mySegmentExps.size(); i++) {
+                    for (int i = lastGoodIndex + 1; i < mySegmentExps
+                            .size(); i++) {
                         newSegments.add(mySegmentExps.get(i).clone());
                     }
 
@@ -342,8 +359,10 @@ public class DotExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the segment expressions.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * segment expressions.
+     * </p>
      *
      * @return A list containing {@link Exp}s.
      */

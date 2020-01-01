@@ -1,7 +1,7 @@
 /*
  * AddsSomethingNewPredicate.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,16 +28,23 @@ import java.util.Set;
 
 // TODO : this comment is entirely out of date and the class should be renamed
 /**
- * <p>This predicate is used during antecedent development to ensure that 1)
- * duplicate antecedents are not added, and 2) that we don't endlessly add "+ 0"
- * at the end of integer valued things, or "o Empty_String" at the end of string
- * valued things.</p>
+ * <p>
+ * This predicate is used during antecedent development to ensure that 1)
+ * duplicate antecedents are
+ * not added, and 2) that we don't endlessly add "+ 0" at the end of integer
+ * valued things, or "o
+ * Empty_String" at the end of string valued things.
+ * </p>
  * 
- * <p>The exact criteria are this: returns true if 1) the introduced expression
- * appears only once in the antecedents and one of 2a) the transformer is
- * an ExpandAntecedentByImplication or 2b) the transformed expression has the 
- * same or fewer number of function calls as the original or 2c) the transformed
- * expression introduces some new constant value or function.</p>
+ * <p>
+ * The exact criteria are this: returns true if 1) the introduced expression
+ * appears only once in
+ * the antecedents and one of 2a) the transformer is an
+ * ExpandAntecedentByImplication or 2b) the
+ * transformed expression has the same or fewer number of function calls as the
+ * original or 2c) the
+ * transformed expression introduces some new constant value or function.
+ * </p>
  */
 public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
@@ -52,15 +59,14 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
     @Override
     public boolean test(ProofStep t) {
-        boolean result =
-                (t instanceof IntroduceLocalTheoremStep)
-                        || (t instanceof GeneralStep);
+        boolean result = (t instanceof IntroduceLocalTheoremStep)
+                || (t instanceof GeneralStep);
 
         if (result) {
-            //Any development that doesn't tell us something about at least 
-            //one of the variable symbols in the consequent of the VC or
-            //doesn't introduce at least one new theorem should be rolled 
-            //back
+            // Any development that doesn't tell us something about at least
+            // one of the variable symbols in the consequent of the VC or
+            // doesn't introduce at least one new theorem should be rolled
+            // back
             Set<String> finalSymbolNames = new HashSet<String>();
 
             boolean somethingNew = false;
@@ -71,27 +77,27 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                         somethingNew || appearsOnce(c.getExpression(), myModel);
             }
 
-            result =
-                    somethingNew
-                            && (!AutomatedProver.H_ONLY_DEVELOP_RELEVANT_TERMS || Utilities
-                                    .containsAny(finalSymbolNames,
-                                            myVariableSymbols));
+            result = somethingNew
+                    && (!AutomatedProver.H_ONLY_DEVELOP_RELEVANT_TERMS
+                            || Utilities.containsAny(finalSymbolNames,
+                                    myVariableSymbols));
 
             if (result) {
                 Transformation tTransformation = t.getTransformation();
 
-                //Any development that reduces the function count should be
-                //accepted
+                // Any development that reduces the function count should be
+                // accepted
                 result = tTransformation.functionApplicationCountDelta() < 0;
 
-                if (!result && AutomatedProver.H_ENCOURAGE_ANTECEDENT_DIVERSITY) {
-                    //Any substitution that doesn't eliminate at least
-                    //one symbol should be rolled back
+                if (!result
+                        && AutomatedProver.H_ENCOURAGE_ANTECEDENT_DIVERSITY) {
+                    // Any substitution that doesn't eliminate at least
+                    // one symbol should be rolled back
                     Set<Conjunct> originalTheorems = t.getBoundConjuncts();
                     Set<String> originalSymbolNames = new HashSet<String>();
                     for (Conjunct ot : originalTheorems) {
-                        originalSymbolNames.addAll(ot.getExpression()
-                                .getSymbolNames());
+                        originalSymbolNames
+                                .addAll(ot.getExpression().getSymbolNames());
                     }
 
                     originalSymbolNames.removeAll(finalSymbolNames);

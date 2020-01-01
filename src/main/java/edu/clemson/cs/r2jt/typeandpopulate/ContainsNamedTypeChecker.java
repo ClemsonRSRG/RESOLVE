@@ -1,7 +1,7 @@
 /*
  * ContainsNamedTypeChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -27,19 +27,26 @@ public class ContainsNamedTypeChecker extends BoundVariableVisitor {
     private boolean myResult = false;
 
     /**
-     * <p>Result in <code>true</code> if one of the given names appears in the
-     * checked type.  The set will not be changed, but it will be read from
-     * so it must not change while checking runs.</p>
-     * @param names 
+     * <p>
+     * Result in <code>true</code> if one of the given names appears in the
+     * checked type. The set will
+     * not be changed, but it will be read from so it must not change while
+     * checking runs.
+     * </p>
+     * 
+     * @param names
      */
     public ContainsNamedTypeChecker(Set<String> names) {
         myNames.addAll(names);
     }
 
     /**
-     * <p>Results in <code>true</cdoe> if the given name appears in the checked
-     * type.</p>
-     * @param name 
+     * <p>
+     * Results in <code>true</cdoe> if the given name appears in the checked
+     * type.
+     * </p>
+     * 
+     * @param name
      */
     public ContainsNamedTypeChecker(String name) {
         myNames.add(name);

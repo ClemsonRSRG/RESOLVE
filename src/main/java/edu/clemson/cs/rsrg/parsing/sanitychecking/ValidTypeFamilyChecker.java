@@ -1,7 +1,7 @@
 /*
  * ValidTypeFamilyChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,10 @@ import edu.clemson.cs.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.cs.rsrg.statushandling.exception.SourceErrorException;
 
 /**
- * <p>This is a sanity checker for making sure the {@link TypeFamilyDec}
- * has valid {@code initialization} and {@code finalization ensures} clauses.</p>
+ * <p>
+ * This is a sanity checker for making sure the {@link TypeFamilyDec} has valid
+ * {@code initialization} and {@code finalization ensures} clauses.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -29,7 +31,11 @@ public class ValidTypeFamilyChecker {
     // Member Fields
     // ===========================================================
 
-    /** <p>The type family declaration we are checking.</p> */
+    /**
+     * <p>
+     * The type family declaration we are checking.
+     * </p>
+     */
     private final TypeFamilyDec myTypeFamilyDec;
 
     // ===========================================================
@@ -37,8 +43,11 @@ public class ValidTypeFamilyChecker {
     // ===========================================================
 
     /**
-     * <p>Creates a sanity checker for checking the {@code initialization}
-     * and {@code finalization} assertion clauses are valid.</p>
+     * <p>
+     * Creates a sanity checker for checking the {@code initialization} and
+     * {@code finalization}
+     * assertion clauses are valid.
+     * </p>
      *
      * @param typeFamilyDec The encountered type family declaration.
      */
@@ -51,11 +60,15 @@ public class ValidTypeFamilyChecker {
     // ===========================================================
 
     /**
-     * <p>Checks to see if the {@link TypeFamilyDec TypeFamilyDec's}
-     * {@code initialization} and {@code finalization} are valid.</p>
+     * <p>
+     * Checks to see if the {@link TypeFamilyDec TypeFamilyDec's}
+     * {@code initialization} and
+     * {@code finalization} are valid.
+     * </p>
      *
      * @throws SourceErrorException This is thrown when we encounter an invalid
-     * {@code initialization} or {@code finalization} assertion clause.
+     *         {@code initialization}
+     *         or {@code finalization} assertion clause.
      */
     public final void hasValidAssertionClauses() {
         // Exemplar and #Exemplar
@@ -69,18 +82,17 @@ public class ValidTypeFamilyChecker {
                 true)) {
             throw new SourceErrorException(
                     "Initialization ensures clause cannot be expressed using '"
-                            + oldExemplar + "'.", initEnsuresClause
-                            .getLocation());
+                            + oldExemplar + "'.",
+                    initEnsuresClause.getLocation());
         }
 
         // Check any which_entails clauses inside initialization ensures clause
-        if (initEnsuresClause.getWhichEntailsExp() != null
-                && initEnsuresClause.getWhichEntailsExp().containsVar(
-                        exemplarAsString, true)) {
+        if (initEnsuresClause.getWhichEntailsExp() != null && initEnsuresClause
+                .getWhichEntailsExp().containsVar(exemplarAsString, true)) {
             throw new SourceErrorException(
                     "Initialization ensures clause cannot contain an 'which_entails' clause that uses '"
-                            + oldExemplar + "'.", initEnsuresClause
-                            .getWhichEntailsExp().getLocation());
+                            + oldExemplar + "'.",
+                    initEnsuresClause.getWhichEntailsExp().getLocation());
         }
 
         // Check finalization ensures clause
@@ -90,18 +102,18 @@ public class ValidTypeFamilyChecker {
                 false)) {
             throw new SourceErrorException(
                     "Finalization ensures clause cannot be expressed using '"
-                            + exemplarAsString + "'.", finalEnsuresClause
-                            .getLocation());
+                            + exemplarAsString + "'.",
+                    finalEnsuresClause.getLocation());
         }
 
         // Check any which_entails clauses inside finalization ensures clause
         if (finalEnsuresClause.getWhichEntailsExp() != null
-                && finalEnsuresClause.getWhichEntailsExp().containsVar(
-                        exemplarAsString, false)) {
+                && finalEnsuresClause.getWhichEntailsExp()
+                        .containsVar(exemplarAsString, false)) {
             throw new SourceErrorException(
                     "Finalization ensures clause cannot contain an 'which_entails' clause that uses '"
-                            + exemplarAsString + "'.", finalEnsuresClause
-                            .getWhichEntailsExp().getLocation());
+                            + exemplarAsString + "'.",
+                    finalEnsuresClause.getWhichEntailsExp().getLocation());
         }
     }
 

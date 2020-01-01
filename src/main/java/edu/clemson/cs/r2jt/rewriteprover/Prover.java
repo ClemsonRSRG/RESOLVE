@@ -1,7 +1,7 @@
 /*
  * Prover.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,24 +18,31 @@ import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 
 /**
- * <p>The <code>Prover</code> accepts as its input <em>verification conditions</em>
- * (VCs) and attempts to resolve each VC to <code>true</code> using various
- * logical steps.</p>
+ * <p>
+ * The <code>Prover</code> accepts as its input <em>verification conditions</em>
+ * (VCs) and attempts
+ * to resolve each VC to <code>true</code> using various logical steps.
+ * </p>
  * 
  * TODO : Currently this will only properly prove VCs originating from the
- * "target file", which is the file named at the command line rather than any
- * files imported from that file. This is because the Environment only gives us
- * a handle on the target file and not the currently compiled file. This is ok
- * for the moment because it seems the Verifier works this way as well (see
+ * "target file", which is
+ * the file named at the command line rather than any files imported from that
+ * file. This is because
+ * the Environment only gives us a handle on the target file and not the
+ * currently compiled file.
+ * This is ok for the moment because it seems the Verifier works this way as
+ * well (see
  * getMainFile()) inside it. But eventually we want to prove VCs for imported
- * files as well. So for right now, we consider exactly those theories availale
- * to us from the target file, even if we're trying to import a different file
- * on the WAY to proving the target file. -HwS
+ * files as well. So for
+ * right now, we consider exactly those theories availale to us from the target
+ * file, even if we're
+ * trying to import a different file on the WAY to proving the target file. -HwS
  * 
  * TODO : Theorems are drawn only from Theories named in the target file and not
- * from those theories included from the theories named. That is, if I include
- * String_Theory and String_Theory "uses" Boolean_Theory, the thoerems from
- * Boolean_Theory will not be imported. -HwS
+ * from those theories
+ * included from the theories named. That is, if I include String_Theory and
+ * String_Theory "uses"
+ * Boolean_Theory, the thoerems from Boolean_Theory will not be imported. -HwS
  * 
  * @author H. Smith
  */
@@ -75,8 +82,9 @@ public final class Prover {
     /**
      * <p>
      * The legacy prover flag. In place for backwards compatibility--causes the
-     * integrated prover to attempt to dispatch generated VCs using the original
-     * prover circa January 2010.
+     * integrated prover to
+     * attempt to dispatch generated VCs using the original prover circa January
+     * 2010.
      * </p>
      */
     public static final Flag FLAG_LEGACY_PROVE =
@@ -98,38 +106,37 @@ public final class Prover {
     /**
      * <p>
      * Causes the prover to prompt the user to choose a theorem at each step,
-     * rather than choosing one on its own.
+     * rather than choosing one
+     * on its own.
      * </p>
      */
-    public static final Flag FLAG_DEBUG =
-            new Flag(FLAG_SECTION_NAME, "debugprove", FLAG_DESC_DEBUG,
-                    Flag.Type.HIDDEN);
+    public static final Flag FLAG_DEBUG = new Flag(FLAG_SECTION_NAME,
+            "debugprove", FLAG_DESC_DEBUG, Flag.Type.HIDDEN);
 
     /**
      * <p>
      * Puts a rough timeout on the old prover.
      * </p>
      */
-    public static final Flag FLAG_TIMEOUT =
-            new Flag(FLAG_SECTION_NAME, "timeout", FLAG_DESC_TIMEOUT,
-                    FLAG_TIMEOUT_ARGS, Flag.Type.HIDDEN);
+    public static final Flag FLAG_TIMEOUT = new Flag(FLAG_SECTION_NAME,
+            "timeout", FLAG_DESC_TIMEOUT, FLAG_TIMEOUT_ARGS, Flag.Type.HIDDEN);
 
     /**
      * <p>
      * Prints additional debugging information.
      * </p>
      */
-    public static final Flag FLAG_VERBOSE =
-            new Flag(FLAG_SECTION_NAME, "verboseprove", FLAG_DESC_VERBOSE,
-                    Flag.Type.HIDDEN);
+    public static final Flag FLAG_VERBOSE = new Flag(FLAG_SECTION_NAME,
+            "verboseprove", FLAG_DESC_VERBOSE, Flag.Type.HIDDEN);
     public static final Flag FLAG_NOGUI =
             new Flag(Main.FLAG_SECTION_GENERAL, "noGUI", FLAG_DESC_NOGUI);
 
     /**
      * <p>
      * An auxiliary flag implied by any flag that attempts to do some proving.
-     * This is a single flag that can be checked to find out if either the old
-     * or new prover is active.
+     * This is a single flag
+     * that can be checked to find out if either the old or new prover is
+     * active.
      * </p>
      */
     public static final Flag FLAG_SOME_PROVER =

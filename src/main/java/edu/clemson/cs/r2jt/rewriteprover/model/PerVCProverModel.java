@@ -1,7 +1,7 @@
 /*
  * PerVCProverModel.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -87,84 +87,115 @@ public final class PerVCProverModel {
     private final ConjunctToSite CONJUNCT_TO_SITE = new ConjunctToSite();
     private final TypeGraph myTypeGraph;
     /**
-     * <p>A friendly name of what we're trying to prove. Should go well with
-     * "Proving XXX" and "Proof for XXX".</p>
+     * <p>
+     * A friendly name of what we're trying to prove. Should go well with
+     * "Proving XXX" and "Proof for
+     * XXX".
+     * </p>
      */
     private final String myTheoremName;
     /**
-     * <p>A hashmap of local theorems for quick searching. Its keyset is always
-     * the same as the set of
-     * <code>PExp</code>s embedded in the
-     * <code>LocalTheorem</code>s of
+     * <p>
+     * A hashmap of local theorems for quick searching. Its keyset is always the
+     * same as the set of
+     * <code>PExp</code>s embedded in the <code>LocalTheorem</code>s of
      * <code>myLocalTheoremsList</code>. Note that this means no
-     * <code>PExp</code> in this set will have a top-level "and".</p>
+     * <code>PExp</code> in this set will
+     * have a top-level "and".
+     * </p>
      *
-     * <p>Each entry in the map maps to an integer count of the number of local
-     * theorems that embed that PExp, making this a representation of a
-     * multiset. As an invariant, no entry will map to 0 or less.</p>
+     * <p>
+     * Each entry in the map maps to an integer count of the number of local
+     * theorems that embed that
+     * PExp, making this a representation of a multiset. As an invariant, no
+     * entry will map to 0 or
+     * less.
+     * </p>
      */
     private final Map<PExp, Integer> myLocalTheoremsSet =
             new HashMap<PExp, Integer>();
     private final Set<PExp> myLocalTheoremSetForReturning;
     /**
-     * <p>A list of local theorems in the order they were introduced, for
-     * friendly displaying and tagged with useful information. The set of
-     * <code>PExp</code>s embedded in this list's elements will always be the
-     * same as those
-     * <code>PExp</code>s in
-     * <code>myLocalTheoremSet</code>.</p>
+     * <p>
+     * A list of local theorems in the order they were introduced, for friendly
+     * displaying and tagged
+     * with useful information. The set of <code>PExp</code>s embedded in this
+     * list's elements will
+     * always be the same as those <code>PExp</code>s in
+     * <code>myLocalTheoremSet</code>.
+     * </p>
      *
-     * <p>Each
-     * <code>LocalTheorem</code> in the list is guaranteed to be a unique
-     * object.</p>
+     * <p>
+     * Each <code>LocalTheorem</code> in the list is guaranteed to be a unique
+     * object.
+     * </p>
      */
     private final List<LocalTheorem> myLocalTheoremsList =
             new UnsafeIteratorLinkedList<LocalTheorem>();
     /**
-     * <p>A list of expressions remaining to be established as true. Each of
-     * these is guaranteed not to have a top-level "and" expression (otherwise
-     * the conjuncts would have been broken up into separate entries in this
-     * list.) Once we empty this list, the proof is complete.</p>
+     * <p>
+     * A list of expressions remaining to be established as true. Each of these
+     * is guaranteed not to
+     * have a top-level "and" expression (otherwise the conjuncts would have
+     * been broken up into
+     * separate entries in this list.) Once we empty this list, the proof is
+     * complete.
+     * </p>
      */
     private final SimpleArrayList<Consequent> myConsequents =
             new SimpleArrayList<Consequent>();
     private int myLocalTheoremsHash;
     private int myConsequentsHash;
     /**
-     * <p>A list of the current proof under consideration. Starting with a fresh
+     * <p>
+     * A list of the current proof under consideration. Starting with a fresh
      * <code>PerVCProverModel</code> initialized with the consequents,
-     * antecedents, and global theorems originally provided to this class, then
-     * applying these steps in order, would bring the fresh model into the exact
-     * same state that this one is currently in.</p>
+     * antecedents, and global
+     * theorems originally provided to this class, then applying these steps in
+     * order, would bring the
+     * fresh model into the exact same state that this one is currently in.
+     * </p>
      */
     private final LinkedList<ProofStep> myProofSoFar =
             new LinkedList<ProofStep>();
     private final List<ProofStep> myUnmodifiableProofSoFar =
             Collections.unmodifiableList(myProofSoFar);
     /**
-     * <p>A link to the global theorem library.</p>
+     * <p>
+     * A link to the global theorem library.
+     * </p>
      */
     private final ImmutableList<Theorem> myTheoremLibrary;
     /**
-     * <p>A list of listeners to be contacted when the model changes. Note that
-     * the behavior of change listening is modified by
-     * <code>myChangeEventMode</code>.</p>
+     * <p>
+     * A list of listeners to be contacted when the model changes. Note that the
+     * behavior of change
+     * listening is modified by <code>myChangeEventMode</code>.
+     * </p>
      */
     private List<ChangeListener> myChangeListeners =
             new LinkedList<ChangeListener>();
     /**
-     * <p>In order to not slow down the proving process by synchronizing this
-     * whole class, we let an automated prover have special status to the model.
-     * Whenever the model would like to alert its change-listeners, it first
-     * checks to see if it has an associate automated prover. If it does not, or
-     * if the automated prover is not running, it alerts its listeners normally.
-     * If there is an associated automated prover and it's running, the model
-     * simply alerts the automated prover that the model would like to alert its
-     * listeners, at which case the ball is in the automated prover's court to
-     * clean up, pause any further modifications to the model, then alert the
-     * model that it's ready. At that point, the model sends out its change
-     * alerts, then alerts the automated prover that it is done, whereupon the
-     * automated prover continues its work.</p>
+     * <p>
+     * In order to not slow down the proving process by synchronizing this whole
+     * class, we let an
+     * automated prover have special status to the model. Whenever the model
+     * would like to alert its
+     * change-listeners, it first checks to see if it has an associate automated
+     * prover. If it does
+     * not, or if the automated prover is not running, it alerts its listeners
+     * normally. If there is
+     * an associated automated prover and it's running, the model simply alerts
+     * the automated prover
+     * that the model would like to alert its listeners, at which case the ball
+     * is in the automated
+     * prover's court to clean up, pause any further modifications to the model,
+     * then alert the model
+     * that it's ready. At that point, the model sends out its change alerts,
+     * then alerts the
+     * automated prover that it is done, whereupon the automated prover
+     * continues its work.
+     * </p>
      */
     private AutomatedProver myAutomatedProver;
     private ChangeEventMode myChangeEventMode = ChangeEventMode.INTERMITTENT;
@@ -208,9 +239,12 @@ public final class PerVCProverModel {
     }
 
     /**
-     * <p>Returns a subset of the steps in the full proof list that, when
-     * applied in order, would arrive at the current consequent. This method
-     * attempts to prune out steps that were not productive.</p>
+     * <p>
+     * Returns a subset of the steps in the full proof list that, when applied
+     * in order, would arrive
+     * at the current consequent. This method attempts to prune out steps that
+     * were not productive.
+     * </p>
      */
     public List<ProofStep> getProductiveProofSteps() {
         List<ProofStep> result = new LinkedList<ProofStep>();
@@ -229,7 +263,8 @@ public final class PerVCProverModel {
             step = steps.next();
 
             if (step instanceof ModifyConsequentStep
-                    && ((ModifyConsequentStep) step).getTransformation() instanceof ReplaceTheoremInConsequentWithTrue
+                    && ((ModifyConsequentStep) step)
+                            .getTransformation() instanceof ReplaceTheoremInConsequentWithTrue
                     && myTheoremName.contains("0_3")) {
                 int i = 5;
             }
@@ -240,23 +275,23 @@ public final class PerVCProverModel {
             overlap = step instanceof LabelStep;
             for (Conjunct s : stepAffectedSites) {
                 if (prerequisiteSites.contains(s)) {
-                    //This step is important if it establishes sites that are
-                    //current global prerequisites
+                    // This step is important if it establishes sites that are
+                    // current global prerequisites
                     overlap = true;
                 }
             }
 
             for (Conjunct c : stepPrerequisites) {
                 if (c instanceof Consequent) {
-                    //This step is important if it operated on a consequent
+                    // This step is important if it operated on a consequent
                     overlap = true;
                 }
             }
 
             if (overlap) {
-                //This step is important.  Any sites it established are cleared
-                //(we've found what gave us the prerequisite) and any sites it
-                //depended on are added as new global prerequisites
+                // This step is important. Any sites it established are cleared
+                // (we've found what gave us the prerequisite) and any sites it
+                // depended on are added as new global prerequisites
                 prerequisiteSites.removeAll(stepAffectedSites);
                 prerequisiteSites.addAll(stepPrerequisites);
 
@@ -268,9 +303,11 @@ public final class PerVCProverModel {
     }
 
     /**
-     * <p>Sets the automated prover that is working on this model. The prover
-     * will be alerted before change events go out so that it can stop modifying
-     * the model.</p>
+     * <p>
+     * Sets the automated prover that is working on this model. The prover will
+     * be alerted before
+     * change events go out so that it can stop modifying the model.
+     * </p>
      *
      * @param p
      */
@@ -284,12 +321,12 @@ public final class PerVCProverModel {
             @Override
             public void run() {
                 if (!FlagManager.getInstance().isFlagSet("nodebug")) {
-                    System.out
-                            .println("PerVCProverModel - Alerting Change Listeners");
+                    System.out.println(
+                            "PerVCProverModel - Alerting Change Listeners");
 
                     alertChangeListeners();
-                    System.out
-                            .println("PerVCProverModel - Done Alerting Change Listeners");
+                    System.out.println(
+                            "PerVCProverModel - Done Alerting Change Listeners");
                 }
                 else {
                     alertChangeListeners();
@@ -307,7 +344,9 @@ public final class PerVCProverModel {
     }
 
     /**
-     * <p>Must be called on the event dispatching thread.</p>
+     * <p>
+     * Must be called on the event dispatching thread.
+     * </p>
      */
     private void alertChangeListeners() {
         ChangeEvent e = new ChangeEvent(PerVCProverModel.this);
@@ -329,9 +368,13 @@ public final class PerVCProverModel {
     }
 
     /**
-     * <p>Attempts to follow the series of steps provided, so long as all
-     * requisite facts are available at each step (but even if the model is not
-     * otherwise exactly the same as when each step was first enacted.)</p>
+     * <p>
+     * Attempts to follow the series of steps provided, so long as all requisite
+     * facts are available
+     * at each step (but even if the model is not otherwise exactly the same as
+     * when each step was
+     * first enacted.)
+     * </p>
      *
      * @param step
      */
@@ -368,9 +411,9 @@ public final class PerVCProverModel {
             System.out.println(this);
             System.out.println("\n\nToward affected sites:\n" + affectedSites);
 
-            throw new IllegalArgumentException("Couldn't mimic step: " + step
-                    + " (" + step.getClass() + ", " + transformation.getClass()
-                    + ")");
+            throw new IllegalArgumentException(
+                    "Couldn't mimic step: " + step + " (" + step.getClass()
+                            + ", " + transformation.getClass() + ")");
         }
     }
 
@@ -530,7 +573,7 @@ public final class PerVCProverModel {
         myConsequents.add(index, c);
         myConsequentsHash += c.getExpression().hashCode();
 
-        //This is an important change if it took us away from a proved state
+        // This is an important change if it took us away from a proved state
         modelChanged(myConsequents.size() == 1);
     }
 
@@ -575,18 +618,21 @@ public final class PerVCProverModel {
             throw new IllegalArgumentException("No such consequent.");
         }
 
-        //This change is important if it eleminates the last conjunct--because
-        //then we've proved it!
+        // This change is important if it eleminates the last conjunct--because
+        // then we've proved it!
         modelChanged(myConsequents.isEmpty());
 
         return result;
     }
 
     /**
-     * <p>Alters the value at the given site, assuming it indicates either an
-     * antecedent or consequent (indicating a global theorem will trigger an
-     * <code>IllegalArgumentException</code>. Returns the original value of the
-     * root site.</p>
+     * <p>
+     * Alters the value at the given site, assuming it indicates either an
+     * antecedent or consequent
+     * (indicating a global theorem will trigger an
+     * <code>IllegalArgumentException</code>. Returns the
+     * original value of the root site.
+     * </p>
      *
      * @param s
      * @param newValue
@@ -635,17 +681,25 @@ public final class PerVCProverModel {
     }
 
     /**
-     * <p>Adds a theorem to the list of local theorems (i.e., the antecedent of
-     * the implication represented by the current proof state) with the given
-     * justification. Setting
-     * <code>tryingToProveThis</code> to
-     * <code>true</code> simply indicates to the prover that the newly
-     * introduced theorem was original a conjunct of the consequent, which helps
-     * prune unproductive proof steps when outputting a final proof (e.g.,
-     * theorems that were not trying to be proved, or used along the way toward
-     * proving one that was are irrelevant and can be omitted.)</p>
+     * <p>
+     * Adds a theorem to the list of local theorems (i.e., the antecedent of the
+     * implication
+     * represented by the current proof state) with the given justification.
+     * Setting
+     * <code>tryingToProveThis</code> to <code>true</code> simply indicates to
+     * the prover that the
+     * newly introduced theorem was original a conjunct of the consequent, which
+     * helps prune
+     * unproductive proof steps when outputting a final proof (e.g., theorems
+     * that were not trying to
+     * be proved, or used along the way toward proving one that was are
+     * irrelevant and can be
+     * omitted.)
+     * </p>
      *
-     * <p>The returned {@link LocalTheorem LocalTheorem} </p>
+     * <p>
+     * The returned {@link LocalTheorem LocalTheorem}
+     * </p>
      *
      * @param assertion
      * @param j
@@ -829,9 +883,8 @@ public final class PerVCProverModel {
 
             if (!binders.isEmpty()) {
                 myFirstBinder = binders.iterator().next();
-                myFirstBinderSites =
-                        myFirstBinder.getInterestingSiteVisitor(
-                                PerVCProverModel.this, Collections.EMPTY_LIST);
+                myFirstBinderSites = myFirstBinder.getInterestingSiteVisitor(
+                        PerVCProverModel.this, Collections.EMPTY_LIST);
                 myOtherBinders.addAll(binders);
                 myOtherBinders.remove(myFirstBinder);
                 myOtherBindings = DummyIterator.getInstance(myOtherBindings);
@@ -841,9 +894,8 @@ public final class PerVCProverModel {
             else {
                 myFirstBinder = null;
                 myFirstBinderSites = null;
-                myNextReturn =
-                        new BindResult(new HashMap<Binder, Site>(),
-                                new HashMap<PExp, PExp>());
+                myNextReturn = new BindResult(new HashMap<Binder, Site>(),
+                        new HashMap<PExp, PExp>());
             }
         }
 
@@ -885,11 +937,11 @@ public final class PerVCProverModel {
                         myFirstBinder.considerSite(myCurFirstSite,
                                 myAssumedBindings, myCurFirstSiteBindings);
 
-                        //This prevents a binder from binding to a global 
-                        //theorem that contains quantified variables.  So we'd
-                        //like to be able to notice that 0 < 1, for example,
-                        //but we shouldn't be incorporating a theorem like
-                        //For all i : Z, i - 1 < i into our bindings.
+                        // This prevents a binder from binding to a global
+                        // theorem that contains quantified variables. So we'd
+                        // like to be able to notice that 0 < 1, for example,
+                        // but we shouldn't be incorporating a theorem like
+                        // For all i : Z, i - 1 < i into our bindings.
                         if (myCurFirstSite.conjunct.libraryTheorem()
                                 && !myCurFirstSite.exp.getQuantifiedVariables()
                                         .isEmpty()) {
@@ -901,18 +953,17 @@ public final class PerVCProverModel {
                         myInductiveBindingsScratch
                                 .putAll(myCurFirstSiteBindings);
 
-                        myOtherBindings =
-                                new BinderSatisfyingIterator(myOtherBinders,
-                                        myInductiveBindingsScratch);
+                        myOtherBindings = new BinderSatisfyingIterator(
+                                myOtherBinders, myInductiveBindingsScratch);
                     }
                     catch (BindingException be) {
-                        //Can't bind the current site.  No worries--just keep
-                        //searching.
+                        // Can't bind the current site. No worries--just keep
+                        // searching.
                     }
                 }
 
-                //Either !myFirstBinderSites.hasNext(), or 
-                //myOtherBindings.hasNext(), or both
+                // Either !myFirstBinderSites.hasNext(), or
+                // myOtherBindings.hasNext(), or both
                 if (myOtherBindings.hasNext()) {
                     myNextReturn = myOtherBindings.next();
                     myNextReturn.bindSites.put(myFirstBinder, myCurFirstSite);
@@ -941,39 +992,47 @@ public final class PerVCProverModel {
     public static interface Binder {
 
         /**
-         * <p>Returns an iterator over binding sites that should be considered,
-         * in the order they should be considered, based on any other sites that
-         * have already been bound.</p>
+         * <p>
+         * Returns an iterator over binding sites that should be considered, in
+         * the order they should be
+         * considered, based on any other sites that have already been bound.
+         * </p>
          *
          * @param boundSitesSoFar Sites that have been bound by previously bound
-         * <code>Binder</code>s .
+         *        <code>Binder</code>s .
          * @return An iterator over interesting sites.
          */
         public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar);
 
         /**
-         * <p>Attempts to bind to the given site, which was returned from an
+         * <p>
+         * Attempts to bind to the given site, which was returned from an
          * iterator returned by
          * {@link getInterestingSiteVisitor() getInterestingSiteVisitor()}.
-         * Before applying any pattern, the binder must take into account the
-         * <code>assumedBindings</code> which indicate bindings determined by
-         * previously applied binders and may "fill in" certain free variables.
+         * Before applying any pattern,
+         * the binder must take into account the <code>assumedBindings</code>
+         * which indicate bindings
+         * determined by previously applied binders and may "fill in" certain
+         * free variables.
          * </p>
          *
          * @param s A non-null site under consideration.
          * @param assumedBindings The mapping that's been proposed by
-         * previously-bound <code>Binder</code>s.
+         *        previously-bound
+         *        <code>Binder</code>s.
          *
          * @return A mapping of any newly-bound free variables.
          *
          * @throws BindingException If the site is rejected.
          */
         public Map<PExp, PExp> considerSite(Site s,
-                Map<PExp, PExp> assumedBindings) throws BindingException;
+                Map<PExp, PExp> assumedBindings)
+                throws BindingException;
 
         public void considerSite(Site s, Map<PExp, PExp> assumedBindings,
-                Map<PExp, PExp> accumulator) throws BindingException;
+                Map<PExp, PExp> accumulator)
+                throws BindingException;
     }
 
     public static class TopLevelAntecedentBinder extends AbstractBinder {
@@ -1011,8 +1070,8 @@ public final class PerVCProverModel {
         @Override
         public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar) {
-            return new InductiveSiteIteratorIterator(m
-                    .topLevelAntecedentSiteIterator());
+            return new InductiveSiteIteratorIterator(
+                    m.topLevelAntecedentSiteIterator());
         }
     }
 
@@ -1025,8 +1084,8 @@ public final class PerVCProverModel {
         @Override
         public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar) {
-            return new InductiveSiteIteratorIterator(m
-                    .topLevelConsequentSiteIterator());
+            return new InductiveSiteIteratorIterator(
+                    m.topLevelConsequentSiteIterator());
         }
     }
 
@@ -1055,7 +1114,8 @@ public final class PerVCProverModel {
 
         @Override
         public Map<PExp, PExp> considerSite(Site s,
-                Map<PExp, PExp> assumedBindings) throws BindingException {
+                Map<PExp, PExp> assumedBindings)
+                throws BindingException {
             Map<PExp, PExp> result = new HashMap<PExp, PExp>();
 
             considerSite(s, assumedBindings, result);
@@ -1065,14 +1125,16 @@ public final class PerVCProverModel {
 
         @Override
         public void considerSite(Site s, Map<PExp, PExp> assumedBindings,
-                Map<PExp, PExp> accumulator) throws BindingException {
+                Map<PExp, PExp> accumulator)
+                throws BindingException {
             PExp substituted = myPattern.substitute(assumedBindings);
 
-            //This is a simple optimization that prevents us from traversing the
-            //expression if there's no way we could match
-            if ((substituted instanceof PSymbol && ((PSymbol) substituted).quantification != Quantification.NONE)
-                    || s.exp.getSymbolNames().contains(
-                            substituted.getTopLevelOperation())) {
+            // This is a simple optimization that prevents us from traversing the
+            // expression if there's no way we could match
+            if ((substituted instanceof PSymbol
+                    && ((PSymbol) substituted).quantification != Quantification.NONE)
+                    || s.exp.getSymbolNames()
+                            .contains(substituted.getTopLevelOperation())) {
                 substituted.bindTo(s.exp, accumulator);
             }
             else {

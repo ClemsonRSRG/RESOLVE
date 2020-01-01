@@ -1,7 +1,7 @@
 /*
  * DummyExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,15 +22,23 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 /**
- * <p>A <code>DummyExp</code> is an <code>Exp</code> guaranteed not to arise
- * from any actual RESOLVE source code.  Its only property is that it has an
- * <code>MTType</code>.  It can be bound normally to quantified variables whose
- * declared type it inhabits (i.e., a <code>DummyExp</code> of type 
- * <code>N</code> is acceptable for a quantified variable of type 
- * <code>Z</code>,) but nothing will bind to it.</p>
+ * <p>
+ * A <code>DummyExp</code> is an <code>Exp</code> guaranteed not to arise from
+ * any actual RESOLVE
+ * source code. Its only property is that it has an <code>MTType</code>. It can
+ * be bound normally to
+ * quantified variables whose declared type it inhabits (i.e., a
+ * <code>DummyExp</code> of type
+ * <code>N</code> is acceptable for a quantified variable of type
+ * <code>Z</code>,) but nothing will
+ * bind to it.
+ * </p>
  * 
- * <p>Mostly useful for representing "a unique variable of type X" without 
- * having to worry if its name is truly unique.</p>
+ * <p>
+ * Mostly useful for representing "a unique variable of type X" without having
+ * to worry if its name
+ * is truly unique.
+ * </p>
  */
 public class DummyExp extends Exp {
 

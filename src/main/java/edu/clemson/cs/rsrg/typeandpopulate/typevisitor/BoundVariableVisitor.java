@@ -1,7 +1,7 @@
 /*
  * BoundVariableVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,7 +17,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import java.util.*;
 
 /**
- * <p>This is the abstract base class for typing bounded variables.</p>
+ * <p>
+ * This is the abstract base class for typing bounded variables.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,19 +30,23 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     // ===========================================================
 
     /**
-     * <p>A container to store all the information about
-     * the bounded variables.</p>
+     * <p>
+     * A container to store all the information about the bounded variables.
+     * </p>
      */
-    private final Deque<Map<String, BindingInfo>> myBoundVariables = new LinkedList<>();
+    private final Deque<Map<String, BindingInfo>> myBoundVariables =
+            new LinkedList<>();
 
     // ===========================================================
     // Public Methods
     // ===========================================================
 
     /**
-     * <p>This method adds additional logic before we visit
-     * a {@link MTBigUnion} by adding the binding information
-     * for all the quantified variables.</p>
+     * <p>
+     * This method adds additional logic before we visit a {@link MTBigUnion} by
+     * adding the binding
+     * information for all the quantified variables.
+     * </p>
      *
      * @param u A math type.
      */
@@ -51,8 +57,11 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     }
 
     /**
-     * <p>This method adds additional logic after we visit
-     * a {@link MTBigUnion} by removing all the binding information.</p>
+     * <p>
+     * This method adds additional logic after we visit a {@link MTBigUnion} by
+     * removing all the
+     * binding information.
+     * </p>
      *
      * @param u A math type.
      */
@@ -67,36 +76,42 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     // ===========================================================
 
     /**
-     * <p>This method annotates the inner most binding for the
-     * given variable name.</p>
+     * <p>
+     * This method annotates the inner most binding for the given variable name.
+     * </p>
      *
      * @param name A variable name.
      * @param key The binding key.
      * @param value The binding value.
      */
-    protected void annotateInnermostBinding(String name, Object key, Object value) {
+    protected void annotateInnermostBinding(String name, Object key,
+            Object value) {
         getInnermostBindingInfo(name).annotations.put(key, value);
     }
 
     /**
-     * <p>This method adds additional logic to bound
-     * {@code u} before we visit it.</p>
+     * <p>
+     * This method adds additional logic to bound {@code u} before we visit it.
+     * </p>
      *
      * @param u A math type.
      */
     protected void boundBeginMTBigUnion(MTBigUnion u) {}
 
     /**
-     * <p>This method adds additional logic to bound
-     * {@code u} after we visit it.</p>
+     * <p>
+     * This method adds additional logic to bound {@code u} after we visit it.
+     * </p>
      *
      * @param u A math type.
      */
     protected void boundEndMTBigUnion(MTBigUnion u) {}
 
     /**
-     * <p>This method returns the mathematical type used
-     * to bind the given variable name.</p>
+     * <p>
+     * This method returns the mathematical type used to bind the given variable
+     * name.
+     * </p>
      *
      * @param name A variable name.
      *
@@ -107,8 +122,10 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     }
 
     /**
-     * <p>This method returns the inner most binding object for the
-     * given variable name and key.</p>
+     * <p>
+     * This method returns the inner most binding object for the given variable
+     * name and key.
+     * </p>
      *
      * @param name A variable name.
      * @param key The binding key.
@@ -124,8 +141,10 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns information about the inner most
-     * binding for the given variable name.</p>
+     * <p>
+     * This method returns information about the inner most binding for the
+     * given variable name.
+     * </p>
      *
      * @param name A variable name.
      *
@@ -146,14 +165,17 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     }
 
     /**
-     * <p>This method creates a map of {@link BindingInfo} for
-     * each of the variables.</p>
+     * <p>
+     * This method creates a map of {@link BindingInfo} for each of the
+     * variables.
+     * </p>
      *
      * @param vars A map from variable names to {@link MTType}.
      *
      * @return The corresponding map of {@link BindingInfo}.
      */
-    private Map<String, BindingInfo> toBindingInfoMap(Map<String, MTType> vars) {
+    private Map<String, BindingInfo>
+            toBindingInfoMap(Map<String, MTType> vars) {
         Map<String, BindingInfo> result = new HashMap<>();
 
         for (Map.Entry<String, MTType> entry : vars.entrySet()) {
@@ -168,8 +190,10 @@ abstract class BoundVariableVisitor extends TypeVisitor {
     // ===========================================================
 
     /**
-     * <p>An helper class that allow us to store all binding annotations
-     * for a mathematical type.</p>
+     * <p>
+     * An helper class that allow us to store all binding annotations for a
+     * mathematical type.
+     * </p>
      */
     private class BindingInfo {
 
@@ -177,10 +201,18 @@ abstract class BoundVariableVisitor extends TypeVisitor {
         // Member Fields
         // ===========================================================
 
-        /** <p>A mathematical type.</p> */
+        /**
+         * <p>
+         * A mathematical type.
+         * </p>
+         */
         final MTType type;
 
-        /** <p>A map containing all the annotations for this type.</p> */
+        /**
+         * <p>
+         * A map containing all the annotations for this type.
+         * </p>
+         */
         final Map<Object, Object> annotations;
 
         // ===========================================================
@@ -188,8 +220,10 @@ abstract class BoundVariableVisitor extends TypeVisitor {
         // ===========================================================
 
         /**
-         * <p>This constructs an object that is used to store
-         * all binding information for this type.</p>
+         * <p>
+         * This constructs an object that is used to store all binding
+         * information for this type.
+         * </p>
          *
          * @param type A mathematical type.
          */

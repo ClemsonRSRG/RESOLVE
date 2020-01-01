@@ -1,7 +1,7 @@
 /*
  * ProgramIntegerExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming integer expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the programming integer expression objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,11 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The integer representing this programming integer</p> */
+    /**
+     * <p>
+     * The integer representing this programming integer
+     * </p>
+     */
     private final Integer myInteger;
 
     // ===========================================================
@@ -36,7 +43,9 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a programing integer expression.</p>
+     * <p>
+     * This constructs a programing integer expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param i A {@link Integer} expression.
@@ -94,7 +103,9 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     }
 
     /**
-     * <p>This method returns the integer value.</p>
+     * <p>
+     * This method returns the integer value.
+     * </p>
      *
      * @return The {@link Integer} value.
      */

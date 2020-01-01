@@ -1,7 +1,7 @@
 /*
  * ProgramTypeDefinitionEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,9 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>Describes a "Type Family" introduction as would be found in a concept 
- * file.</p>
+ * <p>
+ * Describes a "Type Family" introduction as would be found in a concept file.
+ * </p>
  */
 public class ProgramTypeDefinitionEntry extends ProgramTypeEntry {
 

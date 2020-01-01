@@ -1,7 +1,7 @@
 /*
  * FacilityModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the class for the facility module declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for the facility module declarations that the compiler
+ * builds using the ANTLR4
+ * AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,7 +36,11 @@ public class FacilityModuleDec extends ModuleDec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The requires expression</p> */
+    /**
+     * <p>
+     * The requires expression
+     * </p>
+     */
     private final AssertionClause myRequires;
 
     // ===========================================================
@@ -41,18 +48,21 @@ public class FacilityModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>This constructor creates a "Facility" module representation.</p>
+     * <p>
+     * This constructor creates a "Facility" module representation.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param requires A {@link AssertionClause} representing the concept's
-     *                 requires clause.
+     *        requires clause.
      * @param decs The list of {@link Dec} objects.
      * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
-     *                           externally realized flags that indicates
-     *                           all the modules that this module declaration depends on.
+     *        externally realized flags
+     *        that indicates all the modules that this module declaration
+     *        depends on.
      */
     public FacilityModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
@@ -104,8 +114,9 @@ public class FacilityModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the requires clause
-     * for this facility declaration.</p>
+     * <p>
+     * This method returns the requires clause for this facility declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -133,15 +144,18 @@ public class FacilityModuleDec extends ModuleDec {
     @Override
     protected final FacilityModuleDec copy() {
         // Copy all the items in the lists
-        List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
+        List<ModuleParameterDec> newParameterDecs =
+                new ArrayList<>(myParameterDecs.size());
         Collections.copy(newParameterDecs, myParameterDecs);
         List<UsesItem> newUsesItems = new ArrayList<>(myUsesItems.size());
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies = copyModuleDependencies();
+        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies =
+                copyModuleDependencies();
 
-        return new FacilityModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
-                newUsesItems, myRequires.clone(), newDecs, newModuleDependencies);
+        return new FacilityModuleDec(cloneLocation(), myName.clone(),
+                newParameterDecs, newUsesItems, myRequires.clone(), newDecs,
+                newModuleDependencies);
     }
 }

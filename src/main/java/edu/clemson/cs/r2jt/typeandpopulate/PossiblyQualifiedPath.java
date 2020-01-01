@@ -1,7 +1,7 @@
 /*
  * PossiblyQualifiedPath.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,9 +28,8 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
             ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
             boolean localPriority) {
 
-        myActualSearchPath =
-                getAppropriatePath(qualifier, importStrategy, facilityStrategy,
-                        localPriority);
+        myActualSearchPath = getAppropriatePath(qualifier, importStrategy,
+                facilityStrategy, localPriority);
     }
 
     public PossiblyQualifiedPath(PosSymbol qualifier) {
@@ -52,9 +51,8 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
         ScopeSearchPath result;
 
         if (qualifier == null) {
-            result =
-                    new UnqualifiedPath(importStrategy, facilityStrategy,
-                            localPriority);
+            result = new UnqualifiedPath(importStrategy, facilityStrategy,
+                    localPriority);
         }
         else {
             result = new QualifiedPath(qualifier, facilityStrategy);

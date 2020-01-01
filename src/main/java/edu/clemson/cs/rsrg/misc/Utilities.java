@@ -1,7 +1,7 @@
 /*
  * Utilities.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,9 +25,11 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 /**
- * <p>This class contains a collection of static helper methods
- * that the RESOLVE compiler uses throughout the compilation
- * process.</p>
+ * <p>
+ * This class contains a collection of static helper methods that the RESOLVE
+ * compiler uses
+ * throughout the compilation process.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -36,7 +38,9 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 public class Utilities {
 
     /**
-     * <p>A builder of objects of type <code>T</code>.</p>
+     * <p>
+     * A builder of objects of type <code>T</code>.
+     * </p>
      *
      * @param <T> The type object to be created.
      */
@@ -46,7 +50,9 @@ public class Utilities {
     }
 
     /**
-     * <p>An indirect(?) reference to a type.</p>
+     * <p>
+     * An indirect(?) reference to a type.
+     * </p>
      *
      * @param <T> The type of object that is being referred.
      */
@@ -56,7 +62,9 @@ public class Utilities {
     }
 
     /**
-     * <p>A two-parameter mapping.</p>
+     * <p>
+     * A two-parameter mapping.
+     * </p>
      *
      * @param <I> a parameter argument type.
      * @param <O> a parameter argument type.
@@ -64,8 +72,10 @@ public class Utilities {
     public interface Mapping<I, O> {
 
         /**
-         * <p>This method creates some sort of mapping
-         * between <code>input</code> and <code>R</code>.</p>
+         * <p>
+         * This method creates some sort of mapping between <code>input</code>
+         * and <code>R</code>.
+         * </p>
          *
          * @param input An object of type <code>I</code>
          *
@@ -75,7 +85,9 @@ public class Utilities {
     }
 
     /**
-     * <p>A three-parameter mapping.</p>
+     * <p>
+     * A three-parameter mapping.
+     * </p>
      *
      * @param <P1> a parameter argument type.
      * @param <P2> a parameter argument type.
@@ -85,9 +97,11 @@ public class Utilities {
     public interface Mapping3<P1, P2, P3, R> {
 
         /**
-         * <p>This method creates some sort of mapping
-         * between <code>p1</code>, <code>p2</code>,
-         * <code>p3</code> and <code>R</code>.</p>
+         * <p>
+         * This method creates some sort of mapping between <code>p1</code>,
+         * <code>p2</code>,
+         * <code>p3</code> and <code>R</code>.
+         * </p>
          *
          * @param p1 An object of type <code>P1</code>
          * @param p2 An object of type <code>P2</code>
@@ -99,21 +113,26 @@ public class Utilities {
     }
 
     /**
-     * <p>Returns a list of {@code E} given: an expected type {@code T}, some
-     * number of concrete syntax {@code nodes}, and a mapping from rule contexts
-     * to some number of elements descending from {@code E}.</p>
+     * <p>
+     * Returns a list of {@code E} given: an expected type {@code T}, some
+     * number of concrete syntax
+     * {@code nodes}, and a mapping from rule contexts to some number of
+     * elements descending from
+     * {@code E}.
+     * </p>
      *
      * @param expectedType The class type to inhabit the returned list
-     * @param nodes A list of concrete syntax nodes, as obtained through
-     *        a visitor, listener, etc.
-     * @param annotations A map from rule context to the primary supertype
-     *        of {@code expectedType} ({@code E}).
+     * @param nodes A list of concrete syntax nodes, as obtained through a
+     *        visitor, listener, etc.
+     * @param annotations A map from rule context to the primary supertype of
+     *        {@code expectedType}
+     *        ({@code E}).
      * @param <E> Super type of {@code expectedType}.
      * @param <T> The expected type.
      * @return A list of {@code T}.
      */
-    public static <E, T extends E> List<T> collect(
-            Class<T> expectedType, List<? extends ParseTree> nodes,
+    public static <E, T extends E> List<T> collect(Class<T> expectedType,
+            List<? extends ParseTree> nodes,
             ParseTreeProperty<? extends E> annotations) {
         List<T> result = new ArrayList<>();
         for (ParseTree node : nodes) {
@@ -123,8 +142,10 @@ public class Utilities {
     }
 
     /**
-     * <p>Converts a regular {@link File} object to the
-     * {@link ResolveFile} accepted by the compiler.</p>
+     * <p>
+     * Converts a regular {@link File} object to the {@link ResolveFile}
+     * accepted by the compiler.
+     * </p>
      *
      * @param file The Java File object.
      * @param moduleType The extension of the file.
@@ -135,7 +156,8 @@ public class Utilities {
      * @throws IOException There was some sort of error during the conversion.
      */
     public static ResolveFile convertToResolveFile(File file,
-            ModuleType moduleType, String workspacePath) throws IOException {
+            ModuleType moduleType, String workspacePath)
+            throws IOException {
         // Convert to the internal representation of a RESOLVE file
         String name = Utilities.getFileName(file.getName(), moduleType);
         List<String> pkgList =
@@ -143,14 +165,17 @@ public class Utilities {
         CharStream inputStream = CharStreams.fromPath(file.toPath());
         File parentFile = file.getParentFile();
 
-        return new ResolveFile(new ResolveFileBasicInfo(name, parentFile
-                .getName()), moduleType, inputStream, parentFile.toPath(),
-                pkgList, file.getAbsolutePath());
+        return new ResolveFile(
+                new ResolveFileBasicInfo(name, parentFile.getName()),
+                moduleType, inputStream, parentFile.toPath(), pkgList,
+                file.getAbsolutePath());
     }
 
     /**
-     * <p>Converts the specified pathname to a {@link File}
-     * representing the absolute path to the file.</p>
+     * <p>
+     * Converts the specified pathname to a {@link File} representing the
+     * absolute path to the file.
+     * </p>
      *
      * @param pathname The file path.
      *
@@ -161,21 +186,27 @@ public class Utilities {
     }
 
     /**
-     * <p>Uses the workspace directory and converts the specified file pathname
-     * to a {@link File} representing the absolute path to the file.</p>
+     * <p>
+     * Uses the workspace directory and converts the specified file pathname to
+     * a {@link File}
+     * representing the absolute path to the file.
+     * </p>
      *
      * @param workspacePathFile A {@link File} that points to our current
-     *                          working directory.
+     *        working directory.
      * @param pathname The file path.
      *
      * @return The {@link File} specified by the path.
      */
-    public static File getAbsoluteFile(File workspacePathFile, String pathname) {
+    public static File getAbsoluteFile(File workspacePathFile,
+            String pathname) {
         return new File(workspacePathFile, pathname).getAbsoluteFile();
     }
 
     /**
-     * <p>Returns the file name without the extension.</p>
+     * <p>
+     * Returns the file name without the extension.
+     * </p>
      *
      * @param fileName Name of the file with the extension.
      * @param moduleType The extension of the file.
@@ -183,13 +214,16 @@ public class Utilities {
      * @return Name of the file without the extension.
      */
     public static String getFileName(String fileName, ModuleType moduleType) {
-        return fileName.substring(0, fileName.lastIndexOf(moduleType
-                .getExtension()) - 1);
+        return fileName.substring(0,
+                fileName.lastIndexOf(moduleType.getExtension()) - 1);
     }
 
     /**
-     * <p>The folder RESOLVE and it's sub folders are viewed by the compiler
-     * as "packages", therefore we will need to store these for future use.</p>
+     * <p>
+     * The folder RESOLVE and it's sub folders are viewed by the compiler as
+     * "packages", therefore we
+     * will need to store these for future use.
+     * </p>
      *
      * @param filePath The absolute path to the file.
      * @param workspacePath The current workspace's absolute path.
@@ -203,8 +237,8 @@ public class Utilities {
 
         // Add all package names using the Java Collections
         List<String> pkgList = new LinkedList<>();
-        Collections.addAll(pkgList, relativePath.split(Pattern
-                .quote(File.separator)));
+        Collections.addAll(pkgList,
+                relativePath.split(Pattern.quote(File.separator)));
 
         // Remove filename from our package structure.
         pkgList.remove(pkgList.size() - 1);
@@ -213,8 +247,11 @@ public class Utilities {
     }
 
     /**
-     * <p>Get the absolute path to the RESOLVE Workspace. This workspace
-     * must have the same structure as the one hosted on Github.</p>
+     * <p>
+     * Get the absolute path to the RESOLVE Workspace. This workspace must have
+     * the same structure as
+     * the one hosted on Github.
+     * </p>
      *
      * @param path The absolute path we are going to search.
      *
@@ -269,12 +306,15 @@ public class Utilities {
     }
 
     /**
-     * <p>Determines if the specified filename is a valid RESOLVE file type.</p>
+     * <p>
+     * Determines if the specified filename is a valid RESOLVE file type.
+     * </p>
      *
      * @param filename Filename.
      *
      * @return A RESOLVE extension type object if it is an extension we
-     * recognize or null if it is not.
+     *         recognize or null if it is
+     *         not.
      */
     public static ModuleType getModuleType(String filename) {
         ModuleType type = null;
@@ -302,8 +342,10 @@ public class Utilities {
     }
 
     /**
-     * <p>A helper method to form a string using the values inside the
-     * Java collection.</p>
+     * <p>
+     * A helper method to form a string using the values inside the Java
+     * collection.
+     * </p>
      *
      * @param data The collection of values.
      * @param separator The separator to be used.
@@ -316,8 +358,10 @@ public class Utilities {
     }
 
     /**
-     * <p>A helper method to form a string using the values inside the
-     * Java collection.</p>
+     * <p>
+     * A helper method to form a string using the values inside the Java
+     * collection.
+     * </p>
      *
      * @param data The collection of values.
      * @param separator The separator to be used.
@@ -333,7 +377,9 @@ public class Utilities {
     }
 
     /**
-     * <p>A helper method to form a string using an iterator.</p>
+     * <p>
+     * A helper method to form a string using an iterator.
+     * </p>
      *
      * @param iter An iterator for the collection of values.
      * @param separator The separator to be used.
@@ -360,8 +406,9 @@ public class Utilities {
     }
 
     /**
-     * <p>A helper method to form a string using the values inside the
-     * array.</p>
+     * <p>
+     * A helper method to form a string using the values inside the array.
+     * </p>
      *
      * @param array The array of values.
      * @param separator The separator to be used.

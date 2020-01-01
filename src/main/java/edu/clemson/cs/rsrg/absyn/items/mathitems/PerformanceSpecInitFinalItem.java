@@ -1,7 +1,7 @@
 /*
  * PerformanceSpecInitFinalItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the performance profile's type initialization/finalization
- * verification block objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the performance profile's type
+ * initialization/finalization verification
+ * block objects that the compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,7 +32,9 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This defines the various different performance item types.</p>
+     * <p>
+     * This defines the various different performance item types.
+     * </p>
      *
      * @version 2.0
      */
@@ -56,13 +61,25 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The type of clause</p> */
+    /**
+     * <p>
+     * The type of clause
+     * </p>
+     */
     private final ItemType myItemType;
 
-    /** <p>The duration expression</p> */
+    /**
+     * <p>
+     * The duration expression
+     * </p>
+     */
     private final AssertionClause myDuration;
 
-    /** <p>The manipulation displacement expression</p> */
+    /**
+     * <p>
+     * The manipulation displacement expression
+     * </p>
+     */
     private final AssertionClause myManipDisp;
 
     // ===========================================================
@@ -70,15 +87,20 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a type initialization/finalization block that happens
-     * when a variable of this type is initialized/finalized.</p>
+     * <p>
+     * This constructs a type initialization/finalization block that happens
+     * when a variable of this
+     * type is initialized/finalized.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates if it is an initialization or finalization block.
-     * @param duration A {@link AssertionClause} representing the initialization's/finalization's
-     *                 duration clause.
-     * @param manip_disp A {@link AssertionClause} representing the initialization's/finalization's
-     *                   manipulation displacement clause.
+     * @param duration A {@link AssertionClause} representing the
+     *        initialization's/finalization's
+     *        duration clause.
+     * @param manip_disp A {@link AssertionClause} representing the
+     *        initialization's/finalization's
+     *        manipulation displacement clause.
      */
     public PerformanceSpecInitFinalItem(Location l, ItemType type,
             AssertionClause duration, AssertionClause manip_disp) {
@@ -160,9 +182,11 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the type that indicates
-     * if this is a performance profile's
-     * initialization or finalization verification block.</p>
+     * <p>
+     * This method returns the type that indicates if this is a performance
+     * profile's initialization
+     * or finalization verification block.
+     * </p>
      *
      * @return The {@link ItemType} object.
      */
@@ -171,9 +195,11 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the duration clause
-     * in this performance profile's
-     * type initialization/finalization verification block.</p>
+     * <p>
+     * This method returns the duration clause in this performance profile's
+     * type
+     * initialization/finalization verification block.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -182,9 +208,11 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the manipulation displacement clause
-     * in this performance profile's
-     * type initialization/finalization verification block.</p>
+     * <p>
+     * This method returns the manipulation displacement clause in this
+     * performance profile's type
+     * initialization/finalization verification block.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -199,9 +227,8 @@ public class PerformanceSpecInitFinalItem extends ResolveConceptualElement {
     public final int hashCode() {
         int result = myItemType != null ? myItemType.hashCode() : 0;
         result = 31 * result + (myDuration != null ? myDuration.hashCode() : 0);
-        result =
-                31 * result
-                        + (myManipDisp != null ? myManipDisp.hashCode() : 0);
+        result = 31 * result
+                + (myManipDisp != null ? myManipDisp.hashCode() : 0);
         return result;
     }
 

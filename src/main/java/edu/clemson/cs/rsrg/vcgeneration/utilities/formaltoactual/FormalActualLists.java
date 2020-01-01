@@ -1,7 +1,7 @@
 /*
  * FormalActualLists.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>An helper class that stores the formal parameters for a module and
- * the processed instantiation arguments from a {@link FacilityDec}.</p>
+ * <p>
+ * An helper class that stores the formal parameters for a module and the
+ * processed instantiation
+ * arguments from a {@link FacilityDec}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -32,14 +35,18 @@ public class FormalActualLists {
     // ===========================================================
 
     /**
-     * <p>A list that will be populated with the arguments used to
-     * instantiate a module.</p>
+     * <p>
+     * A list that will be populated with the arguments used to instantiate a
+     * module.
+     * </p>
      */
     private final List<Exp> myActualArgList;
 
     /**
-     * <p>A list that will be populated with the instantiating
-     * a module's formal parameters.</p>
+     * <p>
+     * A list that will be populated with the instantiating a module's formal
+     * parameters.
+     * </p>
      */
     private final List<VarExp> myFormalParamList;
 
@@ -48,13 +55,18 @@ public class FormalActualLists {
     // ===========================================================
 
     /**
-     * <p>This creates an object that stores the formal parameters from a module
-     * and the processed instantiating arguments from a {@link FacilityDec}.</p>
+     * <p>
+     * This creates an object that stores the formal parameters from a module
+     * and the processed
+     * instantiating arguments from a {@link FacilityDec}.
+     * </p>
      *
      * @param formalParamList The formal parameters from a module.
-     * @param actualArgList The processed arguments used to instantiate a module.
+     * @param actualArgList The processed arguments used to instantiate a
+     *        module.
      */
-    public FormalActualLists(List<VarExp> formalParamList, List<Exp> actualArgList) {
+    public FormalActualLists(List<VarExp> formalParamList,
+            List<Exp> actualArgList) {
         myActualArgList = new ArrayList<>(actualArgList);
         myFormalParamList = new ArrayList<>(formalParamList);
     }
@@ -64,11 +76,14 @@ public class FormalActualLists {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default {@code equals} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code equals} method implementation.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -85,8 +100,11 @@ public class FormalActualLists {
     }
 
     /**
-     * <p>This method returns a deep copy of the processed arguments
-     * from the instantiated {@code Facility}.</p>
+     * <p>
+     * This method returns a deep copy of the processed arguments from the
+     * instantiated
+     * {@code Facility}.
+     * </p>
      *
      * @return A {@link List} containing the actual arguments.
      */
@@ -100,8 +118,11 @@ public class FormalActualLists {
     }
 
     /**
-     * <p>This method returns a deep copy of the formal parameters
-     * from the module we are trying to instantiate.</p>
+     * <p>
+     * This method returns a deep copy of the formal parameters from the module
+     * we are trying to
+     * instantiate.
+     * </p>
      *
      * @return A {@link List} containing the formal parameters.
      */
@@ -115,7 +136,9 @@ public class FormalActualLists {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */

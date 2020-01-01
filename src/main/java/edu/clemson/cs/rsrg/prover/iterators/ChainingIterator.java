@@ -1,7 +1,7 @@
 /*
  * ChainingIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * <p>This class provides a single iteration construct for a pair of
- * chained iterators.</p>
+ * <p>
+ * This class provides a single iteration construct for a pair of chained
+ * iterators.
+ * </p>
  *
  * @param <T> Elements to to be iterated.
  *
@@ -30,20 +32,32 @@ public class ChainingIterator<T> implements Iterator<T> {
     // Member Fields
     // ===========================================================
 
-    /** <p>The starting iterator.</p> */
+    /**
+     * <p>
+     * The starting iterator.
+     * </p>
+     */
     private Iterator<T> myStartIterator;
 
     /**
-     * <p>A flag tha indicates if we have more elements to be iterated
-     * in the start iterator.</p>
+     * <p>
+     * A flag tha indicates if we have more elements to be iterated in the start
+     * iterator.
+     * </p>
      */
     private boolean myStartHasNext = true;
 
-    /** <p>The end iterator.</p> */
+    /**
+     * <p>
+     * The end iterator.
+     * </p>
+     */
     private Iterator<T> myEndIterator;
 
     /**
-     * <p>A flag tha indicates the last element from start iterator.</p>
+     * <p>
+     * A flag tha indicates the last element from start iterator.
+     * </p>
      */
     private boolean myLastFromStartFlag;
 
@@ -52,13 +66,15 @@ public class ChainingIterator<T> implements Iterator<T> {
     // ===========================================================
 
     /**
-     * <p>Creates a chained iterator from two iterators.</p>
+     * <p>
+     * Creates a chained iterator from two iterators.
+     * </p>
      *
      * @param start The starting iterator.
      * @param end The end iterator.
      */
     public ChainingIterator(Iterator<T> start, Iterator<T> end) {
-        //TODO : This can be removed to increase performance
+        // TODO : This can be removed to increase performance
         if (start == null || end == null) {
             throw new IllegalArgumentException();
         }
@@ -87,8 +103,9 @@ public class ChainingIterator<T> implements Iterator<T> {
             return false;
         if (myLastFromStartFlag != that.myLastFromStartFlag)
             return false;
-        if (myStartIterator != null ? !myStartIterator
-                .equals(that.myStartIterator) : that.myStartIterator != null)
+        if (myStartIterator != null
+                ? !myStartIterator.equals(that.myStartIterator)
+                : that.myStartIterator != null)
             return false;
         return myEndIterator != null ? myEndIterator.equals(that.myEndIterator)
                 : that.myEndIterator == null;
@@ -101,10 +118,8 @@ public class ChainingIterator<T> implements Iterator<T> {
     public final int hashCode() {
         int result = myStartIterator != null ? myStartIterator.hashCode() : 0;
         result = 31 * result + (myStartHasNext ? 1 : 0);
-        result =
-                31
-                        * result
-                        + (myEndIterator != null ? myEndIterator.hashCode() : 0);
+        result = 31 * result
+                + (myEndIterator != null ? myEndIterator.hashCode() : 0);
         result = 31 * result + (myLastFromStartFlag ? 1 : 0);
         return result;
     }

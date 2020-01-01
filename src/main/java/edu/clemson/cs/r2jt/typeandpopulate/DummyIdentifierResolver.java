@@ -1,7 +1,7 @@
 /*
  * DummyIdentifierResolver.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,8 +34,8 @@ public class DummyIdentifierResolver extends AbstractScope {
     }
 
     @Override
-    public <E extends SymbolTableEntry> List<E> query(
-            MultimatchSymbolQuery<E> query) {
+    public <E extends SymbolTableEntry> List<E>
+            query(MultimatchSymbolQuery<E> query) {
 
         return new LinkedList<E>();
     }

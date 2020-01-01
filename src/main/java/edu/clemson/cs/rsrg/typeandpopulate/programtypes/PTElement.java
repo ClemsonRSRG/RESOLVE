@@ -1,7 +1,7 @@
 /*
  * PTElement.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.Map;
 
 /**
- * <p>The program-type corresponding to {@link TypeGraph#ELEMENT},
- * i.e., the type of all program types.</p>
+ * <p>
+ * The program-type corresponding to {@link TypeGraph#ELEMENT}, i.e., the type
+ * of all program types.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,8 +32,10 @@ public class PTElement extends PTType {
     // ===========================================================
 
     /**
-     * <p>This creates a programming type corresponding to
-     * {@link TypeGraph#ELEMENT}.</p>
+     * <p>
+     * This creates a programming type corresponding to
+     * {@link TypeGraph#ELEMENT}.
+     * </p>
      *
      * @param g The current type graph.
      */
@@ -44,9 +48,11 @@ public class PTElement extends PTType {
     // ===========================================================
 
     /**
-     * <p>This method converts a generic {@link PTType} to a program type
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link PTType} to a program type that has
+     * all the generic types
+     * and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -61,7 +67,10 @@ public class PTElement extends PTType {
     }
 
     /**
-     * <p>This method returns the mathematical type associated with this program type.</p>
+     * <p>
+     * This method returns the mathematical type associated with this program
+     * type.
+     * </p>
      *
      * @return A {@link MTType} representation object.
      */

@@ -1,7 +1,7 @@
 /*
  * ResolveConceptualElement.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,8 +33,7 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
     public abstract Location getLocation();
 
     /**
-     * Builds a sequence of numSpaces spaces and returns that
-     * sequence.
+     * Builds a sequence of numSpaces spaces and returns that sequence.
      */
     protected void printSpace(int numSpaces, StringBuffer buffer) {
         for (int i = 0; i < numSpaces; ++i) {
@@ -44,9 +43,9 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
 
     public java.util.List<ResolveConceptualElement> getChildren() {
 
-        //We'd like to hit the fields in the order they appear in the class,
-        //starting with the most general class and getting more specific.  So,
-        //we build a stack of the class hierarchy of this instance
+        // We'd like to hit the fields in the order they appear in the class,
+        // starting with the most general class and getting more specific. So,
+        // we build a stack of the class hierarchy of this instance
         Deque<Class<?>> hierarchy = new LinkedList<Class<?>>();
         Class<?> curClass = this.getClass();
         do {
@@ -84,7 +83,7 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
                     // if so, add it as a child
                     if (ResolveConceptualElement.class
                             .isAssignableFrom(fieldType)) {
-                        //System.out.println("Walking: " + curField.getName());
+                        // System.out.println("Walking: " + curField.getName());
                         children.add(ResolveConceptualElement.class
                                 .cast(curField.get(this)));
                     }
@@ -94,20 +93,17 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
                         Class<?> listOf =
                                 (Class<?>) ((ParameterizedType) curField
                                         .getGenericType())
-                                        .getActualTypeArguments()[0];
+                                                .getActualTypeArguments()[0];
                         java.util.List<?> fieldList =
                                 java.util.List.class.cast(curField.get(this));
-                        if (fieldList != null
-                                && fieldList.size() > 0
+                        if (fieldList != null && fieldList.size() > 0
                                 && ResolveConceptualElement.class
                                         .isAssignableFrom(listOf)) {
-                            children
-                                    .add(new VirtualListNode(
-                                            this,
-                                            curField.getName(),
-                                            (java.util.List<ResolveConceptualElement>) fieldList,
-                                            (Class<?>) ((ParameterizedType) curField
-                                                    .getGenericType())
+                            children.add(new VirtualListNode(this,
+                                    curField.getName(),
+                                    (java.util.List<ResolveConceptualElement>) fieldList,
+                                    (Class<?>) ((ParameterizedType) curField
+                                            .getGenericType())
                                                     .getActualTypeArguments()[0]));
                         }
                     }

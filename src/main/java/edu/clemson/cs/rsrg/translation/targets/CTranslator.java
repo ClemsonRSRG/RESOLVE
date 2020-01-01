@@ -1,7 +1,7 @@
 /*
  * CTranslator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -38,10 +38,13 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 /**
- * <p>This class translates a {@code RESOLVE} source file
- * to {@code C}.</p>
+ * <p>
+ * This class translates a {@code RESOLVE} source file to {@code C}.
+ * </p>
  *
- * <p><em>Note:</em> This implementation isn't complete and needs a lot of work!</p>
+ * <p>
+ * <em>Note:</em> This implementation isn't complete and needs a lot of work!
+ * </p>
  *
  * @author Daniel Welch
  * @author Mark Todd
@@ -55,16 +58,21 @@ public class CTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>While we walk a {@link FacilityDec} and its children,
-     * this maintains a pointer to its corresponding {@link ST} C-struct
-     * representation.</p>
+     * <p>
+     * While we walk a {@link FacilityDec} and its children, this maintains a
+     * pointer to its
+     * corresponding {@link ST} C-struct representation.
+     * </p>
      */
     private ST myCurrentStruct = null;
 
     /**
-     * <p>A list of templates corresponding to global facility instantiations.
-     * These are intended to be added to the <code>variables</code> attribute
-     * of each <code>function</code> template.</p>
+     * <p>
+     * A list of templates corresponding to global facility instantiations.
+     * These are intended to be
+     * added to the <code>variables</code> attribute of each
+     * <code>function</code> template.
+     * </p>
      */
     private final List<ST> myFacilityInstantiations;
 
@@ -72,11 +80,19 @@ public class CTranslator extends AbstractTranslator {
     // Flag Strings
     // ===========================================================
 
-    /** <p>Description for {@code cTranslate} flag.</p> */
+    /**
+     * <p>
+     * Description for {@code cTranslate} flag.
+     * </p>
+     */
     private static final String FLAG_DESC_TRANSLATE =
             "Translate RESOLVE code to C.";
 
-    /** <p>Description for {@code cTranslateClean} flag.</p> */
+    /**
+     * <p>
+     * Description for {@code cTranslateClean} flag.
+     * </p>
+     */
     private static final String FLAG_DESC_TRANSLATE_CLEAN =
             "Regenerates C code for all supporting RESOLVE files.";
 
@@ -85,22 +101,29 @@ public class CTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>The main translator flag. Tells the compiler convert
-     * {@code RESOLVE} source code to {@code C} source code.</p>
+     * <p>
+     * The main translator flag. Tells the compiler convert {@code RESOLVE}
+     * source code to {@code C}
+     * source code.
+     * </p>
      */
     private static final Flag C_FLAG_TRANSLATE =
             new Flag(FLAG_SECTION_NAME, "cTranslate", FLAG_DESC_TRANSLATE);
 
     /**
-     * <p>Tells the compiler to regenerate {@code C} code for all
-     * supporting {@code RESOLVE} source files.</p>
+     * <p>
+     * Tells the compiler to regenerate {@code C} code for all supporting
+     * {@code RESOLVE} source
+     * files.
+     * </p>
      */
-    private static final Flag C_FLAG_TRANSLATE_CLEAN =
-            new Flag(FLAG_SECTION_NAME, "cTranslateClean",
-                    FLAG_DESC_TRANSLATE_CLEAN);
+    private static final Flag C_FLAG_TRANSLATE_CLEAN = new Flag(
+            FLAG_SECTION_NAME, "cTranslateClean", FLAG_DESC_TRANSLATE_CLEAN);
 
     /**
-     * <p>Add all the required and implied flags for the {@code CTranslator}.</p>
+     * <p>
+     * Add all the required and implied flags for the {@code CTranslator}.
+     * </p>
      */
     public static void setUpFlags() {
         // Always need to set the auxiliary flag
@@ -120,10 +143,13 @@ public class CTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>This creates an object that overrides methods to translate
-     * a {@link ModuleDec} into a {@code C} source file.</p>
+     * <p>
+     * This creates an object that overrides methods to translate a
+     * {@link ModuleDec} into a {@code C}
+     * source file.
+     * </p>
      *
-     * @param builder            A scope builder for a symbol table.
+     * @param builder A scope builder for a symbol table.
      * @param compileEnvironment The current job's compilation environment
      */
     public CTranslator(MathSymbolTableBuilder builder,
@@ -141,7 +167,9 @@ public class CTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ConceptModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ConceptModuleDec}.
+     * </p>
      *
      * @param dec A concept module declaration.
      */
@@ -149,21 +177,21 @@ public class CTranslator extends AbstractTranslator {
     public final void preConceptModuleDec(ConceptModuleDec dec) {
         addPreprocessorDirective(dec.getName().getName());
 
-        ST conceptStruct =
-                mySTGroup.getInstanceOf("struct").add("name",
-                        dec.getName().getName());
+        ST conceptStruct = mySTGroup.getInstanceOf("struct").add("name",
+                dec.getName().getName());
 
         myActiveTemplates.push(conceptStruct);
 
-        ST realizSpecific =
-                mySTGroup.getInstanceOf("parameter").add("type", "void*").add(
-                        "name", "realization_specific");
+        ST realizSpecific = mySTGroup.getInstanceOf("parameter")
+                .add("type", "void*").add("name", "realization_specific");
 
         myActiveTemplates.peek().add("params", realizSpecific);
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link ConceptModuleDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link ConceptModuleDec}.
+     * </p>
      *
      * @param dec A concept module declaration.
      */
@@ -178,7 +206,9 @@ public class CTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ConceptRealizModuleDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ConceptRealizModuleDec}.
+     * </p>
      *
      * @param dec A concept realization module declaration.
      */
@@ -191,14 +221,13 @@ public class CTranslator extends AbstractTranslator {
                 getModuleFormalParameters(dec.getConceptName());
 
         ST realizationHeader =
-                mySTGroup.getInstanceOf("concept_realization_header").add(
-                        "module", name).add("concept", conceptName);
+                mySTGroup.getInstanceOf("concept_realization_header")
+                        .add("module", name).add("concept", conceptName);
 
         for (ProgramParameterEntry p : formals) {
-            ST parameter =
-                    mySTGroup.getInstanceOf("parameter").add("type",
-                            getParameterTypeTemplate(p.getDeclaredType())).add(
-                            "name", p.getName());
+            ST parameter = mySTGroup.getInstanceOf("parameter")
+                    .add("type", getParameterTypeTemplate(p.getDeclaredType()))
+                    .add("name", p.getName());
 
             realizationHeader.add("parameters", parameter);
         }
@@ -211,32 +240,33 @@ public class CTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link FacilityDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link FacilityDec}.
+     * </p>
      *
      * @param dec A facility declaration.
      */
     @Override
     public final void preFacilityDec(FacilityDec dec) {
         String conceptName = dec.getConceptName().getName();
-        String realiz = dec.getConceptRealizName().getName() + "_for_" + conceptName;
+        String realiz =
+                dec.getConceptRealizName().getName() + "_for_" + conceptName;
 
         try {
-            myCurrentFacilityEntry =
-                    myCurrentModuleScope.queryForOne(
-                            new NameAndEntryTypeQuery<>(null, dec.getName(),
-                                    FacilityEntry.class,
-                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                    MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, false))
-                            .toFacilityEntry(dec.getLocation());
+            myCurrentFacilityEntry = myCurrentModuleScope
+                    .queryForOne(new NameAndEntryTypeQuery<>(null,
+                            dec.getName(), FacilityEntry.class,
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
+                            false))
+                    .toFacilityEntry(dec.getLocation());
 
-            myCurrentStruct =
-                    mySTGroup.getInstanceOf("struct").add("name",
-                            dec.getName().getName());
+            myCurrentStruct = mySTGroup.getInstanceOf("struct").add("name",
+                    dec.getName().getName());
 
-            ST field =
-                    mySTGroup.getInstanceOf("struct_field").add("type",
-                            conceptName).add("name", "core").add("realization",
-                            realiz);
+            ST field = mySTGroup.getInstanceOf("struct_field")
+                    .add("type", conceptName).add("name", "core")
+                    .add("realization", realiz);
 
             myCurrentStruct.add("variables", field);
             myActiveTemplates.push(myCurrentStruct);
@@ -248,15 +278,16 @@ public class CTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link FacilityDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link FacilityDec}.
+     * </p>
      *
      * @param dec A facility declaration.
      */
     @Override
     public final void postFacilityDec(FacilityDec dec) {
-        ST assignment =
-                mySTGroup.getInstanceOf("facility_assignment").add("struct",
-                        myCurrentStruct);
+        ST assignment = mySTGroup.getInstanceOf("facility_assignment")
+                .add("struct", myCurrentStruct);
 
         myFacilityInstantiations.add(assignment);
 
@@ -265,48 +296,49 @@ public class CTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link EnhancementSpecRealizItem}.</p>
+     * <p>
+     * Code that gets executed before visiting a
+     * {@link EnhancementSpecRealizItem}.
+     * </p>
      *
      * @param item An {@code enhancement} and {@code realization} item pair.
      */
     @Override
-    public final void preEnhancementSpecRealizItem(
-            EnhancementSpecRealizItem item) {
-        String enhancementType =
-                item.getEnhancementName().getName()
-                        + "_for_"
-                        + myCurrentFacilityEntry.getFacility()
-                                .getSpecification().getModuleIdentifier()
-                                .toString();
-        String realiz =
-                item.getEnhancementRealizName().getName() + "_for_"
-                        + enhancementType;
+    public final void
+            preEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
+        String enhancementType = item.getEnhancementName().getName() + "_for_"
+                + myCurrentFacilityEntry.getFacility().getSpecification()
+                        .getModuleIdentifier().toString();
+        String realiz = item.getEnhancementRealizName().getName() + "_for_"
+                + enhancementType;
 
-        ST field =
-                mySTGroup.getInstanceOf("struct_field").add("type",
-                        enhancementType).add("name",
-                        item.getEnhancementName().getName()).add("realization",
-                        realiz);
+        ST field = mySTGroup.getInstanceOf("struct_field")
+                .add("type", enhancementType)
+                .add("name", item.getEnhancementName().getName())
+                .add("realization", realiz);
 
         myCurrentStruct.add("variables", field);
         myActiveTemplates.push(field);
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link EnhancementSpecRealizItem}.</p>
+     * <p>
+     * Code that gets executed after visiting a
+     * {@link EnhancementSpecRealizItem}.
+     * </p>
      *
      * @param item An {@code enhancement} and {@code realization} item pair.
      */
     @Override
-    public final void postEnhancementSpecRealizItem(
-            EnhancementSpecRealizItem item) {
-        //        ST coreParameter =
-        //                myGroup.getInstanceOf("qualified_identifier").add
+    public final void
+            postEnhancementSpecRealizItem(EnhancementSpecRealizItem item) {
+        // ST coreParameter =
+        // myGroup.getInstanceOf("qualified_identifier").add
         // ("qualifier",
-        //                       myCurrentFacilityEntry.getName()).add("name",
+        // myCurrentFacilityEntry.getName()).add("name",
         // "core");
 
-        //        myActiveTemplates.peek().add("arguments", coreParameter);
+        // myActiveTemplates.peek().add("arguments", coreParameter);
         myActiveTemplates.pop();
     }
 
@@ -314,62 +346,65 @@ public class CTranslator extends AbstractTranslator {
     // Operation Declaration-Related
     // -----------------------------------------------------------
 
-    /*@Override
-    public void preOperationDec(OperationDec node) {
-        String operationName = "(*" + node.getName().getName() + ")";
-        ST operation =
-                getOperationLikeTemplate((node.getReturnTy() != null) ? node
-                        .getReturnTy().getProgramTypeValue() : null,
-                        operationName, false);
+    /*
+     * @Override public void preOperationDec(OperationDec node) { String
+     * operationName = "(*" +
+     * node.getName().getName() + ")"; ST operation =
+     * getOperationLikeTemplate((node.getReturnTy() !=
+     * null) ? node .getReturnTy().getProgramTypeValue() : null, operationName,
+     * false);
+     * 
+     * myActiveTemplates.push(operation); }
+     */
 
-        myActiveTemplates.push(operation);
-    }*/
-
-    /*@Override
-    public void postOperationDec(OperationDec node) {
-        ST operation = myActiveTemplates.pop();
-
-        // TODO : Add Struct parameter to every function here...
-        //    ST conceptStruct = myGroup.getInstanceOf("unqualified_type").add
-        //            ("name", myScope)
-        if (myActiveTemplates.size() > 1) {
-            // If we're translating a concept, then our stack should be two
-            // deep since every variable ('operation') is added to a
-            // type-def'ed struct.
-            myActiveTemplates.peek().add("variables", operation);
-        }
-        else {
-            myActiveTemplates.peek().add("functions", operation);
-        }
-    }*/
+    /*
+     * @Override public void postOperationDec(OperationDec node) { ST operation
+     * =
+     * myActiveTemplates.pop();
+     * 
+     * // TODO : Add Struct parameter to every function here... // ST
+     * conceptStruct =
+     * myGroup.getInstanceOf("unqualified_type").add // ("name", myScope) if
+     * (myActiveTemplates.size()
+     * > 1) { // If we're translating a concept, then our stack should be two //
+     * deep since every
+     * variable ('operation') is added to a // type-def'ed struct.
+     * myActiveTemplates.peek().add("variables", operation); } else {
+     * myActiveTemplates.peek().add("functions", operation); } }
+     */
 
     // -----------------------------------------------------------
     // Type Declaration-Related
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link TypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link TypeRepresentationDec}.
+     * </p>
      *
-     * @param dec A type representation declared in a {@code Concept Realization}.
+     * @param dec A type representation declared in a
+     *        {@code Concept Realization}.
      */
     @Override
     public final void preTypeRepresentationDec(TypeRepresentationDec dec) {
-        String conceptName =
-                ((ConceptRealizModuleDec) myCurrentModuleScope
-                        .getDefiningElement()).getConceptName().getName();
+        String conceptName = ((ConceptRealizModuleDec) myCurrentModuleScope
+                .getDefiningElement()).getConceptName().getName();
 
-        ST initAndFinal =
-                mySTGroup.getInstanceOf("init_and_final").add("typename",
-                        dec.getName().getName()).add("concept", conceptName);
+        ST initAndFinal = mySTGroup.getInstanceOf("init_and_final")
+                .add("typename", dec.getName().getName())
+                .add("concept", conceptName);
 
         initAndFinal.add("facilities", myFacilityInstantiations);
         myActiveTemplates.push(initAndFinal);
     }
 
     /**
-     * <p>Code that gets executed after visiting a {@link TypeRepresentationDec}.</p>
+     * <p>
+     * Code that gets executed after visiting a {@link TypeRepresentationDec}.
+     * </p>
      *
-     * @param dec A type representation declared in a {@code Concept Realization}.
+     * @param dec A type representation declared in a
+     *        {@code Concept Realization}.
      */
     @Override
     public final void postTypeRepresentationDec(TypeRepresentationDec dec) {
@@ -382,8 +417,10 @@ public class CTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>This method returns the default function modifier specified
-     * by the target language.</p>
+     * <p>
+     * This method returns the default function modifier specified by the target
+     * language.
+     * </p>
      *
      * @return Function modifier as a string.
      */
@@ -391,7 +428,8 @@ public class CTranslator extends AbstractTranslator {
     protected final String getFunctionModifier() {
         String modifier = null;
 
-        if (myCurrentModuleScope.getDefiningElement() instanceof ConceptRealizModuleDec) {
+        if (myCurrentModuleScope
+                .getDefiningElement() instanceof ConceptRealizModuleDec) {
             modifier = "static";
         }
 
@@ -399,13 +437,13 @@ public class CTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This method returns the operation type template for
-     * the target language.</p>
+     * <p>
+     * This method returns the operation type template for the target language.
+     * </p>
      *
      * @param type A {@link PTType}.
      *
-     * @return A {@link ST} associated with the given
-     * program type.
+     * @return A {@link ST} associated with the given program type.
      */
     @Override
     protected final ST getOperationTypeTemplate(PTType type) {
@@ -421,13 +459,14 @@ public class CTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This method returns the program parameter type template for
-     * the target language.</p>
+     * <p>
+     * This method returns the program parameter type template for the target
+     * language.
+     * </p>
      *
      * @param type A {@link PTType}.
      *
-     * @return A {@link ST} associated with the given
-     * program parameter type.
+     * @return A {@link ST} associated with the given program parameter type.
      */
     @Override
     protected final ST getParameterTypeTemplate(PTType type) {
@@ -435,13 +474,14 @@ public class CTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This method returns the program variable type template for
-     * the target language.</p>
+     * <p>
+     * This method returns the program variable type template for the target
+     * language.
+     * </p>
      *
      * @param type A {@link PTType}.
      *
-     * @return A {@link ST} associated with the given
-     * program variable type.
+     * @return A {@link ST} associated with the given program variable type.
      */
     protected final ST getVariableTypeTemplate(PTType type) {
         ST result = mySTGroup.getInstanceOf("unqualified_type");
@@ -461,12 +501,14 @@ public class CTranslator extends AbstractTranslator {
     // ===========================================================
 
     /**
-     * <p>Inserts preprocessor directives at the top-of (and end-of) the file
-     * undergoing translation. Note that these directives only apply to
-     * <strong>C</strong> header files.</p>
+     * <p>
+     * Inserts preprocessor directives at the top-of (and end-of) the file
+     * undergoing translation.
+     * Note that these directives only apply to <strong>C</strong> header files.
+     * </p>
      *
      * @param moduleName Influences the name given to the directive. For ex:
-     *                   <tt>Integer_Template</tt>-><tt>_INTEGER_TEMPLATE_H</tt>
+     *        <tt>Integer_Template</tt>-><tt>_INTEGER_TEMPLATE_H</tt>
      */
     private void addPreprocessorDirective(String moduleName) {
         moduleName = "__" + moduleName.toUpperCase() + "_H";

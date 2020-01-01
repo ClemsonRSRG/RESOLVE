@@ -1,7 +1,7 @@
 /*
  * PTRepresentation.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,11 +19,15 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Map;
 
 /**
- * <p>A <code>PTRepresentation</code> wraps an existing {@link PTType PTType} 
- * with additional information about a {@link PTFamily PTFamily} this type 
- * represents.  An instance of <code>PTRepresentation</code> is thus a special
- * case of its wrapped type that happens to be functioning as a representation
- * type.</p>
+ * <p>
+ * A <code>PTRepresentation</code> wraps an existing {@link PTType PTType} with
+ * additional
+ * information about a {@link PTFamily PTFamily} this type represents. An
+ * instance of
+ * <code>PTRepresentation</code> is thus a special case of its wrapped type that
+ * happens to be
+ * functioning as a representation type.
+ * </p>
  */
 public class PTRepresentation extends PTType {
 
@@ -52,12 +56,11 @@ public class PTRepresentation extends PTType {
     }
 
     @Override
-    public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
+    public PTType instantiateGenerics(Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        throw new UnsupportedOperationException(this.getClass() + " cannot "
-                + "be instantiated.");
+        throw new UnsupportedOperationException(
+                this.getClass() + " cannot " + "be instantiated.");
     }
 
     @Override

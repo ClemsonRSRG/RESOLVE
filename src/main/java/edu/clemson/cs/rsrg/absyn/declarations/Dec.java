@@ -1,7 +1,7 @@
 /*
  * Dec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 
 /**
- * <p>This is the abstract base class for all the declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the declaration objects that the
+ * compiler builds using
+ * the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,10 +33,18 @@ public abstract class Dec extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The object's mathematical type.</p> */
+    /**
+     * <p>
+     * The object's mathematical type.
+     * </p>
+     */
     protected MTType myMathType = null;
 
-    /** <p>The object's name representation.</p> */
+    /**
+     * <p>
+     * The object's name representation.
+     * </p>
+     */
     protected final PosSymbol myName;
 
     // ===========================================================
@@ -41,9 +52,11 @@ public abstract class Dec extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location
-     * and name of any objects created from a class that inherits
-     * from {@code Dec}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location and name of any
+     * objects created from
+     * a class that inherits from {@code Dec}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
@@ -58,8 +71,11 @@ public abstract class Dec extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for all the classes that extend from {@link Dec}.</p>
+     * <p>
+     * This method overrides the default clone method implementation for all the
+     * classes that extend
+     * from {@link Dec}.
+     * </p>
      *
      * @return A deep copy of the object.
      */
@@ -90,8 +106,9 @@ public abstract class Dec extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method gets the mathematical type associated
-     * with this object.</p>
+     * <p>
+     * This method gets the mathematical type associated with this object.
+     * </p>
      *
      * @return The {@link MTType} type object.
      */
@@ -100,8 +117,9 @@ public abstract class Dec extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the symbol representation
-     * of this class.</p>
+     * <p>
+     * Returns the symbol representation of this class.
+     * </p>
      *
      * @return The name in {@link PosSymbol} format.
      */
@@ -120,8 +138,9 @@ public abstract class Dec extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method sets the mathematical type associated
-     * with this object.</p>
+     * <p>
+     * This method sets the mathematical type associated with this object.
+     * </p>
      *
      * @param mt The {@link MTType} type object.
      */
@@ -134,14 +153,17 @@ public abstract class Dec extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>Implemented by concrete subclasses of {@link Dec}
-     * to manufacture a copy of themselves.</p>
+     * <p>
+     * Implemented by concrete subclasses of {@link Dec} to manufacture a copy
+     * of themselves.
+     * </p>
      *
      * @return A new {@link Dec} that is a deep copy of the original.
      */
     protected Dec copy() {
-        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
-                + this.getClass(), new CloneNotSupportedException());
+        throw new MiscErrorException(
+                "Shouldn't be calling copy()!  Type: " + this.getClass(),
+                new CloneNotSupportedException());
     }
 
 }

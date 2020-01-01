@@ -1,7 +1,7 @@
 /*
  * PerformanceEnhancementModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the class for the performance profiles for enhancement module
- * declarations that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for the performance profiles for enhancement module
+ * declarations that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -34,24 +37,39 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>The complete name for the performance profile
-     * associated with this module</p>
+     * <p>
+     * The complete name for the performance profile associated with this module
+     * </p>
      */
     private final PosSymbol myProfileLongName;
 
-    /** <p>The enhancement module associated with this module</p> */
+    /**
+     * <p>
+     * The enhancement module associated with this module
+     * </p>
+     */
     private final PosSymbol myEnhancementName;
 
-    /** <p>The concept module associated with this module</p> */
+    /**
+     * <p>
+     * The concept module associated with this module
+     * </p>
+     */
     private final PosSymbol myConceptName;
 
     /**
-     * <p>The performance profile for the concept module
-     * associated with this module</p>
+     * <p>
+     * The performance profile for the concept module associated with this
+     * module
+     * </p>
      */
     private final PosSymbol myConceptProfileName;
 
-    /** <p>The requires expression</p> */
+    /**
+     * <p>
+     * The requires expression
+     * </p>
+     */
     private final AssertionClause myRequires;
 
     // ===========================================================
@@ -59,8 +77,11 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>This constructor creates a "Performance Profile" for an {@code Enhancement}
-     * module representation.</p>
+     * <p>
+     * This constructor creates a "Performance Profile" for an
+     * {@code Enhancement} module
+     * representation.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name The short profile name in {@link PosSymbol} format.
@@ -68,14 +89,16 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
      * @param profileLongName The long profile name in {@link PosSymbol} format.
      * @param enhancementName The enhancement name in {@link PosSymbol} format.
      * @param conceptName The concept name in {@link PosSymbol} format.
-     * @param conceptProfileName The concept profile name in {@link PosSymbol} format.
+     * @param conceptProfileName The concept profile name in {@link PosSymbol}
+     *        format.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param requires A {@link AssertionClause} representing the concept's
-     *                 requires clause.
+     *        requires clause.
      * @param decs The list of {@link Dec} objects.
      * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
-     *                           externally realized flags that indicates
-     *                           all the modules that this module declaration depends on.
+     *        externally realized flags
+     *        that indicates all the modules that this module declaration
+     *        depends on.
      */
     public PerformanceEnhancementModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol profileLongName,
@@ -150,8 +173,9 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the symbol representation
-     * of for the concept name.</p>
+     * <p>
+     * This method returns the symbol representation of for the concept name.
+     * </p>
      *
      * @return The name in {@link PosSymbol} format.
      */
@@ -160,8 +184,10 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the symbol representation
-     * of for the concept's profile name.</p>
+     * <p>
+     * This method returns the symbol representation of for the concept's
+     * profile name.
+     * </p>
      *
      * @return The name in {@link PosSymbol} format.
      */
@@ -170,8 +196,10 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the symbol representation
-     * of for the enhancement name.</p>
+     * <p>
+     * This method returns the symbol representation of for the enhancement
+     * name.
+     * </p>
      *
      * @return The name in {@link PosSymbol} format.
      */
@@ -180,8 +208,10 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the symbol representation
-     * of for the long version of the profile name.</p>
+     * <p>
+     * This method returns the symbol representation of for the long version of
+     * the profile name.
+     * </p>
      *
      * @return The name in {@link PosSymbol} format.
      */
@@ -190,8 +220,10 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the requires clause
-     * for this performance profile declaration.</p>
+     * <p>
+     * This method returns the requires clause for this performance profile
+     * declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -223,16 +255,19 @@ public class PerformanceEnhancementModuleDec extends ModuleDec {
     @Override
     protected final PerformanceEnhancementModuleDec copy() {
         // Copy all the items in the lists
-        List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
+        List<ModuleParameterDec> newParameterDecs =
+                new ArrayList<>(myParameterDecs.size());
         Collections.copy(newParameterDecs, myParameterDecs);
         List<UsesItem> newUsesItems = new ArrayList<>(myUsesItems.size());
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies = copyModuleDependencies();
+        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies =
+                copyModuleDependencies();
 
-        return new PerformanceEnhancementModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
-                myProfileLongName.clone(), myEnhancementName.clone(), myConceptName.clone(),
+        return new PerformanceEnhancementModuleDec(cloneLocation(),
+                myName.clone(), newParameterDecs, myProfileLongName.clone(),
+                myEnhancementName.clone(), myConceptName.clone(),
                 myConceptProfileName.clone(), newUsesItems, myRequires.clone(),
                 newDecs, newModuleDependencies);
     }

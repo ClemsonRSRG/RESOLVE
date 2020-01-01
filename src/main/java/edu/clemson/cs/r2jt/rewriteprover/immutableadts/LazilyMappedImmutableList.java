@@ -1,7 +1,7 @@
 /*
  * LazilyMappedImmutableList.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,19 +25,25 @@ public class LazilyMappedImmutableList<T, R> extends AbstractImmutableList<R> {
     private final Mapping<T, R> myMapping;
 
     /**
-     * <p>Constructs a new immutable list based on <code>original</code>, in 
-     * which each entry in this new list will be the sister entry in that 
-     * original list, filtered through <code>m</code>.  <code>m</code> must 
-     * represent a functional mapping--that is, if <code>x.equals(y)</code>, 
-     * then <code>m.map(x).equals(m.map(y))</codE> in all cases, otherwise the 
-     * resulting list may appear to "mutate" to the client, despite the original
-     * underlying list remaining unchanged.</p>
+     * <p>
+     * Constructs a new immutable list based on <code>original</code>, in which
+     * each entry in this new
+     * list will be the sister entry in that original list, filtered through
+     * <code>m</code>.
+     * <code>m</code> must represent a functional mapping--that is, if
+     * <code>x.equals(y)</code>, then
+     * <code>m.map(x).equals(m.map(y))</codE> in all cases, otherwise the
+     * resulting list may appear to
+     * "mutate" to the client, despite the original underlying list remaining
+     * unchanged.
+     * </p>
      * 
      * @param original The original list.
      * @param m The mapping to apply to each entry.
      */
     @SuppressWarnings("unchecked")
-    public LazilyMappedImmutableList(ImmutableList<T> original, Mapping<T, R> m) {
+    public LazilyMappedImmutableList(ImmutableList<T> original,
+            Mapping<T, R> m) {
 
         myOriginalList = original;
         myMapping = m;
@@ -46,8 +52,8 @@ public class LazilyMappedImmutableList<T, R> extends AbstractImmutableList<R> {
 
     @Override
     public ImmutableList<R> tail(int startIndex) {
-        return new LazilyMappedImmutableList<T, R>(myOriginalList
-                .tail(startIndex), myMapping);
+        return new LazilyMappedImmutableList<T, R>(
+                myOriginalList.tail(startIndex), myMapping);
     }
 
     @Override

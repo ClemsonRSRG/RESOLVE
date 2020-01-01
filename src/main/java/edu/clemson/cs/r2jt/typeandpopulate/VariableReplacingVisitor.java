@@ -1,7 +1,7 @@
 /*
  * VariableReplacingVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -32,8 +32,8 @@ public class VariableReplacingVisitor extends MutatingVisitor {
         mySubstitutions = new HashMap<String, MTType>(substitutions);
     }
 
-    private static Map<String, MTType> convertToMTNamedMap(
-            Map<String, String> original, TypeGraph g) {
+    private static Map<String, MTType>
+            convertToMTNamedMap(Map<String, String> original, TypeGraph g) {
 
         Map<String, MTType> result = new HashMap<String, MTType>();
 
@@ -50,7 +50,7 @@ public class VariableReplacingVisitor extends MutatingVisitor {
         if (mySubstitutions.containsKey(t.name)) {
             try {
                 getInnermostBinding(t.name);
-                //This is bound to some inner scope
+                // This is bound to some inner scope
             }
             catch (NoSuchElementException e) {
                 replaceWith(mySubstitutions.get(t.name));

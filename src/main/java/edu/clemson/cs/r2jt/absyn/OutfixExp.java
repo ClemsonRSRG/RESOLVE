@@ -1,7 +1,7 @@
 /*
  * OutfixExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -65,18 +65,16 @@ public class OutfixExp extends AbstractFunctionExp {
 
         if (retval) {
             OutfixExp eAsOutfix = (OutfixExp) e;
-            retval =
-                    (operator == eAsOutfix.operator)
-                            && equivalent(argument, eAsOutfix.argument);
+            retval = (operator == eAsOutfix.operator)
+                    && equivalent(argument, eAsOutfix.argument);
         }
 
         return retval;
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        Exp retval =
-                new OutfixExp(location, operator, substitute(argument,
-                        substitutions));
+        Exp retval = new OutfixExp(location, operator,
+                substitute(argument, substitutions));
         return retval;
     }
 
@@ -225,8 +223,9 @@ public class OutfixExp extends AbstractFunctionExp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         if (argument != null) {
             return argument.containsVar(varName, IsOldExp);

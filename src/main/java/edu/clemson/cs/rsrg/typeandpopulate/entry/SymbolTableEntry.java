@@ -1,7 +1,7 @@
 /*
  * SymbolTableEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,18 +23,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>This abstract class serves as the parent class of all
- * symbol table entries.</p>
+ * <p>
+ * This abstract class serves as the parent class of all symbol table entries.
+ * </p>
  *
- * <p>Checklist for subclassing <code>SymbolTableEntry</code>:</p>
+ * <p>
+ * Checklist for subclassing <code>SymbolTableEntry</code>:
+ * </p>
  *
  * <ul>
- * 		<li>Create subclass.</li>
- * 		<li>Add "toXXX()" method in this parent class.</li>
- * 		<li>Override it in subclass.</li>
- *      <li>Consider if entry can be coerced to other kinds of entries,
- *      and override those toXXXs as well. (See ProgramVariableEntry
- *      as an example.</li>
+ * <li>Create subclass.</li>
+ * <li>Add "toXXX()" method in this parent class.</li>
+ * <li>Override it in subclass.</li>
+ * <li>Consider if entry can be coerced to other kinds of entries, and override
+ * those toXXXs as
+ * well. (See ProgramVariableEntry as an example.</li>
  * </ul>
  *
  * @version 2.0
@@ -46,9 +49,11 @@ public abstract class SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This defines the various different quantification options
-     * for the expressions in the {@link ResolveConceptualElement}
-     * hierarchy.</p>
+     * <p>
+     * This defines the various different quantification options for the
+     * expressions in the
+     * {@link ResolveConceptualElement} hierarchy.
+     * </p>
      *
      * @version 2.0
      */
@@ -91,13 +96,25 @@ public abstract class SymbolTableEntry {
     // Member Fields
     // ===========================================================
 
-    /** <p>Name associated with this entry.</p> */
+    /**
+     * <p>
+     * Name associated with this entry.
+     * </p>
+     */
     private final String myName;
 
-    /** <p>Element that created this entry.</p> */
+    /**
+     * <p>
+     * Element that created this entry.
+     * </p>
+     */
     private final ResolveConceptualElement myDefiningElement;
 
-    /** <p>Module where this entry was created from.</p> */
+    /**
+     * <p>
+     * Module where this entry was created from.
+     * </p>
+     */
     private final ModuleIdentifier mySourceModuleIdentifier;
 
     // ===========================================================
@@ -105,10 +122,12 @@ public abstract class SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the name,
-     * defining element and source module identifier for
-     * any objects created from a class that inherits from
-     * {@code SymbolTableEntry}.</p>
+     * <p>
+     * An helper constructor that allow us to store the name, defining element
+     * and source module
+     * identifier for any objects created from a class that inherits from
+     * {@code SymbolTableEntry}.
+     * </p>
      *
      * @param name Name associated with this entry.
      * @param definingElement The element that created this entry.
@@ -127,19 +146,21 @@ public abstract class SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This static method returns a map of {@link MTType}s obtained
-     * from their associated {@link PTType}s.</p>
+     * <p>
+     * This static method returns a map of {@link MTType}s obtained from their
+     * associated
+     * {@link PTType}s.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      *
      * @return A map containing the {@link MTType}s obtained from the
-     * instantiated program types.
+     *         instantiated program types.
      */
-    public static Map<String, MTType> buildMathTypeGenerics(
-            Map<String, PTType> genericInstantiations) {
+    public static Map<String, MTType>
+            buildMathTypeGenerics(Map<String, PTType> genericInstantiations) {
 
-        Map<String, MTType> genericMathematicalInstantiations =
-                new HashMap<>();
+        Map<String, MTType> genericMathematicalInstantiations = new HashMap<>();
 
         for (Map.Entry<String, PTType> instantiation : genericInstantiations
                 .entrySet()) {
@@ -152,25 +173,30 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the RESOLVE AST node that instantiated
-     * this entry.</p>
+     * <p>
+     * This method returns the RESOLVE AST node that instantiated this entry.
+     * </p>
      *
      * @return The {@link ResolveConceptualElement} that instantiated this
-     * entry.
+     *         entry.
      */
     public final ResolveConceptualElement getDefiningElement() {
         return myDefiningElement;
     }
 
     /**
-     * <p>This method returns a description associated with this entry.</p>
+     * <p>
+     * This method returns a description associated with this entry.
+     * </p>
      *
      * @return A string.
      */
     public abstract String getEntryTypeDescription();
 
     /**
-     * <p>This method returns the name associated with this entry.</p>
+     * <p>
+     * This method returns the name associated with this entry.
+     * </p>
      *
      * @return A string.
      */
@@ -179,8 +205,11 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the module identifier for the {@link ModuleDec}
-     * that instantiated this entry.</p>
+     * <p>
+     * This method returns the module identifier for the {@link ModuleDec} that
+     * instantiated this
+     * entry.
+     * </p>
      *
      * @return A {@link ModuleIdentifier} representation object.
      */
@@ -189,9 +218,11 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method converts a generic {@link SymbolTableEntry} to an entry
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link SymbolTableEntry} to an entry that
+     * has all the generic
+     * types and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -203,13 +234,15 @@ public abstract class SymbolTableEntry {
             FacilityEntry instantiatingFacility);
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link FacilityEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link FacilityEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link FacilityEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link FacilityEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     public FacilityEntry toFacilityEntry(Location l) {
         throw new SourceErrorException("Expecting a facility.\n" + "Found "
@@ -217,29 +250,35 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link FacilityTypeRepresentationEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link FacilityTypeRepresentationEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
      * @return A {@link FacilityTypeRepresentationEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     *         it throws a
+     *         {@link SourceErrorException}.
      */
-    public FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
-            Location l) {
-        throw new SourceErrorException("Expecting a facility type "
-                + "representation.\n" + "Found " + getEntryTypeDescription()
-                + ".", l);
+    public FacilityTypeRepresentationEntry
+            toFacilityTypeRepresentationEntry(Location l) {
+        throw new SourceErrorException(
+                "Expecting a facility type " + "representation.\n" + "Found "
+                        + getEntryTypeDescription() + ".",
+                l);
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link MathSymbolEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link MathSymbolEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link MathSymbolEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link MathSymbolEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     public MathSymbolEntry toMathSymbolEntry(Location l) {
         throw new SourceErrorException("Expecting a math symbol.\n" + "Found "
@@ -247,13 +286,15 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link OperationEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link OperationEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link OperationEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link OperationEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     public OperationEntry toOperationEntry(Location l) {
         throw new SourceErrorException("Expecting an operation.\n" + "Found "
@@ -261,13 +302,16 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link OperationProfileEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link OperationProfileEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link OperationProfileEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link OperationProfileEntry} if possible. Otherwise, it throws
+     *         a
+     *         {@link SourceErrorException}.
      */
     public OperationProfileEntry toOperationProfileEntry(Location l) {
         throw new SourceErrorException("Expecting a operation profile.\n"
@@ -275,13 +319,15 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ProcedureEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ProcedureEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ProcedureEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ProcedureEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     public ProcedureEntry toProcedureEntry(Location l) {
         throw new SourceErrorException("Expecting a procedure.\n" + "Found "
@@ -289,13 +335,16 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ProgramParameterEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ProgramParameterEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ProgramParameterEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ProgramParameterEntry} if possible. Otherwise, it throws
+     *         a
+     *         {@link SourceErrorException}.
      */
     public ProgramParameterEntry toProgramParameterEntry(Location l) {
         throw new SourceErrorException("Expecting a program parameter.\n"
@@ -303,13 +352,15 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ProgramTypeEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ProgramTypeEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ProgramTypeEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ProgramTypeEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     public ProgramTypeEntry toProgramTypeEntry(Location l) {
         throw new SourceErrorException("Expecting a program type.\n" + "Found "
@@ -317,13 +368,16 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ProgramVariableEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ProgramVariableEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ProgramVariableEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ProgramVariableEntry} if possible. Otherwise, it throws
+     *         a
+     *         {@link SourceErrorException}.
      */
     public ProgramVariableEntry toProgramVariableEntry(Location l) {
         throw new SourceErrorException("Expecting a program variable.\n"
@@ -331,13 +385,15 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ShortFacilityEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ShortFacilityEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ShortFacilityEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ShortFacilityEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     public ShortFacilityEntry toShortFacilityEntry(Location l) {
         throw new SourceErrorException("Expecting a short facility module.\n"
@@ -345,27 +401,32 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link TheoremEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link TheoremEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link TheoremEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link TheoremEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     public TheoremEntry toTheoremEntry(Location l) {
-        throw new SourceErrorException("Expecting a theorem.\n" + "Found "
-                + getEntryTypeDescription(), l);
+        throw new SourceErrorException(
+                "Expecting a theorem.\n" + "Found " + getEntryTypeDescription(),
+                l);
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link TypeFamilyEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link TypeFamilyEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link TypeFamilyEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link TypeFamilyEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     public TypeFamilyEntry toTypeFamilyEntry(Location l) {
         throw new SourceErrorException("Expecting a program type family.\n"
@@ -373,18 +434,22 @@ public abstract class SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link TypeRepresentationEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link TypeRepresentationEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link TypeRepresentationEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link TypeRepresentationEntry} if possible. Otherwise, it
+     *         throws a
+     *         {@link SourceErrorException}.
      */
     public TypeRepresentationEntry toTypeRepresentationEntry(Location l) {
         throw new SourceErrorException(
                 "Expecting a program type representation.\n" + "Found "
-                        + getEntryTypeDescription(), l);
+                        + getEntryTypeDescription(),
+                l);
     }
 
 }

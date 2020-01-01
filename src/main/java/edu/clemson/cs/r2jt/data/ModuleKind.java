@@ -1,7 +1,7 @@
 /*
  * ModuleKind.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,7 @@ package edu.clemson.cs.r2jt.data;
 public class ModuleKind {
 
     // ===========================================================
-    // Variables 
+    // Variables
     // ===========================================================
 
     private String name;

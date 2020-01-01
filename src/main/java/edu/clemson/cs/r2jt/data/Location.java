@@ -1,7 +1,7 @@
 /*
  * Location.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -93,19 +93,19 @@ public class Location {
         return (file.equals(loc.file) && pos.equals(loc.pos));
     }
 
-    //      public boolean equals(Location loc) {
-    //          return (  this.file.equals(loc.getFile()) &&
-    //                    this.pos.equals(loc.getPos()));
-    //      }
+    // public boolean equals(Location loc) {
+    // return ( this.file.equals(loc.getFile()) &&
+    // this.pos.equals(loc.getPos()));
+    // }
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        //Environment env = Environment.getInstance();
-        //          if (env.getModuleID(file).hasConcept()) {
-        //              sb.append("[");
-        //              sb.append(env.getModuleID(file).getConceptName().toString());
-        //              sb.append("]");
-        //          }
+        // Environment env = Environment.getInstance();
+        // if (env.getModuleID(file).hasConcept()) {
+        // sb.append("[");
+        // sb.append(env.getModuleID(file).getConceptName().toString());
+        // sb.append("]");
+        // }
         File par = file.getParentFile();
         String path = file.toString();
         String mask = par.toString();

@@ -1,7 +1,7 @@
 /*
  * PTElement.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,10 @@ import java.util.Map;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>The program-type corresponding to TypeGraph.ELEMENT, i.e., the type of
- * all program types.</p>
+ * <p>
+ * The program-type corresponding to TypeGraph.ELEMENT, i.e., the type of all
+ * program types.
+ * </p>
  */
 public class PTElement extends PTType {
 
@@ -34,8 +36,7 @@ public class PTElement extends PTType {
     }
 
     @Override
-    public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
+    public PTType instantiateGenerics(Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
         return this;

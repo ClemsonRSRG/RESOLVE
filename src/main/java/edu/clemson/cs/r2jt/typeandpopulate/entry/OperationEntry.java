@@ -1,7 +1,7 @@
 /*
  * OperationEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -29,17 +29,16 @@ public class OperationEntry extends SymbolTableEntry {
     private final PTType myReturnType;
     private final ImmutableList<ProgramParameterEntry> myParameters;
 
-    public OperationEntry(String name,
-            ResolveConceptualElement definingElement,
+    public OperationEntry(String name, ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, PTType returnType,
             List<ProgramParameterEntry> parameters) {
 
         this(name, definingElement, sourceModule, returnType,
-                new ArrayBackedImmutableList<ProgramParameterEntry>(parameters));
+                new ArrayBackedImmutableList<ProgramParameterEntry>(
+                        parameters));
     }
 
-    public OperationEntry(String name,
-            ResolveConceptualElement definingElement,
+    public OperationEntry(String name, ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, PTType returnType,
             ImmutableList<ProgramParameterEntry> parameters) {
 
@@ -71,9 +70,7 @@ public class OperationEntry extends SymbolTableEntry {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        return new OperationEntry(
-                getName(),
-                getDefiningElement(),
+        return new OperationEntry(getName(), getDefiningElement(),
                 getSourceModuleIdentifier(),
                 myReturnType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility),

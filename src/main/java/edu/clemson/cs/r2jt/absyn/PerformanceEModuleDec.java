@@ -1,7 +1,7 @@
 /*
  * PerformanceEModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -59,11 +59,10 @@ public class PerformanceEModuleDec extends ModuleDec {
 
     public PerformanceEModuleDec() {};
 
-    public PerformanceEModuleDec(PosSymbol profileName1,
-            PosSymbol profileName2, PosSymbol profileName3,
-            PosSymbol profilecName, PosSymbol profilecpName,
-            List<ModuleParameterDec> parameters, List<UsesItem> usesItems,
-            Exp requires, List<Dec> decs) {
+    public PerformanceEModuleDec(PosSymbol profileName1, PosSymbol profileName2,
+            PosSymbol profileName3, PosSymbol profilecName,
+            PosSymbol profilecpName, List<ModuleParameterDec> parameters,
+            List<UsesItem> usesItems, Exp requires, List<Dec> decs) {
         this.profileName1 = profileName1;
         this.profileName2 = profileName2;
         this.profileName3 = profileName3;
@@ -175,7 +174,10 @@ public class PerformanceEModuleDec extends ModuleDec {
         this.profilecName = profilecName;
     }
 
-    /** Sets the Profile's concept's profile name variable to the specified value. */
+    /**
+     * Sets the Profile's concept's profile name variable to the specified
+     * value.
+     */
     public void setProfilecpName(PosSymbol profilecpName) {
         this.profilecpName = profilecpName;
     }

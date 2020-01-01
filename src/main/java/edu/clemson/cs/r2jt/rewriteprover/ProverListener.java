@@ -1,7 +1,7 @@
 /*
  * ProverListener.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,9 @@ public interface ProverListener {
 
     public void progressUpdate(double progess);
 
-    public void vcResult(boolean proved, PerVCProverModel finalModel, Metrics m);
+    public void vcResult(boolean proved, PerVCProverModel finalModel,
+            Metrics m);
 
     // readCancel should return true to stop the prover
-    //public boolean readCancel();
+    // public boolean readCancel();
 }

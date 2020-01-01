@@ -1,7 +1,7 @@
 /*
  * ProgramFunctionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -57,8 +57,8 @@ public class ProgramFunctionExp extends ProgramExp {
             newArguments.add((ProgramExp) substitute(a, substitutions));
         }
 
-        retval =
-                new ProgramFunctionExp(location, qualifier, name, newArguments);
+        retval = new ProgramFunctionExp(location, qualifier, name,
+                newArguments);
         return retval;
     }
 
@@ -181,8 +181,9 @@ public class ProgramFunctionExp extends ProgramExp {
         return str;
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<ProgramExp> i = arguments.iterator();
         while (i.hasNext()) {

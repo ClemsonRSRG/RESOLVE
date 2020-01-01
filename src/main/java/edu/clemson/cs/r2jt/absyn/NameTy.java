@@ -1,7 +1,7 @@
 /*
  * NameTy.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -110,7 +110,7 @@ public class NameTy extends Ty {
 
     public String toString(int indent) {
         StringBuffer sb = new StringBuffer();
-        // 	if(qualifier != null) sb.append(qualifier.getName() + ".");
+        // if(qualifier != null) sb.append(qualifier.getName() + ".");
         sb.append(name.getName());
         return sb.toString();
     }

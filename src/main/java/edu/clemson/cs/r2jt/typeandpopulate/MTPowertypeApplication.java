@@ -1,7 +1,7 @@
 /*
  * MTPowertypeApplication.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,14 +22,14 @@ public class MTPowertypeApplication extends MTFunctionApplication {
 
     @Override
     public boolean isKnownToContainOnlyMTypes() {
-        //The powertype is, by definition, a container of containers
+        // The powertype is, by definition, a container of containers
         return true;
     }
 
     @Override
     public boolean membersKnownToContainOnlyMTypes() {
-        //I'm the container of all sub-containers of my argument.  My members
-        //are containers of members from the original argument.
+        // I'm the container of all sub-containers of my argument. My members
+        // are containers of members from the original argument.
         return getArgument(0).isKnownToContainOnlyMTypes();
     }
 
@@ -62,9 +62,8 @@ public class MTPowertypeApplication extends MTFunctionApplication {
 
         switch (index) {
         case 0:
-            result =
-                    new MTFunctionApplication(getTypeGraph(),
-                            (MTFunction) newType, getArguments());
+            result = new MTFunctionApplication(getTypeGraph(),
+                    (MTFunction) newType, getArguments());
             break;
         case 1:
             result = new MTPowertypeApplication(getTypeGraph(), newType);
@@ -76,8 +75,8 @@ public class MTPowertypeApplication extends MTFunctionApplication {
         return result;
     }
 
-    /*@Override
-    public boolean bindsTo(MTType type, Exp bindingExpr) {
-    	return this.getArgument(0).bindsToWithCoercion(type, bindingExpr);
-    }*/
+    /*
+     * @Override public boolean bindsTo(MTType type, Exp bindingExpr) { return
+     * this.getArgument(0).bindsToWithCoercion(type, bindingExpr); }
+     */
 }

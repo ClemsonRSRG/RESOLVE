@@ -1,7 +1,7 @@
 /*
  * ResolveToken.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
 /**
- * <p>A special token that overrides the {@link #equals(Object)}} logic present in the default
- * implementation of {@link CommonToken}.</p>
+ * <p>
+ * A special token that overrides the {@link #equals(Object)}} logic present in
+ * the default
+ * implementation of {@link CommonToken}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -29,7 +32,11 @@ import org.antlr.v4.runtime.misc.Pair;
  */
 public class ResolveToken extends CommonToken {
 
-    /** <p>The source file for this token.</p> */
+    /**
+     * <p>
+     * The source file for this token.
+     * </p>
+     */
     private final ResolveFile mySourceFile;
 
     // ===========================================================
@@ -37,7 +44,9 @@ public class ResolveToken extends CommonToken {
     // ===========================================================
 
     /**
-     * <p>This creates a RESOLVE identifier token.</p>
+     * <p>
+     * This creates a RESOLVE identifier token.
+     * </p>
      *
      * @param file Source file.
      * @param text Token text.
@@ -48,7 +57,9 @@ public class ResolveToken extends CommonToken {
     }
 
     /**
-     * <p>This creates a generic RESOLVE token.</p>
+     * <p>
+     * This creates a generic RESOLVE token.
+     * </p>
      *
      * @param file Source file.
      * @param type Token type.
@@ -60,8 +71,9 @@ public class ResolveToken extends CommonToken {
     }
 
     /**
-     * <p>This constructor allows you
-     * to create a token from a source pair.</p>
+     * <p>
+     * This constructor allows you to create a token from a source pair.
+     * </p>
      *
      * @param file Source file.
      * @param source Token source.
@@ -81,11 +93,14 @@ public class ResolveToken extends CommonToken {
     // ===========================================================
 
     /**
-     * <p>Equals method to compare two token objects.</p>
+     * <p>
+     * Equals method to compare two token objects.
+     * </p>
      *
      * @param o The object to compare.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -104,7 +119,9 @@ public class ResolveToken extends CommonToken {
     }
 
     /**
-     * <p>Returns the location for the token.</p>
+     * <p>
+     * Returns the location for the token.
+     * </p>
      *
      * @return The {@link Location} object.
      */
@@ -113,7 +130,9 @@ public class ResolveToken extends CommonToken {
     }
 
     /**
-     * <p>Returns a hash code for this string.</p>
+     * <p>
+     * Returns a hash code for this string.
+     * </p>
      *
      * @return A hash code value for this object.
      */
@@ -123,7 +142,9 @@ public class ResolveToken extends CommonToken {
     }
 
     /**
-     * <p>Returns the token in string format.</p>
+     * <p>
+     * Returns the token in string format.
+     * </p>
      *
      * @return Token as a string.
      */

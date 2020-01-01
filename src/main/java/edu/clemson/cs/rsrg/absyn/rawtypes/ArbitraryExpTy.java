@@ -1,7 +1,7 @@
 /*
  * ArbitraryExpTy.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,14 +15,20 @@ package edu.clemson.cs.rsrg.absyn.rawtypes;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 
 /**
- * <p>This is the class for all the raw arbitrary type objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the raw arbitrary type objects that the compiler
+ * builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
- * <p>A syntactic type based on an arbitrary mathematical {@link Exp}.  All
- * math expressions should have this {@link Ty}. Ultimately their
- * interfaces should be changed to reflect this fact, or this class should
- * be unwrapped and math types should simply be represented by 
- * {@link Exp}s.</p>
+ * <p>
+ * A syntactic type based on an arbitrary mathematical {@link Exp}. All math
+ * expressions should have
+ * this {@link Ty}. Ultimately their interfaces should be changed to reflect
+ * this fact, or this
+ * class should be unwrapped and math types should simply be represented by
+ * {@link Exp}s.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,7 +38,11 @@ public class ArbitraryExpTy extends Ty {
     // Member Fields
     // ===========================================================
 
-    /** <p>The inner arbitrary expression.</p> */
+    /**
+     * <p>
+     * The inner arbitrary expression.
+     * </p>
+     */
     private final Exp myArbitraryExp;
 
     // ===========================================================
@@ -40,8 +50,9 @@ public class ArbitraryExpTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>This constructs an arbitrary raw type that contains
-     * an expression.</p>
+     * <p>
+     * This constructs an arbitrary raw type that contains an expression.
+     * </p>
      *
      * @param arbitraryExp An {@link Exp} expression.
      */
@@ -86,7 +97,9 @@ public class ArbitraryExpTy extends Ty {
     }
 
     /**
-     * <p>Returns this raw type's inner expression.</p>
+     * <p>
+     * Returns this raw type's inner expression.
+     * </p>
      *
      * @return The inner (arbitrary) {@link Exp} representation object.
      */

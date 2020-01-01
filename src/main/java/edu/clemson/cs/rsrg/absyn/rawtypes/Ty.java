@@ -1,7 +1,7 @@
 /*
  * Ty.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,10 +19,13 @@ import edu.clemson.cs.rsrg.typeandpopulate.mathtypes.MTType;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 
 /**
- * <p>A {@link Ty} represents the <em>description</em> of a
- * {@code Type}, as it is found in the RESOLVE source code. That is, it is
- * representation of a type in the abstract syntax tree before it is translated 
- * into a true {@code Type}.</p>
+ * <p>
+ * A {@link Ty} represents the <em>description</em> of a {@code Type}, as it is
+ * found in the RESOLVE
+ * source code. That is, it is representation of a type in the abstract syntax
+ * tree before it is
+ * translated into a true {@code Type}.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,13 +35,25 @@ public abstract class Ty extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The object's mathematical type.</p> */
+    /**
+     * <p>
+     * The object's mathematical type.
+     * </p>
+     */
     protected MTType myMathType = null;
 
-    /** <p>The object's mathematical type value.</p> */
+    /**
+     * <p>
+     * The object's mathematical type value.
+     * </p>
+     */
     protected MTType myMathTypeValue = null;
 
-    /** <p>The program type representation for this programming expression.</p> */
+    /**
+     * <p>
+     * The program type representation for this programming expression.
+     * </p>
+     */
     protected PTType myProgramTypeValue = null;
 
     // ===========================================================
@@ -46,9 +61,11 @@ public abstract class Ty extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location
-     * of any objects created from a class that inherits from
-     * {@code Ty}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location of any objects
+     * created from a class
+     * that inherits from {@code Ty}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -61,8 +78,11 @@ public abstract class Ty extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for all the classes that extend from {@link Ty}.</p>
+     * <p>
+     * This method overrides the default clone method implementation for all the
+     * classes that extend
+     * from {@link Ty}.
+     * </p>
      *
      * @return A deep copy of the object.
      */
@@ -91,17 +111,20 @@ public abstract class Ty extends ResolveConceptualElement {
         if (myMathType != null ? !myMathType.equals(ty.myMathType)
                 : ty.myMathType != null)
             return false;
-        if (myMathTypeValue != null ? !myMathTypeValue
-                .equals(ty.myMathTypeValue) : ty.myMathTypeValue != null)
+        if (myMathTypeValue != null
+                ? !myMathTypeValue.equals(ty.myMathTypeValue)
+                : ty.myMathTypeValue != null)
             return false;
-        return myProgramTypeValue != null ? myProgramTypeValue
-                .equals(ty.myProgramTypeValue) : ty.myProgramTypeValue == null;
+        return myProgramTypeValue != null
+                ? myProgramTypeValue.equals(ty.myProgramTypeValue)
+                : ty.myProgramTypeValue == null;
 
     }
 
     /**
-     * <p>This method gets the mathematical type associated
-     * with this object.</p>
+     * <p>
+     * This method gets the mathematical type associated with this object.
+     * </p>
      *
      * @return The {@link MTType} type object.
      */
@@ -110,8 +133,9 @@ public abstract class Ty extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method gets the mathematical type value associated
-     * with this object.</p>
+     * <p>
+     * This method gets the mathematical type value associated with this object.
+     * </p>
      *
      * @return The {@link MTType} type object.
      */
@@ -120,8 +144,9 @@ public abstract class Ty extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method gets the programming type associated
-     * with this object.</p>
+     * <p>
+     * This method gets the programming type associated with this object.
+     * </p>
      *
      * @return The {@link PTType} type object.
      */
@@ -135,22 +160,18 @@ public abstract class Ty extends ResolveConceptualElement {
     @Override
     public int hashCode() {
         int result = myMathType != null ? myMathType.hashCode() : 0;
-        result =
-                31
-                        * result
-                        + (myMathTypeValue != null ? myMathTypeValue.hashCode()
-                                : 0);
-        result =
-                31
-                        * result
-                        + (myProgramTypeValue != null ? myProgramTypeValue
-                                .hashCode() : 0);
+        result = 31 * result
+                + (myMathTypeValue != null ? myMathTypeValue.hashCode() : 0);
+        result = 31 * result
+                + (myProgramTypeValue != null ? myProgramTypeValue.hashCode()
+                        : 0);
         return result;
     }
 
     /**
-     * <p>This method sets the mathematical type associated
-     * with this object.</p>
+     * <p>
+     * This method sets the mathematical type associated with this object.
+     * </p>
      *
      * @param mathType The {@link MTType} type object.
      */
@@ -159,8 +180,9 @@ public abstract class Ty extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method sets the mathematical type value associated
-     * with this object.</p>
+     * <p>
+     * This method sets the mathematical type value associated with this object.
+     * </p>
      *
      * @param mathTypeValue The {@link MTType} type object.
      */
@@ -169,8 +191,9 @@ public abstract class Ty extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method sets the programming type associated
-     * with this object.</p>
+     * <p>
+     * This method sets the programming type associated with this object.
+     * </p>
      *
      * @param progType The {@link PTType} type object.
      */
@@ -183,14 +206,17 @@ public abstract class Ty extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>Implemented by concrete subclasses of {@link Ty} to manufacture
-     * a copy of themselves.</p>
+     * <p>
+     * Implemented by concrete subclasses of {@link Ty} to manufacture a copy of
+     * themselves.
+     * </p>
      *
      * @return A new {@link Ty} that is a deep copy of the original.
      */
     protected Ty copy() {
-        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
-                + this.getClass(), new CloneNotSupportedException());
+        throw new MiscErrorException(
+                "Shouldn't be calling copy()!  Type: " + this.getClass(),
+                new CloneNotSupportedException());
     }
 
 }

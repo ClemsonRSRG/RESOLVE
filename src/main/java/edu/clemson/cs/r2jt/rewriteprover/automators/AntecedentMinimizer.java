@@ -1,7 +1,7 @@
 /*
  * AntecedentMinimizer.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -53,21 +53,20 @@ public class AntecedentMinimizer implements Automator {
         }
 
         myCurrentRound = myReducingTranformations.iterator();
-        myCurrentApplier = DUMMY_APPLIER; //This will never be applied
+        myCurrentApplier = DUMMY_APPLIER; // This will never be applied
     }
 
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
         if (myCurrentRound.hasNext()) {
-            myProductiveRoundFlag =
-                    myProductiveRoundFlag
-                            || (myCurrentApplier.getApplicationCount() > 0);
+            myProductiveRoundFlag = myProductiveRoundFlag
+                    || (myCurrentApplier.getApplicationCount() > 0);
 
             ExpandAntecedentBySubstitution expander = myCurrentRound.next();
             SubstituteInPlaceInAntecedent substituter =
                     new SubstituteInPlaceInAntecedent(expander.getTheorem(),
-                            expander.getMatchPattern(), expander
-                                    .getTransformationTemplate());
+                            expander.getMatchPattern(),
+                            expander.getTransformationTemplate());
 
             myCurrentApplier = new ApplyAll(substituter);
             stack.push(myCurrentApplier);
@@ -76,7 +75,7 @@ public class AntecedentMinimizer implements Automator {
             if (myProductiveRoundFlag) {
                 myCurrentRound = myReducingTranformations.iterator();
                 myProductiveRoundFlag = false;
-                myCurrentApplier = DUMMY_APPLIER; //This will never be applied
+                myCurrentApplier = DUMMY_APPLIER; // This will never be applied
             }
             else {
                 stack.pop();

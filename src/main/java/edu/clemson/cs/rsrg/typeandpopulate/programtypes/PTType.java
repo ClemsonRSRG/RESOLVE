@@ -1,7 +1,7 @@
 /*
  * PTType.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.Map;
 
 /**
- * <p>This abstract class serves as the parent class of all
- * program types.</p>
+ * <p>
+ * This abstract class serves as the parent class of all program types.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,7 +30,11 @@ public abstract class PTType {
     // Member Fields
     // ===========================================================
 
-    /** <p>The current type graph object in use.</p> */
+    /**
+     * <p>
+     * The current type graph object in use.
+     * </p>
+     */
     protected final TypeGraph myTypeGraph;
 
     // ===========================================================
@@ -37,9 +42,11 @@ public abstract class PTType {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the type graph
-     * for any objects created from a class that inherits from
-     * {@code PTType}.</p>
+     * <p>
+     * An helper constructor that allow us to store the type graph for any
+     * objects created from a
+     * class that inherits from {@code PTType}.
+     * </p>
      *
      * @param g The current type graph.
      */
@@ -52,21 +59,26 @@ public abstract class PTType {
     // ===========================================================
 
     /**
-     * <p>This method returns {@code true} <strong>iff</strong> an value of this type
-     * would be acceptable where one of type {@code t} were required.</p>
+     * <p>
+     * This method returns {@code true} <strong>iff</strong> an value of this
+     * type would be acceptable
+     * where one of type {@code t} were required.
+     * </p>
      *
      * @param t The required type.
      *
-     * @return {@code true} <strong>iff</strong> an value of this type
-     *         would be acceptable where one of type {@code t} were
-     *         required, {@code false} otherwise.
+     * @return {@code true} <strong>iff</strong> an value of this type would be
+     *         acceptable where one
+     *         of type {@code t} were required, {@code false} otherwise.
      */
     public boolean acceptableFor(PTType t) {
         return equals(t);
     }
 
     /**
-     * <p>The type graph containing all the type relationships.</p>
+     * <p>
+     * The type graph containing all the type relationships.
+     * </p>
      *
      * @return The type graph for the compiler.
      */
@@ -75,9 +87,11 @@ public abstract class PTType {
     }
 
     /**
-     * <p>This method converts a generic {@link PTType} to a program type
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link PTType} to a program type that has
+     * all the generic types
+     * and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -89,7 +103,10 @@ public abstract class PTType {
             FacilityEntry instantiatingFacility);
 
     /**
-     * <p>This method returns the mathematical type associated with this program type.</p>
+     * <p>
+     * This method returns the mathematical type associated with this program
+     * type.
+     * </p>
      *
      * @return A {@link MTType} representation object.
      */

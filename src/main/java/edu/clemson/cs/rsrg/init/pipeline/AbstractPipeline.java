@@ -1,7 +1,7 @@
 /*
  * AbstractPipeline.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 /**
- * <p>This is the abstract base class for all pipeline objects
- * that are used to perform some sort of action.</p>
+ * <p>
+ * This is the abstract base class for all pipeline objects that are used to
+ * perform some sort of
+ * action.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,12 +32,18 @@ public abstract class AbstractPipeline {
     // ===========================================================
 
     /**
-     * <p>The current job's compilation environment
-     * that stores all necessary objects and flags.</p>
+     * <p>
+     * The current job's compilation environment that stores all necessary
+     * objects and flags.
+     * </p>
      */
     protected final CompileEnvironment myCompileEnvironment;
 
-    /** <p>The symbol table for the compiler.</p> */
+    /**
+     * <p>
+     * The symbol table for the compiler.
+     * </p>
+     */
     protected final MathSymbolTableBuilder mySymbolTable;
 
     // ===========================================================
@@ -42,9 +51,12 @@ public abstract class AbstractPipeline {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the
-     * {@link CompileEnvironment} and {@link MathSymbolTableBuilder}
-     * from a class that inherits from {@code AbstractPipeline}.</p>
+     * <p>
+     * An helper constructor that allow us to store the
+     * {@link CompileEnvironment} and
+     * {@link MathSymbolTableBuilder} from a class that inherits from
+     * {@code AbstractPipeline}.
+     * </p>
      *
      * @param ce The current compilation environment.
      * @param symbolTable The symbol table.
@@ -60,9 +72,11 @@ public abstract class AbstractPipeline {
     // ===========================================================
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to specify how to process the module pointed by the
-     * {@code currentTarget} module identifier.</p>
+     * <p>
+     * This method must be implemented by all inherited classes to specify how
+     * to process the module
+     * pointed by the {@code currentTarget} module identifier.
+     * </p>
      *
      * @param currentTarget The module identifier
      */

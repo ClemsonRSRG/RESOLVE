@@ -1,7 +1,7 @@
 /*
  * ChangeStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,10 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class that builds the change statements created by
- * the {@link VCGenerator}. Since the user cannot supply their own
- * change statements, any instances of this class will solely be created
- * by the {@link VCGenerator}.</p>
+ * <p>
+ * This is the class that builds the change statements created by the
+ * {@link VCGenerator}. Since the
+ * user cannot supply their own change statements, any instances of this class
+ * will solely be
+ * created by the {@link VCGenerator}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -34,7 +37,11 @@ public class ChangeStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of expressions being changed.</p> */
+    /**
+     * <p>
+     * The list of expressions being changed.
+     * </p>
+     */
     private final List<Exp> myChangingVars;
 
     // ===========================================================
@@ -42,11 +49,12 @@ public class ChangeStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a change statement.</p>
+     * <p>
+     * This constructs a change statement.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param changingVars List of all the variable expressions
-     *                     being changed.
+     * @param changingVars List of all the variable expressions being changed.
      */
     public ChangeStmt(Location l, List<Exp> changingVars) {
         super(l);
@@ -87,8 +95,9 @@ public class ChangeStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the variable expressions that are
-     * changing.</p>
+     * <p>
+     * This method returns the variable expressions that are changing.
+     * </p>
      *
      * @return A list of {@link Exp} representation object.
      */

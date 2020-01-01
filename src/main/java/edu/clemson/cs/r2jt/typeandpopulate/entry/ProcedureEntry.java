@@ -1,7 +1,7 @@
 /*
  * ProcedureEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,9 +22,9 @@ public class ProcedureEntry extends SymbolTableEntry {
 
     private final OperationEntry myCorrespondingOperation;
 
-    public ProcedureEntry(String name,
-            ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, OperationEntry correspondingOperation) {
+    public ProcedureEntry(String name, ResolveConceptualElement definingElement,
+            ModuleIdentifier sourceModule,
+            OperationEntry correspondingOperation) {
         super(name, definingElement, sourceModule);
 
         myCorrespondingOperation = correspondingOperation;
@@ -45,9 +45,9 @@ public class ProcedureEntry extends SymbolTableEntry {
             FacilityEntry instantiatingFacility) {
 
         return new ProcedureEntry(getName(), getDefiningElement(),
-                getSourceModuleIdentifier(), myCorrespondingOperation
-                        .instantiateGenerics(genericInstantiations,
-                                instantiatingFacility));
+                getSourceModuleIdentifier(),
+                myCorrespondingOperation.instantiateGenerics(
+                        genericInstantiations, instantiatingFacility));
     }
 
     @Override

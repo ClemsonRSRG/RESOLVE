@@ -1,7 +1,7 @@
 /*
  * EntryTypeQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,7 +24,9 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
  */
 public class EntryTypeQuery<T extends SymbolTableEntry>
         extends
-            BaseMultimatchSymbolQuery<T> implements MultimatchSymbolQuery<T> {
+            BaseMultimatchSymbolQuery<T>
+        implements
+            MultimatchSymbolQuery<T> {
 
     public EntryTypeQuery(Class<? extends SymbolTableEntry> entryType,
             ImportStrategy importStrategy, FacilityStrategy facilityStrategy) {

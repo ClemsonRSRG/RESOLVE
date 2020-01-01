@@ -1,7 +1,7 @@
 /*
  * AltItemExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the individual mathematical alternative
- * items inside the {@link AlternativeExp}s.</p>
+ * <p>
+ * This is the class for all the individual mathematical alternative items
+ * inside the
+ * {@link AlternativeExp}s.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,10 +34,18 @@ public class AltItemExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The testing expression.</p> */
+    /**
+     * <p>
+     * The testing expression.
+     * </p>
+     */
     private final Exp myTestingExp;
 
-    /** <p>The assignment expression.</p> */
+    /**
+     * <p>
+     * The assignment expression.
+     * </p>
+     */
     private final Exp myAssignmentExp;
 
     // ===========================================================
@@ -42,8 +53,10 @@ public class AltItemExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs an inner alternative expression for
-     * the {@link AlternativeExp} class.</p>
+     * <p>
+     * This constructs an inner alternative expression for the
+     * {@link AlternativeExp} class.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param test An {@link Exp} testing expression.
@@ -129,8 +142,9 @@ public class AltItemExp extends MathExp {
         if (myTestingExp != null ? !myTestingExp.equals(that.myTestingExp)
                 : that.myTestingExp != null)
             return false;
-        return myAssignmentExp != null ? myAssignmentExp
-                .equals(that.myAssignmentExp) : that.myAssignmentExp == null;
+        return myAssignmentExp != null
+                ? myAssignmentExp.equals(that.myAssignmentExp)
+                : that.myAssignmentExp == null;
     }
 
     /**
@@ -165,7 +179,9 @@ public class AltItemExp extends MathExp {
     }
 
     /**
-     * <p>Returns this expression's assignment expression.</p>
+     * <p>
+     * Returns this expression's assignment expression.
+     * </p>
      *
      * @return The assignment {@link Exp} object.
      */
@@ -189,7 +205,9 @@ public class AltItemExp extends MathExp {
     }
 
     /**
-     * <p>Returns this expression's testing expression.</p>
+     * <p>
+     * Returns this expression's testing expression.
+     * </p>
      *
      * @return The testing {@link Exp} object.
      */
@@ -203,14 +221,10 @@ public class AltItemExp extends MathExp {
     @Override
     public final int hashCode() {
         int result = super.hashCode();
-        result =
-                31 * result
-                        + (myTestingExp != null ? myTestingExp.hashCode() : 0);
-        result =
-                31
-                        * result
-                        + (myAssignmentExp != null ? myAssignmentExp.hashCode()
-                                : 0);
+        result = 31 * result
+                + (myTestingExp != null ? myTestingExp.hashCode() : 0);
+        result = 31 * result
+                + (myAssignmentExp != null ? myAssignmentExp.hashCode() : 0);
         return result;
     }
 
@@ -228,7 +242,8 @@ public class AltItemExp extends MathExp {
             newTest = myTestingExp.clone();
         }
 
-        return new AltItemExp(cloneLocation(), newTest, myAssignmentExp.clone());
+        return new AltItemExp(cloneLocation(), newTest,
+                myAssignmentExp.clone());
     }
 
     /**
@@ -241,8 +256,8 @@ public class AltItemExp extends MathExp {
             newTest = substitute(myTestingExp, substitutions);
         }
 
-        return new AltItemExp(cloneLocation(), newTest, substitute(
-                myAssignmentExp, substitutions));
+        return new AltItemExp(cloneLocation(), newTest,
+                substitute(myAssignmentExp, substitutions));
     }
 
 }

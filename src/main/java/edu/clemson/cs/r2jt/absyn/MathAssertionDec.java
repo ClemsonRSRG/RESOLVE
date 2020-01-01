@@ -1,7 +1,7 @@
 /*
  * MathAssertionDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -44,9 +44,11 @@ public class MathAssertionDec extends Dec {
     private Exp assertion;
 
     /**
-     * <p>For <em>theorem</em>s only, defines any special properties of the
-     * theorem, such as if it is flagged as an associativity or commutativity
-     * theorem in the definition.</p>
+     * <p>
+     * For <em>theorem</em>s only, defines any special properties of the
+     * theorem, such as if it is
+     * flagged as an associativity or commutativity theorem in the definition.
+     * </p>
      */
     private TheoremSubtype mySubtype;
 
@@ -95,8 +97,9 @@ public class MathAssertionDec extends Dec {
     }
 
     /**
-     * <p>Returns the specific subtype of the theorem reprsented by this
-     * assertion.</p>
+     * <p>
+     * Returns the specific subtype of the theorem reprsented by this assertion.
+     * </p>
      */
     public TheoremSubtype getTheoremSubtype() {
         return mySubtype;

@@ -1,7 +1,7 @@
 /*
  * WhileStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class for all the while loop statement objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the while loop statement objects that the compiler
+ * builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,13 +33,25 @@ public class WhileStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /**<p>The testing expression.</p> */
+    /**
+     * <p>
+     * The testing expression.
+     * </p>
+     */
     private final ProgramExp myTestingExp;
 
-    /** <p>The verification block for this while loop</p> */
+    /**
+     * <p>
+     * The verification block for this while loop
+     * </p>
+     */
     private final LoopVerificationItem myVerificationBlock;
 
-    /** <p>The list of statements for this while loop</p> */
+    /**
+     * <p>
+     * The list of statements for this while loop
+     * </p>
+     */
     private final List<Statement> myWhileStatements;
 
     // ===========================================================
@@ -44,17 +59,21 @@ public class WhileStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a while loop statement.</p>
+     * <p>
+     * This constructs a while loop statement.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param test A {@link ProgramExp} testing expression.
-     * @param verificationBlock A {@link LoopVerificationItem} containing
-     *                          the assertions needed for verification purposes.
-     * @param statements The list of {@link Statement}s that are in
-     *                   the while loop.
+     * @param verificationBlock A {@link LoopVerificationItem} containing the
+     *        assertions needed for
+     *        verification purposes.
+     * @param statements The list of {@link Statement}s that are in the while
+     *        loop.
      */
     public WhileStmt(Location l, ProgramExp test,
-            LoopVerificationItem verificationBlock, List<Statement> statements) {
+            LoopVerificationItem verificationBlock,
+            List<Statement> statements) {
         super(l);
         myTestingExp = test;
         myVerificationBlock = verificationBlock;
@@ -121,8 +140,9 @@ public class WhileStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the verification block in
-     * this {@code WhileStmt}.</p>
+     * <p>
+     * This method returns the verification block in this {@code WhileStmt}.
+     * </p>
      *
      * @return The {@link LoopVerificationItem} representation object.
      */
@@ -131,8 +151,9 @@ public class WhileStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the list of statements in
-     * this {@code WhileStmt}.</p>
+     * <p>
+     * This method returns the list of statements in this {@code WhileStmt}.
+     * </p>
      *
      * @return The list of {@link Statement}s.
      */
@@ -141,8 +162,9 @@ public class WhileStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the testing expression for
-     * this {@code WhileStmt}.</p>
+     * <p>
+     * This method returns the testing expression for this {@code WhileStmt}.
+     * </p>
      *
      * @return The testing {@link ProgramExp} object.
      */
@@ -175,6 +197,7 @@ public class WhileStmt extends Statement {
             copyWhileStatements.add(s.clone());
         }
 
-        return new WhileStmt(cloneLocation(), myTestingExp.clone(), myVerificationBlock.clone(), copyWhileStatements);
+        return new WhileStmt(cloneLocation(), myTestingExp.clone(),
+                myVerificationBlock.clone(), copyWhileStatements);
     }
 }

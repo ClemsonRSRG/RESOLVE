@@ -1,7 +1,7 @@
 /*
  * ArrayIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,7 +17,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * <p>This class implements the iterator class for an array.</p>
+ * <p>
+ * This class implements the iterator class for an array.
+ * </p>
  *
  * @param <E> Elements to to be iterated.
  *
@@ -30,13 +32,25 @@ public class ArrayIterator<E> implements Iterator<E> {
     // Member Fields
     // ===========================================================
 
-    /** <p>The array to be iterated.</p> */
+    /**
+     * <p>
+     * The array to be iterated.
+     * </p>
+     */
     private final E[] myArray;
 
-    /** <p>The first (or next) index that hasn't been iterated.</p> */
+    /**
+     * <p>
+     * The first (or next) index that hasn't been iterated.
+     * </p>
+     */
     private final int myFirstUnincludedIndex;
 
-    /** <p>The current iterated cursor position.</p> */
+    /**
+     * <p>
+     * The current iterated cursor position.
+     * </p>
+     */
     private int myCursor = 0;
 
     // ===========================================================
@@ -44,7 +58,9 @@ public class ArrayIterator<E> implements Iterator<E> {
     // ===========================================================
 
     /**
-     * <p>Creates an iterator for an array.</p>
+     * <p>
+     * Creates an iterator for an array.
+     * </p>
      *
      * @param array The array to be iterated.
      */
@@ -53,8 +69,9 @@ public class ArrayIterator<E> implements Iterator<E> {
     }
 
     /**
-     * <p>Creates an iterator for an array with a specified
-     * start and end index.</p>
+     * <p>
+     * Creates an iterator for an array with a specified start and end index.
+     * </p>
      *
      * @param array The array to be iterated.
      * @param start The start position in the array.

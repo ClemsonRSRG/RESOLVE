@@ -1,7 +1,7 @@
 /*
  * PerformanceTypeFamilyDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the performance type family declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the performance type family declaration objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,16 +33,32 @@ public class PerformanceTypeFamilyDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The type model for the new type family.</p> */
+    /**
+     * <p>
+     * The type model for the new type family.
+     * </p>
+     */
     private final Ty myTy;
 
-    /** <p>The constraint clause for the new type family.</p> */
+    /**
+     * <p>
+     * The constraint clause for the new type family.
+     * </p>
+     */
     private final AssertionClause myConstraint;
 
-    /** <p>The initialization block for the new type family.</p> */
+    /**
+     * <p>
+     * The initialization block for the new type family.
+     * </p>
+     */
     private final PerformanceSpecInitFinalItem myTypeInitItem;
 
-    /** <p>The finalization block for the new type family.</p> */
+    /**
+     * <p>
+     * The finalization block for the new type family.
+     * </p>
+     */
     private final PerformanceSpecInitFinalItem myTypeFinalItem;
 
     // ===========================================================
@@ -47,7 +66,9 @@ public class PerformanceTypeFamilyDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs a performance type family declaration.</p>
+     * <p>
+     * This constructs a performance type family declaration.
+     * </p>
      *
      * @param name Name of the new type family.
      * @param ty Model for the new type family.
@@ -119,15 +140,18 @@ public class PerformanceTypeFamilyDec extends Dec {
             return false;
         if (!myConstraint.equals(that.myConstraint))
             return false;
-        if (myTypeInitItem != null ? !myTypeInitItem
-                .equals(that.myTypeInitItem) : that.myTypeInitItem != null)
+        if (myTypeInitItem != null ? !myTypeInitItem.equals(that.myTypeInitItem)
+                : that.myTypeInitItem != null)
             return false;
-        return myTypeFinalItem != null ? myTypeFinalItem
-                .equals(that.myTypeFinalItem) : that.myTypeFinalItem == null;
+        return myTypeFinalItem != null
+                ? myTypeFinalItem.equals(that.myTypeFinalItem)
+                : that.myTypeFinalItem == null;
     }
 
     /**
-     * <p>Returns the type constraint for this performance type family.</p>
+     * <p>
+     * Returns the type constraint for this performance type family.
+     * </p>
      *
      * @return The type constraint in {@link AssertionClause} format.
      */
@@ -136,28 +160,36 @@ public class PerformanceTypeFamilyDec extends Dec {
     }
 
     /**
-     * <p>Returns the finalization block for this performance type family.</p>
+     * <p>
+     * Returns the finalization block for this performance type family.
+     * </p>
      *
-     * @return All relevant verification for finalization
-     * in {@link PerformanceSpecInitFinalItem} format.
+     * @return All relevant verification for finalization in
+     *         {@link PerformanceSpecInitFinalItem}
+     *         format.
      */
     public final PerformanceSpecInitFinalItem getFinalization() {
         return myTypeFinalItem;
     }
 
     /**
-     * <p>Returns the initialization block for this performance type family.</p>
+     * <p>
+     * Returns the initialization block for this performance type family.
+     * </p>
      *
-     * @return All relevant verification for initialization
-     * in {@link PerformanceSpecInitFinalItem} format.
+     * @return All relevant verification for initialization in
+     *         {@link PerformanceSpecInitFinalItem}
+     *         format.
      */
     public final PerformanceSpecInitFinalItem getInitialization() {
         return myTypeInitItem;
     }
 
     /**
-     * <p>Returns the raw type model representation
-     * of this performance type family.</p>
+     * <p>
+     * Returns the raw type model representation of this performance type
+     * family.
+     * </p>
      *
      * @return The raw type in {@link Ty} format.
      */
@@ -173,16 +205,10 @@ public class PerformanceTypeFamilyDec extends Dec {
         int result = super.hashCode();
         result = 31 * result + myTy.hashCode();
         result = 31 * result + myConstraint.hashCode();
-        result =
-                31
-                        * result
-                        + (myTypeInitItem != null ? myTypeInitItem.hashCode()
-                                : 0);
-        result =
-                31
-                        * result
-                        + (myTypeFinalItem != null ? myTypeFinalItem.hashCode()
-                                : 0);
+        result = 31 * result
+                + (myTypeInitItem != null ? myTypeInitItem.hashCode() : 0);
+        result = 31 * result
+                + (myTypeFinalItem != null ? myTypeFinalItem.hashCode() : 0);
         return result;
     }
 
@@ -196,8 +222,8 @@ public class PerformanceTypeFamilyDec extends Dec {
     @Override
     protected final PerformanceTypeFamilyDec copy() {
         return new PerformanceTypeFamilyDec(myName.clone(), myTy.clone(),
-                myConstraint.clone(), myTypeInitItem.clone(), myTypeFinalItem
-                        .clone());
+                myConstraint.clone(), myTypeInitItem.clone(),
+                myTypeFinalItem.clone());
     }
 
 }

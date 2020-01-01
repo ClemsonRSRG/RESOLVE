@@ -1,7 +1,7 @@
 /*
  * FunctionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -46,7 +46,7 @@ public class FunctionExp extends AbstractFunctionExp {
     /** The paramList member. */
     private List<FunctionArgList> paramList;
 
-    //private boolean isab;
+    // private boolean isab;
 
     private int quantification = VarExp.NONE;
 
@@ -63,7 +63,7 @@ public class FunctionExp extends AbstractFunctionExp {
         this.name = name;
         this.natural = natural;
         this.paramList = paramList;
-        //this.isab = false;
+        // this.isab = false;
     }
 
     public FunctionExp(Location location, PosSymbol qualifier, PosSymbol name,
@@ -73,7 +73,7 @@ public class FunctionExp extends AbstractFunctionExp {
         this.name = name;
         this.natural = natural;
         this.paramList = paramList;
-        //this.isab = false;
+        // this.isab = false;
         this.quantification = quantification;
     }
 
@@ -82,13 +82,11 @@ public class FunctionExp extends AbstractFunctionExp {
 
         if (retval) {
             FunctionExp eAsFunction = (FunctionExp) e;
-            retval =
-                    posSymbolEquivalent(qualifier, eAsFunction.qualifier)
-                            && posSymbolEquivalent(name, eAsFunction.name)
-                            && equivalent(natural, eAsFunction.natural)
-                            && paramsEquivalent(paramList,
-                                    eAsFunction.paramList)
-                            && quantification == eAsFunction.quantification;
+            retval = posSymbolEquivalent(qualifier, eAsFunction.qualifier)
+                    && posSymbolEquivalent(name, eAsFunction.name)
+                    && equivalent(natural, eAsFunction.natural)
+                    && paramsEquivalent(paramList, eAsFunction.paramList)
+                    && quantification == eAsFunction.quantification;
         }
 
         return retval;
@@ -163,10 +161,12 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>Returns an <code>Iterator</code> over the arguments to this function.
-     * call.</p>
+     * <p>
+     * Returns an <code>Iterator</code> over the arguments to this function.
+     * call.
+     * </p>
      * 
-     * @return An <code>Iterator</code> over the arguments to this function 
+     * @return An <code>Iterator</code> over the arguments to this function
      *         call.
      */
     public java.util.Iterator<Exp> argumentIterator() {
@@ -174,9 +174,8 @@ public class FunctionExp extends AbstractFunctionExp {
                 DummyIterator.getInstance((Iterator<Exp>) null);
 
         for (FunctionArgList l : paramList) {
-            retval =
-                    new ChainingIterator<Exp>(l.getArguments().iterator(),
-                            retval);
+            retval = new ChainingIterator<Exp>(l.getArguments().iterator(),
+                    retval);
         }
 
         return retval;
@@ -191,7 +190,8 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     @Override
-    public void setQuantification(SymbolTableEntry.Quantification quantification) {
+    public void
+            setQuantification(SymbolTableEntry.Quantification quantification) {
         this.quantification = quantification.toVarExpQuantificationCode();
     }
 
@@ -225,9 +225,12 @@ public class FunctionExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>In addition to its normal substitution duties, for 
-     * <code>FunctionExp</code> this method will also replace the function name
-     * if it matches a <code>VarExp</code> in the map.</p>
+     * <p>
+     * In addition to its normal substitution duties, for
+     * <code>FunctionExp</code> this method will
+     * also replace the function name if it matches a <code>VarExp</code> in the
+     * map.
+     * </p>
      */
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         FunctionExp retval;
@@ -247,20 +250,19 @@ public class FunctionExp extends AbstractFunctionExp {
         VarExp newName = new VarExp(location, qualifier, name, quantification);
 
         if (substitutions.containsKey(newName)) {
-            //Note that there's no particular mathematical justification why
-            //we can only replace a function with a different function NAME (as
-            //opposed to a function-valued expression), but we have no way of
-            //representing such a thing.  It doesn't tend to come up, but if it
-            //ever did, this would throw a ClassCastException.
-            newName =
-                    new VarExp(location, qualifier, ((VarExp) substitutions
-                            .get(newName)).getName(), quantification);
+            // Note that there's no particular mathematical justification why
+            // we can only replace a function with a different function NAME (as
+            // opposed to a function-valued expression), but we have no way of
+            // representing such a thing. It doesn't tend to come up, but if it
+            // ever did, this would throw a ClassCastException.
+            newName = new VarExp(location, qualifier,
+                    ((VarExp) substitutions.get(newName)).getName(),
+                    quantification);
         }
 
-        retval =
-                new FunctionExp(location, qualifier, newName.getName(),
-                        substitute(natural, substitutions), newParamList,
-                        quantification);
+        retval = new FunctionExp(location, qualifier, newName.getName(),
+                substitute(natural, substitutions), newParamList,
+                quantification);
 
         retval.setMathType(myMathType);
 
@@ -300,8 +302,8 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     public String toString(int indent) {
-        //Environment   env	= Environment.getInstance();
-        //if(env.isabelle()){return toIsabelleString(indent);};    	
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
         StringBuffer sb = new StringBuffer();
         printSpace(indent, sb);
 
@@ -328,17 +330,13 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /*
-    public String toIsabelleString(int indent){
-    	isab = true;
-    	StringBuffer sb = new StringBuffer();
-    	printSpace(indent, sb);
-        sb.append("(");
-        sb.append(name.toString()+ " ");    
-
-        sb.append(isabParamListToString(paramList));
-        sb.append(")");
-        return sb.toString(); 
-    }*/
+     * public String toIsabelleString(int indent){ isab = true; StringBuffer sb
+     * = new StringBuffer();
+     * printSpace(indent, sb); sb.append("("); sb.append(name.toString()+ " ");
+     * 
+     * sb.append(isabParamListToString(paramList)); sb.append(")"); return
+     * sb.toString(); }
+     */
 
     String paramListToString(List<FunctionArgList> paramList) {
         if (paramList != null) {
@@ -408,8 +406,9 @@ public class FunctionExp extends AbstractFunctionExp {
         return str.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         if (name.toString().equals(varName)) {
             return true;
@@ -426,8 +425,8 @@ public class FunctionExp extends AbstractFunctionExp {
         return false;
     }
 
-    private boolean funcArgListContainsVar(String varName,
-            FunctionArgList list, Boolean IsOldExp) {
+    private boolean funcArgListContainsVar(String varName, FunctionArgList list,
+            Boolean IsOldExp) {
         List<Exp> expList = list.getArguments();
         Iterator<Exp> i = expList.iterator();
         while (i.hasNext()) {
@@ -473,10 +472,10 @@ public class FunctionExp extends AbstractFunctionExp {
 
     public void setSubExpression(int index, Exp e) {
         if (natural == null) {
-            //List--for whatever reason--will not add null elements, so in
-            //getSubExpression, the returned list will have "natural" (whatever
-            //THAT means...) as its 0th element ONLY IF NATURAL IS NOT NULL, 
-            //otherwise the parameters will start immediately
+            // List--for whatever reason--will not add null elements, so in
+            // getSubExpression, the returned list will have "natural" (whatever
+            // THAT means...) as its 0th element ONLY IF NATURAL IS NOT NULL,
+            // otherwise the parameters will start immediately
             paramList.get(0).getArguments().set(index, e);
         }
         else {
@@ -496,7 +495,8 @@ public class FunctionExp extends AbstractFunctionExp {
             return false;
         }
         if (qualifier != null && (((FunctionExp) e2).getQualifier() != null)) {
-            if (!(qualifier.equals(((FunctionExp) e2).getQualifier().getName()))) {
+            if (!(qualifier
+                    .equals(((FunctionExp) e2).getQualifier().getName()))) {
                 return false;
             }
         }
@@ -512,14 +512,13 @@ public class FunctionExp extends AbstractFunctionExp {
 
     public Exp replace(Exp old, Exp replacement) {
         if (!(old instanceof FunctionExp)) {
-            paramList =
-                    replaceVariableInParamListWithExp(paramList, old,
-                            replacement);
+            paramList = replaceVariableInParamListWithExp(paramList, old,
+                    replacement);
             if (name != null) {
                 if (old instanceof VarExp) {
 
-                    if (((VarExp) old).getName().toString().equals(
-                            name.toString())) {
+                    if (((VarExp) old).getName().toString()
+                            .equals(name.toString())) {
                         if (replacement instanceof VarExp) {
 
                             this.name = ((VarExp) replacement).getName();
@@ -530,9 +529,8 @@ public class FunctionExp extends AbstractFunctionExp {
                         else if (replacement instanceof DotExp) {
                             DotExp exp = (DotExp) Exp.clone(replacement);
                             List<Exp> segments = exp.getSegments();
-                            Exp result =
-                                    Exp.replace(this, old, segments
-                                            .get(segments.size() - 1));
+                            Exp result = Exp.replace(this, old,
+                                    segments.get(segments.size() - 1));
                             segments.remove(segments.size() - 1);
                             segments.add(result);
                             exp.setSegments(segments);
@@ -541,14 +539,14 @@ public class FunctionExp extends AbstractFunctionExp {
                     }
                 }
 
-                //if(old instanceof VarExp && replacement instanceof DotExp){
-                //	if(((VarExp)old).getName().toString().equals(name.toString())){
-                //		List<Exp> lst = ((DotExp)replacement).getSegments();
-                //		this.name = ((VarExp)lst.get(1)).getName();
-                //		this.qualifier = ((VarExp)lst.get(0)).getName();
-                //		return this;
-                //	}
-                //}        		
+                // if(old instanceof VarExp && replacement instanceof DotExp){
+                // if(((VarExp)old).getName().toString().equals(name.toString())){
+                // List<Exp> lst = ((DotExp)replacement).getSegments();
+                // this.name = ((VarExp)lst.get(1)).getName();
+                // this.qualifier = ((VarExp)lst.get(0)).getName();
+                // return this;
+                // }
+                // }
             }
         }
 
@@ -573,14 +571,14 @@ public class FunctionExp extends AbstractFunctionExp {
     private FunctionArgList replaceVariableInFunctionArgListWithExp(
             FunctionArgList list, Exp old, Exp replacement) {
         List<Exp> expList = list.getArguments();
-        list.setArguments(replaceVariableInExpListWithExp(expList, old,
-                replacement));
+        list.setArguments(
+                replaceVariableInExpListWithExp(expList, old, replacement));
         return list;
     }
 
     private List<Exp> replaceVariableInExpListWithExp(List<Exp> list, Exp old,
             Exp replacement) {
-        // 	AssertiveCode assertion = new AssertiveCode();
+        // AssertiveCode assertion = new AssertiveCode();
         Iterator<Exp> i = list.iterator();
         while (i.hasNext()) {
             Exp exp = (Exp) i.next();
@@ -658,9 +656,8 @@ public class FunctionExp extends AbstractFunctionExp {
         List<FunctionArgList> newParamList = new List<FunctionArgList>();
         newParamList.add(newFAL);
 
-        retval =
-                new FunctionExp(null, newQualifier, newName, newNatural,
-                        newParamList, quantification);
+        retval = new FunctionExp(null, newQualifier, newName, newNatural,
+                newParamList, quantification);
         retval.setMathType(myMathType);
         return retval;
     }

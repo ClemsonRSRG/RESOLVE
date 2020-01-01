@@ -1,7 +1,7 @@
 /*
  * RightNotRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This class contains the logic for applying the {@code right not}
- * rule.</p>
+ * <p>
+ * This class contains the logic for applying the {@code right not} rule.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -36,11 +37,12 @@ public class RightNotRule extends AbstractReductionRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application of the {@code right not}
-     * rule.</p>
+     * <p>
+     * This creates a new application of the {@code right not} rule.
+     * </p>
      *
-     * @param originalSequent The original {@link Sequent} that contains
-     *                        the expression to be reduced.
+     * @param originalSequent The original {@link Sequent} that contains the
+     *        expression to be reduced.
      * @param originalExp The {@link Exp} to be reduced.
      */
     public RightNotRule(Sequent originalSequent, Exp originalExp) {
@@ -52,26 +54,32 @@ public class RightNotRule extends AbstractReductionRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Sequent Reduction Rule}.</p>
+     * <p>
+     * This method applies the {@code Sequent Reduction Rule}.
+     * </p>
      *
-     * @return A list of {@link Sequent Sequents} that resulted
-     * from applying the rule.
+     * @return A list of {@link Sequent Sequents} that resulted from applying
+     *         the rule.
      */
     @Override
     public final List<Sequent> applyRule() {
         if (myOriginalExp instanceof PrefixExp) {
             PrefixExp originalExpAsPrefixExp = (PrefixExp) myOriginalExp;
-            List<Exp> newAntecedents = copyExpList(myOriginalSequent.getAntecedents(), null);
+            List<Exp> newAntecedents =
+                    copyExpList(myOriginalSequent.getAntecedents(), null);
             List<Exp> newConsequents = new ArrayList<>();
             for (Exp exp : myOriginalSequent.getConcequents()) {
                 if (exp.equals(originalExpAsPrefixExp)) {
                     // Add the expression inside the "not" to the consequent.
-                    if (originalExpAsPrefixExp.getOperatorAsString().equals("not")) {
+                    if (originalExpAsPrefixExp.getOperatorAsString()
+                            .equals("not")) {
                         // Copy the entire PrefixExp so we get a new copy of
                         // the LocationDetailModel if it exists.
-                        PrefixExp copyExp = (PrefixExp) originalExpAsPrefixExp.clone();
+                        PrefixExp copyExp =
+                                (PrefixExp) originalExpAsPrefixExp.clone();
                         Exp argumentExp = copyExp.getArgument();
-                        argumentExp.setLocationDetailModel(copyExp.getLocationDetailModel());
+                        argumentExp.setLocationDetailModel(
+                                copyExp.getLocationDetailModel());
 
                         // Add this modified argumentExp
                         newAntecedents.add(argumentExp);
@@ -88,8 +96,9 @@ public class RightNotRule extends AbstractReductionRuleApplication
             }
 
             // Construct a new sequent
-            Sequent resultingSequent = new Sequent(myOriginalSequent.getLocation(),
-                    newAntecedents, newConsequents);
+            Sequent resultingSequent =
+                    new Sequent(myOriginalSequent.getLocation(), newAntecedents,
+                            newConsequents);
             myResultingSequents.add(resultingSequent);
 
             // Indicate that this is an impacting reduction
@@ -104,8 +113,10 @@ public class RightNotRule extends AbstractReductionRuleApplication
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Sequent Reduction Rule}.</p>
+     * <p>
+     * This method returns a description associated with the
+     * {@code Sequent Reduction Rule}.
+     * </p>
      *
      * @return A string.
      */

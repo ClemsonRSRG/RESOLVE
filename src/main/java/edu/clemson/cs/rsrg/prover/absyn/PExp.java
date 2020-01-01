@@ -1,7 +1,7 @@
 /*
  * PExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,12 +34,18 @@ import java.io.StringWriter;
 import java.util.*;
 
 /**
- * <p>This class represents the root of the prover abstract syntax tree (AST) hierarchy.</p>
+ * <p>
+ * This class represents the root of the prover abstract syntax tree (AST)
+ * hierarchy.
+ * </p>
  *
- * <p>{@code PExp} is the root of the prover abstract syntax tree
- * hierarchy. Unlike {@link Exp Exp}s, {@code PExp}s are immutable and
- * exist without the complications introduced by control structures.
- * {@code PExp}s exist to represent <em>only</em> mathematical expressions.</p>
+ * <p>
+ * {@code PExp} is the root of the prover abstract syntax tree hierarchy. Unlike
+ * {@link Exp Exp}s,
+ * {@code PExp}s are immutable and exist without the complications introduced by
+ * control structures.
+ * {@code PExp}s exist to represent <em>only</em> mathematical expressions.
+ * </p>
  *
  * @author Hampton Smith
  * @author Mike Kabbani
@@ -51,29 +57,61 @@ public abstract class PExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>An instance of a binding exception.</p> */
+    /**
+     * <p>
+     * An instance of a binding exception.
+     * </p>
+     */
     protected final static BindingException BINDING_EXCEPTION =
             new BindingException();
 
-    /** <p>The expression's cached symbol names.</p> */
+    /**
+     * <p>
+     * The expression's cached symbol names.
+     * </p>
+     */
     private Set<String> myCachedSymbolNames = null;
 
-    /** <p>The expression's cached function applications.</p> */
+    /**
+     * <p>
+     * The expression's cached function applications.
+     * </p>
+     */
     private List<PExp> myCachedFunctionApplications = null;
 
-    /** <p>The expression's cached quantified variable symbols.</p> */
+    /**
+     * <p>
+     * The expression's cached quantified variable symbols.
+     * </p>
+     */
     private Set<PSymbol> myCachedQuantifiedVariables = null;
 
-    /** <p>The expression's mathematical type.</p> */
+    /**
+     * <p>
+     * The expression's mathematical type.
+     * </p>
+     */
     protected final MTType myMathType;
 
-    /** <p>The expression's mathematical type value.</p> */
+    /**
+     * <p>
+     * The expression's mathematical type value.
+     * </p>
+     */
     protected final MTType myMathTypeValue;
 
-    /** <p>The expression's structure hash.</p> */
+    /**
+     * <p>
+     * The expression's structure hash.
+     * </p>
+     */
     public final int structureHash;
 
-    /** <p>The expression's value hash.</p> */
+    /**
+     * <p>
+     * The expression's value hash.
+     * </p>
+     */
     public final int valueHash;
 
     // ===========================================================
@@ -81,13 +119,15 @@ public abstract class PExp {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the calculated
-     * hash values and mathematical type information for
-     * objects created from a class that inherits from
-     * {@code PExp}.</p>
+     * <p>
+     * An helper constructor that allow us to store the calculated hash values
+     * and mathematical type
+     * information for objects created from a class that inherits from
+     * {@code PExp}.
+     * </p>
      *
-     * @param hashes An helper object that contains the structure hash and
-     *               value hash.
+     * @param hashes An helper object that contains the structure hash and value
+     *        hash.
      * @param type The expression's mathematical type.
      * @param typeValue The expression's mathematical type value.
      */
@@ -96,10 +136,12 @@ public abstract class PExp {
     }
 
     /**
-     * <p>An helper constructor that allow us to store the calculated
-     * hash values and mathematical type information for
-     * objects created from a class that inherits from
-     * {@code PExp}.</p>
+     * <p>
+     * An helper constructor that allow us to store the calculated hash values
+     * and mathematical type
+     * information for objects created from a class that inherits from
+     * {@code PExp}.
+     * </p>
      *
      * @param structureHash The expression's structure hash
      * @param valueHash The expression's value hash.
@@ -120,16 +162,21 @@ public abstract class PExp {
     // ===========================================================
 
     /**
-     * <p>This method is the {@code accept()} method in a visitor pattern
-     * for invoking an instance of {@link PExpVisitor}.</p>
+     * <p>
+     * This method is the {@code accept()} method in a visitor pattern for
+     * invoking an instance of
+     * {@link PExpVisitor}.
+     * </p>
      *
      * @param v A visitor for {@link PExp PExps}.
      */
     public abstract void accept(PExpVisitor v);
 
     /**
-     * <p>This method returns a mapping of expressions that
-     * that can be bound from the target.</p>
+     * <p>
+     * This method returns a mapping of expressions that that can be bound from
+     * the target.
+     * </p>
      *
      * @param target The target expression.
      *
@@ -146,8 +193,10 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method binds the expressions found in our mapping to
-     * the specified target.</p>
+     * <p>
+     * This method binds the expressions found in our mapping to the specified
+     * target.
+     * </p>
      *
      * @param target The target expression.
      * @param accumulator A mapping of expressions to be bound.
@@ -158,8 +207,11 @@ public abstract class PExp {
             throws BindingException;
 
     /**
-     * <p>This method converts an expression generated from the AST to
-     * the prover's immutable expression hierarchy.</p>
+     * <p>
+     * This method converts an expression generated from the AST to the prover's
+     * immutable expression
+     * hierarchy.
+     * </p>
      *
      * @param g The current type graph.
      * @param e An expression from the compiler AST.
@@ -170,12 +222,13 @@ public abstract class PExp {
         PExp retval;
 
         // Apply proper quantification
-        Map<String, SymbolTableEntry.Quantification> quantifiedVariables = new LinkedHashMap<>();
+        Map<String, SymbolTableEntry.Quantification> quantifiedVariables =
+                new LinkedHashMap<>();
         e = applyQuantification(e, quantifiedVariables);
 
         if (e == null) {
-            throw new IllegalArgumentException("Prover does not accept null "
-                    + "as an expression.");
+            throw new IllegalArgumentException(
+                    "Prover does not accept null " + "as an expression.");
         }
 
         if (e instanceof FunctionExp) {
@@ -193,21 +246,18 @@ public abstract class PExp {
             if (g != null) {
                 MTFunction fullType =
                         new MTFunction(g, e.getMathType(), paramTypes);
-                retval =
-                        new PSymbol(fullType, e.getMathTypeValue(), fullName(
-                                eAsFunctionExp.getQualifier(), eAsFunctionExp
-                                        .getName().getName().getName()), arguments,
-                                convertExpQuantification(eAsFunctionExp
-                                        .getQuantification()));
+                retval = new PSymbol(fullType, e.getMathTypeValue(),
+                        fullName(eAsFunctionExp.getQualifier(),
+                                eAsFunctionExp.getName().getName().getName()),
+                        arguments, convertExpQuantification(
+                                eAsFunctionExp.getQuantification()));
             }
             else {
-                retval =
-                        new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                                fullName(eAsFunctionExp.getQualifier(),
-                                        eAsFunctionExp.getName().getName().getName()),
-                                arguments,
-                                convertExpQuantification(eAsFunctionExp
-                                        .getQuantification()));
+                retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                        fullName(eAsFunctionExp.getQualifier(),
+                                eAsFunctionExp.getName().getName().getName()),
+                        arguments, convertExpQuantification(
+                                eAsFunctionExp.getQuantification()));
             }
         }
         else if (e instanceof PrefixExp) {
@@ -216,9 +266,8 @@ public abstract class PExp {
             List<PExp> arguments = new LinkedList<>();
             arguments.add(PExp.buildPExp(g, eAsPrefixExp.getArgument()));
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsPrefixExp.getOperatorAsPosSymbol().getName(), arguments);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsPrefixExp.getOperatorAsPosSymbol().getName(), arguments);
         }
         else if (e instanceof InfixExp) {
             InfixExp eAsInfixExp = (InfixExp) e;
@@ -227,10 +276,9 @@ public abstract class PExp {
             arguments.add(PExp.buildPExp(g, eAsInfixExp.getLeft()));
             arguments.add(PExp.buildPExp(g, eAsInfixExp.getRight()));
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsInfixExp.getOperatorAsPosSymbol().getName(), arguments,
-                            PSymbol.DisplayType.INFIX);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsInfixExp.getOperatorAsPosSymbol().getName(), arguments,
+                    PSymbol.DisplayType.INFIX);
         }
         else if (e instanceof OutfixExp) {
             OutfixExp eAsOutfixExp = (OutfixExp) e;
@@ -238,11 +286,10 @@ public abstract class PExp {
             List<PExp> arguments = new LinkedList<>();
             arguments.add(PExp.buildPExp(g, eAsOutfixExp.getArgument()));
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsOutfixExp.getOperator().getLeftDelimiterString(), eAsOutfixExp.getOperator()
-                            .getRightDelimiterString(), arguments,
-                            PSymbol.DisplayType.OUTFIX);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsOutfixExp.getOperator().getLeftDelimiterString(),
+                    eAsOutfixExp.getOperator().getRightDelimiterString(),
+                    arguments, PSymbol.DisplayType.OUTFIX);
         }
         else if (e instanceof CharExp) {
             CharExp eAsCharExp = (CharExp) e;
@@ -261,9 +308,8 @@ public abstract class PExp {
         else if (e instanceof StringExp) {
             StringExp eAsStringExp = (StringExp) e;
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            eAsStringExp.getValue());
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    eAsStringExp.getValue());
         }
         else if (e instanceof DotExp) {
             DotExp eAsDotExp = (DotExp) e;
@@ -293,33 +339,29 @@ public abstract class PExp {
                 }
             }
 
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol.toString(),
-                            arguments);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                    symbol.toString(), arguments);
         }
         else if (e instanceof VarExp) {
             VarExp eAsVarExp = (VarExp) e;
 
-            retval =
-                    new PSymbol(eAsVarExp.getMathType(), eAsVarExp
-                            .getMathTypeValue(), fullName(eAsVarExp
-                            .getQualifier(), eAsVarExp.getName().getName()),
-                            convertExpQuantification(eAsVarExp
-                                    .getQuantification()));
+            retval = new PSymbol(eAsVarExp.getMathType(),
+                    eAsVarExp.getMathTypeValue(),
+                    fullName(eAsVarExp.getQualifier(),
+                            eAsVarExp.getName().getName()),
+                    convertExpQuantification(eAsVarExp.getQuantification()));
         }
         else if (e instanceof LambdaExp) {
             LambdaExp eAsLambdaExp = (LambdaExp) e;
 
-            List<PLambda.Parameter> parameters =
-                    new LinkedList<>();
+            List<PLambda.Parameter> parameters = new LinkedList<>();
             for (MathVarDec p : eAsLambdaExp.getParameters()) {
-                parameters.add(new PLambda.Parameter(p.getName().getName(), p
-                        .getTy().getMathTypeValue()));
+                parameters.add(new PLambda.Parameter(p.getName().getName(),
+                        p.getTy().getMathTypeValue()));
             }
 
-            retval =
-                    new PLambda(new ArrayBackedImmutableList<>(parameters), PExp
-                            .buildPExp(g, eAsLambdaExp.getBody()));
+            retval = new PLambda(new ArrayBackedImmutableList<>(parameters),
+                    PExp.buildPExp(g, eAsLambdaExp.getBody()));
         }
         else if (e instanceof AlternativeExp) {
             AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
@@ -335,9 +377,8 @@ public abstract class PExp {
         if (retval.getMathType() == null) {
             String varExpAdditional = "";
             if (e instanceof VarExp) {
-                varExpAdditional =
-                        " = \"" + ((VarExp) e).getName().getName() + "\", "
-                                + ((VarExp) e).getName().getLocation();
+                varExpAdditional = " = \"" + ((VarExp) e).getName().getName()
+                        + "\", " + ((VarExp) e).getName().getLocation();
             }
 
             throw new UnsupportedOperationException(
@@ -349,52 +390,66 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method checks to see if the current expression contains
-     * an existential quantifier.</p>
+     * <p>
+     * This method checks to see if the current expression contains an
+     * existential quantifier.
+     * </p>
      *
      * @return {@code true} if it does contain one, {@code false} otherwise.
      */
     public abstract boolean containsExistential();
 
     /**
-     * <p>This method attempts to find an expression with the given name in our
-     * sub-expressions.</p>
+     * <p>
+     * This method attempts to find an expression with the given name in our
+     * sub-expressions.
+     * </p>
      *
      * @param name Expression name to be searched.
      *
-     * @return {@code true} if this expression contains a sub-expression
-     * that matches the specified name, {@code false} otherwise.
+     * @return {@code true} if this expression contains a sub-expression that
+     *         matches the specified
+     *         name, {@code false} otherwise.
      */
     public abstract boolean containsName(String name);
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to override the default equals method implementation.</p>
+     * <p>
+     * This method must be implemented by all inherited classes to override the
+     * default equals method
+     * implementation.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public abstract boolean equals(Object o);
 
     /**
-     * <p>This method attempts to flip all quantifiers to generate
-     * a new expression.</p>
+     * <p>
+     * This method attempts to flip all quantifiers to generate a new
+     * expression.
+     * </p>
      *
      * @return A new {@link PExp}.
      */
     public abstract PExp flipQuantifiers();
 
     /**
-     * <p>This method returns a list of sub-expressions that are function
-     * applications in the current expression.</p>
+     * <p>
+     * This method returns a list of sub-expressions that are function
+     * applications in the current
+     * expression.
+     * </p>
      *
      * @return A list of sub-expressions that are function applications.
      */
     public final List<PExp> getFunctionApplications() {
         if (myCachedFunctionApplications == null) {
-            //We're immutable, so only do this once
+            // We're immutable, so only do this once
             myCachedFunctionApplications = getFunctionApplicationsNoCache();
         }
 
@@ -402,8 +457,9 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method gets the mathematical type associated
-     * with this expression.</p>
+     * <p>
+     * This method gets the mathematical type associated with this expression.
+     * </p>
      *
      * @return A {@link MTType} type object.
      */
@@ -412,8 +468,10 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method gets the mathematical type value associated
-     * with this expression.</p>
+     * <p>
+     * This method gets the mathematical type value associated with this
+     * expression.
+     * </p>
      *
      * @return A {@link MTType} type object.
      */
@@ -422,46 +480,52 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method returns a set of quantified variables for the current
-     * expression.</p>
+     * <p>
+     * This method returns a set of quantified variables for the current
+     * expression.
+     * </p>
      *
      * @return A set of quantified variable symbols.
      */
     public final Set<PSymbol> getQuantifiedVariables() {
         if (myCachedQuantifiedVariables == null) {
-            //We're immutable, so only do this once
-            myCachedQuantifiedVariables =
-                    Collections
-                            .unmodifiableSet(getQuantifiedVariablesNoCache());
+            // We're immutable, so only do this once
+            myCachedQuantifiedVariables = Collections
+                    .unmodifiableSet(getQuantifiedVariablesNoCache());
         }
 
         return myCachedQuantifiedVariables;
     }
 
     /**
-     * <p>This method returns the list of sub-expressions.</p>
+     * <p>
+     * This method returns the list of sub-expressions.
+     * </p>
      *
      * @return An immutable list containing {@link PExp} expressions.
      */
     public abstract ImmutableList<PExp> getSubExpressions();
 
     /**
-     * <p>This method returns an iterator for iterating over the
-     * list of sub-expressions.</p>
+     * <p>
+     * This method returns an iterator for iterating over the list of
+     * sub-expressions.
+     * </p>
      *
      * @return An iterator.
      */
     public abstract PExpSubexpressionIterator getSubExpressionIterator();
 
     /**
-     * <p>This method returns a set of symbol names for the current
-     * expression.</p>
+     * <p>
+     * This method returns a set of symbol names for the current expression.
+     * </p>
      *
      * @return A set of names.
      */
     public final Set<String> getSymbolNames() {
         if (myCachedSymbolNames == null) {
-            //We're immutable, so only do this once
+            // We're immutable, so only do this once
             myCachedSymbolNames =
                     Collections.unmodifiableSet(getSymbolNamesNoCache());
         }
@@ -470,15 +534,18 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method returns the top-level operation for the current
-     * expression.</p>
+     * <p>
+     * This method returns the top-level operation for the current expression.
+     * </p>
      *
      * @return A string representing the top-level operation.
      */
     public abstract String getTopLevelOperation();
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -488,42 +555,50 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method checks to see if this expression is an equality
-     * expression.</p>
+     * <p>
+     * This method checks to see if this expression is an equality expression.
+     * </p>
      *
      * @return {@code true} if it is one, {@code false} otherwise.
      */
     public abstract boolean isEquality();
 
     /**
-     * <p>This method checks to see if this expression is a literal
-     * expression.</p>
+     * <p>
+     * This method checks to see if this expression is a literal expression.
+     * </p>
      *
      * @return {@code true} if it is, {@code false} otherwise.
      */
     public abstract boolean isLiteral();
 
     /**
-     * <p>This method checks to see if this expression is obviously
-     * equivalent to {@code true}.</p>
+     * <p>
+     * This method checks to see if this expression is obviously equivalent to
+     * {@code true}.
+     * </p>
      *
      * @return {@code true} if it is obviously equivalent to mathematical
-     * {@code true} expression, {@code false} otherwise.
+     *         {@code true} expression,
+     *         {@code false} otherwise.
      */
     public abstract boolean isObviouslyTrue();
 
     /**
-     * <p>This method checks to see if this expression represents
-     * a variable.</p>
+     * <p>
+     * This method checks to see if this expression represents a variable.
+     * </p>
      *
-     * @return {@code true} if it is a variable expression,
-     * {@code false} otherwise.
+     * @return {@code true} if it is a variable expression, {@code false}
+     *         otherwise.
      */
     public abstract boolean isVariable();
 
     /**
-     * <p>This method processes the current expression using
-     * its string representation.</p>
+     * <p>
+     * This method processes the current expression using its string
+     * representation.
+     * </p>
      *
      * @param visitor A visitor for {@link PExp PExps}.
      * @param a An appendable object.
@@ -537,29 +612,36 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method returns a DEEP COPY of this expression, with all instances of
-     * {@link PExp PExps} that occur as keys in {@code substitutions}
-     * replaced with their corresponding values.</p>
+     * <p>
+     * This method returns a DEEP COPY of this expression, with all instances of
+     * {@link PExp PExps}
+     * that occur as keys in {@code substitutions} replaced with their
+     * corresponding values.
+     * </p>
      *
      * @param substitutions A mapping from {@link PExp PExps} that should be
-     *                      substituted out to the {@link PExp PExps} that should
-     *                      replace them.
+     *        substituted out to the
+     *        {@link PExp PExps} that should replace them.
      *
-     * @return A new {@link PExp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * @return A new {@link PExp} that is a deep copy of the original with the
+     *         provided substitutions
+     *         made.
      */
     public abstract PExp substitute(Map<PExp, PExp> substitutions);
 
     /**
-     * <p>This method returns the current expression in string format
-     * with proper indentation and offset.</p>
+     * <p>
+     * This method returns the current expression in string format with proper
+     * indentation and offset.
+     * </p>
      *
-     * <p>Note that this method is only used for debugging purposes.</p>
+     * <p>
+     * Note that this method is only used for debugging purposes.
+     * </p>
      *
-     * @param indent The base indentation to the first line
-     *               of the text.
-     * @param offset The additional indentation increment
-     *               for the subsequent lines.
+     * @param indent The base indentation to the first line of the text.
+     * @param offset The additional indentation increment for the subsequent
+     *        lines.
      *
      * @return A formatted text string for this {@link PExp}.
      */
@@ -585,7 +667,9 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method returns the current expression in string format.</p>
+     * <p>
+     * This method returns the current expression in string format.
+     * </p>
      *
      * @return Current {@link PExp} as a string.
      */
@@ -600,8 +684,10 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This static method method creates a variable expression that
-     * matches the boolean {@code true}.</p>
+     * <p>
+     * This static method method creates a variable expression that matches the
+     * boolean {@code true}.
+     * </p>
      *
      * @param g A {@link TypeGraph} to retrieve the mathematical boolean type.
      *
@@ -612,8 +698,11 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method checks to see if the specified type
-     * matches the current expression's mathematical type.</p>
+     * <p>
+     * This method checks to see if the specified type matches the current
+     * expression's mathematical
+     * type.
+     * </p>
      *
      * @param other Some other mathematical type.
      *
@@ -624,8 +713,11 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method checks to see if the specified expression
-     * has a type that matches the current expression's mathematical type.</p>
+     * <p>
+     * This method checks to see if the specified expression has a type that
+     * matches the current
+     * expression's mathematical type.
+     * </p>
      *
      * @param other Some other {@link PExp}.
      *
@@ -636,8 +728,11 @@ public abstract class PExp {
     }
 
     /**
-     * <p>This method returns a new expression by substituting the specified
-     * value in all the sub-expressions.</p>
+     * <p>
+     * This method returns a new expression by substituting the specified value
+     * in all the
+     * sub-expressions.
+     * </p>
      *
      * @param path A path for iterating over the sub-expressions.
      * @param newValue New expression value to be substituted.
@@ -652,8 +747,8 @@ public abstract class PExp {
         while (path.hasNext()) {
             integerPath.push(path.next());
 
-            pexpPath.push(pexpPath.peek().getSubExpressions().get(
-                    integerPath.peek()));
+            pexpPath.push(pexpPath.peek().getSubExpressions()
+                    .get(integerPath.peek()));
         }
 
         pexpPath.pop();
@@ -661,49 +756,53 @@ public abstract class PExp {
 
         while (pexpPath.size() > 1) {
             newValue = pexpPath.pop();
-            pexpPath.push(pexpPath.pop().withSubExpressionReplaced(
-                    integerPath.pop(), newValue));
+            pexpPath.push(pexpPath.pop()
+                    .withSubExpressionReplaced(integerPath.pop(), newValue));
         }
 
         return pexpPath.peek();
     }
 
     /**
-     * <p>This method attempts to replace an argument at the specified
-     * index.</p>
+     * <p>
+     * This method attempts to replace an argument at the specified index.
+     * </p>
      *
      * @param index Index to an expression argument.
      * @param e The {@link PExp} to replace the one in our argument list.
      *
      * @return A new {@link PExp} with the expression at the specified index
-     * replaced with {@code e}.
+     *         replaced with {@code e}.
      */
     public abstract PExp withSubExpressionReplaced(int index, PExp e);
 
     /**
-     * <p>This method provides a mapping of expressions that needs to be
-     * replaced at each index key.</p>
+     * <p>
+     * This method provides a mapping of expressions that needs to be replaced
+     * at each index key.
+     * </p>
      *
      * @param e A mapping from index to some expression argument.
      *
-     * @return A new {@link PExp} with the expression replaced by all
-     * the key-value pairs in {@code e}.
+     * @return A new {@link PExp} with the expression replaced by all the
+     *         key-value pairs in
+     *         {@code e}.
      */
     public final PExp withSubExpressionsReplaced(Map<Integer, PExp> e) {
         PExp working = this;
 
         for (Map.Entry<Integer, PExp> entry : e.entrySet()) {
-            working =
-                    working.withSubExpressionReplaced(entry.getKey(), entry
-                            .getValue());
+            working = working.withSubExpressionReplaced(entry.getKey(),
+                    entry.getValue());
         }
 
         return working;
     }
 
     /**
-     * <p>This method returns a new expression with the mathematical type
-     * replaced.</p>
+     * <p>
+     * This method returns a new expression with the mathematical type replaced.
+     * </p>
      *
      * @param t A new mathematical type.
      *
@@ -712,8 +811,10 @@ public abstract class PExp {
     public abstract PExp withTypeReplaced(MTType t);
 
     /**
-     * <p>This method returns a new expression with the mathematical type
-     * value replaced.</p>
+     * <p>
+     * This method returns a new expression with the mathematical type value
+     * replaced.
+     * </p>
      *
      * @param t A new mathematical type value.
      *
@@ -726,24 +827,30 @@ public abstract class PExp {
     // ===========================================================
 
     /**
-     * <p>This method returns a list of sub-expressions that are function
-     * applications in the current expression without using the cache.</p>
+     * <p>
+     * This method returns a list of sub-expressions that are function
+     * applications in the current
+     * expression without using the cache.
+     * </p>
      *
      * @return A list of sub-expressions that are function applications.
      */
     protected abstract List<PExp> getFunctionApplicationsNoCache();
 
     /**
-     * <p>This method returns a set of quantified variables without using
-     * the cache.</p>
+     * <p>
+     * This method returns a set of quantified variables without using the
+     * cache.
+     * </p>
      *
      * @return A set of quantified variables.
      */
     protected abstract Set<PSymbol> getQuantifiedVariablesNoCache();
 
     /**
-     * <p>This method returns a set of symbol names without using
-     * the cache.</p>
+     * <p>
+     * This method returns a set of symbol names without using the cache.
+     * </p>
      *
      * @return A set of names.
      */
@@ -754,25 +861,34 @@ public abstract class PExp {
     // ===========================================================
 
     /**
-     * <p>Takes an expression and distributes its quantifiers down to the
-     * variables, removing the quantifiers in the process.  (That is, in the
-     * expression <code>For all x, x = y</code>, the variable <code>x</code>
-     * in the equals expression would be marked internally as a "for all"
-     * variable and the expression <code>x = y</code> would be returned.)</p>
+     * <p>
+     * Takes an expression and distributes its quantifiers down to the
+     * variables, removing the
+     * quantifiers in the process. (That is, in the expression
+     * <code>For all x, x = y</code>, the
+     * variable <code>x</code> in the equals expression would be marked
+     * internally as a "for all"
+     * variable and the expression <code>x = y</code> would be returned.)
+     * </p>
      *
-     * <p>Quantified expressions with "where" clauses will be normalized to
-     * remove the where clause.  In the case of "for all" statements, the
-     * where clause will be added as the antecedent to an implication, so that
-     * <code>For all x, where Q(x), P(x)</code> will become <code>For all x,
+     * <p>
+     * Quantified expressions with "where" clauses will be normalized to remove
+     * the where clause. In
+     * the case of "for all" statements, the where clause will be added as the
+     * antecedent to an
+     * implication, so that <code>For all x, where Q(x), P(x)</code> will become
+     * <code>For all x,
      * Q(x) implies P(x)</code> and <code>There exists x, where Q(x), such that
      * P(x)</code> will become <code>There exists x such that Q(x) and P(x)
-     * </code>.</p>
+     * </code>.
+     * </p>
      *
      * @param e The expression for whom quantifiers should be distributed
-     *          downward. This will largely be modified in place.
+     *        downward. This will largely
+     *        be modified in place.
      * @param quantifiedVariables A map of variable names that should be
-     *                            considered quantified mapped to the quantifiers
-     *                            that apply to them.
+     *        considered quantified mapped
+     *        to the quantifiers that apply to them.
      *
      * @return The root of the new expression.
      */
@@ -783,30 +899,28 @@ public abstract class PExp {
         if (e instanceof QuantExp) {
             QuantExp eAsQuantifier = (QuantExp) e;
 
-            //Normalize our eAsQuantifier so that it doesn't have a "where"
-            //clause by appropriately transferring the "where" clause into
-            //the body using logical connectives
+            // Normalize our eAsQuantifier so that it doesn't have a "where"
+            // clause by appropriately transferring the "where" clause into
+            // the body using logical connectives
             if (eAsQuantifier.getWhere() != null) {
                 switch (eAsQuantifier.getQuantification()) {
                 case UNIVERSAL:
-                    eAsQuantifier =
-                            new QuantExp(eAsQuantifier.getLocation(),
-                                    eAsQuantifier.getQuantification(),
-                                    eAsQuantifier.getVars(), null, MathExp
-                                            .formImplies(eAsQuantifier
-                                                    .getLocation().clone(),
-                                                    eAsQuantifier.getWhere(),
-                                                    eAsQuantifier.getBody()));
+                    eAsQuantifier = new QuantExp(eAsQuantifier.getLocation(),
+                            eAsQuantifier.getQuantification(),
+                            eAsQuantifier.getVars(), null,
+                            MathExp.formImplies(
+                                    eAsQuantifier.getLocation().clone(),
+                                    eAsQuantifier.getWhere(),
+                                    eAsQuantifier.getBody()));
                     break;
                 case EXISTENTIAL:
-                    eAsQuantifier =
-                            new QuantExp(eAsQuantifier.getLocation(),
-                                    eAsQuantifier.getQuantification(),
-                                    eAsQuantifier.getVars(), null, MathExp
-                                            .formConjunct(eAsQuantifier
-                                                    .getLocation().clone(),
-                                                    eAsQuantifier.getWhere(),
-                                                    eAsQuantifier.getBody()));
+                    eAsQuantifier = new QuantExp(eAsQuantifier.getLocation(),
+                            eAsQuantifier.getQuantification(),
+                            eAsQuantifier.getVars(), null,
+                            MathExp.formConjunct(
+                                    eAsQuantifier.getLocation().clone(),
+                                    eAsQuantifier.getWhere(),
+                                    eAsQuantifier.getBody()));
                     break;
                 default:
                     throw new RuntimeException("Don't know how to normalize "
@@ -817,13 +931,12 @@ public abstract class PExp {
             List<MathVarDec> variableNames = eAsQuantifier.getVars();
 
             for (MathVarDec v : variableNames) {
-                quantifiedVariables.put(v.getName().getName(), eAsQuantifier
-                        .getQuantification());
+                quantifiedVariables.put(v.getName().getName(),
+                        eAsQuantifier.getQuantification());
             }
 
-            retval =
-                    applyQuantification(eAsQuantifier.getBody(),
-                            quantifiedVariables);
+            retval = applyQuantification(eAsQuantifier.getBody(),
+                    quantifiedVariables);
 
             for (MathVarDec v : variableNames) {
                 quantifiedVariables.remove((v.getName().getName()));
@@ -841,10 +954,11 @@ public abstract class PExp {
             else {
                 if (e instanceof FunctionExp) {
                     FunctionExp eAsFunctionExp = (FunctionExp) e;
-                    String functionName = eAsFunctionExp.getName().getName().getName();
+                    String functionName =
+                            eAsFunctionExp.getName().getName().getName();
                     if (quantifiedVariables.containsKey(functionName)) {
-                        eAsFunctionExp.setQuantification(quantifiedVariables
-                                .get(functionName));
+                        eAsFunctionExp.setQuantification(
+                                quantifiedVariables.get(functionName));
                     }
                 }
 
@@ -853,8 +967,8 @@ public abstract class PExp {
                 Map<Exp, Exp> substitutions = new LinkedHashMap<>();
                 for (Exp subExpression : subExpressions) {
                     curSubExpression = subExpression;
-                    substitutions.put(curSubExpression,
-                            applyQuantification(curSubExpression, quantifiedVariables));
+                    substitutions.put(curSubExpression, applyQuantification(
+                            curSubExpression, quantifiedVariables));
                 }
 
                 // Apply substitutions
@@ -868,15 +982,17 @@ public abstract class PExp {
     }
 
     /**
-     * <p>An helper method for converting the quantification to the one provided by
-     * {@link PSymbol}.</p>
+     * <p>
+     * An helper method for converting the quantification to the one provided by
+     * {@link PSymbol}.
+     * </p>
      *
      * @param q A symbol table quantifier.
      *
      * @return A prover expression version of the quantifier.
      */
-    private static PSymbol.Quantification convertExpQuantification(
-            SymbolTableEntry.Quantification q) {
+    private static PSymbol.Quantification
+            convertExpQuantification(SymbolTableEntry.Quantification q) {
         PSymbol.Quantification retval;
 
         switch (q) {
@@ -897,13 +1013,16 @@ public abstract class PExp {
     }
 
     /**
-     * <p>An helper method for generating the full name with the qualifier.</p>
+     * <p>
+     * An helper method for generating the full name with the qualifier.
+     * </p>
      *
      * @param qualifier A qualifier name.
      * @param name A name.
      *
      * @return A string with the qualifier name (if not {@code null}) prepended
-     * before the specified name.
+     *         before the specified
+     *         name.
      */
     private static String fullName(PosSymbol qualifier, String name) {
         StringBuilder sb = new StringBuilder();
@@ -925,19 +1044,31 @@ public abstract class PExp {
     // ===========================================================
 
     /**
-     * <p>An helper construct for storing the structure hash and
-     * value hash for a {@code PExp}.</p>
+     * <p>
+     * An helper construct for storing the structure hash and value hash for a
+     * {@code PExp}.
+     * </p>
      */
     protected static class HashDuple {
 
-        /** <p>The structure hash.</p> */
+        /**
+         * <p>
+         * The structure hash.
+         * </p>
+         */
         public int structureHash;
 
-        /** <p>The value hash.</p> */
+        /**
+         * <p>
+         * The value hash.
+         * </p>
+         */
         public int valueHash;
 
         /**
-         * <p>This creates a duple with the two hash values.</p>
+         * <p>
+         * This creates a duple with the two hash values.
+         * </p>
          *
          * @param structureHash A structure hash.
          * @param valueHash A value hash.

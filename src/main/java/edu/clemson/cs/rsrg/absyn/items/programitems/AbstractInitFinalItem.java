@@ -1,7 +1,7 @@
 /*
  * AbstractInitFinalItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the initialization/finalization
- * block objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the initialization/finalization block
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 1.0
  */
@@ -34,7 +37,9 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This defines the various different programming item types.</p>
+     * <p>
+     * This defines the various different programming item types.
+     * </p>
      *
      * @version 2.0
      */
@@ -61,19 +66,39 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The affects clause.</p> */
+    /**
+     * <p>
+     * The affects clause.
+     * </p>
+     */
     protected final AffectsClause myAffects;
 
-    /** <p>List of facility declarations.</p> */
+    /**
+     * <p>
+     * List of facility declarations.
+     * </p>
+     */
     protected final List<FacilityDec> myFacilityDecs;
 
-    /** <p>The type of clause</p> */
+    /**
+     * <p>
+     * The type of clause
+     * </p>
+     */
     protected final ItemType myItemType;
 
-    /** <p>List of statements.</p> */
+    /**
+     * <p>
+     * List of statements.
+     * </p>
+     */
     protected final List<Statement> myStatements;
 
-    /** <p>List of variable declarations.</p> */
+    /**
+     * <p>
+     * List of variable declarations.
+     * </p>
+     */
     protected final List<VarDec> myVariableDecs;
 
     // ===========================================================
@@ -81,14 +106,19 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location, type,
-     * affects clause, facilities, variables and statements of any objects
-     * created from a class that inherits from {@code AbstractTypeInitFinalItem}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location, type, affects
+     * clause, facilities,
+     * variables and statements of any objects created from a class that
+     * inherits from
+     * {@code AbstractTypeInitFinalItem}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates if it is an initialization or finalization block.
-     * @param affects A {@link AffectsClause} representing the initialization's/finalization's
-     *                affects clause.
+     * @param affects A {@link AffectsClause} representing the
+     *        initialization's/finalization's affects
+     *        clause.
      * @param facilities List of facility declarations in this block.
      * @param variables List of variables in this block.
      * @param statements List of statements in this block.
@@ -134,8 +164,10 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the affects clause
-     * in this type initialization/finalization block.</p>
+     * <p>
+     * This method returns the affects clause in this type
+     * initialization/finalization block.
+     * </p>
      *
      * @return The {@link AffectsClause} representation object.
      */
@@ -144,8 +176,11 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the list of facility declarations
-     * in this type initialization/finalization block.</p>
+     * <p>
+     * This method returns the list of facility declarations in this type
+     * initialization/finalization
+     * block.
+     * </p>
      *
      * @return A list of {@link FacilityDec} representation objects.
      */
@@ -154,7 +189,9 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the item type.</p>
+     * <p>
+     * This method returns the item type.
+     * </p>
      *
      * @return The {@link ItemType} object.
      */
@@ -163,8 +200,10 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the list of statements
-     * in this type initialization/finalization block.</p>
+     * <p>
+     * This method returns the list of statements in this type
+     * initialization/finalization block.
+     * </p>
      *
      * @return A list of {@link Statement} representation objects.
      */
@@ -173,8 +212,10 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the list of variables
-     * in this type initialization/finalization block.</p>
+     * <p>
+     * This method returns the list of variables in this type
+     * initialization/finalization block.
+     * </p>
      *
      * @return A list of {@link VarDec} representation objects.
      */
@@ -200,8 +241,10 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the facility declarations.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * facility declarations.
+     * </p>
      *
      * @return A list containing {@link FacilityDec}s.
      */
@@ -215,8 +258,10 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the statements.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * statements.
+     * </p>
      *
      * @return A list containing {@link Statement}s.
      */
@@ -230,8 +275,10 @@ public abstract class AbstractInitFinalItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the variable declarations.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * variable declarations.
+     * </p>
      *
      * @return A list containing {@link VarDec}s.
      */

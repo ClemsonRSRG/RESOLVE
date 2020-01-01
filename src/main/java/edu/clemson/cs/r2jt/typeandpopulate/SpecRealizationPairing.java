@@ -1,7 +1,7 @@
 /*
  * SpecRealizationPairing.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,7 +36,8 @@ public class SpecRealizationPairing {
         return mySpec;
     }
 
-    public ModuleParameterization getRealization() throws NoneProvidedException {
+    public ModuleParameterization getRealization()
+            throws NoneProvidedException {
 
         if (myRealization == null) {
             throw new NoneProvidedException();

@@ -1,7 +1,7 @@
 /*
  * ModuleScopeBuilder.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>A <code>ModuleScopeBuilder</code> refines {@link ScopeBuilder} with additional
- * information specific to modules, such as a list of imports.</p>
+ * <p>
+ * A <code>ModuleScopeBuilder</code> refines {@link ScopeBuilder} with
+ * additional information
+ * specific to modules, such as a list of imports.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,7 +33,11 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     // Member Fields
     // ===========================================================
 
-    /** <p>This contains all the imported modules.</p> */
+    /**
+     * <p>
+     * This contains all the imported modules.
+     * </p>
+     */
     private final List<ModuleIdentifier> myImportedModules = new LinkedList<>();
 
     // ==========================================================
@@ -38,7 +45,9 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     // ==========================================================
 
     /**
-     * <p>This constructs a module scope where new entries can be added.</p>
+     * <p>
+     * This constructs a module scope where new entries can be added.
+     * </p>
      *
      * @param g The current type graph.
      * @param definingElement The element that created this scope.
@@ -46,8 +55,9 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
      * @param symbolTable The current scope repository builder.
      */
     ModuleScopeBuilder(TypeGraph g, ModuleDec definingElement, Scope parent,
-                       MathSymbolTableBuilder symbolTable) {
-        super(symbolTable, g, definingElement, parent, new ModuleIdentifier(definingElement));
+            MathSymbolTableBuilder symbolTable) {
+        super(symbolTable, g, definingElement, parent,
+                new ModuleIdentifier(definingElement));
     }
 
     // ===========================================================
@@ -55,10 +65,13 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     // ===========================================================
 
     /**
-     * <p>Adds <code>i</code> to the list of modules imported by the module
-     * who's scope this <code>ModuleScopeBuilder</code> represents.  Duplicate
-     * imports or attempting to import the module represented itself will leave
-     * the import list unmodified.</p>
+     * <p>
+     * Adds <code>i</code> to the list of modules imported by the module who's
+     * scope this
+     * <code>ModuleScopeBuilder</code> represents. Duplicate imports or
+     * attempting to import the
+     * module represented itself will leave the import list unmodified.
+     * </p>
      *
      * @param i The module to import.
      */
@@ -69,8 +82,10 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     }
 
     /**
-     * <p>Returns a <code>ModuleDec</code> who's scope is represented by
-     * this <code>ModuleScope</code>.</p>
+     * <p>
+     * Returns a <code>ModuleDec</code> who's scope is represented by this
+     * <code>ModuleScope</code>.
+     * </p>
      *
      * @return The <code>ModuleDec</code>.
      */
@@ -80,11 +95,15 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     }
 
     /**
-     * <p>Returns a <code>List</code> of modules that the module who's scope
-     * is represented by this <code>ModuleScope</code> imports, not including
-     * itself (which all modules are defined to import).  This <code>List</code>
-     * is a copy and modifying it will not impact the behavior of this
-     * <code>ModuleScope</code>.</p>
+     * <p>
+     * Returns a <code>List</code> of modules that the module who's scope is
+     * represented by this
+     * <code>ModuleScope</code> imports, not including itself (which all modules
+     * are defined to
+     * import). This <code>List</code> is a copy and modifying it will not
+     * impact the behavior of this
+     * <code>ModuleScope</code>.
+     * </p>
      *
      * @return A <code>List</code> of imported modules.
      */
@@ -94,9 +113,11 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     }
 
     /**
-     * <p>Returns a <code>ModuleIdentifier</code> that can be used to refer
-     * to the module who's scope is represented by this
-     * <code>ModuleScope</code>.</p>
+     * <p>
+     * Returns a <code>ModuleIdentifier</code> that can be used to refer to the
+     * module who's scope is
+     * represented by this <code>ModuleScope</code>.
+     * </p>
      *
      * @return The <code>ModuleIdentifier</code>.
      */
@@ -106,9 +127,13 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> the module who's scope
-     * is represented by this <code>ModuleScope</code> imports the given
-     * module. Note that, by definition, all modules import themselves.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> the module who's scope is
+     * represented by this
+     * <code>ModuleScope</code> imports the given module. Note that, by
+     * definition, all modules import
+     * themselves.
+     * </p>
      *
      * @return The boolean result.
      */
@@ -122,7 +147,9 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     // ===========================================================
 
     /**
-     * <p>This method seals this scope from further modifications.</p>
+     * <p>
+     * This method seals this scope from further modifications.
+     * </p>
      *
      * @param finalTable The finalized symbol table.
      *
@@ -130,8 +157,8 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
      */
     @Override
     final FinalizedModuleScope seal(MathSymbolTable finalTable) {
-        return new FinalizedModuleScope(finalTable, myDefiningElement,
-                myParent, myRootModule, myBindings, myImportedModules);
+        return new FinalizedModuleScope(finalTable, myDefiningElement, myParent,
+                myRootModule, myBindings, myImportedModules);
     }
 
 }

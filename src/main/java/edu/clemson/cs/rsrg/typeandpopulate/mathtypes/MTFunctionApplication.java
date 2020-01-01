@@ -1,7 +1,7 @@
 /*
  * MTFunctionApplication.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>A constructed type consisting of a function application over one or more
- * argument types.</p>
+ * <p>
+ * A constructed type consisting of a function application over one or more
+ * argument types.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,19 +33,39 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     // Member Fields
     // ===========================================================
 
-    /** <p>An integer value that helps us retrieve the hashcode for this class.</p> */
+    /**
+     * <p>
+     * An integer value that helps us retrieve the hashcode for this class.
+     * </p>
+     */
     private static final int BASE_HASH = "MTFunctionApplication".hashCode();
 
-    /** <p>The function type to be applied.</p> */
+    /**
+     * <p>
+     * The function type to be applied.
+     * </p>
+     */
     private final MTFunction myFunction;
 
-    /** <p>The arguments for the function type.</p> */
+    /**
+     * <p>
+     * The arguments for the function type.
+     * </p>
+     */
     private final List<MTType> myArguments;
 
-    /** <p>The name used to describe this function application</p> */
+    /**
+     * <p>
+     * The name used to describe this function application
+     * </p>
+     */
     private final String myName;
 
-    /** <p>List of {@link MTType}s that are in this function application type. </p> */
+    /**
+     * <p>
+     * List of {@link MTType}s that are in this function application type.
+     * </p>
+     */
     private List<MTType> myComponents;
 
     // ===========================================================
@@ -51,14 +73,17 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     // ===========================================================
 
     /**
-     * <p>This constructs a function application type.</p>
+     * <p>
+     * This constructs a function application type.
+     * </p>
      *
      * @param g The current type graph.
      * @param f The function type to be applied.
      * @param name The name describing this function application.
      * @param arguments The arguments for the function type.
      */
-    public MTFunctionApplication(TypeGraph g, MTFunction f, String name, MTType... arguments) {
+    public MTFunctionApplication(TypeGraph g, MTFunction f, String name,
+            MTType... arguments) {
         super(g);
 
         myFunction = f;
@@ -72,14 +97,17 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This constructs a function application type.</p>
+     * <p>
+     * This constructs a function application type.
+     * </p>
      *
      * @param g The current type graph.
      * @param f The function type to be applied.
      * @param name The name describing this function application.
      * @param arguments The list of arguments for the function type.
      */
-    public MTFunctionApplication(TypeGraph g, MTFunction f, String name, List<MTType> arguments) {
+    public MTFunctionApplication(TypeGraph g, MTFunction f, String name,
+            List<MTType> arguments) {
         super(g);
 
         myFunction = f;
@@ -91,14 +119,18 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This constructs a function application type using the {@code lambda}
-     * describe this function application.</p>
+     * <p>
+     * This constructs a function application type using the {@code lambda}
+     * describe this function
+     * application.
+     * </p>
      *
      * @param g The current type graph.
      * @param f The function type to be applied.
      * @param arguments The list of arguments for the function type.
      */
-    public MTFunctionApplication(TypeGraph g, MTFunction f, List<MTType> arguments) {
+    public MTFunctionApplication(TypeGraph g, MTFunction f,
+            List<MTType> arguments) {
         super(g);
 
         myFunction = f;
@@ -113,8 +145,11 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     // ===========================================================
 
     /**
-     * <p>This method is the {@code accept()} method in a visitor pattern
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method is the {@code accept()} method in a visitor pattern for
+     * invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -136,8 +171,10 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method implements the post-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the post-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -149,8 +186,10 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method implements the pre-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the pre-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -162,7 +201,9 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method returns the argument at the specified index.</p>
+     * <p>
+     * This method returns the argument at the specified index.
+     * </p>
      *
      * @param i An index.
      *
@@ -173,8 +214,11 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method returns the list of {@link MTType} arguments used in
-     * this function application type.</p>
+     * <p>
+     * This method returns the list of {@link MTType} arguments used in this
+     * function application
+     * type.
+     * </p>
      *
      * @return The list of {@link MTType} arguments.
      */
@@ -183,8 +227,9 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method returns a list of {@link MTType}s
-     * that are part of this type.</p>
+     * <p>
+     * This method returns a list of {@link MTType}s that are part of this type.
+     * </p>
      *
      * @return The list of {@link MTType}s in this big union type.
      */
@@ -194,8 +239,10 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method returns the {@link MTFunction} that was used in
-     * this function application type.</p>
+     * <p>
+     * This method returns the {@link MTFunction} that was used in this function
+     * application type.
+     * </p>
      *
      * @return The {@link MTFunction} used.
      */
@@ -204,8 +251,10 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method returns the name used to this describe this function
-     * application type.</p>
+     * <p>
+     * This method returns the name used to this describe this function
+     * application type.
+     * </p>
      *
      * @return A string representing the name.
      */
@@ -214,26 +263,33 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>Indicates that this type is known to contain only elements <em>that
-     * are themselves</em> types. Practically, this answers the question, "can
-     * an instance of this type itself be used as a type?"</p>
+     * <p>
+     * Indicates that this type is known to contain only elements <em>that are
+     * themselves</em> types.
+     * Practically, this answers the question, "can an instance of this type
+     * itself be used as a
+     * type?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
     @Override
     public boolean isKnownToContainOnlyMTypes() {
-        //Note that, effectively, we represent an instance of the range of our
-        //function.  Thus, we're known to contain only MTypes if the function's
-        //range's members are known only to contain MTypes.
+        // Note that, effectively, we represent an instance of the range of our
+        // function. Thus, we're known to contain only MTypes if the function's
+        // range's members are known only to contain MTypes.
 
         return myFunction.getRange().membersKnownToContainOnlyMTypes();
     }
 
     /**
-     * <p>Indicates that every instance of this type is itself known to contain
-     * only elements that are types. Practically, this answers the question,
-     * "if a function returns an instance of this type, can that instance itself
-     * be said to contain only types?"</p>
+     * <p>
+     * Indicates that every instance of this type is itself known to contain
+     * only elements that are
+     * types. Practically, this answers the question, "if a function returns an
+     * instance of this type,
+     * can that instance itself be said to contain only types?"
+     * </p>
      *
      * @return {@code true} if it can, {@code false} otherwise.
      */
@@ -244,13 +300,14 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         while (arguments.hasNext()) {
             result &= arguments.next().isKnownToContainOnlyMTypes();
         }
-        return result
-                && myFunction
-                        .applicationResultsKnownToContainOnlyRestrictions();
+        return result && myFunction
+                .applicationResultsKnownToContainOnlyRestrictions();
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */
@@ -285,14 +342,17 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     }
 
     /**
-     * <p>This method attempts to replace a component type at the specified
-     * index.</p>
+     * <p>
+     * This method attempts to replace a component type at the specified index.
+     * </p>
      *
      * @param index Index to a component type.
-     * @param newType The {@link MTType} to replace the one in our component list.
+     * @param newType The {@link MTType} to replace the one in our component
+     *        list.
      *
-     * @return A new {@link MTFunctionApplication} with the type at the specified index
-     * replaced with {@code newType}.
+     * @return A new {@link MTFunctionApplication} with the type at the
+     *         specified index replaced with
+     *         {@code newType}.
      */
     @Override
     public MTType withComponentReplaced(int index, MTType newType) {
@@ -316,13 +376,16 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     // ===========================================================
 
     /**
-     * <p>This is just a template method to <em>force</em> all concrete
-     * subclasses of {@link MTType} to implement <code>hashCode()</code>,
-     * as the type resolution algorithm depends on it being implemented
-     * sensibly.</p>
+     * <p>
+     * This is just a template method to <em>force</em> all concrete subclasses
+     * of {@link MTType} to
+     * implement <code>hashCode()</code>, as the type resolution algorithm
+     * depends on it being
+     * implemented sensibly.
+     * </p>
      *
      * @return A hashcode consistent with <code>equals()</code> and thus
-     * alpha-equivalency.
+     *         alpha-equivalency.
      */
     @Override
     protected final int getHashCode() {
@@ -341,8 +404,10 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     // ===========================================================
 
     /**
-     * <p>An helper method to create an immutable list using the function type
-     * and the arguments.</p>
+     * <p>
+     * An helper method to create an immutable list using the function type and
+     * the arguments.
+     * </p>
      */
     private void setUpComponents() {
         List<MTType> result = new LinkedList<>();

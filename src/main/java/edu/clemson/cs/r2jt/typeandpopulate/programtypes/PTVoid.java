@@ -1,7 +1,7 @@
 /*
  * PTVoid.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -45,15 +45,14 @@ public class PTVoid extends PTType {
     }
 
     @Override
-    public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
+    public PTType instantiateGenerics(Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
         return this;
     }
 
     @Override
     public boolean equals(Object o) {
-        //We override this simply to show that we've given it some thought
+        // We override this simply to show that we've given it some thought
         return super.equals(o);
     }
 }

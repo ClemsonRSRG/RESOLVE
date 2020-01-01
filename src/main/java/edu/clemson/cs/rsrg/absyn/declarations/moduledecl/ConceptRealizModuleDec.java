@@ -1,7 +1,7 @@
 /*
  * ConceptRealizModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the class for the concept realization module declarations
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for the concept realization module declarations that the
+ * compiler builds using
+ * the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,13 +36,25 @@ public class ConceptRealizModuleDec extends ModuleDec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The performance profile associated with this module</p> */
+    /**
+     * <p>
+     * The performance profile associated with this module
+     * </p>
+     */
     private final PosSymbol myProfileName;
 
-    /** <p>The concept module associated with this module</p> */
+    /**
+     * <p>
+     * The concept module associated with this module
+     * </p>
+     */
     private final PosSymbol myConceptName;
 
-    /** <p>The requires expression</p> */
+    /**
+     * <p>
+     * The requires expression
+     * </p>
+     */
     private final AssertionClause myRequires;
 
     // ===========================================================
@@ -47,21 +62,24 @@ public class ConceptRealizModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>This constructor creates a "Concept Realization"
-     * module representation.</p>
+     * <p>
+     * This constructor creates a "Concept Realization" module representation.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
-     * @param profileName The performance profile name (if any) in {@link PosSymbol} format.
+     * @param profileName The performance profile name (if any) in
+     *        {@link PosSymbol} format.
      * @param conceptName The concept name in {@link PosSymbol} format.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param requires A {@link AssertionClause} representing the concept's
-     *                 requires clause.
+     *        requires clause.
      * @param decs The list of {@link Dec} objects.
      * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
-     *                           externally realized flags that indicates
-     *                           all the modules that this module declaration depends on.
+     *        externally realized flags
+     *        that indicates all the modules that this module declaration
+     *        depends on.
      */
     public ConceptRealizModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, PosSymbol profileName,
@@ -129,8 +147,9 @@ public class ConceptRealizModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the symbol representation
-     * of for the concept name.</p>
+     * <p>
+     * This method returns the symbol representation of for the concept name.
+     * </p>
      *
      * @return The name in {@link PosSymbol} format.
      */
@@ -139,8 +158,9 @@ public class ConceptRealizModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the symbol representation
-     * of for the profile name.</p>
+     * <p>
+     * This method returns the symbol representation of for the profile name.
+     * </p>
      *
      * @return The name in {@link PosSymbol} format.
      */
@@ -149,8 +169,9 @@ public class ConceptRealizModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method returns the requires clause
-     * for this enhancement declaration.</p>
+     * <p>
+     * This method returns the requires clause for this enhancement declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -164,10 +185,8 @@ public class ConceptRealizModuleDec extends ModuleDec {
     @Override
     public final int hashCode() {
         int result = super.hashCode();
-        result =
-                31
-                        * result
-                        + (myProfileName != null ? myProfileName.hashCode() : 0);
+        result = 31 * result
+                + (myProfileName != null ? myProfileName.hashCode() : 0);
         result = 31 * result + myConceptName.hashCode();
         result = 31 * result + myRequires.hashCode();
         return result;
@@ -183,13 +202,15 @@ public class ConceptRealizModuleDec extends ModuleDec {
     @Override
     protected final ConceptRealizModuleDec copy() {
         // Copy all the items in the lists
-        List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
+        List<ModuleParameterDec> newParameterDecs =
+                new ArrayList<>(myParameterDecs.size());
         Collections.copy(newParameterDecs, myParameterDecs);
         List<UsesItem> newUsesItems = new ArrayList<>(myUsesItems.size());
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies = copyModuleDependencies();
+        Map<ResolveFileBasicInfo, Boolean> newModuleDependencies =
+                copyModuleDependencies();
 
         // Copy the profile name
         PosSymbol newProfileName = null;
@@ -197,8 +218,9 @@ public class ConceptRealizModuleDec extends ModuleDec {
             newProfileName = myProfileName.clone();
         }
 
-        return new ConceptRealizModuleDec(cloneLocation(), myName.clone(), newParameterDecs,
-                newProfileName, myConceptName.clone(), newUsesItems, myRequires.clone(),
-                newDecs, newModuleDependencies);
+        return new ConceptRealizModuleDec(cloneLocation(), myName.clone(),
+                newParameterDecs, newProfileName, myConceptName.clone(),
+                newUsesItems, myRequires.clone(), newDecs,
+                newModuleDependencies);
     }
 }

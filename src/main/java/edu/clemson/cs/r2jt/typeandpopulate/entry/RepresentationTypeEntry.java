@@ -1,7 +1,7 @@
 /*
  * RepresentationTypeEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -76,8 +76,8 @@ public class RepresentationTypeEntry extends SymbolTableEntry {
     @Override
     public ProgramTypeEntry toProgramTypeEntry(Location l) {
         return new ProgramTypeEntry(myTypeGraph, getName(),
-                getDefiningElement(), getSourceModuleIdentifier(), myDefinition
-                        .getModelType(), myRepresentation);
+                getDefiningElement(), getSourceModuleIdentifier(),
+                myDefinition.getModelType(), myRepresentation);
     }
 
     @Override
@@ -85,9 +85,9 @@ public class RepresentationTypeEntry extends SymbolTableEntry {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        //Representation is an internal implementation detail of a realization
-        //and cannot be accessed through a facility instantiation
-        throw new UnsupportedOperationException("Cannot instantiate "
-                + this.getClass());
+        // Representation is an internal implementation detail of a realization
+        // and cannot be accessed through a facility instantiation
+        throw new UnsupportedOperationException(
+                "Cannot instantiate " + this.getClass());
     }
 }

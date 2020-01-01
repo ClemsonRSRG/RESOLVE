@@ -1,7 +1,7 @@
 /*
  * PTRecord.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,10 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>A {@code PTRecord} is record of variables with {@link PTInstantiated} types
- * or from {@link PTGeneric} types from the specification field that is used to
- * implement a {@link PTFamily}. The record itself should be a {@link PTInstantiated}
- * object.</p>
+ * <p>
+ * A {@code PTRecord} is record of variables with {@link PTInstantiated} types
+ * or from
+ * {@link PTGeneric} types from the specification field that is used to
+ * implement a
+ * {@link PTFamily}. The record itself should be a {@link PTInstantiated}
+ * object.
+ * </p>
  *
  * @version 2.0
  */
@@ -34,10 +38,18 @@ public class PTRecord extends PTInstantiated {
     // Member Fields
     // ===========================================================
 
-    /** <p>A map of variable names and program types.</p> */
+    /**
+     * <p>
+     * A map of variable names and program types.
+     * </p>
+     */
     private final Map<String, PTType> myFields = new HashMap<>();
 
-    /** <p>The mathematical type corresponding to this record type.</p> */
+    /**
+     * <p>
+     * The mathematical type corresponding to this record type.
+     * </p>
+     */
     private final MTType myMathTypeAlterEgo;
 
     // ===========================================================
@@ -45,7 +57,9 @@ public class PTRecord extends PTInstantiated {
     // ===========================================================
 
     /**
-     * <p>This creates a record programming type.</p>
+     * <p>
+     * This creates a record programming type.
+     * </p>
      *
      * @param g The current type graph.
      * @param types A map of all programming types in this record.
@@ -70,8 +84,9 @@ public class PTRecord extends PTInstantiated {
     // ===========================================================
 
     /**
-     * <p>This method returns the {@link PTType} associated with
-     * the name.</p>
+     * <p>
+     * This method returns the {@link PTType} associated with the name.
+     * </p>
      *
      * @param name Name of a field variable.
      *
@@ -82,9 +97,11 @@ public class PTRecord extends PTInstantiated {
     }
 
     /**
-     * <p>This method converts a generic {@link PTType} to a program type
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link PTType} to a program type that has
+     * all the generic types
+     * and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -106,7 +123,10 @@ public class PTRecord extends PTInstantiated {
     }
 
     /**
-     * <p>This method returns the mathematical type associated with this program type.</p>
+     * <p>
+     * This method returns the mathematical type associated with this program
+     * type.
+     * </p>
      *
      * @return A {@link MTType} representation object.
      */
@@ -116,7 +136,9 @@ public class PTRecord extends PTInstantiated {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */

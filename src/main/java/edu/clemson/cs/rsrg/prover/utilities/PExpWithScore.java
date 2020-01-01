@@ -1,7 +1,7 @@
 /*
  * PExpWithScore.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,9 @@ import edu.clemson.cs.rsrg.prover.absyn.PExp;
 import java.util.Map;
 
 /**
- * <p>This class allows us to create a comparable theorem with a score.</p>
+ * <p>
+ * This class allows us to create a comparable theorem with a score.
+ * </p>
  *
  * @author Mike Kabbani
  * @version 2.0
@@ -27,16 +29,32 @@ public class PExpWithScore implements Comparable<PExpWithScore> {
     // Member Fields
     // ===========================================================
 
-    /** <p>A theorem expression</p> */
+    /**
+     * <p>
+     * A theorem expression
+     * </p>
+     */
     private final PExp myTheorem;
 
-    /** <p>The theorem's definition.</p> */
+    /**
+     * <p>
+     * The theorem's definition.
+     * </p>
+     */
     private final String myTheoremDefinitionString;
 
-    /** <p>A comparison score.</p> */
+    /**
+     * <p>
+     * A comparison score.
+     * </p>
+     */
     private final Integer myScore;
 
-    /** <p>A map of symbols in this theorem.</p> */
+    /**
+     * <p>
+     * A map of symbols in this theorem.
+     * </p>
+     */
     private final Map<String, String> myBMap;
 
     // ===========================================================
@@ -44,7 +62,9 @@ public class PExpWithScore implements Comparable<PExpWithScore> {
     // ===========================================================
 
     /**
-     * <p>This constructs a new expression that includes a score.</p>
+     * <p>
+     * This constructs a new expression that includes a score.
+     * </p>
      *
      * @param theorem A theorem represented as a {@link PExp}.
      * @param bMap A map of symbols in this theorem.
@@ -63,7 +83,9 @@ public class PExpWithScore implements Comparable<PExpWithScore> {
     // ===========================================================
 
     /**
-     * <p>Compares <code>this<code> and <code>o</code>.</p>
+     * <p>
+     * Compares <code>this<code> and <code>o</code>.
+     * </p>
      *
      * @param o Another {@link PExpWithScore}.
      *
@@ -75,7 +97,9 @@ public class PExpWithScore implements Comparable<PExpWithScore> {
     }
 
     /**
-     * <p>This method returns a theorem expression.</p>
+     * <p>
+     * This method returns a theorem expression.
+     * </p>
      *
      * @return A {@link PExp}.
      */
@@ -84,7 +108,9 @@ public class PExpWithScore implements Comparable<PExpWithScore> {
     }
 
     /**
-     * <p>This method returns the theorem definition.</p>
+     * <p>
+     * This method returns the theorem definition.
+     * </p>
      *
      * @return A string.
      */
@@ -93,7 +119,9 @@ public class PExpWithScore implements Comparable<PExpWithScore> {
     }
 
     /**
-     * <p>This method returns this expression in string format.</p>
+     * <p>
+     * This method returns this expression in string format.
+     * </p>
      *
      * @return A string.
      */

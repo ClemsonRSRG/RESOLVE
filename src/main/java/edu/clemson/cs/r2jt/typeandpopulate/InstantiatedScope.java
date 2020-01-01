@@ -1,7 +1,7 @@
 /*
  * InstantiatedScope.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,10 +26,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>An <code>InstantiatedScope</code> decorates an existing 
- * {@link Scope Scope} such that calls to {@link Scope#addMatches addMatches()},
- * the search method to which all others defer, are augmented with an additional
- * set of generic instantiations and an instantiating facility.</p>
+ * <p>
+ * An <code>InstantiatedScope</code> decorates an existing {@link Scope Scope}
+ * such that calls to
+ * {@link Scope#addMatches addMatches()}, the search method to which all others
+ * defer, are augmented
+ * with an additional set of generic instantiations and an instantiating
+ * facility.
+ * </p>
  */
 public class InstantiatedScope extends AbstractScope {
 
@@ -47,8 +51,8 @@ public class InstantiatedScope extends AbstractScope {
     }
 
     @Override
-    public <E extends SymbolTableEntry> List<E> query(
-            MultimatchSymbolQuery<E> query) {
+    public <E extends SymbolTableEntry> List<E>
+            query(MultimatchSymbolQuery<E> query) {
         return myBaseScope.query(query);
     }
 
@@ -68,9 +72,9 @@ public class InstantiatedScope extends AbstractScope {
             throws DuplicateSymbolException {
 
         if (facilityInstantiation != null) {
-            //It's unclear how this could happen or what it would mean, so we
-            //fail fast.  If an example triggers this, we need to think 
-            //carefully about what it would mean.
+            // It's unclear how this could happen or what it would mean, so we
+            // fail fast. If an example triggers this, we need to think
+            // carefully about what it would mean.
             throw new RuntimeException("Duplicate instantiation???");
         }
 

@@ -1,7 +1,7 @@
 /*
  * SubstituteInPlaceInConsequent.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -54,10 +54,9 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
-        Iterator<PerVCProverModel.BindResult> bindResults =
-                m.bind(Collections
-                        .singleton((Binder) new InductiveConsequentBinder(
-                                myMatchPattern)));
+        Iterator<PerVCProverModel.BindResult> bindResults = m.bind(
+                Collections.singleton((Binder) new InductiveConsequentBinder(
+                        myMatchPattern)));
 
         return new LazyMappingIterator<BindResult, Application>(bindResults,
                 BIND_RESULT_TO_APPLICATION);
@@ -81,9 +80,8 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
     @Override
     public boolean introducesQuantifiedVariables() {
-        Set<PSymbol> introduced =
-                new HashSet<PSymbol>(myTransformationTemplate
-                        .getQuantifiedVariables());
+        Set<PSymbol> introduced = new HashSet<PSymbol>(
+                myTransformationTemplate.getQuantifiedVariables());
 
         introduced.removeAll(myMatchPattern.getQuantifiedVariables());
 
@@ -124,8 +122,9 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
         @Override
         public Application map(BindResult input) {
-            return new SubstituteInPlaceInConsequentApplication(input.bindSites
-                    .values().iterator().next(), input.freeVariableBindings);
+            return new SubstituteInPlaceInConsequentApplication(
+                    input.bindSites.values().iterator().next(),
+                    input.freeVariableBindings);
         }
 
     }
@@ -155,13 +154,12 @@ public class SubstituteInPlaceInConsequent implements Transformation {
             PExp transformed = myTransformationTemplate.substitute(myBindings);
             m.alterSite(myBindSite, transformed);
 
-            myFinalSite =
-                    new Site(m, myBindSite.conjunct, myBindSite.path,
-                            transformed);
+            myFinalSite = new Site(m, myBindSite.conjunct, myBindSite.path,
+                    transformed);
 
             m.addProofStep(new ModifyConsequentStep(myBindSite, myFinalSite,
-                    SubstituteInPlaceInConsequent.this, this, Collections
-                            .singleton(myBindSite)));
+                    SubstituteInPlaceInConsequent.this, this,
+                    Collections.singleton(myBindSite)));
         }
 
         @Override

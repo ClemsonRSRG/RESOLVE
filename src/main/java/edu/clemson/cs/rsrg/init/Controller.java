@@ -1,7 +1,7 @@
 /*
  * Controller.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -49,7 +49,9 @@ import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
- * <p>A manager for the target file of a compilation.</p>
+ * <p>
+ * A manager for the target file of a compilation.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -62,28 +64,38 @@ class Controller {
     // ===========================================================
 
     /**
-     * <p>This is the lexer error listener for all ANTLR4 related objects.</p>
+     * <p>
+     * This is the lexer error listener for all ANTLR4 related objects.
+     * </p>
      */
     private final AntlrLexerErrorListener myAntlrLexerErrorListener;
 
     /**
-     * <p>This is the parser error listener for all ANTLR4 related objects.</p>
+     * <p>
+     * This is the parser error listener for all ANTLR4 related objects.
+     * </p>
      */
     private final AntlrParserErrorListener myAntlrParserErrorListener;
 
     /**
-     * <p>The current job's compilation environment
-     * that stores all necessary objects and flags.</p>
+     * <p>
+     * The current job's compilation environment that stores all necessary
+     * objects and flags.
+     * </p>
      */
     private final CompileEnvironment myCompileEnvironment;
 
     /**
-     * <p>This is the status handler for the RESOLVE compiler.</p>
+     * <p>
+     * This is the status handler for the RESOLVE compiler.
+     * </p>
      */
     private final StatusHandler myStatusHandler;
 
     /**
-     * <p>The symbol table for the compiler.</p>
+     * <p>
+     * The symbol table for the compiler.
+     * </p>
      */
     private final MathSymbolTableBuilder mySymbolTable;
 
@@ -92,9 +104,12 @@ class Controller {
     // ===========================================================
 
     /**
-     * <p>This is a list of all externally realized file extensions
-     * accepted by the RESOLVE compiler. When adding a new type of
-     * extension, simply add the extension name into the list.</p>
+     * <p>
+     * This is a list of all externally realized file extensions accepted by the
+     * RESOLVE compiler.
+     * When adding a new type of extension, simply add the extension name into
+     * the list.
+     * </p>
      */
     private static final List<String> NON_NATIVE_EXT =
             Collections.unmodifiableList(Arrays.asList("java", "c", "h"));
@@ -104,11 +119,15 @@ class Controller {
     // ===========================================================
 
     /**
-     * <p>This object takes care of all dependency imports, population,
-     * semantic analysis, translation, VC generation and/or verification.</p>
+     * <p>
+     * This object takes care of all dependency imports, population, semantic
+     * analysis, translation,
+     * VC generation and/or verification.
+     * </p>
      *
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
+     * @param compileEnvironment The current job's compilation environment that
+     *        stores all necessary
+     *        objects and flags.
      */
     Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
@@ -126,9 +145,12 @@ class Controller {
     // ===========================================================
 
     /**
-     * <p>Compiles a target file. A target file is one that is specified on the
-     * command line of the compiler as opposed to one that is being compiled
-     * because it was imported by another file.</p>
+     * <p>
+     * Compiles a target file. A target file is one that is specified on the
+     * command line of the
+     * compiler as opposed to one that is being compiled because it was imported
+     * by another file.
+     * </p>
      *
      * @param file The compiling RESOLVE file.
      */
@@ -139,69 +161,80 @@ class Controller {
 
             // Add this file to our compile environment
             myCompileEnvironment.constructRecord(file, targetModule);
-            if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                myStatusHandler.info(null, "Begin Compiling: " + targetModule.getName().getName());
+            if (myCompileEnvironment.flags
+                    .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                myStatusHandler.info(null,
+                        "Begin Compiling: " + targetModule.getName().getName());
             }
 
             // Create a dependencies graph and search for import
             // dependencies.
             DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g =
-                    new DefaultDirectedGraph<>(
-                            DefaultEdge.class);
+                    new DefaultDirectedGraph<>(DefaultEdge.class);
             g.addVertex(new ModuleIdentifier(targetModule));
             findDependencies(g, targetModule, file.getParentPath());
 
             // Perform different compilation tasks to each file
             for (ModuleIdentifier m : getCompileOrder(g)) {
                 // Print the entire ModuleDec
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_PRINT_MODULE) &&
-                        m.equals(new ModuleIdentifier(targetModule))) {
+                if (myCompileEnvironment.flags
+                        .isFlagSet(ResolveCompiler.FLAG_PRINT_MODULE)
+                        && m.equals(new ModuleIdentifier(targetModule))) {
                     RawASTOutputPipeline rawASTOutputPipe =
-                            new RawASTOutputPipeline(myCompileEnvironment, mySymbolTable);
+                            new RawASTOutputPipeline(myCompileEnvironment,
+                                    mySymbolTable);
                     rawASTOutputPipe.process(m);
                 }
 
                 // Output AST to Graphviz dot file. (Only for argument files)
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_EXPORT_AST) &&
-                        m.equals(new ModuleIdentifier(targetModule))) {
+                if (myCompileEnvironment.flags
+                        .isFlagSet(ResolveCompiler.FLAG_EXPORT_AST)
+                        && m.equals(new ModuleIdentifier(targetModule))) {
                     GraphicalASTOutputPipeline astOutputPipe =
-                            new GraphicalASTOutputPipeline(myCompileEnvironment, mySymbolTable);
+                            new GraphicalASTOutputPipeline(myCompileEnvironment,
+                                    mySymbolTable);
                     astOutputPipe.process(m);
                 }
 
                 // Type and populate symbol table
-                AnalysisPipeline analysisPipe =
-                        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
+                AnalysisPipeline analysisPipe = new AnalysisPipeline(
+                        myCompileEnvironment, mySymbolTable);
                 analysisPipe.process(m);
 
                 // Translate source file to target file
-                if (myCompileEnvironment.flags.isFlagSet(AbstractTranslator.FLAG_TRANSLATE) &&
-                        m.equals(new ModuleIdentifier(targetModule))) {
+                if (myCompileEnvironment.flags
+                        .isFlagSet(AbstractTranslator.FLAG_TRANSLATE)
+                        && m.equals(new ModuleIdentifier(targetModule))) {
                     TranslatorPipeline translatorPipeline =
-                            new TranslatorPipeline(myCompileEnvironment, mySymbolTable);
+                            new TranslatorPipeline(myCompileEnvironment,
+                                    mySymbolTable);
                     translatorPipeline.process(m);
                 }
 
                 // Generate VCs
-                if (myCompileEnvironment.flags.isFlagSet(VCGenerator.FLAG_VERIFY_VC) &&
-                        m.equals(new ModuleIdentifier(targetModule))) {
-                    VCGenPipeline vcGenPipeline =
-                            new VCGenPipeline(myCompileEnvironment, mySymbolTable);
+                if (myCompileEnvironment.flags
+                        .isFlagSet(VCGenerator.FLAG_VERIFY_VC)
+                        && m.equals(new ModuleIdentifier(targetModule))) {
+                    VCGenPipeline vcGenPipeline = new VCGenPipeline(
+                            myCompileEnvironment, mySymbolTable);
                     vcGenPipeline.process(m);
                 }
 
                 // Invoke Automated Prover (if requested)
-                if (myCompileEnvironment.flags.isFlagSet(CongruenceClassProver.FLAG_PROVE) &&
-                        m.equals(new ModuleIdentifier(targetModule))) {
-                    ProverPipeline proverPipeline =
-                            new ProverPipeline(myCompileEnvironment, mySymbolTable);
+                if (myCompileEnvironment.flags
+                        .isFlagSet(CongruenceClassProver.FLAG_PROVE)
+                        && m.equals(new ModuleIdentifier(targetModule))) {
+                    ProverPipeline proverPipeline = new ProverPipeline(
+                            myCompileEnvironment, mySymbolTable);
                     proverPipeline.process(m);
                 }
 
                 // Complete compilation for this module
                 myCompileEnvironment.completeRecord(m);
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                    myStatusHandler.info(null, "Done Compiling: " + m.toString());
+                if (myCompileEnvironment.flags
+                        .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                    myStatusHandler.info(null,
+                            "Done Compiling: " + m.toString());
                 }
             }
         }
@@ -221,8 +254,9 @@ class Controller {
             else {
                 CompilerException see = (CompilerException) cause;
                 myStatusHandler.error(see.getErrorLocation(), see.getMessage());
-                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)) {
-                   myStatusHandler.printStackTrace(see);
+                if (myCompileEnvironment.flags
+                        .isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)) {
+                    myStatusHandler.printStackTrace(see);
                 }
                 myStatusHandler.stopLogging();
             }
@@ -234,10 +268,12 @@ class Controller {
     // ===========================================================
 
     /**
-     * <p>For concept/enhancement realizations, the user can supply
-     * Non-RESOLVE type files. This method locates all externally
-     * supplied files and add them to the compile environment for
-     * future use.</p>
+     * <p>
+     * For concept/enhancement realizations, the user can supply Non-RESOLVE
+     * type files. This method
+     * locates all externally supplied files and add them to the compile
+     * environment for future use.
+     * </p>
      *
      * @param importName A filename that we have labeled as externally import
      *
@@ -256,15 +292,16 @@ class Controller {
                         new ModuleIdentifier(importName);
 
                 // Add this as an external realiz file if it is not already declared to be one.
-                if (!myCompileEnvironment.isExternalRealizFile(externalImport)) {
+                if (!myCompileEnvironment
+                        .isExternalRealizFile(externalImport)) {
                     myCompileEnvironment.addExternalRealizFile(externalImport,
                             l.getFile());
 
                     // Print out debugging message
                     if (myCompileEnvironment.flags
                             .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                        myStatusHandler.info(null, "Skipping External Import: "
-                                + importName);
+                        myStatusHandler.info(null,
+                                "Skipping External Import: " + importName);
                     }
                 }
             }
@@ -280,14 +317,18 @@ class Controller {
     }
 
     /**
-     * <p>This method uses the {@link ResolveFile} provided
-     * to construct a parser and create an ANTLR4 module AST.</p>
+     * <p>
+     * This method uses the {@link ResolveFile} provided to construct a parser
+     * and create an ANTLR4
+     * module AST.
+     * </p>
      *
      * @param file The RESOLVE file that we are going to compile.
      *
      * @return The inner representation for a module. See {@link ModuleDec}.
      *
-     * @throws MiscErrorException Some how we couldn't instantiate an {@link CharStream}.
+     * @throws MiscErrorException Some how we couldn't instantiate an
+     *         {@link CharStream}.
      * @throws SourceErrorException There are errors in the source file.
      */
     private ModuleDec createModuleAST(ResolveFile file) {
@@ -337,25 +378,26 @@ class Controller {
         }
 
         // Build the intermediate representation
-        TreeBuildingListener v =
-                new TreeBuildingListener(file, myCompileEnvironment
-                        .getTypeGraph());
+        TreeBuildingListener v = new TreeBuildingListener(file,
+                myCompileEnvironment.getTypeGraph());
         ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
 
         return v.getModule();
     }
 
     /**
-     * <p>A recursive method to find all the import dependencies
-     * needed by the specified module.</p>
+     * <p>
+     * A recursive method to find all the import dependencies needed by the
+     * specified module.
+     * </p>
      *
      * @param g The compilation's file dependency graph.
      * @param root Current compiling module.
-     * @param parentPath The parent path if it is known. Otherwise,
-     *                   this can be {@code null}.
+     * @param parentPath The parent path if it is known. Otherwise, this can be
+     *        {@code null}.
      *
      * @throws CircularDependencyException Some of the source files form a
-     * circular dependency.
+     *         circular dependency.
      * @throws ImportException Incorrect import type.
      * @throws SourceErrorException There are errors in the source file.
      */
@@ -379,8 +421,8 @@ class Controller {
                         // Print out debugging message
                         if (myCompileEnvironment.flags
                                 .isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                            myStatusHandler.info(null, "Importing New Module: "
-                                    + id.toString());
+                            myStatusHandler.info(null,
+                                    "Importing New Module: " + id.toString());
                         }
 
                         ResolveFile file =
@@ -404,10 +446,9 @@ class Controller {
                                 myCompileEnvironment.getModuleAST(id);
                         if (module == null) {
                             // Import error
-                            throw new ImportException(
-                                    "Import error: "
-                                            + importRequest.toString()
-                                            + "; Module does not exist in our current compile environment.");
+                            throw new ImportException("Import error: "
+                                    + importRequest.toString()
+                                    + "; Module does not exist in our current compile environment.");
                         }
                     }
 
@@ -431,12 +472,14 @@ class Controller {
     }
 
     /**
-     * <p>This method attempts to locate a file with the
-     * specified name.</p>
+     * <p>
+     * This method attempts to locate a file with the specified name.
+     * </p>
      *
-     * @param fileBasicInfo The name of the file including any known parent directory.
-     * @param parentPath The parent path if it is known. Otherwise,
-     *                   this can be {@code null}.
+     * @param fileBasicInfo The name of the file including any known parent
+     *        directory.
+     * @param parentPath The parent path if it is known. Otherwise, this can be
+     *        {@code null}.
      *
      * @return A {@link ResolveFile} object that is used by the compiler.
      *
@@ -458,19 +501,18 @@ class Controller {
                 File actualFile = null;
                 if (parentPath != null) {
                     try {
-                        FileLocator l =
-                                new FileLocator(fileBasicInfo.getName(),
-                                        ModuleType.getAllExtensions());
+                        FileLocator l = new FileLocator(fileBasicInfo.getName(),
+                                ModuleType.getAllExtensions());
 
                         // If our file's basic information contains a parent directory
                         // that matches a file we have already compiled, use that path
                         // instead of the parent path passed in.
                         if (myCompileEnvironment
-                                .containsID(new ModuleIdentifier(fileBasicInfo
-                                        .getParentDirName()))) {
-                            Files.walkFileTree(myCompileEnvironment.getFile(
-                                    new ModuleIdentifier(fileBasicInfo
-                                            .getParentDirName()))
+                                .containsID(new ModuleIdentifier(
+                                        fileBasicInfo.getParentDirName()))) {
+                            Files.walkFileTree(myCompileEnvironment
+                                    .getFile(new ModuleIdentifier(
+                                            fileBasicInfo.getParentDirName()))
                                     .getParentPath(), l);
                         }
                         else {
@@ -487,9 +529,8 @@ class Controller {
                 // If we couldn't find it, try searching the entire workspace.
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 if (actualFile == null) {
-                    FileLocator l =
-                            new FileLocator(fileBasicInfo.getName(), ModuleType
-                                    .getAllExtensions());
+                    FileLocator l = new FileLocator(fileBasicInfo.getName(),
+                            ModuleType.getAllExtensions());
                     Files.walkFileTree(workspaceDir.toPath(), l);
                     actualFile = l.getFile();
                 }
@@ -497,9 +538,8 @@ class Controller {
                 // Convert to ResolveFile
                 ModuleType extType =
                         Utilities.getModuleType(actualFile.getName());
-                file =
-                        Utilities.convertToResolveFile(actualFile, extType,
-                                workspaceDir.getAbsolutePath());
+                file = Utilities.convertToResolveFile(actualFile, extType,
+                        workspaceDir.getAbsolutePath());
             }
             catch (IOException ioe) {
                 throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
@@ -510,22 +550,23 @@ class Controller {
     }
 
     /**
-     * <p>This method returns the order that our modules
-     * need to be compiled.</p>
+     * <p>
+     * This method returns the order that our modules need to be compiled.
+     * </p>
      *
      * @param g The compilation's file dependency graph.
      *
      * @return An ordered list of {@link ModuleIdentifier ModuleIdentifiers}.
      */
-    private List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g) {
+    private List<ModuleIdentifier> getCompileOrder(
+            DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g) {
         List<ModuleIdentifier> result = new ArrayList<>();
 
         EdgeReversedGraph<ModuleIdentifier, DefaultEdge> reversed =
                 new EdgeReversedGraph<>(g);
 
         TopologicalOrderIterator<ModuleIdentifier, DefaultEdge> dependencies =
-                new TopologicalOrderIterator<>(
-                        reversed);
+                new TopologicalOrderIterator<>(reversed);
         while (dependencies.hasNext()) {
             // Ignore the modules that have been compiled
             ModuleIdentifier next = dependencies.next();
@@ -538,8 +579,11 @@ class Controller {
     }
 
     /**
-     * <p>This method is used to check for circular dependencies when
-     * importing modules using our file dependencies graph.</p>
+     * <p>
+     * This method is used to check for circular dependencies when importing
+     * modules using our file
+     * dependencies graph.
+     * </p>
      *
      * @param g The compilation's file dependency graph.
      * @param src The source file module.
@@ -547,10 +591,11 @@ class Controller {
      *
      * @return {@code true} if there is a cycle, {@code false} otherwise.
      */
-    private boolean pathExists(DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
+    private boolean pathExists(
+            DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g,
             ModuleIdentifier src, ModuleIdentifier dest) {
-        //If src doesn't exist in g, then there is obviously no path from
-        //src -> ... -> dest
+        // If src doesn't exist in g, then there is obviously no path from
+        // src -> ... -> dest
         if (!g.containsVertex(src)) {
             return false;
         }
@@ -559,7 +604,7 @@ class Controller {
 
         while (iterator.hasNext()) {
             ModuleIdentifier next = iterator.next();
-            //we've reached dest from src -- a path exists.
+            // we've reached dest from src -- a path exists.
             if (next.equals(dest)) {
                 return true;
             }

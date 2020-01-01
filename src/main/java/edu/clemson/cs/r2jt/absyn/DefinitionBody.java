@@ -1,7 +1,7 @@
 /*
  * DefinitionBody.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -53,7 +53,7 @@ public class DefinitionBody extends ResolveConceptualElement {
 
     @Override
     public void accept(ResolveConceptualVisitor v) {
-    // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * SameProgTypeChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,9 +19,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 
 /**
- * <p>This is a sanity checker for making sure our the two programming types are
- * the same. This is a requirement before we can safely execute a swap or function
- * assignment.</p>
+ * <p>
+ * This is a sanity checker for making sure our the two programming types are
+ * the same. This is a
+ * requirement before we can safely execute a swap or function assignment.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -32,10 +34,18 @@ public class SameProgTypeChecker {
     // Member Fields
     // ===========================================================
 
-    /** <p>Programming expression on the left</p> */
+    /**
+     * <p>
+     * Programming expression on the left
+     * </p>
+     */
     private final ProgramExp myLeftExp;
 
-    /** <p>Programming expression on the right</p> */
+    /**
+     * <p>
+     * Programming expression on the right
+     * </p>
+     */
     private final ProgramExp myRightExp;
 
     // ===========================================================
@@ -43,8 +53,11 @@ public class SameProgTypeChecker {
     // ===========================================================
 
     /**
-     * <p>Creates a sanity checker for checking if the left expression's
-     * programming type matches the right expression's programming type.</p>
+     * <p>
+     * Creates a sanity checker for checking if the left expression's
+     * programming type matches the
+     * right expression's programming type.
+     * </p>
      *
      * @param leftExp The programming expression on the left.
      * @param rightExp The programming expression on the right.
@@ -59,11 +72,13 @@ public class SameProgTypeChecker {
     // ===========================================================
 
     /**
-     * <p>This method indicates whether the programming types match.</p>
+     * <p>
+     * This method indicates whether the programming types match.
+     * </p>
      */
     public final void hasSameProgrammingType() {
-        if (!extractProgramType(myLeftExp.getProgramType()).equals(
-                extractProgramType(myRightExp.getProgramType()))) {
+        if (!extractProgramType(myLeftExp.getProgramType())
+                .equals(extractProgramType(myRightExp.getProgramType()))) {
             throw new TypeMismatchException("Non-matching programming types. ["
                     + myLeftExp.getLocation() + "]" + "\nLeft: "
                     + myLeftExp.getProgramType() + "\nRight: "
@@ -76,8 +91,9 @@ public class SameProgTypeChecker {
     // ===========================================================
 
     /**
-     * <p>An helper method for extracting the proper program type
-     * to be compared.</p>
+     * <p>
+     * An helper method for extracting the proper program type to be compared.
+     * </p>
      *
      * @param type A potentially instantiated {@link PTType}.
      *

@@ -1,7 +1,7 @@
 /*
  * ProgramStringExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming string expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the programming string expression objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,11 @@ public class ProgramStringExp extends ProgramLiteralExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The inner representation for this programming string</p>*/
+    /**
+     * <p>
+     * The inner representation for this programming string
+     * </p>
+     */
     private final String myString;
 
     // ===========================================================
@@ -36,7 +43,9 @@ public class ProgramStringExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming string expression.</p>
+     * <p>
+     * This constructs a programming string expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param s A {@link String} expression.
@@ -94,7 +103,9 @@ public class ProgramStringExp extends ProgramLiteralExp {
     }
 
     /**
-     * <p>This method returns the string value.</p>
+     * <p>
+     * This method returns the string value.
+     * </p>
      *
      * @return The {@link String} value.
      */

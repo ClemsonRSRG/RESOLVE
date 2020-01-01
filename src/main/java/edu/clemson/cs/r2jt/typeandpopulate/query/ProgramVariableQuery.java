@@ -1,7 +1,7 @@
 /*
  * ProgramVariableQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.PossiblyQualifiedPath;
 import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 
 /**
- * <p>The type of query used when looking for a variable name as found in
- * executable code.</p>
+ * <p>
+ * The type of query used when looking for a variable name as found in
+ * executable code.
+ * </p>
  */
 public class ProgramVariableQuery
         extends
@@ -35,9 +37,10 @@ public class ProgramVariableQuery
 
     public ProgramVariableQuery(PosSymbol qualifier, String name,
             Location nameLoc) {
-        super(new BaseSymbolQuery<SymbolTableEntry>(new PossiblyQualifiedPath(
-                qualifier, MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true),
+        super(new BaseSymbolQuery<SymbolTableEntry>(
+                new PossiblyQualifiedPath(qualifier,
+                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true),
                 new NameSearcher(name, true)),
                 new MapToProgramVariable(nameLoc));
     }

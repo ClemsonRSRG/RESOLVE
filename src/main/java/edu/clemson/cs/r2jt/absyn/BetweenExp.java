@@ -1,7 +1,7 @@
 /*
  * BetweenExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,7 +33,7 @@ public class BetweenExp extends Exp {
     // ===========================================================
 
     public BetweenExp() {
-    // Empty
+        // Empty
     }
 
     public BetweenExp(Location location, List<Exp> lessExps) {
@@ -136,8 +136,8 @@ public class BetweenExp extends Exp {
     }
 
     public String toString(int indent) {
-        // 	Environment   env	= Environment.getInstance();
-        // 	if(env.isabelle()){return toIsabelleString(indent);};    	
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
         StringBuffer sb = new StringBuffer();
         printSpace(indent, sb);
         List<Exp> list = lessExps;
@@ -166,8 +166,9 @@ public class BetweenExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<Exp> i = lessExps.iterator();
         while (i.hasNext()) {
@@ -197,9 +198,12 @@ public class BetweenExp extends Exp {
     }
 
     /**
-     * <p>I don't really understand what a "BetweenExp" is, so for now its
-     * 'equivalent' implementation just checks to see if all subexpressions
-     * exist as a subexpression in <code>e</code>.  -HwS</p>
+     * <p>
+     * I don't really understand what a "BetweenExp" is, so for now its
+     * 'equivalent' implementation
+     * just checks to see if all subexpressions exist as a subexpression in
+     * <code>e</code>. -HwS
+     * </p>
      */
     public boolean equivalent(Exp e) {
         boolean retval = (e instanceof BetweenExp);
@@ -228,15 +232,15 @@ public class BetweenExp extends Exp {
             return null;
         }
         else {
-            lessExps =
-                    replaceVariableInExpListWithExp(this.lessExps, old, replace);
+            lessExps = replaceVariableInExpListWithExp(this.lessExps, old,
+                    replace);
             return this;
         }
     }
 
     private List<Exp> replaceVariableInExpListWithExp(List<Exp> list, Exp old,
             Exp replacement) {
-        // 	AssertiveCode assertion = new AssertiveCode();
+        // AssertiveCode assertion = new AssertiveCode();
         Iterator<Exp> i = list.iterator();
         while (i.hasNext()) {
             Exp exp = (Exp) i.next();

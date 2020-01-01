@@ -1,7 +1,7 @@
 /*
  * FlagDependencyException.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,9 +13,12 @@
 package edu.clemson.cs.rsrg.statushandling.exception;
 
 /**
- * <p>A <code>FlagDependencyException</code> indicates that the user-provided
- * flag configuration is not acceptable for some reason. The reason for the
- * exception is provided in the exception's message.</p>
+ * <p>
+ * A <code>FlagDependencyException</code> indicates that the user-provided flag
+ * configuration is not
+ * acceptable for some reason. The reason for the exception is provided in the
+ * exception's message.
+ * </p>
  *
  * @author Hampton Smith
  * @author Yu-Shan Sun
@@ -27,7 +30,11 @@ public class FlagDependencyException extends CompilerException {
     // Member Fields
     // ===========================================================
 
-    /** <p>Serial version for Serializable objects</p> */
+    /**
+     * <p>
+     * Serial version for Serializable objects
+     * </p>
+     */
     private static final long serialVersionUID = 1L;
 
     // ==========================================================
@@ -35,8 +42,10 @@ public class FlagDependencyException extends CompilerException {
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a message
-     * that caused a flag dependency exception to be thrown.</p>
+     * <p>
+     * This constructor takes in a message that caused a flag dependency
+     * exception to be thrown.
+     * </p>
      *
      * @param message Message to be displayed when the exception is thrown.
      */

@@ -1,7 +1,7 @@
 /*
  * FuncAssignStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -35,7 +35,8 @@ public class FuncAssignStmt extends Statement {
 
     public FuncAssignStmt() {};
 
-    public FuncAssignStmt(Location location, VariableExp var, ProgramExp assign) {
+    public FuncAssignStmt(Location location, VariableExp var,
+            ProgramExp assign) {
         this.location = location;
         this.var = var;
         this.assign = assign;

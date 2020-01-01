@@ -1,7 +1,7 @@
 /*
  * ProgramTypeEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,25 +28,27 @@ public class ProgramTypeEntry extends SymbolTableEntry {
     private final PTType myProgramType;
 
     /**
-     * <p>A program type can masquerade as a math type.  This will represent the
-     * (non-existent) symbol table entry for the "program type" when viewed as
-     * a math type.</p>
+     * <p>
+     * A program type can masquerade as a math type. This will represent the
+     * (non-existent) symbol
+     * table entry for the "program type" when viewed as a math type.
+     * </p>
      */
     private final MathSymbolEntry myMathTypeAlterEgo;
 
     public ProgramTypeEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, MTType modelType, PTType programType) {
+            ModuleIdentifier sourceModule, MTType modelType,
+            PTType programType) {
         super(name, definingElement, sourceModule);
 
         myModelType = modelType;
 
-        //TODO: Probably need to recajigger this to correctly account for any
-        //      generics in the defining context
-        myMathTypeAlterEgo =
-                new MathSymbolEntry(g, name,
-                        SymbolTableEntry.Quantification.NONE, definingElement,
-                        g.CLS, modelType, null, null, sourceModule);
+        // TODO: Probably need to recajigger this to correctly account for any
+        // generics in the defining context
+        myMathTypeAlterEgo = new MathSymbolEntry(g, name,
+                SymbolTableEntry.Quantification.NONE, definingElement, g.CLS,
+                modelType, null, null, sourceModule);
         myProgramType = programType;
     }
 
@@ -87,9 +89,9 @@ public class ProgramTypeEntry extends SymbolTableEntry {
 
         return new ProgramTypeEntry(myModelType.getTypeGraph(), getName(),
                 getDefiningElement(), getSourceModuleIdentifier(),
-                typeSubstitutor.getFinalExpression(), myProgramType
-                        .instantiateGenerics(genericInstantiations,
-                                instantiatingFacility));
+                typeSubstitutor.getFinalExpression(),
+                myProgramType.instantiateGenerics(genericInstantiations,
+                        instantiatingFacility));
     }
 
 }

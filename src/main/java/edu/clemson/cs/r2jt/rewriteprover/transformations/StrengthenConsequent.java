@@ -1,7 +1,7 @@
 /*
  * StrengthenConsequent.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,11 +34,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>This transformation applies an implication to the consequent.  Assuming
- * we have a theorem that reads "A and B implies C", we look for a consequent
- * matching C and replace it with A and B.  Note that this could be a strictly
- * stronger statement--we could take the VC from a provable place to a 
- * not-provable place.</p>
+ * <p>
+ * This transformation applies an implication to the consequent. Assuming we
+ * have a theorem that
+ * reads "A and B implies C", we look for a consequent matching C and replace it
+ * with A and B. Note
+ * that this could be a strictly stronger statement--we could take the VC from a
+ * provable place to a
+ * not-provable place.
+ * </p>
  */
 public class StrengthenConsequent implements Transformation {
 

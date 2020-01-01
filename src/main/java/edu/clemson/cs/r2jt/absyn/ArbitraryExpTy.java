@@ -1,7 +1,7 @@
 /*
  * ArbitraryExpTy.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,11 +15,14 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.data.Location;
 
 /**
- * <p>A syntactic type based on an arbitrary mathematical <code>Exp</code>.  All
- * math expressions should have this <code>Ty</code>.  Ultimately their 
- * interfaces should be changed to reflect this fact, or this class should
- * be unwrapped and math types should simply be represented by 
- * <code>Exp</code>s.</p>
+ * <p>
+ * A syntactic type based on an arbitrary mathematical <code>Exp</code>. All
+ * math expressions should
+ * have this <code>Ty</code>. Ultimately their interfaces should be changed to
+ * reflect this fact, or
+ * this class should be unwrapped and math types should simply be represented by
+ * <code>Exp</code>s.
+ * </p>
  */
 public class ArbitraryExpTy extends Ty {
 

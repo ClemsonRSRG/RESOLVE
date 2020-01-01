@@ -1,7 +1,7 @@
 /*
  * ImplementAllOperChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>This is a sanity checker for making sure all operations from the specification
- * are implemented by the realization.</p>
+ * <p>
+ * This is a sanity checker for making sure all operations from the
+ * specification are implemented by
+ * the realization.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -33,13 +36,25 @@ public class ImplementAllOperChecker {
     // Member Fields
     // ===========================================================
 
-    /** <p>Location object from the realization module.</p> */
+    /**
+     * <p>
+     * Location object from the realization module.
+     * </p>
+     */
     private final Location myLocation;
 
-    /** <p>List of all specification declarations.</p> */
+    /**
+     * <p>
+     * List of all specification declarations.
+     * </p>
+     */
     private final List<Dec> mySpecDecs;
 
-    /** <p>List of all realization declarations.</p> */
+    /**
+     * <p>
+     * List of all realization declarations.
+     * </p>
+     */
     private final List<Dec> myRealizationDecs;
 
     // ===========================================================
@@ -47,9 +62,11 @@ public class ImplementAllOperChecker {
     // ===========================================================
 
     /**
-     * <p>Creates a sanity checker for checking whether or not
-     * the realization implements all the operations in a given
-     * {@code Concept}/{@code Enhancement}.</p>
+     * <p>
+     * Creates a sanity checker for checking whether or not the realization
+     * implements all the
+     * operations in a given {@code Concept}/{@code Enhancement}.
+     * </p>
      *
      * @param location The module that called this method.
      * @param specDecs List of decs of the Concept/Enhancement
@@ -67,10 +84,14 @@ public class ImplementAllOperChecker {
     // ===========================================================
 
     /**
-     * <p>Checks to see if all operation specified by {@code Concept}/{@code Enhancement}
-     * are implemented by the corresponding realization.</p>
+     * <p>
+     * Checks to see if all operation specified by
+     * {@code Concept}/{@code Enhancement} are implemented
+     * by the corresponding realization.
+     * </p>
      *
-     * @throws SourceErrorException This is thrown when an operation isn't implemented.
+     * @throws SourceErrorException This is thrown when an operation isn't
+     *         implemented.
      */
     public final void implementAllOper() throws SourceErrorException {
         List<Dec> opDecList1 = getOperationDecs(mySpecDecs);
@@ -84,8 +105,10 @@ public class ImplementAllOperChecker {
                 }
             }
             if (!inRealization) {
-                throw new SourceErrorException("Operation " + d1.getName()
-                        + " not implemented by the realization.", myLocation);
+                throw new SourceErrorException(
+                        "Operation " + d1.getName()
+                                + " not implemented by the realization.",
+                        myLocation);
             }
         }
     }
@@ -95,8 +118,10 @@ public class ImplementAllOperChecker {
     // ===========================================================
 
     /**
-     * <p>Obtains the list of all <code>OperationDec</code> and
-     * <code>ProcedureDec</code>.</p>
+     * <p>
+     * Obtains the list of all <code>OperationDec</code> and
+     * <code>ProcedureDec</code>.
+     * </p>
      *
      * @param decs List of all declarations.
      *

@@ -1,7 +1,7 @@
 /*
  * ContainsNamedTypeChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * <p>This class visits the named types to see if any of the
- * given names is present.</p>
+ * <p>
+ * This class visits the named types to see if any of the given names is
+ * present.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,10 +31,18 @@ public class ContainsNamedTypeChecker extends BoundVariableVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>A set of names.</p> */
+    /**
+     * <p>
+     * A set of names.
+     * </p>
+     */
     private final Set<String> myNames = new HashSet<>();
 
-    /** <p>This is used to store the final result of the visit.</p> */
+    /**
+     * <p>
+     * This is used to store the final result of the visit.
+     * </p>
+     */
     private boolean myResult = false;
 
     // ===========================================================
@@ -40,9 +50,12 @@ public class ContainsNamedTypeChecker extends BoundVariableVisitor {
     // ===========================================================
 
     /**
-     * <p>Result in <code>true</code> if one of the given names appears in the
-     * checked type. The set will not be changed, but it will be read from
-     * so it must not change while checking runs.</p>
+     * <p>
+     * Result in <code>true</code> if one of the given names appears in the
+     * checked type. The set will
+     * not be changed, but it will be read from so it must not change while
+     * checking runs.
+     * </p>
      *
      * @param names A set of names.
      */
@@ -51,8 +64,10 @@ public class ContainsNamedTypeChecker extends BoundVariableVisitor {
     }
 
     /**
-     * <p>Results in <code>true</code> if the given name appears in the checked
-     * type.</p>
+     * <p>
+     * Results in <code>true</code> if the given name appears in the checked
+     * type.
+     * </p>
      *
      * @param name A name.
      */
@@ -65,9 +80,11 @@ public class ContainsNamedTypeChecker extends BoundVariableVisitor {
     // ===========================================================
 
     /**
-     * <p>This method adds additional logic after we visit
-     * a {@link MTNamed} by checking if it appears in our set
-     * of <code>names</code>.</p>
+     * <p>
+     * This method adds additional logic after we visit a {@link MTNamed} by
+     * checking if it appears in
+     * our set of <code>names</code>.
+     * </p>
      *
      * @param named A math type.
      */
@@ -82,11 +99,14 @@ public class ContainsNamedTypeChecker extends BoundVariableVisitor {
     }
 
     /**
-     * <p>This method returns the final result after we are
-     * done visiting all the type nodes.</p>
+     * <p>
+     * This method returns the final result after we are done visiting all the
+     * type nodes.
+     * </p>
      *
-     * @return {@code true} if the the given name appears in the checked
-     * type, {@code false} otherwise.
+     * @return {@code true} if the the given name appears in the checked type,
+     *         {@code false}
+     *         otherwise.
      */
     public final boolean getResult() {
         return myResult;

@@ -1,7 +1,7 @@
 /*
  * GenericSearcher.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -43,8 +43,8 @@ public class GenericSearcher
         while (parameters.hasNext()) {
             parameter = parameters.next();
 
-            if (parameter.getParameterMode().equals(
-                    ProgramParameterEntry.ParameterMode.TYPE)) {
+            if (parameter.getParameterMode()
+                    .equals(ProgramParameterEntry.ParameterMode.TYPE)) {
                 matches.add(parameter.toProgramTypeEntry(null));
             }
         }

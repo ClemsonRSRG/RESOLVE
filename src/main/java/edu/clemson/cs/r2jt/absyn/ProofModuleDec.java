@@ -1,7 +1,7 @@
 /*
  * ProofModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -31,12 +31,11 @@ public class ProofModuleDec extends AbstractParameterizedModuleDec {
     private List<Dec> decs;
 
     public ProofModuleDec() {
-    // Empty
+        // Empty
     }
 
-    public ProofModuleDec(PosSymbol name,
-            List<ModuleParameterDec> moduleParams, List<UsesItem> usesItems,
-            List<Dec> decs) {
+    public ProofModuleDec(PosSymbol name, List<ModuleParameterDec> moduleParams,
+            List<UsesItem> usesItems, List<Dec> decs) {
         this.name = name;
         this.moduleParams = moduleParams;
         this.usesItems = usesItems;

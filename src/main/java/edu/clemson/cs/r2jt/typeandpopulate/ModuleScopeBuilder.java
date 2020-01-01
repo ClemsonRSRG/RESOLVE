@@ -1,7 +1,7 @@
 /*
  * ModuleScopeBuilder.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,9 +19,11 @@ import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>A <code>ModuleScopeBuilder</code> refines 
- * {@link ScopeBuilder ScopeBuilder} with additional information specific to 
- * modules, such as a list of imports.</p>
+ * <p>
+ * A <code>ModuleScopeBuilder</code> refines {@link ScopeBuilder ScopeBuilder}
+ * with additional
+ * information specific to modules, such as a list of imports.
+ * </p>
  */
 public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
 
@@ -32,8 +34,8 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
 
     ModuleScopeBuilder(TypeGraph g, ModuleDec definingElement, Scope parent,
             MathSymbolTableBuilder symbolTable) {
-        super(symbolTable, g, definingElement, parent, new ModuleIdentifier(
-                definingElement));
+        super(symbolTable, g, definingElement, parent,
+                new ModuleIdentifier(definingElement));
 
         myWorkingSymbolTable = symbolTable;
     }
@@ -49,10 +51,13 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     }
 
     /**
-     * <p>Adds <code>i</code> to the list of modules imported by the module
-     * who's scope this <code>ModuleScopeBuilder</code> represents.  Duplicate
-     * imports or attempting to import the module represented itself will leave
-     * the import list unmodified.</p>
+     * <p>
+     * Adds <code>i</code> to the list of modules imported by the module who's
+     * scope this
+     * <code>ModuleScopeBuilder</code> represents. Duplicate imports or
+     * attempting to import the
+     * module represented itself will leave the import list unmodified.
+     * </p>
      * 
      * @param i The module to import.
      */

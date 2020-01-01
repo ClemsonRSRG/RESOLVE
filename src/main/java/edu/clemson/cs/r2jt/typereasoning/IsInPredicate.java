@@ -1,7 +1,7 @@
 /*
  * IsInPredicate.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,8 +36,8 @@ public class IsInPredicate implements TypeRelationshipPredicate {
     }
 
     @Override
-    public TypeRelationshipPredicate replaceUnboundVariablesInTypes(
-            Map<String, String> substitions) {
+    public TypeRelationshipPredicate
+            replaceUnboundVariablesInTypes(Map<String, String> substitions) {
 
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitions, myTypeGraph);

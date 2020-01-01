@@ -1,7 +1,7 @@
 /*
  * UniqueSymbolNameExtractor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,12 +24,17 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * <p>This class extracts unique symbols from an {@link Exp}.
- * This visitor logic is implemented as a {@link TreeWalkerVisitor}.</p>
+ * <p>
+ * This class extracts unique symbols from an {@link Exp}. This visitor logic is
+ * implemented as a
+ * {@link TreeWalkerVisitor}.
+ * </p>
  *
- * <p>Note that this class was designed to be an helper class
- * for the {@link AssumeStmtRule}. Any modifications to this class
- * might break the rule!</p>
+ * <p>
+ * Note that this class was designed to be an helper class for the
+ * {@link AssumeStmtRule}. Any
+ * modifications to this class might break the rule!
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -40,7 +45,11 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>Set of expression names extracted by this visitor.</p> */
+    /**
+     * <p>
+     * Set of expression names extracted by this visitor.
+     * </p>
+     */
     private final Set<String> myExpNames;
 
     // ===========================================================
@@ -48,8 +57,11 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This creates an object that that extract expression names
-     * for anything that descends from {@link MathExp}.</p>
+     * <p>
+     * This creates an object that that extract expression names for anything
+     * that descends from
+     * {@link MathExp}.
+     * </p>
      */
     public UniqueSymbolNameExtractor() {
         myExpNames = new LinkedHashSet<>();
@@ -64,7 +76,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>This method redefines how a {@link DotExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link DotExp} should be walked.
+     * </p>
      *
      * @param exp A dotted expression.
      *
@@ -84,7 +98,7 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
         // YS: We really don't want the individual names from
         // each of the segments. What we really want are the
         // different dotted segment names.
-        //      Ex: "p.q.r" -> "p", "p.q", "p.q.r"
+        // Ex: "p.q.r" -> "p", "p.q", "p.q.r"
         StringBuilder sb = new StringBuilder();
         for (Exp segmentExp : exp.getSegments()) {
             // Clear myExpNames because we don't want intermediate
@@ -100,7 +114,8 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
 
                 // Visit any caratExp.
                 if (segmentExpAsFunctionExp.getCaratExp() != null) {
-                    TreeWalker.visit(this, segmentExpAsFunctionExp.getCaratExp());
+                    TreeWalker.visit(this,
+                            segmentExpAsFunctionExp.getCaratExp());
                     tempSet.addAll(myExpNames);
                     myExpNames.clear();
                 }
@@ -120,8 +135,10 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
 
             // Make sure our segment only has 1 name
             if (myExpNames.size() != 1) {
-                throw new SourceErrorException("[VCGenerator] Cannot extract name from this segment: "
-                        + segmentExp, segmentExp.getLocation());
+                throw new SourceErrorException(
+                        "[VCGenerator] Cannot extract name from this segment: "
+                                + segmentExp,
+                        segmentExp.getLocation());
             }
             else {
                 // Store this new string into tempSet
@@ -147,7 +164,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link LambdaExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link LambdaExp} should be walked.
+     * </p>
      *
      * @param exp A lambda expression.
      *
@@ -191,7 +210,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how an {@link OldExp} should be walked.</p>
+     * <p>
+     * This method redefines how an {@link OldExp} should be walked.
+     * </p>
      *
      * @param exp An old expression.
      *
@@ -261,7 +282,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link QuantExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link QuantExp} should be walked.
+     * </p>
      *
      * @param exp A quantified expression.
      *
@@ -310,7 +333,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link RecpExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link RecpExp} should be walked.
+     * </p>
      *
      * @param exp A type receptacles expression.
      *
@@ -333,7 +358,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link SetCollectionExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link SetCollectionExp} should be walked.
+     * </p>
      *
      * @param exp A set collection expression.
      *
@@ -362,7 +389,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link SetExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link SetExp} should be walked.
+     * </p>
      *
      * @param exp A set expression.
      *
@@ -409,7 +438,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link TypeReceptaclesExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link TypeReceptaclesExp} should be walked.
+     * </p>
      *
      * @param exp A type receptacles expression.
      *
@@ -432,7 +463,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Code that gets executed before visiting a {@link VarExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link VarExp}.
+     * </p>
      *
      * @param exp A variable expression.
      */
@@ -454,7 +487,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This method redefines how a {@link VCVarExp} should be walked.</p>
+     * <p>
+     * This method redefines how a {@link VCVarExp} should be walked.
+     * </p>
      *
      * @param exp A verification variable expression.
      *
@@ -508,7 +543,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Code that gets executed before visiting a {@link ProgramExp}.</p>
+     * <p>
+     * Code that gets executed before visiting a {@link ProgramExp}.
+     * </p>
      *
      * @param exp A programming expression.
      */
@@ -516,8 +553,9 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     public final void preProgramExp(ProgramExp exp) {
         // This is an error! We should have converted all ProgramExp
         // to their math counterparts.
-        throw new SourceErrorException("[VCGenerator] Unexpected ProgramExp: "
-                + exp, exp.getLocation());
+        throw new SourceErrorException(
+                "[VCGenerator] Unexpected ProgramExp: " + exp,
+                exp.getLocation());
     }
 
     // ===========================================================
@@ -525,8 +563,10 @@ public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns the set of symbols extracted by this
-     * tree walker visitor.</p>
+     * <p>
+     * This method returns the set of symbols extracted by this tree walker
+     * visitor.
+     * </p>
      *
      * @return Set of expression names.
      */

@@ -1,7 +1,7 @@
 /*
  * BindingVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>Attempts to bind the concrete expression <code>t1</code> against the
- * template expression <code>t2</code>.</p>
+ * <p>
+ * Attempts to bind the concrete expression <code>t1</code> against the template
+ * expression
+ * <code>t2</code>.
+ * </p>
  */
 public class BindingVisitor extends SymmetricBoundVariableVisitor {
 
@@ -64,7 +67,7 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
             t1DeclaredType = myBindings.get(t2.name);
         }
 
-        //Fine if the declared type of t1 restricts the declared type of t2
+        // Fine if the declared type of t1 restricts the declared type of t2
         myMatchSoFarFlag &=
                 myTypeGraph.isSubtype(t1DeclaredType, t2DeclaredType);
 
@@ -72,7 +75,7 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
             myBindings.put(t2.name, t1);
         }
 
-        //No need to keep searching if we've already found we don't bind
+        // No need to keep searching if we've already found we don't bind
         return myMatchSoFarFlag;
     }
 
@@ -80,14 +83,14 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
     public boolean beginMTProper(MTProper t1, MTProper t2) {
         myMatchSoFarFlag &= t1.equals(t2);
 
-        //No need to keep searching if we've already found we don't bind
+        // No need to keep searching if we've already found we don't bind
         return myMatchSoFarFlag;
     }
 
     @Override
     public boolean mismatch(MTType t1, MTType t2) {
 
-        //This is fine if t1 names a type of which t2 is a supertype
+        // This is fine if t1 names a type of which t2 is a supertype
         if (t2 instanceof MTNamed) {
             String t2Name = ((MTNamed) t2).name;
             MTType t2DeclaredType = getInnermostBinding2(t2Name);
@@ -104,18 +107,18 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
             }
         }
         else if (t1 instanceof MTBigUnion) {
-            //So long as the inner expression binds, this is ok
+            // So long as the inner expression binds, this is ok
             myMatchSoFarFlag = visit(((MTBigUnion) t1).getExpression(), t2);
         }
         else if (t2 instanceof MTBigUnion) {
-            //So long as the inner expression binds, this is ok
+            // So long as the inner expression binds, this is ok
             myMatchSoFarFlag = visit(t1, ((MTBigUnion) t2).getExpression());
         }
         else {
             myMatchSoFarFlag = false;
         }
 
-        //No need to keep searching if we've already found we don't bind
+        // No need to keep searching if we've already found we don't bind
         return myMatchSoFarFlag;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * OperationProfileQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,10 +22,15 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportSt
 import java.util.List;
 
 /**
- * <p>An <code>OperationProfileQuery</code> searched for a (possibly-qualified)
- * operation profile. If a qualifier is provided, the named facility or module is searched.
- * Otherwise, the operation profile is searched for in any directly imported modules
- * and in instantiated versions of any available facilities.</p>
+ * <p>
+ * An <code>OperationProfileQuery</code> searched for a (possibly-qualified)
+ * operation profile. If a
+ * qualifier is provided, the named facility or module is searched. Otherwise,
+ * the operation profile
+ * is searched for in any directly imported modules and in instantiated versions
+ * of any available
+ * facilities.
+ * </p>
  *
  * @version 2.0
  */
@@ -38,13 +43,16 @@ public class OperationProfileQuery
     // ===========================================================
 
     /**
-     * <p>This query searches for an operation profile entry that matches
-     * the provided arguments.</p>
+     * <p>
+     * This query searches for an operation profile entry that matches the
+     * provided arguments.
+     * </p>
      *
      * @param qualifier A qualifier symbol that indicates the instantiating
-     *                  facility or module.
+     *        facility or module.
      * @param name An operation profile name to query for.
-     * @param argumentTypes The list of program types for this operation profile.
+     * @param argumentTypes The list of program types for this operation
+     *        profile.
      */
     public OperationProfileQuery(PosSymbol qualifier, PosSymbol name,
             List<PTType> argumentTypes) {

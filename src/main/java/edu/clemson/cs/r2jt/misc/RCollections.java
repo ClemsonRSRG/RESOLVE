@@ -1,7 +1,7 @@
 /*
  * RCollections.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,18 +21,25 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>A set of utility functions for java collections.</p>
+ * <p>
+ * A set of utility functions for java collections.
+ * </p>
  */
 public class RCollections {
 
     /**
-     * <p>Returns a new list that is the result of processing each element of
-     * the original list with the given mapping, in order, and adding it to
-     * the final list.</p>
+     * <p>
+     * Returns a new list that is the result of processing each element of the
+     * original list with the
+     * given mapping, in order, and adding it to the final list.
+     * </p>
      * 
-     * <p>This method will return an <code>ArrayList</code> if given one, and
-     * a <code>LinkedList</code> if given one, but otherwise the specific 
-     * subclass of list returned is undefined.</p>
+     * <p>
+     * This method will return an <code>ArrayList</code> if given one, and a
+     * <code>LinkedList</code>
+     * if given one, but otherwise the specific subclass of list returned is
+     * undefined.
+     * </p>
      * 
      * @param original The original list.
      * @param mapping A mapping to be used to render the new list.

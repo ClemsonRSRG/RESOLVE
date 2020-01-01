@@ -1,7 +1,7 @@
 /*
  * SymmetricVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>Note that instances of SymmetricVisitor are not thread-safe.</p>
+ * <p>
+ * Note that instances of SymmetricVisitor are not thread-safe.
+ * </p>
  */
 public class SymmetricVisitor {
 
@@ -57,9 +59,8 @@ public class SymmetricVisitor {
                             t1.acceptOpen(myMidMultiplexer);
                         }
 
-                        visitSiblings =
-                                visit(t1ComponentIter.next(), t2ComponentIter
-                                        .next());
+                        visitSiblings = visit(t1ComponentIter.next(),
+                                t2ComponentIter.next());
 
                         myMultiplexer.setOtherType(t2);
                         myMidMultiplexer.setOtherType(t2);
@@ -107,75 +108,63 @@ public class SymmetricVisitor {
         }
 
         public void beginMTAbstract(MTAbstract<?> t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTAbstract(t,
-                            (MTAbstract) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTAbstract(t,
+                    (MTAbstract) myOtherType);
         }
 
         public void beginMTBigUnion(MTBigUnion t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTBigUnion(t,
-                            (MTBigUnion) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTBigUnion(t,
+                    (MTBigUnion) myOtherType);
         }
 
         public void beginMTCartesian(MTCartesian t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTCartesian(t,
-                            (MTCartesian) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTCartesian(t,
+                    (MTCartesian) myOtherType);
         }
 
         public void beginMTFunction(MTFunction t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTFunction(t,
-                            (MTFunction) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTFunction(t,
+                    (MTFunction) myOtherType);
         }
 
         public void beginMTFunctionApplication(MTFunctionApplication t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTFunctionApplication(t,
-                            (MTFunctionApplication) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTFunctionApplication(t,
+                    (MTFunctionApplication) myOtherType);
         }
 
         public void beginMTIntersect(MTIntersect t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTIntersect(t,
-                            (MTIntersect) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTIntersect(t,
+                    (MTIntersect) myOtherType);
         }
 
         public void beginMTPowertypeApplication(MTPowertypeApplication t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTPowertypeApplication(t,
-                            (MTPowertypeApplication) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTPowertypeApplication(t,
+                    (MTPowertypeApplication) myOtherType);
         }
 
         public void beginMTProper(MTProper t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTProper(t,
-                            (MTProper) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTProper(t,
+                    (MTProper) myOtherType);
         }
 
         public void beginMTSetRestriction(MTSetRestriction t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTSetRestriction(t,
-                            (MTSetRestriction) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTSetRestriction(t,
+                    (MTSetRestriction) myOtherType);
         }
 
         public void beginMTUnion(MTUnion t) {
-            myReturn =
-                    SymmetricVisitor.this
-                            .beginMTUnion(t, (MTUnion) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTUnion(t,
+                    (MTUnion) myOtherType);
         }
 
         public void beginMTNamed(MTNamed t) {
-            myReturn =
-                    SymmetricVisitor.this
-                            .beginMTNamed(t, (MTNamed) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTNamed(t,
+                    (MTNamed) myOtherType);
         }
 
         public void beginMTGeneric(MTGeneric t) {
-            myReturn =
-                    SymmetricVisitor.this.beginMTGeneric(t,
-                            (MTGeneric) myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTGeneric(t,
+                    (MTGeneric) myOtherType);
         }
 
         public void endMTType(MTType t) {
@@ -183,57 +172,48 @@ public class SymmetricVisitor {
         }
 
         public void endMTAbstract(MTAbstract<?> t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTAbstract(t,
-                            (MTAbstract) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTAbstract(t,
+                    (MTAbstract) myOtherType);
         }
 
         public void endMTBigUnion(MTBigUnion t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTBigUnion(t,
-                            (MTBigUnion) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTBigUnion(t,
+                    (MTBigUnion) myOtherType);
         }
 
         public void endMTCartesian(MTCartesian t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTCartesian(t,
-                            (MTCartesian) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTCartesian(t,
+                    (MTCartesian) myOtherType);
         }
 
         public void endMTFunction(MTFunction t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTFunction(t,
-                            (MTFunction) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTFunction(t,
+                    (MTFunction) myOtherType);
         }
 
         public void endMTFunctionApplication(MTFunctionApplication t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTFunctionApplication(t,
-                            (MTFunctionApplication) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTFunctionApplication(t,
+                    (MTFunctionApplication) myOtherType);
         }
 
         public void endMTIntersect(MTIntersect t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTIntersect(t,
-                            (MTIntersect) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTIntersect(t,
+                    (MTIntersect) myOtherType);
         }
 
         public void endMTPowertypeApplication(MTPowertypeApplication t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTPowertypeApplication(t,
-                            (MTPowertypeApplication) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTPowertypeApplication(t,
+                    (MTPowertypeApplication) myOtherType);
         }
 
         public void endMTProper(MTProper t) {
-            myReturn =
-                    SymmetricVisitor.this
-                            .endMTProper(t, (MTProper) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTProper(t,
+                    (MTProper) myOtherType);
         }
 
         public void endMTSetRestriction(MTSetRestriction t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTSetRestriction(t,
-                            (MTSetRestriction) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTSetRestriction(t,
+                    (MTSetRestriction) myOtherType);
         }
 
         public void endMTUnion(MTUnion t) {
@@ -247,9 +227,8 @@ public class SymmetricVisitor {
         }
 
         public void endMTGeneric(MTGeneric t) {
-            myReturn =
-                    SymmetricVisitor.this.endMTGeneric(t,
-                            (MTGeneric) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTGeneric(t,
+                    (MTGeneric) myOtherType);
         }
     }
 
@@ -299,9 +278,8 @@ public class SymmetricVisitor {
         }
 
         public void beginMTFunctionApplication(MTFunctionApplication t) {
-            myReturn =
-                    midMTFunctionApplication(t,
-                            (MTFunctionApplication) myOtherType);
+            myReturn = midMTFunctionApplication(t,
+                    (MTFunctionApplication) myOtherType);
         }
 
         public void beginMTIntersect(MTIntersect t) {
@@ -309,9 +287,8 @@ public class SymmetricVisitor {
         }
 
         public void beginMTPowertypeApplication(MTPowertypeApplication t) {
-            myReturn =
-                    midMTPowertypeApplication(t,
-                            (MTPowertypeApplication) myOtherType);
+            myReturn = midMTPowertypeApplication(t,
+                    (MTPowertypeApplication) myOtherType);
         }
 
         public void beginMTProper(MTProper t) {
@@ -428,7 +405,8 @@ public class SymmetricVisitor {
         return true;
     }
 
-    public boolean midMTSetRestriction(MTSetRestriction t1, MTSetRestriction t2) {
+    public boolean midMTSetRestriction(MTSetRestriction t1,
+            MTSetRestriction t2) {
         return true;
     }
 
@@ -486,7 +464,8 @@ public class SymmetricVisitor {
         return true;
     }
 
-    public boolean endMTSetRestriction(MTSetRestriction t1, MTSetRestriction t2) {
+    public boolean endMTSetRestriction(MTSetRestriction t1,
+            MTSetRestriction t2) {
         return true;
     }
 

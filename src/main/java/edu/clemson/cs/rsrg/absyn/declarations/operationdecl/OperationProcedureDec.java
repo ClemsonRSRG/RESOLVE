@@ -1,7 +1,7 @@
 /*
  * OperationProcedureDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class for all the local operation procedure declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the local operation procedure declaration objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,32 +36,44 @@ public class OperationProcedureDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>The wrapped operation declaration</p>
+     * <p>
+     * The wrapped operation declaration
+     * </p>
      */
     private final OperationDec myWrappedOpDec;
 
     /**
-     * <p>The decreasing expression</p>
+     * <p>
+     * The decreasing expression
+     * </p>
      */
     private final AssertionClause myDecreasing;
 
     /**
-     * <p>The list of facility declarations</p>
+     * <p>
+     * The list of facility declarations
+     * </p>
      */
     private final List<FacilityDec> myFacilityDecs;
 
     /**
-     * <p>The list of variable declarations</p>
+     * <p>
+     * The list of variable declarations
+     * </p>
      */
     private final List<VarDec> myVariableDecs;
 
     /**
-     * <p>The list of statements</p>
+     * <p>
+     * The list of statements
+     * </p>
      */
     private final List<Statement> myStatements;
 
     /**
-     * <p>Boolean indicating if this is a recursive procedure or not.</p>
+     * <p>
+     * Boolean indicating if this is a recursive procedure or not.
+     * </p>
      */
     private final boolean myRecursiveFlag;
 
@@ -67,24 +82,27 @@ public class OperationProcedureDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs a local recursive operation procedure declaration.</p>
+     * <p>
+     * This constructs a local recursive operation procedure declaration.
+     * </p>
      *
-     * @param opDec An {@link OperationDec} containing all the operation
-     *              related items.
+     * @param opDec An {@link OperationDec} containing all the operation related
+     *        items.
      * @param decreasing A {@link AssertionClause} representing the procedure's
-     *                   decreasing clause.
+     *        decreasing clause.
      * @param facDecs A list of {@link FacilityDec} representing the procedure's
-     *                facility declarations.
+     *        facility
+     *        declarations.
      * @param varDecs A list of {@link VarDec} representing the procedure's
-     *                variables.
-     * @param statements As list of {@link Statement} representing the procedure's
-     *                   statements.
-     * @param recursiveFlag A boolean indicating if this procedure is recursive or not.
+     *        variables.
+     * @param statements As list of {@link Statement} representing the
+     *        procedure's statements.
+     * @param recursiveFlag A boolean indicating if this procedure is recursive
+     *        or not.
      */
-    public OperationProcedureDec(OperationDec opDec,
-            AssertionClause decreasing, List<FacilityDec> facDecs,
-            List<VarDec> varDecs, List<Statement> statements,
-            boolean recursiveFlag) {
+    public OperationProcedureDec(OperationDec opDec, AssertionClause decreasing,
+            List<FacilityDec> facDecs, List<VarDec> varDecs,
+            List<Statement> statements, boolean recursiveFlag) {
         super(opDec.getLocation(), opDec.getName());
         myDecreasing = decreasing;
         myFacilityDecs = facDecs;
@@ -95,16 +113,19 @@ public class OperationProcedureDec extends Dec {
     }
 
     /**
-     * <p>This constructs a local operation procedure declaration.</p>
+     * <p>
+     * This constructs a local operation procedure declaration.
+     * </p>
      *
-     * @param opDec An {@link OperationDec} containing all the operation
-     *              related items.
+     * @param opDec An {@link OperationDec} containing all the operation related
+     *        items.
      * @param facDecs A list of {@link FacilityDec} representing the procedure's
-     *                facility declarations.
+     *        facility
+     *        declarations.
      * @param varDecs A list of {@link VarDec} representing the procedure's
-     *                variables.
-     * @param statements As list of {@link Statement} representing the procedure's
-     *                   statements.
+     *        variables.
+     * @param statements As list of {@link Statement} representing the
+     *        procedure's statements.
      */
     public OperationProcedureDec(OperationDec opDec, List<FacilityDec> facDecs,
             List<VarDec> varDecs, List<Statement> statements) {
@@ -199,8 +220,10 @@ public class OperationProcedureDec extends Dec {
     }
 
     /**
-     * <p>This method returns the decreasing clause
-     * for this operation procedure declaration.</p>
+     * <p>
+     * This method returns the decreasing clause for this operation procedure
+     * declaration.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -209,8 +232,10 @@ public class OperationProcedureDec extends Dec {
     }
 
     /**
-     * <p>This method returns the list of facility declarations
-     * for this operation procedure declaration.</p>
+     * <p>
+     * This method returns the list of facility declarations for this operation
+     * procedure declaration.
+     * </p>
      *
      * @return A list of {@link FacilityDec} representation objects.
      */
@@ -220,7 +245,9 @@ public class OperationProcedureDec extends Dec {
 
     /**
      * /**
-     * <p>This method returns whether or not this is an recursive procedure.</p>
+     * <p>
+     * This method returns whether or not this is an recursive procedure.
+     * </p>
      *
      * @return {@code true} if it is recursive, {@code false} otherwise.
      */
@@ -229,8 +256,10 @@ public class OperationProcedureDec extends Dec {
     }
 
     /**
-     * <p>This method returns the list of statements in
-     * for this operation procedure declaration.</p>
+     * <p>
+     * This method returns the list of statements in for this operation
+     * procedure declaration.
+     * </p>
      *
      * @return The list of {@link Statement} representation objects.
      */
@@ -239,8 +268,10 @@ public class OperationProcedureDec extends Dec {
     }
 
     /**
-     * <p>This method returns the list of variables
-     * for this operation procedure declaration.</p>
+     * <p>
+     * This method returns the list of variables for this operation procedure
+     * declaration.
+     * </p>
      *
      * @return A list of {@link VarDec} representation objects.
      */
@@ -249,8 +280,10 @@ public class OperationProcedureDec extends Dec {
     }
 
     /**
-     * <p>This method returns the wrapped operation declaration
-     * for this operation procedure declaration.</p>
+     * <p>
+     * This method returns the wrapped operation declaration for this operation
+     * procedure declaration.
+     * </p>
      *
      * @return The {@link OperationDec} representation object.
      */
@@ -265,9 +298,8 @@ public class OperationProcedureDec extends Dec {
     public final int hashCode() {
         int result = super.hashCode();
         result = 31 * result + myWrappedOpDec.hashCode();
-        result =
-                31 * result
-                        + (myDecreasing != null ? myDecreasing.hashCode() : 0);
+        result = 31 * result
+                + (myDecreasing != null ? myDecreasing.hashCode() : 0);
         result = 31 * result + myFacilityDecs.hashCode();
         result = 31 * result + myVariableDecs.hashCode();
         result = 31 * result + myStatements.hashCode();
@@ -304,7 +336,8 @@ public class OperationProcedureDec extends Dec {
             newStatements.add(s.clone());
         }
 
-        return new OperationProcedureDec((OperationDec) myWrappedOpDec.clone(), newDecreasing,
-                newFacilityDecs, newVarDecs, newStatements, myRecursiveFlag);
+        return new OperationProcedureDec((OperationDec) myWrappedOpDec.clone(),
+                newDecreasing, newFacilityDecs, newVarDecs, newStatements,
+                myRecursiveFlag);
     }
 }

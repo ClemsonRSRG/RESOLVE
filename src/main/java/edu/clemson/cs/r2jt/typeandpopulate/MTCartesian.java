@@ -1,7 +1,7 @@
 /*
  * MTCartesian.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * TODO: This is a wreck.  Clean it up.
+ * TODO: This is a wreck. Clean it up.
  */
 public class MTCartesian extends MTAbstract<MTCartesian> {
 
@@ -50,7 +50,7 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         super(g);
 
         if (elementCount < 2) {
-            //We assert this isn't possible, but who knows?
+            // We assert this isn't possible, but who knows?
             throw new IllegalArgumentException(
                     "Unexpected cartesian product size.");
         }
@@ -99,7 +99,7 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         }
         else {
             if (mySize == 2) {
-                //ASSERT: myElements.get(0) cannot be an instance of MTCartesian
+                // ASSERT: myElements.get(0) cannot be an instance of MTCartesian
                 if (index != 0) {
                     throw new IndexOutOfBoundsException("" + index);
                 }
@@ -107,10 +107,9 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
                 result = myElements.get(0);
             }
             else {
-                //ASSERT: myElements.get(0) MUST be an instance of MTCartesian
-                result =
-                        ((MTCartesian) myElements.get(0).myElement)
-                                .getElement(index);
+                // ASSERT: myElements.get(0) MUST be an instance of MTCartesian
+                result = ((MTCartesian) myElements.get(0).myElement)
+                        .getElement(index);
             }
         }
 
@@ -222,8 +221,8 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
     @Override
     public MTType withComponentReplaced(int index, MTType newType) {
         List<Element> newElements = new LinkedList<Element>(myElements);
-        newElements.set(index, new Element(newElements.get(index).myTag,
-                newType));
+        newElements.set(index,
+                new Element(newElements.get(index).myTag, newType));
 
         return new MTCartesian(getTypeGraph(), newElements);
     }
@@ -243,8 +242,8 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
 
         public Element(String tag, MTType element) {
             if (element == null) {
-                throw new IllegalArgumentException("Element \"" + tag + "\" "
-                        + "has null type.");
+                throw new IllegalArgumentException(
+                        "Element \"" + tag + "\" " + "has null type.");
             }
 
             myElement = element;
@@ -272,8 +271,8 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
             if (myTag != null) {
 
                 if (tagsToElements.containsKey(myTag)) {
-                    throw new IllegalArgumentException("Duplicate tag: "
-                            + myTag);
+                    throw new IllegalArgumentException(
+                            "Duplicate tag: " + myTag);
                 }
 
                 tagsToElements.put(myTag, this);

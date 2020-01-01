@@ -1,7 +1,7 @@
 /*
  * ReplaceTheoremInConsequentWithTrue.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -52,8 +52,8 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
         Set<Binder> binders = new HashSet<Binder>();
         binders.add(new InductiveConsequentBinder(myTheoremAssertion));
 
-        return new LazyMappingIterator<BindResult, Application>(
-                m.bind(binders), BIND_RESULT_TO_APPLICATION);
+        return new LazyMappingIterator<BindResult, Application>(m.bind(binders),
+                BIND_RESULT_TO_APPLICATION);
     }
 
     @Override
@@ -128,13 +128,12 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
         public void apply(PerVCProverModel m) {
             m.alterSite(myBindSite, m.getTrue());
 
-            myFinalSite =
-                    new Site(m, myBindSite.conjunct, myBindSite.path, m
-                            .getTrue());
+            myFinalSite = new Site(m, myBindSite.conjunct, myBindSite.path,
+                    m.getTrue());
 
             m.addProofStep(new ModifyConsequentStep(myBindSite, myFinalSite,
-                    ReplaceTheoremInConsequentWithTrue.this, this, Collections
-                            .singleton(myBindSite)));
+                    ReplaceTheoremInConsequentWithTrue.this, this,
+                    Collections.singleton(myBindSite)));
         }
 
         @Override

@@ -1,7 +1,7 @@
 /*
  * ScopeBuilder.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -27,12 +27,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>ScopeBuilder</code> is a working, mutable realization of 
- * <code>Scope</code>.</p>
+ * <p>
+ * A <code>ScopeBuilder</code> is a working, mutable realization of
+ * <code>Scope</code>.
+ * </p>
  * 
- * <p>Note that <code>ScopeBuilder</code> has no public constructor.  
- * <code>ScopeBuilders</code>s are acquired through calls to some of the methods
- * of {@link MathSymbolTableBuilder MathSymbolTableBuilder}.</p>
+ * <p>
+ * Note that <code>ScopeBuilder</code> has no public constructor.
+ * <code>ScopeBuilders</code>s are
+ * acquired through calls to some of the methods of
+ * {@link MathSymbolTableBuilder
+ * MathSymbolTableBuilder}.
+ * </p>
  */
 public class ScopeBuilder extends SyntacticScope {
 
@@ -74,9 +80,8 @@ public class ScopeBuilder extends SyntacticScope {
 
         sanityCheckBindArguments(name, definingElement, type);
 
-        ProgramVariableEntry entry =
-                new ProgramVariableEntry(name, definingElement, myRootModule,
-                        type);
+        ProgramVariableEntry entry = new ProgramVariableEntry(name,
+                definingElement, myRootModule, type);
 
         myBindings.put(name, entry);
 
@@ -92,8 +97,8 @@ public class ScopeBuilder extends SyntacticScope {
             throw new DuplicateSymbolException(curLocalEntry);
         }
 
-        FacilityEntry entry =
-                new FacilityEntry(facility, myRootModule, getSourceRepository());
+        FacilityEntry entry = new FacilityEntry(facility, myRootModule,
+                getSourceRepository());
 
         myBindings.put(facility.getName().getName(), entry);
 
@@ -107,9 +112,8 @@ public class ScopeBuilder extends SyntacticScope {
 
         sanityCheckBindArguments(name, definingElement, returnType);
 
-        OperationEntry entry =
-                new OperationEntry(name, definingElement, myRootModule,
-                        returnType, params);
+        OperationEntry entry = new OperationEntry(name, definingElement,
+                myRootModule, returnType, params);
 
         myBindings.put(name, entry);
 
@@ -124,9 +128,8 @@ public class ScopeBuilder extends SyntacticScope {
 
         sanityCheckBindArguments(name, definingElement, "");
 
-        OperationProfileEntry entry =
-                new OperationProfileEntry(name, definingElement, myRootModule,
-                        correspondingOperation);
+        OperationProfileEntry entry = new OperationProfileEntry(name,
+                definingElement, myRootModule, correspondingOperation);
 
         myBindings.put(name, entry);
 
@@ -140,9 +143,8 @@ public class ScopeBuilder extends SyntacticScope {
 
         sanityCheckBindArguments(name, definingElement, "");
 
-        ProcedureEntry entry =
-                new ProcedureEntry(name, definingElement, myRootModule,
-                        correspondingOperation);
+        ProcedureEntry entry = new ProcedureEntry(name, definingElement,
+                myRootModule, correspondingOperation);
 
         myBindings.put(name, entry);
 
@@ -160,7 +162,8 @@ public class ScopeBuilder extends SyntacticScope {
                 new FacilityTypeRepresentationEntry(myTypeGraph, name,
                         definingElement, myRootModule,
                         new PTFacilityRepresentation(myTypeGraph,
-                                representationType, name), convention);
+                                representationType, name),
+                        convention);
 
         myBindings.put(name, result);
 
@@ -170,14 +173,14 @@ public class ScopeBuilder extends SyntacticScope {
     public RepresentationTypeEntry addRepresentationTypeEntry(String name,
             RepresentationDec definingElement,
             ProgramTypeDefinitionEntry definition, PTType representationType,
-            Exp convention, Exp correspondence) throws DuplicateSymbolException {
+            Exp convention, Exp correspondence)
+            throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, "");
 
-        RepresentationTypeEntry result =
-                new RepresentationTypeEntry(myTypeGraph, name, definingElement,
-                        myRootModule, definition, representationType,
-                        convention, correspondence);
+        RepresentationTypeEntry result = new RepresentationTypeEntry(
+                myTypeGraph, name, definingElement, myRootModule, definition,
+                representationType, convention, correspondence);
 
         myBindings.put(name, result);
 
@@ -185,7 +188,8 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramTypeEntry addProgramTypeDefinition(String name,
-            TypeDec definingElement, MTType model, MathSymbolEntry exemplarEntry)
+            TypeDec definingElement, MTType model,
+            MathSymbolEntry exemplarEntry)
             throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, model);
@@ -205,26 +209,25 @@ public class ScopeBuilder extends SyntacticScope {
         Exp finalizationEnsures =
                 (finalization == null) ? null : finalization.getEnsures();
 
-        ProgramTypeEntry entry =
-                new ProgramTypeDefinitionEntry(myTypeGraph, name,
-                        definingElement, myRootModule, model, new PTFamily(
-                                model, name, exemplarSymbol.getName(),
-                                definingElement.getConstraint(), initRequires,
-                                initEnsures, finalizationRequires,
-                                finalizationEnsures), exemplarEntry);
+        ProgramTypeEntry entry = new ProgramTypeDefinitionEntry(myTypeGraph,
+                name, definingElement, myRootModule, model,
+                new PTFamily(model, name, exemplarSymbol.getName(),
+                        definingElement.getConstraint(), initRequires,
+                        initEnsures, finalizationRequires, finalizationEnsures),
+                exemplarEntry);
 
         myBindings.put(name, entry);
 
         return entry;
     }
 
-    public TheoremEntry addTheorem(String name, MathAssertionDec definingElement)
+    public TheoremEntry addTheorem(String name,
+            MathAssertionDec definingElement)
             throws DuplicateSymbolException {
         sanityCheckBindArguments(name, definingElement, "");
 
-        TheoremEntry entry =
-                new TheoremEntry(myTypeGraph, name, definingElement,
-                        myRootModule);
+        TheoremEntry entry = new TheoremEntry(myTypeGraph, name,
+                definingElement, myRootModule);
 
         myBindings.put(name, entry);
 
@@ -233,13 +236,13 @@ public class ScopeBuilder extends SyntacticScope {
 
     public ProgramParameterEntry addFormalParameter(String name,
             ResolveConceptualElement definingElement, ParameterMode mode,
-            PTType type) throws DuplicateSymbolException {
+            PTType type)
+            throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
-        ProgramParameterEntry entry =
-                new ProgramParameterEntry(myTypeGraph, name, definingElement,
-                        myRootModule, type, mode);
+        ProgramParameterEntry entry = new ProgramParameterEntry(myTypeGraph,
+                name, definingElement, myRootModule, type, mode);
 
         myBindings.put(name, entry);
 
@@ -247,20 +250,24 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new binding for a
-     * symbol with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> and of type <code>type</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new binding for a symbol with
+     * an unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>
+     * and of type
+     * <code>type</code>.
+     * </p>
      * 
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
      * @param type The declared type of the symbol.
      * @param typeValue The type assigned to the symbol (can be null).
      * 
-     * @throws DuplicateSymbolException If such a symbol is already defined 
-     *             directly in the scope represented by this 
-     *             <code>ScopeBuilder</code>.  Note that this exception is not
-     *             thrown if the symbol is defined in a parent scope or an
-     *             imported module.
+     * @throws DuplicateSymbolException If such a symbol is already defined
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      */
     public MathSymbolEntry addBinding(String name,
             SymbolTableEntry.Quantification q,
@@ -271,10 +278,9 @@ public class ScopeBuilder extends SyntacticScope {
 
         sanityCheckBindArguments(name, definingElement, type);
 
-        MathSymbolEntry entry =
-                new MathSymbolEntry(myTypeGraph, name, q, definingElement,
-                        type, typeValue, schematicTypes,
-                        genericsInDefiningContext, myRootModule);
+        MathSymbolEntry entry = new MathSymbolEntry(myTypeGraph, name, q,
+                definingElement, type, typeValue, schematicTypes,
+                genericsInDefiningContext, myRootModule);
 
         myBindings.put(name, entry);
 
@@ -290,7 +296,8 @@ public class ScopeBuilder extends SyntacticScope {
 
     public MathSymbolEntry addBinding(String name,
             ResolveConceptualElement definingElement, MTType type,
-            MTType typeValue) throws DuplicateSymbolException {
+            MTType typeValue)
+            throws DuplicateSymbolException {
 
         return addBinding(name, SymbolTableEntry.Quantification.NONE,
                 definingElement, type, typeValue, null, null);
@@ -319,8 +326,8 @@ public class ScopeBuilder extends SyntacticScope {
         }
 
         if (type == null) {
-            throw new IllegalArgumentException("Symbol table entry type must "
-                    + "be non-null.");
+            throw new IllegalArgumentException(
+                    "Symbol table entry type must " + "be non-null.");
         }
     }
 }

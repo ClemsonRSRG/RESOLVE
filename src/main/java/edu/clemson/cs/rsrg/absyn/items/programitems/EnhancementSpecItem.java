@@ -1,7 +1,7 @@
 /*
  * EnhancementSpecItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,9 +19,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the facility declaration arguments
- * for Enhancement extension modules that the compiler builds using
- * the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the facility declaration arguments for Enhancement
+ * extension modules
+ * that the compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,10 +33,18 @@ public class EnhancementSpecItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>Name of this imported module.</p> */
+    /**
+     * <p>
+     * Name of this imported module.
+     * </p>
+     */
     private final PosSymbol myName;
 
-    /** <p>List of parameters arguments for this enhancement extension.</p> */
+    /**
+     * <p>
+     * List of parameters arguments for this enhancement extension.
+     * </p>
+     */
     private final List<ModuleArgumentItem> myParams;
 
     // ===========================================================
@@ -42,12 +52,17 @@ public class EnhancementSpecItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a enhancement extension argument for facility declarations.</p>
+     * <p>
+     * This constructs a enhancement extension argument for facility
+     * declarations.
+     * </p>
      *
      * @param name Name of the extended enhancement module.
-     * @param params The parameter arguments that are passed to instantiate this enhancement.
+     * @param params The parameter arguments that are passed to instantiate this
+     *        enhancement.
      */
-    public EnhancementSpecItem(PosSymbol name, List<ModuleArgumentItem> params) {
+    public EnhancementSpecItem(PosSymbol name,
+            List<ModuleArgumentItem> params) {
         super(name.getLocation());
         myName = name;
         myParams = params;
@@ -111,7 +126,9 @@ public class EnhancementSpecItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the symbol representation of the enhancement extension.</p>
+     * <p>
+     * Returns the symbol representation of the enhancement extension.
+     * </p>
      *
      * @return A {@link PosSymbol} representation of the name.
      */
@@ -120,8 +137,9 @@ public class EnhancementSpecItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of arguments for this enhancement
-     * extension.</p>
+     * <p>
+     * Returns the list of arguments for this enhancement extension.
+     * </p>
      *
      * @return A list of {@link ModuleArgumentItem} representation objects.
      */
@@ -144,8 +162,10 @@ public class EnhancementSpecItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the parameter arguments.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * parameter arguments.
+     * </p>
      *
      * @return A list containing {@link ModuleArgumentItem}s.
      */

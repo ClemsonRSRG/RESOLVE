@@ -1,7 +1,7 @@
 /*
  * ProgramLiteralExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the programming literal expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the programming literal expression
+ * objects that the
+ * compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,9 +33,11 @@ public abstract class ProgramLiteralExp extends ProgramExp {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location
-     * of any objects created from a class that inherits from
-     * {@code ProgramLiteralExp}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location of any objects
+     * created from a class
+     * that inherits from {@code ProgramLiteralExp}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      */

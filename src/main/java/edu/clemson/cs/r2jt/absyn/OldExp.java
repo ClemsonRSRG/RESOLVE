@@ -1,7 +1,7 @@
 /*
  * OldExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -135,8 +135,9 @@ public class OldExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         if (exp != null) {
             if (IsOldExp) {
@@ -176,9 +177,8 @@ public class OldExp extends Exp {
     public Exp replace(Exp old, Exp replacement) {
         if (old instanceof OldExp) {
             if (replacement instanceof OldExp) {
-                Exp tmp =
-                        Exp.replace(exp, ((OldExp) old).getExp(),
-                                ((OldExp) replacement).getExp());
+                Exp tmp = Exp.replace(exp, ((OldExp) old).getExp(),
+                        ((OldExp) replacement).getExp());
                 if (tmp != null) {
                     exp = tmp;
                     return this;
@@ -193,21 +193,20 @@ public class OldExp extends Exp {
         }
         else {
             if (exp instanceof FunctionExp) {
-                if (old instanceof VarExp
-                        && !((FunctionExp) exp).getName().equals(
-                                ((VarExp) old).getName().toString())) {
-                    if (!(replacement instanceof VarExp && (((VarExp) replacement)
-                            .getName().getName().startsWith("?") || ((VarExp) replacement)
-                            .getName().getName().startsWith("_")))) {
+                if (old instanceof VarExp && !((FunctionExp) exp).getName()
+                        .equals(((VarExp) old).getName().toString())) {
+                    if (!(replacement instanceof VarExp
+                            && (((VarExp) replacement).getName().getName()
+                                    .startsWith("?")
+                                    || ((VarExp) replacement).getName()
+                                            .getName().startsWith("_")))) {
                         exp = Exp.replace(exp, old, replacement);
                     }
                     else {
-                        List<FunctionArgList> paramList =
-                                ((FunctionExp) exp)
-                                        .replaceVariableInParamListWithExp(
-                                                ((FunctionExp) exp)
-                                                        .getParamList(), old,
-                                                replacement);
+                        List<FunctionArgList> paramList = ((FunctionExp) exp)
+                                .replaceVariableInParamListWithExp(
+                                        ((FunctionExp) exp).getParamList(), old,
+                                        replacement);
                         ((FunctionExp) exp).setParamList(paramList);
                     }
                 }
@@ -233,16 +232,20 @@ public class OldExp extends Exp {
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
+     * <p>
+     * Shallow compare is too weak for many things, and equals() is too strict.
+     * This method returns
+     * <code>true</code> <strong>iff</code> this expression and the provided
+     * expression,
+     * <code>e</code>, are equivalent with respect to structure and all function
+     * and variable names.
+     * </p>
      *
      * @param e The expression to compare this one to.
      *
      * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     *         expression are equivalent
+     *         with respect to structure and all function and variable names.
      */
     @Override
     public boolean equivalent(Exp e) {

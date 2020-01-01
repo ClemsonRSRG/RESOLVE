@@ -1,7 +1,7 @@
 /*
  * MTAbstract.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,8 +15,11 @@ package edu.clemson.cs.rsrg.typeandpopulate.mathtypes;
 import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 
 /**
- * <p>This abstract class serves as the parent class of all
- * abstract mathematical types that contains other {@link MTType}s.</p>
+ * <p>
+ * This abstract class serves as the parent class of all abstract mathematical
+ * types that contains
+ * other {@link MTType}s.
+ * </p>
  *
  * @version 2.0
  */
@@ -27,9 +30,11 @@ public abstract class MTAbstract<T extends MTType> extends MTType {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the type graph
-     * of any objects created from a class that inherits from
-     * {@link MTAbstract}.</p>
+     * <p>
+     * An helper constructor that allow us to store the type graph of any
+     * objects created from a class
+     * that inherits from {@link MTAbstract}.
+     * </p>
      *
      * @param g The current type graph.
      */

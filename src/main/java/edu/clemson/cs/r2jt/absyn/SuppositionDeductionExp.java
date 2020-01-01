@@ -1,7 +1,7 @@
 /*
  * SuppositionDeductionExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -41,7 +41,8 @@ public class SuppositionDeductionExp extends Exp {
     public SuppositionDeductionExp() {};
 
     public SuppositionDeductionExp(Location location,
-            SuppositionExp supposition, List<Exp> body, DeductionExp deduction) {
+            SuppositionExp supposition, List<Exp> body,
+            DeductionExp deduction) {
         this.location = location;
         this.supposition = supposition;
         this.body = body;

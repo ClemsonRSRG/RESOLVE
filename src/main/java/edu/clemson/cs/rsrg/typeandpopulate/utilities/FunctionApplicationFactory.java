@@ -1,7 +1,7 @@
 /*
  * FunctionApplicationFactory.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,15 +18,19 @@ import edu.clemson.cs.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import java.util.List;
 
 /**
- * <p>This is an interface for building a function application.</p>
+ * <p>
+ * This is an interface for building a function application.
+ * </p>
  *
  * @version 2.0
  */
 public interface FunctionApplicationFactory {
 
     /**
-     * <p>This method returns a {@link MTType} resulting from a
-     * function application.</p>
+     * <p>
+     * This method returns a {@link MTType} resulting from a function
+     * application.
+     * </p>
      *
      * @param g The current type graph.
      * @param f The function to be applied.

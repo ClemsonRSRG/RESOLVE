@@ -1,7 +1,7 @@
 /*
  * ResultProcessingQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,9 +22,12 @@ import java.util.List;
 import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 
 /**
- * <p>An implementation of {@link SymbolQuery SymbolQuery} that decorates an
- * existing <code>SymbolQuery</code>, post processing its results and returning
- * the processed set of results.</p>
+ * <p>
+ * An implementation of {@link SymbolQuery SymbolQuery} that decorates an
+ * existing
+ * <code>SymbolQuery</code>, post processing its results and returning the
+ * processed set of results.
+ * </p>
  *
  * @param <T> The return type of the base <code>SymbolQuery</code>.
  * @param <R> The return type of the resultant, processed entries.

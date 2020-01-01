@@ -1,7 +1,7 @@
 /*
  * TheoremPrioritizer.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -48,13 +48,12 @@ public class TheoremPrioritizer {
         }
         for (TheoremCongruenceClosureImpl t : theoremList) {
             TheoremWithScore tws = new TheoremWithScore(t);
-            //int score = calculateScore(t.getFunctionNames());
+            // int score = calculateScore(t.getFunctionNames());
             int score;
-            //if (!shouldExclude(t.getFunctionNames())) {
+            // if (!shouldExclude(t.getFunctionNames())) {
             if (!shouldExclude(t.getNonQuantifiedSymbols())) {
-                score =
-                        calculateScoreMinimum(t.getNonQuantifiedSymbols(),
-                                m_vcReg.m_symbolToIndex.keySet().size());
+                score = calculateScoreMinimum(t.getNonQuantifiedSymbols(),
+                        m_vcReg.m_symbolToIndex.keySet().size());
                 if (m_theoremAppliedCount.containsKey(t.m_name)) {
                     score += m_theoremAppliedCount.get(t.m_name);
                 }
@@ -77,7 +76,7 @@ public class TheoremPrioritizer {
         return false;
     }
 
-    //  minimum of symbol scores in both vc and theorem
+    // minimum of symbol scores in both vc and theorem
     public int calculateScoreMinimum(Set<String> theorem_symbols,
             int not_contained_penalty) {
         if (theorem_symbols.isEmpty())
@@ -107,7 +106,8 @@ public class TheoremPrioritizer {
             int gi = m_vcReg.getIndexForSymbol(g);
             if (si == gi)
                 return 0;
-            for (NormalizedAtomicExpression ng : m_vc.getConjunct().getUses(gi)) {
+            for (NormalizedAtomicExpression ng : m_vc.getConjunct()
+                    .getUses(gi)) {
                 if (ng.readRoot() != gi)
                     continue;
                 if (ng.getOperatorsAsStrings(true).containsKey(sc))

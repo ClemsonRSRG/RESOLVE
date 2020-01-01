@@ -1,7 +1,7 @@
 /*
  * DotExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -91,9 +91,8 @@ public class DotExp extends Exp {
             newSegments.add(substitute(e, substitutions));
         }
 
-        retval =
-                new DotExp(location, newSegments, substitute(semanticExp,
-                        substitutions));
+        retval = new DotExp(location, newSegments,
+                substitute(semanticExp, substitutions));
         return retval;
     }
 
@@ -117,8 +116,9 @@ public class DotExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         if (segments != null) {
             Iterator<Exp> i = segments.iterator();
@@ -176,15 +176,14 @@ public class DotExp extends Exp {
             if (retval) {
                 Iterator<Exp> thisSegments = segments.iterator();
                 Iterator<Exp> eSegments = eAsDotExp.segments.iterator();
-                while (retval && thisSegments.hasNext() && eSegments.hasNext()) {
+                while (retval && thisSegments.hasNext()
+                        && eSegments.hasNext()) {
 
                     retval = thisSegments.next().equivalent(eSegments.next());
                 }
 
-                retval =
-                        retval
-                                && !(thisSegments.hasNext() || eSegments
-                                        .hasNext());
+                retval = retval
+                        && !(thisSegments.hasNext() || eSegments.hasNext());
             }
         }
 
@@ -239,7 +238,7 @@ public class DotExp extends Exp {
 
     private String segmentsToString(List<Exp> segments) {
         StringBuffer sb = new StringBuffer();
-        //Environment env = Environment.getInstance();
+        // Environment env = Environment.getInstance();
         if (segments != null) {
             Iterator<Exp> i = segments.iterator();
 
@@ -279,9 +278,11 @@ public class DotExp extends Exp {
                     Exp newName = Exp.replace(name, old, replacement);
 
                     if (!newName.equals(name)) {
-                        /* Weird way of doing it. Replaced it with the following. - YS
-                        segments.remove(it.nextIndex()-1);
-                        segments.add(it.nextIndex()-1, newName);
+                        /*
+                         * Weird way of doing it. Replaced it with the
+                         * following. - YS
+                         * segments.remove(it.nextIndex()-1);
+                         * segments.add(it.nextIndex()-1, newName);
                          */
                         segments.remove(index - 1);
                         segments.add(index - 1, newName);
@@ -292,15 +293,17 @@ public class DotExp extends Exp {
                 else if (name instanceof VariableNameExp) {
                     int index = it.nextIndex();
                     VariableExp newName = (VariableExp) Exp.clone(name);
-                    /* Was:
-                     * new VarExp(null, null, 
-                    		((VariableNameExp)name).getName());
+                    /*
+                     * Was: new VarExp(null, null,
+                     * ((VariableNameExp)name).getName());
                      */
 
                     if (!newName.equals(name)) {
-                        /* Weird way of doing it. Replaced it with the following. - YS
-                        segments.remove(it.nextIndex()-1);
-                        segments.add(it.nextIndex()-1, newName);
+                        /*
+                         * Weird way of doing it. Replaced it with the
+                         * following. - YS
+                         * segments.remove(it.nextIndex()-1);
+                         * segments.add(it.nextIndex()-1, newName);
                          */
                         segments.remove(index - 1);
                         segments.add(index - 1, newName);
@@ -313,30 +316,38 @@ public class DotExp extends Exp {
                 Exp name = it.next();
 
                 if (old instanceof VarExp && name instanceof VarExp) {
-                    if (((VarExp) old).getName().toString().equals(
-                            ((VarExp) name).getName().toString())
+                    if (((VarExp) old).getName().toString()
+                            .equals(((VarExp) name).getName().toString())
                             && (replacement instanceof DotExp)) {
                         segments.remove(0);
-                        segments
-                                .addAll(0, ((DotExp) replacement).getSegments());
+                        segments.addAll(0,
+                                ((DotExp) replacement).getSegments());
 
                         return this;
                     }
-                    else if (((VarExp) old).getName().toString().equals(
-                            ((VarExp) name).getName().toString()) /*&& (replacement instanceof VarExp)*/) {
+                    else if (((VarExp) old).getName().toString()
+                            .equals(((VarExp) name).getName()
+                                    .toString()) /*
+                                                  * && (replacement instanceof
+                                                  * VarExp)
+                                                  */) {
                         segments.remove(0);
                         segments.add(0, (Exp) (Exp.clone(replacement)));
 
                         return this;
                     }
                 }
-                else if (old instanceof OldExp && name instanceof OldExp/* && replacement instanceof VarExp*/) {
+                else if (old instanceof OldExp
+                        && name instanceof OldExp/*
+                                                  * && replacement instanceof
+                                                  * VarExp
+                                                  */) {
                     if (replacement instanceof DotExp) {
                         name = Exp.replace(name, old, replacement);
                         if (name != null) {
                             segments.remove(0);
-                            segments.addAll(0, ((DotExp) replacement)
-                                    .getSegments());
+                            segments.addAll(0,
+                                    ((DotExp) replacement).getSegments());
                             return this;
                         }
                     }
@@ -351,15 +362,15 @@ public class DotExp extends Exp {
                 }
             }
 
-            //        	if(it.hasNext()){
-            //        		Exp name = it.next();
-            //        		name = name.replace(old, replacement);
-            //        		if(name != null){
-            //        			segments.remove(1);
-            //        			segments.add(1, (Exp)(name.clone()));
-            //        			return this;
-            //        		}
-            //        	}
+            // if(it.hasNext()){
+            // Exp name = it.next();
+            // name = name.replace(old, replacement);
+            // if(name != null){
+            // segments.remove(1);
+            // segments.add(1, (Exp)(name.clone()));
+            // return this;
+            // }
+            // }
         }
         else if (old instanceof DotExp && replacement instanceof DotExp) {
             if (all_segments_match((DotExp) old, this)) {
@@ -390,8 +401,8 @@ public class DotExp extends Exp {
         }
         else {
             for (int count = 0; count < old.getSegments().size(); count++) {
-                if (!old.getSegments().get(count).equals(
-                        current.getSegments().get(count))) {
+                if (!old.getSegments().get(count)
+                        .equals(current.getSegments().get(count))) {
                     return false;
                 }
             }
@@ -399,15 +410,15 @@ public class DotExp extends Exp {
         return true;
     }
 
-    public void update_matching_segments(DotExp old, DotExp current, Exp newExp) {
+    public void update_matching_segments(DotExp old, DotExp current,
+            Exp newExp) {
 
         if (old.getSegments().size() <= current.getSegments().size()) {
 
             for (int count = 0; count < old.getSegments().size(); count++) {
                 Exp oldExp = old.getSegments().get(count);
                 Exp curExp = current.getSegments().get(count);
-                if (curExp instanceof FunctionExp
-                        && oldExp instanceof VarExp
+                if (curExp instanceof FunctionExp && oldExp instanceof VarExp
                         && ((FunctionExp) curExp).getName().getName().equals(
                                 ((VarExp) oldExp).getName().getName())) {
                     // This matches.
@@ -430,8 +441,8 @@ public class DotExp extends Exp {
                 Exp oldExp = old.getSegments().get(count);
                 Exp curExp = current.getSegments().get(0);
 
-                if (old.getSegments().get(count).equals(
-                        current.getSegments().get(0))) {
+                if (old.getSegments().get(count)
+                        .equals(current.getSegments().get(0))) {
                     current.segments.remove(0);
                 }
                 else if (curExp instanceof FunctionExp
@@ -441,13 +452,13 @@ public class DotExp extends Exp {
                     // This matches.
                     if (newExp instanceof DotExp) {
                         newSegments.remove(count);
-                        ((FunctionExp) curExp).setName(((VarExp) oldExp)
-                                .getName());
+                        ((FunctionExp) curExp)
+                                .setName(((VarExp) oldExp).getName());
                     }
                     else if (newExp instanceof VarExp) {
                         current.segments.remove(0);
-                        ((FunctionExp) curExp).setName(((VarExp) newExp)
-                                .getName());
+                        ((FunctionExp) curExp)
+                                .setName(((VarExp) newExp).getName());
                         newExp = curExp;
                     }
 

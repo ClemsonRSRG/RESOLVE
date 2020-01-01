@@ -1,7 +1,7 @@
 /*
  * HardCoded.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,16 +33,16 @@ public class HardCoded {
     public static void addBuiltInRelationships(TypeGraph g,
             MathSymbolTableBuilder b) {
         try {
-            //This is just a hard-coded version of this theoretical type theorem
-            //that can't actually appear in a theory because it won't type-check
-            //(it requires itself to typecheck):
+            // This is just a hard-coded version of this theoretical type theorem
+            // that can't actually appear in a theory because it won't type-check
+            // (it requires itself to typecheck):
 
-            //Type Theorem Function_Subtypes:
-            //   For all D1, R1 : MType,
-            //   For all D2 : Powerset(D1),
-            //   For all R2 : Powerset(R1),
-            //   For all f : D2 -> R2,
-            //       f : D1 -> R1;
+            // Type Theorem Function_Subtypes:
+            // For all D1, R1 : MType,
+            // For all D2 : Powerset(D1),
+            // For all R2 : Powerset(R1),
+            // For all f : D2 -> R2,
+            // f : D1 -> R1;
 
             PosSymbol ntv = new PosSymbol(null, Symbol.symbol("native"));
             ModuleDec module =
@@ -66,8 +66,8 @@ public class HardCoded {
             PosSymbol fSym = new PosSymbol(null, Symbol.symbol("f"));
             VarExp f = new VarExp();
             f.setName(fSym);
-            f.setMathType(new MTFunction(g, new MTNamed(g, "R2"), new MTNamed(
-                    g, "D2")));
+            f.setMathType(new MTFunction(g, new MTNamed(g, "R2"),
+                    new MTNamed(g, "D2")));
             f.setQuantification(VarExp.FORALL);
 
             g.addRelationship(f, new MTFunction(g, new MTNamed(g, "R1"),
@@ -76,13 +76,15 @@ public class HardCoded {
             b.endScope();
         }
         catch (DuplicateSymbolException dse) {
-            //Not possible--we're the first ones to add anything
+            // Not possible--we're the first ones to add anything
             throw new RuntimeException(dse);
         }
     }
 
     /**
-     * <p>This method establishes all built-in symbols of the symbol table.</p>
+     * <p>
+     * This method establishes all built-in symbols of the symbol table.
+     * </p>
      */
     public static void addBuiltInSymbols(TypeGraph g, ScopeBuilder b) {
         VarExp v = new VarExp();
@@ -93,8 +95,8 @@ public class HardCoded {
             b.addBinding("MType", v, g.CLS, g.CLS);
             b.addBinding("Cls", v, g.CLS, g.CLS);
 
-            b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
-                    g.ENTITY));
+            b.addBinding("Instance_Of", v,
+                    new MTFunction(g, g.BOOLEAN, g.CLS, g.ENTITY));
 
             b.addBinding("SSet", v, g.CLS, g.CLS);
             b.addBinding("B", v, g.CLS, g.BOOLEAN);
@@ -111,20 +113,21 @@ public class HardCoded {
             b.addBinding("not", v, g.NOT);
             b.addBinding("*", v, g.CROSS);
 
-            b.addBinding("=", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
-                    g.ENTITY));
-            b.addBinding("/=", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
-                    g.ENTITY));
-            b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
-                    g.BOOLEAN));
+            b.addBinding("=", v,
+                    new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY));
+            b.addBinding("/=", v,
+                    new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY));
+            b.addBinding("or", v,
+                    new MTFunction(g, g.BOOLEAN, g.BOOLEAN, g.BOOLEAN));
         }
         catch (DuplicateSymbolException dse) {
-            //Not possible--we're the first ones to add anything
+            // Not possible--we're the first ones to add anything
             throw new RuntimeException(dse);
         }
     }
 
-    public static MTType getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
+    public static MTType getMetaFieldType(TypeGraph g, Exp e,
+            String metaSegment) {
 
         MTType result = null;
 

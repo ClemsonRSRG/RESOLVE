@@ -1,7 +1,7 @@
 /*
  * InstantiatedEnhSpecRealizItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,9 +19,13 @@ import edu.clemson.cs.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
 import java.util.List;
 
 /**
- * <p>This class stores an {@link EnhancementSpecRealizItem EnhancementSpecRealizItem's}
- * formal parameters in the specifications/implementations and their actual arguments in the
- * {@code Facility} instantiation.</p>
+ * <p>
+ * This class stores an {@link EnhancementSpecRealizItem
+ * EnhancementSpecRealizItem's} formal
+ * parameters in the specifications/implementations and their actual arguments
+ * in the
+ * {@code Facility} instantiation.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -33,20 +37,29 @@ public class InstantiatedEnhSpecRealizItem {
     // ===========================================================
 
     /**
-     * <p>The {@code Enhancement} and {@code Enhancement Realization}
-     * instantiation from a {@link FacilityDec}.</p>
+     * <p>
+     * The {@code Enhancement} and {@code Enhancement Realization} instantiation
+     * from a
+     * {@link FacilityDec}.
+     * </p>
      */
     private final EnhancementSpecRealizItem myEnhancementSpecRealizItem;
 
     /**
-     * <p>This contains all the {@code Enhancement}'s formal arguments
-     * and its instantiated actual arguments.</p>
+     * <p>
+     * This contains all the {@code Enhancement}'s formal arguments and its
+     * instantiated actual
+     * arguments.
+     * </p>
      */
     private final FormalActualLists myEnhancementParamArgs;
 
     /**
-     * <p>This contains all the {@code Enhancement Realization}'s formal arguments
-     * and its instantiated actual arguments.</p>
+     * <p>
+     * This contains all the {@code Enhancement Realization}'s formal arguments
+     * and its instantiated
+     * actual arguments.
+     * </p>
      */
     private final FormalActualLists myEnhancementRealizParamArgs;
 
@@ -55,16 +68,24 @@ public class InstantiatedEnhSpecRealizItem {
     // ===========================================================
 
     /**
-     * <p>This creates an object that stores the various pieces of
-     * information related to the instantiated {@code Facility}'s
-     * {@code Enhancement} and {@code Enhancement Realization}.</p>
+     * <p>
+     * This creates an object that stores the various pieces of information
+     * related to the
+     * instantiated {@code Facility}'s {@code Enhancement} and
+     * {@code Enhancement Realization}.
+     * </p>
      *
-     * @param enhancementSpecRealizItem The {@link EnhancementSpecRealizItem} from
-     *                                  the instantiated {@code Facility}.
-     * @param eFormalParamList The formal parameters from the {@code Enhancement}.
-     * @param eActualArgList The processed arguments used to instantiate the {@code Enhancement}.
-     * @param erFormalParamList The formal parameters from the {@code Enhancement Realization}.
-     * @param erActualArgList The processed arguments used to instantiate the {@code Enhancement Realization}.
+     * @param enhancementSpecRealizItem The {@link EnhancementSpecRealizItem}
+     *        from the instantiated
+     *        {@code Facility}.
+     * @param eFormalParamList The formal parameters from the
+     *        {@code Enhancement}.
+     * @param eActualArgList The processed arguments used to instantiate the
+     *        {@code Enhancement}.
+     * @param erFormalParamList The formal parameters from the
+     *        {@code Enhancement Realization}.
+     * @param erActualArgList The processed arguments used to instantiate the
+     *        {@code Enhancement Realization}.
      */
     public InstantiatedEnhSpecRealizItem(
             EnhancementSpecRealizItem enhancementSpecRealizItem,
@@ -82,11 +103,14 @@ public class InstantiatedEnhSpecRealizItem {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default {@code equals} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code equals} method implementation.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -107,32 +131,42 @@ public class InstantiatedEnhSpecRealizItem {
     }
 
     /**
-     * <p>This method returns a {@link FormalActualLists} containing the
-     * {@code Enhancement}'s formal and actual arguments for the instantiated
-     * {@code Facility}.</p>
+     * <p>
+     * This method returns a {@link FormalActualLists} containing the
+     * {@code Enhancement}'s formal and
+     * actual arguments for the instantiated {@code Facility}.
+     * </p>
      *
      * @return A {@link FormalActualLists} containing the formal parameters and
-     * the instantiation arguments.
+     *         the instantiation
+     *         arguments.
      */
     public final FormalActualLists getEnhancementParamArgLists() {
         return myEnhancementParamArgs;
     }
 
     /**
-     * <p>This method returns a {@link FormalActualLists} containing the
+     * <p>
+     * This method returns a {@link FormalActualLists} containing the
      * {@code Enhancement Realization}'s formal and actual arguments for the
-     * instantiated {@code Facility}.</p>
+     * instantiated
+     * {@code Facility}.
+     * </p>
      *
      * @return A {@link FormalActualLists} containing the formal parameters and
-     * the instantiation arguments.
+     *         the instantiation
+     *         arguments.
      */
     public final FormalActualLists getEnhancementRealizParamArgLists() {
         return myEnhancementRealizParamArgs;
     }
 
     /**
-     * <p>This method returns the {@link EnhancementSpecRealizItem} from
-     * the instantiated {@code Facility} declaration.</p>
+     * <p>
+     * This method returns the {@link EnhancementSpecRealizItem} from the
+     * instantiated
+     * {@code Facility} declaration.
+     * </p>
      *
      * @return A {@link EnhancementSpecRealizItem}.
      */
@@ -141,7 +175,9 @@ public class InstantiatedEnhSpecRealizItem {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
      *
      * @return The hash code associated with the object.
      */

@@ -1,7 +1,7 @@
 /*
  * RawASTOutputPipeline.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
 /**
- * <p>This is pipeline that outputs the module AST
- * as a string.</p>
+ * <p>
+ * This is pipeline that outputs the module AST as a string.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -32,8 +33,9 @@ public class RawASTOutputPipeline extends AbstractPipeline {
     // ===========================================================
 
     /**
-     * <p>This generates a pipeline to output a module's AST
-     * as a string.</p>
+     * <p>
+     * This generates a pipeline to output a module's AST as a string.
+     * </p>
      *
      * @param ce The current compilation environment.
      * @param symbolTable The symbol table.

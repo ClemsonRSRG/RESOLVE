@@ -1,7 +1,7 @@
 /*
  * AlphaEquivalencyChecker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,10 @@ import java.util.Deque;
 import java.util.NoSuchElementException;
 
 /**
- * <p>This class visits two mathematical types to see if they are
- * alpha-equivalent to each other.</p>
+ * <p>
+ * This class visits two mathematical types to see if they are alpha-equivalent
+ * to each other.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,16 +31,26 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>A limit for how many checkers we can have.</p> */
+    /**
+     * <p>
+     * A limit for how many checkers we can have.
+     * </p>
+     */
     private static final int POOL_SIZE = 3;
 
     /**
-     * <p>An object pool to cut down on the creation of
-     * <code>AlphaEquivalencyCheckers</code>.</p>
+     * <p>
+     * An object pool to cut down on the creation of
+     * <code>AlphaEquivalencyCheckers</code>.
+     * </p>
      */
     private final Deque<AlphaEquivalencyChecker> myCheckerPool;
 
-    /** <p>The result from the alpha-equivalency check.</p> */
+    /**
+     * <p>
+     * The result from the alpha-equivalency check.
+     * </p>
+     */
     private boolean myResult;
 
     // ===========================================================
@@ -46,7 +58,9 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     // ===========================================================
 
     /**
-     * <p>This constructs a checker for checking for alpha-equivalency.</p>
+     * <p>
+     * This constructs a checker for checking for alpha-equivalency.
+     * </p>
      */
     public AlphaEquivalencyChecker() {
         myCheckerPool = new ArrayDeque<>(POOL_SIZE);
@@ -57,8 +71,10 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     /**
-     * <p>This constructs an alpha-equivalency checker instance
-     * with the provided pool of checkers.</p>
+     * <p>
+     * This constructs an alpha-equivalency checker instance with the provided
+     * pool of checkers.
+     * </p>
      *
      * @param pool A pool of existing checkers.
      */
@@ -67,7 +83,9 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     /**
-     * <p>This creates an empty pool of checkers.</p>
+     * <p>
+     * This creates an empty pool of checkers.
+     * </p>
      *
      * @param dummy A dummy variable that is not being used.
      */
@@ -80,20 +98,22 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     // ===========================================================
 
     /**
-     * <p>This method adds additional logic before we visit
-     * two {@link MTFunctionApplication} by checking for
-     * equality.</p>
+     * <p>
+     * This method adds additional logic before we visit two
+     * {@link MTFunctionApplication} by checking
+     * for equality.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
      *
-     * @return The updated result if they are not equal or
-     * we keep the original result value.
+     * @return The updated result if they are not equal or we keep the original
+     *         result value.
      */
     @Override
     public final boolean beginMTFunctionApplication(MTFunctionApplication t1,
             MTFunctionApplication t2) {
-        //myResult = (t1.getName().equals(t2.getName()));
+        // myResult = (t1.getName().equals(t2.getName()));
 
         // Not sure if this is the right fix.... -BD
         myResult = (t1.hashCode() == t2.hashCode());
@@ -102,8 +122,11 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     /**
-     * <p>This method adds additional logic before we visit
-     * two {@link MTNamed} by checking for alpha equivalency.</p>
+     * <p>
+     * This method adds additional logic before we visit two {@link MTNamed} by
+     * checking for alpha
+     * equivalency.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
@@ -112,8 +135,8 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
      */
     @Override
     public final boolean beginMTNamed(MTNamed t1, MTNamed t2) {
-        //TODO: This doesn't deal correctly with multiple appearances of a
-        //variable
+        // TODO: This doesn't deal correctly with multiple appearances of a
+        // variable
 
         if (!t1.getName().equals(t2.getName())) {
             MTType t1Value;
@@ -128,8 +151,8 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
                 returnChecker(alphaEq);
             }
             catch (NoSuchElementException nsee) {
-                //We have no information about the named types--but we know they
-                //aren't named the same, so...
+                // We have no information about the named types--but we know they
+                // aren't named the same, so...
                 myResult = false;
             }
         }
@@ -138,15 +161,17 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     /**
-     * <p>This method adds additional logic before we visit
-     * two {@link MTProper} by setting the final return value
-     * to false if {@code t1 != t2}.</p>
+     * <p>
+     * This method adds additional logic before we visit two {@link MTProper} by
+     * setting the final
+     * return value to false if {@code t1 != t2}.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
      *
-     * @return The updated result if they are not equal or
-     * we keep the original result value.
+     * @return The updated result if they are not equal or we keep the original
+     *         result value.
      */
     @Override
     public final boolean beginMTProper(MTProper t1, MTProper t2) {
@@ -158,8 +183,10 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     /**
-     * <p>This method adds additional logic before we visit
-     * two {@link MTSetRestriction}.</p>
+     * <p>
+     * This method adds additional logic before we visit two
+     * {@link MTSetRestriction}.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
@@ -169,27 +196,32 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     @Override
     public final boolean beginMTSetRestriction(MTSetRestriction t1,
             MTSetRestriction t2) {
-        //TODO:
-        //We really need a way to check the expression embedded in each set
-        //restriction for alpha-equivalency.  We don't have one, so for the
-        //moment, we throw an exception
-        throw new RuntimeException("Can't check set restrictions for "
-                + "alpha equivalency.");
+        // TODO:
+        // We really need a way to check the expression embedded in each set
+        // restriction for alpha-equivalency. We don't have one, so for the
+        // moment, we throw an exception
+        throw new RuntimeException(
+                "Can't check set restrictions for " + "alpha equivalency.");
     }
 
     /**
-     * <p>This method returns the final result for checking
-     * alpha equivalency between two {@link MTType MTTypes}.</p>
+     * <p>
+     * This method returns the final result for checking alpha equivalency
+     * between two {@link MTType
+     * MTTypes}.
+     * </p>
      *
-     * @return {@code true} if they are alpha-equivalent,
-     * {@code false} otherwise.
+     * @return {@code true} if they are alpha-equivalent, {@code false}
+     *         otherwise.
      */
     public final boolean getResult() {
         return myResult;
     }
 
     /**
-     * <p>This method provides logic for handling type mismatches.</p>
+     * <p>
+     * This method provides logic for handling type mismatches.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
@@ -203,7 +235,9 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     /**
-     * <p>This method resets this symmetric visitor.</p>
+     * <p>
+     * This method resets this symmetric visitor.
+     * </p>
      */
     @Override
     public final void reset() {
@@ -216,7 +250,9 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     // ===========================================================
 
     /**
-     * <p>This method only creates a new checker if needed.</p>
+     * <p>
+     * This method only creates a new checker if needed.
+     * </p>
      *
      * @return A checker for handling alpha equivalency.
      */
@@ -234,8 +270,9 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     /**
-     * <p>This method returns a checker to our available
-     * pool of checkers.</p>
+     * <p>
+     * This method returns a checker to our available pool of checkers.
+     * </p>
      *
      * @param c The alpha equivalency checker to be returned.
      */

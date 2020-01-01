@@ -1,7 +1,7 @@
 /*
  * UniversalVariableQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,8 +28,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>A <code>UniversalVariableQuery</code> searches for entries that
- * are universally quantified.</p>
+ * <p>
+ * A <code>UniversalVariableQuery</code> searches for entries that are
+ * universally quantified.
+ * </p>
  *
  * @version 2.0
  */
@@ -41,11 +43,19 @@ public class UniversalVariableQuery
     // Member Fields
     // ===========================================================
 
-    /** <p>A singleton instance for this query.</p> */
+    /**
+     * <p>
+     * A singleton instance for this query.
+     * </p>
+     */
     public static final MultimatchSymbolQuery<MathSymbolEntry> INSTANCE =
             new UniversalVariableQuery();
 
-    /** <p>The actual query that is going to perform the searching.</p> */
+    /**
+     * <p>
+     * The actual query that is going to perform the searching.
+     * </p>
+     */
     private final BaseMultimatchSymbolQuery<MathSymbolEntry> myBaseQuery;
 
     // ===========================================================
@@ -53,15 +63,16 @@ public class UniversalVariableQuery
     // ===========================================================
 
     /**
-     * <p>This query searches for all {@link MathSymbolEntry} that are
-     * universally quantified.</p>
+     * <p>
+     * This query searches for all {@link MathSymbolEntry} that are universally
+     * quantified.
+     * </p>
      */
     private UniversalVariableQuery() {
-        myBaseQuery =
-                new SimpleMultimatchSymbolQuery(new UnqualifiedPath(
-                        ImportStrategy.IMPORT_NONE,
+        myBaseQuery = new SimpleMultimatchSymbolQuery(
+                new UnqualifiedPath(ImportStrategy.IMPORT_NONE,
                         FacilityStrategy.FACILITY_IGNORE, false),
-                        new UniversalVariableSearcher());
+                new UniversalVariableSearcher());
     }
 
     // ===========================================================
@@ -69,8 +80,12 @@ public class UniversalVariableQuery
     // ===========================================================
 
     /**
-     * <p>Behaves just as {@link SymbolQuery#searchFromContext(Scope, ScopeRepository)},
-     * except that it cannot throw a {@link DuplicateSymbolException}.</p>
+     * <p>
+     * Behaves just as
+     * {@link SymbolQuery#searchFromContext(Scope, ScopeRepository)}, except
+     * that it
+     * cannot throw a {@link DuplicateSymbolException}.
+     * </p>
      *
      * @param source The source scope from which the search was spawned.
      * @param repo A repository of any referenced modules.
@@ -88,7 +103,9 @@ public class UniversalVariableQuery
     // ===========================================================
 
     /**
-     * <p>This is a simple implementation for a {@link BaseMultimatchSymbolQuery}.</p>
+     * <p>
+     * This is a simple implementation for a {@link BaseMultimatchSymbolQuery}.
+     * </p>
      */
     private static class SimpleMultimatchSymbolQuery
             extends
@@ -99,8 +116,10 @@ public class UniversalVariableQuery
         // ===========================================================
 
         /**
-         * <p>This query searches for all {@link MathSymbolEntry} that using a
-         * {@link MultimatchTableSearcher}.</p>
+         * <p>
+         * This query searches for all {@link MathSymbolEntry} that using a
+         * {@link MultimatchTableSearcher}.
+         * </p>
          */
         SimpleMultimatchSymbolQuery(ScopeSearchPath path,
                 MultimatchTableSearcher<MathSymbolEntry> searcher) {
@@ -110,8 +129,11 @@ public class UniversalVariableQuery
     }
 
     /**
-     * <p>This is an implementation of {@link MultimatchTableSearcher} for
-     * searching universally quantified symbol table entries.</p>
+     * <p>
+     * This is an implementation of {@link MultimatchTableSearcher} for
+     * searching universally
+     * quantified symbol table entries.
+     * </p>
      */
     private static class UniversalVariableSearcher
             implements
@@ -122,19 +144,25 @@ public class UniversalVariableQuery
         // ===========================================================
 
         /**
-         * <p>Refines {@link TableSearcher#addMatches(SymbolTable, List, SearchContext)}}
-         * to guarantee that it will not throw a {@link DuplicateSymbolException}.
-         * Otherwise, behaves identically.</p>
+         * <p>
+         * Refines
+         * {@link TableSearcher#addMatches(SymbolTable, List, SearchContext)}}
+         * to guarantee that
+         * it will not throw a {@link DuplicateSymbolException}. Otherwise,
+         * behaves identically.
+         * </p>
          *
          * @param entries The set of symbol table entries to consider.
          * @param matches A non-<code>null</code> accumulator of matches.
          * @param l The context from which <code>entries</code> was drawn.
          *
          * @return <code>true</code> if <code>matches</code> now represents a
-         *         final list of search results; i.e., no further symbol table
-         *         entries should be considered. <code>false</code> indicates that
-         *         the search should continue, provided there are additional
-         *         un-searched scopes.
+         *         final list of search
+         *         results; i.e., no further symbol table entries should be
+         *         considered.
+         *         <code>false</code> indicates that the search should continue,
+         *         provided there are
+         *         additional un-searched scopes.
          */
         @Override
         public final boolean addMatches(SymbolTable entries,
@@ -146,7 +174,8 @@ public class UniversalVariableQuery
             while (mathSymbols.hasNext()) {
                 curSymbol = mathSymbols.next();
 
-                if (curSymbol.getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) {
+                if (curSymbol
+                        .getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) {
                     matches.add(curSymbol);
                 }
             }

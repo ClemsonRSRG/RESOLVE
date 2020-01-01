@@ -1,7 +1,7 @@
 /*
  * MTFunction.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,13 +34,19 @@ public class MTFunction extends MTAbstract<MTFunction> {
             new VanillaFunctionApplicationFactory();
 
     /**
-     * <p>In cases where myDomain is an instance of MTCartesian, the names of
-     * the original parameters are stored in the tags of that cartesian product.
-     * However, when myDomain is another type, we represent a function with
-     * a SINGLE PARAMETER and we have no way to embed the name of our parameter.
-     * In the latter case, this field will reflect the parameter name (or be 
-     * null if we represent a function with un-named parameters).  In the former
-     * case, the value of this field is undefined.</p>
+     * <p>
+     * In cases where myDomain is an instance of MTCartesian, the names of the
+     * original parameters are
+     * stored in the tags of that cartesian product. However, when myDomain is
+     * another type, we
+     * represent a function with a SINGLE PARAMETER and we have no way to embed
+     * the name of our
+     * parameter. In the latter case, this field will reflect the parameter name
+     * (or be null if we
+     * represent a function with un-named parameters). In the former case, the
+     * value of this field is
+     * undefined.
+     * </p>
      */
     private final String mySingleParameterName;
 
@@ -54,8 +60,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
     public MTFunction(TypeGraph g, MTType range, List<MTType> paramTypes,
             String singleParameterName) {
-        this(g, false, DEFAULT_FACTORY, range, Collections
-                .singletonList(singleParameterName), paramTypes);
+        this(g, false, DEFAULT_FACTORY, range,
+                Collections.singletonList(singleParameterName), paramTypes);
     }
 
     public MTFunction(TypeGraph g, MTType range, MTType... paramTypes) {
@@ -71,13 +77,14 @@ public class MTFunction extends MTAbstract<MTFunction> {
      */
     public MTFunction(TypeGraph g, DefinitionDec d) {
         this(g, false, DEFAULT_FACTORY, d.getReturnTy().getMathTypeValue(),
-                getParamNames(d.getParameters()), getParamTypes(d
-                        .getParameters()));
+                getParamNames(d.getParameters()),
+                getParamTypes(d.getParameters()));
     }
 
     public MTFunction(TypeGraph g, LambdaExp l) {
-        this(g, false, DEFAULT_FACTORY, l.getMathType(), getParamNames(l
-                .getParameters()), getParamTypes(l.getParameters()));
+        this(g, false, DEFAULT_FACTORY, l.getMathType(),
+                getParamNames(l.getParameters()),
+                getParamTypes(l.getParameters()));
     }
 
     public MTFunction(TypeGraph g, boolean elementsRestrict, MTType range,
@@ -145,37 +152,50 @@ public class MTFunction extends MTAbstract<MTFunction> {
     }
 
     /**
-     * <p>Takes a set of typed parameters as they would be passed to a function
-     * of this type, and returns a new function type with the same number of
-     * parameters as this one, but any unbound type variables that appear as
-     * top level parameters "filled in".</p>
+     * <p>
+     * Takes a set of typed parameters as they would be passed to a function of
+     * this type, and returns
+     * a new function type with the same number of parameters as this one, but
+     * any unbound type
+     * variables that appear as top level parameters "filled in".
+     * </p>
      * 
-     * <p>So, for example, if this function type were 
-     * <code>(T : MType, S : Str(R : MType), t : T) -> (T * S)</code> and you 
-     * were to provide the parameters 
-     * <code>(Z, {true, false, false}, false)</code>, this method would return 
-     * the function type 
-     * <code>(T : MType, S : Str(R : MType), t : Z) -> (Z * S)</code>. Note that
-     * the parameters in this example <em>do not</em> type against the given
-     * function type, but that is irrelevant to this method.  The unbound
-     * type variable <code>T</code> would be matched to <code>Z</code> and 
+     * <p>
+     * So, for example, if this function type were
+     * <code>(T : MType, S : Str(R : MType), t : T) -> (T * S)</code> and you
+     * were to provide the
+     * parameters <code>(Z, {true, false, false}, false)</code>, this method
+     * would return the function
+     * type <code>(T : MType, S : Str(R : MType), t : Z) -> (Z * S)</code>. Note
+     * that the parameters
+     * in this example <em>do not</em> type against the given function type, but
+     * that is irrelevant to
+     * this method. The unbound type variable <code>T</code> would be matched to
+     * <code>Z</code> and
      * replaced throughout, while the unbound type variable <code>R</code> would
-     * not be bound, since it is not at the top level.  Note for simplicity of
-     * implementation that the top-level type parameter itself remains unchanged
-     * (i.e., in theory you could later pass a <em>different</em> type to 
-     * <code>T</code>, despite having already "decided" that <code>T</code> is 
-     * <code>Z</code>.  This shouldn't be a problem in the normal type checking 
-     * algorithm, but being certain not to abuse this is the client's 
-     * responsibility.</p>
+     * not be bound, since
+     * it is not at the top level. Note for simplicity of implementation that
+     * the top-level type
+     * parameter itself remains unchanged (i.e., in theory you could later pass
+     * a <em>different</em>
+     * type to <code>T</code>, despite having already "decided" that
+     * <code>T</code> is <code>Z</code>.
+     * This shouldn't be a problem in the normal type checking algorithm, but
+     * being certain not to
+     * abuse this is the client's responsibility.
+     * </p>
      * 
-     * <p>If the parameters cannot be applied to this function type, either
-     * because of an inappropriate number of parameters, or a parameter value
-     * offered that is not within the bounds of a type parameter, this function
-     * will throw a <code>NoSolutionException</code>.</p>
+     * <p>
+     * If the parameters cannot be applied to this function type, either because
+     * of an inappropriate
+     * number of parameters, or a parameter value offered that is not within the
+     * bounds of a type
+     * parameter, this function will throw a <code>NoSolutionException</code>.
+     * </p>
      * 
      * @param parameters Some typed parameters.
      * 
-     * @return A version of this function type with any top-level type 
+     * @return A version of this function type with any top-level type
      *         parameters filled in.
      */
     public MTFunction deschematize(List<Exp> parameters)
@@ -209,8 +229,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 else {
                     for (int i = 0; i < domainSize; i++) {
                         deschematizeParameter(domainAsMTCartesian.getTag(i),
-                                domainAsMTCartesian.getFactor(i), parameters
-                                        .get(i), concreteValues);
+                                domainAsMTCartesian.getFactor(i),
+                                parameters.get(i), concreteValues);
                     }
                 }
             }
@@ -233,9 +253,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
             Map<String, MTType> accumulatedConcreteValues)
             throws NoSolutionException {
 
-        formalParameterType =
-                formalParameterType
-                        .getCopyWithVariablesSubstituted(accumulatedConcreteValues);
+        formalParameterType = formalParameterType
+                .getCopyWithVariablesSubstituted(accumulatedConcreteValues);
 
         if (formalParameterType.isKnownToContainOnlyMTypes()) {
             MTType actualParameterMathTypeValue =
@@ -247,28 +266,36 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 throw NoSolutionException.INSTANCE;
             }
 
-            accumulatedConcreteValues.put(formalParameterName, actualParameter
-                    .getMathTypeValue());
+            accumulatedConcreteValues.put(formalParameterName,
+                    actualParameter.getMathTypeValue());
         }
     }
 
     /**
-     * <p>Applies the given type comparison function to each of the expressions
-     * in <code>parameters</code>, returning <code>true</code> 
-     * <strong>iff</strong> the comparison returns true for each parameter.</p>
+     * <p>
+     * Applies the given type comparison function to each of the expressions in
+     * <code>parameters</code>, returning <code>true</code> <strong>iff</strong>
+     * the comparison
+     * returns true for each parameter.
+     * </p>
      * 
-     * <p>The comparison is guaranteed to be applied to the parameters in the
-     * order returned by <code>parameters</code>' iterator, and thus the 
-     * comparison may accumulate data about, for example, parameterized types
-     * as it goes.  However, if the comparison returns <code>false</code> for
-     * any individual parameter, then further comparison behavior is undefined.
-     * That is, in this case this method will return <code>false</code> and the 
-     * comparison may be applied to none, some, or all of the remaining 
-     * parameters.</p>
+     * <p>
+     * The comparison is guaranteed to be applied to the parameters in the order
+     * returned by
+     * <code>parameters</code>' iterator, and thus the comparison may accumulate
+     * data about, for
+     * example, parameterized types as it goes. However, if the comparison
+     * returns <code>false</code>
+     * for any individual parameter, then further comparison behavior is
+     * undefined. That is, in this
+     * case this method will return <code>false</code> and the comparison may be
+     * applied to none,
+     * some, or all of the remaining parameters.
+     * </p>
      * 
      * @param parameters
      * @param comparison
-     * @return 
+     * @return
      */
     public boolean parametersMatch(List<Exp> parameters,
             TypeComparison<Exp, MTType> comparison) {
@@ -293,10 +320,9 @@ public class MTFunction extends MTAbstract<MTFunction> {
                     while (result && i < domainSize) {
 
                         parameter = parameters.get(i);
-                        result =
-                                comparison.compare(parameter, parameter
-                                        .getMathType(), domainAsMTCartesian
-                                        .getFactor(i));
+                        result = comparison.compare(parameter,
+                                parameter.getMathType(),
+                                domainAsMTCartesian.getFactor(i));
 
                         i++;
                     }
@@ -305,9 +331,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
             if (!result && (parameters.size() == 1)) {
                 Exp parameter = parameters.get(0);
-                result =
-                        comparison.compare(parameter, parameter.getMathType(),
-                                myDomain);
+                result = comparison.compare(parameter, parameter.getMathType(),
+                        myDomain);
             }
         }
 
@@ -337,10 +362,9 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 if (result) {
                     int i = 0;
                     while (result && i < domainSize) {
-                        result =
-                                (comparison.compare(domainAsMTCartesian
-                                        .getFactor(i), otherDomainAsMTCartesian
-                                        .getFactor(i)) == 0);
+                        result = (comparison.compare(
+                                domainAsMTCartesian.getFactor(i),
+                                otherDomainAsMTCartesian.getFactor(i)) == 0);
 
                         i++;
                     }
@@ -378,8 +402,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
         return names;
     }
 
-    private static List<String> buildNullNameListOfEqualLength(
-            List<MTType> original) {
+    private static List<String>
+            buildNullNameListOfEqualLength(List<MTType> original) {
 
         List<String> names = new LinkedList<String>();
         for (@SuppressWarnings("unused")
@@ -414,7 +438,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
         return mySingleParameterName;
     }
 
-    public MTType getApplicationType(String calledAsName, List<MTType> arguments) {
+    public MTType getApplicationType(String calledAsName,
+            List<MTType> arguments) {
 
         return myFunctionApplicationFactory.buildFunctionApplication(
                 myTypeGraph, this, calledAsName, arguments);
@@ -492,10 +517,11 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 newDomain);
     }
 
-    public static MTType buildParameterType(TypeGraph g, List<MTType> paramTypes) {
+    public static MTType buildParameterType(TypeGraph g,
+            List<MTType> paramTypes) {
 
-        return buildParameterType(g,
-                buildNullNameListOfEqualLength(paramTypes), paramTypes);
+        return buildParameterType(g, buildNullNameListOfEqualLength(paramTypes),
+                paramTypes);
     }
 
     public static MTType buildParameterType(TypeGraph g,

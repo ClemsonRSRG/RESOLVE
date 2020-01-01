@@ -1,7 +1,7 @@
 /*
  * ProgramParamExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -57,9 +57,8 @@ public class ProgramParamExp extends ProgramExp {
             newArguments.add((ProgramExp) substitute(a, substitutions));
         }
 
-        retval =
-                new ProgramParamExp(location, name, newArguments,
-                        (ProgramExp) substitute(semanticExp, substitutions));
+        retval = new ProgramParamExp(location, name, newArguments,
+                (ProgramExp) substitute(semanticExp, substitutions));
 
         return retval;
     }
@@ -188,8 +187,9 @@ public class ProgramParamExp extends ProgramExp {
         return name.getName();
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<ProgramExp> i = arguments.iterator();
         while (i.hasNext()) {

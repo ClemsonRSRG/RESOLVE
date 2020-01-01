@@ -1,7 +1,7 @@
 /*
  * FinalizedModuleScope.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,14 +23,22 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 
 /**
- * <p>A <code>FinalizedModuleScope</code> is an immutable realization of 
- * {@link ModuleScope ModuleScope}.</p>
+ * <p>
+ * A <code>FinalizedModuleScope</code> is an immutable realization of
+ * {@link ModuleScope
+ * ModuleScope}.
+ * </p>
  * 
- * <p>Note that <code>FinalizedModuleScope</code> has no public constructor.  
- * <code>FinalizedModuleScope</code>s are acquired through calls to some of the 
- * methods of {@link MathSymbolTable MathSymbolTable}.</p>
+ * <p>
+ * Note that <code>FinalizedModuleScope</code> has no public constructor.
+ * <code>FinalizedModuleScope</code>s are acquired through calls to some of the
+ * methods of
+ * {@link MathSymbolTable MathSymbolTable}.
+ * </p>
  */
-public class FinalizedModuleScope extends FinalizedScope implements ModuleScope {
+public class FinalizedModuleScope extends FinalizedScope
+        implements
+            ModuleScope {
 
     private final List<ModuleIdentifier> myImportedModules;
     private final MathSymbolTable mySymbolTable;

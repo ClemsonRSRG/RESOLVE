@@ -1,7 +1,7 @@
 /*
  * CrossTypeExpression.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,7 +22,9 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 
 /**
- * <p>The value of a type that looks like:</p>
+ * <p>
+ * The value of a type that looks like:
+ * </p>
  * 
  * <pre>
  * CART_PROD
@@ -135,14 +137,14 @@ public class CrossTypeExpression extends Exp {
 
     @Override
     public void setSubExpression(int index, Exp e) {
-        throw new UnsupportedOperationException("Cannot replace "
-                + "subexpression in a cross type.");
+        throw new UnsupportedOperationException(
+                "Cannot replace " + "subexpression in a cross type.");
     }
 
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        throw new UnsupportedOperationException("Cannot substitute in a "
-                + "cross type.");
+        throw new UnsupportedOperationException(
+                "Cannot substitute in a " + "cross type.");
     }
 
 }

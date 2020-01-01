@@ -1,7 +1,7 @@
 /*
  * InfixExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical infix expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical infix expression objects that the
+ * compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,13 +34,25 @@ public class InfixExp extends AbstractFunctionExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression on the left hand side.</p> */
+    /**
+     * <p>
+     * The expression on the left hand side.
+     * </p>
+     */
     protected final Exp myLeftHandSide;
 
-    /** <p>The expression's operation.</p> */
+    /**
+     * <p>
+     * The expression's operation.
+     * </p>
+     */
     protected final PosSymbol myOperationName;
 
-    /** <p>The expression on the right hand side.</p> */
+    /**
+     * <p>
+     * The expression on the right hand side.
+     * </p>
+     */
     protected final Exp myRightHandSide;
 
     // ===========================================================
@@ -45,7 +60,9 @@ public class InfixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This constructs an infix expression.</p>
+     * <p>
+     * This constructs an infix expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param left A {@link Exp} representing the left hand side.
@@ -108,9 +125,8 @@ public class InfixExp extends AbstractFunctionExp {
                 newOpQualifier = myQualifier.clone();
             }
 
-            retExp =
-                    new InfixExp(cloneLocation(), newLeftSide, newOpQualifier,
-                            myOperationName.clone(), newRightSide);
+            retExp = new InfixExp(cloneLocation(), newLeftSide, newOpQualifier,
+                    myOperationName.clone(), newRightSide);
         }
         else {
             retExp = this.clone();
@@ -174,20 +190,19 @@ public class InfixExp extends AbstractFunctionExp {
         boolean retval = e instanceof InfixExp;
         if (retval) {
             InfixExp eAsInfix = (InfixExp) e;
-            retval =
-                    posSymbolEquivalent(myOperationName,
-                            eAsInfix.myOperationName)
-                            && myLeftHandSide
-                                    .equivalent(eAsInfix.myLeftHandSide)
-                            && myRightHandSide
-                                    .equivalent(eAsInfix.myRightHandSide);
+            retval = posSymbolEquivalent(myOperationName,
+                    eAsInfix.myOperationName)
+                    && myLeftHandSide.equivalent(eAsInfix.myLeftHandSide)
+                    && myRightHandSide.equivalent(eAsInfix.myRightHandSide);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns the left hand side expression.</p>
+     * <p>
+     * This method returns the left hand side expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -196,7 +211,9 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the operator name.</p>
+     * <p>
+     * This method returns the operator name.
+     * </p>
      *
      * @return A {@link PosSymbol} object containing the operator.
      */
@@ -206,7 +223,9 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the operator name in string format.</p>
+     * <p>
+     * This method returns the operator name in string format.
+     * </p>
      *
      * @return The operator as a string.
      */
@@ -216,7 +235,9 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns the right hand side expression.</p>
+     * <p>
+     * This method returns the right hand side expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -276,8 +297,9 @@ public class InfixExp extends AbstractFunctionExp {
             newOpQualifier = myQualifier.clone();
         }
 
-        return new InfixExp(cloneLocation(), substitute(myLeftHandSide,
-                substitutions), newOpQualifier, myOperationName.clone(),
+        return new InfixExp(cloneLocation(),
+                substitute(myLeftHandSide, substitutions), newOpQualifier,
+                myOperationName.clone(),
                 substitute(myRightHandSide, substitutions));
     }
 

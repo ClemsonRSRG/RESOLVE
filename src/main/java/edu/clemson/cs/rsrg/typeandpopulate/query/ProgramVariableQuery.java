@@ -1,7 +1,7 @@
 /*
  * ProgramVariableQuery.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,8 +23,10 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.Facility
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTable.ImportStrategy;
 
 /**
- * <p>A <code>ProgramVariableQuery</code> searches for a variable name as found in
- * executable code.</p>
+ * <p>
+ * A <code>ProgramVariableQuery</code> searches for a variable name as found in
+ * executable code.
+ * </p>
  *
  * @version 2.0
  */
@@ -37,10 +39,12 @@ public class ProgramVariableQuery
     // ===========================================================
 
     /**
-     * <p>This query searches for a {@link ProgramVariableEntry}.</p>
+     * <p>
+     * This query searches for a {@link ProgramVariableEntry}.
+     * </p>
      *
      * @param qualifier A qualifier symbol that indicates the instantiating
-     *                  facility or module.
+     *        facility or module.
      * @param name A name symbol of the entry to be searched.
      */
     public ProgramVariableQuery(PosSymbol qualifier, PosSymbol name) {
@@ -48,19 +52,23 @@ public class ProgramVariableQuery
     }
 
     /**
-     * <p>This query searches for a {@link ProgramVariableEntry}.</p>
+     * <p>
+     * This query searches for a {@link ProgramVariableEntry}.
+     * </p>
      *
      * @param qualifier A qualifier symbol that indicates the instantiating
-     *                  facility or module.
+     *        facility or module.
      * @param name Name of the entry to be searched.
      * @param nameLoc Location for the name.
      */
     public ProgramVariableQuery(PosSymbol qualifier, String name,
             Location nameLoc) {
-        super(new SimpleSymbolQuery(new PossiblyQualifiedPath(qualifier,
-                ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_IGNORE,
-                true), new NameSearcher(name, true)), new MapToProgramVariable(
-                nameLoc));
+        super(new SimpleSymbolQuery(
+                new PossiblyQualifiedPath(qualifier,
+                        ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_IGNORE, true),
+                new NameSearcher(name, true)),
+                new MapToProgramVariable(nameLoc));
     }
 
     // ===========================================================
@@ -68,8 +76,11 @@ public class ProgramVariableQuery
     // ===========================================================
 
     /**
-     * <p>This is an implementation of a {@link Mapping} between {@link SymbolTableEntry} and
-     * {@link ProgramVariableEntry}.</p>
+     * <p>
+     * This is an implementation of a {@link Mapping} between
+     * {@link SymbolTableEntry} and
+     * {@link ProgramVariableEntry}.
+     * </p>
      */
     private static class MapToProgramVariable
             implements
@@ -79,7 +90,11 @@ public class ProgramVariableQuery
         // Member Fields
         // ===========================================================
 
-        /** <p>Location for the name.</p> */
+        /**
+         * <p>
+         * Location for the name.
+         * </p>
+         */
         private final Location myNameLocation;
 
         // ===========================================================
@@ -87,8 +102,11 @@ public class ProgramVariableQuery
         // ===========================================================
 
         /**
-         * <p>This creates a conversion mapping between {@link SymbolTableEntry}
-         * and {@link ProgramVariableEntry}.</p>
+         * <p>
+         * This creates a conversion mapping between {@link SymbolTableEntry}
+         * and
+         * {@link ProgramVariableEntry}.
+         * </p>
          *
          * @param l Location for the name.
          */
@@ -101,8 +119,10 @@ public class ProgramVariableQuery
         // ===========================================================
 
         /**
-         * <p>This method converts a {@link SymbolTableEntry} into
-         * a {@link ProgramVariableEntry}.</p>
+         * <p>
+         * This method converts a {@link SymbolTableEntry} into a
+         * {@link ProgramVariableEntry}.
+         * </p>
          *
          * @param input A {@link SymbolTableEntry} object.
          *

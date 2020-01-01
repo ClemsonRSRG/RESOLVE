@@ -1,7 +1,7 @@
 /*
  * ImmutableIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,10 +15,13 @@ package edu.clemson.cs.rsrg.prover.iterators;
 import java.util.Iterator;
 
 /**
- * <p>Wraps an existing {@link Iterator} and disables its
- * {@link Iterator#remove()} method, ensuring that clients cannot change the
- * contents of encapsulated lists. Note that if the iterator returns mutable
- * objects, the contained objects themselves could still be changed.</p>
+ * <p>
+ * Wraps an existing {@link Iterator} and disables its {@link Iterator#remove()}
+ * method, ensuring
+ * that clients cannot change the contents of encapsulated lists. Note that if
+ * the iterator returns
+ * mutable objects, the contained objects themselves could still be changed.
+ * </p>
  *
  * @param <T> Type of elements in this collection.
  *
@@ -27,7 +30,11 @@ import java.util.Iterator;
  */
 public class ImmutableIterator<T> implements Iterator<T> {
 
-    /** <p>The inner iterator.</p> */
+    /**
+     * <p>
+     * The inner iterator.
+     * </p>
+     */
     private final Iterator<T> myInnerIterator;
 
     // ===========================================================
@@ -35,7 +42,9 @@ public class ImmutableIterator<T> implements Iterator<T> {
     // ===========================================================
 
     /**
-     * <p>This creates an immutable iterator.</p>
+     * <p>
+     * This creates an immutable iterator.
+     * </p>
      *
      * @param inner An {@link Iterator}.
      */

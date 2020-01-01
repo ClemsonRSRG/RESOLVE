@@ -1,7 +1,7 @@
 /*
  * AssertionClause.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all mathematical assertion clause objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all mathematical assertion clause objects that the
+ * compiler builds using
+ * the ANTLR4 AST nodes.
+ * </p>
  *
  * @author Daniel Welch
  * @author Yu-Shan Sun
@@ -34,7 +37,9 @@ public class AssertionClause extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This defines the various different assertion clause types.</p>
+     * <p>
+     * This defines the various different assertion clause types.
+     * </p>
      *
      * @version 2.0
      */
@@ -141,16 +146,32 @@ public class AssertionClause extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The mathematical assertion expression</p> */
+    /**
+     * <p>
+     * The mathematical assertion expression
+     * </p>
+     */
     private final Exp myAssertionExp;
 
-    /** <p>The type of clause</p> */
+    /**
+     * <p>
+     * The type of clause
+     * </p>
+     */
     private final ClauseType myClauseType;
 
-    /** <p>The list of shared variable expressions that is affecting this clause.</p> */
+    /**
+     * <p>
+     * The list of shared variable expressions that is affecting this clause.
+     * </p>
+     */
     private final List<Exp> myInvolvedSharedVars;
 
-    /** <p>The which_entails mathematical assertion expression</p> */
+    /**
+     * <p>
+     * The which_entails mathematical assertion expression
+     * </p>
+     */
     private final Exp myWhichEntailsExp;
 
     // ===========================================================
@@ -158,24 +179,32 @@ public class AssertionClause extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical assertion clause.</p>
+     * <p>
+     * This constructs a mathematical assertion clause.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates which type of assertion clause.
-     * @param assertionExp A {@link Exp} representing the mathematical assertion.
+     * @param assertionExp A {@link Exp} representing the mathematical
+     *        assertion.
      */
     public AssertionClause(Location l, ClauseType type, Exp assertionExp) {
         this(l, type, assertionExp, null);
     }
 
     /**
-     * <p>This constructs a mathematical assertion clause with a
-     * {@code which_entails} assertion.</p>
+     * <p>
+     * This constructs a mathematical assertion clause with a
+     * {@code which_entails} assertion.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates which type of assertion clause.
-     * @param assertionExp A {@link Exp} representing the mathematical assertion.
-     * @param whichEntailsExp A {@link Exp} representing the {@code which_entails} mathematical assertion.
+     * @param assertionExp A {@link Exp} representing the mathematical
+     *        assertion.
+     * @param whichEntailsExp A {@link Exp} representing the
+     *        {@code which_entails} mathematical
+     *        assertion.
      */
     public AssertionClause(Location l, ClauseType type, Exp assertionExp,
             Exp whichEntailsExp) {
@@ -183,16 +212,22 @@ public class AssertionClause extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This constructs a mathematical assertion clause with a
-     * {@code which_entails} assertion and a list of variable
-     * expressions that is affecting this clause.</p>
+     * <p>
+     * This constructs a mathematical assertion clause with a
+     * {@code which_entails} assertion and a
+     * list of variable expressions that is affecting this clause.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates which type of assertion clause.
-     * @param assertionExp A {@link Exp} representing the mathematical assertion.
-     * @param whichEntailsExp A {@link Exp} representing the {@code which_entails} mathematical assertion.
-     * @param involvedSharedVars  The list of variable expressions that are listed to be involved
-     *                            in this assertion clause.
+     * @param assertionExp A {@link Exp} representing the mathematical
+     *        assertion.
+     * @param whichEntailsExp A {@link Exp} representing the
+     *        {@code which_entails} mathematical
+     *        assertion.
+     * @param involvedSharedVars The list of variable expressions that are
+     *        listed to be involved in
+     *        this assertion clause.
      */
     public AssertionClause(Location l, ClauseType type, Exp assertionExp,
             Exp whichEntailsExp, List<Exp> involvedSharedVars) {
@@ -288,13 +323,15 @@ public class AssertionClause extends ResolveConceptualElement {
             return false;
         if (!myInvolvedSharedVars.equals(that.myInvolvedSharedVars))
             return false;
-        return myWhichEntailsExp != null ? myWhichEntailsExp
-                .equals(that.myWhichEntailsExp)
+        return myWhichEntailsExp != null
+                ? myWhichEntailsExp.equals(that.myWhichEntailsExp)
                 : that.myWhichEntailsExp == null;
     }
 
     /**
-     * <p>This method returns the mathematical assertion for this clause.</p>
+     * <p>
+     * This method returns the mathematical assertion for this clause.
+     * </p>
      *
      * @return The {@link Exp} representing the mathematical assertion.
      */
@@ -303,7 +340,9 @@ public class AssertionClause extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the type of clause.</p>
+     * <p>
+     * This method returns the type of clause.
+     * </p>
      *
      * @return The {@link ClauseType} object.
      */
@@ -312,8 +351,10 @@ public class AssertionClause extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of shared variable expressions that are involved
-     * in this clause.</p>
+     * <p>
+     * Returns the list of shared variable expressions that are involved in this
+     * clause.
+     * </p>
      *
      * @return The list of involved {@link Exp}s.
      */
@@ -322,10 +363,13 @@ public class AssertionClause extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the {@code which_entails} mathematical assertion
-     * for this clause.</p>
+     * <p>
+     * This method returns the {@code which_entails} mathematical assertion for
+     * this clause.
+     * </p>
      *
-     * @return The {@link Exp} representing the {@code which_entails} expression.
+     * @return The {@link Exp} representing the {@code which_entails}
+     *         expression.
      */
     public final Exp getWhichEntailsExp() {
         return myWhichEntailsExp;
@@ -339,11 +383,9 @@ public class AssertionClause extends ResolveConceptualElement {
         int result = myAssertionExp.hashCode();
         result = 31 * result + myClauseType.hashCode();
         result = 31 * result + myInvolvedSharedVars.hashCode();
-        result =
-                31
-                        * result
-                        + (myWhichEntailsExp != null ? myWhichEntailsExp
-                                .hashCode() : 0);
+        result = 31 * result
+                + (myWhichEntailsExp != null ? myWhichEntailsExp.hashCode()
+                        : 0);
         return result;
     }
 

@@ -1,7 +1,7 @@
 /*
  * AutomatedProver.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -59,23 +59,25 @@ import javax.swing.SwingUtilities;
  */
 public class AutomatedProver {
 
-    /* The flags in this section permit certain heuristics to be turned on/off
-     * for testing purposes.  They should all default to "on".
+    /*
+     * The flags in this section permit certain heuristics to be turned on/off
+     * for testing purposes.
+     * They should all default to "on".
      */
-    //Look for statements of identity functions (like i + 0 = i) and never 
-    //use them to expand something.  I.e., never take i and make it i + 0.
+    // Look for statements of identity functions (like i + 0 = i) and never
+    // use them to expand something. I.e., never take i and make it i + 0.
     public static final boolean H_DETECT_IDENTITY_EXPANSION = true;
-    //Prevent new givens from being developed if they don't mention "important"
-    //terms that appear in the consequent
+    // Prevent new givens from being developed if they don't mention "important"
+    // terms that appear in the consequent
     public static final boolean H_ONLY_DEVELOP_RELEVANT_TERMS = true;
-    //Only accept antecedent developments that put things in new terms
+    // Only accept antecedent developments that put things in new terms
     public static final boolean H_ENCOURAGE_ANTECEDENT_DIVERSITY = true;
-    //Apply minimization steps to antecedents and consequents
+    // Apply minimization steps to antecedents and consequents
     public static final boolean H_PERFORM_MINIMIZATION = true;
-    //Detect and avoid cycles
+    // Detect and avoid cycles
     public static final boolean H_DETECT_CYCLES = true;
-    //Use a fitness function to try and order transformations so that "better"
-    //transformations are applied first
+    // Use a fitness function to try and order transformations so that "better"
+    // transformations are applied first
     public static final boolean H_BEST_FIRST_CONSEQUENT_EXPLORATION = true;
     public static final String SEARCH_START_LABEL =
             "--- Done Minimizing Consequent ---";
@@ -105,33 +107,33 @@ public class AutomatedProver {
                 new AntecedentDeveloperFitnessFunction(m);
         myTimeout = timeout;
 
-        //This looks weird but suppresses a "leaked this" warning
+        // This looks weird but suppresses a "leaked this" warning
         AutomatedProver p = this;
         m.setAutomatedProver(p);
 
         myTheoremLibrary = theoremLibrary;
 
-        //The consequents will contain many symbols like "min_int",
-        //"S", "Empty_String", etc.  For the purposes of a number of 
-        //optimizations/heuristics it's useful to know which of those come from 
-        //programmatic variables and which come from mathematical definitions
+        // The consequents will contain many symbols like "min_int",
+        // "S", "Empty_String", etc. For the purposes of a number of
+        // optimizations/heuristics it's useful to know which of those come from
+        // programmatic variables and which come from mathematical definitions
         myVariableSymbols = determineVariableSymbols(myModel, moduleScope);
-        if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+        if (!FlagManager.getInstance()
+                .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             System.out.println("VARSYM: " + myVariableSymbols);
 
-            System.out
-                    .println("###################### consequent transformations");
+            System.out.println(
+                    "###################### consequent transformations");
         }
-        List<Transformation> consequentTransformations =
-                orderByFitnessFunction(myTheoremLibrary,
-                        myMainProofFitnessFunction);
-        if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
-            System.out
-                    .println("###################### antecedent transformations");
+        List<Transformation> consequentTransformations = orderByFitnessFunction(
+                myTheoremLibrary, myMainProofFitnessFunction);
+        if (!FlagManager.getInstance()
+                .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            System.out.println(
+                    "###################### antecedent transformations");
         }
-        List<Transformation> antecedentTransformations =
-                orderByFitnessFunction(myTheoremLibrary,
-                        myAntecedentDeveloperFitnessFunction);
+        List<Transformation> antecedentTransformations = orderByFitnessFunction(
+                myTheoremLibrary, myAntecedentDeveloperFitnessFunction);
 
         List<Automator> steps = new LinkedList<Automator>();
         steps.add(new VariablePropagator());
@@ -142,8 +144,8 @@ public class AutomatedProver {
 
         steps.add(new VariablePropagator());
         steps.add(new EliminateObviousAntecedents());
-        steps.add(new ApplyN(new NoOpLabel(this,
-                "--- Done Minimizing Antecedent ---"), 1));
+        steps.add(new ApplyN(
+                new NoOpLabel(this, "--- Done Minimizing Antecedent ---"), 1));
 
         for (int i = 0; i < 3; i++) {
             steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
@@ -157,8 +159,8 @@ public class AutomatedProver {
             steps.add(EliminateRedundantAntecedents.INSTANCE);
             steps.add(new EliminateObviousAntecedents());
         }
-        steps.add(new ApplyN(new NoOpLabel(this,
-                "--- Done Developing Antecedent ---"), 1));
+        steps.add(new ApplyN(
+                new NoOpLabel(this, "--- Done Developing Antecedent ---"), 1));
 
         if (H_PERFORM_MINIMIZATION) {
             steps.add(new Minimizer(myTheoremLibrary));
@@ -194,22 +196,22 @@ public class AutomatedProver {
 
             top = transformationHeap.poll();
             transformations.add(top);
-            if (!FlagManager.getInstance().isFlagSet(
-                    ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance()
+                    .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println(top + " (" + top.getClass() + ") -- "
                         + f.calculateFitness(top));
             }
         }
 
         if (transformationHeap.size() > 0) {
-            if (!FlagManager.getInstance().isFlagSet(
-                    ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance()
+                    .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("<<<<<<<<<<<<<<< recommend against");
             }
             while (!transformationHeap.isEmpty()) {
                 top = transformationHeap.poll();
-                if (!FlagManager.getInstance().isFlagSet(
-                        ResolveCompiler.FLAG_NO_DEBUG)) {
+                if (!FlagManager.getInstance()
+                        .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                     System.out.println(top + " (" + top.getClass() + ") -- "
                             + f.calculateFitness(top));
                 }
@@ -222,25 +224,25 @@ public class AutomatedProver {
     private Set<String> determineVariableSymbols(PerVCProverModel model,
             ModuleScope moduleScope) {
 
-        //With apologies to whoever has to deal with this mess, this is not a
-        //very good way of dealing with this.  Ideally the populator would 
-        //attach the entry that corresponds to each symbol to its Exp, making
-        //answering this questions really easy.  But because the Verifier builds
-        //lots of Exps from scratch based on existing ones, getting new 
-        //information through the verifier is a nightmare.  Once a better 
-        //verifier exists, that change would be a lot easier and this can be
-        //made a lot more robust.
+        // With apologies to whoever has to deal with this mess, this is not a
+        // very good way of dealing with this. Ideally the populator would
+        // attach the entry that corresponds to each symbol to its Exp, making
+        // answering this questions really easy. But because the Verifier builds
+        // lots of Exps from scratch based on existing ones, getting new
+        // information through the verifier is a nightmare. Once a better
+        // verifier exists, that change would be a lot easier and this can be
+        // made a lot more robust.
 
-        //First, get a list of all symbols
+        // First, get a list of all symbols
         Set<String> symbols = new HashSet<String>();
         for (Conjunct consequent : model.getConsequentList()) {
             symbols.addAll(consequent.getExpression().getSymbolNames());
         }
 
-        //We also include any symbols that could be easily 'swapped in' by a
-        //local theorem equality.  For example, if we know (P o Q) = (P' o Q'),
-        //then even if P' and Q' don't currently appear in the consequent... if
-        //(P o Q) -does- appear, we'll include P' and Q' as symbols
+        // We also include any symbols that could be easily 'swapped in' by a
+        // local theorem equality. For example, if we know (P o Q) = (P' o Q'),
+        // then even if P' and Q' don't currently appear in the consequent... if
+        // (P o Q) -does- appear, we'll include P' and Q' as symbols
         for (LocalTheorem t : model.getLocalTheoremList()) {
             if (t.getAssertion().isEquality()) {
                 for (Transformation trans : t.getTransformations()) {
@@ -256,17 +258,16 @@ public class AutomatedProver {
             }
         }
 
-        //Next, find all those that come from mathematical definitions
+        // Next, find all those that come from mathematical definitions
         Set<String> mathSymbols = new HashSet<String>();
         for (String s : symbols) {
-            List<SymbolTableEntry> entries =
-                    moduleScope.query(new NameQuery(null, s,
-                            ImportStrategy.IMPORT_RECURSIVE,
+            List<SymbolTableEntry> entries = moduleScope.query(
+                    new NameQuery(null, s, ImportStrategy.IMPORT_RECURSIVE,
                             FacilityStrategy.FACILITY_INSTANTIATE, false));
 
             if (entries.isEmpty()) {
-                //Symbol must be inside an operation scope, in which case it's
-                //a programmatic variable
+                // Symbol must be inside an operation scope, in which case it's
+                // a programmatic variable
             }
             else {
                 boolean math = true;
@@ -284,7 +285,7 @@ public class AutomatedProver {
             }
         }
 
-        //Everything that isn't a math symbol is a variable symbol
+        // Everything that isn't a math symbol is a variable symbol
         symbols.removeAll(mathSymbols);
 
         return Collections.unmodifiableSet(symbols);
@@ -296,38 +297,39 @@ public class AutomatedProver {
 
     public void prepForUIUpdate() {
         if (SwingUtilities.isEventDispatchThread()) {
-            //Changes are happening on the event dispatching thread, which
-            //likely means we're in interactive mode--no harm in going ahead
-            //and alerting change listeners
+            // Changes are happening on the event dispatching thread, which
+            // likely means we're in interactive mode--no harm in going ahead
+            // and alerting change listeners
             myModel.triggerUIUpdates();
         }
         else {
-            //We're on the prover thread, so we're in no danger of a race 
-            //condition checking myTakingStepFlag
+            // We're on the prover thread, so we're in no danger of a race
+            // condition checking myTakingStepFlag
 
-            //Signal to step() that it shouldn't begin new work until the UI
-            //update is complete
+            // Signal to step() that it shouldn't begin new work until the UI
+            // update is complete
             myPrepForUIUpdateFlag = true;
 
             if (!myTakingStepFlag) {
-                //We're not in step, so we're safe to start updating immediately
+                // We're not in step, so we're safe to start updating immediately
                 myModel.triggerUIUpdates();
             }
 
-            //In the other case, step() will take it from here when it's done
-            //with its work
+            // In the other case, step() will take it from here when it's done
+            // with its work
         }
     }
 
     public void uiUpdateFinished() {
         myPrepForUIUpdateFlag = false;
-        if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+        if (!FlagManager.getInstance()
+                .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             System.out.println("AutomatedProver - uiUpdateFinished");
         }
 
         if (myWorkerThread != null) {
-            if (!FlagManager.getInstance().isFlagSet(
-                    ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance()
+                    .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("AutomatedProver - Interrupting");
             }
             myWorkerThread.interrupt();
@@ -340,9 +342,9 @@ public class AutomatedProver {
 
     public void start() {
 
-        //This synchronization provides a convenient way for other methods to
-        //wait until we've actually gotten out of the automated proof loop--
-        //just synchronize on TRANSPORT_LOCK
+        // This synchronization provides a convenient way for other methods to
+        // wait until we've actually gotten out of the automated proof loop--
+        // just synchronize on TRANSPORT_LOCK
         synchronized (TRANSPORT_LOCK) {
             myStartTime = System.currentTimeMillis();
 
@@ -352,15 +354,15 @@ public class AutomatedProver {
 
             myWorkerThread = Thread.currentThread();
 
-            if (!FlagManager.getInstance().isFlagSet(
-                    ResolveCompiler.FLAG_NO_DEBUG)) {
-                System.out
-                        .println("============= AutomatedProver - start() ==============");
+            if (!FlagManager.getInstance()
+                    .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+                System.out.println(
+                        "============= AutomatedProver - start() ==============");
             }
             long stopTime = System.currentTimeMillis() + myTimeout;
             myRunningFlag = true;
-            while (myRunningFlag
-                    && (myTimeout == -1 || System.currentTimeMillis() < stopTime)) {
+            while (myRunningFlag && (myTimeout == -1
+                    || System.currentTimeMillis() < stopTime)) {
                 workerStep();
             }
 
@@ -369,8 +371,8 @@ public class AutomatedProver {
             }
             myRunningFlag = false;
             myEndTime = System.currentTimeMillis();
-            if (!FlagManager.getInstance().isFlagSet(
-                    ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance()
+                    .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("AutomatedProver - end of start()");
             }
 
@@ -385,7 +387,8 @@ public class AutomatedProver {
     }
 
     public void pause() {
-        if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+        if (!FlagManager.getInstance()
+                .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             System.out.println("AutomatedProver - pause()");
         }
         myRunningFlag = false;
@@ -398,22 +401,26 @@ public class AutomatedProver {
         }
 
         synchronized (TRANSPORT_LOCK) {
-            //Redundant, just suppressing empty block warning.  This 
-            //synchronization just serves to make us wait here while the prover
-            //loop unwinds and start() terminates
+            // Redundant, just suppressing empty block warning. This
+            // synchronization just serves to make us wait here while the prover
+            // loop unwinds and start() terminates
             myPrepForUIUpdateFlag = false;
         }
-        if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+        if (!FlagManager.getInstance()
+                .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             System.out.println("AutomatedProver - end of pause()");
             System.out.println("Goal stack: " + myAutomatorStack);
         }
     }
 
     /**
-     * <p>markToPause is like {@link #pause() pause()} except that it does not
-     * block and must be called from the worker thread. This is mostly useful
-     * for proof steps that want to trigger a pause (and can't use pause because
-     * they're already on the worker thread).</p>
+     * <p>
+     * markToPause is like {@link #pause() pause()} except that it does not
+     * block and must be called
+     * from the worker thread. This is mostly useful for proof steps that want
+     * to trigger a pause (and
+     * can't use pause because they're already on the worker thread).
+     * </p>
      */
     public void markToPause() {
         myRunningFlag = false;
@@ -424,14 +431,14 @@ public class AutomatedProver {
         myTakingStepFlag = true;
 
         if (myPrepForUIUpdateFlag) {
-            if (!FlagManager.getInstance().isFlagSet(
-                    ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance()
+                    .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("AutomatedProver - Prepping for UI update");
             }
 
-            //We're not actually trying to make this code mutually exclusive
-            //with anything--we're just grabbing the object's monitor so we can
-            //wait()
+            // We're not actually trying to make this code mutually exclusive
+            // with anything--we're just grabbing the object's monitor so we can
+            // wait()
             synchronized (this) {
                 if (myRunningFlag) {
                     myModel.triggerUIUpdates();
@@ -444,8 +451,8 @@ public class AutomatedProver {
                     }
                 }
             }
-            if (!FlagManager.getInstance().isFlagSet(
-                    ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance()
+                    .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("AutomatedProver - Done with UI update");
             }
         }
@@ -471,8 +478,8 @@ public class AutomatedProver {
         }
 
         if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
-            if (!FlagManager.getInstance().isFlagSet(
-                    ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance()
+                    .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                 if (myAutomatorStack.isEmpty()) {
                     System.out.println("Proof space exhausted.");
                 }
@@ -510,7 +517,7 @@ public class AutomatedProver {
                 result = 1;
             }
             else {
-                //Give us a consistent, if arbitrary, order
+                // Give us a consistent, if arbitrary, order
                 result = o1.getKey().compareTo(o2.getKey());
             }
 

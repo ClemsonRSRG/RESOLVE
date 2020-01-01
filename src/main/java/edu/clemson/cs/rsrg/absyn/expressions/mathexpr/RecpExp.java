@@ -1,7 +1,7 @@
 /*
  * RecpExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,11 +19,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class represents a named {@code Receptacle}
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class represents a named {@code Receptacle} that the compiler
+ * builds using the ANTLR4
+ * AST nodes.
+ * </p>
  *
- * <p>As an example a receptacle: {@code recp.S} indicate
- * that it is the {@code Receptacle} for the variable {@code S}.</p>
+ * <p>
+ * As an example a receptacle: {@code recp.S} indicate that it is the
+ * {@code Receptacle} for the
+ * variable {@code S}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -34,7 +40,11 @@ public class RecpExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's type represented as an {@link Exp}.</p> */
+    /**
+     * <p>
+     * The expression's type represented as an {@link Exp}.
+     * </p>
+     */
     private final Exp myVarAsExp;
 
     // ===========================================================
@@ -124,7 +134,9 @@ public class RecpExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the variable expression.</p>
+     * <p>
+     * This method returns the variable expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -159,8 +171,8 @@ public class RecpExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new RecpExp(cloneLocation(), substitute(myVarAsExp,
-                substitutions));
+        return new RecpExp(cloneLocation(),
+                substitute(myVarAsExp, substitutions));
     }
 
 }

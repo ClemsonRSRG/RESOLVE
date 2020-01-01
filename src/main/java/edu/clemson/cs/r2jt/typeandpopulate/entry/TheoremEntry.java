@@ -1,7 +1,7 @@
 /*
  * TheoremEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -36,10 +36,8 @@ public class TheoremEntry extends SymbolTableEntry {
         super(name, definingElement, sourceModule);
         myAssertionAsPExp = PExp.buildPExp(definingElement.getAssertion());
 
-        myMathSymbolAlterEgo =
-                new MathSymbolEntry(g, name, Quantification.NONE,
-                        definingElement, g.BOOLEAN, null, null, null,
-                        sourceModule);
+        myMathSymbolAlterEgo = new MathSymbolEntry(g, name, Quantification.NONE,
+                definingElement, g.BOOLEAN, null, null, null, sourceModule);
     }
 
     public PExp getAssertion() {

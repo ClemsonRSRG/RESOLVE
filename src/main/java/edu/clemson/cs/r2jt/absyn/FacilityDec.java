@@ -1,7 +1,7 @@
 /*
  * FacilityDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -46,10 +46,11 @@ public class FacilityDec extends Dec {
     private List<EnhancementBodyItem> enhancementBodies;
 
     /**
-     * <p>Tells us whether or not the facility's realization
-     * has a implementation written in Resolve. If it does,
-     * then this flag should be true, otherwise, it will be
-     * false.</p>
+     * <p>
+     * Tells us whether or not the facility's realization has a implementation
+     * written in Resolve. If
+     * it does, then this flag should be true, otherwise, it will be false.
+     * </p>
      */
     private boolean myExternallyRealizedFlag;
 
@@ -73,7 +74,8 @@ public class FacilityDec extends Dec {
             List<ModuleArgumentItem> conceptParams,
             List<EnhancementItem> enhancements, PosSymbol bodyName,
             PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
-            List<EnhancementBodyItem> enhancementBodies, boolean externRealized) {
+            List<EnhancementBodyItem> enhancementBodies,
+            boolean externRealized) {
 
         this.name = name;
         this.conceptName = conceptName;
@@ -179,7 +181,8 @@ public class FacilityDec extends Dec {
     }
 
     /** Sets the enhancementBodies variable to the specified value. */
-    public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
+    public void
+            setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
         this.enhancementBodies = enhancementBodies;
     }
 
@@ -230,9 +233,8 @@ public class FacilityDec extends Dec {
         }
 
         if (enhancementBodies != null) {
-            sb
-                    .append(enhancementBodies.asString(indent + increment,
-                            increment));
+            sb.append(
+                    enhancementBodies.asString(indent + increment, increment));
         }
 
         return sb.toString();

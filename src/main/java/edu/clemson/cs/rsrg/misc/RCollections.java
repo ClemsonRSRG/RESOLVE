@@ -1,7 +1,7 @@
 /*
  * RCollections.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,20 +18,27 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>A set of utility functions for java collections.</p>
+ * <p>
+ * A set of utility functions for java collections.
+ * </p>
  *
  * @version 2.0
  */
 public class RCollections {
 
     /**
-     * <p>Returns a new list that is the result of processing each element of
-     * the original list with the given mapping, in order, and adding it to
-     * the final list.</p>
+     * <p>
+     * Returns a new list that is the result of processing each element of the
+     * original list with the
+     * given mapping, in order, and adding it to the final list.
+     * </p>
      * 
-     * <p>This method will return an <code>ArrayList</code> if given one, and
-     * a <code>LinkedList</code> if given one, but otherwise the specific 
-     * subclass of list returned is undefined.</p>
+     * <p>
+     * This method will return an <code>ArrayList</code> if given one, and a
+     * <code>LinkedList</code>
+     * if given one, but otherwise the specific subclass of list returned is
+     * undefined.
+     * </p>
      *
      * @param <T> Type of the original list.
      * @param <R> Type for the return list.
@@ -40,7 +47,8 @@ public class RCollections {
      * 
      * @return The new list.
      */
-    public static <T, R> List<R> map(List<T> original, Utilities.Mapping<T, R> mapping) {
+    public static <T, R> List<R> map(List<T> original,
+            Utilities.Mapping<T, R> mapping) {
         List<R> result;
 
         if (original instanceof ArrayList) {

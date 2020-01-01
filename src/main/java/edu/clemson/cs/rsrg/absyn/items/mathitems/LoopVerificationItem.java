@@ -1,7 +1,7 @@
 /*
  * LoopVerificationItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,8 +21,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the loop verification block objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the loop verification block objects that the
+ * compiler builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -33,16 +36,32 @@ public class LoopVerificationItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The changing clause</p> */
+    /**
+     * <p>
+     * The changing clause
+     * </p>
+     */
     private final List<ProgramVariableExp> myChangingVars;
 
-    /** <p>The maintaining clause</p> */
+    /**
+     * <p>
+     * The maintaining clause
+     * </p>
+     */
     private final AssertionClause myMaintainingClause;
 
-    /** <p>The decreasing clause</p> */
+    /**
+     * <p>
+     * The decreasing clause
+     * </p>
+     */
     private final AssertionClause myDecreasingClause;
 
-    /** <p>The elapsed time clause</p> */
+    /**
+     * <p>
+     * The elapsed time clause
+     * </p>
+     */
     private final AssertionClause myElapsedTimeClause;
 
     // ===========================================================
@@ -50,7 +69,9 @@ public class LoopVerificationItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a verification block for loops.</p>
+     * <p>
+     * This constructs a verification block for loops.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param changingVars The list of program variables that are changing.
@@ -124,10 +145,8 @@ public class LoopVerificationItem extends ResolveConceptualElement {
             newElapsedTimeClause = myElapsedTimeClause.clone();
         }
 
-        return new LoopVerificationItem(cloneLocation(),
-                newChangingVars,
-                myMaintainingClause.clone(),
-                myDecreasingClause.clone(),
+        return new LoopVerificationItem(cloneLocation(), newChangingVars,
+                myMaintainingClause.clone(), myDecreasingClause.clone(),
                 newElapsedTimeClause);
     }
 
@@ -149,15 +168,17 @@ public class LoopVerificationItem extends ResolveConceptualElement {
             return false;
         if (!myDecreasingClause.equals(that.myDecreasingClause))
             return false;
-        return myElapsedTimeClause != null ? myElapsedTimeClause
-                .equals(that.myElapsedTimeClause)
+        return myElapsedTimeClause != null
+                ? myElapsedTimeClause.equals(that.myElapsedTimeClause)
                 : that.myElapsedTimeClause == null;
 
     }
 
     /**
-     * <p>This method returns the list of changing variables
-     * in this loop verification block.</p>
+     * <p>
+     * This method returns the list of changing variables in this loop
+     * verification block.
+     * </p>
      *
      * @return The list of {@link ProgramVariableExp}s.
      */
@@ -166,8 +187,10 @@ public class LoopVerificationItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the decreasing
-     * clause in this loop verification block.</p>
+     * <p>
+     * This method returns the decreasing clause in this loop verification
+     * block.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -176,8 +199,10 @@ public class LoopVerificationItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the elapsed time
-     * clause in this loop verification block.</p>
+     * <p>
+     * This method returns the elapsed time clause in this loop verification
+     * block.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -186,8 +211,10 @@ public class LoopVerificationItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the maintaining
-     * clause in this loop verification block.</p>
+     * <p>
+     * This method returns the maintaining clause in this loop verification
+     * block.
+     * </p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -203,11 +230,9 @@ public class LoopVerificationItem extends ResolveConceptualElement {
         int result = myChangingVars.hashCode();
         result = 31 * result + myMaintainingClause.hashCode();
         result = 31 * result + myDecreasingClause.hashCode();
-        result =
-                31
-                        * result
-                        + (myElapsedTimeClause != null ? myElapsedTimeClause
-                                .hashCode() : 0);
+        result = 31 * result
+                + (myElapsedTimeClause != null ? myElapsedTimeClause.hashCode()
+                        : 0);
         return result;
     }
 

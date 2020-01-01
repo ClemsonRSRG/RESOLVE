@@ -1,7 +1,7 @@
 /*
  * FacilityTypeRepresentationDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,8 +18,11 @@ import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the facility type representation declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the facility type representation declaration
+ * objects that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -31,10 +34,18 @@ public class FacilityTypeRepresentationDec
     // Member Fields
     // ===========================================================
 
-    /** <p>The initialization block for the new type.</p> */
+    /**
+     * <p>
+     * The initialization block for the new type.
+     * </p>
+     */
     private final FacilityInitFinalItem myTypeInitItem;
 
-    /** <p>The finalization block for the new type.</p> */
+    /**
+     * <p>
+     * The finalization block for the new type.
+     * </p>
+     */
     private final FacilityInitFinalItem myTypeFinalItem;
 
     // ===========================================================
@@ -42,7 +53,9 @@ public class FacilityTypeRepresentationDec
     // ===========================================================
 
     /**
-     * <p>This constructs a facility type representation declaration.</p>
+     * <p>
+     * This constructs a facility type representation declaration.
+     * </p>
      *
      * @param name Name of the new type.
      * @param ty Raw type used to implement this new type.
@@ -110,20 +123,24 @@ public class FacilityTypeRepresentationDec
     }
 
     /**
-     * <p>Returns the finalization block for this type representation.</p>
+     * <p>
+     * Returns the finalization block for this type representation.
+     * </p>
      *
-     * @return The code block used for finalization
-     * in {@link FacilityInitFinalItem} format.
+     * @return The code block used for finalization in
+     *         {@link FacilityInitFinalItem} format.
      */
     public final FacilityInitFinalItem getTypeFinalItem() {
         return myTypeFinalItem;
     }
 
     /**
-     * <p>Returns the initialization block for this type representation.</p>
+     * <p>
+     * Returns the initialization block for this type representation.
+     * </p>
      *
-     * @return The code block used for initialization
-     * in {@link FacilityInitFinalItem} format.
+     * @return The code block used for initialization in
+     *         {@link FacilityInitFinalItem} format.
      */
     public final FacilityInitFinalItem getTypeInitItem() {
         return myTypeInitItem;
@@ -150,8 +167,8 @@ public class FacilityTypeRepresentationDec
     @Override
     protected final FacilityTypeRepresentationDec copy() {
         return new FacilityTypeRepresentationDec(myName.clone(), myTy.clone(),
-                myConvention.clone(), myTypeInitItem.clone(), myTypeFinalItem
-                        .clone());
+                myConvention.clone(), myTypeInitItem.clone(),
+                myTypeFinalItem.clone());
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * VerificationCondition.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,11 +25,17 @@ public class VerificationCondition {
     // Global Variables
     // ===========================================================
 
-    /** <p>Section ID for this VC</p> **/
+    /**
+     * <p>
+     * Section ID for this VC
+     * </p>
+     **/
     private String myName;
 
-    /** <p>List of Consequents (Goals) and
-     * Antecedents (Givens) </p>
+    /**
+     * <p>
+     * List of Consequents (Goals) and Antecedents (Givens)
+     * </p>
      */
     private Conjuncts myAntecedents, myConsequents;
 
@@ -63,7 +69,9 @@ public class VerificationCondition {
     // ===========================================================
 
     /**
-     * <p>The deep copy method for this object.</p>
+     * <p>
+     * The deep copy method for this object.
+     * </p>
      *
      * @return Copy of the original object.
      */
@@ -81,11 +89,14 @@ public class VerificationCondition {
             newConsequents.add(Exp.copy(c));
         }
 
-        return new VerificationCondition(newAntecedents, newConsequents, myName);
+        return new VerificationCondition(newAntecedents, newConsequents,
+                myName);
     }
 
     /**
-     * <p>Equality test for this object.</p>
+     * <p>
+     * Equality test for this object.
+     * </p>
      *
      * @param o Object to be compared.
      *
@@ -96,17 +107,17 @@ public class VerificationCondition {
 
         if (retval) {
             VerificationCondition otherVC = (VerificationCondition) o;
-            retval =
-                    (otherVC.getAntecedents().equivalent(myAntecedents))
-                            && (otherVC.getConsequents()
-                                    .equivalent(myConsequents));
+            retval = (otherVC.getAntecedents().equivalent(myAntecedents))
+                    && (otherVC.getConsequents().equivalent(myConsequents));
         }
 
         return retval;
     }
 
     /**
-     * <p>Returns the current list of givens.</p>
+     * <p>
+     * Returns the current list of givens.
+     * </p>
      *
      * @return The givens in <code>Conjuncts</code> form.
      */
@@ -115,7 +126,9 @@ public class VerificationCondition {
     }
 
     /**
-     * <p>Returns the current goal.</p>
+     * <p>
+     * Returns the current goal.
+     * </p>
      *
      * @return The goals in <code>Conjuncts</code> form.
      */
@@ -124,8 +137,9 @@ public class VerificationCondition {
     }
 
     /**
-     * <p>Returns the section ID assigned by the
-     * VC Generator.</p>
+     * <p>
+     * Returns the section ID assigned by the VC Generator.
+     * </p>
      *
      * @return <code>String</code> form of the ID.
      */
@@ -134,8 +148,9 @@ public class VerificationCondition {
     }
 
     /**
-     * <p>This will give us the number of givens for
-     * a particular VC.</p>
+     * <p>
+     * This will give us the number of givens for a particular VC.
+     * </p>
      *
      * @return Number of <code>Antecedents</code>
      */
@@ -144,8 +159,9 @@ public class VerificationCondition {
     }
 
     /**
-     * <p>This will give us the number of goals for
-     * a particular VC.</p>
+     * <p>
+     * This will give us the number of goals for a particular VC.
+     * </p>
      *
      * @return Number of <code>Concequents</code>
      */
@@ -154,7 +170,9 @@ public class VerificationCondition {
     }
 
     /**
-     * <p>Updates the list of antecedents.</p>
+     * <p>
+     * Updates the list of antecedents.
+     * </p>
      *
      * @param antecedents New givens for this VC.
      */
@@ -163,7 +181,9 @@ public class VerificationCondition {
     }
 
     /**
-     * <p>Updates the list of consequents.</p>
+     * <p>
+     * Updates the list of consequents.
+     * </p>
      *
      * @param consequents New goal for this VC.
      */
@@ -172,7 +192,9 @@ public class VerificationCondition {
     }
 
     /**
-     * <p>Simplify the VCs</p>
+     * <p>
+     * Simplify the VCs
+     * </p>
      */
     public void simplify() {
         myAntecedents.eliminateObviousConjunctsInPlace();
@@ -187,7 +209,9 @@ public class VerificationCondition {
     }
 
     /**
-     * <p>Convert this object into a readable format.</p>
+     * <p>
+     * Convert this object into a readable format.
+     * </p>
      *
      * @return String object that can be printed.
      */

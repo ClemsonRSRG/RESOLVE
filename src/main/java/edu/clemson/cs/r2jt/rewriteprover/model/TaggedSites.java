@@ -1,7 +1,7 @@
 /*
  * TaggedSites.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,34 +22,44 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * <p><code>TaggedSites</code> provides a way of tagging sub-sites of a 
- * root <code>Site</code> with associated data of type <code>T</code>, as 
- * well as providing facilities to search tagged sub-expression via which 
- * sub-expressions they contain.</p>
+ * <p>
+ * <code>TaggedSites</code> provides a way of tagging sub-sites of a root
+ * <code>Site</code> with
+ * associated data of type <code>T</code>, as well as providing facilities to
+ * search tagged
+ * sub-expression via which sub-expressions they contain.
+ * </p>
  * 
- * @param <T> The type of the associated data. 
+ * @param <T> The type of the associated data.
  */
 public class TaggedSites<T> {
 
     private final Site myRoot;
 
     /**
-     * <p>The set of all those <code>Site</code>s with associated data that 
-     * are not contained inside another such <code>PExp</code>.  Note that, 
-     * since <code>PExp</code>s nest, the elements in this set are therefore 
-     * disjoint.</p>
+     * <p>
+     * The set of all those <code>Site</code>s with associated data that are not
+     * contained inside
+     * another such <code>PExp</code>. Note that, since <code>PExp</code>s nest,
+     * the elements in this
+     * set are therefore disjoint.
+     * </p>
      */
     private Set<Site> myTopLevelIdentifiedNodes = new HashSet<Site>();
 
     /**
-     * <p>A mapping from each tagged <code>Site</code>s to the set of tagged
-     * <code>Sites</code>s that represent subexpressions of it.</p>
+     * <p>
+     * A mapping from each tagged <code>Site</code>s to the set of tagged
+     * <code>Sites</code>s that
+     * represent subexpressions of it.
+     * </p>
      */
     private Map<Site, Set<Site>> myIdentifiedNodes =
             new HashMap<Site, Set<Site>>();
 
     /**
-     * <p>A map each tagged <code>Site</code> to the data associated with it.
+     * <p>
+     * A map each tagged <code>Site</code> to the data associated with it.
      * </p>
      */
     private Map<Site, T> myDataMap = new HashMap<Site, T>();
@@ -70,7 +80,7 @@ public class TaggedSites<T> {
                     result);
         }
         catch (NoSuchElementException e) {
-            //That's ok--if it has no ancestors, return an empty list
+            // That's ok--if it has no ancestors, return an empty list
         }
 
         return result;
@@ -106,9 +116,8 @@ public class TaggedSites<T> {
                     path.add(containedIn);
                 }
 
-                result =
-                        getSmallestIdentifiedAncestorIn(s, myIdentifiedNodes
-                                .get(containedIn), path);
+                result = getSmallestIdentifiedAncestorIn(s,
+                        myIdentifiedNodes.get(containedIn), path);
             }
             catch (NoSuchElementException e) {
                 result = containedIn;
@@ -135,9 +144,8 @@ public class TaggedSites<T> {
             Set<Site> nodeChildren = doTopLevelStuff(s, data);
             Set<Site> layer;
             try {
-                Site container =
-                        getSmallestIdentifiedAncestorIn(s,
-                                myTopLevelIdentifiedNodes, null);
+                Site container = getSmallestIdentifiedAncestorIn(s,
+                        myTopLevelIdentifiedNodes, null);
 
                 layer = myIdentifiedNodes.get(container);
             }

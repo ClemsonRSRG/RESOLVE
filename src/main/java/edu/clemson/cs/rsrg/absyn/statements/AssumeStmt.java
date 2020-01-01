@@ -1,7 +1,7 @@
 /*
  * AssumeStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,10 +17,13 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 
 /**
- * <p>This is the class that builds the assume statements created by
- * the {@link VCGenerator}. Since the user cannot supply their own
- * assume clauses, any instances of this class will solely be created
- * by the {@link VCGenerator}.</p>
+ * <p>
+ * This is the class that builds the assume statements created by the
+ * {@link VCGenerator}. Since the
+ * user cannot supply their own assume clauses, any instances of this class will
+ * solely be created
+ * by the {@link VCGenerator}.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,10 +33,18 @@ public class AssumeStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The assume assertion expression</p> */
+    /**
+     * <p>
+     * The assume assertion expression
+     * </p>
+     */
     private final Exp myAssertion;
 
-    /** <p>This flag indicates if this is an stipulate assume clause or not</p> */
+    /**
+     * <p>
+     * This flag indicates if this is an stipulate assume clause or not
+     * </p>
+     */
     private final boolean myIsStipulate;
 
     // ===========================================================
@@ -41,13 +52,15 @@ public class AssumeStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs an assume statement.</p>
+     * <p>
+     * This constructs an assume statement.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param assertion A {@link Exp} representing the assume statement's
-     *                  assertion expression.
-     * @param isStipulate A flag to indicate whether or not this is a
-     *                    stipulate assume statement.
+     *        assertion expression.
+     * @param isStipulate A flag to indicate whether or not this is a stipulate
+     *        assume statement.
      */
     public AssumeStmt(Location l, Exp assertion, boolean isStipulate) {
         super(l);
@@ -98,7 +111,9 @@ public class AssumeStmt extends Statement {
     }
 
     /**
-     * <p>This method returns the assumed assertion expression.</p>
+     * <p>
+     * This method returns the assumed assertion expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -107,9 +122,12 @@ public class AssumeStmt extends Statement {
     }
 
     /**
-     * <p>This method checks to see if this is is a stipulate assume statement.</p>
+     * <p>
+     * This method checks to see if this is is a stipulate assume statement.
+     * </p>
      *
-     * @return {@code true} if it is a stipulate assume statement, {@code false} otherwise.
+     * @return {@code true} if it is a stipulate assume statement, {@code false}
+     *         otherwise.
      */
     public final boolean getIsStipulate() {
         return myIsStipulate;

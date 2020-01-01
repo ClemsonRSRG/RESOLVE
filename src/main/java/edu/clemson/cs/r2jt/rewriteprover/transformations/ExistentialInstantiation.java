@@ -1,7 +1,7 @@
 /*
  * ExistentialInstantiation.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -61,13 +61,9 @@ public class ExistentialInstantiation implements Transformation {
 
         for (Consequent c : m.getConsequentList()) {
             if (c.getExpression().containsExistential()) {
-                bindResults =
-                        new ChainingIterator(
-                                bindResults,
-                                m
-                                        .bind(Collections
-                                                .singleton((Binder) new ConsequentBasedBinder(
-                                                        c))));
+                bindResults = new ChainingIterator(bindResults,
+                        m.bind(Collections.singleton(
+                                (Binder) new ConsequentBasedBinder(c))));
             }
         }
 
@@ -153,8 +149,8 @@ public class ExistentialInstantiation implements Transformation {
         @Override
         public Application map(BindResult input) {
             return new ExistentialInstantiationApplication(myModel,
-                    ((ConsequentBasedBinder) input.bindSites.keySet()
-                            .iterator().next()).getConsequent(),
+                    ((ConsequentBasedBinder) input.bindSites.keySet().iterator()
+                            .next()).getConsequent(),
                     input.bindSites.values().iterator().next(),
                     input.freeVariableBindings);
         }
@@ -190,14 +186,14 @@ public class ExistentialInstantiation implements Transformation {
             for (Consequent c : m.getConsequentList()) {
                 myAffectedConsequents.add(c);
                 myAffectedSites.add(c.toSite(m));
-                originals.add(m.alterSite(c.toSite(m), c.getExpression()
-                        .substitute(myBindings)));
+                originals.add(m.alterSite(c.toSite(m),
+                        c.getExpression().substitute(myBindings)));
             }
 
             m.addProofStep(new ExistentialInstantiationStep(
                     ExistentialInstantiation.this, this,
-                    myExistentialConsequent, index, originals, Collections
-                            .singleton(myBindSite)));
+                    myExistentialConsequent, index, originals,
+                    Collections.singleton(myBindSite)));
         }
 
         @Override

@@ -1,7 +1,7 @@
 /*
  * MathExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -24,8 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the mathematical expression objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 1.0
  */
@@ -36,9 +39,11 @@ public abstract class MathExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location
-     * of any objects created from a class that inherits from
-     * {@code MathExp}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location of any objects
+     * created from a class
+     * that inherits from {@code MathExp}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -51,8 +56,11 @@ public abstract class MathExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for all the classes that extend from {@link MathExp}.</p>
+     * <p>
+     * This method overrides the default clone method implementation for all the
+     * classes that extend
+     * from {@link MathExp}.
+     * </p>
      *
      * @return A deep copy of the object.
      */
@@ -62,8 +70,10 @@ public abstract class MathExp extends Exp {
     }
 
     /**
-     * <p>This static method makes sure that our types are set,
-     * before attempting to form a conjunct.</p>
+     * <p>
+     * This static method makes sure that our types are set, before attempting
+     * to form a conjunct.
+     * </p>
      *
      * @param l A {@link Location} for the new conjuncted expression.
      * @param e1 The first {@link Exp} representation object.
@@ -73,12 +83,12 @@ public abstract class MathExp extends Exp {
      */
     public static MathExp formConjunct(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
-            throw new NullMathTypeException("The math type for "
-                    + e1.toString() + " is null.");
+            throw new NullMathTypeException(
+                    "The math type for " + e1.toString() + " is null.");
         }
         else if (e2.getMathType() == null) {
-            throw new NullMathTypeException("The math type for "
-                    + e2.toString() + " is null.");
+            throw new NullMathTypeException(
+                    "The math type for " + e2.toString() + " is null.");
         }
 
         TypeGraph typeGraph = e1.getMathType().getTypeGraph();
@@ -98,17 +108,18 @@ public abstract class MathExp extends Exp {
         }
         Location newPosSymbolLoc = cloneLocation(newExpLoc);
 
-        MathExp retval =
-                new InfixExp(newExpLoc, e1.clone(), null, new PosSymbol(
-                        newPosSymbolLoc, "and"), e2.clone());
+        MathExp retval = new InfixExp(newExpLoc, e1.clone(), null,
+                new PosSymbol(newPosSymbolLoc, "and"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 
         return retval;
     }
 
     /**
-     * <p>This static method makes sure that our types are set,
-     * before attempting to form a disjunct.</p>
+     * <p>
+     * This static method makes sure that our types are set, before attempting
+     * to form a disjunct.
+     * </p>
      *
      * @param l A {@link Location} for the new disjuncted expression.
      * @param e1 The first {@link Exp} representation object.
@@ -118,12 +129,12 @@ public abstract class MathExp extends Exp {
      */
     public static MathExp formDisjunct(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
-            throw new NullMathTypeException("The math type for "
-                    + e1.toString() + " is null.");
+            throw new NullMathTypeException(
+                    "The math type for " + e1.toString() + " is null.");
         }
         else if (e2.getMathType() == null) {
-            throw new NullMathTypeException("The math type for "
-                    + e2.toString() + " is null.");
+            throw new NullMathTypeException(
+                    "The math type for " + e2.toString() + " is null.");
         }
 
         TypeGraph typeGraph = e1.getMathType().getTypeGraph();
@@ -143,17 +154,18 @@ public abstract class MathExp extends Exp {
         }
         Location newPosSymbolLoc = cloneLocation(newExpLoc);
 
-        MathExp retval =
-                new InfixExp(newExpLoc, e1.clone(), null, new PosSymbol(
-                        newPosSymbolLoc, "or"), e2.clone());
+        MathExp retval = new InfixExp(newExpLoc, e1.clone(), null,
+                new PosSymbol(newPosSymbolLoc, "or"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 
         return retval;
     }
 
     /**
-     * <p>This static method makes sure that our types are set,
-     * before attempting to form an implication.</p>
+     * <p>
+     * This static method makes sure that our types are set, before attempting
+     * to form an implication.
+     * </p>
      *
      * @param l A {@link Location} for the new implied expression.
      * @param e1 The first {@link Exp} representation object.
@@ -163,12 +175,12 @@ public abstract class MathExp extends Exp {
      */
     public static MathExp formImplies(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
-            throw new NullMathTypeException("The math type for "
-                    + e1.toString() + " is null.");
+            throw new NullMathTypeException(
+                    "The math type for " + e1.toString() + " is null.");
         }
         else if (e2.getMathType() == null) {
-            throw new NullMathTypeException("The math type for "
-                    + e2.toString() + " is null.");
+            throw new NullMathTypeException(
+                    "The math type for " + e2.toString() + " is null.");
         }
 
         TypeGraph typeGraph = e1.getMathType().getTypeGraph();
@@ -188,17 +200,18 @@ public abstract class MathExp extends Exp {
         }
         Location newPosSymbolLoc = cloneLocation(newExpLoc);
 
-        MathExp retval =
-                new InfixExp(newExpLoc, e1.clone(), null, new PosSymbol(
-                        newPosSymbolLoc, "implies"), e2.clone());
+        MathExp retval = new InfixExp(newExpLoc, e1.clone(), null,
+                new PosSymbol(newPosSymbolLoc, "implies"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 
         return retval;
     }
 
     /**
-     * <p>This static method method creates a variable expression that
-     * matches the boolean {@code false}.</p>
+     * <p>
+     * This static method method creates a variable expression that matches the
+     * boolean {@code false}.
+     * </p>
      *
      * @param l A {@link Location} for the new {@code false} expression.
      * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
@@ -210,17 +223,18 @@ public abstract class MathExp extends Exp {
         Location newExpLoc = cloneLocation(l);
         Location newPosSymbolLoc = cloneLocation(l);
 
-        VarExp retval =
-                new VarExp(newExpLoc, null, new PosSymbol(newPosSymbolLoc,
-                        "false"));
+        VarExp retval = new VarExp(newExpLoc, null,
+                new PosSymbol(newPosSymbolLoc, "false"));
         retval.setMathType(tg.BOOLEAN);
 
         return retval;
     }
 
     /**
-     * <p>This static method method creates a variable expression that
-     * matches the boolean {@code true}.</p>
+     * <p>
+     * This static method method creates a variable expression that matches the
+     * boolean {@code true}.
+     * </p>
      *
      * @param l A {@link Location} for the new {@code true} expression.
      * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
@@ -232,23 +246,24 @@ public abstract class MathExp extends Exp {
         Location newExpLoc = cloneLocation(l);
         Location newPosSymbolLoc = cloneLocation(l);
 
-        VarExp retval =
-                new VarExp(newExpLoc, null, new PosSymbol(newPosSymbolLoc,
-                        "true"));
+        VarExp retval = new VarExp(newExpLoc, null,
+                new PosSymbol(newPosSymbolLoc, "true"));
         retval.setMathType(tg.BOOLEAN);
 
         return retval;
     }
 
     /**
-     * <p>This method returns the default behavior for an
-     * arbitrary {@link Exp} when checking to see if we are
-     * simply the literal {@code true}.</p>
+     * <p>
+     * This method returns the default behavior for an arbitrary {@link Exp}
+     * when checking to see if
+     * we are simply the literal {@code true}.
+     * </p>
      *
      * @param exp An {@link Exp} to be evaluated.
      *
      * @return {@code true} if {@code exp} is the literal true expression,
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     public static boolean isLiteralTrue(Exp exp) {
         boolean retval = (exp instanceof VarExp);
@@ -261,14 +276,16 @@ public abstract class MathExp extends Exp {
     }
 
     /**
-     * <p>This method returns the default behavior for an
-     * arbitrary {@link Exp} when checking to see if we are
-     * simply the literal {@code false}.</p>
+     * <p>
+     * This method returns the default behavior for an arbitrary {@link Exp}
+     * when checking to see if
+     * we are simply the literal {@code false}.
+     * </p>
      *
      * @param exp An {@link Exp} to be evaluated.
      *
      * @return {@code true} if {@code exp} is the literal false expression,
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     public static boolean isLiteralFalse(Exp exp) {
         boolean retval = (exp instanceof VarExp);
@@ -285,17 +302,20 @@ public abstract class MathExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>An helper method for replacing a {@link FunctionExp}.</p>
+     * <p>
+     * An helper method for replacing a {@link FunctionExp}.
+     * </p>
      *
      * @param originalFunctionExp The original function expression.
      * @param replacementExp The replacement expression.
      * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
+     *        substituted out to the
+     *        {@link Exp} that should replace them.
      *
      * @return An {@link Exp} after substituting {@code originalFunctionExp}.
      */
-    final Exp substituteFunctionExp(FunctionExp originalFunctionExp, Exp replacementExp, Map<Exp, Exp> substitutions) {
+    final Exp substituteFunctionExp(FunctionExp originalFunctionExp,
+            Exp replacementExp, Map<Exp, Exp> substitutions) {
         // YS: Copy the components of the original inner function exp
         Exp newCaratExp = null;
         if (originalFunctionExp.getCaratExp() != null) {
@@ -309,17 +329,19 @@ public abstract class MathExp extends Exp {
 
         // Case #1: "replacementExp" is a VarExp
         if (replacementExp instanceof VarExp) {
-            FunctionExp newFunctionExp =
-                    new FunctionExp(replacementExp.getLocation().clone(),
-                            (VarExp) replacementExp.clone(), newCaratExp, newArgs);
+            FunctionExp newFunctionExp = new FunctionExp(
+                    replacementExp.getLocation().clone(),
+                    (VarExp) replacementExp.clone(), newCaratExp, newArgs);
 
             // Copy any qualifiers
             if (originalFunctionExp.getQualifier() != null) {
-                newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                newFunctionExp.setQualifier(
+                        originalFunctionExp.getQualifier().clone());
             }
 
             // Copy the function quantification
-            newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+            newFunctionExp
+                    .setQuantification(originalFunctionExp.getQuantification());
 
             return newFunctionExp;
         }
@@ -338,80 +360,90 @@ public abstract class MathExp extends Exp {
                 }
 
                 // Create the replacement function
-                FunctionExp newFunctionExp =
-                        new FunctionExp(originalFunctionExp.getLocation().clone(),
-                                (VarExp) lastSegment.clone(), newCaratExp, newArgs);
+                FunctionExp newFunctionExp = new FunctionExp(
+                        originalFunctionExp.getLocation().clone(),
+                        (VarExp) lastSegment.clone(), newCaratExp, newArgs);
 
                 // Copy any qualifiers
                 if (originalFunctionExp.getQualifier() != null) {
-                    newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                    newFunctionExp.setQualifier(
+                            originalFunctionExp.getQualifier().clone());
                 }
 
                 // Copy the function quantification
-                newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+                newFunctionExp.setQuantification(
+                        originalFunctionExp.getQuantification());
 
                 // Add the function expression with the name changed
                 newSegments.add(newFunctionExp);
 
                 // Return a new DotExp with the function name replaced
-                return new DotExp(replacementExpAsDotExp.getLocation().clone(), newSegments);
+                return new DotExp(replacementExpAsDotExp.getLocation().clone(),
+                        newSegments);
             }
             // Everything else is an error!
             else {
-                throw new SourceErrorException("Cannot substitute: "
-                        + this.toString() + " with: "
-                        + replacementExp.toString(), replacementExp.getLocation());
+                throw new SourceErrorException(
+                        "Cannot substitute: " + this.toString() + " with: "
+                                + replacementExp.toString(),
+                        replacementExp.getLocation());
             }
         }
         // Case #3: "replacementExp" is an OldExp
         else if (replacementExp instanceof OldExp) {
-            OldExp replacementExpAsOldExp= (OldExp) replacementExp;
+            OldExp replacementExpAsOldExp = (OldExp) replacementExp;
             Exp innerExp = replacementExpAsOldExp.getExp();
 
             // Check to see if the inner expression is a VarExp
             if (innerExp instanceof VarExp) {
                 // Create the replacement function
-                FunctionExp newFunctionExp =
-                        new FunctionExp(originalFunctionExp.getLocation().clone(),
-                                (VarExp) innerExp.clone(), newCaratExp, newArgs);
+                FunctionExp newFunctionExp = new FunctionExp(
+                        originalFunctionExp.getLocation().clone(),
+                        (VarExp) innerExp.clone(), newCaratExp, newArgs);
 
                 // Copy any qualifiers
                 if (originalFunctionExp.getQualifier() != null) {
-                    newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                    newFunctionExp.setQualifier(
+                            originalFunctionExp.getQualifier().clone());
                 }
 
                 // Copy the function quantification
-                newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+                newFunctionExp.setQuantification(
+                        originalFunctionExp.getQuantification());
 
                 // Return a new OldExp with the function name replaced
-                return new OldExp(replacementExpAsOldExp.getLocation().clone(), newFunctionExp);
+                return new OldExp(replacementExpAsOldExp.getLocation().clone(),
+                        newFunctionExp);
             }
             // Everything else is an error!
             else {
-                throw new SourceErrorException("Cannot substitute: "
-                        + this.toString() + " with: "
-                        + replacementExp.toString(), replacementExp.getLocation());
+                throw new SourceErrorException(
+                        "Cannot substitute: " + this.toString() + " with: "
+                                + replacementExp.toString(),
+                        replacementExp.getLocation());
             }
         }
         // Case #4: "replacementExp" is a VCVarExp
         else if (replacementExp instanceof VCVarExp) {
-            VCVarExp replacementExpAsVCVarExp= (VCVarExp) replacementExp;
+            VCVarExp replacementExpAsVCVarExp = (VCVarExp) replacementExp;
             Exp innerExp = replacementExpAsVCVarExp.getExp();
             Exp newInnerExp;
 
             // Case #4.1: "innerExp" is a VarExp
             if (innerExp instanceof VarExp) {
-                FunctionExp newFunctionExp =
-                        new FunctionExp(replacementExp.getLocation().clone(),
-                                (VarExp) innerExp.clone(), newCaratExp, newArgs);
+                FunctionExp newFunctionExp = new FunctionExp(
+                        replacementExp.getLocation().clone(),
+                        (VarExp) innerExp.clone(), newCaratExp, newArgs);
 
                 // Copy any qualifiers
                 if (originalFunctionExp.getQualifier() != null) {
-                    newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                    newFunctionExp.setQualifier(
+                            originalFunctionExp.getQualifier().clone());
                 }
 
                 // Copy the function quantification
-                newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+                newFunctionExp.setQuantification(
+                        originalFunctionExp.getQuantification());
 
                 // Set this as our new inner expression.
                 newInnerExp = newFunctionExp;
@@ -431,36 +463,42 @@ public abstract class MathExp extends Exp {
                     }
 
                     // Create the replacement function
-                    FunctionExp newFunctionExp =
-                            new FunctionExp(originalFunctionExp.getLocation().clone(),
-                                    (VarExp) lastSegment.clone(), newCaratExp, newArgs);
+                    FunctionExp newFunctionExp = new FunctionExp(
+                            originalFunctionExp.getLocation().clone(),
+                            (VarExp) lastSegment.clone(), newCaratExp, newArgs);
 
                     // Copy any qualifiers
                     if (originalFunctionExp.getQualifier() != null) {
-                        newFunctionExp.setQualifier(originalFunctionExp.getQualifier().clone());
+                        newFunctionExp.setQualifier(
+                                originalFunctionExp.getQualifier().clone());
                     }
 
                     // Copy the function quantification
-                    newFunctionExp.setQuantification(originalFunctionExp.getQuantification());
+                    newFunctionExp.setQuantification(
+                            originalFunctionExp.getQuantification());
 
                     // Add the function expression with the name changed
                     newSegments.add(newFunctionExp);
 
                     // Return a new DotExp with the function name replaced
-                    newInnerExp = new DotExp(innerExpAsDotExp.getLocation().clone(), newSegments);
+                    newInnerExp =
+                            new DotExp(innerExpAsDotExp.getLocation().clone(),
+                                    newSegments);
                 }
                 // Everything else is an error!
                 else {
-                    throw new SourceErrorException("Cannot substitute: "
-                            + this.toString() + " with: "
-                            + replacementExp.toString(), replacementExp.getLocation());
+                    throw new SourceErrorException(
+                            "Cannot substitute: " + this.toString() + " with: "
+                                    + replacementExp.toString(),
+                            replacementExp.getLocation());
                 }
             }
             // Everything else is an error!
             else {
-                throw new SourceErrorException("Cannot substitute: "
-                        + this.toString() + " with: "
-                        + replacementExp.toString(), replacementExp.getLocation());
+                throw new SourceErrorException(
+                        "Cannot substitute: " + this.toString() + " with: "
+                                + replacementExp.toString(),
+                        replacementExp.getLocation());
             }
 
             return new VCVarExp(replacementExpAsVCVarExp.getLocation().clone(),
@@ -468,9 +506,10 @@ public abstract class MathExp extends Exp {
         }
         // Everything else is an error!
         else {
-            throw new SourceErrorException("Cannot substitute: "
-                    + this.toString() + " with: "
-                    + replacementExp.toString(), replacementExp.getLocation());
+            throw new SourceErrorException(
+                    "Cannot substitute: " + this.toString() + " with: "
+                            + replacementExp.toString(),
+                    replacementExp.getLocation());
         }
     }
 
@@ -479,12 +518,14 @@ public abstract class MathExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>An helper method to clone a {@link Location}.</p>
+     * <p>
+     * An helper method to clone a {@link Location}.
+     * </p>
      *
      * @param l The location we want to make a copy of.
      *
-     * @return A deep copy of {@code l} or {@code null} if {@code l}
-     * is {@code null}.
+     * @return A deep copy of {@code l} or {@code null} if {@code l} is
+     *         {@code null}.
      */
     private static Location cloneLocation(Location l) {
         return l != null ? l.clone() : null;

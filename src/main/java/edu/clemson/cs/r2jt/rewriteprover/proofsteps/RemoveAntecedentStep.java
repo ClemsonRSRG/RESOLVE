@@ -1,7 +1,7 @@
 /*
  * RemoveAntecedentStep.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,9 +28,8 @@ public class RemoveAntecedentStep extends AbstractProofStep {
     private final LocalTheorem myOriginalTheorem;
     private final int myOriginalIndex;
 
-    public RemoveAntecedentStep(LocalTheorem originalTheorem,
-            int originalIndex, Transformation t, Application a,
-            Collection<Site> boundSites) {
+    public RemoveAntecedentStep(LocalTheorem originalTheorem, int originalIndex,
+            Transformation t, Application a, Collection<Site> boundSites) {
         super(t, a, boundSites);
 
         myOriginalIndex = originalIndex;

@@ -1,7 +1,7 @@
 /*
  * AbstractVarDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,9 +19,11 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 
 /**
- * <p>This is the abstract base class for both the mathematical and
- * programming variable declaration objects that the compiler builds
- * using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for both the mathematical and programming
+ * variable declaration
+ * objects that the compiler builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 1.0
  */
@@ -31,7 +33,11 @@ public abstract class AbstractVarDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The object's raw type representation.</p> */
+    /**
+     * <p>
+     * The object's raw type representation.
+     * </p>
+     */
     protected final Ty myTy;
 
     // ===========================================================
@@ -39,9 +45,11 @@ public abstract class AbstractVarDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location,
-     * name and raw type of any objects created from a class
-     * that inherits from {@code AbstractVarDec}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location, name and raw
+     * type of any objects
+     * created from a class that inherits from {@code AbstractVarDec}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name A {@link PosSymbol} representing the variable's name.
@@ -80,8 +88,9 @@ public abstract class AbstractVarDec extends Dec {
     }
 
     /**
-     * <p>Returns the raw type representation
-     * of this class.</p>
+     * <p>
+     * Returns the raw type representation of this class.
+     * </p>
      *
      * @return The raw type in {@link Ty} format.
      */
@@ -94,13 +103,15 @@ public abstract class AbstractVarDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>A helper method to generate the special text formatted strings
-     * for classes that inherit from {@code AbstractVarDec}</p>
+     * <p>
+     * A helper method to generate the special text formatted strings for
+     * classes that inherit from
+     * {@code AbstractVarDec}
+     * </p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentInc The additional indentation increment
-     *                       for the subsequent lines.
+     * @param indentSize The base indentation to the first line of the text.
+     * @param innerIndentInc The additional indentation increment for the
+     *        subsequent lines.
      *
      * @return A formatted text string of the class.
      */
@@ -114,14 +125,18 @@ public abstract class AbstractVarDec extends Dec {
     }
 
     /**
-     * <p>Implemented by concrete subclasses of {@link AbstractVarDec}
-     * to manufacture a copy of themselves.</p>
+     * <p>
+     * Implemented by concrete subclasses of {@link AbstractVarDec} to
+     * manufacture a copy of
+     * themselves.
+     * </p>
      *
      * @return A new {@link AbstractVarDec} that is a deep copy of the original.
      */
     protected AbstractVarDec copy() {
-        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
-                + this.getClass(), new CloneNotSupportedException());
+        throw new MiscErrorException(
+                "Shouldn't be calling copy()!  Type: " + this.getClass(),
+                new CloneNotSupportedException());
     }
 
 }

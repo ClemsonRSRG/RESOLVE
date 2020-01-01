@@ -1,7 +1,7 @@
 /*
  * FacilityDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the facility declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the facility declaration objects that the compiler
+ * builds using the
+ * ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,38 +36,63 @@ public class FacilityDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The concept name of this facility declaration.</p> */
+    /**
+     * <p>
+     * The concept name of this facility declaration.
+     * </p>
+     */
     private final PosSymbol myConceptName;
 
-    /** <p>The arguments to instantiate the concept.</p> */
+    /**
+     * <p>
+     * The arguments to instantiate the concept.
+     * </p>
+     */
     private final List<ModuleArgumentItem> myConceptParams;
 
     /**
-     * <p>The enhancements that are implemented by the concept
-     * realization directly.</p>
+     * <p>
+     * The enhancements that are implemented by the concept realization
+     * directly.
+     * </p>
      */
     private final List<EnhancementSpecItem> myEnhancements;
 
-    /** <p>The concept realization name of this facility declaration.</p> */
+    /**
+     * <p>
+     * The concept realization name of this facility declaration.
+     * </p>
+     */
     private final PosSymbol myConceptRealizName;
 
-    /** <p>The arguments to instantiate the concept realization.</p> */
+    /**
+     * <p>
+     * The arguments to instantiate the concept realization.
+     * </p>
+     */
     private final List<ModuleArgumentItem> myConceptRealizParams;
 
     /**
-     * <p>The enhancement and their associated realizations instantiated
-     * by the facility declaration.</p>
+     * <p>
+     * The enhancement and their associated realizations instantiated by the
+     * facility declaration.
+     * </p>
      */
     private final List<EnhancementSpecRealizItem> myEnhancementRealizPairs;
 
-    /** <p>Profile name for this facility.</p> */
+    /**
+     * <p>
+     * Profile name for this facility.
+     * </p>
+     */
     private final PosSymbol myProfileName;
 
     /**
-     * <p>Tells us whether or not the facility's realization
-     * has a implementation written in Resolve. If it does,
-     * then this flag should be true, otherwise, it will be
-     * false.</p>
+     * <p>
+     * Tells us whether or not the facility's realization has a implementation
+     * written in Resolve. If
+     * it does, then this flag should be true, otherwise, it will be false.
+     * </p>
      */
     private final boolean myExternallyRealizedFlag;
 
@@ -73,20 +101,25 @@ public class FacilityDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This constructs a facility declaration with "false"
-     * as the external realization option.</p>
+     * <p>
+     * This constructs a facility declaration with "false" as the external
+     * realization option.
+     * </p>
      *
      * @param name Name of the facility declaration.
      * @param conceptName Name of the concept module.
      * @param conceptParams The parameter arguments that are passed to
-     *                      instantiate the concept.
-     * @param enhancements List of all enhancements that are implemented
-     *                     by the concept realization directly.
+     *        instantiate the concept.
+     * @param enhancements List of all enhancements that are implemented by the
+     *        concept realization
+     *        directly.
      * @param bodyName Name of the concept realization module.
-     * @param bodyParams The parameter arguments that are passed to
-     *                   instantiate the concept realization.
-     * @param enhancementBodies List of all enhancement/realization pairs
-     *                          that are instantiated by the facility.
+     * @param bodyParams The parameter arguments that are passed to instantiate
+     *        the concept
+     *        realization.
+     * @param enhancementBodies List of all enhancement/realization pairs that
+     *        are instantiated by the
+     *        facility.
      * @param profileName The name of the performance profile in use.
      */
     public FacilityDec(PosSymbol name, PosSymbol conceptName,
@@ -100,23 +133,29 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>This constructs a facility declaration the passed in
-     * the external realization option.</p>
+     * <p>
+     * This constructs a facility declaration the passed in the external
+     * realization option.
+     * </p>
      *
      * @param name Name of the facility declaration.
      * @param conceptName Name of the concept module.
      * @param conceptParams The parameter arguments that are passed to
-     *                      instantiate the concept.
-     * @param enhancements List of all enhancements that are implemented
-     *                     by the concept realization directly.
+     *        instantiate the concept.
+     * @param enhancements List of all enhancements that are implemented by the
+     *        concept realization
+     *        directly.
      * @param bodyName Name of the concept realization module.
-     * @param bodyParams The parameter arguments that are passed to
-     *                   instantiate the concept realization.
-     * @param enhancementBodies List of all enhancement/realization pairs
-     *                          that are instantiated by the facility.
+     * @param bodyParams The parameter arguments that are passed to instantiate
+     *        the concept
+     *        realization.
+     * @param enhancementBodies List of all enhancement/realization pairs that
+     *        are instantiated by the
+     *        facility.
      * @param profileName The name of the performance profile in use.
-     * @param externRealized Boolean option to indicate if this facility
-     *                       has been externally realized or not.
+     * @param externRealized Boolean option to indicate if this facility has
+     *        been externally realized
+     *        or not.
      */
     public FacilityDec(PosSymbol name, PosSymbol conceptName,
             List<ModuleArgumentItem> conceptParams,
@@ -211,7 +250,9 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>Returns the symbol representation for the concept name.</p>
+     * <p>
+     * Returns the symbol representation for the concept name.
+     * </p>
      *
      * @return A {@link PosSymbol} representation of the concept name.
      */
@@ -220,8 +261,9 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>Returns the list of arguments for this concept
-     * extension.</p>
+     * <p>
+     * Returns the list of arguments for this concept extension.
+     * </p>
      *
      * @return A list of {@link ModuleArgumentItem} representation objects.
      */
@@ -230,16 +272,21 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>Returns the symbol representation for the concept realization name.</p>
+     * <p>
+     * Returns the symbol representation for the concept realization name.
+     * </p>
      *
-     * @return A {@link PosSymbol} representation of the enhancement realization name.
+     * @return A {@link PosSymbol} representation of the enhancement realization
+     *         name.
      */
     public final PosSymbol getConceptRealizName() {
         return myConceptRealizName;
     }
 
     /**
-     * <p>Returns the list of arguments for the enhancement realization.</p>
+     * <p>
+     * Returns the list of arguments for the enhancement realization.
+     * </p>
      *
      * @return A list of {@link ModuleArgumentItem} representation objects.
      */
@@ -248,8 +295,10 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>Returns the list of enhancement extensions implemented by the concept
-     * realization.</p>
+     * <p>
+     * Returns the list of enhancement extensions implemented by the concept
+     * realization.
+     * </p>
      *
      * @return A list of {@link EnhancementSpecItem} representation objects.
      */
@@ -258,28 +307,37 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>Returns the list of enhancement/realizations in this facility
-     * declaration.</p>
+     * <p>
+     * Returns the list of enhancement/realizations in this facility
+     * declaration.
+     * </p>
      *
-     * @return A list of {@link EnhancementSpecRealizItem} representation objects.
+     * @return A list of {@link EnhancementSpecRealizItem} representation
+     *         objects.
      */
     public final List<EnhancementSpecRealizItem> getEnhancementRealizPairs() {
         return myEnhancementRealizPairs;
     }
 
     /**
-     * <p>Checks to see if the concept realization is implemented in RESOLVE.</p>
+     * <p>
+     * Checks to see if the concept realization is implemented in RESOLVE.
+     * </p>
      *
-     * @return {@code true} if the realization is externally realized, {@code false} otherwise.
+     * @return {@code true} if the realization is externally realized,
+     *         {@code false} otherwise.
      */
     public final boolean getExternallyRealizedFlag() {
         return myExternallyRealizedFlag;
     }
 
     /**
-     * <p>Returns the symbol representation for the performance profile name.</p>
+     * <p>
+     * Returns the symbol representation for the performance profile name.
+     * </p>
      *
-     * @return A {@link PosSymbol} representation of the performance profile name.
+     * @return A {@link PosSymbol} representation of the performance profile
+     *         name.
      */
     public final PosSymbol getProfileName() {
         return myProfileName;
@@ -297,10 +355,8 @@ public class FacilityDec extends Dec {
         result = 31 * result + myConceptRealizName.hashCode();
         result = 31 * result + myConceptRealizParams.hashCode();
         result = 31 * result + myEnhancementRealizPairs.hashCode();
-        result =
-                31
-                        * result
-                        + (myProfileName != null ? myProfileName.hashCode() : 0);
+        result = 31 * result
+                + (myProfileName != null ? myProfileName.hashCode() : 0);
         result = 31 * result + (myExternallyRealizedFlag ? 1 : 0);
         return result;
     }
@@ -330,8 +386,11 @@ public class FacilityDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the concept parameter arguments.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * concept parameter
+     * arguments.
+     * </p>
      *
      * @return A list containing {@link ModuleArgumentItem}s.
      */
@@ -345,8 +404,11 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the concept realization parameter arguments.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * concept realization
+     * parameter arguments.
+     * </p>
      *
      * @return A list containing {@link ModuleArgumentItem}s.
      */
@@ -360,8 +422,11 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the enhancement realization items.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * enhancement
+     * realization items.
+     * </p>
      *
      * @return A list containing {@link EnhancementSpecRealizItem}s.
      */
@@ -375,8 +440,10 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the enhancement items.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * enhancement items.
+     * </p>
      *
      * @return A list containing {@link EnhancementSpecItem}s.
      */
@@ -390,7 +457,9 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>An helper method to generate a string for the argument list.</p>
+     * <p>
+     * An helper method to generate a string for the argument list.
+     * </p>
      *
      * @param argumentItems A list containing {@link ModuleArgumentItem}s.
      *

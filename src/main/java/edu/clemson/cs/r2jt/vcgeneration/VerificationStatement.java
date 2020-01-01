@@ -1,7 +1,7 @@
 /*
  * VerificationStatement.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,7 +26,7 @@ import edu.clemson.cs.r2jt.collections.*;
 public class VerificationStatement implements Cloneable {
 
     // ===========================================================
-    // Global Variables 
+    // Global Variables
     // ===========================================================
 
     // Type of Verification Statement
@@ -69,25 +69,22 @@ public class VerificationStatement implements Cloneable {
             VerificationStatement clone = new VerificationStatement();
             if (myType == CODE) {
                 if (myAssertion instanceof Statement) {
-                    clone =
-                            new VerificationStatement(myType,
-                                    ((Statement) myAssertion).clone());
+                    clone = new VerificationStatement(myType,
+                            ((Statement) myAssertion).clone());
                 }
                 return clone;
             }
             else if (myType == VARIABLE) {
                 if (myAssertion instanceof VarDec) {
-                    clone =
-                            new VerificationStatement(myType,
-                                    ((VarDec) myAssertion).clone());
+                    clone = new VerificationStatement(myType,
+                            ((VarDec) myAssertion).clone());
                 }
                 return clone;
             }
             else if (myType == CHANGE) {
                 if (myAssertion instanceof List<?>) {
-                    clone =
-                            new VerificationStatement(myType,
-                                    ((List<?>) myAssertion).clone());
+                    clone = new VerificationStatement(myType,
+                            ((List<?>) myAssertion).clone());
                     return clone;
                 }
                 else {
@@ -112,7 +109,9 @@ public class VerificationStatement implements Cloneable {
     // -----------------------------------------------------------
 
     /**
-     * <p>Returns the type of the assertion.</p>
+     * <p>
+     * Returns the type of the assertion.
+     * </p>
      *
      * @return The type of <code>VerificationStatement</code>.
      */
@@ -121,7 +120,9 @@ public class VerificationStatement implements Cloneable {
     }
 
     /**
-     * <p>Returns the assertion object.</p>
+     * <p>
+     * Returns the assertion object.
+     * </p>
      *
      * @return The object containing an <code>ResolveConceptualElement</code>.
      */
@@ -134,8 +135,9 @@ public class VerificationStatement implements Cloneable {
     // -----------------------------------------------------------
 
     /**
-     * <p>Sets the <code>ResolveConceptualElement</code>
-     * <code>Object</code>.</p>
+     * <p>
+     * Sets the <code>ResolveConceptualElement</code> <code>Object</code>.
+     * </p>
      *
      * @param assertion The corresponding assertion <code>Object</code>.
      */
@@ -148,8 +150,9 @@ public class VerificationStatement implements Cloneable {
     // ===========================================================
 
     /**
-     * <p>Returns the type of the <code>VerificationStatement</code>
-     * as a String.</p>
+     * <p>
+     * Returns the type of the <code>VerificationStatement</code> as a String.
+     * </p>
      *
      * @return The string form of the type.
      */

@@ -1,7 +1,7 @@
 /*
  * ProgramParameterEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -25,7 +25,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
 
 /**
- * <p>This creates a symbol table entry for a program parameter declaration.</p>
+ * <p>
+ * This creates a symbol table entry for a program parameter declaration.
+ * </p>
  *
  * @version 2.0
  */
@@ -36,17 +38,23 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This defines the various different parameter modes that
-     * a {@link ParameterVarDec} can have.</p>
+     * <p>
+     * This defines the various different parameter modes that a
+     * {@link ParameterVarDec} can have.
+     * </p>
      *
      * @version 2.0
      */
     public enum ParameterMode {
+
         ALTERS {
 
             /**
-             * <p>This method returns all the parameter modes that can be used to implement
-             * a particular mode.</p>
+             * <p>
+             * This method returns all the parameter modes that can be used to
+             * implement a particular
+             * mode.
+             * </p>
              *
              * @return An array of valid implementation {@link ParameterMode}s.
              */
@@ -58,8 +66,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         UPDATES {
 
             /**
-             * <p>This method returns all the parameter modes that can be used to implement
-             * a particular mode.</p>
+             * <p>
+             * This method returns all the parameter modes that can be used to
+             * implement a particular
+             * mode.
+             * </p>
              *
              * @return An array of valid implementation {@link ParameterMode}s.
              */
@@ -72,8 +83,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         REPLACES {
 
             /**
-             * <p>This method returns all the parameter modes that can be used to implement
-             * a particular mode.</p>
+             * <p>
+             * This method returns all the parameter modes that can be used to
+             * implement a particular
+             * mode.
+             * </p>
              *
              * @return An array of valid implementation {@link ParameterMode}s.
              */
@@ -85,8 +99,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         CLEARS {
 
             /**
-             * <p>This method returns all the parameter modes that can be used to implement
-             * a particular mode.</p>
+             * <p>
+             * This method returns all the parameter modes that can be used to
+             * implement a particular
+             * mode.
+             * </p>
              *
              * @return An array of valid implementation {@link ParameterMode}s.
              */
@@ -98,8 +115,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         RESTORES {
 
             /**
-             * <p>This method returns all the parameter modes that can be used to implement
-             * a particular mode.</p>
+             * <p>
+             * This method returns all the parameter modes that can be used to
+             * implement a particular
+             * mode.
+             * </p>
              *
              * @return An array of valid implementation {@link ParameterMode}s.
              */
@@ -111,8 +131,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         PRESERVES {
 
             /**
-             * <p>This method returns all the parameter modes that can be used to implement
-             * a particular mode.</p>
+             * <p>
+             * This method returns all the parameter modes that can be used to
+             * implement a particular
+             * mode.
+             * </p>
              *
              * @return An array of valid implementation {@link ParameterMode}s.
              */
@@ -124,8 +147,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         EVALUATES {
 
             /**
-             * <p>This method returns all the parameter modes that can be used to implement
-             * a particular mode.</p>
+             * <p>
+             * This method returns all the parameter modes that can be used to
+             * implement a particular
+             * mode.
+             * </p>
              *
              * @return An array of valid implementation {@link ParameterMode}s.
              */
@@ -137,8 +163,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         TYPE {
 
             /**
-             * <p>This method returns all the parameter modes that can be used to implement
-             * a particular mode.</p>
+             * <p>
+             * This method returns all the parameter modes that can be used to
+             * implement a particular
+             * mode.
+             * </p>
              *
              * @return An array of valid implementation {@link ParameterMode}s.
              */
@@ -149,26 +178,32 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         };
 
         /**
-         * <p>This method checks if a parameter mode can be implemented using {@code o}.</p>
+         * <p>
+         * This method checks if a parameter mode can be implemented using
+         * {@code o}.
+         * </p>
          *
          * @param o A {@link ParameterMode} to check.
          *
          * @return {@code true} if {@code o} can be used to implement this mode,
-         * {@code false} otherwise.
+         *         {@code false}
+         *         otherwise.
          */
         public boolean canBeImplementedWith(ParameterMode o) {
             return contains(getValidImplementationModes(), o);
         }
 
         /**
-         * <p>A helper method to check whether we can implement this mode using
-         * {@code o}.</p>
+         * <p>
+         * A helper method to check whether we can implement this mode using
+         * {@code o}.
+         * </p>
          *
          * @param os An array of acceptable parameter modes.
          * @param o A {@link ParameterMode} to check.
          *
-         * @return {@code true} if this mode contains {@code o},
-         * {@code false} otherwise.
+         * @return {@code true} if this mode contains {@code o}, {@code false}
+         *         otherwise.
          */
         private static boolean contains(ParameterMode[] os, ParameterMode o) {
             boolean result = false;
@@ -184,8 +219,10 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         }
 
         /**
-         * <p>This method returns all the parameter modes that can be used to implement
-         * a particular mode.</p>
+         * <p>
+         * This method returns all the parameter modes that can be used to
+         * implement a particular mode.
+         * </p>
          *
          * @return An array of valid implementation {@link ParameterMode}s.
          */
@@ -196,19 +233,39 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     // Member Fields
     // ===========================================================
 
-    /** <p>The program type declared for this entry.</p> */
+    /**
+     * <p>
+     * The program type declared for this entry.
+     * </p>
+     */
     private final PTType myDeclaredType;
 
-    /** <p>The parameter mode for this entry.</p> */
+    /**
+     * <p>
+     * The parameter mode for this entry.
+     * </p>
+     */
     private final ParameterMode myPassingMode;
 
-    /** <p>The current type graph object in use.</p> */
+    /**
+     * <p>
+     * The current type graph object in use.
+     * </p>
+     */
     private final TypeGraph myTypeGraph;
 
-    /** <p>The mathematical symbol entry associated with this entry.</p> */
+    /**
+     * <p>
+     * The mathematical symbol entry associated with this entry.
+     * </p>
+     */
     private final MathSymbolEntry myMathSymbolAlterEgo;
 
-    /** <p>The program variable entry associated with this entry.</p> */
+    /**
+     * <p>
+     * The program variable entry associated with this entry.
+     * </p>
+     */
     private final ProgramVariableEntry myProgramVariableAlterEgo;
 
     // ===========================================================
@@ -216,7 +273,9 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This creates a symbol table entry for a program parameter declaration.</p>
+     * <p>
+     * This creates a symbol table entry for a program parameter declaration.
+     * </p>
      *
      * @param g The current type graph.
      * @param name Name associated with this entry.
@@ -239,12 +298,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
             typeValue = new PTGeneric(type.getTypeGraph(), name).toMath();
         }
 
-        //TODO: Probably need to recajigger this to correctly account for any
-        //      generics in the defining context
-        myMathSymbolAlterEgo =
-                new MathSymbolEntry(type.getTypeGraph(), name,
-                        Quantification.NONE, definingElement, type.toMath(),
-                        typeValue, null, null, sourceModule);
+        // TODO: Probably need to recajigger this to correctly account for any
+        // generics in the defining context
+        myMathSymbolAlterEgo = new MathSymbolEntry(type.getTypeGraph(), name,
+                Quantification.NONE, definingElement, type.toMath(), typeValue,
+                null, null, sourceModule);
 
         myProgramVariableAlterEgo =
                 new ProgramVariableEntry(getName(), getDefiningElement(),
@@ -256,7 +314,9 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
-     * <p>This method returns the program type associated with this entry.</p>
+     * <p>
+     * This method returns the program type associated with this entry.
+     * </p>
      *
      * @return A {@link PTType} representation object.
      */
@@ -265,7 +325,9 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns a description associated with this entry.</p>
+     * <p>
+     * This method returns a description associated with this entry.
+     * </p>
      *
      * @return A string.
      */
@@ -275,7 +337,9 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the parameter mode associated with this entry.</p>
+     * <p>
+     * This method returns the parameter mode associated with this entry.
+     * </p>
      *
      * @return A {@link ParameterMode} representation object.
      */
@@ -284,9 +348,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method converts a generic {@link SymbolTableEntry} to an entry
-     * that has all the generic types and variables replaced with actual
-     * values.</p>
+     * <p>
+     * This method converts a generic {@link SymbolTableEntry} to an entry that
+     * has all the generic
+     * types and variables replaced with actual values.
+     * </p>
      *
      * @param genericInstantiations Map containing all the instantiations.
      * @param instantiatingFacility Facility that instantiated this type.
@@ -300,17 +366,20 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         return new ProgramParameterEntry(myTypeGraph, getName(),
                 getDefiningElement(), getSourceModuleIdentifier(),
                 myDeclaredType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), myPassingMode);
+                        instantiatingFacility),
+                myPassingMode);
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link MathSymbolEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link MathSymbolEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link MathSymbolEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link MathSymbolEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final MathSymbolEntry toMathSymbolEntry(Location l) {
@@ -318,13 +387,16 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ProgramParameterEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ProgramParameterEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ProgramParameterEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ProgramParameterEntry} if possible. Otherwise, it throws
+     *         a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final ProgramParameterEntry toProgramParameterEntry(Location l) {
@@ -332,13 +404,15 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ProgramTypeEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ProgramTypeEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ProgramTypeEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ProgramTypeEntry} if possible. Otherwise, it throws a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final ProgramTypeEntry toProgramTypeEntry(Location l) {
@@ -346,28 +420,30 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         ProgramTypeEntry result;
 
         if (!myPassingMode.equals(ParameterMode.TYPE)) {
-            //This will throw an appropriate error
+            // This will throw an appropriate error
             result = super.toProgramTypeEntry(l);
         }
         else {
-            result =
-                    new ProgramTypeEntry(myTypeGraph, getName(),
-                            getDefiningElement(), getSourceModuleIdentifier(),
-                            new MTNamed(myTypeGraph, getName()), new PTGeneric(
-                                    myTypeGraph, getName()));
+            result = new ProgramTypeEntry(myTypeGraph, getName(),
+                    getDefiningElement(), getSourceModuleIdentifier(),
+                    new MTNamed(myTypeGraph, getName()),
+                    new PTGeneric(myTypeGraph, getName()));
         }
 
         return result;
     }
 
     /**
-     * <p>This method will attempt to convert this {@link SymbolTableEntry}
-     * into a {@link ProgramVariableEntry}.</p>
+     * <p>
+     * This method will attempt to convert this {@link SymbolTableEntry} into a
+     * {@link ProgramVariableEntry}.
+     * </p>
      *
      * @param l Location where we encountered this entry.
      *
-     * @return A {@link ProgramVariableEntry} if possible. Otherwise,
-     * it throws a {@link SourceErrorException}.
+     * @return A {@link ProgramVariableEntry} if possible. Otherwise, it throws
+     *         a
+     *         {@link SourceErrorException}.
      */
     @Override
     public final ProgramVariableEntry toProgramVariableEntry(Location l) {
@@ -375,7 +451,9 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */

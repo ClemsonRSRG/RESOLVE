@@ -1,7 +1,7 @@
 /*
  * SpecRealizationPairing.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,9 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.typeandpopulate.exception.NoneProvidedException;
 
 /**
- * <p>A <code>SpecRealizationPairing</code> pairs both a specification
- * and a realization together to indicate that the realization implements
- * the given specification.</p>
+ * <p>
+ * A <code>SpecRealizationPairing</code> pairs both a specification and a
+ * realization together to
+ * indicate that the realization implements the given specification.
+ * </p>
  *
  * @version 2.0
  */
@@ -29,13 +31,25 @@ public class SpecRealizationPairing {
     // Member Fields
     // ===========================================================
 
-    /** <p>The location that created this object.</p> */
+    /**
+     * <p>
+     * The location that created this object.
+     * </p>
+     */
     private final Location myLocation;
 
-    /** <p>Specification parameter object.</p> */
+    /**
+     * <p>
+     * Specification parameter object.
+     * </p>
+     */
     private final ModuleParameterization mySpec;
 
-    /** <p>Realization parameter object.</p> */
+    /**
+     * <p>
+     * Realization parameter object.
+     * </p>
+     */
     private final ModuleParameterization myRealization;
 
     // ===========================================================
@@ -43,7 +57,9 @@ public class SpecRealizationPairing {
     // ===========================================================
 
     /**
-     * <p>This constructs a specification with no realization.</p>
+     * <p>
+     * This constructs a specification with no realization.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param spec Specification parameter object.
@@ -53,7 +69,9 @@ public class SpecRealizationPairing {
     }
 
     /**
-     * <p>This constructs a specification/realization pairing.</p>
+     * <p>
+     * This constructs a specification/realization pairing.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param spec Specification parameter object.
@@ -75,10 +93,13 @@ public class SpecRealizationPairing {
     // ===========================================================
 
     /**
-     * <p>This method returns the realization module parameter.</p>
+     * <p>
+     * This method returns the realization module parameter.
+     * </p>
      *
-     * @return A {@link ModuleParameterization} object that refers either
-     * to a {@link ConceptRealizModuleDec} or a {@link EnhancementRealizModuleDec}.
+     * @return A {@link ModuleParameterization} object that refers either to a
+     *         {@link ConceptRealizModuleDec} or a
+     *         {@link EnhancementRealizModuleDec}.
      */
     public final ModuleParameterization getRealization()
             throws NoneProvidedException {
@@ -90,10 +111,12 @@ public class SpecRealizationPairing {
     }
 
     /**
-     * <p>This method returns the specification module parameter.</p>
+     * <p>
+     * This method returns the specification module parameter.
+     * </p>
      *
-     * @return A {@link ModuleParameterization} object that refers either
-     * to a {@link ConceptModuleDec} or a {@link EnhancementModuleDec}.
+     * @return A {@link ModuleParameterization} object that refers either to a
+     *         {@link ConceptModuleDec} or a {@link EnhancementModuleDec}.
      */
     public final ModuleParameterization getSpecification() {
         return mySpec;

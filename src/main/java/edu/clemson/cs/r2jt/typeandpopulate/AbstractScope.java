@@ -1,7 +1,7 @@
 /*
  * AbstractScope.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,9 +26,9 @@ import java.util.Set;
 public abstract class AbstractScope implements Scope {
 
     @Override
-    public final <E extends SymbolTableEntry> List<E> getMatches(
-            TableSearcher<E> searcher, SearchContext l)
-            throws DuplicateSymbolException {
+    public final <E extends SymbolTableEntry> List<E>
+            getMatches(TableSearcher<E> searcher, SearchContext l)
+                    throws DuplicateSymbolException {
         List<E> result = new LinkedList<E>();
         Set<Scope> searchedScopes = new HashSet<Scope>();
         Map<String, PTType> genericInstantiations =

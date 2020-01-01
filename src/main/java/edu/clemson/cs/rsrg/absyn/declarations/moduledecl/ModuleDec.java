@@ -1,7 +1,7 @@
 /*
  * ModuleDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,8 +23,11 @@ import edu.clemson.cs.rsrg.statushandling.exception.MiscErrorException;
 import java.util.*;
 
 /**
- * <p>This is the abstract base class for all the module declaration objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the module declaration objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -34,16 +37,32 @@ public abstract class ModuleDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The current module's parameter declaration objects.</p> */
+    /**
+     * <p>
+     * The current module's parameter declaration objects.
+     * </p>
+     */
     protected final List<ModuleParameterDec> myParameterDecs;
 
-    /** <p>The current module's import objects.</p> */
+    /**
+     * <p>
+     * The current module's import objects.
+     * </p>
+     */
     protected final List<UsesItem> myUsesItems;
 
-    /** <p>The current module's declaration objects.</p> */
+    /**
+     * <p>
+     * The current module's declaration objects.
+     * </p>
+     */
     protected final List<Dec> myDecs;
 
-    /** <p>The current module's import objects.</p> */
+    /**
+     * <p>
+     * The current module's import objects.
+     * </p>
+     */
     protected final Map<ResolveFileBasicInfo, Boolean> myModuleDependencies;
 
     // ===========================================================
@@ -51,9 +70,11 @@ public abstract class ModuleDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store common member fields
-     * for objects created from a class that inherits from
-     * {@code ModuleDec}.</p>
+     * <p>
+     * A helper constructor that allow us to store common member fields for
+     * objects created from a
+     * class that inherits from {@code ModuleDec}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
@@ -61,8 +82,9 @@ public abstract class ModuleDec extends Dec {
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
      * @param moduleDependencies A map of {@link ResolveFileBasicInfo} to
-     *                           externally realized flags that indicates
-     *                           all the modules that this module declaration depends on.
+     *        externally realized flags
+     *        that indicates all the modules that this module declaration
+     *        depends on.
      */
     protected ModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
@@ -103,8 +125,9 @@ public abstract class ModuleDec extends Dec {
     }
 
     /**
-     * <p>This method gets all the object declarations associated
-     * with this module.</p>
+     * <p>
+     * This method gets all the object declarations associated with this module.
+     * </p>
      *
      * @return A list of {@link Dec} objects.
      */
@@ -113,8 +136,9 @@ public abstract class ModuleDec extends Dec {
     }
 
     /**
-     * <p>This method returns all modules dependencies associated
-     * with this module.</p>
+     * <p>
+     * This method returns all modules dependencies associated with this module.
+     * </p>
      *
      * @return A list of {@link Dec} objects.
      */
@@ -123,8 +147,10 @@ public abstract class ModuleDec extends Dec {
     }
 
     /**
-     * <p>This method gets all the object parameter declarations associated
-     * with this module.</p>
+     * <p>
+     * This method gets all the object parameter declarations associated with
+     * this module.
+     * </p>
      *
      * @return A list of {@link ModuleParameterDec} objects.
      */
@@ -133,8 +159,9 @@ public abstract class ModuleDec extends Dec {
     }
 
     /**
-     * <p>This method gets all the import objects associated
-     * with this module.</p>
+     * <p>
+     * This method gets all the import objects associated with this module.
+     * </p>
      *
      * @return A list of {@link UsesItem} objects.
      */
@@ -160,26 +187,35 @@ public abstract class ModuleDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>Implemented by concrete subclasses of {@link ModuleDec}
-     * to manufacture a copy of themselves.</p>
+     * <p>
+     * Implemented by concrete subclasses of {@link ModuleDec} to manufacture a
+     * copy of themselves.
+     * </p>
      *
      * @return A new {@link ModuleDec} that is a deep copy of the original.
      */
     protected ModuleDec copy() {
-        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
-                + this.getClass(), new CloneNotSupportedException());
+        throw new MiscErrorException(
+                "Shouldn't be calling copy()!  Type: " + this.getClass(),
+                new CloneNotSupportedException());
     }
 
     /**
-     * <p>An helper method that deep copies all the module dependencies.</p>
+     * <p>
+     * An helper method that deep copies all the module dependencies.
+     * </p>
      *
      * @return A new module dependencies map.
      */
-    protected final Map<ResolveFileBasicInfo, Boolean> copyModuleDependencies() {
+    protected final Map<ResolveFileBasicInfo, Boolean>
+            copyModuleDependencies() {
         Map<ResolveFileBasicInfo, Boolean> newModuleDependencies =
                 new LinkedHashMap<>(myModuleDependencies.size());
-        for (ResolveFileBasicInfo fileBasicInfo : myModuleDependencies.keySet()) {
-            newModuleDependencies.put(new ResolveFileBasicInfo(fileBasicInfo.getName(), fileBasicInfo.getParentDirName()),
+        for (ResolveFileBasicInfo fileBasicInfo : myModuleDependencies
+                .keySet()) {
+            newModuleDependencies.put(
+                    new ResolveFileBasicInfo(fileBasicInfo.getName(),
+                            fileBasicInfo.getParentDirName()),
                     myModuleDependencies.get(fileBasicInfo));
         }
 
@@ -187,13 +223,14 @@ public abstract class ModuleDec extends Dec {
     }
 
     /**
-     * <p>A helper method to form the string with
-     * the declaration list and the end of module.</p>
+     * <p>
+     * A helper method to form the string with the declaration list and the end
+     * of module.
+     * </p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentInc The additional indentation increment
-     *                       for the subsequent lines.
+     * @param indentSize The base indentation to the first line of the text.
+     * @param innerIndentInc The additional indentation increment for the
+     *        subsequent lines.
      *
      * @return A formatted text string.
      */
@@ -211,13 +248,13 @@ public abstract class ModuleDec extends Dec {
     }
 
     /**
-     * <p>A helper method to form the string with
-     * the module's name and args.</p>
+     * <p>
+     * A helper method to form the string with the module's name and args.
+     * </p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentInc The additional indentation increment
-     *                       for the subsequent lines.
+     * @param indentSize The base indentation to the first line of the text.
+     * @param innerIndentInc The additional indentation increment for the
+     *        subsequent lines.
      *
      * @return A formatted text string.
      */
@@ -246,13 +283,13 @@ public abstract class ModuleDec extends Dec {
     }
 
     /**
-     * <p>A helper method to form the string with
-     * the module's uses items.</p>
+     * <p>
+     * A helper method to form the string with the module's uses items.
+     * </p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentInc The additional indentation increment
-     *                       for the subsequent lines.
+     * @param indentSize The base indentation to the first line of the text.
+     * @param innerIndentInc The additional indentation increment for the
+     *        subsequent lines.
      *
      * @return A formatted text string.
      */

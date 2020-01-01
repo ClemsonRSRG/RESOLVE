@@ -1,7 +1,7 @@
 /*
  * EmptyImmutableList.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,7 +16,9 @@ import edu.clemson.cs.rsrg.prover.iterators.DummyIterator;
 import java.util.Iterator;
 
 /**
- * <p>This class implements an empty immutable list.</p>
+ * <p>
+ * This class implements an empty immutable list.
+ * </p>
  *
  * @param <E> Type of elements stored inside this list.
  *
@@ -29,7 +31,11 @@ public class EmptyImmutableList<E> extends AbstractImmutableList<E> {
     // Member Fields
     // ===========================================================
 
-    /** <p>A type safe iterator.</p> */
+    /**
+     * <p>
+     * A type safe iterator.
+     * </p>
+     */
     private final Iterator<E> TYPESAFE_ITERATOR = (Iterator<E>) null;
 
     // ===========================================================
@@ -37,7 +43,9 @@ public class EmptyImmutableList<E> extends AbstractImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>This method returns the element at the specified index.</p>
+     * <p>
+     * This method returns the element at the specified index.
+     * </p>
      *
      * @param index An index position.
      *
@@ -49,8 +57,10 @@ public class EmptyImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from the head
-     * to the specified index.</p>
+     * <p>
+     * This method returns a new immutable sub-list from the head to the
+     * specified index.
+     * </p>
      *
      * @param length Length of the sub-list.
      *
@@ -74,8 +84,9 @@ public class EmptyImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns the number of elements in
-     * this list.</p>
+     * <p>
+     * This method returns the number of elements in this list.
+     * </p>
      *
      * @return Number of elements.
      */
@@ -85,11 +96,13 @@ public class EmptyImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from the
-     * specified start index to the end of our list.</p>
+     * <p>
+     * This method returns a new immutable sub-list from the specified start
+     * index to the end of our
+     * list.
+     * </p>
      *
-     * @param startIndex An index position to start building
-     *                   our sub-list.
+     * @param startIndex An index position to start building our sub-list.
      *
      * @return An immutable sub-list of the original list.
      */

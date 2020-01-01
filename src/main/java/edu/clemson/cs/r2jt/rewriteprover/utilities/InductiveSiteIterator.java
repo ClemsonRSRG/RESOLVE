@@ -1,7 +1,7 @@
 /*
  * InductiveSiteIterator.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,11 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * <p>Wraps a Site, and iterates over every sub-site, including the site itself.
- * The order in which it does this is undefined.</p>
+ * <p>
+ * Wraps a Site, and iterates over every sub-site, including the site itself.
+ * The order in which it
+ * does this is undefined.
+ * </p>
  */
 public class InductiveSiteIterator implements Iterator<Site> {
 
@@ -45,9 +48,8 @@ public class InductiveSiteIterator implements Iterator<Site> {
                     new InductiveSiteIterator(myCurrentSubExpression);
         }
         else {
-            myCurrentInductiveSubExpressionIterator =
-                    DummyIterator
-                            .getInstance(myCurrentInductiveSubExpressionIterator);
+            myCurrentInductiveSubExpressionIterator = DummyIterator
+                    .getInstance(myCurrentInductiveSubExpressionIterator);
         }
 
         setUpNext();
@@ -116,9 +118,8 @@ public class InductiveSiteIterator implements Iterator<Site> {
 
         @Override
         public Site next() {
-            Site result =
-                    new Site(myBasis.getModel(), myBasis.conjunct, myBasis.path
-                            .appended(mySiblingIndex), myPExps.next());
+            Site result = new Site(myBasis.getModel(), myBasis.conjunct,
+                    myBasis.path.appended(mySiblingIndex), myPExps.next());
 
             mySiblingIndex++;
 

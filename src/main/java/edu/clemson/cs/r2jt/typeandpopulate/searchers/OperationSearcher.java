@@ -1,7 +1,7 @@
 /*
  * OperationSearcher.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -39,18 +39,17 @@ public class OperationSearcher implements TableSearcher<OperationEntry> {
     }
 
     @Override
-    public boolean addMatches(SymbolTable entries,
-            List<OperationEntry> matches, SearchContext l)
+    public boolean addMatches(SymbolTable entries, List<OperationEntry> matches,
+            SearchContext l)
             throws DuplicateSymbolException {
 
         if (entries.containsKey(myQueryName)) {
             try {
-                OperationEntry operation =
-                        entries.get(myQueryName).toOperationEntry(
-                                myQueryLocation);
+                OperationEntry operation = entries.get(myQueryName)
+                        .toOperationEntry(myQueryLocation);
 
                 if (argumentsMatch(operation.getParameters())) {
-                    //We have a match at this point
+                    // We have a match at this point
                     if (!matches.isEmpty()) {
                         throw new DuplicateSymbolException();
                     }
@@ -59,7 +58,7 @@ public class OperationSearcher implements TableSearcher<OperationEntry> {
                 }
             }
             catch (SourceErrorException see) {
-                //No problem, just don't include it in the result
+                // No problem, just don't include it in the result
             }
         }
 

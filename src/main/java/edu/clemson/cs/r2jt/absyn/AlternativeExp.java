@@ -1,7 +1,7 @@
 /*
  * AlternativeExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -89,7 +89,7 @@ public class AlternativeExp extends Exp {
                 result &= thisAltItems.next().equivalent(eAltItems.next());
             }
 
-            //Both had better have run out at the same time
+            // Both had better have run out at the same time
             result &= (!thisAltItems.hasNext()) && (!eAltItems.hasNext());
         }
 
@@ -130,8 +130,9 @@ public class AlternativeExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<AltItemExp> i = alternatives.iterator();
         while (i.hasNext()) {

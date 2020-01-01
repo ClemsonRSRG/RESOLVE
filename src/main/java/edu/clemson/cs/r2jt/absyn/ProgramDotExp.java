@@ -1,7 +1,7 @@
 /*
  * ProgramDotExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,24 +23,40 @@ public class ProgramDotExp extends ProgramExp {
     // Variables
     // ===========================================================
 
-    /** <p>The location member.</p> */
+    /**
+     * <p>
+     * The location member.
+     * </p>
+     */
     private Location myLocation;
 
-    /** <p>The facility qualifier member.</p> */
+    /**
+     * <p>
+     * The facility qualifier member.
+     * </p>
+     */
     private PosSymbol myQualifier;
 
-    /** <p>The program expression member.</p> */
+    /**
+     * <p>
+     * The program expression member.
+     * </p>
+     */
     private ProgramExp myExp;
 
-    /** <p>The semanticExp member.</p> */
+    /**
+     * <p>
+     * The semanticExp member.
+     * </p>
+     */
     private ProgramExp mySemanticExp;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public ProgramDotExp(Location location, PosSymbol qualifier,
-            ProgramExp exp, ProgramExp semanticExp) {
+    public ProgramDotExp(Location location, PosSymbol qualifier, ProgramExp exp,
+            ProgramExp semanticExp) {
         myLocation = location;
         myQualifier = qualifier;
         myExp = exp;
@@ -48,12 +64,14 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>This is a method that is called to create a new ProgramDotExp
-     * that is substituted.</p>
+     * <p>
+     * This is a method that is called to create a new ProgramDotExp that is
+     * substituted.
+     * </p>
      *
      * @param substitutions A mapping from <code>Exp</code>s that should be
-     *                      substituted out to the <code>Exp</code> that should
-     *                      replace them.
+     *        substituted out to the
+     *        <code>Exp</code> that should replace them.
      *
      * @return A new ProgramDotExp.
      */
@@ -70,7 +88,9 @@ public class ProgramDotExp extends ProgramExp {
     // -----------------------------------------------------------
 
     /**
-     * <p>Returns the value of the location variable.</p>
+     * <p>
+     * Returns the value of the location variable.
+     * </p>
      *
      * @return The location of the <code>ProgramDotExp</code>.
      */
@@ -79,7 +99,9 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Returns the name of the qualifying facility.</p>
+     * <p>
+     * Returns the name of the qualifying facility.
+     * </p>
      *
      * @return The <code>PosSymbol</code> form of the qualifier.
      */
@@ -88,7 +110,9 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Returns the expression that is being dotted.</p>
+     * <p>
+     * Returns the expression that is being dotted.
+     * </p>
      *
      * @return The <code>Exp</code> form of the expression.
      */
@@ -97,7 +121,9 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Returns the value of the semanticExp variable.</p>
+     * <p>
+     * Returns the value of the semanticExp variable.
+     * </p>
      *
      * @return The semantic expression.
      */
@@ -110,7 +136,9 @@ public class ProgramDotExp extends ProgramExp {
     // -----------------------------------------------------------
 
     /**
-     * <p>Sets the location variable to the specified value.</p>
+     * <p>
+     * Sets the location variable to the specified value.
+     * </p>
      *
      * @param location New location.
      */
@@ -119,7 +147,9 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Sets the qualifier variable to the specified value.</p>
+     * <p>
+     * Sets the qualifier variable to the specified value.
+     * </p>
      *
      * @param qualifier New qualifier symbol.
      */
@@ -128,7 +158,9 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Sets the expression variable to the specified value.</p>
+     * <p>
+     * Sets the expression variable to the specified value.
+     * </p>
      *
      * @param exp New expression.
      */
@@ -137,7 +169,9 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Sets the semanticExp variable to the specified value.</p>
+     * <p>
+     * Sets the semanticExp variable to the specified value.
+     * </p>
      *
      * @param semanticExp New semantic expression.
      */
@@ -150,7 +184,9 @@ public class ProgramDotExp extends ProgramExp {
     // ===========================================================
 
     /**
-     * <p>Accepts a ResolveConceptualVisitor.</p>
+     * <p>
+     * Accepts a ResolveConceptualVisitor.
+     * </p>
      *
      * @param v A visitor object.
      */
@@ -160,7 +196,9 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Returns a formatted text string of this class.</p>
+     * <p>
+     * Returns a formatted text string of this class.
+     * </p>
      *
      * @param indent The value to be indented.
      * @param increment The increment value.
@@ -192,14 +230,15 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Returns true if the variable is found in any sub expression
-     * of this one.</p>
+     * <p>
+     * Returns true if the variable is found in any sub expression of this one.
+     * </p>
      *
      * @param varName Name of the variable to be checked.
      * @param IsOldExp Check to see if this is a "#" expression.
      *
-     * @return True if it contains the variable as a sub expression,
-     *         false otherwise.
+     * @return True if it contains the variable as a sub expression, false
+     *         otherwise.
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
@@ -219,22 +258,27 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>Creates a deep copy of the <code>ProgramDotExp</code>.</p>
+     * <p>
+     * Creates a deep copy of the <code>ProgramDotExp</code>.
+     * </p>
      *
      * @return A new program expression.
      */
     @Override
     protected ProgramDotExp copy() {
-        ProgramDotExp c =
-                new ProgramDotExp(myLocation, myQualifier, myExp, mySemanticExp);
+        ProgramDotExp c = new ProgramDotExp(myLocation, myQualifier, myExp,
+                mySemanticExp);
         c.setMathType(this.myMathType);
         c.setMathTypeValue(this.myMathTypeValue);
         return c;
     }
 
     /**
-     * <p>This doesn't do anything since we don't have any sub
-     * expressions. This is here because it is an abstract method.</p>
+     * <p>
+     * This doesn't do anything since we don't have any sub expressions. This is
+     * here because it is an
+     * abstract method.
+     * </p>
      *
      * @return An empty list.
      */
@@ -244,7 +288,9 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>This replaces the old expression with the new one.</p>
+     * <p>
+     * This replaces the old expression with the new one.
+     * </p>
      *
      * @param old The old expression.
      * @param replacement The replacing expression.
@@ -270,8 +316,11 @@ public class ProgramDotExp extends ProgramExp {
     }
 
     /**
-     * <p>This doesn't do anything since we don't have any sub
-     * expressions. This is here because it is an abstract method.</p>
+     * <p>
+     * This doesn't do anything since we don't have any sub expressions. This is
+     * here because it is an
+     * abstract method.
+     * </p>
      *
      * @param index Index location where we need to set the expression.
      * @param e Expression to be set.
@@ -280,7 +329,9 @@ public class ProgramDotExp extends ProgramExp {
     public void setSubExpression(int index, Exp e) {}
 
     /**
-     * <p>Returns a formatted text string of this class.</p>
+     * <p>
+     * Returns a formatted text string of this class.
+     * </p>
      *
      * @param indent The value to be indented.
      *

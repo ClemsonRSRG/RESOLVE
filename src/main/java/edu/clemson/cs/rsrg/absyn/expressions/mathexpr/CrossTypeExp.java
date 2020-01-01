@@ -1,7 +1,7 @@
 /*
  * CrossTypeExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,10 +19,15 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the class for all the mathematical cross type expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical cross type expression objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
- * <p>The value of a type that looks like:</p>
+ * <p>
+ * The value of a type that looks like:
+ * </p>
  *
  * <pre>
  * CART_PROD
@@ -41,7 +46,11 @@ public class CrossTypeExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>A map from names to raw types.</p> */
+    /**
+     * <p>
+     * A map from names to raw types.
+     * </p>
+     */
     private final Map<PosSymbol, ArbitraryExpTy> myTagsToFields;
 
     // ===========================================================
@@ -49,7 +58,9 @@ public class CrossTypeExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical cross type expression.</p>
+     * <p>
+     * This constructs a mathematical cross type expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param tagsToFieldsMap A map containing all the tags to fields mapping.
@@ -160,12 +171,11 @@ public class CrossTypeExp extends MathExp {
                 ArbitraryExpTy thisTy = myTagsToFields.get(thisTagsIt.next());
                 ArbitraryExpTy eTy =
                         eAsCrossTypeExp.myTagsToFields.get(eTagsIt.next());
-                result &=
-                        thisTy.getArbitraryExp().equivalent(
-                                eTy.getArbitraryExp());
+                result &= thisTy.getArbitraryExp()
+                        .equivalent(eTy.getArbitraryExp());
             }
 
-            //Both had better have run out at the same time
+            // Both had better have run out at the same time
             result &= (!thisTagsIt.hasNext()) && (!eTagsIt.hasNext());
         }
 
@@ -173,8 +183,9 @@ public class CrossTypeExp extends MathExp {
     }
 
     /**
-     * <p>This returns the number of elements in this cross type
-     * expression.</p>
+     * <p>
+     * This returns the number of elements in this cross type expression.
+     * </p>
      *
      * @return The size of the map.
      */
@@ -191,8 +202,9 @@ public class CrossTypeExp extends MathExp {
     }
 
     /**
-     * <p>This returns the tag/field pairs in this cross type
-     * expression.</p>
+     * <p>
+     * This returns the tag/field pairs in this cross type expression.
+     * </p>
      *
      * @return The {@link Map} containing the tags to field pairs.
      */

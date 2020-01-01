@@ -1,7 +1,7 @@
 /*
  * QuantExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,8 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical quantified expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the mathematical quantified expression objects that
+ * the compiler builds
+ * using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,16 +36,32 @@ public class QuantExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The object's quantification (if any).</p> */
+    /**
+     * <p>
+     * The object's quantification (if any).
+     * </p>
+     */
     private final SymbolTableEntry.Quantification myQuantification;
 
-    /** <p>The mathematical variables in this quantified expression.</p> */
+    /**
+     * <p>
+     * The mathematical variables in this quantified expression.
+     * </p>
+     */
     private final List<MathVarDec> myVars;
 
-    /** <p>The quantified expression's where part.</p> */
+    /**
+     * <p>
+     * The quantified expression's where part.
+     * </p>
+     */
     private final Exp myWhereExp;
 
-    /** <p>The quantified expression's body.</p> */
+    /**
+     * <p>
+     * The quantified expression's body.
+     * </p>
+     */
     private final Exp myBodyExp;
 
     // ===========================================================
@@ -50,11 +69,15 @@ public class QuantExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a quantified expression.</p>
+     * <p>
+     * This constructs a quantified expression.
+     * </p>
      *
      * @param l A {@link Location} representation object.
-     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier object.
-     * @param vars A list of {@link MathVarDec}s representing the expression's variables.
+     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier
+     *        object.
+     * @param vars A list of {@link MathVarDec}s representing the expression's
+     *        variables.
      * @param where A {@link Exp} representing the where clause.
      * @param body A {@link Exp} representing the body of the expression.
      */
@@ -180,12 +203,11 @@ public class QuantExp extends MathExp {
                 while (retval && thisVars.hasNext() && eVars.hasNext()) {
                     MathVarDec cThisVar = thisVars.next();
                     MathVarDec cEVar = eVars.next();
-                    retval &=
-                            cThisVar.getName().equals(cEVar.getName())
-                                    && cThisVar.getTy().equals(cEVar.getTy());
+                    retval &= cThisVar.getName().equals(cEVar.getName())
+                            && cThisVar.getTy().equals(cEVar.getTy());
                 }
 
-                //Both had better have run out at the same time
+                // Both had better have run out at the same time
                 retval &= (!thisVars.hasNext()) && (!eVars.hasNext());
             }
 
@@ -197,7 +219,9 @@ public class QuantExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the body expression.</p>
+     * <p>
+     * This method returns the body expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -206,7 +230,9 @@ public class QuantExp extends MathExp {
     }
 
     /**
-     * <p>This method returns this variable expression's quantification.</p>
+     * <p>
+     * This method returns this variable expression's quantification.
+     * </p>
      *
      * @return The {@link SymbolTableEntry.Quantification} object.
      */
@@ -229,8 +255,10 @@ public class QuantExp extends MathExp {
     }
 
     /**
-     * <p>This method returns all the variable expressions
-     * in this quantified expression.</p>
+     * <p>
+     * This method returns all the variable expressions in this quantified
+     * expression.
+     * </p>
      *
      * @return A list containing all the {@link MathVarDec}s.
      */
@@ -239,7 +267,9 @@ public class QuantExp extends MathExp {
     }
 
     /**
-     * <p>This method returns the where expression.</p>
+     * <p>
+     * This method returns the where expression.
+     * </p>
      *
      * @return The {@link Exp} representation object.
      */
@@ -274,8 +304,8 @@ public class QuantExp extends MathExp {
             newWhere = myWhereExp.clone();
         }
 
-        return new QuantExp(cloneLocation(), myQuantification, myVars,
-                newWhere, myBodyExp.clone());
+        return new QuantExp(cloneLocation(), myQuantification, myVars, newWhere,
+                myBodyExp.clone());
     }
 
     /**
@@ -297,8 +327,11 @@ public class QuantExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the variables in the expression.</p>
+     * <p>
+     * This is a helper method that makes a copy of the list containing all the
+     * variables in the
+     * expression.
+     * </p>
      *
      * @return A list containing {@link MathVarDec}s.
      */

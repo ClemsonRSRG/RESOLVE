@@ -1,7 +1,7 @@
 /*
  * SymmetricBoundVariableVisitor.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,8 +19,9 @@ import edu.clemson.cs.rsrg.typeandpopulate.symboltables.FinalizedScope;
 import java.util.*;
 
 /**
- * <p>This is the abstract base class for symmetrically visiting
- * bounded variables.</p>
+ * <p>
+ * This is the abstract base class for symmetrically visiting bounded variables.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,10 +31,18 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     // Member Fields
     // ===========================================================
 
-    /** <p>A scope for the first set of bounded variables.</p> */
+    /**
+     * <p>
+     * A scope for the first set of bounded variables.
+     * </p>
+     */
     private Deque<Map<String, MTType>> myBoundVariables1 = new LinkedList<>();
 
-    /** <p>A scope for the second set of bounded variables.</p> */
+    /**
+     * <p>
+     * A scope for the second set of bounded variables.
+     * </p>
+     */
     private Deque<Map<String, MTType>> myBoundVariables2 = new LinkedList<>();
 
     // ===========================================================
@@ -41,13 +50,16 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     // ===========================================================
 
     /**
-     * <p>This constructs a symmetric visitor with no initial
-     * bounded variables.</p>
+     * <p>
+     * This constructs a symmetric visitor with no initial bounded variables.
+     * </p>
      */
     protected SymmetricBoundVariableVisitor() {}
 
     /**
-     * <p>This constructs a symmetric visitor using a {@link FinalizedScope}.</p>
+     * <p>
+     * This constructs a symmetric visitor using a {@link FinalizedScope}.
+     * </p>
      *
      * @param context1 A finalized scope.
      */
@@ -64,8 +76,10 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     }
 
     /**
-     * <p>This constructs a symmetric visitor with initial
-     * bounded variables for the first scope.</p>
+     * <p>
+     * This constructs a symmetric visitor with initial bounded variables for
+     * the first scope.
+     * </p>
      *
      * @param context1 Bounded variables map.
      */
@@ -74,13 +88,16 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     }
 
     /**
-     * <p>This constructs a symmetric visitor with initial
-     * bounded variables for both scopes.</p>
+     * <p>
+     * This constructs a symmetric visitor with initial bounded variables for
+     * both scopes.
+     * </p>
      *
      * @param context1 Bounded variables map for the first scope.
      * @param context2 Bounded variables map for the second scope.
      */
-    protected SymmetricBoundVariableVisitor(Map<String, MTType> context1, Map<String, MTType> context2) {
+    protected SymmetricBoundVariableVisitor(Map<String, MTType> context1,
+            Map<String, MTType> context2) {
         this(context1);
         myBoundVariables2.push(new HashMap<>(context2));
     }
@@ -90,14 +107,17 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     // ===========================================================
 
     /**
-     * <p>This method adds additional logic before we visit
-     * two {@link MTBigUnion} by storing the quantified variables
-     * into separate scopes.</p>
+     * <p>
+     * This method adds additional logic before we visit two {@link MTBigUnion}
+     * by storing the
+     * quantified variables into separate scopes.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
      *
-     * @return The result from calling {@link #boundBeginMTBigUnion(MTBigUnion, MTBigUnion)}.
+     * @return The result from calling
+     *         {@link #boundBeginMTBigUnion(MTBigUnion, MTBigUnion)}.
      */
     @Override
     public final boolean beginMTBigUnion(MTBigUnion t1, MTBigUnion t2) {
@@ -108,14 +128,17 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     }
 
     /**
-     * <p>This method adds additional logic after we visit
-     * two {@link MTBigUnion} by removing the quantified variables
-     * from our scopes.</p>
+     * <p>
+     * This method adds additional logic after we visit two {@link MTBigUnion}
+     * by removing the
+     * quantified variables from our scopes.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
      *
-     * @return The result from calling {@link #boundEndMTBigUnion(MTBigUnion, MTBigUnion)}.
+     * @return The result from calling
+     *         {@link #boundEndMTBigUnion(MTBigUnion, MTBigUnion)}.
      */
     @Override
     public final boolean endMTBigUnion(MTBigUnion t1, MTBigUnion t2) {
@@ -127,7 +150,9 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     }
 
     /**
-     * <p>This method resets this symmetric visitor.</p>
+     * <p>
+     * This method resets this symmetric visitor.
+     * </p>
      */
     public void reset() {
         myBoundVariables1.clear();
@@ -139,37 +164,43 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     // ===========================================================
 
     /**
-     * <p>This method adds additional logic to bound
-     * {@code t1} and {@code t2} before we visit it.</p>
+     * <p>
+     * This method adds additional logic to bound {@code t1} and {@code t2}
+     * before we visit it.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
      *
-     * @return {@code true} if {@code t1} and {@code t2} bind,
-     * {@code false} otherwise.
+     * @return {@code true} if {@code t1} and {@code t2} bind, {@code false}
+     *         otherwise.
      */
     protected boolean boundBeginMTBigUnion(MTBigUnion t1, MTBigUnion t2) {
         return true;
     }
 
     /**
-     * <p>This method adds additional logic to bound
-     * {@code t1} and {@code t2} after we visit it.</p>
+     * <p>
+     * This method adds additional logic to bound {@code t1} and {@code t2}
+     * after we visit it.
+     * </p>
      *
      * @param t1 A math type.
      * @param t2 A math type.
      *
-     * @return {@code true} if {@code t1} and {@code t2} bind,
-     * {@code false} otherwise.
+     * @return {@code true} if {@code t1} and {@code t2} bind, {@code false}
+     *         otherwise.
      */
     protected boolean boundEndMTBigUnion(MTBigUnion t1, MTBigUnion t2) {
         return true;
     }
 
     /**
-     * <p>This method returns the mathematical type used
-     * to bind the given variable name from my first scope of
-     * bounded variables.</p>
+     * <p>
+     * This method returns the mathematical type used to bind the given variable
+     * name from my first
+     * scope of bounded variables.
+     * </p>
      *
      * @param name A variable name.
      *
@@ -180,9 +211,11 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     }
 
     /**
-     * <p>This method returns the mathematical type used
-     * to bind the given variable name from my second scope of
-     * bounded variables.</p>
+     * <p>
+     * This method returns the mathematical type used to bind the given variable
+     * name from my second
+     * scope of bounded variables.
+     * </p>
      *
      * @param name A variable name.
      *
@@ -197,17 +230,21 @@ abstract class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     // ===========================================================
 
     /**
-     * <p>This method returns mathematical type for the inner most
-     * binding for the given variable name from the provided scope.</p>
+     * <p>
+     * This method returns mathematical type for the inner most binding for the
+     * given variable name
+     * from the provided scope.
+     * </p>
      *
      * @param name A variable name.
      *
      * @return The {@link MTType} representation object.
      *
-     * @throws NoSuchElementException We did not locate a {@link MTType}
-     * with that name.
+     * @throws NoSuchElementException We did not locate a {@link MTType} with
+     *         that name.
      */
-    private static MTType getInnermostBinding(Deque<Map<String, MTType>> scopes, String name)
+    private static MTType getInnermostBinding(Deque<Map<String, MTType>> scopes,
+            String name)
             throws NoSuchElementException {
         MTType result = null;
 

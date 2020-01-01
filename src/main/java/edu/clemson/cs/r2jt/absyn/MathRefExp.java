@@ -1,7 +1,7 @@
 /*
  * MathRefExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -47,8 +47,10 @@ public class MathRefExp extends Exp {
     /** The id member. */
     private PosSymbol id;
 
-    /** The index of the rule within the definition if the id identifies an 
-     *  inductive definition. */
+    /**
+     * The index of the rule within the definition if the id identifies an
+     * inductive definition.
+     */
     private PosSymbol index;
 
     /** The name of the module in which we will find the id. */

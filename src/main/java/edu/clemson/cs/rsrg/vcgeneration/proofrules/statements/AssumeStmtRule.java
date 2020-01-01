@@ -1,7 +1,7 @@
 /*
  * AssumeStmtRule.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -35,8 +35,10 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 
 /**
- * <p>This class contains the logic for applying the {@code assume}
- * rule to an {@link AssumeStmt}.</p>
+ * <p>
+ * This class contains the logic for applying the {@code assume} rule to an
+ * {@link AssumeStmt}.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -49,12 +51,18 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     // Member Fields
     // ===========================================================
 
-    /** <p>The {@link AssumeStmt} we are applying the rule to.</p> */
+    /**
+     * <p>
+     * The {@link AssumeStmt} we are applying the rule to.
+     * </p>
+     */
     private final AssumeStmt myAssumeStmt;
 
     /**
-     * <p>A map that indicates if a particular {@link Sequent} had
-     * an impacting reduction.</p>
+     * <p>
+     * A map that indicates if a particular {@link Sequent} had an impacting
+     * reduction.
+     * </p>
      */
     private final Map<Sequent, Boolean> myImpactingReducedSequentMap;
 
@@ -63,15 +71,16 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This creates a new application of the {@code assume}
-     * rule.</p>
+     * <p>
+     * This creates a new application of the {@code assume} rule.
+     * </p>
      *
-     * @param assumeStmt The {@link AssumeStmt} we are applying
-     *                   the rule to.
-     * @param block The assertive code block that the subclasses are
-     *              applying the rule to.
-     * @param context The verification context that contains all
-     *                the information we have collected so far.
+     * @param assumeStmt The {@link AssumeStmt} we are applying the rule to.
+     * @param block The assertive code block that the subclasses are applying
+     *        the rule to.
+     * @param context The verification context that contains all the information
+     *        we have collected so
+     *        far.
      * @param stGroup The string template group we will be using.
      * @param blockModel The model associated with {@code block}.
      */
@@ -87,7 +96,9 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This method applies the {@code Proof Rule}.</p>
+     * <p>
+     * This method applies the {@code Proof Rule}.
+     * </p>
      */
     @Override
     public final void applyRule() {
@@ -129,43 +140,48 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 // Create a root node using the original assumeExp and
                 // a children node using the assumeExps list. Then create
                 // and edge to indicate a reduction.
-                Sequent rootSequent =
-                        new Sequent(myAssumeStmt.getLocation(),
-                                Collections.singletonList(assumeExp), new ArrayList<Exp>());
-                Sequent updatedSequent =
-                        new Sequent(myAssumeStmt.getLocation(),
-                                assumeExps, new ArrayList<Exp>());
+                Sequent rootSequent = new Sequent(myAssumeStmt.getLocation(),
+                        Collections.singletonList(assumeExp),
+                        new ArrayList<Exp>());
+                Sequent updatedSequent = new Sequent(myAssumeStmt.getLocation(),
+                        assumeExps, new ArrayList<Exp>());
                 reductionTree.addVertex(rootSequent);
                 reductionTree.addVertex(updatedSequent);
                 reductionTree.addEdge(rootSequent, updatedSequent);
 
                 // Export the tree
-                ReductionTreeExporter treeExporter = new ReductionTreeDotExporter();
-                stepModel.add("reductionTrees", treeExporter.output(reductionTree));
+                ReductionTreeExporter treeExporter =
+                        new ReductionTreeDotExporter();
+                stepModel.add("reductionTrees",
+                        treeExporter.output(reductionTree));
             }
 
             // Build the new list of VCs
             List<VerificationCondition> newVCs = new ArrayList<>();
-            for (VerificationCondition vc : myCurrentAssertiveCodeBlock.getVCs()) {
+            for (VerificationCondition vc : myCurrentAssertiveCodeBlock
+                    .getVCs()) {
                 // YS: The substitutionStep will call applicationStep
-                Sequent resultSequent = substitutionStep(vc.getSequent(), assumeExps);
+                Sequent resultSequent =
+                        substitutionStep(vc.getSequent(), assumeExps);
 
                 // Reduce the sequent, check to see if any of them had an
                 // impacting reduction and create a new VC for each sequent
                 // that was generated.
-                List<Sequent> reducedSequents = reducedSequentForm(resultSequent, stepModel);
+                List<Sequent> reducedSequents =
+                        reducedSequentForm(resultSequent, stepModel);
                 for (Sequent reducedSequent : reducedSequents) {
                     // A flag that checks if this new sequent got some kind of
                     // impacting reduction. Note that if the original VC got an impacting
                     // reduction, this is automatically true.
-                    boolean hasImpactingReduction =
-                            vc.getHasImpactingReductionFlag() ||
-                                    myImpactingReducedSequentMap.get(reducedSequent);
+                    boolean hasImpactingReduction = vc
+                            .getHasImpactingReductionFlag()
+                            || myImpactingReducedSequentMap.get(reducedSequent);
 
                     // Create a new VC for each reduced sequent.
-                    newVCs.add(new VerificationCondition(vc.getLocation().clone(),
-                            reducedSequent, hasImpactingReduction,
-                            vc.getLocationDetailModel().clone()));
+                    newVCs.add(
+                            new VerificationCondition(vc.getLocation().clone(),
+                                    reducedSequent, hasImpactingReduction,
+                                    vc.getLocationDetailModel().clone()));
                 }
             }
 
@@ -174,16 +190,17 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         }
 
         // Add the different details to the various different output models
-        stepModel.add("proofRuleName", ruleName).add(
-                "currentStateOfBlock", myCurrentAssertiveCodeBlock);
+        stepModel.add("proofRuleName", ruleName).add("currentStateOfBlock",
+                myCurrentAssertiveCodeBlock);
 
         // Add the different details to the various different output models
         myBlockModel.add("vcGenSteps", stepModel.render());
     }
 
     /**
-     * <p>This method returns a description associated with
-     * the {@code Proof Rule}.</p>
+     * <p>
+     * This method returns a description associated with the {@code Proof Rule}.
+     * </p>
      *
      * @return A string.
      */
@@ -197,17 +214,25 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     // ===========================================================
 
     /**
-     * <p>This is a helper method that checks to see if the given assume expression
-     * can be used to prove anything in {@code seq}. This is done by finding the
-     * intersection between the set of symbols in the assume expression and
-     * the set of symbols in {@code seq}.</p>
+     * <p>
+     * This is a helper method that checks to see if the given assume expression
+     * can be used to prove
+     * anything in {@code seq}. This is done by finding the intersection between
+     * the set of symbols in
+     * the assume expression and the set of symbols in {@code seq}.
+     * </p>
      *
-     * <p>For a stipulate assume statement, we keep the remaining
-     * then we keep all the remaining assume expressions no matter what.</p>
+     * <p>
+     * For a stipulate assume statement, we keep the remaining then we keep all
+     * the remaining assume
+     * expressions no matter what.
+     * </p>
      *
-     * <p>For a regular assume statement, we loop though keep looping through
-     * the remaining assume expressions until we stop adding more expression
-     * to our antecedent.</p>
+     * <p>
+     * For a regular assume statement, we loop though keep looping through the
+     * remaining assume
+     * expressions until we stop adding more expression to our antecedent.
+     * </p>
      *
      * @param seq The current {@link Sequent} we are processing.
      * @param remAssumeExpList The list of remaining assume expressions.
@@ -262,7 +287,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
 
                     // Add this as a new antecedent if there are common symbols
                     // in the assume expression and in the sequent. (Parsimonious step)
-                    Set<String> intersection = new LinkedHashSet<>(symbolsInSeq);
+                    Set<String> intersection =
+                            new LinkedHashSet<>(symbolsInSeq);
                     UniqueSymbolNameExtractor symbolNameExtractor =
                             new UniqueSymbolNameExtractor();
                     TreeWalker.visit(symbolNameExtractor, assumeExp);
@@ -302,7 +328,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                     // more. If we didn't, then none of the remaining
                     // expressions will be helpful.
                     checkForMoreAntecedents = addedToAntecendentSet;
-                } else {
+                }
+                else {
                     // Since we are done with all assume expressions,
                     // we can quit out of the loop.
                     checkForMoreAntecedents = false;
@@ -314,13 +341,17 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>This method checks to see if this the expression we passed
-     * is either a variable expression or a dotted expression that
-     * contains a variable expression in the last position.</p>
+     * <p>
+     * This method checks to see if this the expression we passed is either a
+     * variable expression or a
+     * dotted expression that contains a variable expression in the last
+     * position.
+     * </p>
      *
      * @param exp The checking expression.
      *
-     * @return {@code true} if is an expression we can replace, {@code false} otherwise.
+     * @return {@code true} if is an expression we can replace, {@code false}
+     *         otherwise.
      */
     private boolean containsReplaceableExp(Exp exp) {
         boolean retVal = false;
@@ -333,9 +364,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         else if (exp instanceof DotExp) {
             DotExp dotExp = (DotExp) exp;
             List<Exp> dotExpList = dotExp.getSegments();
-            retVal =
-                    containsReplaceableExp(dotExpList
-                            .get(dotExpList.size() - 1));
+            retVal = containsReplaceableExp(
+                    dotExpList.get(dotExpList.size() - 1));
         }
         // Case #3: VCVarExp
         else if (exp instanceof VCVarExp) {
@@ -346,15 +376,18 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>Rather than using the strict {@code equals} method that is defined for
-     * {@link Exp Exps}, this method checks to see if all {@link Exp Exps}
-     * are {@code equivalent}.</p>
+     * <p>
+     * Rather than using the strict {@code equals} method that is defined for
+     * {@link Exp Exps}, this
+     * method checks to see if all {@link Exp Exps} are {@code equivalent}.
+     * </p>
      *
      * @param originalExpList The original expression list.
      * @param newExpList The new expression list.
      *
-     * @return {@code true} if the lists contain {@code equivalent} {@link Exp Exps},
-     * {@code false} otherwise.
+     * @return {@code true} if the lists contain {@code equivalent} {@link Exp
+     *         Exps}, {@code false}
+     *         otherwise.
      */
     private boolean isEquivalentExpList(List<Exp> originalExpList,
             List<Exp> newExpList) {
@@ -372,8 +405,10 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>This method uses {@code sequent} to produce
-     * a list of reduced {@link Sequent Sequents}.</p>
+     * <p>
+     * This method uses {@code sequent} to produce a list of reduced
+     * {@link Sequent Sequents}.
+     * </p>
      *
      * @param sequent Original {@link Sequent}.
      * @param stepModel The model associated with this step.
@@ -388,8 +423,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 reduction.getReductionTree();
 
         // Store the map of impacting reductions
-        myImpactingReducedSequentMap.putAll(reduction
-                .getImpactingReducedSequentMap());
+        myImpactingReducedSequentMap
+                .putAll(reduction.getImpactingReducedSequentMap());
 
         // Output the reduction tree as a dot file to the step model
         // only if we did some kind of reduction.
@@ -402,14 +437,15 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>Takes an expression and split it by the {@code and}
-     * operator.</p>
+     * <p>
+     * Takes an expression and split it by the {@code and} operator.
+     * </p>
      *
      * @param exp Expression to be split.
      * @param expList List of expressions that have been split already.
      *
-     * @return A list containing {@code expList} and the split result
-     * of {@code exp}.
+     * @return A list containing {@code expList} and the split result of
+     *         {@code exp}.
      */
     private List<Exp> splitConjunctExp(Exp exp, List<Exp> expList) {
         // Attempt to split the expression if it contains a conjunct
@@ -438,15 +474,18 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>This method performs the substitutions on each of the expressions in the
-     * given list.</p>
+     * <p>
+     * This method performs the substitutions on each of the expressions in the
+     * given list.
+     * </p>
      *
      * @param expressions List of {@link Exp Exps}.
      * @param replacements A map of substitutions.
      *
      * @return A modified list of {@link Exp Exps}.
      */
-    private List<Exp> substituteExps(List<Exp> expressions, Map<Exp, Exp> replacements) {
+    private List<Exp> substituteExps(List<Exp> expressions,
+            Map<Exp, Exp> replacements) {
         List<Exp> newExps = new ArrayList<>();
         for (Exp exp : expressions) {
             newExps.add(exp.substitute(replacements));
@@ -456,10 +495,15 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
     }
 
     /**
-     * <p>This is a helper method that checks to see if the any of the assume expressions
-     * can be substituted. If it can, it will generate a new sequent. If it cannot, the original
-     * sequent will be kept. Once this step is over, it will call {@link #applicationStep(Sequent, List)}
-     * to generate the final {@link Sequent}.</p>
+     * <p>
+     * This is a helper method that checks to see if the any of the assume
+     * expressions can be
+     * substituted. If it can, it will generate a new sequent. If it cannot, the
+     * original sequent will
+     * be kept. Once this step is over, it will call
+     * {@link #applicationStep(Sequent, List)} to
+     * generate the final {@link Sequent}.
+     * </p>
      *
      * @param seq The current {@link Sequent} we are processing.
      * @param assumeExpList A list of {@link Exp Exps} being assumed.
@@ -494,14 +538,17 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
 
             // Attempts to simplify equality expressions
             if (currentAssumeExp instanceof EqualsExp
-                    && ((EqualsExp) currentAssumeExp).getOperator() == Operator.EQUAL) {
+                    && ((EqualsExp) currentAssumeExp)
+                            .getOperator() == Operator.EQUAL) {
                 EqualsExp equalsExp = (EqualsExp) currentAssumeExp;
-                boolean isLeftReplaceable = containsReplaceableExp(equalsExp.getLeft());
-                boolean isRightReplaceable = containsReplaceableExp(equalsExp.getRight());
+                boolean isLeftReplaceable =
+                        containsReplaceableExp(equalsExp.getLeft());
+                boolean isRightReplaceable =
+                        containsReplaceableExp(equalsExp.getRight());
 
                 // Check to see if we have P_Val or Cum_Dur
-                if (equalsExp.getLeft().containsVar("P_Val", false) ||
-                        equalsExp.getLeft().containsVar("Cum_Dur", false)) {
+                if (equalsExp.getLeft().containsVar("P_Val", false)
+                        || equalsExp.getLeft().containsVar("Cum_Dur", false)) {
                     hasVerificationVar = true;
                 }
                 // Check to see if we have Conc.[expression]
@@ -518,7 +565,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                     // in the current context, therefore we do the
                     // substitution.
                     if (hasVerificationVar || isConceptualVar) {
-                        substitutions.put(equalsExp.getLeft(), equalsExp.getRight());
+                        substitutions.put(equalsExp.getLeft(),
+                                equalsExp.getRight());
                     }
                     // This is a special case where we have two VarExps, but one of them
                     // refers to a Precis' definition. If that is the case, then it is safe
@@ -526,41 +574,48 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                     // so we are only implementing the logic for this side only. Might have to
                     // modify it in the future if it ever changes.
                     else {
-                        if (equalsExp.getRight() instanceof VarExp &&
-                                ((VarExp) equalsExp.getRight()).isIsPrecisDefinitionName()) {
-                            substitutions.put(equalsExp.getLeft(), equalsExp.getRight());
+                        if (equalsExp.getRight() instanceof VarExp
+                                && ((VarExp) equalsExp.getRight())
+                                        .isIsPrecisDefinitionName()) {
+                            substitutions.put(equalsExp.getLeft(),
+                                    equalsExp.getRight());
                         }
                     }
                 }
                 // Check if left hand side is replaceable
                 else if (isLeftReplaceable) {
                     // Add to substitutions where left is replaced with the right
-                    substitutions.put(equalsExp.getLeft(), equalsExp.getRight());
+                    substitutions.put(equalsExp.getLeft(),
+                            equalsExp.getRight());
                 }
                 // Only right hand side is replaceable
                 else if (isRightReplaceable) {
                     // Add to substitutions where right is replaced with the left
-                    substitutions.put(equalsExp.getRight(), equalsExp.getLeft());
+                    substitutions.put(equalsExp.getRight(),
+                            equalsExp.getLeft());
                 }
             }
 
             // Replace all instances of the left side in
             // the assume expressions we have already processed.
             for (int k = 0; k < remAssumeExpList.size(); k++) {
-                Exp newAssumeExp = remAssumeExpList.get(k).substitute(substitutions);
+                Exp newAssumeExp =
+                        remAssumeExpList.get(k).substitute(substitutions);
                 remAssumeExpList.set(k, newAssumeExp);
             }
 
             // Replace all instances of the left side in
             // the assume expressions we haven't processed.
-            for (int k = j + 1; k < assumeExpCopyList
-                    .size(); k++) {
-                Exp newAssumeExp = assumeExpCopyList.get(k).substitute(substitutions);
+            for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
+                Exp newAssumeExp =
+                        assumeExpCopyList.get(k).substitute(substitutions);
                 assumeExpCopyList.set(k, newAssumeExp);
             }
 
-            List<Exp> antencedentsSubtituted = substituteExps(newAntecedents, substitutions);
-            List<Exp> consequentsSubtituted = substituteExps(newConsequents, substitutions);
+            List<Exp> antencedentsSubtituted =
+                    substituteExps(newAntecedents, substitutions);
+            List<Exp> consequentsSubtituted =
+                    substituteExps(newConsequents, substitutions);
 
             // Check to see if this is a stipulate assume clause
             // If yes, then we will have to add it for further processing
@@ -572,8 +627,9 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
                 // Check to see if there is no change to the new antecedents
                 // and consequents. If not, then we might to keep this assumed
                 // expression for further processing.
-                if (isEquivalentExpList(antencedentsSubtituted, newAntecedents) &&
-                        isEquivalentExpList(consequentsSubtituted, newConsequents)) {
+                if (isEquivalentExpList(antencedentsSubtituted, newAntecedents)
+                        && isEquivalentExpList(consequentsSubtituted,
+                                newConsequents)) {
                     // Check to see if this a verification
                     // variable. If yes, we don't keep this assume.
                     // Otherwise, we need to store this for the
@@ -589,7 +645,8 @@ public class AssumeStmtRule extends AbstractProofRuleApplication
         }
 
         // Perform the application step and return the new sequent
-        return applicationStep(new Sequent(seq.getLocation(),
-                newAntecedents, newConsequents), remAssumeExpList);
+        return applicationStep(
+                new Sequent(seq.getLocation(), newAntecedents, newConsequents),
+                remAssumeExpList);
     }
 }

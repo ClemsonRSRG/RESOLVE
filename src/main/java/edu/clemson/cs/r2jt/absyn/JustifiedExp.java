@@ -1,7 +1,7 @@
 /*
  * JustifiedExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -94,8 +94,8 @@ public class JustifiedExp extends LineNumberedExp {
     // ===========================================================
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new JustifiedExp(location, this.getLineNum(), substitute(exp,
-                substitutions), justification);
+        return new JustifiedExp(location, this.getLineNum(),
+                substitute(exp, substitutions), justification);
     }
 
     /** Accepts a ResolveConceptualVisitor. */

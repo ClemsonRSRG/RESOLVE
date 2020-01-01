@@ -1,7 +1,7 @@
 /*
  * VarExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -68,9 +68,8 @@ public class VarExp extends Exp {
 
         if (e instanceof VarExp) {
             VarExp eAsVarExp = (VarExp) e;
-            retval =
-                    (posSymbolEquivalent(qualifier, eAsVarExp.qualifier) && (posSymbolEquivalent(
-                            name, eAsVarExp.name)));
+            retval = (posSymbolEquivalent(qualifier, eAsVarExp.qualifier)
+                    && (posSymbolEquivalent(name, eAsVarExp.name)));
         }
         else {
             retval = false;
@@ -175,8 +174,8 @@ public class VarExp extends Exp {
 
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
-        // 	Environment   env	= Environment.getInstance();
-        //  	if(env.isabelle()){return toIsabelleString(indent);};
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
 
         StringBuffer sb = new StringBuffer();
         String strName = "";
@@ -187,9 +186,9 @@ public class VarExp extends Exp {
             strName = qualifier.toString() + "." + strName;
 
         printSpace(indent, sb);
-        //    if (name != null) {
-        //        sb.append(name.toString());
-        //    }
+        // if (name != null) {
+        // sb.append(name.toString());
+        // }
 
         if (name != null) {
             int index = 0;
@@ -210,58 +209,48 @@ public class VarExp extends Exp {
         return sb.toString();
     }
 
-    /*public String toIsabelleString(int indent) {
-        Environment env = Environment.getInstance();
-        StringBuffer sb = new StringBuffer();
-    	printSpace(indent, sb);
-    	String strName = name.toString();
-        if (name != null) {
-        	int index = 0;
-        	int num = 0;
-        	while((strName.charAt(index))== '?'){
-        		num++;
-        		index++;
-        	}
-        	sb.append(strName.substring(index, strName.length()));
-        	if(num > 0)
-        		sb.append(num);
-        }
-    //    if(env.pretty()){
-            try{
-            	Type type = null; //this.getType();
-            	String typeStr = null;
-            	if(type == null){
-            		type = AssertiveCode.getCurrVar(this.name).getType();
-    	    		typeStr = type.asString();
-
-            	}
-            	if(type == null){
-            		// added the null (for StatusHandler) after changing it to not be abstract
-    	        	MathExpTypeResolver METR = new MathExpTypeResolver(env.getSymbolTable(env.getModuleID(env.getTargetFile())),
-    	        												new TypeMatcher(), null);
-    	        	type = METR.getVarExpType(this);
-    	        		  
-    	    		typeStr = type.toMath().toString().substring(0, (type.toMath()).toString().lastIndexOf("_Theory"));
-            	}
-            	if(typeStr == null) return sb.toString();
-            	
-            
-        		if(typeStr.equals("Integer") || typeStr.equals("*Z")){typeStr = "int";}
-        		else if(typeStr.equals("*String") || typeStr.equals("*Str(*Entry)")){typeStr = "'obj string";}
-        		else if(typeStr.equals("*Entry")  || typeStr.equals("*Entry")){typeStr = "'obj";}
-        		else return sb.toString();
-            	
-            	sb.append("::" + typeStr);
-                sb.append(")");
-                sb.insert(0, "(");
-            } catch(Exception e){
-            
-            }
-    //        }
-
-
-        return sb.toString();
-    }*/
+    /*
+     * public String toIsabelleString(int indent) { Environment env =
+     * Environment.getInstance();
+     * StringBuffer sb = new StringBuffer(); printSpace(indent, sb); String
+     * strName = name.toString();
+     * if (name != null) { int index = 0; int num = 0;
+     * while((strName.charAt(index))== '?'){ num++;
+     * index++; } sb.append(strName.substring(index, strName.length())); if(num
+     * > 0) sb.append(num); }
+     * // if(env.pretty()){ try{ Type type = null; //this.getType(); String
+     * typeStr = null; if(type ==
+     * null){ type = AssertiveCode.getCurrVar(this.name).getType(); typeStr =
+     * type.asString();
+     * 
+     * } if(type == null){ // added the null (for StatusHandler) after changing
+     * it to not be abstract
+     * MathExpTypeResolver METR = new
+     * MathExpTypeResolver(env.getSymbolTable(env.getModuleID(env.getTargetFile(
+     * ))), new
+     * TypeMatcher(), null); type = METR.getVarExpType(this);
+     * 
+     * typeStr = type.toMath().toString().substring(0,
+     * (type.toMath()).toString().lastIndexOf("_Theory")); } if(typeStr == null)
+     * return sb.toString();
+     * 
+     * 
+     * if(typeStr.equals("Integer") || typeStr.equals("*Z")){typeStr = "int";}
+     * else
+     * if(typeStr.equals("*String") || typeStr.equals("*Str(*Entry)")){typeStr =
+     * "'obj string";} else
+     * if(typeStr.equals("*Entry") || typeStr.equals("*Entry")){typeStr =
+     * "'obj";} else return
+     * sb.toString();
+     * 
+     * sb.append("::" + typeStr); sb.append(")"); sb.insert(0, "("); }
+     * catch(Exception e){
+     * 
+     * } // }
+     * 
+     * 
+     * return sb.toString(); }
+     */
 
     public boolean containsVar(String varName, boolean IsOldExp) {
         if (this.getName() != null) {
@@ -274,8 +263,11 @@ public class VarExp extends Exp {
                 }
             }
             else {
-                /* If IsOldExp is true, it means we were looking for an OldExp class
-                   above this and have not yet found one. */
+                /*
+                 * If IsOldExp is true, it means we were looking for an OldExp
+                 * class above this and have not
+                 * yet found one.
+                 */
                 return false;
             }
         }
@@ -326,12 +318,13 @@ public class VarExp extends Exp {
     public Exp replace(Exp old, Exp replacement) {
         if (name != null) {
             if (old instanceof VarExp) {
-                if (((VarExp) old).getName().toString().equals(name.toString())) {
+                if (((VarExp) old).getName().toString()
+                        .equals(name.toString())) {
                     return Exp.copy(replacement);
                 }
-                /*else {
-                	return this;
-                }*/
+                /*
+                 * else { return this; }
+                 */
             }
         }
 

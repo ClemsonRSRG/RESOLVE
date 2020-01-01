@@ -1,7 +1,7 @@
 /*
  * IfConditionItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the class for all the if/else-if condition block objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the if/else-if condition block objects that the
+ * compiler builds using
+ * the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -32,13 +35,17 @@ public class IfConditionItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>The testing expression.</p>
+     * <p>
+     * The testing expression.
+     * </p>
      */
     private final ProgramExp myTestingExp;
 
     /**
-     * <p>The list of statements that gets executed
-     * if the testing expression is met</p>
+     * <p>
+     * The list of statements that gets executed if the testing expression is
+     * met
+     * </p>
      */
     private final List<Statement> myStatements;
 
@@ -47,14 +54,15 @@ public class IfConditionItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a if/else-if code block with a condition test.
-     * If the testing expression is met, then the code block is
-     * executed.</p>
+     * <p>
+     * This constructs a if/else-if code block with a condition test. If the
+     * testing expression is
+     * met, then the code block is executed.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      * @param test A {@link ProgramExp} testing expression.
-     * @param statements The list of {@link Statement}s that are in
-     *                   this block.
+     * @param statements The list of {@link Statement}s that are in this block.
      */
     public IfConditionItem(Location l, ProgramExp test,
             List<Statement> statements) {
@@ -115,8 +123,9 @@ public class IfConditionItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the list of statements
-     * in this code block.</p>
+     * <p>
+     * This method returns the list of statements in this code block.
+     * </p>
      *
      * @return The list of {@link Statement}s.
      */
@@ -125,8 +134,9 @@ public class IfConditionItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the testing expression for
-     * this code block.</p>
+     * <p>
+     * This method returns the testing expression for this code block.
+     * </p>
      *
      * @return The testing {@link ProgramExp} object.
      */
@@ -149,8 +159,10 @@ public class IfConditionItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method returns a deep copy of the list of statements
-     * in this code block.</p>
+     * <p>
+     * This method returns a deep copy of the list of statements in this code
+     * block.
+     * </p>
      *
      * @return The list of {@link Statement}s.
      */

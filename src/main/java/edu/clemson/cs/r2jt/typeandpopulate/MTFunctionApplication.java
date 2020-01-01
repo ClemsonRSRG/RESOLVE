@@ -1,7 +1,7 @@
 /*
  * MTFunctionApplication.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -97,9 +97,9 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
     @Override
     public boolean isKnownToContainOnlyMTypes() {
-        //Note that, effectively, we represent an instance of the range of our
-        //function.  Thus, we're known to contain only MTypes if the function's
-        //range's members are known only to contain MTypes.
+        // Note that, effectively, we represent an instance of the range of our
+        // function. Thus, we're known to contain only MTypes if the function's
+        // range's members are known only to contain MTypes.
 
         return myFunction.getRange().membersKnownToContainOnlyMTypes();
     }
@@ -111,9 +111,8 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         while (arguments.hasNext()) {
             result &= arguments.next().isKnownToContainOnlyMTypes();
         }
-        return result
-                && myFunction
-                        .applicationResultsKnownToContainOnlyRestrictions();
+        return result && myFunction
+                .applicationResultsKnownToContainOnlyRestrictions();
     }
 
     @Override

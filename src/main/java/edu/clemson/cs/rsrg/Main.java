@@ -1,7 +1,7 @@
 /*
  * Main.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,8 +15,10 @@ package edu.clemson.cs.rsrg;
 import edu.clemson.cs.rsrg.init.ResolveCompiler;
 
 /**
- * <p>The main class for the RESOLVE compiler when invoking
- * from the command line or using an IDE.</p>
+ * <p>
+ * The main class for the RESOLVE compiler when invoking from the command line
+ * or using an IDE.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -25,8 +27,10 @@ import edu.clemson.cs.rsrg.init.ResolveCompiler;
 public class Main {
 
     /**
-     * <p>This method creates and invokes the {@link ResolveCompiler}
-     * to perform the compilation job.</p>
+     * <p>
+     * This method creates and invokes the {@link ResolveCompiler} to perform
+     * the compilation job.
+     * </p>
      *
      * @param args Arguments required to perform the compile process.
      */

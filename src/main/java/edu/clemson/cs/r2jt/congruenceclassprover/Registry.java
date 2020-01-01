@@ -1,7 +1,7 @@
 /*
  * Registry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -62,7 +62,11 @@ public class Registry {
         m_typeGraph = g;
         m_typeDictionary = new TreeMap<String, MTType>();
         addSymbol("=B", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
-                Usage.LITERAL); // = as a predicate function, not as an assertion
+                Usage.LITERAL); // = as a
+                                                                                                  // predicate
+                                                                                                  // function,
+                                                                                                  // not as an
+                                                                                                  // assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         addSymbol("false", g.BOOLEAN, Usage.LITERAL);
         assert (getIndexForSymbol("=B") == 0);
@@ -100,7 +104,8 @@ public class Registry {
         assert t != null : "request for null type";
         Set<String> rSet = new HashSet<String>();
         Set<MTType> allTypesInSet = m_typeToSetOfOperators.keySet();
-        assert !m_typeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
+        assert !m_typeToSetOfOperators
+                .isEmpty() : "empty m_typeToSetOfOperator.keySet()";
         assert allTypesInSet != null : "null set in Registry.getSetMatchingType";
         // if there are subtypes of t, return those too
         for (MTType m : allTypesInSet) {
@@ -162,7 +167,8 @@ public class Registry {
         if (m_symbolIndexParentArray.get(index) == index)
             return index;
         Stack<Integer> needToUpdate = new Stack<Integer>();
-        assert index < m_symbolIndexParentArray.size() : "findAndCompress error";
+        assert index < m_symbolIndexParentArray
+                .size() : "findAndCompress error";
         int parent = m_symbolIndexParentArray.get(index);
         while (parent != index) {
             needToUpdate.push(index);
@@ -285,7 +291,7 @@ public class Registry {
         return isCommutative(root);
     }
 
-    // use sparingly, call with a parent symbol.  assumes parent array is compressed
+    // use sparingly, call with a parent symbol. assumes parent array is compressed
     protected Set<String> getChildren(String parent) {
         int pInt = getIndexForSymbol(parent);
         HashSet<Integer> ch = new HashSet<Integer>();

@@ -1,7 +1,7 @@
 /*
  * ImmutableListConcatenation.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,10 @@ import edu.clemson.cs.rsrg.prover.iterators.ChainingIterator;
 import java.util.Iterator;
 
 /**
- * <p>This class implements an immutable list after concatenating
- * two immutable lists.</p>
+ * <p>
+ * This class implements an immutable list after concatenating two immutable
+ * lists.
+ * </p>
  *
  * @param <E> Type of elements stored inside this list.
  *
@@ -31,16 +33,32 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     // Member Fields
     // ===========================================================
 
-    /** <p>The first immutable list in our concatenated list.</p> */
+    /**
+     * <p>
+     * The first immutable list in our concatenated list.
+     * </p>
+     */
     private final ImmutableList<E> myFirstList;
 
-    /** <p>The number of elements in the first immutable list.</p> */
+    /**
+     * <p>
+     * The number of elements in the first immutable list.
+     * </p>
+     */
     private final int myFirstListSize;
 
-    /** <p>The second immutable list in our concatenated list.</p> */
+    /**
+     * <p>
+     * The second immutable list in our concatenated list.
+     * </p>
+     */
     private final ImmutableList<E> mySecondList;
 
-    /** <p>Total number of elements in this immutable list.</p> */
+    /**
+     * <p>
+     * Total number of elements in this immutable list.
+     * </p>
+     */
     private final int myTotalSize;
 
     // ===========================================================
@@ -48,8 +66,10 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>This creates a new immutable list after concatenating
-     * two immutable lists.</p>
+     * <p>
+     * This creates a new immutable list after concatenating two immutable
+     * lists.
+     * </p>
      *
      * @param firstList An immutable list.
      * @param secondList Another immutable list.
@@ -67,7 +87,9 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     // ===========================================================
 
     /**
-     * <p>This method returns the element at the specified index.</p>
+     * <p>
+     * This method returns the element at the specified index.
+     * </p>
      *
      * @param index An index position.
      *
@@ -88,8 +110,10 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from the head
-     * to the specified index.</p>
+     * <p>
+     * This method returns a new immutable sub-list from the head to the
+     * specified index.
+     * </p>
      *
      * @param length Length of the sub-list.
      *
@@ -103,9 +127,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
             retval = myFirstList.head(length);
         }
         else {
-            retval =
-                    new ImmutableListConcatenation<>(myFirstList, mySecondList
-                            .head(length - myFirstListSize));
+            retval = new ImmutableListConcatenation<>(myFirstList,
+                    mySecondList.head(length - myFirstListSize));
         }
 
         return retval;
@@ -116,12 +139,14 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
      */
     @Override
     public final Iterator<E> iterator() {
-        return new ChainingIterator<>(myFirstList.iterator(), mySecondList.iterator());
+        return new ChainingIterator<>(myFirstList.iterator(),
+                mySecondList.iterator());
     }
 
     /**
-     * <p>This method returns the number of elements in
-     * this list.</p>
+     * <p>
+     * This method returns the number of elements in this list.
+     * </p>
      *
      * @return Number of elements.
      */
@@ -131,11 +156,13 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from
-     * the specified start index to the specified length (end index).</p>
+     * <p>
+     * This method returns a new immutable sub-list from the specified start
+     * index to the specified
+     * length (end index).
+     * </p>
      *
-     * @param startIndex An index position to start building
-     *                   our sub-list.
+     * @param startIndex An index position to start building our sub-list.
      * @param length Length of the sub-list.
      *
      * @return An immutable sub-list of the original list.
@@ -146,11 +173,13 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     }
 
     /**
-     * <p>This method returns a new immutable sub-list from the
-     * specified start index to the end of our list.</p>
+     * <p>
+     * This method returns a new immutable sub-list from the specified start
+     * index to the end of our
+     * list.
+     * </p>
      *
-     * @param startIndex An index position to start building
-     *                   our sub-list.
+     * @param startIndex An index position to start building our sub-list.
      *
      * @return An immutable sub-list of the original list.
      */
@@ -159,9 +188,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
         ImmutableList<E> retval;
 
         if (startIndex < myFirstListSize) {
-            retval =
-                    new ImmutableListConcatenation<>(myFirstList
-                            .tail(startIndex), mySecondList);
+            retval = new ImmutableListConcatenation<>(
+                    myFirstList.tail(startIndex), mySecondList);
         }
         else {
             retval = mySecondList.tail(startIndex - myFirstListSize);

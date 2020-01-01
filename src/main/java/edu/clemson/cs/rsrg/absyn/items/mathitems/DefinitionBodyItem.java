@@ -1,7 +1,7 @@
 /*
  * DefinitionBodyItem.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 
 /**
- * <p>This is the class for all the definition body objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the definition body objects that the compiler
+ * builds using the ANTLR4
+ * AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -27,16 +30,32 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The base expression for an inductive definition</p> */
+    /**
+     * <p>
+     * The base expression for an inductive definition
+     * </p>
+     */
     private final Exp myBase;
 
-    /** <p>The hypothesis expression for an inductive definition</p> */
+    /**
+     * <p>
+     * The hypothesis expression for an inductive definition
+     * </p>
+     */
     private final Exp myHypothesis;
 
-    /** <p>The base expression for a standard definition</p> */
+    /**
+     * <p>
+     * The base expression for a standard definition
+     * </p>
+     */
     private final Exp myDefinition;
 
-    /** <p>Boolean indicating if this is an inductive definition or not.</p> */
+    /**
+     * <p>
+     * Boolean indicating if this is an inductive definition or not.
+     * </p>
+     */
     private final boolean myIsInductiveFlag;
 
     // ===========================================================
@@ -44,7 +63,9 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a standard definition body.</p>
+     * <p>
+     * This constructs a standard definition body.
+     * </p>
      *
      * @param definition The definition expression.
      */
@@ -57,7 +78,9 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This constructs an inductive definition body.</p>
+     * <p>
+     * This constructs an inductive definition body.
+     * </p>
      *
      * @param base The base case expression.
      * @param hypothesis The inductive hypothesis expression.
@@ -110,8 +133,8 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
     public final DefinitionBodyItem clone() {
         DefinitionBodyItem newItem;
         if (myIsInductiveFlag) {
-            newItem =
-                    new DefinitionBodyItem(myBase.clone(), myHypothesis.clone());
+            newItem = new DefinitionBodyItem(myBase.clone(),
+                    myHypothesis.clone());
         }
         else {
             newItem = new DefinitionBodyItem(myDefinition.clone());
@@ -145,7 +168,9 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the base case of an inductive definition.</p>
+     * <p>
+     * This method returns the base case of an inductive definition.
+     * </p>
      *
      * @return An {@code Exp} representing the base case or {@code null}.
      */
@@ -154,25 +179,33 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the definition expression of a standard definition.</p>
+     * <p>
+     * This method returns the definition expression of a standard definition.
+     * </p>
      *
-     * @return An {@code Exp} representing the definition expression or {@code null}.
+     * @return An {@code Exp} representing the definition expression or
+     *         {@code null}.
      */
     public final Exp getDefinition() {
         return myDefinition;
     }
 
     /**
-     * <p>This method returns the hypothesis of an inductive definition.</p>
+     * <p>
+     * This method returns the hypothesis of an inductive definition.
+     * </p>
      *
-     * @return An {@code Exp} representing the inductive hypothesis or {@code null}.
+     * @return An {@code Exp} representing the inductive hypothesis or
+     *         {@code null}.
      */
     public final Exp getHypothesis() {
         return myHypothesis;
     }
 
     /**
-     * <p>This method returns whether or not this is an inductive definition.</p>
+     * <p>
+     * This method returns whether or not this is an inductive definition.
+     * </p>
      *
      * @return {@code true} if it is inductive, {@code false} otherwise.
      */
@@ -186,12 +219,10 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
     @Override
     public final int hashCode() {
         int result = myBase != null ? myBase.hashCode() : 0;
-        result =
-                31 * result
-                        + (myHypothesis != null ? myHypothesis.hashCode() : 0);
-        result =
-                31 * result
-                        + (myDefinition != null ? myDefinition.hashCode() : 0);
+        result = 31 * result
+                + (myHypothesis != null ? myHypothesis.hashCode() : 0);
+        result = 31 * result
+                + (myDefinition != null ? myDefinition.hashCode() : 0);
         result = 31 * result + (myIsInductiveFlag ? 1 : 0);
         return result;
     }

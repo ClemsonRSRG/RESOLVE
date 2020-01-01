@@ -1,7 +1,7 @@
 /*
  * ModuleID.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -134,12 +134,14 @@ public class ModuleID {
         return new ModuleID(name.getSymbol(), ModuleKind.USES_ITEM);
     }
 
-    public static ModuleID createEnhancementID(PosSymbol name, PosSymbol cName) {
+    public static ModuleID createEnhancementID(PosSymbol name,
+            PosSymbol cName) {
         return new ModuleID(name.getSymbol(), cName.getSymbol(),
                 ModuleKind.ENHANCEMENT);
     }
 
-    public static ModuleID createConceptBodyID(PosSymbol name, PosSymbol cName) {
+    public static ModuleID createConceptBodyID(PosSymbol name,
+            PosSymbol cName) {
         return new ModuleID(name.getSymbol(), cName.getSymbol(),
                 ModuleKind.CONCEPT_BODY);
     }
@@ -147,28 +149,29 @@ public class ModuleID {
     // --ny
     public static ModuleID createConceptBodyID(PosSymbol name, PosSymbol cName,
             PosSymbol pName) {
-        return new ModuleID(name.getSymbol(), cName.getSymbol(), pName
-                .getSymbol(), ModuleKind.CONCEPT_BODY);
+        return new ModuleID(name.getSymbol(), cName.getSymbol(),
+                pName.getSymbol(), ModuleKind.CONCEPT_BODY);
     }
 
     public static ModuleID createEnhancementBodyID(PosSymbol name,
             PosSymbol eName, PosSymbol cName) {
-        return new ModuleID(name.getSymbol(), eName.getSymbol(), cName
-                .getSymbol());
+        return new ModuleID(name.getSymbol(), eName.getSymbol(),
+                cName.getSymbol());
     }
 
     // --ny
     public static ModuleID createEnhancementBodyID(PosSymbol name,
             PosSymbol eName, PosSymbol cName, PosSymbol pName) {
-        return new ModuleID(name.getSymbol(), eName.getSymbol(), cName
-                .getSymbol(), pName.getSymbol(), ModuleKind.ENHANCEMENT_BODY);
+        return new ModuleID(name.getSymbol(), eName.getSymbol(),
+                cName.getSymbol(), pName.getSymbol(),
+                ModuleKind.ENHANCEMENT_BODY);
     }
 
     // --ny
     public static ModuleID createProfileID(PosSymbol name, PosSymbol p2Name,
             PosSymbol p3Name, PosSymbol pcName, PosSymbol pcpName) {
-        return new ModuleID(name.getSymbol(), p2Name.getSymbol(), p3Name
-                .getSymbol(), pcName.getSymbol(), pcpName.getSymbol(),
+        return new ModuleID(name.getSymbol(), p2Name.getSymbol(),
+                p3Name.getSymbol(), pcName.getSymbol(), pcpName.getSymbol(),
                 ModuleKind.PROFILE);
     }
 
@@ -222,7 +225,7 @@ public class ModuleID {
             PosSymbol p3Name = dec2.getProfileName3();
             PosSymbol pcName = dec2.getProfilecName();
             PosSymbol pcpName = dec2.getProfilecpName();
-            //    id = createProfileID(Name, p2Name, p3Name, pcName, pcpName);
+            // id = createProfileID(Name, p2Name, p3Name, pcName, pcpName);
             id = createPerformanceID(Name);
 
         }
@@ -330,27 +333,27 @@ public class ModuleID {
     // Public Methods
     // ===========================================================
 
-    //      public String toString() {
-    //          StringBuffer sb = new StringBuffer();
-    //          sb.append("[");
-    //          sb.append(name.toString());
-    //          sb.append(kind.getExtension());
-    //          if (eName != null) {
-    //              sb.append(":" + eName.toString() + ".en");
-    //          }
-    //          if (cName != null) {
-    //              sb.append(":" + cName.toString() + ".co");
-    //          }
-    //          sb.append("]");
-    //          return sb.toString();
-    //      }
+    // public String toString() {
+    // StringBuffer sb = new StringBuffer();
+    // sb.append("[");
+    // sb.append(name.toString());
+    // sb.append(kind.getExtension());
+    // if (eName != null) {
+    // sb.append(":" + eName.toString() + ".en");
+    // }
+    // if (cName != null) {
+    // sb.append(":" + cName.toString() + ".co");
+    // }
+    // sb.append("]");
+    // return sb.toString();
+    // }
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
         if (cName != null) {
             sb.append(cName.toString() + ".");
         }
-        //if (eName != null) { sb.append(eName.toString() + ":"); }
+        // if (eName != null) { sb.append(eName.toString() + ":"); }
         if (name != null) {
             sb.append(name.toString());
         }
@@ -372,9 +375,9 @@ public class ModuleID {
         }
     }
 
-    //      public boolean equals(ModuleID id) {
-    //          return (this.kind == id.kind && this.name == id.name &&
-    //                  this.eName == id.eName && this.cName == id.cName);
-    //      }
+    // public boolean equals(ModuleID id) {
+    // return (this.kind == id.kind && this.name == id.name &&
+    // this.eName == id.eName && this.cName == id.cName);
+    // }
 
 }

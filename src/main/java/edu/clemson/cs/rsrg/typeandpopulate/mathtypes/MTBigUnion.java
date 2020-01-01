@@ -1,7 +1,7 @@
 /*
  * MTBigUnion.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -18,9 +18,11 @@ import edu.clemson.cs.rsrg.typeandpopulate.typevisitor.TypeVisitor;
 import java.util.*;
 
 /**
- * <p>A constructed type consisting of the union over one or more quantified
- * types. For example <code>U{t, r : MType}{t intersect r}</code> is the type of all
- * intersections.</p>
+ * <p>
+ * A constructed type consisting of the union over one or more quantified types.
+ * For example
+ * <code>U{t, r : MType}{t intersect r}</code> is the type of all intersections.
+ * </p>
  *
  * @version 2.0
  */
@@ -30,10 +32,18 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     // Member Fields
     // ===========================================================
 
-    /** <p>An integer value that helps us retrieve the hashcode for this class.</p> */
+    /**
+     * <p>
+     * An integer value that helps us retrieve the hashcode for this class.
+     * </p>
+     */
     private static final int BASE_HASH = "MTBigUnion".hashCode();
 
-    /** <p>A map containing all the quantified variables in this type.</p> */
+    /**
+     * <p>
+     * A map containing all the quantified variables in this type.
+     * </p>
+     */
     private TreeMap<String, MTType> myQuantifiedVariables;
 
     /**
@@ -42,13 +52,25 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
      */
     private final int myUniqueQuantifiedVariableCount;
 
-    /** <p>The expression that binds all the variables in this type.</p> */
+    /**
+     * <p>
+     * The expression that binds all the variables in this type.
+     * </p>
+     */
     private final MTType myExpression;
 
-    /** <p>A mapping between indexes and quantified variables.</p> */
+    /**
+     * <p>
+     * A mapping between indexes and quantified variables.
+     * </p>
+     */
     private final Map<Integer, String> myComponentIndexes = new HashMap<>();
 
-    /** <p>List of {@link MTType}s that are in this big union type. </p> */
+    /**
+     * <p>
+     * List of {@link MTType}s that are in this big union type.
+     * </p>
+     */
     private List<MTType> myComponents;
 
     // ===========================================================
@@ -56,15 +78,19 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     // ===========================================================
 
     /**
-     * <p>This constructs a type that is the big union over a group of
-     * variables and is bound by some expression.</p>
+     * <p>
+     * This constructs a type that is the big union over a group of variables
+     * and is bound by some
+     * expression.
+     * </p>
      *
      * @param g The current type graph.
      * @param quantifiedVariables The quantified variables for this type.
      * @param expression The {@link MTType} expression that binds all the
-     *                   variables in this type.
+     *        variables in this type.
      */
-    public MTBigUnion(TypeGraph g, Map<String, MTType> quantifiedVariables, MTType expression) {
+    public MTBigUnion(TypeGraph g, Map<String, MTType> quantifiedVariables,
+            MTType expression) {
         super(g);
         myQuantifiedVariables = new TreeMap<>(quantifiedVariables);
         myUniqueQuantifiedVariableCount = -1;
@@ -72,18 +98,22 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This provides a small optimization for working with
-     * {@link SyntacticSubtypeChecker SyntacticSubtypeChecker}. In the case
-     * where we're just going to have <em>n</em> variables whose names are
-     * meant to be guaranteed not to appear in <code>expression</code>, we just
-     * pass in the number of variables this union is meant to be quantified over
-     * rather than going through the trouble of giving them names and types and
-     * putting them in a map.</p>
+     * <p>
+     * This provides a small optimization for working with
+     * {@link SyntacticSubtypeChecker
+     * SyntacticSubtypeChecker}. In the case where we're just going to have
+     * <em>n</em> variables whose
+     * names are meant to be guaranteed not to appear in
+     * <code>expression</code>, we just pass in the
+     * number of variables this union is meant to be quantified over rather than
+     * going through the
+     * trouble of giving them names and types and putting them in a map.
+     * </p>
      *
      * @param g The current type graph.
      * @param uniqueVariableCount The number of unique variables.
      * @param expression The {@link MTType} expression that binds all the
-     *                   variables in this type.
+     *        variables in this type.
      */
     public MTBigUnion(TypeGraph g, int uniqueVariableCount, MTType expression) {
         super(g);
@@ -97,8 +127,11 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     // ===========================================================
 
     /**
-     * <p>This method is the {@code accept()} method in a visitor pattern
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method is the {@code accept()} method in a visitor pattern for
+     * invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -127,8 +160,10 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This method implements the post-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the post-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -140,8 +175,10 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This method implements the pre-visit method
-     * for invoking an instance of {@link TypeVisitor}.</p>
+     * <p>
+     * This method implements the pre-visit method for invoking an instance of
+     * {@link TypeVisitor}.
+     * </p>
      *
      * @param v A visitor for types.
      */
@@ -153,8 +190,9 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This method returns a list of {@link MTType}s
-     * that are part of this type.</p>
+     * <p>
+     * This method returns a list of {@link MTType}s that are part of this type.
+     * </p>
      *
      * @return The list of {@link MTType}s in this big union type.
      */
@@ -162,8 +200,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     public final List<MTType> getComponentTypes() {
         if (myComponents == null) {
             if (myQuantifiedVariables == null) {
-                myComponents =
-                        new ArrayList<>(myUniqueQuantifiedVariableCount);
+                myComponents = new ArrayList<>(myUniqueQuantifiedVariableCount);
 
                 for (int i = 0; i < myUniqueQuantifiedVariableCount; i++) {
                     myComponents.add(myTypeGraph.CLS);
@@ -187,7 +224,9 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This method returns the expression used to bind this type.</p>
+     * <p>
+     * This method returns the expression used to bind this type.
+     * </p>
      *
      * @return A {@link MTType} representing the binding expression.
      */
@@ -196,7 +235,9 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This method returns all the quantified variables and types.</p>
+     * <p>
+     * This method returns all the quantified variables and types.
+     * </p>
      *
      * @return A map containing all the quantified variables and types.
      */
@@ -207,8 +248,9 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This method returns the number of quantified variables
-     * in this type.</p>
+     * <p>
+     * This method returns the number of quantified variables in this type.
+     * </p>
      *
      * @return An integer value.
      */
@@ -226,7 +268,9 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This method returns the object in string format.</p>
+     * <p>
+     * This method returns the object in string format.
+     * </p>
      *
      * @return Object as a string.
      */
@@ -238,14 +282,17 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     }
 
     /**
-     * <p>This method attempts to replace a component type at the specified
-     * index.</p>
+     * <p>
+     * This method attempts to replace a component type at the specified index.
+     * </p>
      *
      * @param index Index to a component type.
-     * @param newType The {@link MTType} to replace the one in our component list.
+     * @param newType The {@link MTType} to replace the one in our component
+     *        list.
      *
      * @return A new {@link MTBigUnion} with the type at the specified index
-     * replaced with {@code newType}.
+     *         replaced with
+     *         {@code newType}.
      */
     @Override
     public final MTType withComponentReplaced(int index, MTType newType) {
@@ -255,8 +302,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
         MTType newExpression;
 
         if (index < myQuantifiedVariables.size()) {
-            newQuantifiedVariables =
-                    new HashMap<>(myQuantifiedVariables);
+            newQuantifiedVariables = new HashMap<>(myQuantifiedVariables);
 
             newQuantifiedVariables.put(myComponentIndexes.get(index), newType);
 
@@ -280,13 +326,16 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     // ===========================================================
 
     /**
-     * <p>This is just a template method to <em>force</em> all concrete
-     * subclasses of {@link MTType} to implement <code>hashCode()</code>,
-     * as the type resolution algorithm depends on it being implemented
-     * sensibly.</p>
+     * <p>
+     * This is just a template method to <em>force</em> all concrete subclasses
+     * of {@link MTType} to
+     * implement <code>hashCode()</code>, as the type resolution algorithm
+     * depends on it being
+     * implemented sensibly.
+     * </p>
      *
      * @return A hashcode consistent with <code>equals()</code> and thus
-     * alpha-equivalency.
+     *         alpha-equivalency.
      */
     @Override
     protected final int getHashCode() {
@@ -294,7 +343,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
 
         int result = BASE_HASH;
 
-        //Note that order of these MTTypes doesn't matter
+        // Note that order of these MTTypes doesn't matter
         for (MTType t : myQuantifiedVariables.values()) {
             result += t.hashCode();
         }
@@ -310,9 +359,12 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
     // ===========================================================
 
     /**
-     * <p>Converts us from a "enh, some number of unique variables" big union to
-     * a "specific named unique variables" big union if one of the methods is
-     * called that requires such a thing.</p>
+     * <p>
+     * Converts us from a "enh, some number of unique variables" big union to a
+     * "specific named unique
+     * variables" big union if one of the methods is called that requires such a
+     * thing.
+     * </p>
      */
     private void ensureQuantifiedTypes() {
         if (myQuantifiedVariables == null) {

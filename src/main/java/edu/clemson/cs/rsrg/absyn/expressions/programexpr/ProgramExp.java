@@ -1,7 +1,7 @@
 /*
  * ProgramExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.typeandpopulate.programtypes.PTType;
 
 /**
- * <p>This is the abstract base class for all the programming expression objects
- * that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the abstract base class for all the programming expression objects
+ * that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,7 +31,11 @@ public abstract class ProgramExp extends Exp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The program type representation for this programming expression.</p> */
+    /**
+     * <p>
+     * The program type representation for this programming expression.
+     * </p>
+     */
     private PTType myProgramType;
 
     // ===========================================================
@@ -36,9 +43,11 @@ public abstract class ProgramExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>An helper constructor that allow us to store the location
-     * of any objects created from a class that inherits from
-     * {@code ProgramExp}.</p>
+     * <p>
+     * An helper constructor that allow us to store the location of any objects
+     * created from a class
+     * that inherits from {@code ProgramExp}.
+     * </p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -51,8 +60,11 @@ public abstract class ProgramExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for all the classes that extend from {@link ProgramExp}.</p>
+     * <p>
+     * This method overrides the default clone method implementation for all the
+     * classes that extend
+     * from {@link ProgramExp}.
+     * </p>
      *
      * @return A deep copy of the object.
      */
@@ -83,8 +95,9 @@ public abstract class ProgramExp extends Exp {
     }
 
     /**
-     * <p>This method gets the programming type associated
-     * with this object.</p>
+     * <p>
+     * This method gets the programming type associated with this object.
+     * </p>
      *
      * @return The {@link PTType} type object.
      */
@@ -98,16 +111,15 @@ public abstract class ProgramExp extends Exp {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result =
-                31
-                        * result
-                        + (myProgramType != null ? myProgramType.hashCode() : 0);
+        result = 31 * result
+                + (myProgramType != null ? myProgramType.hashCode() : 0);
         return result;
     }
 
     /**
-     * <p>This method sets the programming type associated
-     * with this object.</p>
+     * <p>
+     * This method sets the programming type associated with this object.
+     * </p>
      *
      * @param progType The {@link PTType} type object.
      */

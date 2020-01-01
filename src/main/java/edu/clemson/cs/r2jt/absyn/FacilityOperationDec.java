@@ -1,7 +1,7 @@
 /*
  * FacilityOperationDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -55,9 +55,8 @@ public class FacilityOperationDec extends Dec {
             Exp decreasing, List<FacilityDec> facilities,
             List<VarDec> variables, List<AuxVarDec> aux_variables,
             List<Statement> statements) {
-        this.operationDec =
-                new OperationDec(name, parameters, returnTy, stateVars,
-                        requires, ensures);
+        this.operationDec = new OperationDec(name, parameters, returnTy,
+                stateVars, requires, ensures);
         this.decreasing = decreasing;
         this.facilities = facilities;
         this.variables = variables;
@@ -72,9 +71,8 @@ public class FacilityOperationDec extends Dec {
             Exp decreasing, List<FacilityDec> facilities,
             List<VarDec> variables, List<AuxVarDec> aux_variables,
             List<Statement> statements, boolean recursive) {
-        this.operationDec =
-                new OperationDec(name, parameters, returnTy, stateVars,
-                        requires, ensures);
+        this.operationDec = new OperationDec(name, parameters, returnTy,
+                stateVars, requires, ensures);
         this.decreasing = decreasing;
         this.facilities = facilities;
         this.variables = variables;

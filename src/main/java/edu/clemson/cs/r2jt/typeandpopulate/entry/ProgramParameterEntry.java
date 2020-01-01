@@ -1,7 +1,7 @@
 /*
  * ProgramParameterEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -28,6 +28,7 @@ import java.util.Map;
 public class ProgramParameterEntry extends SymbolTableEntry {
 
     public static enum ParameterMode {
+
         ALTERS {
 
             @Override
@@ -143,12 +144,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
             typeValue = new PTGeneric(type.getTypeGraph(), name).toMath();
         }
 
-        //TODO: Probably need to recajigger this to correctly account for any
-        //      generics in the defining context
-        myMathSymbolAlterEgo =
-                new MathSymbolEntry(type.getTypeGraph(), name,
-                        Quantification.NONE, definingElement, type.toMath(),
-                        typeValue, null, null, sourceModule);
+        // TODO: Probably need to recajigger this to correctly account for any
+        // generics in the defining context
+        myMathSymbolAlterEgo = new MathSymbolEntry(type.getTypeGraph(), name,
+                Quantification.NONE, definingElement, type.toMath(), typeValue,
+                null, null, sourceModule);
 
         myProgramVariableAlterEgo =
                 new ProgramVariableEntry(getName(), getDefiningElement(),
@@ -176,15 +176,14 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         ProgramTypeEntry result;
 
         if (!myPassingMode.equals(ParameterMode.TYPE)) {
-            //This will throw an appropriate error
+            // This will throw an appropriate error
             result = super.toProgramTypeEntry(l);
         }
         else {
-            result =
-                    new ProgramTypeEntry(myTypeGraph, getName(),
-                            getDefiningElement(), getSourceModuleIdentifier(),
-                            new MTNamed(myTypeGraph, getName()), new PTGeneric(
-                                    myTypeGraph, getName()));
+            result = new ProgramTypeEntry(myTypeGraph, getName(),
+                    getDefiningElement(), getSourceModuleIdentifier(),
+                    new MTNamed(myTypeGraph, getName()),
+                    new PTGeneric(myTypeGraph, getName()));
         }
 
         return result;
@@ -211,7 +210,8 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         return new ProgramParameterEntry(myTypeGraph, getName(),
                 getDefiningElement(), getSourceModuleIdentifier(),
                 myDeclaredType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), myPassingMode);
+                        instantiatingFacility),
+                myPassingMode);
     }
 
     @Override

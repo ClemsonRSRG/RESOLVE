@@ -1,7 +1,7 @@
 /*
  * Conjunct.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,12 +15,15 @@ package edu.clemson.cs.r2jt.rewriteprover.model;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 
 /**
- * <p>A <code>Conjunct</code> represents a single mathematical statement that
- * we may assume or are trying to prove from a 
- * {@link PerVCProverModel PerVCProverModel}.  An instance of this class 
- * provides a consistent handle on a single such statement throughout its 
- * lifetime, even if its formulation changes or it is temporarily removed from
- * the model.</p>
+ * <p>
+ * A <code>Conjunct</code> represents a single mathematical statement that we
+ * may assume or are
+ * trying to prove from a {@link PerVCProverModel PerVCProverModel}. An instance
+ * of this class
+ * provides a consistent handle on a single such statement throughout its
+ * lifetime, even if its
+ * formulation changes or it is temporarily removed from the model.
+ * </p>
  */
 public interface Conjunct {
 

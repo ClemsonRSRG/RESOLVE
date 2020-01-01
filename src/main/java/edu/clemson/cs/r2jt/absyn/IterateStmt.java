@@ -1,7 +1,7 @@
 /*
  * IterateStmt.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -160,7 +160,7 @@ public class IterateStmt extends Statement {
             printSpace(indent, sb);
             sb.append("\tchanging " + argumentsToString(changing) + ";\n");
         }
-        //	printSpace(indent, sb);
+        // printSpace(indent, sb);
 
         Iterator<Statement> i = statements.iterator();
         while (i.hasNext()) {

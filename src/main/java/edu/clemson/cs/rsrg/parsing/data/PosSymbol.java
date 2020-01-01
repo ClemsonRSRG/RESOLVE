@@ -1,7 +1,7 @@
 /*
  * PosSymbol.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 /**
- * <p>This class creates the representation of any symbol we
- * have encountered during the compile process.</p>
+ * <p>
+ * This class creates the representation of any symbol we have encountered
+ * during the compile
+ * process.
+ * </p>
  *
  * @author Yu-Shan Sun
  * @version 1.0
@@ -29,13 +32,26 @@ public class PosSymbol implements BasicCapabilities {
     // Member Fields
     // ===========================================================
 
-    /** <p>Symbol location</p> */
+    /**
+     * <p>
+     * Symbol location
+     * </p>
+     */
     private final Location myLocation;
 
-    /** <p>Static dictionary containing all the symbols we have created so far.</p> */
-    private final static Dictionary<String, Symbol> mySymbolDict = new Hashtable<>();
+    /**
+     * <p>
+     * Static dictionary containing all the symbols we have created so far.
+     * </p>
+     */
+    private final static Dictionary<String, Symbol> mySymbolDict =
+            new Hashtable<>();
 
-    /** <p>Inner symbol representation</p> */
+    /**
+     * <p>
+     * Inner symbol representation
+     * </p>
+     */
     private final Symbol mySymbol;
 
     // ===========================================================
@@ -43,8 +59,9 @@ public class PosSymbol implements BasicCapabilities {
     // ===========================================================
 
     /**
-     * <p>This constructor create the symbol representation
-     * used by the compiler.</p>
+     * <p>
+     * This constructor create the symbol representation used by the compiler.
+     * </p>
      *
      * @param location The location where this symbol originated from.
      * @param sym Symbol name.
@@ -59,13 +76,14 @@ public class PosSymbol implements BasicCapabilities {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the instantiated object.</p>
+     * <p>
+     * This method creates a special indented text version of the instantiated
+     * object.
+     * </p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentInc The additional indentation increment
-     *                       for the subsequent lines.
+     * @param indentSize The base indentation to the first line of the text.
+     * @param innerIndentInc The additional indentation increment for the
+     *        subsequent lines.
      *
      * @return A formatted text string of the class.
      */
@@ -80,8 +98,10 @@ public class PosSymbol implements BasicCapabilities {
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@code PosSymbol} class.</p>
+     * <p>
+     * This method overrides the default clone method implementation for the
+     * {@code PosSymbol} class.
+     * </p>
      *
      * @return A deep copy of the object.
      */
@@ -96,12 +116,15 @@ public class PosSymbol implements BasicCapabilities {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@code PosSymbol} class.</p>
+     * <p>
+     * This method overrides the default equals method implementation for the
+     * {@code PosSymbol} class.
+     * </p>
      *
      * @param o Object to be compared.
      *
-     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     * @return {@code true} if all the fields are equal, {@code false}
+     *         otherwise.
      */
     @Override
     public final boolean equals(Object o) {
@@ -119,8 +142,9 @@ public class PosSymbol implements BasicCapabilities {
     }
 
     /**
-     * <p>Returns of the location where this object
-     * originated from.</p>
+     * <p>
+     * Returns of the location where this object originated from.
+     * </p>
      *
      * @return A {@link Location} representation object.
      */
@@ -129,8 +153,9 @@ public class PosSymbol implements BasicCapabilities {
     }
 
     /**
-     * <p>Returns the inner string representation
-     * of this class.</p>
+     * <p>
+     * Returns the inner string representation of this class.
+     * </p>
      *
      * @return Name as a string.
      */
@@ -139,8 +164,11 @@ public class PosSymbol implements BasicCapabilities {
     }
 
     /**
-     * <p>This method overrides the default {@code hashCode} method implementation
-     * for the {@code PosSymbol} class.</p>
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation
+     * for the
+     * {@code PosSymbol} class.
+     * </p>
      *
      * @return The hash code associated with the object.
      */
@@ -152,7 +180,9 @@ public class PosSymbol implements BasicCapabilities {
     }
 
     /**
-     * <p>Returns the symbol in string format.</p>
+     * <p>
+     * Returns the symbol in string format.
+     * </p>
      *
      * @return Symbol as a string.
      */
@@ -166,11 +196,13 @@ public class PosSymbol implements BasicCapabilities {
     // ===========================================================
 
     /**
-     * <p>In order to not have duplicated symbols, we have
-     * are using a static dictionary to keep track of all symbols
-     * we have created so far. If a symbol already exists,
-     * we return the symbol in our dictionary. Otherwise,
-     * we create one and store it in our dictionary.</p>
+     * <p>
+     * In order to not have duplicated symbols, we have are using a static
+     * dictionary to keep track of
+     * all symbols we have created so far. If a symbol already exists, we return
+     * the symbol in our
+     * dictionary. Otherwise, we create one and store it in our dictionary.
+     * </p>
      *
      * @param str The symbol we are searching.
      *
@@ -192,7 +224,9 @@ public class PosSymbol implements BasicCapabilities {
     // ===========================================================
 
     /**
-     * <p>Private inner class to store the symbol.</p>
+     * <p>
+     * Private inner class to store the symbol.
+     * </p>
      */
     private class Symbol implements Comparable<Symbol>, BasicCapabilities {
 
@@ -200,7 +234,11 @@ public class PosSymbol implements BasicCapabilities {
         // Member Fields
         // ===========================================================
 
-        /** <p>Symbol name</p> */
+        /**
+         * <p>
+         * Symbol name
+         * </p>
+         */
         private final String myName;
 
         // ===========================================================
@@ -208,9 +246,11 @@ public class PosSymbol implements BasicCapabilities {
         // ===========================================================
 
         /**
-         * <p>This constructor adds/modifies functionality to the
-         * {link String} class to create the inner symbol representation
-         * used by the compiler.</p>
+         * <p>
+         * This constructor adds/modifies functionality to the {link String}
+         * class to create the inner
+         * symbol representation used by the compiler.
+         * </p>
          *
          * @param name Symbol name
          */
@@ -223,13 +263,14 @@ public class PosSymbol implements BasicCapabilities {
         // ===========================================================
 
         /**
-         * <p>This method creates a special indented
-         * text version of the instantiated object.</p>
+         * <p>
+         * This method creates a special indented text version of the
+         * instantiated object.
+         * </p>
          *
-         * @param indentSize The base indentation to the first line
-         *                   of the text.
-         * @param innerIndentInc The additional indentation increment
-         *                       for the subsequent lines.
+         * @param indentSize The base indentation to the first line of the text.
+         * @param innerIndentInc The additional indentation increment for the
+         *        subsequent lines.
          *
          * @return A formatted text string of the class.
          */
@@ -244,35 +285,46 @@ public class PosSymbol implements BasicCapabilities {
         }
 
         /**
-         * <p>This method shouldn't be called, because we don't want to be able to
-         * make copies of the current symbol.</p>
+         * <p>
+         * This method shouldn't be called, because we don't want to be able to
+         * make copies of the
+         * current symbol.
+         * </p>
          *
          * @return Nothing. This throws an exception.
          */
         @Override
         public final Object clone() {
-            throw new MiscErrorException("Can't make copies of a Symbol.", new IllegalAccessException());
+            throw new MiscErrorException("Can't make copies of a Symbol.",
+                    new IllegalAccessException());
         }
 
         /**
-         * <p>This method implements the method in {@link Comparable#compareTo(Object)}.</p>
+         * <p>
+         * This method implements the method in
+         * {@link Comparable#compareTo(Object)}.
+         * </p>
          *
          * @param o Object to be compared.
          *
-         * @return A negative integer, zero, or a positive integer as this object
-         *         is less than, equal to, or greater than the specified object.
+         * @return A negative integer, zero, or a positive integer as this
+         *         object is less than, equal
+         *         to, or greater than the specified object.
          */
         public final int compareTo(Symbol o) {
             return myName.compareTo(o.myName);
         }
 
         /**
-         * <p>This method overrides the default equals method implementation
-         * for the {@code Symbol} class.</p>
+         * <p>
+         * This method overrides the default equals method implementation for
+         * the {@code Symbol} class.
+         * </p>
          *
          * @param o Object to be compared.
          *
-         * @return {@code true} if all the fields are equal, {@code false} otherwise.
+         * @return {@code true} if all the fields are equal, {@code false}
+         *         otherwise.
          */
         @Override
         public final boolean equals(Object o) {
@@ -290,8 +342,9 @@ public class PosSymbol implements BasicCapabilities {
         }
 
         /**
-         * <p>Returns the inner string representation
-         * of this class.</p>
+         * <p>
+         * Returns the inner string representation of this class.
+         * </p>
          *
          * @return Name as a string.
          */
@@ -300,8 +353,11 @@ public class PosSymbol implements BasicCapabilities {
         }
 
         /**
-         * <p>This method overrides the default {@code hashCode} method implementation
-         * for the {@code Symbol} class.</p>
+         * <p>
+         * This method overrides the default {@code hashCode} method
+         * implementation for the
+         * {@code Symbol} class.
+         * </p>
          *
          * @return The hash code associated with the object.
          */
@@ -311,7 +367,9 @@ public class PosSymbol implements BasicCapabilities {
         }
 
         /**
-         * <p>Returns the symbol in string format.</p>
+         * <p>
+         * Returns the symbol in string format.
+         * </p>
          *
          * @return Symbol as a string.
          */

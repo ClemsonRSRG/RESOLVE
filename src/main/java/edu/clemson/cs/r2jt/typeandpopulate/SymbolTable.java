@@ -1,7 +1,7 @@
 /*
  * SymbolTable.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -27,8 +27,9 @@ public interface SymbolTable extends Iterable<SymbolTableEntry> {
 
     public boolean containsKey(String name);
 
-    public <T extends SymbolTableEntry> Iterator<T> iterateByType(Class<T> type);
+    public <T extends SymbolTableEntry> Iterator<T>
+            iterateByType(Class<T> type);
 
-    public <T extends SymbolTableEntry> Iterator<T> iterateByType(
-            Collection<Class<T>> types);
+    public <T extends SymbolTableEntry> Iterator<T>
+            iterateByType(Collection<Class<T>> types);
 }

@@ -1,7 +1,7 @@
 /*
  * ProofStep.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -32,29 +32,36 @@ public interface ProofStep {
     public Application getApplication();
 
     /**
-     * <p>Those conjuncts that must be present for this step to make sense--this 
-     * will include any conjuncts containing sites that were bound against, any
-     * conjuncts representing the theorem that motivated this step, and possibly
-     * others.</p>
+     * <p>
+     * Those conjuncts that must be present for this step to make sense--this
+     * will include any
+     * conjuncts containing sites that were bound against, any conjuncts
+     * representing the theorem that
+     * motivated this step, and possibly others.
+     * </p>
      * 
-     * @return 
+     * @return
      */
     public Set<Conjunct> getPrerequisiteConjuncts();
 
     /**
-     * <p>A subset of the prerequisite conjuncts: those conjuncts that were
-     * bound against.</p>
+     * <p>
+     * A subset of the prerequisite conjuncts: those conjuncts that were bound
+     * against.
+     * </p>
      * 
-     * @return 
+     * @return
      */
     public Set<Conjunct> getBoundConjuncts();
 
     public Set<Conjunct> getAffectedConjuncts();
 
     /**
-     * <p>Any sites that were modified or introduced.</p>
+     * <p>
+     * Any sites that were modified or introduced.
+     * </p>
      * 
-     * @return 
+     * @return
      */
     public Set<Site> getAffectedSites();
 }

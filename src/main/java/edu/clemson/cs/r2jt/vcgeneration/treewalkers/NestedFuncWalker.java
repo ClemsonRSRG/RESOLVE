@@ -1,7 +1,7 @@
 /*
  * NestedFuncWalker.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -110,9 +110,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
     public void postProgramParamExp(ProgramParamExp exp) {
         // Call a method to locate the operation dec for this call
-        OperationDec opDec =
-                getOperationDec(myCurrentLocation, myQualifier, exp.getName(),
-                        exp.getArguments());
+        OperationDec opDec = getOperationDec(myCurrentLocation, myQualifier,
+                exp.getName(), exp.getArguments());
 
         // Get the requires clause for this operation
         Exp opRequires;
@@ -135,15 +134,13 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         }
 
         // Replace PreCondition variables in the requires clause
-        opRequires =
-                replaceFormalWithActualReq(opRequires, opDec.getParameters(),
-                        exp.getArguments());
+        opRequires = replaceFormalWithActualReq(opRequires,
+                opDec.getParameters(), exp.getArguments());
 
         // Replace facility actuals variables in the requires clause
-        opRequires =
-                Utilities.replaceFacilityFormalWithActual(myCurrentLocation,
-                        opRequires, opDec.getParameters(),
-                        myInstantiatedFacilityArgMap, myCurrentModuleScope);
+        opRequires = Utilities.replaceFacilityFormalWithActual(
+                myCurrentLocation, opRequires, opDec.getParameters(),
+                myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
         // Append the name of the current procedure
         String details = "";
@@ -189,34 +186,31 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                         Location ensuresLoc;
                         if (exp.getName().getLocation() != null) {
                             // Set the details of the current location
-                            ensuresLoc =
-                                    (Location) exp.getName().getLocation()
-                                            .clone();
+                            ensuresLoc = (Location) exp.getName().getLocation()
+                                    .clone();
                         }
                         else {
                             ensuresLoc = (Location) myCurrentLocation.clone();
                         }
-                        ensuresLoc.setDetails("Ensures Clause of "
-                                + opDec.getName());
+                        ensuresLoc.setDetails(
+                                "Ensures Clause of " + opDec.getName());
                         Utilities.setLocation(ensures, ensuresLoc);
 
                         // Replace the formal with the actual
-                        ensures =
-                                replaceFormalWithActualEns(ensures, opDec
-                                        .getParameters(), opDec.getStateVars(),
-                                        exp.getArguments(), false);
+                        ensures = replaceFormalWithActualEns(ensures,
+                                opDec.getParameters(), opDec.getStateVars(),
+                                exp.getArguments(), false);
 
                         // Replace facility actuals variables in the ensures clause
-                        ensures =
-                                Utilities.replaceFacilityFormalWithActual(
-                                        myCurrentLocation, ensures, opDec
-                                                .getParameters(),
-                                        myInstantiatedFacilityArgMap,
-                                        myCurrentModuleScope);
+                        ensures = Utilities.replaceFacilityFormalWithActual(
+                                myCurrentLocation, ensures,
+                                opDec.getParameters(),
+                                myInstantiatedFacilityArgMap,
+                                myCurrentModuleScope);
 
                         // Add this ensures clause to our map
-                        myEnsuresClauseMap
-                                .put(exp.getName().getName(), ensures);
+                        myEnsuresClauseMap.put(exp.getName().getName(),
+                                ensures);
                     }
                     else {
                         Utilities.illegalOperationEnsures(opDec.getLocation());
@@ -236,26 +230,24 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
         // Check for recursive call of itself
         if (myCurrentOperationEntry != null
-                && myCurrentOperationEntry.getName().equals(
-                        opDec.getName().getName())
+                && myCurrentOperationEntry.getName()
+                        .equals(opDec.getName().getName())
                 && myCurrentOperationEntry.getReturnType() != null) {
             // Create a new confirm statement using P_val and the decreasing clause
-            VarExp pVal =
-                    Utilities.createPValExp(myOperationDecreasingExp
-                            .getLocation(), myCurrentModuleScope);
+            VarExp pVal = Utilities.createPValExp(
+                    myOperationDecreasingExp.getLocation(),
+                    myCurrentModuleScope);
 
             // Create a new infix expression
             IntegerExp oneExp = new IntegerExp();
             oneExp.setValue(1);
             oneExp.setMathType(myOperationDecreasingExp.getMathType());
-            InfixExp leftExp =
-                    new InfixExp(myCurrentLocation, oneExp, Utilities
-                            .createPosSymbol("+"), Exp
-                            .copy(myOperationDecreasingExp));
+            InfixExp leftExp = new InfixExp(myCurrentLocation, oneExp,
+                    Utilities.createPosSymbol("+"),
+                    Exp.copy(myOperationDecreasingExp));
             leftExp.setMathType(myOperationDecreasingExp.getMathType());
-            InfixExp infixExp =
-                    Utilities.createLessThanEqExp(myCurrentLocation, leftExp,
-                            pVal, myTypeGraph.BOOLEAN);
+            InfixExp infixExp = Utilities.createLessThanEqExp(myCurrentLocation,
+                    leftExp, pVal, myTypeGraph.BOOLEAN);
 
             // Create the new confirm statement
             Location loc;
@@ -279,8 +271,10 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>Returns the final modified ensures clause after all the
-     * necessary alterations have been made.</p>
+     * <p>
+     * Returns the final modified ensures clause after all the necessary
+     * alterations have been made.
+     * </p>
      *
      * @return The complete ensures clause.
      */
@@ -310,8 +304,10 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Returns the final modified requires clause after all the
-     * necessary alterations have been made.</p>
+     * <p>
+     * Returns the final modified requires clause after all the necessary
+     * alterations have been made.
+     * </p>
      *
      * @return The complete requires clause.
      */
@@ -324,15 +320,18 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
-     * <p>Locate and return the corresponding operation dec based on the qualifier,
-     * name, and arguments.</p>
+     * <p>
+     * Locate and return the corresponding operation dec based on the qualifier,
+     * name, and arguments.
+     * </p>
      *
      * @param loc Location of the calling statement.
      * @param qual Qualifier of the operation
      * @param name Name of the operation.
      * @param args List of arguments for the operation.
      *
-     * @return The operation corresponding to the calling statement in <code>OperationDec</code> form.
+     * @return The operation corresponding to the calling statement in
+     *         <code>OperationDec</code> form.
      */
     private OperationDec getOperationDec(Location loc, PosSymbol qual,
             PosSymbol name, List<ProgramExp> args) {
@@ -341,9 +340,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         for (ProgramExp arg : args) {
             argTypes.add(arg.getProgramType());
         }
-        OperationEntry opEntry =
-                Utilities.searchOperation(loc, qual, name, argTypes,
-                        myCurrentModuleScope);
+        OperationEntry opEntry = Utilities.searchOperation(loc, qual, name,
+                argTypes, myCurrentModuleScope);
 
         // Obtain an OperationDec from the OperationEntry
         ResolveConceptualElement element = opEntry.getDefiningElement();
@@ -354,18 +352,18 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         else {
             FacilityOperationDec fOpDec =
                     (FacilityOperationDec) opEntry.getDefiningElement();
-            opDec =
-                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
-                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
-                                    .getRequires(), fOpDec.getEnsures());
+            opDec = new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
+                    fOpDec.getReturnTy(), fOpDec.getStateVars(),
+                    fOpDec.getRequires(), fOpDec.getEnsures());
         }
 
         return opDec;
     }
 
     /**
-     * <p>Replace the formal with the actual variables
-     * inside the ensures clause.</p>
+     * <p>
+     * Replace the formal with the actual variables inside the ensures clause.
+     * </p>
      *
      * @param ensures The ensures clause.
      * @param paramList The list of parameter variables.
@@ -437,30 +435,26 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                 Exp convertExp =
                         Utilities.convertExp(pExp, myCurrentModuleScope);
                 if (pExp instanceof ProgramIntegerExp) {
-                    replName =
-                            Integer.toString(((IntegerExp) convertExp)
-                                    .getValue());
+                    replName = Integer
+                            .toString(((IntegerExp) convertExp).getValue());
                 }
                 else if (pExp instanceof ProgramCharExp) {
-                    replName =
-                            Character.toString(((CharExp) convertExp)
-                                    .getValue());
+                    replName = Character
+                            .toString(((CharExp) convertExp).getValue());
                 }
                 else {
                     replName = ((StringExp) convertExp).getValue();
                 }
 
                 // Create a variable expression of the form "_?[Argument Name]"
-                undqRep =
-                        Utilities.createVarExp(null, null, Utilities
-                                .createPosSymbol("_?" + replName), pExp
-                                .getMathType(), pExp.getMathTypeValue());
+                undqRep = Utilities.createVarExp(null, null,
+                        Utilities.createPosSymbol("_?" + replName),
+                        pExp.getMathType(), pExp.getMathTypeValue());
 
                 // Create a variable expression of the form "?[Argument Name]"
-                quesRep =
-                        Utilities.createVarExp(null, null, Utilities
-                                .createPosSymbol("?" + replName), pExp
-                                .getMathType(), pExp.getMathTypeValue());
+                quesRep = Utilities.createVarExp(null, null,
+                        Utilities.createPosSymbol("?" + replName),
+                        pExp.getMathType(), pExp.getMathTypeValue());
             }
             // Case #4: VariableDotExp
             else if (pExp instanceof VariableDotExp) {
@@ -472,9 +466,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     undqRep = Exp.copy(repl);
                     edu.clemson.cs.r2jt.collections.List<Exp> segList =
                             ((DotExp) undqRep).getSegments();
-                    VariableNameExp undqNameRep =
-                            new VariableNameExp(null, null, Utilities
-                                    .createPosSymbol("_?" + replName));
+                    VariableNameExp undqNameRep = new VariableNameExp(null,
+                            null, Utilities.createPosSymbol("_?" + replName));
                     undqNameRep.setMathType(pE.getMathType());
                     segList.set(0, undqNameRep);
                     ((DotExp) undqRep).setSegments(segList);
@@ -482,9 +475,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     // Create a variable expression of the form "?[Argument Name]"
                     quesRep = Exp.copy(repl);
                     segList = ((DotExp) quesRep).getSegments();
-                    segList
-                            .set(0, ((VariableDotExp) pExp).getSegments()
-                                    .get(0));
+                    segList.set(0,
+                            ((VariableDotExp) pExp).getSegments().get(0));
                     ((DotExp) quesRep).setSegments(segList);
                 }
                 else if (repl instanceof VariableDotExp) {
@@ -495,9 +487,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     undqRep = Exp.copy(repl);
                     edu.clemson.cs.r2jt.collections.List<VariableExp> segList =
                             ((VariableDotExp) undqRep).getSegments();
-                    VariableNameExp undqNameRep =
-                            new VariableNameExp(null, null, Utilities
-                                    .createPosSymbol("_?" + replName));
+                    VariableNameExp undqNameRep = new VariableNameExp(null,
+                            null, Utilities.createPosSymbol("_?" + replName));
                     undqNameRep.setMathType(pE.getMathType());
                     segList.set(0, undqNameRep);
                     ((VariableDotExp) undqRep).setSegments(segList);
@@ -505,9 +496,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     // Create a variable expression of the form "?[Argument Name]"
                     quesRep = Exp.copy(repl);
                     segList = ((VariableDotExp) quesRep).getSegments();
-                    segList
-                            .set(0, ((VariableDotExp) pExp).getSegments()
-                                    .get(0));
+                    segList.set(0,
+                            ((VariableDotExp) pExp).getSegments().get(0));
                     ((VariableDotExp) quesRep).setSegments(segList);
                 }
                 // Error: Case not handled!
@@ -521,16 +511,14 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                 replName = ((VariableNameExp) pExp).getName().getName();
 
                 // Create a variable expression of the form "_?[Argument Name]"
-                undqRep =
-                        Utilities.createVarExp(null, null, Utilities
-                                .createPosSymbol("_?" + replName), pExp
-                                .getMathType(), pExp.getMathTypeValue());
+                undqRep = Utilities.createVarExp(null, null,
+                        Utilities.createPosSymbol("_?" + replName),
+                        pExp.getMathType(), pExp.getMathTypeValue());
 
                 // Create a variable expression of the form "?[Argument Name]"
-                quesRep =
-                        Utilities.createVarExp(null, null, Utilities
-                                .createPosSymbol("?" + replName), pExp
-                                .getMathType(), pExp.getMathTypeValue());
+                quesRep = Utilities.createVarExp(null, null,
+                        Utilities.createPosSymbol("?" + replName),
+                        pExp.getMathType(), pExp.getMathTypeValue());
             }
             // Case #6: ProgramParamExp
             else if (pExp instanceof ProgramParamExp) {
@@ -538,16 +526,14 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                 replName = ((ProgramParamExp) pExp).getName().getName();
 
                 // Create a variable expression of the form "_?[Argument Name]"
-                undqRep =
-                        Utilities.createVarExp(null, null, Utilities
-                                .createPosSymbol("_?" + replName), pExp
-                                .getMathType(), pExp.getMathTypeValue());
+                undqRep = Utilities.createVarExp(null, null,
+                        Utilities.createPosSymbol("_?" + replName),
+                        pExp.getMathType(), pExp.getMathTypeValue());
 
                 // Create a variable expression of the form "?[Argument Name]"
-                quesRep =
-                        Utilities.createVarExp(null, null, Utilities
-                                .createPosSymbol("?" + replName), pExp
-                                .getMathType(), pExp.getMathTypeValue());
+                quesRep = Utilities.createVarExp(null, null,
+                        Utilities.createPosSymbol("?" + replName),
+                        pExp.getMathType(), pExp.getMathTypeValue());
             }
             // Error: Case not handled!
             else {
@@ -573,28 +559,18 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     Exp quesVar;
 
                     // Obtain the free variable
-                    VarExp freeVar =
-                            (VarExp) myCurrentAssertiveCode.getFreeVar(
-                                    Utilities.createPosSymbol(replName), false);
+                    VarExp freeVar = (VarExp) myCurrentAssertiveCode.getFreeVar(
+                            Utilities.createPosSymbol(replName), false);
                     if (freeVar == null) {
-                        freeVar =
-                                Utilities
-                                        .createVarExp(
-                                                varDec.getLocation(),
-                                                null,
-                                                Utilities
-                                                        .createPosSymbol(replName),
-                                                varDec.getTy()
-                                                        .getMathTypeValue(),
-                                                null);
+                        freeVar = Utilities.createVarExp(varDec.getLocation(),
+                                null, Utilities.createPosSymbol(replName),
+                                varDec.getTy().getMathTypeValue(), null);
                     }
 
                     // Apply the question mark to the free variable
-                    freeVar =
-                            Utilities
-                                    .createQuestionMarkVariable(myTypeGraph
-                                            .formConjunct(ensures, newConfirm),
-                                            freeVar);
+                    freeVar = Utilities.createQuestionMarkVariable(
+                            myTypeGraph.formConjunct(ensures, newConfirm),
+                            freeVar);
 
                     if (pExp instanceof ProgramDotExp
                             || pExp instanceof VariableDotExp) {
@@ -680,8 +656,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Replace the formal with the actual variables
-     * inside the requires clause.</p>
+     * <p>
+     * Replace the formal with the actual variables inside the requires clause.
+     * </p>
      *
      * @param requires The requires clause.
      * @param paramList The list of parameter variables.
@@ -702,9 +679,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             ProgramExp pExp = argList.get(i);
 
             // VarExp form of the parameter variable
-            VarExp oldExp =
-                    Utilities.createVarExp(null, null, varDec.getName(), pExp
-                            .getMathType(), pExp.getMathTypeValue());
+            VarExp oldExp = Utilities.createVarExp(null, null, varDec.getName(),
+                    pExp.getMathType(), pExp.getMathTypeValue());
 
             // Deal with nested function calls
             Exp repl;
@@ -732,10 +708,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             }
 
             // New VarExp
-            VarExp newExp =
-                    Utilities.createVarExp(null, null, Utilities
-                            .createPosSymbol("_" + varDec.getName().getName()),
-                            repl.getMathType(), repl.getMathTypeValue());
+            VarExp newExp = Utilities.createVarExp(null, null,
+                    Utilities.createPosSymbol("_" + varDec.getName().getName()),
+                    repl.getMathType(), repl.getMathTypeValue());
 
             // Replace the old with the new in the requires clause
             requires = Utilities.replace(requires, oldExp, newExp);
@@ -747,9 +722,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
         // Replace the temp values with the actual values
         for (int i = 0; i < undRepList.size(); i++) {
-            requires =
-                    Utilities.replace(requires, undRepList.get(i), replList
-                            .get(i));
+            requires = Utilities.replace(requires, undRepList.get(i),
+                    replList.get(i));
         }
 
         return requires;

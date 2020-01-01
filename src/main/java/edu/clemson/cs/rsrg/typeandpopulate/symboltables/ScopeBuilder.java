@@ -1,7 +1,7 @@
 /*
  * ScopeBuilder.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -35,12 +35,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>ScopeBuilder</code> is a working, mutable realization of
- * {@link Scope}.</p>
+ * <p>
+ * A <code>ScopeBuilder</code> is a working, mutable realization of
+ * {@link Scope}.
+ * </p>
  *
- * <p>Note that <code>ScopeBuilder</code> has no public constructor.
- * <code>ScopeBuilders</code>s are acquired through calls to some of the methods
- * of {@link MathSymbolTableBuilder}.</p>
+ * <p>
+ * Note that <code>ScopeBuilder</code> has no public constructor.
+ * <code>ScopeBuilders</code>s are
+ * acquired through calls to some of the methods of
+ * {@link MathSymbolTableBuilder}.
+ * </p>
  *
  * @version 2.0
  */
@@ -50,10 +55,18 @@ public class ScopeBuilder extends SyntacticScope {
     // Member Fields
     // ===========================================================
 
-    /** <p>This contains all the children scopes</p> */
+    /**
+     * <p>
+     * This contains all the children scopes
+     * </p>
+     */
     private final List<ScopeBuilder> myChildren = new LinkedList<>();
 
-    /** <p>The current type graph object in use.</p> */
+    /**
+     * <p>
+     * The current type graph object in use.
+     * </p>
+     */
     private final TypeGraph myTypeGraph;
 
     // ==========================================================
@@ -61,18 +74,22 @@ public class ScopeBuilder extends SyntacticScope {
     // ==========================================================
 
     /**
-     * <p>This constructs a scope where new entries can be added.</p>
+     * <p>
+     * This constructs a scope where new entries can be added.
+     * </p>
      *
      * @param b The current scope repository builder.
      * @param g The current type graph.
      * @param definingElement The element that created this scope.
      * @param parent The parent scope.
-     * @param enclosingModule The module identifier for the module
-     *                        that this scope belongs to.
+     * @param enclosingModule The module identifier for the module that this
+     *        scope belongs to.
      */
-    ScopeBuilder(MathSymbolTableBuilder b, TypeGraph g, ResolveConceptualElement definingElement,
-                 Scope parent, ModuleIdentifier enclosingModule) {
-        super(b, definingElement, parent, enclosingModule, new BaseSymbolTable());
+    ScopeBuilder(MathSymbolTableBuilder b, TypeGraph g,
+            ResolveConceptualElement definingElement, Scope parent,
+            ModuleIdentifier enclosingModule) {
+        super(b, definingElement, parent, enclosingModule,
+                new BaseSymbolTable());
         myTypeGraph = g;
     }
 
@@ -81,9 +98,13 @@ public class ScopeBuilder extends SyntacticScope {
     // ===========================================================
 
     /**
-     * <p>Modifies the current working scope to add a new binding for a
-     * symbol with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> and of type <code>type</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new binding for a symbol with
+     * an unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>
+     * and of type
+     * <code>type</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param q The symbol quantification.
@@ -96,22 +117,26 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link MathSymbolEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final MathSymbolEntry addBinding(String name, SymbolTableEntry.Quantification q,
-            ResolveConceptualElement definingElement, MTType type, MTType typeValue,
-            Map<String, MTType> schematicTypes, Map<String, MTType> genericsInDefiningContext)
-            throws DuplicateSymbolException, IllegalArgumentException {
+    public final MathSymbolEntry addBinding(String name,
+            SymbolTableEntry.Quantification q,
+            ResolveConceptualElement definingElement, MTType type,
+            MTType typeValue, Map<String, MTType> schematicTypes,
+            Map<String, MTType> genericsInDefiningContext)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, type);
 
-        MathSymbolEntry entry =
-                new MathSymbolEntry(myTypeGraph, name, q, definingElement,
-                        type, typeValue, schematicTypes,
-                        genericsInDefiningContext, myRootModule);
+        MathSymbolEntry entry = new MathSymbolEntry(myTypeGraph, name, q,
+                definingElement, type, typeValue, schematicTypes,
+                genericsInDefiningContext, myRootModule);
 
         myBindings.put(name, entry);
 
@@ -119,9 +144,13 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new binding for a
-     * symbol with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> and of type <code>type</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new binding for a symbol with
+     * an unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>
+     * and of type
+     * <code>type</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param q The symbol quantification.
@@ -131,22 +160,30 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link MathSymbolEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final MathSymbolEntry addBinding(String name, SymbolTableEntry.Quantification q,
+    public final MathSymbolEntry addBinding(String name,
+            SymbolTableEntry.Quantification q,
             ResolveConceptualElement definingElement, MTType type)
-            throws DuplicateSymbolException, IllegalArgumentException {
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         return addBinding(name, q, definingElement, type, null, null, null);
     }
 
     /**
-     * <p>Modifies the current working scope to add a new binding for a
-     * symbol with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> and of type <code>type</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new binding for a symbol with
+     * an unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>
+     * and of type
+     * <code>type</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
@@ -156,22 +193,31 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link MathSymbolEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final MathSymbolEntry addBinding(String name, ResolveConceptualElement definingElement,
-            MTType type, MTType typeValue)
-            throws DuplicateSymbolException, IllegalArgumentException {
-        return addBinding(name, SymbolTableEntry.Quantification.NONE, definingElement, type, typeValue, null, null);
+    public final MathSymbolEntry addBinding(String name,
+            ResolveConceptualElement definingElement, MTType type,
+            MTType typeValue)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
+        return addBinding(name, SymbolTableEntry.Quantification.NONE,
+                definingElement, type, typeValue, null, null);
     }
 
     /**
-     * <p>Modifies the current working scope to add a new binding for a
-     * symbol with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> and of type <code>type</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new binding for a symbol with
+     * an unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>
+     * and of type
+     * <code>type</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
@@ -180,44 +226,59 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link MathSymbolEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final MathSymbolEntry addBinding(String name, ResolveConceptualElement definingElement, MTType type)
-            throws DuplicateSymbolException, IllegalArgumentException {
-        return addBinding(name, SymbolTableEntry.Quantification.NONE, definingElement, type);
+    public final MathSymbolEntry addBinding(String name,
+            ResolveConceptualElement definingElement, MTType type)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
+        return addBinding(name, SymbolTableEntry.Quantification.NONE,
+                definingElement, type);
     }
 
     /**
-     * <p>Modifies the current working scope to add a new facility entry
-     * defined by the AST node <code>facility</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new facility entry defined by
+     * the AST node
+     * <code>facility</code>.
+     * </p>
      *
      * @param facility The AST Node that introduced the symbol.
-     * @param isSharingConceptInstantiation This flag indicates whether or not this {@code facility}
-     *                                      is an instantiation of a {@code sharing concept}.
+     * @param isSharingConceptInstantiation This flag indicates whether or not
+     *        this {@code facility}
+     *        is an instantiation of a {@code sharing concept}.
      *
      * @return A new {@link FacilityEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final FacilityEntry addFacility(FacilityDec facility, boolean isSharingConceptInstantiation)
-            throws DuplicateSymbolException, IllegalArgumentException {
+    public final FacilityEntry addFacility(FacilityDec facility,
+            boolean isSharingConceptInstantiation)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         SymbolTableEntry curLocalEntry =
                 myBindings.get(facility.getName().getName());
         if (curLocalEntry != null) {
-            throw new DuplicateSymbolException("Found two matching entries!", curLocalEntry);
+            throw new DuplicateSymbolException("Found two matching entries!",
+                    curLocalEntry);
         }
 
-        FacilityEntry entry = new FacilityEntry(facility, isSharingConceptInstantiation,
-                myRootModule, getSourceRepository());
+        FacilityEntry entry =
+                new FacilityEntry(facility, isSharingConceptInstantiation,
+                        myRootModule, getSourceRepository());
 
         myBindings.put(facility.getName().getName(), entry);
 
@@ -225,33 +286,45 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new facility type representation
-     * for a type with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code>, instantiated with type <code>representationType</code>
-     * and has a <code>convention</code> clause.</p>
+     * <p>
+     * Modifies the current working scope to add a new facility type
+     * representation for a type with an
+     * unqualified name, <code>name</code>, defined by the AST node
+     * <code>definingElement</code>,
+     * instantiated with type <code>representationType</code> and has a
+     * <code>convention</code>
+     * clause.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
-     * @param representationType The instantiated program type used to implement this type.
+     * @param representationType The instantiated program type used to implement
+     *        this type.
      * @param convention The new type's convention clause.
      *
      * @return A new {@link FacilityTypeRepresentationEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final FacilityTypeRepresentationEntry addFacilityRepresentationEntry(String name,
-            FacilityTypeRepresentationDec definingElement, PTInstantiated representationType,
-            AssertionClause convention)
-            throws DuplicateSymbolException, IllegalArgumentException {
+    public final FacilityTypeRepresentationEntry addFacilityRepresentationEntry(
+            String name, FacilityTypeRepresentationDec definingElement,
+            PTInstantiated representationType, AssertionClause convention)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, "");
 
-        FacilityTypeRepresentationEntry result = new FacilityTypeRepresentationEntry(name, definingElement,
-                myRootModule, new PTFacilityRepresentation(myTypeGraph, representationType, name), convention);
+        FacilityTypeRepresentationEntry result =
+                new FacilityTypeRepresentationEntry(name, definingElement,
+                        myRootModule, new PTFacilityRepresentation(myTypeGraph,
+                                representationType, name),
+                        convention);
 
         myBindings.put(name, result);
 
@@ -259,10 +332,13 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new parameter variable
-     * with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code>, with parameter <code>mode</code>
-     * and has the specified program <code>type</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new parameter variable with
+     * an unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>,
+     * with parameter
+     * <code>mode</code> and has the specified program <code>type</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
@@ -272,20 +348,23 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link ProgramParameterEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final ProgramParameterEntry addFormalParameter(String name, ResolveConceptualElement definingElement,
-            ParameterMode mode, PTType type)
-            throws DuplicateSymbolException, IllegalArgumentException {
+    public final ProgramParameterEntry addFormalParameter(String name,
+            ResolveConceptualElement definingElement, ParameterMode mode,
+            PTType type)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, type);
 
-        ProgramParameterEntry entry =
-                new ProgramParameterEntry(myTypeGraph, name, definingElement,
-                        myRootModule, type, mode);
+        ProgramParameterEntry entry = new ProgramParameterEntry(myTypeGraph,
+                name, definingElement, myRootModule, type, mode);
 
         myBindings.put(name, entry);
 
@@ -293,10 +372,13 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new operation
-     * with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code>, with parameters <code>params</code>
-     * and could have a <code>returnType</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new operation with an
+     * unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>,
+     * with parameters
+     * <code>params</code> and could have a <code>returnType</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
@@ -306,20 +388,23 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link OperationEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final OperationEntry addOperation(String name, ResolveConceptualElement definingElement,
+    public final OperationEntry addOperation(String name,
+            ResolveConceptualElement definingElement,
             List<ProgramParameterEntry> params, PTType returnType)
-            throws DuplicateSymbolException, IllegalArgumentException {
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, returnType);
 
-        OperationEntry entry =
-                new OperationEntry(name, definingElement, myRootModule,
-                        returnType, params);
+        OperationEntry entry = new OperationEntry(name, definingElement,
+                myRootModule, returnType, params);
 
         myBindings.put(name, entry);
 
@@ -327,32 +412,39 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new operation profile
-     * with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> that is associated with
-     * <code>correspondingOperation</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new operation profile with an
+     * unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>
+     * that is associated with
+     * <code>correspondingOperation</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
-     * @param correspondingOperation The corresponding operation for this profile entry.
+     * @param correspondingOperation The corresponding operation for this
+     *        profile entry.
      *
      * @return A new {@link OperationProfileEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final OperationProfileEntry addOperationProfile(String name, ResolveConceptualElement definingElement,
+    public final OperationProfileEntry addOperationProfile(String name,
+            ResolveConceptualElement definingElement,
             OperationEntry correspondingOperation)
-            throws DuplicateSymbolException, IllegalArgumentException {
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, "");
 
-        OperationProfileEntry entry =
-                new OperationProfileEntry(name, definingElement, myRootModule,
-                        correspondingOperation);
+        OperationProfileEntry entry = new OperationProfileEntry(name,
+                definingElement, myRootModule, correspondingOperation);
 
         myBindings.put(name, entry);
 
@@ -360,32 +452,39 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new procedure entry
-     * with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> that is associated with
-     * <code>correspondingOperation</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new procedure entry with an
+     * unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>
+     * that is associated with
+     * <code>correspondingOperation</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
-     * @param correspondingOperation The corresponding operation for this procedure entry.
+     * @param correspondingOperation The corresponding operation for this
+     *        procedure entry.
      *
      * @return A new {@link ProcedureEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final ProcedureEntry addProcedure(String name, ResolveConceptualElement definingElement,
+    public final ProcedureEntry addProcedure(String name,
+            ResolveConceptualElement definingElement,
             OperationEntry correspondingOperation)
-            throws DuplicateSymbolException, IllegalArgumentException {
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, "");
 
-        ProcedureEntry entry =
-                new ProcedureEntry(name, definingElement, myRootModule,
-                        correspondingOperation);
+        ProcedureEntry entry = new ProcedureEntry(name, definingElement,
+                myRootModule, correspondingOperation);
 
         myBindings.put(name, entry);
 
@@ -393,10 +492,13 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new type family entry
-     * with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> that is represented with
-     * <code>model</code> and has the exemplar <code>exemplarEntry</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new type family entry with an
+     * unqualified name,
+     * <code>name</code>, defined by the AST node <code>definingElement</code>
+     * that is represented
+     * with <code>model</code> and has the exemplar <code>exemplarEntry</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
@@ -406,15 +508,19 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link ProgramTypeEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final ProgramTypeEntry addProgramTypeDefinition(String name, TypeFamilyDec definingElement,
-            MTType model, MathSymbolEntry exemplarEntry)
-            throws DuplicateSymbolException, IllegalArgumentException {
+    public final ProgramTypeEntry addProgramTypeDefinition(String name,
+            TypeFamilyDec definingElement, MTType model,
+            MathSymbolEntry exemplarEntry)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, model);
 
         PosSymbol exemplarSymbol = definingElement.getExemplar();
@@ -422,9 +528,11 @@ public class ScopeBuilder extends SyntacticScope {
             throw new IllegalArgumentException("Null exemplar.");
         }
 
-        ProgramTypeEntry entry = new TypeFamilyEntry(myTypeGraph, name, definingElement,
-                myRootModule, model, new PTFamily(model, name, exemplarSymbol.getName()),
-                exemplarEntry, definingElement.getConstraint(), definingElement.getDefinitionVarList());
+        ProgramTypeEntry entry = new TypeFamilyEntry(myTypeGraph, name,
+                definingElement, myRootModule, model,
+                new PTFamily(model, name, exemplarSymbol.getName()),
+                exemplarEntry, definingElement.getConstraint(),
+                definingElement.getDefinitionVarList());
 
         myBindings.put(name, entry);
 
@@ -432,10 +540,13 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new program variable entry
-     * with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code> that has <code>type</code> as programming
-     * type.</p>
+     * <p>
+     * Modifies the current working scope to add a new program variable entry
+     * with an unqualified
+     * name, <code>name</code>, defined by the AST node
+     * <code>definingElement</code> that has
+     * <code>type</code> as programming type.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
@@ -444,20 +555,22 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link ProgramVariableEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
     public final ProgramVariableEntry addProgramVariable(String name,
             ResolveConceptualElement definingElement, PTType type)
-            throws DuplicateSymbolException, IllegalArgumentException {
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, type);
 
-        ProgramVariableEntry entry =
-                new ProgramVariableEntry(name, definingElement, myRootModule,
-                        type);
+        ProgramVariableEntry entry = new ProgramVariableEntry(name,
+                definingElement, myRootModule, type);
 
         myBindings.put(name, entry);
 
@@ -465,36 +578,47 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new type representation
-     * for a type with an unqualified name, <code>name</code>, defined by the AST
-     * node <code>definingElement</code>, that is associated with <code>definition</code>
-     * and instantiated with type <code>representationType</code> with
-     * <code>convention</code> and <code>correspondence</code> clauses.</p>
+     * <p>
+     * Modifies the current working scope to add a new type representation for a
+     * type with an
+     * unqualified name, <code>name</code>, defined by the AST node
+     * <code>definingElement</code>, that
+     * is associated with <code>definition</code> and instantiated with type
+     * <code>representationType</code> with <code>convention</code> and
+     * <code>correspondence</code>
+     * clauses.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
      * @param definition The associated type family entry.
-     * @param representationType The instantiated program type used to implement this type.
+     * @param representationType The instantiated program type used to implement
+     *        this type.
      * @param convention The new type's convention clause.
      * @param correspondence The new type's correspondence clause.
      *
      * @return A new {@link TypeRepresentationEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
     public final TypeRepresentationEntry addRepresentationTypeEntry(String name,
-            TypeRepresentationDec definingElement, TypeFamilyEntry definition, PTType representationType,
-            AssertionClause convention, AssertionClause correspondence)
-            throws DuplicateSymbolException, IllegalArgumentException {
+            TypeRepresentationDec definingElement, TypeFamilyEntry definition,
+            PTType representationType, AssertionClause convention,
+            AssertionClause correspondence)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, "");
 
-        TypeRepresentationEntry result = new TypeRepresentationEntry(name, definingElement, myRootModule,
-                definition, representationType, convention, correspondence);
+        TypeRepresentationEntry result = new TypeRepresentationEntry(name,
+                definingElement, myRootModule, definition, representationType,
+                convention, correspondence);
 
         myBindings.put(name, result);
 
@@ -502,9 +626,12 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>Modifies the current working scope to add a new theorem
-     * with an unqualified name, <code>name</code> and defined by the AST
-     * node <code>definingElement</code>.</p>
+     * <p>
+     * Modifies the current working scope to add a new theorem with an
+     * unqualified name,
+     * <code>name</code> and defined by the AST node
+     * <code>definingElement</code>.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
@@ -512,19 +639,22 @@ public class ScopeBuilder extends SyntacticScope {
      * @return A new {@link TheoremEntry}.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    public final TheoremEntry addTheorem(String name, MathAssertionDec definingElement)
-            throws DuplicateSymbolException, IllegalArgumentException {
+    public final TheoremEntry addTheorem(String name,
+            MathAssertionDec definingElement)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, "");
 
-        TheoremEntry entry =
-                new TheoremEntry(myTypeGraph, name, definingElement,
-                        myRootModule);
+        TheoremEntry entry = new TheoremEntry(myTypeGraph, name,
+                definingElement, myRootModule);
 
         myBindings.put(name, entry);
 
@@ -536,7 +666,9 @@ public class ScopeBuilder extends SyntacticScope {
     // ===========================================================
 
     /**
-     * <p>This method adds a child scope builder.</p>
+     * <p>
+     * This method adds a child scope builder.
+     * </p>
      *
      * @param b Child {@link ScopeBuilder}.
      */
@@ -545,7 +677,9 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>This method returns the list of children scope builders.</p>
+     * <p>
+     * This method returns the list of children scope builders.
+     * </p>
      *
      * @return A list of {@link ScopeBuilder}.
      */
@@ -554,18 +688,23 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     /**
-     * <p>This method seals this scope from further modifications.</p>
+     * <p>
+     * This method seals this scope from further modifications.
+     * </p>
      *
      * @param finalTable The finalized symbol table.
      *
      * @return A {@link FinalizedScope} object.
      */
     FinalizedScope seal(MathSymbolTable finalTable) {
-        return new FinalizedScope(finalTable, myDefiningElement, myParent, myRootModule, myBindings);
+        return new FinalizedScope(finalTable, myDefiningElement, myParent,
+                myRootModule, myBindings);
     }
 
     /**
-     * <p>This method sets the parent scope.</p>
+     * <p>
+     * This method sets the parent scope.
+     * </p>
      *
      * @param parent The parent {@link Scope}.
      */
@@ -578,25 +717,33 @@ public class ScopeBuilder extends SyntacticScope {
     // ===========================================================
 
     /**
-     * <p>This method performs basic sanity checks before we attempt
-     * to add an entry into the symbol table.</p>
+     * <p>
+     * This method performs basic sanity checks before we attempt to add an
+     * entry into the symbol
+     * table.
+     * </p>
      *
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
      * @param type The entry type.
      *
      * @throws DuplicateSymbolException If such a symbol is already defined
-     * directly in the scope represented by this <code>ScopeBuilder</code>.
-     * Note that this exception is not thrown if the symbol is defined in
-     * a parent scope or an imported module.
+     *         directly in the scope
+     *         represented by this <code>ScopeBuilder</code>. Note that this
+     *         exception is not thrown
+     *         if the symbol is defined in a parent scope or an imported module.
      * @throws IllegalArgumentException Arguments do not meet the entry creation
-     * criteria. Most likely, we have passed <code>null</code> objects.
+     *         criteria. Most
+     *         likely, we have passed <code>null</code> objects.
      */
-    private void sanityCheckBindArguments(String name, ResolveConceptualElement definingElement, Object type)
-            throws DuplicateSymbolException, IllegalArgumentException {
+    private void sanityCheckBindArguments(String name,
+            ResolveConceptualElement definingElement, Object type)
+            throws DuplicateSymbolException,
+                IllegalArgumentException {
         SymbolTableEntry curLocalEntry = myBindings.get(name);
         if (curLocalEntry != null) {
-            throw new DuplicateSymbolException("Found two matching entries!", curLocalEntry);
+            throw new DuplicateSymbolException("Found two matching entries!",
+                    curLocalEntry);
         }
 
         if (name == null || name.equals("")) {
@@ -605,12 +752,13 @@ public class ScopeBuilder extends SyntacticScope {
         }
 
         if (type == null) {
-            throw new IllegalArgumentException("Symbol table entry type must "
-                    + "be non-null.");
+            throw new IllegalArgumentException(
+                    "Symbol table entry type must " + "be non-null.");
         }
 
         if (definingElement == null) {
-            throw new IllegalArgumentException("Defining entry must be non-null!");
+            throw new IllegalArgumentException(
+                    "Defining entry must be non-null!");
         }
     }
 

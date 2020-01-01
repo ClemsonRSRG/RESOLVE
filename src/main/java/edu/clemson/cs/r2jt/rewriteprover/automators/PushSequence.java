@@ -1,7 +1,7 @@
 /*
  * PushSequence.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,9 +17,13 @@ import java.util.Deque;
 import java.util.Iterator;
 
 /**
- * <p>An {@link Automator Automator} that, when given the heartbeat, simply 
- * pushes the next in a sequence of automators onto the stack.  When it runs out
- * of automators to push, it pops itself off the stack.</p>
+ * <p>
+ * An {@link Automator Automator} that, when given the heartbeat, simply pushes
+ * the next in a
+ * sequence of automators onto the stack. When it runs out of automators to
+ * push, it pops itself off
+ * the stack.
+ * </p>
  */
 public class PushSequence implements Automator {
 

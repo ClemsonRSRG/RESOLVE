@@ -1,7 +1,7 @@
 /*
  * ConceptTypeParamDec.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,11 @@ import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the concept module type parameter
- * declaration objects that the compiler builds using the ANTLR4 AST nodes.</p>
+ * <p>
+ * This is the class for all the concept module type parameter declaration
+ * objects that the compiler
+ * builds using the ANTLR4 AST nodes.
+ * </p>
  *
  * @version 2.0
  */
@@ -28,8 +31,10 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
     // ===========================================================
 
     /**
-     * <p>This constructs a type representation that is passed as a parameter
-     * to a module.</p>
+     * <p>
+     * This constructs a type representation that is passed as a parameter to a
+     * module.
+     * </p>
      *
      * @param name A {@link PosSymbol} representing the type's name.
      */

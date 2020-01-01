@@ -1,7 +1,7 @@
 /*
  * MTType.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,7 +22,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * <p>The parent class of all mathematical types.</p>
+ * <p>
+ * The parent class of all mathematical types.
+ * </p>
  */
 public abstract class MTType {
 
@@ -33,7 +35,9 @@ public abstract class MTType {
             new HashMap<MTType, Map<String, MTType>>();
 
     /**
-     * <p>Allows us to detect if we're getting into an equals-loop.</p>
+     * <p>
+     * Allows us to detect if we're getting into an equals-loop.
+     * </p>
      */
     private int myEqualsDepth = 0;
 
@@ -59,27 +63,32 @@ public abstract class MTType {
 
         MTType target = this;
         for (Map.Entry<Integer, MTType> entry : newTypes.entrySet()) {
-            target =
-                    target.withComponentReplaced(entry.getKey(), entry
-                            .getValue());
+            target = target.withComponentReplaced(entry.getKey(),
+                    entry.getValue());
         }
 
         return target;
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> <code>o</code> is an
-     * </code>MTType</code> that is <em>alpha equivalent</em> to this type.
-     * I.e., it must be exactly the same with the sole exception that 
-     * quantified variables may have different names if they are otherwise
-     * identical.  So, BigUnion{t : MType}{t} <code>equals</code>
-     * BigUnion{r : MType}{r}.  However, BigUnion{t : MType}{t} <em>does 
-     * not</em> <code>equals</code> BigUnion{r : Power(MType)}{r}.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> <code>o</code> is an
+     * </code>MTType</code> that
+     * is <em>alpha equivalent</em> to this type. I.e., it must be exactly the
+     * same with the sole
+     * exception that quantified variables may have different names if they are
+     * otherwise identical.
+     * So, BigUnion{t : MType}{t} <code>equals</code> BigUnion{r : MType}{r}.
+     * However, BigUnion{t :
+     * MType}{t} <em>does not</em> <code>equals</code> BigUnion{r :
+     * Power(MType)}{r}.
+     * </p>
      * 
      * @param o The object to compare with this <code>MTType</code>.
      * 
      * @return <code>true</code> <strong>iff</strong> this <code>MTType</code>
-     *		is alpha equivalent to <code>o</code>.
+     *         is alpha equivalent to
+     *         <code>o</code>.
      */
     @Override
     public final boolean equals(Object o) {
@@ -91,16 +100,15 @@ public abstract class MTType {
             result = true;
         }
         else {
-            //We only check our cache if we're at the first level of equals
-            //comparison to avoid an infinite recursive loop
-            result =
-                    (myEqualsDepth == 1)
-                            && myKnownAlphaEquivalencies.contains(o);
+            // We only check our cache if we're at the first level of equals
+            // comparison to avoid an infinite recursive loop
+            result = (myEqualsDepth == 1)
+                    && myKnownAlphaEquivalencies.contains(o);
 
             if (!result) {
                 try {
-                    //All 'equals' logic should be put into AlphaEquivalencyChecker! 
-                    //Don't override equals!
+                    // All 'equals' logic should be put into AlphaEquivalencyChecker!
+                    // Don't override equals!
                     AlphaEquivalencyChecker alphaEq =
                             myTypeGraph.threadResources.alphaChecker;
                     alphaEq.reset();
@@ -113,8 +121,8 @@ public abstract class MTType {
                     result = false;
                 }
 
-                //We only cache our answer at the first level to avoid an 
-                //infinite equals loop
+                // We only cache our answer at the first level to avoid an
+                // infinite equals loop
                 if ((myEqualsDepth == 1) && result) {
                     myKnownAlphaEquivalencies.add(o);
                 }
@@ -190,8 +198,8 @@ public abstract class MTType {
         return this.equals(t);
     }
 
-    public final MTType getCopyWithVariablesSubstituted(
-            Map<String, MTType> substitutions) {
+    public final MTType
+            getCopyWithVariablesSubstituted(Map<String, MTType> substitutions) {
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitutions);
         accept(renamer);
@@ -225,7 +233,8 @@ public abstract class MTType {
     }
 
     public Map<String, MTType> bindTo(MTType template,
-            Map<String, MTType> thisContext, Map<String, MTType> templateContext)
+            Map<String, MTType> thisContext,
+            Map<String, MTType> templateContext)
             throws BindingException {
 
         BindingVisitor bind =
@@ -240,16 +249,18 @@ public abstract class MTType {
     }
 
     public MTType getType() {
-        //TODO : Each MTType should really contain it's declared type.  I.e.,
-        //       if I say "Definition X : Set", I should store that X is
-        //       of type Set someplace.  That's not currently available, so for
-        //       the moment we say that all types are of type MType, the parent
-        //       type of all types.
+        // TODO : Each MTType should really contain it's declared type. I.e.,
+        // if I say "Definition X : Set", I should store that X is
+        // of type Set someplace. That's not currently available, so for
+        // the moment we say that all types are of type MType, the parent
+        // type of all types.
         return myTypeGraph.CLS;
     }
 
     /**
-     * <p>Returns the object-reference hash.</p>
+     * <p>
+     * Returns the object-reference hash.
+     * </p>
      */
     public final int objectReferenceHashCode() {
         return super.hashCode();
@@ -261,30 +272,40 @@ public abstract class MTType {
     }
 
     /**
-     * <p>This is just a template method to <em>force</em> all concrete 
-     * subclasses of <code>MTType</code> to implement <code>hashCode()</code>,
-     * as the type resolution algorithm depends on it being implemented 
-     * sensibly.</p>
+     * <p>
+     * This is just a template method to <em>force</em> all concrete subclasses
+     * of <code>MTType</code>
+     * to implement <code>hashCode()</code>, as the type resolution algorithm
+     * depends on it being
+     * implemented sensibly.
+     * </p>
      * 
      * @return A hashcode consistent with <code>equals()</code> and thus
-     *     alpha-equivalency.
+     *         alpha-equivalency.
      */
     public abstract int getHashCode();
 
     /**
-     * <p>Indicates that this type is known to contain only elements <em>that
-     * are themselves</em> types.  Practically, this answers the question, "can
-     * an instance of this type itself be used as a type?"</p>
+     * <p>
+     * Indicates that this type is known to contain only elements <em>that are
+     * themselves</em> types.
+     * Practically, this answers the question, "can an instance of this type
+     * itself be used as a
+     * type?"
+     * </p>
      */
     public boolean isKnownToContainOnlyMTypes() {
         return false;
     }
 
     /**
-     * <p>Indicates that every instance of this type is itself known to contain
-     * only elements that are types.  Practically, this answers the question,
-     * "if a function returns an instance of this type, can that instance itself
-     * be said to contain only types?"</p>
+     * <p>
+     * Indicates that every instance of this type is itself known to contain
+     * only elements that are
+     * types. Practically, this answers the question, "if a function returns an
+     * instance of this type,
+     * can that instance itself be said to contain only types?"
+     * </p>
      */
     public boolean membersKnownToContainOnlyMTypes() {
         return false;

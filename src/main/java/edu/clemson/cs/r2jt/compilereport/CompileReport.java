@@ -1,7 +1,7 @@
 /*
  * CompileReport.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,7 +19,7 @@ import edu.clemson.cs.r2jt.collections.List;
 
 public class CompileReport {
 
-    //private static CompileReport INSTANCE = new CompileReport();
+    // private static CompileReport INSTANCE = new CompileReport();
     private boolean vc = false;
     private boolean prove = false;
     private boolean translate = false;
@@ -33,16 +33,16 @@ public class CompileReport {
     private StringBuilder myBugReportBuffer = new StringBuilder();
     private String myOutput = "";
 
-    //public  WebSocketWriter myWsWriter = null;
-    //private List<String> proveList = null;
+    // public WebSocketWriter myWsWriter = null;
+    // private List<String> proveList = null;
 
     public CompileReport() {
-    //proveList = new List<String>();
+        // proveList = new List<String>();
     }
 
-    /*public static CompileReport getInstance(){
-    	return INSTANCE;
-    }*/
+    /*
+     * public static CompileReport getInstance(){ return INSTANCE; }
+     */
 
     public void resetReport() {
         vc = false;
@@ -82,9 +82,9 @@ public class CompileReport {
         facilityName = facName;
     }
 
-    /*public void setWsWriter(WebSocketWriter writer){
-        myWsWriter = writer;
-    }*/
+    /*
+     * public void setWsWriter(WebSocketWriter writer){ myWsWriter = writer; }
+     */
 
     public boolean vcSuccess() {
         return vc;

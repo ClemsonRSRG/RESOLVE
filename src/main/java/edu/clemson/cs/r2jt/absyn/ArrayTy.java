@@ -1,7 +1,7 @@
 /*
  * ArrayTy.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -37,10 +37,11 @@ public class ArrayTy extends Ty {
     // ===========================================================
 
     public ArrayTy() {
-    // Empty
+        // Empty
     }
 
-    public ArrayTy(Location location, ProgramExp lo, ProgramExp hi, Ty entryType) {
+    public ArrayTy(Location location, ProgramExp lo, ProgramExp hi,
+            Ty entryType) {
         this.location = location;
         this.lo = lo;
         this.hi = hi;

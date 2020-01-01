@@ -1,7 +1,7 @@
 /*
  * IfExp.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -103,9 +103,9 @@ public class IfExp extends Exp {
     // ===========================================================
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new IfExp(location, substitute(test, substitutions), substitute(
-                thenclause, substitutions), substitute(elseclause,
-                substitutions));
+        return new IfExp(location, substitute(test, substitutions),
+                substitute(thenclause, substitutions),
+                substitute(elseclause, substitutions));
     }
 
     /** Accepts a ResolveConceptualVisitor. */
@@ -137,8 +137,8 @@ public class IfExp extends Exp {
     }
 
     public String toString(int indent) {
-        //Environment   env	= Environment.getInstance();
-        //if(env.isabelle()){return toIsabelleString(indent);};    	
+        // Environment env = Environment.getInstance();
+        // if(env.isabelle()){return toIsabelleString(indent);};
         StringBuffer sb = new StringBuffer();
 
         printSpace(indent, sb);
@@ -177,8 +177,9 @@ public class IfExp extends Exp {
         return sb.toString();
     }
 
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * Returns true if the variable is found in any sub expression of this one.
+     **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Boolean found = false;
         if (test != null) {

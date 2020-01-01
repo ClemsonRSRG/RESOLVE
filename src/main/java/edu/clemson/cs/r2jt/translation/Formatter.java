@@ -1,7 +1,7 @@
 /*
  * Formatter.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,8 +17,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>A small class that automatically supplements a user supplied string
- * containing translated Java or C code with:</p>
+ * <p>
+ * A small class that automatically supplements a user supplied string
+ * containing translated Java or
+ * C code with:
+ * </p>
  * <ul>
  * <li>Newlines after semicolons and left/right curly braces.</li>
  * <li>Appropriate tabification for each level of curly brace.</li>
@@ -27,11 +30,14 @@ import java.util.List;
 public class Formatter {
 
     /**
-     * <p>Annotates a tab-less, newline-less string containing Java or C code
-     * with proper newlines and indentation.</p>
+     * <p>
+     * Annotates a tab-less, newline-less string containing Java or C code with
+     * proper newlines and
+     * indentation.
+     * </p>
      *
-     * @param code A raw string of Java or C code <em>lacking</em> newlines
-     *             or tabs.
+     * @param code A raw string of Java or C code <em>lacking</em> newlines or
+     *        tabs.
      *
      * @return The string, <code>code</code>, with newlines and indentation
      *         added.
@@ -62,7 +68,9 @@ public class Formatter {
     }
 
     /**
-     * <p>Creates a string of consecutive tabs of length |T|.</p>
+     * <p>
+     * Creates a string of consecutive tabs of length |T|.
+     * </p>
      *
      * @param T A Deque of tab <code>'\t'</code> characters.
      * @return A string of consecutive tabs.
@@ -80,10 +88,11 @@ public class Formatter {
     // somehow figure out a way to get at whitespace preceding semicolons
 
     /**
-     * <p>Makes use of regular expressions to:
+     * <p>
+     * Makes use of regular expressions to:
      * <ul>
-     *      <li>Remove all trailing whitespace on ';' and '{'.</li>
-     *      <li>Remove all preceding whitespace on '}'.</li>
+     * <li>Remove all trailing whitespace on ';' and '{'.</li>
+     * <li>Remove all preceding whitespace on '}'.</li>
      * </p>
      *
      * @param code The string whitespace should be removed from.

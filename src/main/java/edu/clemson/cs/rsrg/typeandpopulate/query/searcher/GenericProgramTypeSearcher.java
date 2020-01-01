@@ -1,7 +1,7 @@
 /*
  * GenericProgramTypeSearcher.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,8 +20,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>An <code>GenericProgramTypeSearcher</code> returns entries in a {@link SymbolTable}
- * that are generic type parameters.</p>
+ * <p>
+ * An <code>GenericProgramTypeSearcher</code> returns entries in a
+ * {@link SymbolTable} that are
+ * generic type parameters.
+ * </p>
  *
  * @version 2.0
  */
@@ -33,7 +36,11 @@ public class GenericProgramTypeSearcher
     // Member Fields
     // ===========================================================
 
-    /** <p>A singleton instance for this searcher.</p> */
+    /**
+     * <p>
+     * A singleton instance for this searcher.
+     * </p>
+     */
     public static final GenericProgramTypeSearcher INSTANCE =
             new GenericProgramTypeSearcher();
 
@@ -42,8 +49,9 @@ public class GenericProgramTypeSearcher
     // ===========================================================
 
     /**
-     * <p>This constructs a searcher that searches for a generic
-     * program type.</p>
+     * <p>
+     * This constructs a searcher that searches for a generic program type.
+     * </p>
      */
     private GenericProgramTypeSearcher() {}
 
@@ -52,19 +60,25 @@ public class GenericProgramTypeSearcher
     // ===========================================================
 
     /**
-     * <p>Refines {@link TableSearcher#addMatches(SymbolTable, List, SearchContext)}}
-     * to guarantee that it will not throw a {@link DuplicateSymbolException}.
-     * Otherwise, behaves identically.</p>
+     * <p>
+     * Refines
+     * {@link TableSearcher#addMatches(SymbolTable, List, SearchContext)}} to
+     * guarantee that
+     * it will not throw a {@link DuplicateSymbolException}. Otherwise, behaves
+     * identically.
+     * </p>
      *
      * @param entries The set of symbol table entries to consider.
      * @param matches A non-<code>null</code> accumulator of matches.
      * @param l The context from which <code>entries</code> was drawn.
      *
-     * @return <code>true</code> if <code>matches</code> now represents a
-     *         final list of search results; i.e., no further symbol table
-     *         entries should be considered. <code>false</code> indicates that
-     *         the search should continue, provided there are additional
-     *         un-searched scopes.
+     * @return <code>true</code> if <code>matches</code> now represents a final
+     *         list of search
+     *         results; i.e., no further symbol table entries should be
+     *         considered. <code>false</code>
+     *         indicates that the search should continue, provided there are
+     *         additional un-searched
+     *         scopes.
      */
     @Override
     public final boolean addMatches(SymbolTable entries,
@@ -75,10 +89,10 @@ public class GenericProgramTypeSearcher
         while (parameters.hasNext()) {
             parameter = parameters.next();
 
-            if (parameter.getParameterMode().equals(
-                    ProgramParameterEntry.ParameterMode.TYPE)) {
-                matches.add(parameter.toProgramTypeEntry(parameter
-                        .getDefiningElement().getLocation()));
+            if (parameter.getParameterMode()
+                    .equals(ProgramParameterEntry.ParameterMode.TYPE)) {
+                matches.add(parameter.toProgramTypeEntry(
+                        parameter.getDefiningElement().getLocation()));
             }
         }
 

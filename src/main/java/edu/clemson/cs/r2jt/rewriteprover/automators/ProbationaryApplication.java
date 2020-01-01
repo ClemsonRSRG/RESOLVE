@@ -1,7 +1,7 @@
 /*
  * ProbationaryApplication.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -52,8 +52,8 @@ public class ProbationaryApplication implements Automator {
                 model.undoLastProofStep();
                 myChangeStuckFlag = false;
                 if (!FlagManager.getInstance().isFlagSet("nodebug")) {
-                    System.out
-                            .println("ProbationaryApplication - Rolling back change");
+                    System.out.println(
+                            "ProbationaryApplication - Rolling back change");
                 }
             }
 

@@ -1,7 +1,7 @@
 /*
  * MathSymbolTable.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -26,19 +26,30 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>MathSymbolTable</code> represents an immutable mapping from
- * those nodes in the AST that define a scope to {@link FinalizedScope} objects
- * representing those scopes and containing the symbols defined therein.</p>
+ * <p>
+ * A <code>MathSymbolTable</code> represents an immutable mapping from those
+ * nodes in the AST that
+ * define a scope to {@link FinalizedScope} objects representing those scopes
+ * and containing the
+ * symbols defined therein.
+ * </p>
  *
- * <p><code>Scope</code>s that were introduced at the module-level (e.g.,
- * the scope defined by a {@link PrecisModuleDec}) will have an
- * associated <code>Scope</code> that is further refined into an instance of
- * {@link FinalizedModuleScope}. As a convenience, such module scopes may
- * be retrieved in a type-safe way with a call to
- * {@link #getModuleScope(ModuleIdentifier)}.</p>
+ * <p>
+ * <code>Scope</code>s that were introduced at the module-level (e.g., the scope
+ * defined by a
+ * {@link PrecisModuleDec}) will have an associated <code>Scope</code> that is
+ * further refined into
+ * an instance of {@link FinalizedModuleScope}. As a convenience, such module
+ * scopes may be
+ * retrieved in a type-safe way with a call to
+ * {@link #getModuleScope(ModuleIdentifier)}.
+ * </p>
  *
- * <p>Note that there are no public constructors for <code>MathSymbolTable</code>.
- * New instances should be acquired from a call to {@link MathSymbolTableBuilder#seal()}.</p>
+ * <p>
+ * Note that there are no public constructors for <code>MathSymbolTable</code>.
+ * New instances should
+ * be acquired from a call to {@link MathSymbolTableBuilder#seal()}.
+ * </p>
  *
  * @version 2.0
  */
@@ -49,70 +60,101 @@ public class MathSymbolTable extends ScopeRepository {
     // ===========================================================
 
     /**
-     * <p>When starting a search from a particular scope, specifies how any
-     * available facilities should be searched.</p>
+     * <p>
+     * When starting a search from a particular scope, specifies how any
+     * available facilities should
+     * be searched.
+     * </p>
      *
-     * <p>Available facilities are those facilities defined in a module searched
-     * by the search's <code>ImportStrategy</code> (which necessarily always
-     * includes the source module).</p>
+     * <p>
+     * Available facilities are those facilities defined in a module searched by
+     * the search's
+     * <code>ImportStrategy</code> (which necessarily always includes the source
+     * module).
+     * </p>
      *
-     * <p>Note that facilities cannot be recursively searched. Imports and
-     * facilities appearing in available facilities will not be searched.</p>
+     * <p>
+     * Note that facilities cannot be recursively searched. Imports and
+     * facilities appearing in
+     * available facilities will not be searched.
+     * </p>
      */
     public enum FacilityStrategy {
 
         /**
-         * <p>Indicates that available facilities should not be searched.  The
-         * default strategy.</p>
+         * <p>
+         * Indicates that available facilities should not be searched. The
+         * default strategy.
+         * </p>
          */
         FACILITY_IGNORE,
 
         /**
-         * <p>Indicates that available facilities should be searched with
-         * generic types instantiated.  That is, any types used by symbols
-         * inside the facility should be updated to reflect the particular
-         * instantiation of the generic types.</p>
+         * <p>
+         * Indicates that available facilities should be searched with generic
+         * types instantiated. That
+         * is, any types used by symbols inside the facility should be updated
+         * to reflect the particular
+         * instantiation of the generic types.
+         * </p>
          */
         FACILITY_INSTANTIATE,
 
         /**
-         * <p>Indicates that available facilities should be searched with
-         * generic types intact.  That is, any types used by symbols inside the
-         * facility will appear exactly as listed in the source file--including
-         * references to generics--even if we could use information from the
-         * facility to "fill them in."</p>
+         * <p>
+         * Indicates that available facilities should be searched with generic
+         * types intact. That is,
+         * any types used by symbols inside the facility will appear exactly as
+         * listed in the source
+         * file--including references to generics--even if we could use
+         * information from the facility to
+         * "fill them in."
+         * </p>
          */
         FACILITY_GENERIC
     }
 
     /**
-     * <p>When starting a search from a particular scope, specifies which
-     * additional modules should be searched, based on any imported modules.</p>
+     * <p>
+     * When starting a search from a particular scope, specifies which
+     * additional modules should be
+     * searched, based on any imported modules.
+     * </p>
      *
-     * <p>Imported modules are those listed in the <em>uses</em> clause of the
-     * source module scope in which the scope is introduced.  For searches
-     * originating directly in a module scope, the source module scope is the
-     * scope itself. In addition to those scopes directly imported in the
+     * <p>
+     * Imported modules are those listed in the <em>uses</em> clause of the
+     * source module scope in
+     * which the scope is introduced. For searches originating directly in a
+     * module scope, the source
+     * module scope is the scope itself. In addition to those scopes directly
+     * imported in the
      * <em>uses</em> clause, any modules implicitly imported will also be
-     * searched. Implicitly imported modules include the standard modules
-     * (<code>Std_Boolean_Fac</code>, etc.), and any modules named in the header
-     * of the source module (e.g., an enhancement realization implicitly imports
-     * it's associate enhancement and concept.)</p>
+     * searched. Implicitly
+     * imported modules include the standard modules
+     * (<code>Std_Boolean_Fac</code>, etc.), and any
+     * modules named in the header of the source module (e.g., an enhancement
+     * realization implicitly
+     * imports it's associate enhancement and concept.)
+     * </p>
      */
     public enum ImportStrategy {
 
         /**
-         * <p>Indicates that imported modules should not be searched. The
-         * default strategy.</p>
+         * <p>
+         * Indicates that imported modules should not be searched. The default
+         * strategy.
+         * </p>
          */
         IMPORT_NONE {
 
             /**
-             * <p>Returns the strategy that should be used to recursively search
-             * any imported modules.</p>
+             * <p>
+             * Returns the strategy that should be used to recursively search
+             * any imported modules.
+             * </p>
              *
-             * @return The strategy that should be used to recursively search any
-             *         imported modules.
+             * @return The strategy that should be used to recursively search
+             *         any imported modules.
              */
             @Override
             public ImportStrategy cascadingStrategy() {
@@ -120,11 +162,15 @@ public class MathSymbolTable extends ScopeRepository {
             }
 
             /**
-             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
-             * requires searching directly imported modules.</p>
+             * <p>
+             * Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly
+             * imported modules.
+             * </p>
              *
              * @return <code>true</code> <strong>iff</strong> this strategy
-             *         requires searching directly imported modules.
+             *         requires searching directly
+             *         imported modules.
              */
             @Override
             public boolean considerImports() {
@@ -133,17 +179,22 @@ public class MathSymbolTable extends ScopeRepository {
         },
 
         /**
-         * <p>Indicates that only those modules imported directly from the
-         * source module should be searched.</p>
+         * <p>
+         * Indicates that only those modules imported directly from the source
+         * module should be
+         * searched.
+         * </p>
          */
         IMPORT_NAMED {
 
             /**
-             * <p>Returns the strategy that should be used to recursively search
-             * any imported modules.</p>
+             * <p>
+             * Returns the strategy that should be used to recursively search
+             * any imported modules.
+             * </p>
              *
-             * @return The strategy that should be used to recursively search any
-             *         imported modules.
+             * @return The strategy that should be used to recursively search
+             *         any imported modules.
              */
             @Override
             public ImportStrategy cascadingStrategy() {
@@ -151,11 +202,15 @@ public class MathSymbolTable extends ScopeRepository {
             }
 
             /**
-             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
-             * requires searching directly imported modules.</p>
+             * <p>
+             * Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly
+             * imported modules.
+             * </p>
              *
              * @return <code>true</code> <strong>iff</strong> this strategy
-             *         requires searching directly imported modules.
+             *         requires searching directly
+             *         imported modules.
              */
             @Override
             public boolean considerImports() {
@@ -164,17 +219,22 @@ public class MathSymbolTable extends ScopeRepository {
         },
 
         /**
-         * <p>Indicates that the search should recursively search the closure
-         * of all imports and their own imports.</p>
+         * <p>
+         * Indicates that the search should recursively search the closure of
+         * all imports and their own
+         * imports.
+         * </p>
          */
         IMPORT_RECURSIVE {
 
             /**
-             * <p>Returns the strategy that should be used to recursively search
-             * any imported modules.</p>
+             * <p>
+             * Returns the strategy that should be used to recursively search
+             * any imported modules.
+             * </p>
              *
-             * @return The strategy that should be used to recursively search any
-             *         imported modules.
+             * @return The strategy that should be used to recursively search
+             *         any imported modules.
              */
             @Override
             public ImportStrategy cascadingStrategy() {
@@ -182,11 +242,15 @@ public class MathSymbolTable extends ScopeRepository {
             }
 
             /**
-             * <p>Returns <code>true</code> <strong>iff</strong> this strategy
-             * requires searching directly imported modules.</p>
+             * <p>
+             * Returns <code>true</code> <strong>iff</strong> this strategy
+             * requires searching directly
+             * imported modules.
+             * </p>
              *
              * @return <code>true</code> <strong>iff</strong> this strategy
-             *         requires searching directly imported modules.
+             *         requires searching directly
+             *         imported modules.
              */
             @Override
             public boolean considerImports() {
@@ -195,8 +259,10 @@ public class MathSymbolTable extends ScopeRepository {
         };
 
         /**
-         * <p>Returns the strategy that should be used to recursively search
-         * any imported modules.</p>
+         * <p>
+         * Returns the strategy that should be used to recursively search any
+         * imported modules.
+         * </p>
          *
          * @return The strategy that should be used to recursively search any
          *         imported modules.
@@ -204,11 +270,15 @@ public class MathSymbolTable extends ScopeRepository {
         public abstract ImportStrategy cascadingStrategy();
 
         /**
-         * <p>Returns <code>true</code> <strong>iff</strong> this strategy
-         * requires searching directly imported modules.</p>
+         * <p>
+         * Returns <code>true</code> <strong>iff</strong> this strategy requires
+         * searching directly
+         * imported modules.
+         * </p>
          *
-         * @return <code>true</code> <strong>iff</strong> this strategy
-         *         requires searching directly imported modules.
+         * @return <code>true</code> <strong>iff</strong> this strategy requires
+         *         searching directly
+         *         imported modules.
          */
         public abstract boolean considerImports();
 
@@ -218,15 +288,27 @@ public class MathSymbolTable extends ScopeRepository {
     // Member Fields
     // ===========================================================
 
-    /** <p>A map of non-module scopes.</p> */
+    /**
+     * <p>
+     * A map of non-module scopes.
+     * </p>
+     */
     private final Map<ResolveConceptualElement, FinalizedScope> myScopes =
             new HashMap<>();
 
-    /** <p>A map of module scopes</p> */
+    /**
+     * <p>
+     * A map of module scopes
+     * </p>
+     */
     private final Map<ModuleIdentifier, FinalizedModuleScope> myModuleScopes =
             new HashMap<>();
 
-    /** <p>The current type graph.</p> */
+    /**
+     * <p>
+     * The current type graph.
+     * </p>
+     */
     private final TypeGraph myTypeGraph;
 
     // ===========================================================
@@ -234,15 +316,18 @@ public class MathSymbolTable extends ScopeRepository {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical symbol table.</p>
+     * <p>
+     * This constructs a mathematical symbol table.
+     * </p>
      *
      * @param g The current type graph.
      * @param root The current scope repository builder.
      *
-     * @throws NoSuchModuleException Throws an error if we cannot locate the requested
-     * imported module from the source module.
+     * @throws NoSuchModuleException Throws an error if we cannot locate the
+     *         requested imported module
+     *         from the source module.
      */
-	MathSymbolTable(TypeGraph g, ScopeBuilder root)
+    MathSymbolTable(TypeGraph g, ScopeBuilder root)
             throws NoSuchModuleException {
         myTypeGraph = g;
 
@@ -263,15 +348,17 @@ public class MathSymbolTable extends ScopeRepository {
     // ===========================================================
 
     /**
-     * <p>Returns the {@link ModuleScope} associated with the given
-     * {@link ModuleIdentifier}.</p>
+     * <p>
+     * Returns the {@link ModuleScope} associated with the given
+     * {@link ModuleIdentifier}.
+     * </p>
      *
      * @param module The module identifier.
      *
      * @return The associated module scope.
      *
-     * @throws NoSuchSymbolException If no scope has been opened for
-     * the named module.
+     * @throws NoSuchSymbolException If no scope has been opened for the named
+     *         module.
      */
     @Override
     public final ModuleScope getModuleScope(ModuleIdentifier module)
@@ -284,15 +371,17 @@ public class MathSymbolTable extends ScopeRepository {
     }
 
     /**
-     * <p>Returns the {@link Scope} introduced and bounded by the given
-     * defining element.</p>
+     * <p>
+     * Returns the {@link Scope} introduced and bounded by the given defining
+     * element.
+     * </p>
      *
      * @param e defining element.
      *
      * @return The associated scope.
      *
-     * @throws NoSuchScopeException If no scope has been opened for
-     * the given defining element.
+     * @throws NoSuchScopeException If no scope has been opened for the given
+     *         defining element.
      */
     @Override
     public final Scope getScope(ResolveConceptualElement e)
@@ -305,8 +394,10 @@ public class MathSymbolTable extends ScopeRepository {
     }
 
     /**
-     * <p>Returns the {@link TypeGraph} that relates the types found in this
-     * <code>MathSymbolTable</code>.</p>
+     * <p>
+     * Returns the {@link TypeGraph} that relates the types found in this
+     * <code>MathSymbolTable</code>.
+     * </p>
      *
      * @return The {@link TypeGraph} object.
      */
@@ -314,21 +405,23 @@ public class MathSymbolTable extends ScopeRepository {
     public final TypeGraph getTypeGraph() {
         return myTypeGraph;
     }
-	
-	// ===========================================================
+
+    // ===========================================================
     // Private Methods
     // ===========================================================
 
     /**
-     * <p>This creates an {@link ImportRequest} for each imported
-     * module.</p>
+     * <p>
+     * This creates an {@link ImportRequest} for each imported module.
+     * </p>
      *
      * @param source The source module's identifier.
      * @param imports The list of modules imported by <code>source</code>.
      *
      * @return A list of {@link ImportRequest}.
      */
-    private static List<ImportRequest> buildImportRequests(ModuleIdentifier source, List<ModuleIdentifier> imports) {
+    private static List<ImportRequest> buildImportRequests(
+            ModuleIdentifier source, List<ModuleIdentifier> imports) {
         List<ImportRequest> result = new LinkedList<>();
 
         for (ModuleIdentifier imported : imports) {
@@ -339,13 +432,16 @@ public class MathSymbolTable extends ScopeRepository {
     }
 
     /**
-     * <p>This method makes sure that we do not attempt to import more modules
-     * after we invoke the constructor.</p>
+     * <p>
+     * This method makes sure that we do not attempt to import more modules
+     * after we invoke the
+     * constructor.
+     * </p>
      *
      * @param b The current scope repository builder.
      * @param importedModules The list of imported modules.
      */
-	private void seal(ScopeBuilder b, List<ImportRequest> importedModules) {
+    private void seal(ScopeBuilder b, List<ImportRequest> importedModules) {
         FinalizedScope result = b.seal(this);
         FinalizedModuleScope resultAsModuleScope;
         ModuleIdentifier resultIdentifier;
@@ -356,8 +452,8 @@ public class MathSymbolTable extends ScopeRepository {
 
             if (result instanceof FinalizedModuleScope) {
                 resultAsModuleScope = (FinalizedModuleScope) result;
-                resultIdentifier =
-                        new ModuleIdentifier((ModuleDec) b.getDefiningElement());
+                resultIdentifier = new ModuleIdentifier(
+                        (ModuleDec) b.getDefiningElement());
 
                 myModuleScopes.put(resultIdentifier, resultAsModuleScope);
 
@@ -372,24 +468,35 @@ public class MathSymbolTable extends ScopeRepository {
         }
     }
 
-	// ===========================================================
+    // ===========================================================
     // Helper Constructs
     // ===========================================================
 
     /**
-     * <p>An helper construct that keeps track of both {@link ModuleIdentifier}
-     * for the source and imported modules.</p>
+     * <p>
+     * An helper construct that keeps track of both {@link ModuleIdentifier} for
+     * the source and
+     * imported modules.
+     * </p>
      */
-	private static class ImportRequest {
-		
-		// ===========================================================
-		// Member Fields
-		// ===========================================================
+    private static class ImportRequest {
 
-        /** <p>The source module.</p> */
+        // ===========================================================
+        // Member Fields
+        // ===========================================================
+
+        /**
+         * <p>
+         * The source module.
+         * </p>
+         */
         final ModuleIdentifier sourceModule;
 
-        /** <p>The imported module.</p> */
+        /**
+         * <p>
+         * The imported module.
+         * </p>
+         */
         final ModuleIdentifier importedModule;
 
         // ===========================================================
@@ -397,8 +504,11 @@ public class MathSymbolTable extends ScopeRepository {
         // ===========================================================
 
         /**
-         * <p>This creates a helper construct that keeps track of imported
-         * module for the specified source module.</p>
+         * <p>
+         * This creates a helper construct that keeps track of imported module
+         * for the specified source
+         * module.
+         * </p>
          *
          * @param source The source module's identifier.
          * @param imported The imported module's identifier.

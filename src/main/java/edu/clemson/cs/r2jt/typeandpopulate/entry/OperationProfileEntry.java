@@ -1,7 +1,7 @@
 /*
  * OperationProfileEntry.java
  * ---------------------------------
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -33,7 +33,8 @@ public class OperationProfileEntry extends SymbolTableEntry {
 
     public OperationProfileEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, OperationEntry correspondingOperation) {
+            ModuleIdentifier sourceModule,
+            OperationEntry correspondingOperation) {
 
         super(name, definingElement, sourceModule);
 
