@@ -14,8 +14,7 @@ VCs for <fileName> generated <dateGenerated>
  * Template for storing the final set of VCs in a human readable format.
  */
 outputVC(vcNum, hasImpactingReduction, location, locationDetail, sequent) ::= <<
-VC <vcNum>
-
+VC <vcNum>:
 <locationDetail><if(hasImpactingReduction)> [After Logical Reduction(s)]<endif>: <location>
 
 <sequent>
@@ -27,11 +26,9 @@ VC <vcNum>
 outputSequent(consequents, antecedents) ::= <<
 
 Goal:
-
 <consequents : {consequent | <consequent>}; separator = " or \n">
 
 Given(s):
-
 <antecedents : {antecedent | <i>. <antecedent>}; separator = "\n">
 
 >>
