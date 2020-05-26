@@ -798,7 +798,7 @@ public class CallStmtRule extends AbstractProofRuleApplication
         requiresExp.setLocationDetailModel(
                 new LocationDetailModel(requiresClause.getLocation().clone(),
                         myCallStmt.getLocation().clone(),
-                        "Requires Clause of " + operationDec.getName()));
+                        "Requires Clause for " + operationDec.getName()));
 
         // Apply any replacements if it isn't just "requires true;"
         if (!VarExp.isLiteralTrue(requiresExp)) {
