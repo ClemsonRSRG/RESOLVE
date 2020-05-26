@@ -15,7 +15,7 @@ VCs for <fileName> generated <dateGenerated>
  */
 outputVC(vcNum, hasImpactingReduction, location, locationDetail, sequent) ::= <<
 VC <vcNum>:
-<locationDetail><if(hasImpactingReduction)> [After Logical Reduction(s)]<endif>: <location>
+<locationDetail><if(hasImpactingReduction)> [After Logical Reduction(s)]<endif> at <location>
 
 <sequent>
 >>

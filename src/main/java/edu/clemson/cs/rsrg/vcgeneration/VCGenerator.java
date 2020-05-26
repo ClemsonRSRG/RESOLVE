@@ -2236,7 +2236,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     new LocationDetailModel(
                             modifiedRequiresClause.getLocation().clone(),
                             modifiedRequiresClause.getLocation().clone(),
-                            "Requires Clause of "
+                            "Requires Clause for "
                                     + correspondingOperationEntry.getName()));
         }
 
