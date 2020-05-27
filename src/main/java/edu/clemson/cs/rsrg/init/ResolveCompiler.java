@@ -49,6 +49,17 @@ import java.util.*;
 public class ResolveCompiler {
 
     // ===========================================================
+    // Constant Fields
+    // ===========================================================
+
+    /**
+     * <p>
+     * This indicates the current compiler version.
+     * </p>
+     */
+    public static final String COMPILER_VERSION = "Summer 2020";
+
+    // ===========================================================
     // Member Fields
     // ===========================================================
 
@@ -58,13 +69,6 @@ public class ResolveCompiler {
      * </p>
      */
     private final String[] myCompilerArgs;
-
-    /**
-     * <p>
-     * This indicates the current compiler version.
-     * </p>
-     */
-    private final String myCompilerVersion = "Spring 2020";
 
     /**
      * <p>
@@ -453,7 +457,7 @@ public class ResolveCompiler {
             // all the necessary information needed throughout the compilation
             // process.
             compileEnvironment = new CompileEnvironment(myCompilerArgs,
-                    myCompilerVersion, statusHandler);
+                    COMPILER_VERSION, statusHandler);
 
             if (compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
                 printHelpMessage(compileEnvironment);
