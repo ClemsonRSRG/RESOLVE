@@ -1029,25 +1029,31 @@ public class Utilities {
         if (exp instanceof EqualsExp) {
             EqualsExp expAsEqualsExp = (EqualsExp) exp;
 
-            // Obtain the new operator
-            Operator newOperator;
+            // Case 1.1: a = b
             if (expAsEqualsExp.getOperator() == Operator.EQUAL) {
-                newOperator = Operator.NOT_EQUAL;
+                // Apply the not operator to the equals expression
+                // YS: By converting this to a negation expression,
+                //     the sequent reduction rules will be applied
+                //     when we try to add this antecedent/consequent.
+                retExp = new PrefixExp(expAsEqualsExp.getLocation().clone(),
+                        null,
+                        new PosSymbol(expAsEqualsExp.getLocation().clone(),
+                                "not"),
+                        expAsEqualsExp.clone());
             }
+            // Case 1.2: a /= b
             else {
-                newOperator = Operator.EQUAL;
-            }
+                // Copy the qualifier if any
+                PosSymbol newQualifier = null;
+                if (expAsEqualsExp.getQualifier() != null) {
+                    newQualifier = expAsEqualsExp.getQualifier().clone();
+                }
 
-            // Copy the qualifier if any
-            PosSymbol newQualifier = null;
-            if (expAsEqualsExp.getQualifier() != null) {
-                newQualifier = expAsEqualsExp.getQualifier().clone();
+                // Convert any not equals expression to equals expression.
+                retExp = new EqualsExp(expAsEqualsExp.getLocation().clone(),
+                        expAsEqualsExp.getLeft().clone(), newQualifier,
+                        Operator.EQUAL, expAsEqualsExp.getRight().clone());
             }
-
-            // Create the negation of the equality expression.
-            retExp = new EqualsExp(expAsEqualsExp.getLocation().clone(),
-                    expAsEqualsExp.getLeft().clone(), newQualifier, newOperator,
-                    expAsEqualsExp.getRight().clone());
         }
         // Case 2: Some kind of prefix expression
         else if (exp instanceof PrefixExp) {
@@ -1059,14 +1065,8 @@ public class Utilities {
                 retExp = expAsPrefixExp.getArgument().clone();
             }
             else {
-                // Copy the qualifier if any
-                PosSymbol newQualifier = null;
-                if (expAsPrefixExp.getQualifier() != null) {
-                    newQualifier = expAsPrefixExp.getQualifier().clone();
-                }
-
                 retExp = new PrefixExp(expAsPrefixExp.getLocation().clone(),
-                        newQualifier,
+                        null,
                         new PosSymbol(expAsPrefixExp.getLocation().clone(),
                                 "not"),
                         expAsPrefixExp.clone());
