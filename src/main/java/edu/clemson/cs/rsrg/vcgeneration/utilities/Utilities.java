@@ -1059,14 +1059,8 @@ public class Utilities {
                 retExp = expAsPrefixExp.getArgument().clone();
             }
             else {
-                // Copy the qualifier if any
-                PosSymbol newQualifier = null;
-                if (expAsPrefixExp.getQualifier() != null) {
-                    newQualifier = expAsPrefixExp.getQualifier().clone();
-                }
-
                 retExp = new PrefixExp(expAsPrefixExp.getLocation().clone(),
-                        newQualifier,
+                        null,
                         new PosSymbol(expAsPrefixExp.getLocation().clone(),
                                 "not"),
                         expAsPrefixExp.clone());
