@@ -24,7 +24,6 @@ VC <vcNum>:
  * Template for storing a sequent in a VC
  */
 outputSequent(consequents, antecedents) ::= <<
-
 Goal:
 <consequents : {consequent | <consequent>}; separator = " or \n">
 
