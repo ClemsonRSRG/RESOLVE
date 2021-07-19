@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>Summer20a</version>
+    <version>Summer21a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -166,7 +166,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
+                <version>4.1</version>
                 <configuration>
                     <header>${license.url}</header>
                     <excludes>
@@ -188,7 +188,7 @@
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <properties>
-                        <year>2020</year>
+                        <year>2021</year>
                     </properties>
                 </configuration>
                 <executions>
