@@ -248,10 +248,10 @@ public class CompileEnvironment {
      * @param mid Completed module's identifier.
      */
     public final void completeRecord(ModuleIdentifier mid) {
-        assert myCompilingModules.containsKey(
-                mid) : "We haven't seen a module with this ID yet!";
-        assert myIncompleteModules.contains(
-                mid) : "We already completed compilation for a module with this ID!";
+        assert myCompilingModules.containsKey(mid)
+                : "We haven't seen a module with this ID yet!";
+        assert myIncompleteModules.contains(mid)
+                : "We already completed compilation for a module with this ID!";
         myIncompleteModules.remove(mid);
     }
 
@@ -269,8 +269,8 @@ public class CompileEnvironment {
      */
     public final void constructRecord(ResolveFile file, ModuleDec moduleDec) {
         ModuleIdentifier mid = new ModuleIdentifier(moduleDec);
-        assert !myCompilingModules.containsKey(
-                mid) : "We already compiled a module with this ID!";
+        assert !myCompilingModules.containsKey(mid)
+                : "We already compiled a module with this ID!";
         myCompilingModules.put(mid,
                 new AbstractMap.SimpleEntry<>(moduleDec, file));
         myIncompleteModules.add(mid);
