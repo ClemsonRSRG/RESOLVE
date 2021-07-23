@@ -17,7 +17,8 @@ import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jgrapht.Graph;
-import org.jgrapht.io.*;
+import org.jgrapht.nio.*;
+import org.jgrapht.nio.dot.*;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -55,7 +56,7 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
      */
     public ReductionTreeDotExporter() {
         myDotExporter =
-                new DOTExporter<>(new IntegerComponentNameProvider<Sequent>(),
+                new DOTExporter<>(new IntegerIdProvider<Sequent>(),
                         new StringComponentNameProvider<Sequent>(), null,
                         new SequentAttributeProvider<>(), null);
     }
