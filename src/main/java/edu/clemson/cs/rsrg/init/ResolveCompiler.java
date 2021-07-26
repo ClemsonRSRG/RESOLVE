@@ -57,7 +57,7 @@ public class ResolveCompiler {
      * This indicates the current compiler version.
      * </p>
      */
-    public static final String COMPILER_VERSION = "Summer 2020";
+    public static final String COMPILER_VERSION = "Summer 2021";
 
     // ===========================================================
     // Member Fields
