@@ -176,6 +176,7 @@
                         <exclude>*.xml</exclude>
                         <exclude>*.yml</exclude>
                         <exclude>LICENSE.txt</exclude>
+                        <exclude>.github/**</exclude>
                         <exclude>bin/**</exclude>
                         <exclude>docs/**</exclude>
                         <exclude>src/main/antlr3/**</exclude>
