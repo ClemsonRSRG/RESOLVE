@@ -11,13 +11,6 @@ set -euf -o pipefail
 # the compile tests on.
 FILESTOPROVE=($(cat bin/tests/filesToProve.txt | tr "\n" " "))
 
-# Prepare to launch tests
-echo ""
-echo "---- PRE-EXECUTION SETUP ----"
-cp RESOLVE/target/RESOLVE-Summer21a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
-cd RESOLVE-Workspace/RESOLVE/Main/
-echo "---- DONE WITH PRE-EXECUTION SETUP ----"
-
 # Generate proves the following files
 echo ""
 echo "---- PROVING FILES ----"

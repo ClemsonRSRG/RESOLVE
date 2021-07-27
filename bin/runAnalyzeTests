@@ -11,13 +11,6 @@ set -euf -o pipefail
 # the compile tests on.
 FILESTOANALYZE=($(cat bin/tests/filesToAnalyze.txt | tr "\n" " "))
 
-# Prepare to launch tests
-echo ""
-echo "---- PRE-EXECUTION SETUP ----"
-cp RESOLVE/target/RESOLVE-Summer21a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
-cd RESOLVE-Workspace/RESOLVE/Main/
-echo "---- DONE WITH PRE-EXECUTION SETUP ----"
-
 # Analyze the theory files
 # (Note: Only "Boolean_Theory" and "Integer_Theory" are checkable at the moment)
 echo ""

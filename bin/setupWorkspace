@@ -10,6 +10,13 @@ set -euf -o pipefail
 # Clone the latest RESOLVE-Workspace from GitHub
 echo ""
 echo "---- RETRIEVING RESOLVE WORKSPACE ----"
-cd ..
+cd "${GITHUB_WORKSPACE}/"
 git clone https://github.com/ClemsonRSRG/RESOLVE-Workspace.git
 echo "---- DONE RETRIEVING RESOLVE WORKSPACE ----"
+
+# Prepare to launch tests
+echo ""
+echo "---- PRE-EXECUTION SETUP ----"
+cp "${GITHUB_WORKSPACE}/target/RESOLVE-Summer21a-jar-with-dependencies.jar" "${GITHUB_WORKSPACE}/RESOLVE-Workspace/RESOLVE/Main/resolve.jar"
+cd "${GITHUB_WORKSPACE}RESOLVE-Workspace/RESOLVE/Main/"
+echo "---- DONE WITH PRE-EXECUTION SETUP ----"
