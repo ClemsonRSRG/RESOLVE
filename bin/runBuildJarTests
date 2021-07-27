@@ -14,33 +14,26 @@ FILESTOBUILDJAR=($(cat bin/tests/filesToBuildJar.txt | tr "\n" " "))
 # Clone the latest RESOLVE-Workspace from GitHub
 echo ""
 echo "---- RETRIEVING RESOLVE WORKSPACE ----"
-echo ""
-cd ..
+cd "${GITHUB_WORKSPACE}/"
+mkdir temp
+cd temp
 git clone https://github.com/ClemsonRSRG/RESOLVE-Workspace.git
-echo ""
 echo "---- DONE RETRIEVING RESOLVE WORKSPACE ----"
-echo ""
 
 # Prepare to launch tests
 echo ""
 echo "---- PRE-EXECUTION SETUP ----"
-echo ""
-cp RESOLVE/target/RESOLVE-Summer21a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
-cd RESOLVE-Workspace/RESOLVE/Main/
-echo ""
+cp "${GITHUB_WORKSPACE}/target/RESOLVE-Summer21a-jar-with-dependencies.jar" "${GITHUB_WORKSPACE}/temp/RESOLVE-Workspace/RESOLVE/Main/resolve.jar"
+cd "${GITHUB_WORKSPACE}/temp/RESOLVE-Workspace/RESOLVE/Main/"
 echo "---- DONE WITH PRE-EXECUTION SETUP ----"
-echo ""
 
 # Build jars for the following files
 # Enable these when we have facilities to build
 #echo ""
 #echo "---- BUILDING JARS ----"
-#echo ""
 #for i in "${FILESTOBUILDJAR[@]}"
 #do
 #   echo "Analyzing $i"
 #   java -jar resolve.jar -createJar -verboseJar -nodebug $i
 #done
-#echo ""
 #echo "---- DONE BUILDING JARS ----"
-#echo ""

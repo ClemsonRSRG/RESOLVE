@@ -14,32 +14,25 @@ FILESTOPROVE=($(cat bin/tests/filesToProve.txt | tr "\n" " "))
 # Clone the latest RESOLVE-Workspace from GitHub
 echo ""
 echo "---- RETRIEVING RESOLVE WORKSPACE ----"
-echo ""
-cd ..
+cd "${GITHUB_WORKSPACE}/"
+mkdir temp
+cd temp
 git clone https://github.com/ClemsonRSRG/RESOLVE-Workspace.git
-echo ""
 echo "---- DONE RETRIEVING RESOLVE WORKSPACE ----"
-echo ""
 
 # Prepare to launch tests
 echo ""
 echo "---- PRE-EXECUTION SETUP ----"
-echo ""
-cp RESOLVE/target/RESOLVE-Summer21a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
-cd RESOLVE-Workspace/RESOLVE/Main/
-echo ""
+cp "${GITHUB_WORKSPACE}/target/RESOLVE-Summer21a-jar-with-dependencies.jar" "${GITHUB_WORKSPACE}/temp/RESOLVE-Workspace/RESOLVE/Main/resolve.jar"
+cd "${GITHUB_WORKSPACE}/temp/RESOLVE-Workspace/RESOLVE/Main/"
 echo "---- DONE WITH PRE-EXECUTION SETUP ----"
-echo ""
 
 # Generate proves the following files
 echo ""
-echo "---- GENERATING PROVES ----"
-echo ""
+echo "---- PROVING FILES ----"
 for i in "${FILESTOPROVE[@]}"
 do
    echo "Proving $i"
    java -jar resolve.jar -ccprove -nodebug -timeout 7000 -num_tries 3 $i
 done
-echo ""
-echo "---- DONE GENERATING PROVES ----"
-echo ""
+echo "---- DONE PROVING FILES ----"
