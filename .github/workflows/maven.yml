@@ -92,6 +92,10 @@ jobs:
           # Make the scripts runnable
           chmod +x "${GITHUB_WORKSPACE}/bin/runAnalyzeTests"
           chmod +x "${GITHUB_WORKSPACE}/bin/runProveTests"
+          chmod +x "${GITHUB_WORKSPACE}/bin/setupWorkspace"
+
+          # Setup a RESOLVE Workspace with the RESOLVE compiler
+          "${GITHUB_WORKSPACE}/bin/setupWorkspace"
 
           # Analyze the specified RESOLVE files
           "${GITHUB_WORKSPACE}/bin/runAnalyzeTests"
