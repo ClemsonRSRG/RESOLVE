@@ -102,3 +102,6 @@ jobs:
 
           # Prove the specified RESOLVE files
           "${GITHUB_WORKSPACE}/bin/runProveTests"
+
+          # Delete temporary folder
+          rm -rf "${GITHUB_WORKSPACE}/temp"
