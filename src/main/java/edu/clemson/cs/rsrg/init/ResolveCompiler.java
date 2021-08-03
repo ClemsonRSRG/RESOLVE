@@ -1,7 +1,7 @@
 /*
  * ResolveCompiler.java
  * ---------------------------------
- * Copyright (c) 2020
+ * Copyright (c) 2021
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -58,7 +58,7 @@ public class ResolveCompiler {
      * This indicates the current compiler version.
      * </p>
      */
-    public static final String COMPILER_VERSION = "Summer 2020";
+    public static final String COMPILER_VERSION = "Summer 2021";
 
     // ===========================================================
     // Member Fields

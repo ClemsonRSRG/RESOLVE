@@ -1,7 +1,7 @@
 /*
  * CompileEnvironment.java
  * ---------------------------------
- * Copyright (c) 2020
+ * Copyright (c) 2021
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -341,8 +341,8 @@ public class CompileEnvironment {
             String path = file.toString();
             String mask = par.toString();
 
-            assert path.startsWith(mask) : "path does not start with mask: "
-                    + path;
+            assert path.startsWith(mask)
+                    : "path does not start with mask: " + path;
             return path.substring(mask.length() + 1);
         }
     }

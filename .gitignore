@@ -21,6 +21,8 @@ target/
 #gedit
 *~
 
+#formatter cache
+.cache
 
 ###################
 # Other VCS Files #

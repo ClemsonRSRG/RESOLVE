@@ -1,7 +1,7 @@
 /*
  * ModuleKind.java
  * ---------------------------------
- * Copyright (c) 2020
+ * Copyright (c) 2021
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University

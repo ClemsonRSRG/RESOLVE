@@ -1,6 +1,6 @@
 What is RESOLVE?
 ==============
-[![Build Status](https://travis-ci.org/ClemsonRSRG/RESOLVE.svg?branch=master)](https://travis-ci.org/ClemsonRSRG/RESOLVE) 
+[![Java CI with Maven](https://github.com/ClemsonRSRG/RESOLVE/actions/workflows/maven.yml/badge.svg)](https://github.com/ClemsonRSRG/RESOLVE/actions/workflows/maven.yml)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/ClemsonRSRG/RESOLVE/master/LICENSE.txt)
 <img align="right" src="src/resources/images/resolve_logo.png" width="200"/>
 
@@ -20,4 +20,4 @@ Developers of this particular test/working-iteration of the `RESOLVE Compiler` i
 
 ## Copyright and license
 
-Copyright © 2020, [RESOLVE Software Research Group (RSRG)](https://www.cs.clemson.edu/resolve/). All rights reserved. The use and distribution terms for this software are covered by the BSD 3-clause license which can be found in the file `LICENSE.txt` at the root of this repository. By using this software in any fashion, you are agreeing to be bound by the terms of this license. You must not remove this notice, or any other, from this software.
+Copyright © 2021, [RESOLVE Software Research Group (RSRG)](https://www.cs.clemson.edu/resolve/). All rights reserved. The use and distribution terms for this software are covered by the BSD 3-clause license which can be found in the file `LICENSE.txt` at the root of this repository. By using this software in any fashion, you are agreeing to be bound by the terms of this license. You must not remove this notice, or any other, from this software.

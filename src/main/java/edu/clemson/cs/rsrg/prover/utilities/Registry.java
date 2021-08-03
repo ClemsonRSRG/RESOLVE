@@ -1,7 +1,7 @@
 /*
  * Registry.java
  * ---------------------------------
- * Copyright (c) 2020
+ * Copyright (c) 2021
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -318,8 +318,8 @@ public class Registry {
 
         Stack<Integer> needToUpdate = new Stack<>();
 
-        assert index < mySymbolIndexParentArray
-                .size() : "findAndCompress error";
+        assert index < mySymbolIndexParentArray.size()
+                : "findAndCompress error";
 
         int parent = mySymbolIndexParentArray.get(index);
         while (parent != index) {
@@ -389,8 +389,8 @@ public class Registry {
      * @return The associated integer index.
      */
     public final int getIndexForSymbol(String symbol) {
-        assert mySymbolToIndex.get(symbol) != null : symbol + " not found"
-                + mySymbolToIndex.toString();
+        assert mySymbolToIndex.get(symbol) != null
+                : symbol + " not found" + mySymbolToIndex.toString();
 
         if (!mySymbolToIndex.containsKey(symbol)) {
             return -1;
@@ -451,8 +451,8 @@ public class Registry {
      * @return The associated symbol.
      */
     public final String getSymbolForIndex(int index) {
-        assert index >= 0 : "invalid index: " + index
-                + " in Registry.getSymbolForIndex";
+        assert index >= 0
+                : "invalid index: " + index + " in Registry.getSymbolForIndex";
 
         String rS = myIndexToSymbol.get(findAndCompress(index));
         assert rS.length() != 0 : "Blank symbol error";
@@ -620,9 +620,10 @@ public class Registry {
         Set<String> rSet = new HashSet<>();
         Set<MTType> allTypesInSet = myTypeToSetOfOperators.keySet();
 
-        assert !myTypeToSetOfOperators
-                .isEmpty() : "empty m_typeToSetOfOperator.keySet()";
-        assert allTypesInSet != null : "null set in Registry.getSetMatchingType";
+        assert !myTypeToSetOfOperators.isEmpty()
+                : "empty m_typeToSetOfOperator.keySet()";
+        assert allTypesInSet != null
+                : "null set in Registry.getSetMatchingType";
 
         // if there are subtypes of t, return those too
         for (MTType m : allTypesInSet) {

@@ -1,7 +1,7 @@
 /*
  * ReductionTreeDotExporter.java
  * ---------------------------------
- * Copyright (c) 2020
+ * Copyright (c) 2021
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,7 +17,8 @@ import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jgrapht.Graph;
-import org.jgrapht.io.*;
+import org.jgrapht.nio.*;
+import org.jgrapht.nio.dot.*;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -54,10 +55,21 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
      * </p>
      */
     public ReductionTreeDotExporter() {
-        myDotExporter =
-                new DOTExporter<>(new IntegerComponentNameProvider<Sequent>(),
-                        new StringComponentNameProvider<Sequent>(), null,
-                        new SequentAttributeProvider<>(), null);
+        myDotExporter = new DOTExporter<>();
+        myDotExporter.setVertexAttributeProvider(v -> {
+            Map<String, Attribute> attributesMap = new LinkedHashMap<>();
+
+            // Add the attributes for the sequent to the map
+            attributesMap.put("label",
+                    DefaultAttribute.createAttribute(v.toString()));
+            attributesMap.put("shape", DefaultAttribute.createAttribute("box"));
+            if (v.consistOfAtomicFormulas()) {
+                attributesMap.put("color",
+                        DefaultAttribute.createAttribute("red"));
+            }
+
+            return attributesMap;
+        });
     }
 
     // ===========================================================
@@ -80,47 +92,6 @@ public class ReductionTreeDotExporter implements ReductionTreeExporter {
         myDotExporter.exportGraph(reductionTree, writer);
 
         return writer.toString();
-    }
-
-    // ===========================================================
-    // Helper Constructs
-    // ===========================================================
-
-    /**
-     * <p>
-     * An helper class that adds attribute fields to the {@code DOT} graph.
-     * </p>
-     *
-     * @author Yu-Shan Sun
-     * @version 1.0
-     */
-    private class SequentAttributeProvider<T extends Sequent>
-            implements
-                ComponentAttributeProvider<T> {
-
-        /**
-         * <p>
-         * This method returns a set of attribute key/value pairs for a
-         * {@link Sequent}.
-         * </p>
-         *
-         * @param sequent A {@link Sequent} node in a DOT graph.
-         *
-         * @return A map containing the attributes for a {@code sequent} node.
-         */
-        @Override
-        public final Map<String, Attribute> getComponentAttributes(T sequent) {
-            Map<String, Attribute> attributesMap = new LinkedHashMap<>();
-
-            // Add the attributes for the sequent to the map
-            attributesMap.put("shape", DefaultAttribute.createAttribute("box"));
-            if (sequent.consistOfAtomicFormulas()) {
-                attributesMap.put("color",
-                        DefaultAttribute.createAttribute("red"));
-            }
-
-            return attributesMap;
-        }
     }
 
 }
