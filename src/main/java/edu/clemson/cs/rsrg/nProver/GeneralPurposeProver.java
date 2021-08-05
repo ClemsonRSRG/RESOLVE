@@ -1,7 +1,7 @@
 /*
  * GeneralPurposeProver.java
  * ---------------------------------
- * Copyright (c) 2020
+ * Copyright (c) 2021
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -27,12 +27,12 @@ public class GeneralPurposeProver {
 
     //member fields
 
-    private final CompileEnvironment myCompileEnvironment;
-    private final ModuleScope myCurrentModuleScope;
-    private final int myNumVCsBeforeHalting;
-    private final long myTimeout;
-    private List<OutputListener> myOutputListeners;
-    private final TypeGraph myTypeGraph;
+    //private final CompileEnvironment myCompileEnvironment;
+    //private final ModuleScope myCurrentModuleScope;
+    //private final int myNumVCsBeforeHalting;
+    //private final long myTimeout;
+    //private List<OutputListener> myOutputListeners;
+    //private final TypeGraph myTypeGraph;
 
     //flag strings
     public static final String FLAG_SECTION_NAME = "Prover";
@@ -69,7 +69,7 @@ public class GeneralPurposeProver {
         FlagDependencies.addRequires(FLAG_VCSFAILED, FLAG_PROVE);
     }
 
-    public GeneralPurposeProver(CompileEnvironment CompileEnvironment,
+/*    public GeneralPurposeProver(CompileEnvironment CompileEnvironment,
             ModuleScope CurrentModuleScope) {
         myCompileEnvironment = CompileEnvironment;
         myCurrentModuleScope = CurrentModuleScope;
@@ -95,6 +95,10 @@ public class GeneralPurposeProver {
             myNumVCsBeforeHalting = -1;
         }
 
+    }*/
+
+    public GeneralPurposeProver(){
+        System.out.println("Test Prove ....");
     }
 
 }

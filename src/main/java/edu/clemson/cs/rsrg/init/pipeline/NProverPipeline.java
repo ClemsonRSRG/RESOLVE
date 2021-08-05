@@ -1,7 +1,7 @@
 /*
  * NProverPipeline.java
  * ---------------------------------
- * Copyright (c) 2020
+ * Copyright (c) 2021
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -12,9 +12,16 @@
  */
 package edu.clemson.cs.rsrg.init.pipeline;
 
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
+import edu.clemson.cs.rsrg.nProver.GeneralPurposeProver;
+import edu.clemson.cs.rsrg.prover.CongruenceClassProver;
+import edu.clemson.cs.rsrg.prover.utilities.ImmutableVC;
+import edu.clemson.cs.rsrg.statushandling.StatusHandler;
 import edu.clemson.cs.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.typeandpopulate.utilities.ModuleIdentifier;
+
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -31,8 +38,18 @@ public class NProverPipeline extends AbstractPipeline {
     }
 
     //public methods
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void process(ModuleIdentifier currentTarget) {
-
+        ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
+        StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
+        GeneralPurposeProver prover =
+                new GeneralPurposeProver();
     }
 }
