@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>RESOLVE</artifactId>
-    <groupId>edu.clemson.cs.rsrg</groupId>
+    <groupId>edu.clemson.rsrg</groupId>
     <version>Summer21a</version>
     <packaging>jar</packaging>
 
@@ -20,7 +20,7 @@
             <name>Murali Sitaraman</name>
             <email>murali@clemson.edu</email>
             <roles>
-                <role>Project lead - RESOLVE</role>
+                <role>Project Lead - RESOLVE</role>
             </roles>
         </developer>
         <developer>
@@ -33,6 +33,12 @@
         <developer>
             <name>Dan Welch</name>
             <email>dtw.welch@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Nicodemus Mbwambo</name>
             <roles>
                 <role>Developer</role>
             </roles>
@@ -74,11 +80,6 @@
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
-            <artifactId>antlr-runtime</artifactId>
-            <version>3.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
             <version>4.9.2</version>
         </dependency>
@@ -103,11 +104,6 @@
             <version>1.5.1</version>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20210307</version>
-        </dependency>
-        <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.12</version>
@@ -121,24 +117,17 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-scm-plugin</artifactId>
-                <version>1.11.2</version>
-                <configuration>
-                    <connectionType>developerConnection</connectionType>
-                </configuration>
-            </plugin>
+            <!-- Plugin for ANTLR 4 grammar. -->
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>4.9.2</version>
                 <configuration>
-                    <sourceDirectory>src/main/antlr4</sourceDirectory>
+                    <sourceDirectory>src/antlr4</sourceDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -166,7 +155,7 @@
                         <exclude>.github/**</exclude>
                         <exclude>bin/**</exclude>
                         <exclude>docs/**</exclude>
-                        <exclude>src/main/antlr4/**</exclude>
+                        <exclude>src/antlr4/**</exclude>
                         <exclude>src/resources/**</exclude>
                         <exclude>test/resources/**</exclude>
                     </excludes>
@@ -192,9 +181,6 @@
                 <artifactId>formatter-maven-plugin</artifactId>
                 <version>2.16.0</version>
                 <configuration>
-                    <configFile>
-                        ${project.basedir}/rsrg-format.xml
-                    </configFile>
                     <directories>
                         <directory>${project.build.sourceDirectory}</directory>
                         <directory>${project.build.testSourceDirectory}</directory>
@@ -221,7 +207,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>edu.clemson.cs.rsrg.Main</mainClass>
+                            <mainClass>edu.clemson.rsrg.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -237,6 +223,9 @@
             </plugin>
         </plugins>
 
+        <!-- Directory for source files -->
+        <sourceDirectory>src/java</sourceDirectory>
+
         <!-- Resources directory for source files -->
         <resources>
             <resource>
@@ -244,7 +233,7 @@
             </resource>
         </resources>
 
-        <!-- Source directory for test files -->
+        <!-- Directory for test files -->
         <testSourceDirectory>test/java</testSourceDirectory>
 
         <!-- Resources directory for test files -->
