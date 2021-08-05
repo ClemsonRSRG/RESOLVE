@@ -49,7 +49,6 @@ public class NProverPipeline extends AbstractPipeline {
     public final void process(ModuleIdentifier currentTarget) {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
         StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
-        GeneralPurposeProver prover =
-                new GeneralPurposeProver();
+        GeneralPurposeProver prover = new GeneralPurposeProver();
     }
 }

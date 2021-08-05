@@ -69,35 +69,37 @@ public class GeneralPurposeProver {
         FlagDependencies.addRequires(FLAG_VCSFAILED, FLAG_PROVE);
     }
 
-/*    public GeneralPurposeProver(CompileEnvironment CompileEnvironment,
-            ModuleScope CurrentModuleScope) {
-        myCompileEnvironment = CompileEnvironment;
-        myCurrentModuleScope = CurrentModuleScope;
-        myOutputListeners = myCompileEnvironment.getOutputListeners();
-        myTypeGraph = myCompileEnvironment.getTypeGraph();
+    /*
+     * public GeneralPurposeProver(CompileEnvironment CompileEnvironment,
+     * ModuleScope CurrentModuleScope) {
+     * myCompileEnvironment = CompileEnvironment;
+     * myCurrentModuleScope = CurrentModuleScope;
+     * myOutputListeners = myCompileEnvironment.getOutputListeners();
+     * myTypeGraph = myCompileEnvironment.getTypeGraph();
+     * 
+     * //proving process timeout
+     * 
+     * if (myCompileEnvironment.flags.isFlagSet(FLAG_TIMEOUT)) {
+     * myTimeout = Long.parseLong(myCompileEnvironment.flags
+     * .getFlagArgument(FLAG_TIMEOUT, "milliseconds"));
+     * }
+     * else {
+     * myTimeout = 5000;
+     * }
+     * 
+     * //number of failed VCs before halting
+     * if (myCompileEnvironment.flags.isFlagSet(FLAG_VCSFAILED)) {
+     * myNumVCsBeforeHalting = Integer.parseInt(myCompileEnvironment.flags
+     * .getFlagArgument(FLAG_VCSFAILED, "vcsfailed"));
+     * }
+     * else {
+     * myNumVCsBeforeHalting = -1;
+     * }
+     * 
+     * }
+     */
 
-        //proving process timeout
-
-        if (myCompileEnvironment.flags.isFlagSet(FLAG_TIMEOUT)) {
-            myTimeout = Long.parseLong(myCompileEnvironment.flags
-                    .getFlagArgument(FLAG_TIMEOUT, "milliseconds"));
-        }
-        else {
-            myTimeout = 5000;
-        }
-
-        //number of failed VCs before halting
-        if (myCompileEnvironment.flags.isFlagSet(FLAG_VCSFAILED)) {
-            myNumVCsBeforeHalting = Integer.parseInt(myCompileEnvironment.flags
-                    .getFlagArgument(FLAG_VCSFAILED, "vcsfailed"));
-        }
-        else {
-            myNumVCsBeforeHalting = -1;
-        }
-
-    }*/
-
-    public GeneralPurposeProver(){
+    public GeneralPurposeProver() {
         System.out.println("Test Prove ....");
     }
 
