@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.ResolveFileBasicInfo;
 import edu.clemson.cs.rsrg.init.pipeline.*;
 import edu.clemson.cs.rsrg.misc.Utilities;
+import edu.clemson.cs.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
@@ -227,6 +228,15 @@ class Controller {
                     ProverPipeline proverPipeline = new ProverPipeline(
                             myCompileEnvironment, mySymbolTable);
                     proverPipeline.process(m);
+                }
+
+                // Invoke nProver (if requested)
+                if (myCompileEnvironment.flags
+                        .isFlagSet(GeneralPurposeProver.FLAG_PROVE)
+                        && m.equals(new ModuleIdentifier(targetModule))) {
+                    NProverPipeline nproverPipeline = new NProverPipeline(
+                            myCompileEnvironment, mySymbolTable);
+                    nproverPipeline.process(m);
                 }
 
                 // Complete compilation for this module

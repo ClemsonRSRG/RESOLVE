@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.init.flag.Flag;
 import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.init.output.OutputListener;
 import edu.clemson.cs.rsrg.misc.Utilities;
+import edu.clemson.cs.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.cs.rsrg.prover.CongruenceClassProver;
 import edu.clemson.cs.rsrg.statushandling.SystemStdHandler;
 import edu.clemson.cs.rsrg.statushandling.StatusHandler;
@@ -545,6 +546,7 @@ public class ResolveCompiler {
             Populator.setUpFlags();
             VCGenerator.setUpFlags();
             CongruenceClassProver.setUpFlags();
+            GeneralPurposeProver.setUpFlags();
             FlagDependencies.seal();
         }
     }
