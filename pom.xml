@@ -149,19 +149,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr3-maven-plugin</artifactId>
-                <version>3.5.2</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>antlr</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- Plugin to add the license information. -->
             <plugin>
                 <groupId>com.mycila</groupId>
@@ -179,9 +166,7 @@
                         <exclude>.github/**</exclude>
                         <exclude>bin/**</exclude>
                         <exclude>docs/**</exclude>
-                        <exclude>src/main/antlr3/**</exclude>
                         <exclude>src/main/antlr4/**</exclude>
-                        <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
                         <exclude>src/resources/**</exclude>
                         <exclude>test/resources/**</exclude>
                     </excludes>
@@ -236,7 +221,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>edu.clemson.cs.r2jt.Main</mainClass>
+                            <mainClass>edu.clemson.cs.rsrg.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
