@@ -29,7 +29,7 @@ import java.util.*;
  * </p>
  *
  * @author Mike Kabbani
- * 
+ *
  * @version 2.0
  */
 public class Theorem {

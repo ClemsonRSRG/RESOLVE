@@ -23,7 +23,7 @@ import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class ValidTypeFamilyChecker {

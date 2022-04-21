@@ -34,7 +34,7 @@ import java.util.*;
  * @author Hampton Smith
  * @author Mike Kabbani
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class ImmutableVC {
@@ -546,20 +546,20 @@ public class ImmutableVC {
          * (PAlternatives) rhs; ArrayList<PExp> conditions = new ArrayList<PExp>(); for (PAlternatives.Alternative pa :
          * asPa.myAlternatives) { conditions.add(pa.condition); ArrayList<PExp> args = new ArrayList<PExp>();
          * args.add(lhs); args.add(pa.result); PSymbol ant = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-         * 
+         *
          * args.clear(); args.add(pa.condition); args.add(ant); PSymbol pc = new PSymbol(m_typegraph.BOOLEAN, null,
          * "implies", args); converted.add(pc); m_conditions.add(pa.condition); }
-         * 
+         *
          * // do otherwise clause if (conditions.size() > 1) { // make conjunction } else { ArrayList<PExp> args = new
          * ArrayList<PExp>(); args.add(conditions.get(0)); PExp neg = new PSymbol(m_typegraph.BOOLEAN, null, "not",
          * args); args.clear();
-         * 
+         *
          * args.add(lhs); args.add(asPa.myOtherwiseClauseResult); PExp eq = new PSymbol(m_typegraph.BOOLEAN, null, "=",
          * args); args.clear(); args.add(neg); args.add(eq); converted.add(new PSymbol(m_typegraph.BOOLEAN, null,
          * "implies", args)); //m_conditions.add(neg); }
-         * 
+         *
          * } // No PAlt else { converted.add(p); } }
-         * 
+         *
          * } m_liftedLambdaPredicates = converted; }
          */
 
@@ -653,7 +653,7 @@ public class ImmutableVC {
          * <p>
          * An helper method for dealing with quantified symbols.
          * </p >
-         * 
+         *
          * @param thingToHigherOrder
          *            An expression that contains the quantified variable.
          * @param quantVar

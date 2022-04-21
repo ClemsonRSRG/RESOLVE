@@ -20,7 +20,7 @@ import edu.clemson.rsrg.init.file.ResolveFile;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class Location implements Cloneable {

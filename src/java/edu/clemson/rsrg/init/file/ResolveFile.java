@@ -24,7 +24,7 @@ import org.antlr.v4.runtime.CharStream;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class ResolveFile {

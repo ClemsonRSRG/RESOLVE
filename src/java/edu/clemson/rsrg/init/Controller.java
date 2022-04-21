@@ -56,7 +56,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * 
+ *
  * @version 1.0
  */
 class Controller {

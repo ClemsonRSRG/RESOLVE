@@ -18,7 +18,7 @@ package edu.clemson.rsrg.parsing.data;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public interface BasicCapabilities {

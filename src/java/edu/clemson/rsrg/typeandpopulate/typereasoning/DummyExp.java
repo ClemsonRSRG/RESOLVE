@@ -35,7 +35,7 @@ import java.util.Map;
  *
  * @author Hampton Smith
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class DummyExp extends MathExp {

@@ -67,7 +67,7 @@ import org.jgrapht.graph.DefaultEdge;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class Utilities {

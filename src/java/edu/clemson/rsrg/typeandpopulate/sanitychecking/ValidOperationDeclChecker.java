@@ -28,7 +28,7 @@ import java.util.List;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class ValidOperationDeclChecker {

@@ -23,7 +23,7 @@ import edu.clemson.rsrg.parsing.data.PosSymbol;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class TypeDefinitionDec extends Dec {

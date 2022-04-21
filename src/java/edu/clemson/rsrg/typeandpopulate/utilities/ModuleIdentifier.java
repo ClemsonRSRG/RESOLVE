@@ -19,7 +19,7 @@ import edu.clemson.rsrg.absyn.items.programitems.UsesItem;
  * <p>
  * Identifies a particular module unambiguously.
  * </p>
- * 
+ *
  * <p>
  * <strong>Note:</strong> Currently, we only permit one level of namespace. But ultimately that will probably change
  * (because, for example, at this moment if there were two "Stack_Templates", we couldn't deal with that. A java
@@ -30,7 +30,7 @@ import edu.clemson.rsrg.absyn.items.programitems.UsesItem;
  * @author Hampton Smith
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * 
+ *
  * @version 2.0
  */
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {

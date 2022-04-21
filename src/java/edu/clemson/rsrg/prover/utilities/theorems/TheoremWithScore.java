@@ -18,7 +18,7 @@ package edu.clemson.rsrg.prover.utilities.theorems;
  * </p>
  *
  * @author Mike Kabbani
- * 
+ *
  * @version 2.0
  */
 public class TheoremWithScore implements Comparable<TheoremWithScore> {

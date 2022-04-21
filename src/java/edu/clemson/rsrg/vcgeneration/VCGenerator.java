@@ -99,7 +99,7 @@ import org.stringtemplate.v4.STGroupFile;
  * @author Heather Keown Harton
  * @author Yu-Shan Sun
  * @author Nighat Yasmin
- * 
+ *
  * @version 3.0
  */
 public class VCGenerator extends TreeWalkerVisitor {

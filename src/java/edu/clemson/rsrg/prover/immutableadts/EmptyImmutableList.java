@@ -24,7 +24,7 @@ import java.util.Iterator;
  *            Type of elements stored inside this list.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class EmptyImmutableList<E> extends AbstractImmutableList<E> {

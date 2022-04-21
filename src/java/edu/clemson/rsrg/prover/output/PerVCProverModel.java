@@ -18,7 +18,7 @@ package edu.clemson.rsrg.prover.output;
  * </p>
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public final class PerVCProverModel {

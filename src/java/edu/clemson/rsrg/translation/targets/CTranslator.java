@@ -49,7 +49,7 @@ import org.stringtemplate.v4.STGroupFile;
  * @author Daniel Welch
  * @author Mark Todd
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class CTranslator extends AbstractTranslator {
@@ -327,13 +327,13 @@ public class CTranslator extends AbstractTranslator {
      * @Override public void preOperationDec(OperationDec node) { String operationName = "(*" + node.getName().getName()
      * + ")"; ST operation = getOperationLikeTemplate((node.getReturnTy() != null) ? node
      * .getReturnTy().getProgramTypeValue() : null, operationName, false);
-     * 
+     *
      * myActiveTemplates.push(operation); }
      */
 
     /*
      * @Override public void postOperationDec(OperationDec node) { ST operation = myActiveTemplates.pop();
-     * 
+     *
      * // TODO : Add Struct parameter to every function here... // ST conceptStruct =
      * myGroup.getInstanceOf("unqualified_type").add // ("name", myScope) if (myActiveTemplates.size() > 1) { // If
      * we're translating a concept, then our stack should be two // deep since every variable ('operation') is added to

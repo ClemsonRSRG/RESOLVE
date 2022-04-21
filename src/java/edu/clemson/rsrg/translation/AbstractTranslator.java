@@ -59,7 +59,7 @@ import org.stringtemplate.v4.STGroup;
  * @author Daniel Welch
  * @author Mark Todd
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public abstract class AbstractTranslator extends TreeWalkerStackVisitor {

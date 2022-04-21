@@ -25,7 +25,7 @@ import java.util.List;
  * </p>
  *
  * @author Mike Khabbani
- * 
+ *
  * @version 2.0
  */
 public class Utilities {

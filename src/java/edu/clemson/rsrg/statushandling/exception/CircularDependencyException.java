@@ -19,7 +19,7 @@ package edu.clemson.rsrg.statushandling.exception;
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * 
+ *
  * @version 2.0
  */
 public class CircularDependencyException extends CompilerException {

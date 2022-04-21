@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
  * presents an interface for mapping over objects of type <code>O</code>. A {@link Mapping} from <code>I</code> to
  * <code>O</code> is used to transform each object as it is requested.
  * </p>
- * 
+ *
  * @param <I>
  *            The type of the objects in the source iterator.
  * @param <O>

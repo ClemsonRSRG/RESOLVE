@@ -42,7 +42,7 @@ import org.stringtemplate.v4.STGroupFile;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class FileOutputListener implements OutputListener {
