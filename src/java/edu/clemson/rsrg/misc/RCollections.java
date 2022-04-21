@@ -31,7 +31,7 @@ public class RCollections {
      * Returns a new list that is the result of processing each element of the original list with the given mapping, in
      * order, and adding it to the final list.
      * </p>
-     * 
+     *
      * <p>
      * This method will return an <code>ArrayList</code> if given one, and a <code>LinkedList</code> if given one, but
      * otherwise the specific subclass of list returned is undefined.
@@ -45,7 +45,7 @@ public class RCollections {
      *            The original list.
      * @param mapping
      *            A mapping to be used to render the new list.
-     * 
+     *
      * @return The new list.
      */
     public static <T, R> List<R> map(List<T> original, Utilities.Mapping<T, R> mapping) {

@@ -28,7 +28,7 @@ import edu.clemson.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMod
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class ValidFunctionOpDeclChecker {

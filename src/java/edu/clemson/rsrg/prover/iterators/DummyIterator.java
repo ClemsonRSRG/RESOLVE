@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
  *            Element to to be iterated.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class DummyIterator<T> implements Iterator<T> {

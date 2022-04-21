@@ -23,7 +23,7 @@ import java.util.Iterator;
  *            Element to to be iterated.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class SingletonIterator<T> implements Iterator<T> {

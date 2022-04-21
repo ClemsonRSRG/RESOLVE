@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
  *            Elements to to be iterated.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class ArrayIterator<E> implements Iterator<E> {

@@ -20,7 +20,7 @@ package edu.clemson.rsrg.statushandling.exception;
  *
  * @author Hampton Smith
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class FlagDependencyException extends CompilerException {

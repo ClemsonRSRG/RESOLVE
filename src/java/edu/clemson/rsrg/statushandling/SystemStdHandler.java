@@ -21,7 +21,7 @@ import java.io.PrintWriter;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class SystemStdHandler extends WriterStatusHandler implements StatusHandler {

@@ -21,7 +21,7 @@ import edu.clemson.rsrg.init.ResolveCompiler;
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * 
+ *
  * @version 1.0
  */
 public class Main {

@@ -22,7 +22,7 @@ import java.util.Iterator;
  * </p>
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class PSymbolArgumentIterator implements PExpSubexpressionIterator {

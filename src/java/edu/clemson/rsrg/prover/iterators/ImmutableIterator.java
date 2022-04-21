@@ -25,7 +25,7 @@ import java.util.Iterator;
  *            Type of elements in this collection.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class ImmutableIterator<T> implements Iterator<T> {

@@ -61,7 +61,7 @@ import org.stringtemplate.v4.STGroupFile;
  *
  * @author Daniel Welch
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class JavaTranslator extends AbstractTranslator {
@@ -1140,9 +1140,9 @@ public class JavaTranslator extends AbstractTranslator {
      * <p>
      * For example, given {@code type} = null, {@code name} = 'Pop', and {@code parameters} = [R, S]; is method returns
      * :
-     * 
+     *
      * <pre>
-     * 
+     *
      * public void Pop(RType R, Stack_Template.Stack S) {
      *     con.Pop(R, S);
      * }

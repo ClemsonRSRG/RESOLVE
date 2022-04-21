@@ -21,7 +21,7 @@ import edu.clemson.rsrg.prover.absyn.expressions.*;
  * </p>
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public abstract class PExpVisitor {

@@ -21,7 +21,7 @@ import edu.clemson.rsrg.statushandling.exception.CompilerException;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public abstract class SymbolTableException extends CompilerException {

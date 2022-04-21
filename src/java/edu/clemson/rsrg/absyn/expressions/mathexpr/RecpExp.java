@@ -28,7 +28,7 @@ import java.util.Map;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class RecpExp extends MathExp {

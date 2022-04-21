@@ -58,7 +58,7 @@ import org.stringtemplate.v4.STGroup;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class CallStmtRule extends AbstractProofRuleApplication implements ProofRuleApplication {
@@ -232,32 +232,32 @@ public class CallStmtRule extends AbstractProofRuleApplication implements ProofR
          * // NY YS // Duration for CallStmt if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) { Location loc
          * = (Location) stmt.getLocation().clone(); ConfirmStmt finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
          * Exp finalConfirmExp = finalConfirm.getAssertion();
-         * 
+         *
          * // Obtain the corresponding OperationProfileEntry OperationProfileEntry ope =
          * Utilities.searchOperationProfile(loc, stmt.getQualifier(), stmt.getName(), argTypes, myCurrentModuleScope);
-         * 
+         *
          * // Add the profile ensures as additional assume Exp profileEnsures = ope.getEnsuresClause(); if
          * (profileEnsures != null) { profileEnsures = replaceFormalWithActualEns(profileEnsures, opDec
          * .getParameters(), opDec.getStateVars(), replaceArgs, false);
-         * 
+         *
          * // Obtain the current location if (stmt.getName().getLocation() != null) { // Set the details of the current
          * location Location ensuresLoc = (Location) loc.clone(); ensuresLoc.setDetails("Ensures Clause of " +
          * opDec.getName() + " from Profile " + ope.getName()); Utilities.setLocation(profileEnsures, ensuresLoc); }
-         * 
+         *
          * ensures = myTypeGraph.formConjunct(ensures, profileEnsures); }
-         * 
+         *
          * // Construct the Duration Clause Exp opDur = Exp.copy(ope.getDurationClause());
-         * 
+         *
          * // Replace PostCondition variables in the duration clause opDur = replaceFormalWithActualEns(opDur,
          * opDec.getParameters(), opDec.getStateVars(), replaceArgs, false);
-         * 
+         *
          * VarExp cumDur = Utilities.createVarExp((Location) loc.clone(), null, Utilities.createPosSymbol(Utilities
          * .getCumDur(finalConfirmExp)), myTypeGraph.R, null); Exp durCallExp = Utilities.createDurCallExp((Location)
          * loc.clone(), Integer .toString(opDec.getParameters().size()), Z, myTypeGraph.R); InfixExp sumEvalDur = new
          * InfixExp((Location) loc.clone(), opDur, Utilities .createPosSymbol("+"), durCallExp);
          * sumEvalDur.setMathType(myTypeGraph.R); sumEvalDur = new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
          * Utilities.createPosSymbol("+"), sumEvalDur); sumEvalDur.setMathType(myTypeGraph.R);
-         * 
+         *
          * // For any evaluates mode expression, we need to finalize the variable
          * edu.clemson.cs.r2jt.collections.List<ProgramExp> assignExpList = stmt.getArguments(); for (int i = 0; i <
          * assignExpList.size(); i++) { ParameterVarDec p = opDec.getParameters().get(i); VariableExp pExp =
@@ -265,7 +265,7 @@ public class CallStmtRule extends AbstractProofRuleApplication implements ProofR
          * VarDec(Utilities.getVarName(pExp), p.getTy()); FunctionExp finalDur = Utilities.createFinalizAnyDur(v,
          * myTypeGraph.R); sumEvalDur = new InfixExp((Location) loc.clone(), sumEvalDur, Utilities.createPosSymbol("+"),
          * finalDur); sumEvalDur.setMathType(myTypeGraph.R); } }
-         * 
+         *
          * // Replace Cum_Dur in our final ensures clause finalConfirmExp = Utilities.replace(finalConfirmExp, cumDur,
          * sumEvalDur); myCurrentAssertiveCode.setFinalConfirm(finalConfirmExp, finalConfirm.getSimplify()); }
          */

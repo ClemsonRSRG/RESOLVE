@@ -19,7 +19,7 @@ package edu.clemson.rsrg.prover.output;
  *
  * @author Hampton Smith
  * @author Mike Kabbani
- * 
+ *
  * @version 2.0
  */
 public class Metrics {

@@ -48,7 +48,7 @@ import static edu.clemson.rsrg.vcgeneration.VCGenerator.FLAG_ADD_CONSTRAINT;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class VerificationContext implements BasicCapabilities, Cloneable {

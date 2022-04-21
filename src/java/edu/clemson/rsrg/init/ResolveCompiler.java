@@ -43,7 +43,7 @@ import java.util.*;
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * 
+ *
  * @version 1.0
  */
 public class ResolveCompiler {

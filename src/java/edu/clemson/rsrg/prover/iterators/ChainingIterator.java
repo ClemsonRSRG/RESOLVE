@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
  *            Elements to to be iterated.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class ChainingIterator<T> implements Iterator<T> {

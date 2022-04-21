@@ -27,7 +27,7 @@ import java.util.ArrayList;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class ProverPipeline extends AbstractPipeline {

@@ -30,7 +30,7 @@ import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class TranslatorPipeline extends AbstractPipeline {
@@ -158,10 +158,10 @@ public class TranslatorPipeline extends AbstractPipeline {
      * modifyString(inFile, "\\." + ext, ".java"); File javaFile = new File(javaName); if (!javaFile.exists() ||
      * sourceNewerThan(file, javaFile)) { translate = true; } else if (myInstanceEnvironment.flags
      * .isFlagSet(JAVA_FLAG_TRANSLATE_CLEAN)) { translate = true; } } } return translate; }
-     * 
+     *
      * private String modifyString(String src, String find, String replace) { Pattern pattern = Pattern.compile(find);
      * Matcher matcher = pattern.matcher(src); return matcher.replaceAll(replace); }
-     * 
+     *
      * private boolean sourceNewerThan(File a, File b) { if (a.lastModified() > b.lastModified()) { return true; }
      * return false; }
      */

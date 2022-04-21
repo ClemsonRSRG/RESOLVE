@@ -26,7 +26,7 @@ import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class AnalysisPipeline extends AbstractPipeline {

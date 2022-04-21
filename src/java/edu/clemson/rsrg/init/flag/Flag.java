@@ -25,13 +25,13 @@ import java.util.Map;
  * what the flag will be called from the command line (for instance a <code>Flag</code> named "myflag" will be turned on
  * by adding "-myflag" as an option from the command line.)
  * </p>
- * 
+ *
  * <p>
  * Each flag also has a <em>section</em> and a <em>description</em>, which are used to display information about flags
  * to the user. All flags with the same section string will be grouped together under that heading. Each flag's
  * description will be displayed to explain what it does.
  * </p>
- * 
+ *
  * <p>
  * Some flags take parameters. An example would be a flag that lets the user specify the output directory.
  * Hypothetically let's name that flag "outdir." We expect that after giving this flag, the user will provide a
@@ -62,7 +62,7 @@ import java.util.Map;
  *
  * @author Hampton Smith
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class Flag {

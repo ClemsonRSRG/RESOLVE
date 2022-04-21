@@ -28,7 +28,7 @@ import org.stringtemplate.v4.STGroup;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class PresumeStmtRule extends AbstractProofRuleApplication implements ProofRuleApplication {

@@ -32,7 +32,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * 
+ *
  * @version 1.0
  */
 public class Utilities {
@@ -138,7 +138,7 @@ public class Utilities {
      *            Super type of {@code expectedType}.
      * @param <T>
      *            The expected type.
-     * 
+     *
      * @return A list of {@code T}.
      */
     public static <E, T extends E> List<T> collect(Class<T> expectedType, List<? extends ParseTree> nodes,

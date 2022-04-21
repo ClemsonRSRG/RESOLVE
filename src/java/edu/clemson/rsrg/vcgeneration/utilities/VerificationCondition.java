@@ -23,7 +23,7 @@ import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class VerificationCondition implements BasicCapabilities, Cloneable {

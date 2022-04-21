@@ -21,7 +21,7 @@ import java.util.Map;
  * </p>
  *
  * @author Mike Kabbani
- * 
+ *
  * @version 2.0
  */
 public class PExpWithScore implements Comparable<PExpWithScore> {

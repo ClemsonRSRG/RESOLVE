@@ -68,7 +68,7 @@ import java.util.NoSuchElementException;
  *     ... unique_var_name_n : MType}{t1}</code> (for some {@code n > 0}, where each <code>unique_var_name</code> does
  * not appear in <code>t1</code>) is a syntactic subtype of <code>t2</code>.</li>
  * <li>
- * 
+ *
  * <pre>
  * BigUnion{t1 : (T1 : Power(MType)),
  *          t2 : (T2 : Power(MType)),

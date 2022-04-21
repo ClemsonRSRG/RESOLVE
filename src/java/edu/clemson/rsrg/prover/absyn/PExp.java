@@ -46,7 +46,7 @@ import java.util.*;
  *
  * @author Hampton Smith
  * @author Mike Kabbani
- * 
+ *
  * @version 2.0
  */
 public abstract class PExp {

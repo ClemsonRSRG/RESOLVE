@@ -24,7 +24,7 @@ import edu.clemson.rsrg.vcgeneration.VCGenerator;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class FacilityInitStmt extends Statement {
