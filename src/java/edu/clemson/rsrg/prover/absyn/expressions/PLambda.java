@@ -31,7 +31,7 @@ import java.util.*;
  *
  * @author Hampton Smith
  * @author Mike Kabbani
- * 
+ *
  * @version 2.0
  */
 public class PLambda extends PExp {
@@ -46,7 +46,7 @@ public class PLambda extends PExp {
      * </p>
      *
      * @author Hampton Smith
-     * 
+     *
      * @version 2.0
      */
     public static class Parameter {
@@ -484,7 +484,7 @@ public class PLambda extends PExp {
      * </p>
      *
      * @author Hampton Smith
-     * 
+     *
      * @version 2.0
      */
     private class PLambdaBodyIterator implements PExpSubexpressionIterator {

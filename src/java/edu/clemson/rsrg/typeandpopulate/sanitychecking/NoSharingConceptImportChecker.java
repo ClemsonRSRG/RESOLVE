@@ -37,7 +37,7 @@ import java.util.Iterator;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class NoSharingConceptImportChecker {

@@ -371,14 +371,14 @@ public abstract class Exp extends ResolveConceptualElement {
      * Returns a DEEP COPY of this expression, with all instances of {@link Exp}s that occur as keys in
      * {@code substitutions} replaced with their corresponding values.
      * </p>
-     * 
+     *
      * <p>
      * In general, a key {@link Exp} "occurs" in this {@link Exp} if either this {@link Exp} or some sub-expression is
      * {@link Exp#equivalent(Exp)}. However, if the key is a {@link VarExp} function names are additionally matched,
      * even though they would not ordinarily match via {@link Exp#equivalent(Exp)}, so function names can be substituted
      * without affecting their arguments.
      * </p>
-     * 
+     *
      * @param substitutions
      *            A mapping from {@link Exp}s that should be substituted out to the {@link Exp} that should replace
      *            them.
@@ -465,7 +465,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * have been appropriately substituted. The concrete subclass may assume that {@code this} does not match any key in
      * {@code substitutions} and thus need only concern itself with performing substitutions in its children.
      * </p>
-     * 
+     *
      * @param substitutions
      *            A mapping from {@link Exp}s that should be substituted out to the {@link Exp} that should replace
      *            them.

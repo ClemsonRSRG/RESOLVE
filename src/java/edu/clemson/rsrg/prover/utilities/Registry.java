@@ -23,7 +23,7 @@ import java.util.*;
  * </p>
  *
  * @author Mike Khabbani
- * 
+ *
  * @version 2.0
  */
 public class Registry {

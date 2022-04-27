@@ -24,7 +24,7 @@ import java.util.*;
  *
  * @author Blair Durkee
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class VirtualListNode extends ResolveConceptualElement {

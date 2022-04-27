@@ -31,7 +31,7 @@ import java.util.*;
  * </p>
  *
  * @author Daniel Welch
- * 
+ *
  * @version 2.0
  */
 public class PAlternatives extends PExp {

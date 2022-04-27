@@ -26,7 +26,7 @@ import edu.clemson.rsrg.treewalk.TreeWalkerVisitor;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class ReceptaclesExpExtractor extends TreeWalkerVisitor {

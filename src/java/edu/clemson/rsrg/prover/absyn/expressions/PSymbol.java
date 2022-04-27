@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Hampton Smith
  * @author Mike Kabbani
- * 
+ *
  * @version 2.0
  */
 public class PSymbol extends PExp {
@@ -47,7 +47,7 @@ public class PSymbol extends PExp {
      * </p>
      *
      * @author Hampton Smith
-     * 
+     *
      * @version 2.0
      */
     public enum Quantification {
@@ -90,7 +90,7 @@ public class PSymbol extends PExp {
      * </p>
      *
      * @author Hampton Smith
-     * 
+     *
      * @version 2.0
      */
     public enum DisplayType {

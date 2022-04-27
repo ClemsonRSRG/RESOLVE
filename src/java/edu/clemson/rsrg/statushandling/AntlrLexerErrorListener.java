@@ -24,7 +24,7 @@ import org.antlr.v4.runtime.Recognizer;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class AntlrLexerErrorListener extends BaseErrorListener {

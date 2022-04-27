@@ -33,7 +33,7 @@ import org.jgrapht.graph.DefaultEdge;
  * @see <a href="https://en.wikipedia.org/wiki/Sequent_calculus">Sequent Calculus</a>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class SequentReduction {

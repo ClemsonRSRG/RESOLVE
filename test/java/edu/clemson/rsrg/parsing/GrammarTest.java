@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class GrammarTest {

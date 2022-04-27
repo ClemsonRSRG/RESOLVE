@@ -23,7 +23,7 @@ import edu.clemson.rsrg.prover.absyn.expressions.*;
  * @author Hampton Smith
  * @author Mike Kabbani
  * @author Daniel Welch
- * 
+ *
  * @version 2.0
  */
 public class NestedPExpVisitors extends PExpVisitor {

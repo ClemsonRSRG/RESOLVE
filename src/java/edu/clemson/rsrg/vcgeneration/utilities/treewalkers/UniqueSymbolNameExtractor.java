@@ -35,7 +35,7 @@ import java.util.Set;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class UniqueSymbolNameExtractor extends TreeWalkerVisitor {

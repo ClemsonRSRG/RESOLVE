@@ -22,14 +22,14 @@ import java.util.Iterator;
  * and presents an interface for mapping over objects of type <code>O</code>. A <code>Mapping</code> from <code>I</code>
  * to <code>O</code> is used to transform each object as it is requested.
  * </p>
- * 
+ *
  * @param <I>
  *            The type of the objects in the source iterator.
  * @param <O>
  *            The type of the final objects.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public final class LazyMappingIterator<I, O> implements Iterator<O> {

@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author Heather Keown Harton
  * @author Yu-Shan Sun
- * 
+ *
  * @version 3.0
  */
 public class AssertiveCodeBlock implements BasicCapabilities, Cloneable {

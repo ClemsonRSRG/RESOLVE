@@ -29,7 +29,7 @@ import static edu.clemson.rsrg.vcgeneration.VCGenerator.FLAG_VERIFY_VC;
  * </p>
  *
  * @author Mike Kabbani
- * 
+ *
  * @version 2.0
  */
 public class CongruenceClassProver {

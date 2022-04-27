@@ -21,7 +21,7 @@ import edu.clemson.rsrg.parsing.data.PosSymbol;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class SourceErrorException extends CompilerException {

@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author Daniel Welch
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class AssertionClause extends ResolveConceptualElement {

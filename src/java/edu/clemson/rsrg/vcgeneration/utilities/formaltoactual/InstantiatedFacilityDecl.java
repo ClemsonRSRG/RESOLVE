@@ -29,7 +29,7 @@ import java.util.List;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class InstantiatedFacilityDecl {

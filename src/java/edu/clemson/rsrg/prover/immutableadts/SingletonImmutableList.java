@@ -24,7 +24,7 @@ import java.util.Iterator;
  *            Type of element stored inside this list.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class SingletonImmutableList<E> extends AbstractImmutableList<E> {

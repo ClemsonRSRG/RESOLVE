@@ -18,7 +18,7 @@ package edu.clemson.rsrg.init.file;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class ResolveFileBasicInfo {

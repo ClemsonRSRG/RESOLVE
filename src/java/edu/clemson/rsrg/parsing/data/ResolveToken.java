@@ -27,7 +27,7 @@ import org.antlr.v4.runtime.misc.Pair;
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * 
+ *
  * @version 1.0
  */
 public class ResolveToken extends CommonToken {

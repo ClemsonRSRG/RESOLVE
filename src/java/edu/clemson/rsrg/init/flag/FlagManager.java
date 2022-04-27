@@ -23,7 +23,7 @@ import java.util.*;
  *
  * @author Hampton Smith
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class FlagManager {

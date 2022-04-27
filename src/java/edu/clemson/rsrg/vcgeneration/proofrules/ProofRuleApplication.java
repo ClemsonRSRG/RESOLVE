@@ -23,7 +23,7 @@ import org.stringtemplate.v4.ST;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public interface ProofRuleApplication {

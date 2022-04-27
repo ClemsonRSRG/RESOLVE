@@ -46,7 +46,7 @@ import java.util.*;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class SyntacticSugarConverter extends TreeWalkerVisitor {

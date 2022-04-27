@@ -23,7 +23,7 @@ import java.io.Writer;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 1.0
  */
 public class WriterStatusHandler implements StatusHandler {

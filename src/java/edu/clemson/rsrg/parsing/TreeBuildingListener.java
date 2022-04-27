@@ -76,7 +76,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * 
+ *
  * @version 1.0
  */
 public class TreeBuildingListener extends ResolveParserBaseListener {

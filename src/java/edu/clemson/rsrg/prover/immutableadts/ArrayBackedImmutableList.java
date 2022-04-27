@@ -27,7 +27,7 @@ import java.util.List;
  *            Type of elements stored inside this list.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {

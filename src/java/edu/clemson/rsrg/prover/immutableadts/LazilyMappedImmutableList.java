@@ -27,7 +27,7 @@ import java.util.Iterator;
  *            Mapped type for the elements stored inside this list.
  *
  * @author Hampton Smith
- * 
+ *
  * @version 2.0
  */
 public class LazilyMappedImmutableList<T, R> extends AbstractImmutableList<R> {

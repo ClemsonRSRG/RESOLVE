@@ -18,7 +18,7 @@ package edu.clemson.rsrg.statushandling.exception;
  * </p>
  *
  * @author Yu-Shan Sun
- * 
+ *
  * @version 2.0
  */
 public class ImportException extends CompilerException {
