@@ -33,6 +33,7 @@ import edu.clemson.rsrg.translation.AbstractTranslator;
 import edu.clemson.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import edu.clemson.rsrg.vcgeneration.VCGenerator;
+import edu.clemson.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -197,20 +198,21 @@ class Controller {
                         && m.equals(new ModuleIdentifier(targetModule))) {
                     VCGenPipeline vcGenPipeline = new VCGenPipeline(myCompileEnvironment, mySymbolTable);
                     vcGenPipeline.process(m);
-                }
+                    List<VerificationCondition> vcs = vcGenPipeline.getVerificationConditions();
 
-                // Invoke Automated Prover (if requested)
-                if (myCompileEnvironment.flags.isFlagSet(CongruenceClassProver.FLAG_PROVE)
-                        && m.equals(new ModuleIdentifier(targetModule))) {
-                    ProverPipeline proverPipeline = new ProverPipeline(myCompileEnvironment, mySymbolTable);
-                    proverPipeline.process(m);
-                }
+                    // Invoke Automated Prover (if requested)
+                    if (myCompileEnvironment.flags.isFlagSet(CongruenceClassProver.FLAG_PROVE)
+                            && m.equals(new ModuleIdentifier(targetModule))) {
+                        ProverPipeline proverPipeline = new ProverPipeline(myCompileEnvironment, mySymbolTable);
+                        proverPipeline.process(m);
+                    }
 
-                // Invoke nProver (if requested)
-                if (myCompileEnvironment.flags.isFlagSet(GeneralPurposeProver.FLAG_PROVE)
-                        && m.equals(new ModuleIdentifier(targetModule))) {
-                    NProverPipeline nproverPipeline = new NProverPipeline(myCompileEnvironment, mySymbolTable);
-                    nproverPipeline.process(m);
+                    // Invoke nProver (if requested)
+                    if (myCompileEnvironment.flags.isFlagSet(GeneralPurposeProver.FLAG_PROVE)
+                            && m.equals(new ModuleIdentifier(targetModule))) {
+                        NProverPipeline nproverPipeline = new NProverPipeline(myCompileEnvironment, mySymbolTable);
+                        nproverPipeline.process(m);
+                    }
                 }
 
                 // Complete compilation for this module
