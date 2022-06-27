@@ -1,3 +1,15 @@
+/*
+ * CongruenceCluster.java
+ * ---------------------------------
+ * Copyright (c) 2021
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.rsrg.nProver.registry;
 
 import edu.clemson.rsrg.nProver.registry.CongruenceClass;
@@ -9,14 +21,17 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * <p>This class is for every cluster that is created and belonging to one of the {@link CongruenceClass} all clusters are also belong to one of
- * the {@link Plantation} </p>
+ * <p>
+ * This class is for every cluster that is created and belonging to one of the {@link CongruenceClass} all clusters are
+ * also belong to one of the {@link Plantation}
+ * </p>
  *
  * @author Nicodemus Msafiri J. M.
+ * 
  * @version v1.0
  */
 public class CongruenceCluster {
-    //member fields
+    // member fields
     private Integer treeNodeLabel;
     private int indexToArgumentList;
     private int indexToCongruenceClass;
@@ -26,68 +41,81 @@ public class CongruenceCluster {
     private int dominantCluster;
     private int nextWithSameArg;
 
-    //constructor
-    public CongruenceCluster(Integer treeNodeLabel, int toArgList, int toCC, int toClusterTag, int nextPlantationCluster, int previousPlantationCluster, int dominantCluster, int nextWithSameArg){
+    // constructor
+    public CongruenceCluster(Integer treeNodeLabel, int toArgList, int toCC, int toClusterTag,
+            int nextPlantationCluster, int previousPlantationCluster, int dominantCluster, int nextWithSameArg) {
         this.treeNodeLabel = treeNodeLabel;
         indexToArgumentList = toArgList;
         indexToCongruenceClass = toCC;
         tag = toClusterTag; // to a structure that keeps the tags
-        this.nextPlantationCluster = nextPlantationCluster; // next cluster in the plantation in same class, having same root node label
-        this.previousPlantationCluster = previousPlantationCluster; //previous cluster
-        this.dominantCluster = dominantCluster; //will point to itself initially, and gets the smaller dominant when it is merged to other cluster
-        this.nextWithSameArg = nextWithSameArg; //points to the next cluster with same arguments
+        this.nextPlantationCluster = nextPlantationCluster; // next cluster in the plantation in same class, having same
+                                                            // root node label
+        this.previousPlantationCluster = previousPlantationCluster; // previous cluster
+        this.dominantCluster = dominantCluster; // will point to itself initially, and gets the smaller dominant when it
+                                                // is merged to other cluster
+        this.nextWithSameArg = nextWithSameArg; // points to the next cluster with same arguments
     }
 
-    //public methods
+    // public methods
 
-    public Integer getTreeNodeLabel(){
+    public Integer getTreeNodeLabel() {
         return treeNodeLabel;
     }
 
-    public int getIndexToArgList(){
+    public int getIndexToArgList() {
         return indexToArgumentList;
     }
 
-    public void setIndexToArgumentList(int newIndex){
+    public void setIndexToArgumentList(int newIndex) {
         indexToArgumentList = newIndex;
     }
 
-    public int getIndexToCongruenceClass() {return indexToCongruenceClass;}
+    public int getIndexToCongruenceClass() {
+        return indexToCongruenceClass;
+    }
 
-    public void setIndexToCongruenceClass(int newIndex){
+    public void setIndexToCongruenceClass(int newIndex) {
         indexToCongruenceClass = newIndex;
     }
 
-    public int getIndexToTag(){return tag;}
+    public int getIndexToTag() {
+        return tag;
+    }
 
-    public void setIndexToTag(int newIndex){
+    public void setIndexToTag(int newIndex) {
         tag = newIndex;
     }
 
-    public int getNextPlantationCluster (){return nextPlantationCluster;}
+    public int getNextPlantationCluster() {
+        return nextPlantationCluster;
+    }
 
-    public void setNextPlantationCluster(int newIndex){
+    public void setNextPlantationCluster(int newIndex) {
         nextPlantationCluster = newIndex;
     }
 
-    public int getPreviousPlantationCluster(){return previousPlantationCluster;}
+    public int getPreviousPlantationCluster() {
+        return previousPlantationCluster;
+    }
 
-    public void setPreviousPlantationCluster(int newIndex){
+    public void setPreviousPlantationCluster(int newIndex) {
         previousPlantationCluster = newIndex;
     }
 
-    public int getDominantCluster(){return dominantCluster;}
+    public int getDominantCluster() {
+        return dominantCluster;
+    }
 
-    public void setDominantCluster(int newIndex){
+    public void setDominantCluster(int newIndex) {
         dominantCluster = newIndex;
     }
 
-    public int getNextWithSameArg(){return nextWithSameArg;}
-
-    public void setNextWithSameArg(int newIndex){
-        nextWithSameArg = newIndex;
+    public int getNextWithSameArg() {
+        return nextWithSameArg;
     }
 
-
+    public void setNextWithSameArg(int newIndex) {
+        nextWithSameArg = newIndex;
+    }
 
 }
