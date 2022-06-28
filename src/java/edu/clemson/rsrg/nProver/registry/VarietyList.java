@@ -19,7 +19,7 @@ package edu.clemson.rsrg.nProver.registry;
  * </p>
  *
  * @author Nicodemus Msafiri J. M.
- * 
+ *
  * @version v1.0
  */
 public class VarietyList {

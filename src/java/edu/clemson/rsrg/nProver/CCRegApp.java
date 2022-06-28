@@ -47,7 +47,7 @@ public class CCRegApp {
          * testRegistry.getClusterArgArray()[i].getClusterNumber()+ "|"); System.out.print("|" +
          * testRegistry.getClusterArgArray()[i].getNxtIndexWithSameCCNumberInLevel()+ "|"); System.out.println("|" +
          * testRegistry.getClusterArgArray()[i].getAlternativeArg()+ "|"); }
-         * 
+         *
          * System.out.println("Cluster Array"); for (int i = 1; i < 9; i++){ System.out.print("|" +
          * testRegistry.getClusterArray()[i].getTreeNodeLabel() + "|"); System.out.print("|" +
          * testRegistry.getClusterArray()[i].getIndexToArgList() + "|"); System.out.print("|" +
@@ -56,31 +56,31 @@ public class CCRegApp {
          * testRegistry.getClusterArray()[i].getPreviousPlantationCluster() + "|"); System.out.print("|" +
          * testRegistry.getClusterArray()[i].getDominantCluster() + "|"); System.out.println("|" +
          * testRegistry.getClusterArray()[i].getNextWithSameArg() + "|"); }
-         * 
+         *
          * System.out.println("Plantation Array");
-         * 
+         *
          * for(int i = 1; i < 9; i++){ System.out.print("|" + testRegistry.getPlantationArray()[i].getTreeNodeLabel() +
          * "|"); System.out.print("|" + testRegistry.getPlantationArray()[i].getFirstPlantationCluster() + "|");
          * System.out.print("|" + testRegistry.getPlantationArray()[i].getPlantationTag() + "|"); System.out.print("|" +
          * testRegistry.getPlantationArray()[i].getNextCCPlantation() + "|"); System.out.print("|" +
          * testRegistry.getPlantationArray()[i].getNextVrtyPlantation() + "|"); System.out.println("|" +
          * testRegistry.getPlantationArray()[i].getPrvVrtyPlantation() + "|"); }
-         * 
+         *
          * System.out.println("Class Array"); for(int i = 1; i < 9 ; i++){ System.out.print("|" +
          * testRegistry.getCongruenceClassArray()[i].getFirstPlantation() + "|"); System.out.print("|" +
          * testRegistry.getCongruenceClassArray()[i].getClassTag() + "|"); System.out.print("|" +
          * testRegistry.getCongruenceClassArray()[i].getLastArgStringPosition() + "|"); System.out.println("|" +
          * testRegistry.getCongruenceClassArray()[i].getDominantCClass() + "|"); }
-         * 
+         *
          * System.out.println();
-         * 
+         *
          */
 
     }
 
     /**
      * num -- 4, min_int -- 2, max_int -- 3, 0 -- 0, 1 -- 1, <= -- 5
-     * 
+     *
      * @param testRegistry
      * @param attb
      */
@@ -605,33 +605,33 @@ public class CCRegApp {
     /*
      * private static void sequentVC_4 (CongruenceClassRegistry<Integer, String, String, String> testRegistry, BitSet
      * attb){
-     * 
+     *
      * //a a = testRegistry.registerCluster(1); //b b = testRegistry.registerCluster(2);
-     * 
+     *
      * //a + b testRegistry.appendToClusterArgList(a); testRegistry.appendToClusterArgList(b); c =
      * testRegistry.registerCluster(3);
-     * 
+     *
      * //9 d = testRegistry.registerCluster(9);
-     * 
+     *
      * //9 x a testRegistry.appendToClusterArgList(a); testRegistry.appendToClusterArgList(d); e =
      * testRegistry.registerCluster(4);
-     * 
-     * 
+     *
+     *
      * //a + b <= 9 x a BitSet attb_1 = new BitSet(); attb_1.set(0);//antecedent attb_1.set(2);//ultimate
      * testRegistry.appendToClusterArgList(c); testRegistry.appendToClusterArgList(e); f =
      * testRegistry.registerCluster(5); testRegistry.updateClassAttributes(f,attb_1);
-     * 
+     *
      * testRegistry.appendToClusterArgList(a); testRegistry.appendToClusterArgList(b);
      * if(testRegistry.checkIfRegistered(3)){ h = testRegistry.getAccessorFor(3); }
-     * 
+     *
      * //8 g = testRegistry.registerCluster(8);
-     * 
+     *
      * if(!testRegistry.areClassesCongruent(h, g)){ //a + b = 8 testRegistry.makeCongruent(h,g); }
-     * 
+     *
      * //8 testRegistry.appendToClusterArgList(g); testRegistry.appendToClusterArgList(e);
      * if(testRegistry.checkIfRegistered(5)){ j = testRegistry.getAccessorFor(5); } BitSet attb_2 = new BitSet();
      * attb_2.set(1); attb_2.set(2); testRegistry.updateClassAttributes(j, attb_2);
-     * 
+     *
      * if(testRegistry.checkIfProved()){ System.out.println("VC Proved"); }else{ System.out.println("VC Unproved"); } }
      */
 

@@ -12,8 +12,6 @@
  */
 package edu.clemson.rsrg.nProver.registry;
 
-import edu.clemson.rsrg.nProver.tags.TreeCategoryTag;
-
 import java.util.*;
 
 /**
@@ -22,7 +20,7 @@ import java.util.*;
  * </p>
  *
  * @author Nicodemus Msafiri J. M.
- * 
+ *
  * @version v1.0
  */
 public class CongruenceClass {

@@ -21,7 +21,7 @@ import java.util.*;
  * </p>
  *
  * @author Nicodemus Msafiri J. M.
- * 
+ *
  * @version v1.0
  *
  * @param <T1>
@@ -129,7 +129,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      *
      * @param treeNodeLabel
      *            an integer value to represent the tree node being registered.
-     * 
+     *
      * @return integer value representing accessor for the class created.
      */
     public int registerCluster(Integer treeNodeLabel) { /* Register_Cluster_Lbld */
@@ -686,10 +686,10 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * <p>
      * The operation that gets the ultimate dominant class designator for a given class
      * </p>
-     * 
+     *
      * @param cClassDesingator
      *            is a current class designator.
-     * 
+     *
      * @return int value for the ultimate class designator for the provided designator.
      */
     private int getTheUltimateDominantClass(int cClassDesingator) {
@@ -708,7 +708,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      *            is an accessor for the first class provided by the client.
      * @param secondAccessor
      *            is an accessor for the second class provided by the client
-     * 
+     *
      * @return {@code true} iff the two provided classes are congruent. Otherwise, return {@code false}.
      */
     private boolean areClassesCongruent(int firstAccessor, int secondAccessor) {
@@ -736,7 +736,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      *            index to the argument string representing first occurrence of the class in second level.
      * @param classAccessorInFirstLevel
      *            accessor for the class in the first level that the second class should match.
-     * 
+     *
      * @return {@code true} iff the previous class from {@param indexToArgInSecondLevel} is
      *         {@param classAccessorInFirstLevel}, and the root node of the cluster is in the set of reflexive
      *         operators. Otherwise return {@code false}.
@@ -793,7 +793,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      *            {@param firstClassAccessor}.
      * @param level
      *            is the level in the argument string array for the second class.
-     * 
+     *
      * @return {@code true} iff the sequent VC is proved, otherwise it returns {@code false}
      */
     private boolean reflexivityBingoTest(int firstClassAccessor, int secondClassAccessor, int level) {
@@ -823,7 +823,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * @param secondAccessor
      *            is accessor for the second class, {@param secondAccessor} is considered greater than
      *            {@param firstAccessor}.
-     * 
+     *
      * @return BitSet resulting from merging the two individual bit sets for the first class and second class.
      */
     private BitSet mergeAttribute(int firstAccessor, int secondAccessor) {
@@ -841,7 +841,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      *
      * @param bitSetIn
      *            is a bitset provided to be checked if it proves the sequent VC.
-     * 
+     *
      * @return {@code true} iff the {@param bitSeIn} has all the bits set, which proves the sequent VC. Otherwise, the
      *         operation returns {@code false}.
      */
@@ -902,7 +902,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * containing the content of the two classes is designated with the smaller designator, and the dominant class for
      * the larger designator is updated to the smaller designator
      * </p>
-     * 
+     *
      * @param firstCCAccessor
      *            is an accessor for the first class provided by the client.
      * @param secondCCAccessor
@@ -1001,7 +1001,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation removes the class in the variety list after the plantation that stood in that class for a root
      * label is merged to another class
      * </p>
-     * 
+     *
      * @param treeNodeLabel
      *            the tree node label designating the plantation
      * @param plantationDesignatorToRemove
@@ -1040,7 +1040,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * <p>
      * The operation update the plantations in the smaller class after the two classes are merged
      * </p>
-     * 
+     *
      * @param firstCCAccessor
      *            the smaller class designator
      * @param secondCCAccessor
@@ -1113,7 +1113,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * list according to their root node label. In this case, the operation covers the merger when the root nodes are
      * either greater than or less than than each other
      * </p>
-     * 
+     *
      * @param plantationDesignator_1
      *            index to the first plantation in the first class
      * @param plantationDesignator_2
@@ -1139,7 +1139,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation join clusters in plantations that have the same root node label by moving the clusters from the
      * larger plantation to the smaller plantation
      * </p>
-     * 
+     *
      * @param plantationDesignator_1
      *            index to the smaller plantation
      * @param plantationDesignator_2
@@ -1213,12 +1213,12 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * This operation mergers two clusters one for the smaller plantation and one from the larger plantation, in this
      * case, the cluster on the smaller plantation is less than the cluster on the larger plantation
      * </p>
-     * 
+     *
      * @param currentClusterDesignator_1
      *            is the class designator for the first cluster in smaller plantation
      * @param currentClusterDesignator_2
      *            is the class designator for the second cluster in a larger plantation
-     * 
+     *
      * @return a cluster designator for the cluster just moved to the smaller plantation
      */
     private int clusterJoinCase_01(int currentClusterDesignator_1, int currentClusterDesignator_2) {
@@ -1260,7 +1260,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation join two plantations where the tree node designating the first one is less than the tree node
      * designating the second one
      * </p>
-     * 
+     *
      * @param plantationDesignator_1
      *            index to plantation array for the first plantation
      * @param plantationDesignator_2
@@ -1314,12 +1314,12 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * This operation mergers two clusters one for the smaller plantation and one from the larger plantation, in this
      * case, the cluster on the smaller plantation is greater than the cluster on the larger plantation
      * </p>
-     * 
+     *
      * @param currentClusterDesignator_1
      *            is the class designator for the first cluster in smaller plantation
      * @param currentClusterDesignator_2
      *            is the class designator for the second cluster in a larger plantation
-     * 
+     *
      * @return a cluster designator for the cluster moved to the smaller plantation
      */
     private int clusterJoinCase_02(int currentClusterDesignator_1, int currentClusterDesignator_2) {
@@ -1355,7 +1355,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation join two plantations where the tree node designating the first one is greater than the tree node
      * designating the second one
      * </p>
-     * 
+     *
      * @param plantationDesignator_1
      *            index to plantation array for the first plantation
      * @param plantationDesignator_2
@@ -1393,7 +1393,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation updates the cluster argument array after merging two classes, after merging we may need to update
      * FASOP, rearrange arguments ond merge clusters
      * </p>
-     * 
+     *
      * @param firstAccessor
      *            congruence class accessor for the smaller class e.g., 3
      * @param secondAccessor
@@ -1494,7 +1494,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation updates the cluster argument string by merging the children of arguments with classes that got
      * merged
      * </p>
-     * 
+     *
      * @param indexToArgString
      *            index to cluster argument array with a larger class e.g., 7
      * @param indexToArgString_3
@@ -1594,7 +1594,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation merges to two clusters that used to have different arguments and now they have the same argument
      * after the larger class turning to the smaller class e.g., 7 ---> 3
      * </p>
-     * 
+     *
      * @param indexToArgString
      *            index to argument string for the larger class e.g., 7
      * @param indexToArgString_3
@@ -1678,7 +1678,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * <p>
      * The operation rearrange children under a parent and keep them in order, children are ordered in descending order
      * </p>
-     * 
+     *
      * @param argIndexWithChangedClass
      *            index to the argument string of the class that got changed e.g., 7 ---> 3
      */
@@ -1748,14 +1748,14 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * <p>
      * The operation checks if the two classes on the argument list are under the same parent
      * </p>
-     * 
+     *
      * @param indexToString
      *            index to the argument string with larger class e.g., 7
      * @param firstAccessor
      *            smaller class accessor e.g., 3
      * @param level
      *            the argument string level
-     * 
+     *
      * @return the operation returns true when a parent for the argument at
      */
     private boolean areClassesUnderSameParentInArgArray(int indexToString, int firstAccessor, int level) {
@@ -1784,12 +1784,12 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * <p>
      * The operation create a cluster argument as an entry to the cluster argument array
      * </p>
-     * 
+     *
      * @param label
      *            a label to the respective cluster with arguments in {@param clusterArgumentString}
      * @param clusterArgumentString
      *            an argument string holding the arguments for the cluster with {@param label}
-     * 
+     *
      * @return an integer value representing an index to the argument array for the argument created
      */
     private int createClusterArgumentArray(Integer label, Queue<Integer> clusterArgumentString) {
@@ -1977,7 +1977,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation updates the clusters that ends up being with the same argument after merging the classes and put
      * them in the list, the list is kept in order
      * </p>
-     * 
+     *
      * @param lab
      *            label for the cluster we want it to join the list of clusters with same arguments
      * @param index
@@ -2020,7 +2020,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
      * The operation updates the FASOP for the classes created as they are used as arguments in the clusters, their
      * occurrences in the cluster argument array are recorded in the levels for the FASOP array
      * </p>
-     * 
+     *
      * @param ccDesignator
      *            the designator to the congruence class holding the FASOP
      * @param level

@@ -13,7 +13,6 @@
 package edu.clemson.rsrg.nProver.registry;
 
 import edu.clemson.rsrg.nProver.registry.CongruenceClass;
-import edu.clemson.rsrg.nProver.tags.TreeCategoryTag;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,7 +26,7 @@ import java.util.Set;
  * </p>
  *
  * @author Nicodemus Msafiri J. M.
- * 
+ *
  * @version v1.0
  */
 public class CongruenceCluster {
