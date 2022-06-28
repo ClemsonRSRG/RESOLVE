@@ -1,7 +1,7 @@
 /*
  * TypeNode.java
  * ---------------------------------
- * Copyright (c) 2021
+ * Copyright (c) 2022
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University

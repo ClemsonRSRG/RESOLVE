@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.rsrg</groupId>
-    <version>Summer21a</version>
+    <version>Summer22a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -163,7 +163,7 @@
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <properties>
-                        <year>2021</year>
+                        <year>2022</year>
                     </properties>
                 </configuration>
                 <executions>
