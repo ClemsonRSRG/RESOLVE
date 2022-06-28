@@ -210,7 +210,7 @@ class Controller {
                     // Invoke nProver (if requested)
                     if (myCompileEnvironment.flags.isFlagSet(GeneralPurposeProver.FLAG_PROVE)
                             && m.equals(new ModuleIdentifier(targetModule))) {
-                        NProverPipeline nproverPipeline = new NProverPipeline(myCompileEnvironment, mySymbolTable);
+                        NProverPipeline nproverPipeline = new NProverPipeline(myCompileEnvironment, mySymbolTable, vcs);
                         nproverPipeline.process(m);
                     }
                 }
