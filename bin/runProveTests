@@ -23,7 +23,7 @@ echo "---- DONE RETRIEVING RESOLVE WORKSPACE ----"
 # Prepare to launch tests
 echo ""
 echo "---- PRE-EXECUTION SETUP ----"
-cp "${GITHUB_WORKSPACE}/target/RESOLVE-Summer21a-jar-with-dependencies.jar" "${GITHUB_WORKSPACE}/temp/RESOLVE-Workspace/RESOLVE/Main/resolve.jar"
+cp "${GITHUB_WORKSPACE}/target/RESOLVE-Summer22a-jar-with-dependencies.jar" "${GITHUB_WORKSPACE}/temp/RESOLVE-Workspace/RESOLVE/Main/resolve.jar"
 cd "${GITHUB_WORKSPACE}/temp/RESOLVE-Workspace/RESOLVE/Main/"
 echo "---- DONE WITH PRE-EXECUTION SETUP ----"
 
