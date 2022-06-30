@@ -13,10 +13,7 @@
 package edu.clemson.rsrg.nProver.utilities.treewakers;
 
 import edu.clemson.rsrg.absyn.expressions.Exp;
-import edu.clemson.rsrg.absyn.expressions.mathexpr.InfixExp;
-import edu.clemson.rsrg.absyn.expressions.mathexpr.LiteralExp;
-import edu.clemson.rsrg.absyn.expressions.mathexpr.VCVarExp;
-import edu.clemson.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.LinkedHashMap;
@@ -105,6 +102,23 @@ public class ExpLabeler extends TreeWalkerVisitor {
         // If this is not a variable expression we have seen, then add it to our map
         if (!myExpLabels.containsKey(exp.toString())) {
             myExpLabels.put(exp.toString(), myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link OutfixExp}.
+     * </p>
+     *
+     * @param exp
+     *            An outfix expression.
+     */
+    @Override
+    public final void postOutfixExp(OutfixExp exp) {
+        // If this is not a variable expression we have seen, then add it to our map
+        if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
+            myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
             myNextLabel++;
         }
     }
