@@ -48,7 +48,7 @@ public class Utilities {
      *
      * @return A mapping for all the expression in this verification condition.
      */
-    public static Map<Exp, Integer> convertExpToLabel(VerificationCondition condition) {
+    public static Map<String, Integer> convertExpToLabel(VerificationCondition condition) {
         Sequent sequent = condition.getSequent();
         ExpLabeler labeler = new ExpLabeler();
 

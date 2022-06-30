@@ -191,15 +191,15 @@ public class GeneralPurposeProver {
         // Loop through each of the VCs and attempt to prove them
         for (VerificationCondition vc : myVerificationConditions) {
             // Convert each expression in the VC to a numeric label
-            Map<Exp, Integer> labels = Utilities.convertExpToLabel(vc);
+            Map<String, Integer> labels = Utilities.convertExpToLabel(vc);
 
             if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("\n================VC ");
                 sb.append(vc.getName());
                 sb.append("================\n\n");
-                for (Exp exp : labels.keySet()) {
-                    sb.append(exp.asString(0, 0));
+                for (String exp : labels.keySet()) {
+                    sb.append(exp);
                     sb.append(" -> ");
                     sb.append(labels.get(exp));
                     sb.append("\n");

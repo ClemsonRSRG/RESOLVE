@@ -13,6 +13,8 @@
 package edu.clemson.rsrg.nProver.utilities.treewakers;
 
 import edu.clemson.rsrg.absyn.expressions.Exp;
+import edu.clemson.rsrg.absyn.expressions.mathexpr.InfixExp;
+import edu.clemson.rsrg.absyn.expressions.mathexpr.LiteralExp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.VCVarExp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.VarExp;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
@@ -42,7 +44,7 @@ public class ExpLabeler extends TreeWalkerVisitor {
      * This map contains the mapping between expressions and its associated integer number.
      * </p>
      */
-    private final Map<Exp, Integer> myExpLabels;
+    private final Map<String, Integer> myExpLabels;
 
     /**
      * <p>
@@ -62,7 +64,7 @@ public class ExpLabeler extends TreeWalkerVisitor {
      */
     public ExpLabeler() {
         myExpLabels = new LinkedHashMap<>();
-        myNextLabel = 0;
+        myNextLabel = 2;
     }
 
     // ===========================================================
@@ -75,6 +77,40 @@ public class ExpLabeler extends TreeWalkerVisitor {
 
     /**
      * <p>
+     * Code that gets executed after visiting a {@link InfixExp}.
+     * </p>
+     *
+     * @param exp
+     *            An infix expression.
+     */
+    @Override
+    public final void postInfixExp(InfixExp exp) {
+        // If this is not a variable expression we have seen, then add it to our map
+        if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
+            myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link LiteralExp}.
+     * </p>
+     *
+     * @param exp
+     *            A literal expression.
+     */
+    @Override
+    public final void postLiteralExp(LiteralExp exp) {
+        // If this is not a variable expression we have seen, then add it to our map
+        if (!myExpLabels.containsKey(exp.toString())) {
+            myExpLabels.put(exp.toString(), myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
      * Code that gets executed after visiting a {@link VarExp}.
      * </p>
      *
@@ -84,8 +120,8 @@ public class ExpLabeler extends TreeWalkerVisitor {
     @Override
     public final void postVarExp(VarExp exp) {
         // If this is not a variable expression we have seen, then add it to our map
-        if (!myExpLabels.containsKey(exp)) {
-            myExpLabels.put(exp, myNextLabel);
+        if (!myExpLabels.containsKey(exp.toString())) {
+            myExpLabels.put(exp.toString(), myNextLabel);
             myNextLabel++;
         }
     }
@@ -108,11 +144,11 @@ public class ExpLabeler extends TreeWalkerVisitor {
 
         // YS: Need special handle VarExp
         if (exp.getExp() instanceof VarExp) {
-            if (!myExpLabels.containsKey(exp)) {
+            if (!myExpLabels.containsKey(exp.toString())) {
                 // YS: A VCVarExp is something like: a' or a'''.
                 // We don't want all the variations so rather than walking
                 // the inner expression, we simply store the expression
-                myExpLabels.put(exp, myNextLabel);
+                myExpLabels.put(exp.toString(), myNextLabel);
                 myNextLabel++;
             }
         }
@@ -133,9 +169,9 @@ public class ExpLabeler extends TreeWalkerVisitor {
      * This method returns the mapping from expression to its associated number.
      * </p>
      *
-     * @return A mapping from {@link Exp} to {@link Integer}.
+     * @return A mapping from {@link String} to {@link Integer}.
      */
-    public final Map<Exp, Integer> getExpLabels() {
+    public final Map<String, Integer> getExpLabels() {
         return myExpLabels;
     }
 
