@@ -61,6 +61,8 @@ public class ExpLabeler extends TreeWalkerVisitor {
      */
     public ExpLabeler() {
         myExpLabels = new LinkedHashMap<>();
+        //NM: 0, 1 are spared for succedent = (0), <=(1) and can expand with
+        //with more reflexive operators
         myNextLabel = 2;
     }
 
