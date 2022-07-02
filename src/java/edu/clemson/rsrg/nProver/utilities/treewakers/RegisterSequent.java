@@ -1,3 +1,15 @@
+/*
+ * RegisterSequent.java
+ * ---------------------------------
+ * Copyright (c) 2022
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.rsrg.nProver.utilities.treewakers;
 
 import edu.clemson.rsrg.absyn.expressions.Exp;
@@ -62,7 +74,7 @@ public class RegisterSequent extends TreeWalkerVisitor {
      */
     public RegisterSequent() {
         myExpLabels = new LinkedHashMap<>();
-        registry = new CongruenceClassRegistry<>(1000,1000,1000,1000);
+        registry = new CongruenceClassRegistry<>(1000, 1000, 1000, 1000);
         arguments = new ArrayDeque<>();
         antecedentExp = true;
     }
@@ -85,24 +97,23 @@ public class RegisterSequent extends TreeWalkerVisitor {
      */
     @Override
     public final void postInfixExp(InfixExp exp) {
-        //append arguments usable in registering the infix operator
-        while (arguments.size() > 0 ){
+        // append arguments usable in registering the infix operator
+        while (arguments.size() > 0) {
             registry.appendToClusterArgList(arguments.remove());
         }
-        //check if registered, no duplicates allowed
-        if(registry.checkIfRegistered(myExpLabels.get(exp.getOperatorAsString()))){
+        // check if registered, no duplicates allowed
+        if (registry.checkIfRegistered(myExpLabels.get(exp.getOperatorAsString()))) {
             arguments.add(registry.getAccessorFor(myExpLabels.get(exp.getOperatorAsString())));
         }
-        //register if new, and make it an argument for the next higher level operator
+        // register if new, and make it an argument for the next higher level operator
         registry.registerCluster(myExpLabels.get(exp.getOperatorAsString()));
         arguments.add(myExpLabels.get(exp.getOperatorAsString()));
 
-        if(ultimate && antecedentExp){
+        if (ultimate && antecedentExp) {
 
-        }else if(ultimate && !antecedentExp){
+        } else if (ultimate && !antecedentExp) {
 
         }
-
 
     }
 
@@ -116,11 +127,11 @@ public class RegisterSequent extends TreeWalkerVisitor {
      */
     @Override
     public final void postVarExp(VarExp exp) {
-        //check if registered, no duplicates allowed
-        if(registry.checkIfRegistered(myExpLabels.get(exp.toString()))){
+        // check if registered, no duplicates allowed
+        if (registry.checkIfRegistered(myExpLabels.get(exp.toString()))) {
             arguments.add(registry.getAccessorFor(myExpLabels.get(exp.toString())));
         }
-        //register if new, and make it an argument for the next higher level operator
+        // register if new, and make it an argument for the next higher level operator
         registry.registerCluster(myExpLabels.get(exp.toString()));
         arguments.add(myExpLabels.get(exp.toString()));
     }
@@ -143,11 +154,11 @@ public class RegisterSequent extends TreeWalkerVisitor {
 
         // YS: Need special handle VarExp
         if (exp.getExp() instanceof VarExp) {
-            //check if registered, no duplicates allowed
-            if(registry.checkIfRegistered(myExpLabels.get(exp.toString()))){
+            // check if registered, no duplicates allowed
+            if (registry.checkIfRegistered(myExpLabels.get(exp.toString()))) {
                 arguments.add(registry.getAccessorFor(myExpLabels.get(exp.toString())));
             }
-            //register if new, and make it an argument for the next higher level operator
+            // register if new, and make it an argument for the next higher level operator
             registry.registerCluster(myExpLabels.get(exp.toString()));
             arguments.add(myExpLabels.get(exp.toString()));
         }
@@ -167,7 +178,9 @@ public class RegisterSequent extends TreeWalkerVisitor {
      * <p>
      * This method returns the mapping from expression to its associated number.
      * </p>
-     * @param myExpLabels expression labels mapping
+     *
+     * @param myExpLabels
+     *            expression labels mapping
      */
     public void setMyExpLabels(Map<String, Integer> myExpLabels) {
         this.myExpLabels = myExpLabels;
@@ -177,9 +190,10 @@ public class RegisterSequent extends TreeWalkerVisitor {
      * <p>
      * This method sets the
      * </p>
+     *
      * @param antecedentExp
      */
-    public void setAntecedentExp(boolean antecedentExp){
+    public void setAntecedentExp(boolean antecedentExp) {
         this.antecedentExp = antecedentExp;
     }
 
@@ -187,9 +201,10 @@ public class RegisterSequent extends TreeWalkerVisitor {
      * <p>
      * This method sets the
      * </p>
+     *
      * @param ultimate
      */
-    public void setUltimate(boolean ultimate){
+    public void setUltimate(boolean ultimate) {
         this.ultimate = ultimate;
     }
 

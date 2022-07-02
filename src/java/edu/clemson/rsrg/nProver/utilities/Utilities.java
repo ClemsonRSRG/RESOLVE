@@ -76,7 +76,7 @@ public class Utilities {
      *
      * @return A mapping for all the expression in this verification condition.
      */
-    public static boolean proveTargetVC(VerificationCondition condition){
+    public static boolean proveTargetVC(VerificationCondition condition) {
         Sequent sequent = condition.getSequent();
         RegisterSequent registration = new RegisterSequent();
 
