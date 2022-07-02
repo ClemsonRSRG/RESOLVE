@@ -15,6 +15,7 @@ package edu.clemson.rsrg.nProver.utilities;
 import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.utilities.treewakers.ExpLabeler;
+import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSequent;
 import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
@@ -65,4 +66,31 @@ public class Utilities {
         return labeler.getExpLabels();
     }
 
+    /**
+     * <p>
+     * Given a {@link VerificationCondition}, convert all relevant expression to a numeric label.
+     * </p>
+     *
+     * @param condition
+     *            Current verification condition.
+     *
+     * @return A mapping for all the expression in this verification condition.
+     */
+    public static boolean proveTargetVC(VerificationCondition condition){
+        Sequent sequent = condition.getSequent();
+        RegisterSequent registration = new RegisterSequent();
+
+        // Visit antecedents
+        for (Exp exp : sequent.getAntecedents()) {
+            TreeWalker.visit(registration, exp);
+        }
+        registration.setAntecedentExp(false);
+
+        // Visit consequents
+        for (Exp exp : sequent.getConcequents()) {
+            TreeWalker.visit(registration, exp);
+        }
+
+        return true;
+    }
 }

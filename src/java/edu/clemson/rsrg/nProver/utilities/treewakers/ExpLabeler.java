@@ -15,6 +15,8 @@ package edu.clemson.rsrg.nProver.utilities.treewakers;
 import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
+import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.rsrg.treewalk.TreeWalkerVisitor;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,7 +32,7 @@ import java.util.Map;
  *
  * @version 1.0
  */
-public class ExpLabeler extends TreeWalkerVisitor {
+public class ExpLabeler extends TreeWalkerStackVisitor {
 
     // ===========================================================
     // Member Fields
