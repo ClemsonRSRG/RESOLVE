@@ -14,12 +14,13 @@ package edu.clemson.rsrg.nProver.utilities;
 
 import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
-import edu.clemson.rsrg.nProver.utilities.treewakers.ExpLabeler;
-import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSequent;
+import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.nProver.utilities.treewakers.*;
 import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.rsrg.vcgeneration.utilities.VerificationCondition;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -51,19 +52,28 @@ public class Utilities {
      */
     public static Map<String, Integer> convertExpToLabel(VerificationCondition condition) {
         Sequent sequent = condition.getSequent();
-        ExpLabeler labeler = new ExpLabeler();
+
+        // NM: 0, 1 are spared for succedent = (0), <=(1) and can expand with
+        // with more reflexive operators
+        CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000, 1000,
+                1000, 1000);
+        Map<String, Integer> expLabels = new LinkedHashMap<>();
 
         // Visit antecedents
+        RegisterAntecedent regAntecedent = new RegisterAntecedent(registry, expLabels, 2);
         for (Exp exp : sequent.getAntecedents()) {
-            TreeWalker.visit(labeler, exp);
+            TreeWalker.visit(regAntecedent, exp);
         }
 
         // Visit consequents
+        RegisterAntecedent regConsequent = new RegisterAntecedent(regAntecedent.getRegistry(),
+                regAntecedent.getExpLabels(), regAntecedent.getNextLabel()); // YS: change this to the correct
+                                                                             // constructor.
         for (Exp exp : sequent.getConcequents()) {
-            TreeWalker.visit(labeler, exp);
+            TreeWalker.visit(regConsequent, exp);
         }
 
-        return labeler.getExpLabels();
+        return regConsequent.getExpLabels();
     }
 
     /**

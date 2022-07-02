@@ -1,5 +1,5 @@
 /*
- * ExpLabeler.java
+ * AbstractRegisterSequent.java
  * ---------------------------------
  * Copyright (c) 2022
  * RESOLVE Software Research Group
@@ -17,14 +17,13 @@ import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
-import edu.clemson.rsrg.treewalk.TreeWalkerVisitor;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * <p>
- * This class labels all the {@link Exp} with a number to be used by the {@link GeneralPurposeProver}. This visitor
- * logic is implemented as a {@link TreeWalkerVisitor}.
+ * This abstract class labels all the {@link Exp} with a number to be used by the {@link GeneralPurposeProver}. The
+ * concrete logic of registering each expression is left to its child class. This visitor logic is implemented as a
+ * {@link TreeWalkerStackVisitor}.
  * </p>
  *
  * @author Yu-Shan Sun
@@ -32,7 +31,7 @@ import java.util.Map;
  *
  * @version 1.0
  */
-public class ExpLabeler extends TreeWalkerStackVisitor {
+public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
 
     // ===========================================================
     // Member Fields
@@ -43,14 +42,21 @@ public class ExpLabeler extends TreeWalkerStackVisitor {
      * This map contains the mapping between expressions and its associated integer number.
      * </p>
      */
-    private final Map<String, Integer> myExpLabels;
+    protected final Map<String, Integer> myExpLabels;
 
     /**
      * <p>
      * A counter for the next expression
      * </p>
      */
-    private int myNextLabel;
+    protected int myNextLabel;
+
+    /**
+     * <p>
+     * This registry contains the target sequent VC to be proved.
+     * </p>
+     */
+    protected final CongruenceClassRegistry<Integer, String, String, String> myRegistry;
 
     // ===========================================================
     // Constructors
@@ -58,14 +64,21 @@ public class ExpLabeler extends TreeWalkerStackVisitor {
 
     /**
      * <p>
-     * This creates an object that labels all relevant {@link Exp} with a number.
+     * This helper constructor stores all relevant classes for the child classes to use.
      * </p>
+     *
+     * @param registry
+     *            The registry that will contain the target sequent VC to be proved.
+     * @param expLabels
+     *            A mapping between expressions and its associated integer number.
+     * @param nextLabel
+     *            The number to be assigned initially as a label.
      */
-    public ExpLabeler() {
-        myExpLabels = new LinkedHashMap<>();
-        // NM: 0, 1 are spared for succedent = (0), <=(1) and can expand with
-        // with more reflexive operators
-        myNextLabel = 2;
+    protected AbstractRegisterSequent(CongruenceClassRegistry<Integer, String, String, String> registry,
+            Map<String, Integer> expLabels, int nextLabel) {
+        myRegistry = registry;
+        myExpLabels = expLabels;
+        myNextLabel = nextLabel;
     }
 
     // ===========================================================
@@ -85,7 +98,7 @@ public class ExpLabeler extends TreeWalkerStackVisitor {
      *            An infix expression.
      */
     @Override
-    public final void postInfixExp(InfixExp exp) {
+    public void postInfixExp(InfixExp exp) {
         // If this is not a variable expression we have seen, then add it to our map
         if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
@@ -119,7 +132,7 @@ public class ExpLabeler extends TreeWalkerStackVisitor {
      *            An outfix expression.
      */
     @Override
-    public final void postOutfixExp(OutfixExp exp) {
+    public void postOutfixExp(OutfixExp exp) {
         // If this is not a variable expression we have seen, then add it to our map
         if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
@@ -191,6 +204,28 @@ public class ExpLabeler extends TreeWalkerStackVisitor {
      */
     public final Map<String, Integer> getExpLabels() {
         return myExpLabels;
+    }
+
+    /**
+     * <p>
+     * This method returns the next number to be assigned as a label.
+     * </p>
+     *
+     * @return The next label number.
+     */
+    public final int getNextLabel() {
+        return myNextLabel;
+    }
+
+    /**
+     * <p>
+     * This method returns the congruence class registry.
+     * </p>
+     *
+     * @return The registry containing the sequent we are trying to prove.
+     */
+    public final CongruenceClassRegistry<Integer, String, String, String> getRegistry() {
+        return myRegistry;
     }
 
 }
