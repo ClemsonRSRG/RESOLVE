@@ -18,11 +18,17 @@ import edu.clemson.rsrg.init.ResolveCompiler;
 import edu.clemson.rsrg.init.flag.Flag;
 import edu.clemson.rsrg.init.flag.FlagDependencies;
 import edu.clemson.rsrg.init.output.OutputListener;
-import edu.clemson.rsrg.nProver.utilities.Utilities;
+import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterAntecedent;
+import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSuccedent;
+import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.vcgeneration.VCGenerator;
+import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.rsrg.vcgeneration.utilities.VerificationCondition;
+
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import static edu.clemson.rsrg.vcgeneration.VCGenerator.FLAG_VERIFY_VC;
@@ -190,18 +196,43 @@ public class GeneralPurposeProver {
     public void proveVCs() {
         // Loop through each of the VCs and attempt to prove them
         for (VerificationCondition vc : myVerificationConditions) {
-            // Convert each expression in the VC to a numeric label
-            Map<String, Integer> labels = Utilities.convertExpToLabel(vc);
+
+            Sequent sequent = vc.getSequent();
+
+            CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000, 1000,
+                    1000, 1000);
+            Map<String, Integer> expLabels = new LinkedHashMap<>();
+
+            // NM: 0, 1 are spared for <= (1), = (2), e.t.c., the list can expand with
+            // with more reflexive operators
+            // preload <=, = into the map
+            expLabels.put("<=", 1);
+            expLabels.put("=", 2);
+
+            // Visit antecedents
+            RegisterAntecedent regAntecedent = new RegisterAntecedent(registry, expLabels, 3);
+            for (Exp exp : sequent.getAntecedents()) {
+                TreeWalker.visit(regAntecedent, exp);
+            }
+
+            // Visit consequents
+            RegisterSuccedent regConsequent = new RegisterSuccedent(regAntecedent.getRegistry(), regAntecedent.getExpLabels(), regAntecedent.getNextLabel()); // YS: change
+            // this to the
+            // correct
+            // constructor.
+            for (Exp exp : sequent.getConcequents()) {
+                TreeWalker.visit(regConsequent, exp);
+            }
 
             if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("\n================VC ");
                 sb.append(vc.getName());
                 sb.append("================\n\n");
-                for (String exp : labels.keySet()) {
+                for (String exp : expLabels.keySet()) {
                     sb.append(exp);
                     sb.append(" -> ");
-                    sb.append(labels.get(exp));
+                    sb.append(expLabels.get(exp));
                     sb.append("\n");
                 }
 

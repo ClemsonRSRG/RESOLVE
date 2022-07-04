@@ -13,12 +13,11 @@
 package edu.clemson.rsrg.nProver.utilities.treewakers;
 
 import edu.clemson.rsrg.absyn.expressions.Exp;
-import edu.clemson.rsrg.absyn.expressions.mathexpr.InfixExp;
-import edu.clemson.rsrg.absyn.expressions.mathexpr.OutfixExp;
-import edu.clemson.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
 
+import java.util.ArrayDeque;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.Queue;
@@ -36,6 +35,19 @@ import java.util.Queue;
  */
 public class RegisterAntecedent extends AbstractRegisterSequent {
 
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /**
+     * <p>
+     * This queue contains the arguments for the most immediate operator to be registered.
+     * </p>
+     */
+    protected final Queue<Integer> myArguments;
+
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -45,7 +57,6 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
      * This creates an object that labels all relevant {@link Exp} in the antecedents with a number and registers them.
      * </p>
      *
-     * @param arguments
      * @param registry
      *            The registry that will contain the target sequent VC to be proved.
      * @param expLabels
@@ -53,10 +64,10 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
      * @param nextLabel
      *            The number to be assigned initially as a label.
      */
-    public RegisterAntecedent(Queue<Integer> arguments,
-            CongruenceClassRegistry<Integer, String, String, String> registry, Map<String, Integer> expLabels,
+    public RegisterAntecedent(CongruenceClassRegistry<Integer, String, String, String> registry, Map<String, Integer> expLabels,
             int nextLabel) {
-        super(arguments, registry, expLabels, nextLabel);
+        super(registry, expLabels, nextLabel);
+        myArguments = new ArrayDeque<>();
     }
 
     // ===========================================================
@@ -84,32 +95,56 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
         // Logic for handling infix expressions in the antecedent
 
         if (operatorNumber == 2) { // if it is antecedent equal
-            super.getRegistry().makeCongruent(super.getMyArguments().remove(), super.getMyArguments().remove());
+            myRegistry.makeCongruent(myArguments.remove(), myArguments.remove());
         } else {
             // append arguments usable in registering the infix operator
             for (int i = 0; i < 2; i++) { // should only run twice
-                super.getRegistry().appendToClusterArgList(super.getMyArguments().remove());
+                myRegistry.appendToClusterArgList(myArguments.remove());
             }
             // check if registered, no duplicates allowed
-            if (super.getRegistry().checkIfRegistered(operatorNumber)) {
-                super.getMyArguments().add(super.getRegistry().getAccessorFor(operatorNumber));
+            if (myRegistry.checkIfRegistered(operatorNumber)) {
+                myArguments.add(myRegistry.getAccessorFor(operatorNumber));
             } else {
                 // register if new, and make it an argument for the next higher level operator
-                accessor = super.getRegistry().registerCluster(operatorNumber);
+                accessor = myRegistry.registerCluster(operatorNumber);
 
                 // if exp is ultimate i.e., at root
                 if (super.getAncestorSize() == 1) {
                     BitSet attb = new BitSet();
                     attb.set(0);// set the class antecedent
                     attb.set(2);// set the class ultimate
-                    super.getRegistry().updateClassAttributes(accessor, attb);
+                    myRegistry.updateClassAttributes(accessor, attb);
                 } else {
                     // only non-ultimate classes can be used as arguments in clusters
-                    super.getMyArguments().add(accessor);
+                    myArguments.add(accessor);
                 }
             }
         }
 
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link LiteralExp}.
+     * </p>
+     *
+     * @param exp
+     *            A literal expression.
+     */
+    @Override
+    public final void postLiteralExp(LiteralExp exp) {
+        super.postLiteralExp(exp);
+        int variableNumber = myExpLabels.get(exp.toString());
+        int accessor = 0;
+
+        // Logic for handling variable expressions in the antecedent
+
+        if (super.getRegistry().checkIfRegistered(variableNumber)) {
+            myArguments.add(myRegistry.getAccessorFor(variableNumber));
+        } else {
+            accessor = myRegistry.registerCluster(variableNumber);
+            myArguments.add(accessor);
+        }
     }
 
     /**
@@ -121,7 +156,7 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
      *            An outfix expression.
      */
     @Override
-    public void postOutfixExp(OutfixExp exp) {
+    public final void postOutfixExp(OutfixExp exp) {
         super.postOutfixExp(exp);
         int operatorNumber = myExpLabels.get(exp.getOperatorAsString());
         int accessor = 0;
@@ -129,24 +164,24 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
         // Logic for handling outfix expressions in the antecedent
 
         // Has only one argument, it should run only once
-        super.getRegistry().appendToClusterArgList(super.getMyArguments().remove());
+        myRegistry.appendToClusterArgList(myArguments.remove());
 
         // check if registered, no duplicates allowed
         if (super.getRegistry().checkIfRegistered(operatorNumber)) {
-            super.getMyArguments().add(super.getRegistry().getAccessorFor(operatorNumber));
+            myArguments.add(super.getRegistry().getAccessorFor(operatorNumber));
         } else {
             // register if new, and make it an argument for the next higher level operator
-            accessor = super.getRegistry().registerCluster(operatorNumber);
+            accessor = myRegistry.registerCluster(operatorNumber);
 
             // if exp is ultimate i.e., at root
             if (super.getAncestorSize() == 1) {
                 BitSet attb = new BitSet();
                 attb.set(0);// set the class antecedent
                 attb.set(2);// set the class ultimate
-                super.getRegistry().updateClassAttributes(accessor, attb);
+                myRegistry.updateClassAttributes(accessor, attb);
             } else {
                 // only non-ultimate classes can be used as arguments in clusters
-                super.getMyArguments().add(accessor);
+                myArguments.add(accessor);
             }
         }
     }
@@ -160,7 +195,7 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
      *            An outfix expression.
      */
     @Override
-    public void postVarExp(VarExp exp) {
+    public final void postVarExp(VarExp exp) {
         super.postVarExp(exp);
         int variableNumber = myExpLabels.get(exp.toString());
         int accessor = 0;
@@ -168,12 +203,40 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
         // Logic for handling variable expressions in the antecedent
 
         if (super.getRegistry().checkIfRegistered(variableNumber)) {
-            super.getMyArguments().add(super.getRegistry().getAccessorFor(variableNumber));
+            myArguments.add(myRegistry.getAccessorFor(variableNumber));
         } else {
-            accessor = super.getRegistry().registerCluster(variableNumber);
-            super.getMyArguments().add(accessor);
+            accessor = myRegistry.registerCluster(variableNumber);
+            myArguments.add(accessor);
         }
 
+    }
+
+    /**
+     * <p>
+     * This method redefines how a {@link VCVarExp} should be walked.
+     * </p>
+     *
+     * @param exp
+     *            A verification variable expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkVCVarExp(VCVarExp exp) {
+        super.walkVCVarExp(exp);
+
+        int variableNumber = myExpLabels.get(exp.toString());
+        int accessor = 0;
+        if (exp.getExp() instanceof VarExp) {
+            if (super.getRegistry().checkIfRegistered(variableNumber)) {
+                myArguments.add(myRegistry.getAccessorFor(variableNumber));
+            } else {
+                accessor = myRegistry.registerCluster(variableNumber);
+                myArguments.add(accessor);
+            }
+        }
+
+        return true;
     }
 
 }

@@ -559,34 +559,46 @@ public class CCRegApp {
 
     /**
      * ROOT LABEL MAPPING 1 - a | 2 - b | 3 - + | 4 - x | 5 - <= | 8 - 8|9 - 9 | 6 - d | 7 - c | 10 - \ | m - 11 | f -
-     * 12 | e - 13 | == - 14| f - 15 | d - 16
+     * 12 | e - 13 | == - 14| f - 15 | d - 16 | 1 - 17||_| - 18| S- 19
      *
      *
      */
     private static void sequentVC_3(CongruenceClassRegistry<Integer, String, String, String> testRegistry,
             BitSet attb) {
-        // b
-        a = testRegistry.registerCluster(2);
+        // 1
+        a = testRegistry.registerCluster(17);
+
+        // S
+        f = testRegistry.registerCluster(19);
+
 
         testRegistry.appendToClusterArgList(a);
-        // f(b)
-        f = testRegistry.registerCluster(15);
-        // d
-        d = testRegistry.registerCluster(16);
-        // f(b) = d
-        testRegistry.makeCongruent(f, d);
 
+        // |S|
+        d = testRegistry.registerCluster(18);
+
+        testRegistry.appendToClusterArgList(a);
         testRegistry.appendToClusterArgList(d);
-        // f(d)
-        f = testRegistry.registerCluster(15);
+        // 1 <= |S|
+        f = testRegistry.registerCluster(5);
 
-        // a
-        b = testRegistry.registerCluster(1);
-        // f(d) = a
-        testRegistry.makeCongruent(b, f);
+        BitSet attribute_2 = new BitSet();
+        attribute_2.set(0); // antecedent
+        attribute_2.set(2); // ultimate
+        testRegistry.updateClassAttributes(f, attribute_2);
 
-        testRegistry.addOperatorToSuccedentReflexiveOperatorSet(14);
-        testRegistry.makeCongruent(b, a);
+        testRegistry.appendToClusterArgList(a);
+        testRegistry.appendToClusterArgList(d);
+        testRegistry.addOperatorToSuccedentReflexiveOperatorSet(5);
+        BitSet attribute_4 = new BitSet();
+        attribute_4.set(1); // succedent
+        attribute_4.set(2); // ultimate
+        if(testRegistry.checkIfRegistered(5)){
+            testRegistry.updateClassAttributes(testRegistry.getAccessorFor(5), attribute_4);
+        }else {
+            g = testRegistry.registerCluster(5);
+            testRegistry.updateClassAttributes(g, attribute_4);
+        }
 
         if (testRegistry.checkIfProved()) {
             System.out.println("VC 3 Proved");
@@ -596,43 +608,5 @@ public class CCRegApp {
 
     }
 
-    /**
-     * ROOT LABEL MAPPING 1 - a | 2 - b | 3 - + | 4 - x | 5 - <= | 8 - 8|9 - 9 | 6 - d | 7 - c | 10 - \ | m - 11 |
-     *
-     *
-     *
-     */
-    /*
-     * private static void sequentVC_4 (CongruenceClassRegistry<Integer, String, String, String> testRegistry, BitSet
-     * attb){
-     *
-     * //a a = testRegistry.registerCluster(1); //b b = testRegistry.registerCluster(2);
-     *
-     * //a + b testRegistry.appendToClusterArgList(a); testRegistry.appendToClusterArgList(b); c =
-     * testRegistry.registerCluster(3);
-     *
-     * //9 d = testRegistry.registerCluster(9);
-     *
-     * //9 x a testRegistry.appendToClusterArgList(a); testRegistry.appendToClusterArgList(d); e =
-     * testRegistry.registerCluster(4);
-     *
-     *
-     * //a + b <= 9 x a BitSet attb_1 = new BitSet(); attb_1.set(0);//antecedent attb_1.set(2);//ultimate
-     * testRegistry.appendToClusterArgList(c); testRegistry.appendToClusterArgList(e); f =
-     * testRegistry.registerCluster(5); testRegistry.updateClassAttributes(f,attb_1);
-     *
-     * testRegistry.appendToClusterArgList(a); testRegistry.appendToClusterArgList(b);
-     * if(testRegistry.checkIfRegistered(3)){ h = testRegistry.getAccessorFor(3); }
-     *
-     * //8 g = testRegistry.registerCluster(8);
-     *
-     * if(!testRegistry.areClassesCongruent(h, g)){ //a + b = 8 testRegistry.makeCongruent(h,g); }
-     *
-     * //8 testRegistry.appendToClusterArgList(g); testRegistry.appendToClusterArgList(e);
-     * if(testRegistry.checkIfRegistered(5)){ j = testRegistry.getAccessorFor(5); } BitSet attb_2 = new BitSet();
-     * attb_2.set(1); attb_2.set(2); testRegistry.updateClassAttributes(j, attb_2);
-     *
-     * if(testRegistry.checkIfProved()){ System.out.println("VC Proved"); }else{ System.out.println("VC Unproved"); } }
-     */
 
 }
