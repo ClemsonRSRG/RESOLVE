@@ -1,0 +1,20 @@
+/**
+ * The highest level template for storing the all the proof results for all the VCs.
+ */
+outputProofFile(fileName, dateGenerated, vcs, totalTime) ::= <<
+Proofs for <fileName> generated <dateGenerated>
+
+================================= Summary =================================
+
+<vcs; separator = "\n">
+
+Total elapsed time in generating proofs: <totalTime>
+
+>>
+
+/**
+ * Template for storing the proof result for a VC in a human readable format.
+ */
+outputVCProofResult(vcNum, proofResult, wasSkipped, timedOut, time) ::= <<
+    VC <vcNum>  .........   <if(wasSkipped)>skipped<elseif(timedOut)>timed out after <time><else><if(!isProved)>not <endif>proved in <time><endif>
+>>

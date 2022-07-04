@@ -1,0 +1,106 @@
+/*
+ * Template for proof generation details (aka Verbose Mode)
+ */
+outputProofGenDetails(fileHeader, vcProofDetails) ::= <<
+========================= Proof Generation Details  =========================
+
+<fileHeader>
+
+=============================================================================
+
+<vcProofDetails; separator = "\n">
+
+>>
+
+/*
+ * Template for concept header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputConceptHeader(conceptName) ::= <<
+    Concept Name:   <conceptName>
+>>
+
+/*
+ * Template for concept realization header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputConceptRealizHeader(realizName, conceptName) ::= <<
+    Concept Realization Name:   <realizName>
+    Concept Name:               <conceptName>
+>>
+
+/*
+ * Template for enhancement header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputEnhancementHeader(enhancementName, conceptName) ::= <<
+    Enhancement Name:   <enhancementName>
+    Concept Name:       <conceptName>
+>>
+
+/*
+ * Template for enhancement realization header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputEnhancementRealizHeader(realizName, enhancementName, conceptName) ::= <<
+    Enhancement Realization Name:   <realizName>
+    Enhancement Name:               <enhancementName>
+    Concept Name:                   <conceptName>
+>>
+
+/*
+ * Template for facility header. This gets added to the top
+ * of the verbose mode section.
+ */
+outputFacilityHeader(facilityName) ::= <<
+    Facility Name:   <facilityName>
+>>
+
+/*
+ * Template for displaying the VC and the proof details associated with this VC.
+ */
+outputVCProofDetails(vcNum, vc, expLabels, proofGenSteps) ::= <<
+=================================== <vcNum> ===================================
+
+<vc>
+_____________________
+
+[Label(s)]:
+    <expLabels.keys : {exp | <exp> -> <expLabels.(exp)>}; separator = "\n">
+
+_____________________
+
+<proofGenSteps; separator = "\n">
+>>
+
+/**
+ * Template for storing the final set of VCs in a human readable format.
+ */
+outputVC(vcNum, hasImpactingReduction, location, locationDetail, sequent) ::= <<
+VC <vcNum>:
+<locationDetail><if(hasImpactingReduction)> [After Logical Reduction(s)]<endif> at <location>
+
+<sequent>
+>>
+
+/**
+ * Template for storing a sequent in a VC
+ */
+outputSequent(consequents, antecedents) ::= <<
+Goal:
+<consequents : {consequent | <consequent>}; separator = " or \n">
+
+Given(s):
+<antecedents : {antecedent | <i>. <antecedent>}; separator = "\n">
+
+>>
+
+/*
+ * Template for displaying the details about the proof step applied.
+ */
+outputProofGenStep(proofStepName) ::= <<
+Applied <proofStepName>:
+
+_____________________
+
+>>
