@@ -18,6 +18,7 @@ import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * <p>
@@ -36,6 +37,13 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>
+     * This queue contains the arguments for the most immediate operator to be registered.
+     * </p>
+     */
+    protected Queue<Integer> myArguments;
 
     /**
      * <p>
@@ -67,6 +75,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      * This helper constructor stores all relevant classes for the child classes to use.
      * </p>
      *
+     * @param arguments
      * @param registry
      *            The registry that will contain the target sequent VC to be proved.
      * @param expLabels
@@ -74,8 +83,10 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      * @param nextLabel
      *            The number to be assigned initially as a label.
      */
-    protected AbstractRegisterSequent(CongruenceClassRegistry<Integer, String, String, String> registry,
-            Map<String, Integer> expLabels, int nextLabel) {
+    protected AbstractRegisterSequent(Queue<Integer> arguments,
+            CongruenceClassRegistry<Integer, String, String, String> registry, Map<String, Integer> expLabels,
+            int nextLabel) {
+        myArguments = arguments;
         myRegistry = registry;
         myExpLabels = expLabels;
         myNextLabel = nextLabel;
@@ -149,7 +160,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      *            A variable expression.
      */
     @Override
-    public final void postVarExp(VarExp exp) {
+    public void postVarExp(VarExp exp) {
         // If this is not a variable expression we have seen, then add it to our map
         if (!myExpLabels.containsKey(exp.toString())) {
             myExpLabels.put(exp.toString(), myNextLabel);
@@ -194,6 +205,17 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>
+     * This method returns the list of arguments usable in registering the upper level operator
+     * </p>
+     *
+     * @return a queue containing designators of arguments
+     */
+    public Queue<Integer> getMyArguments() {
+        return myArguments;
+    }
 
     /**
      * <p>
