@@ -16,11 +16,8 @@ import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
-
-import java.util.ArrayDeque;
 import java.util.BitSet;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * <p>
@@ -34,19 +31,6 @@ import java.util.Queue;
  * @version 1.0
  */
 public class RegisterAntecedent extends AbstractRegisterSequent {
-
-
-    // ===========================================================
-    // Member Fields
-    // ===========================================================
-
-    /**
-     * <p>
-     * This queue contains the arguments for the most immediate operator to be registered.
-     * </p>
-     */
-    protected final Queue<Integer> myArguments;
-
 
     // ===========================================================
     // Constructors
@@ -64,10 +48,9 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
      * @param nextLabel
      *            The number to be assigned initially as a label.
      */
-    public RegisterAntecedent(CongruenceClassRegistry<Integer, String, String, String> registry, Map<String, Integer> expLabels,
-            int nextLabel) {
+    public RegisterAntecedent(CongruenceClassRegistry<Integer, String, String, String> registry,
+            Map<String, Integer> expLabels, int nextLabel) {
         super(registry, expLabels, nextLabel);
-        myArguments = new ArrayDeque<>();
     }
 
     // ===========================================================
@@ -202,13 +185,12 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
 
         // Logic for handling variable expressions in the antecedent
 
-        if (super.getRegistry().checkIfRegistered(variableNumber)) {
+        if (myRegistry.checkIfRegistered(variableNumber)) {
             myArguments.add(myRegistry.getAccessorFor(variableNumber));
         } else {
             accessor = myRegistry.registerCluster(variableNumber);
             myArguments.add(accessor);
         }
-
     }
 
     /**

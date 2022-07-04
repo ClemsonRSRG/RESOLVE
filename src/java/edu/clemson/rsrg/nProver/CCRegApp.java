@@ -571,7 +571,6 @@ public class CCRegApp {
         // S
         f = testRegistry.registerCluster(19);
 
-
         testRegistry.appendToClusterArgList(a);
 
         // |S|
@@ -593,9 +592,9 @@ public class CCRegApp {
         BitSet attribute_4 = new BitSet();
         attribute_4.set(1); // succedent
         attribute_4.set(2); // ultimate
-        if(testRegistry.checkIfRegistered(5)){
+        if (testRegistry.checkIfRegistered(5)) {
             testRegistry.updateClassAttributes(testRegistry.getAccessorFor(5), attribute_4);
-        }else {
+        } else {
             g = testRegistry.registerCluster(5);
             testRegistry.updateClassAttributes(g, attribute_4);
         }
@@ -607,6 +606,5 @@ public class CCRegApp {
         }
 
     }
-
 
 }

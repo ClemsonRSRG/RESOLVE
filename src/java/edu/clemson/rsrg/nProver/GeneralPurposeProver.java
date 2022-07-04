@@ -27,7 +27,6 @@ import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.rsrg.vcgeneration.utilities.VerificationCondition;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +100,7 @@ public class GeneralPurposeProver {
     // ===========================================================
     // Flag Strings
     // ===========================================================
+
     public static final String FLAG_SECTION_NAME = "Prover";
     private static final String FLAG_DESC_GP_PROVER = "General Purpose Automated Prover"; // DESC -- Description
     private static final String FLAG_DESC_PROVER_NUMTRIES = "Number of Failed VCs Before Halting the Prover.";
@@ -196,11 +196,21 @@ public class GeneralPurposeProver {
     public void proveVCs() {
         // Loop through each of the VCs and attempt to prove them
         for (VerificationCondition vc : myVerificationConditions) {
-
+            // Obtain the sequent to be proved
             Sequent sequent = vc.getSequent();
+            if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                StringBuffer sb = new StringBuffer();
+                sb.append("\n-----------------Proving VC-----------------\n\n");
+                sb.append("VC ");
+                sb.append(vc.getName());
+                sb.append("\n\n");
 
-            CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000, 1000,
-                    1000, 1000);
+                myCompileEnvironment.getStatusHandler().info(null, sb.toString());
+            }
+
+            // Create a registry and label map
+            CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000,
+                    1000, 1000, 1000);
             Map<String, Integer> expLabels = new LinkedHashMap<>();
 
             // NM: 0, 1 are spared for <= (1), = (2), e.t.c., the list can expand with
@@ -216,25 +226,21 @@ public class GeneralPurposeProver {
             }
 
             // Visit consequents
-            RegisterSuccedent regConsequent = new RegisterSuccedent(regAntecedent.getRegistry(), regAntecedent.getExpLabels(), regAntecedent.getNextLabel()); // YS: change
-            // this to the
-            // correct
-            // constructor.
+            RegisterSuccedent regConsequent = new RegisterSuccedent(regAntecedent.getRegistry(),
+                    regAntecedent.getExpLabels(), regAntecedent.getNextLabel());
             for (Exp exp : sequent.getConcequents()) {
                 TreeWalker.visit(regConsequent, exp);
             }
 
             if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                 StringBuffer sb = new StringBuffer();
-                sb.append("\n================VC ");
-                sb.append(vc.getName());
-                sb.append("================\n\n");
                 for (String exp : expLabels.keySet()) {
                     sb.append(exp);
                     sb.append(" -> ");
                     sb.append(expLabels.get(exp));
                     sb.append("\n");
                 }
+                sb.append("\n---------------Done Proving VC---------------\n");
 
                 myCompileEnvironment.getStatusHandler().info(null, sb.toString());
             }

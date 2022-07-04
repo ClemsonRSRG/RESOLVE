@@ -15,21 +15,10 @@ package edu.clemson.rsrg.nProver.utilities.treewakers;
 import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
-
-import java.util.*;
+import java.util.BitSet;
+import java.util.Map;
 
 public class RegisterSuccedent extends AbstractRegisterSequent {
-
-    // ===========================================================
-    // Member Fields
-    // ===========================================================
-
-    /**
-     * <p>
-     * This queue contains the arguments for the most immediate operator to be registered.
-     * </p>
-     */
-    protected final Queue<Integer> myArguments;
 
     // ===========================================================
     // Constructors
@@ -47,10 +36,9 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
      * @param nextLabel
      *            The number to be assigned initially as a label.
      */
-    public RegisterSuccedent(CongruenceClassRegistry<Integer, String, String, String> registry, Map<String, Integer> expLabels,
-            int nextLabel) {
+    public RegisterSuccedent(CongruenceClassRegistry<Integer, String, String, String> registry,
+            Map<String, Integer> expLabels, int nextLabel) {
         super(registry, expLabels, nextLabel);
-        myArguments = new ArrayDeque<>();
     }
 
     // ===========================================================
@@ -60,10 +48,6 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
     // -----------------------------------------------------------
     // Math Expression-Related
     // -----------------------------------------------------------
-
-    // ===========================================================
-    // Public Methods
-    // ===========================================================
 
     /**
      * <p>
@@ -91,15 +75,15 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
             attb.set(1); // set the class succedent
             attb.set(2); // set the class ultimate
 
-            if ( operatorNumber == 2) { // if it is succedent equal
+            if (operatorNumber == 2) { // if it is succedent equal
                 myRegistry.addOperatorToSuccedentReflexiveOperatorSet(operatorNumber);
                 accessor = myRegistry.registerCluster(operatorNumber);
                 myRegistry.updateClassAttributes(accessor, attb);
-            } else if(operatorNumber == 1){ //if it is succedent <=
+            } else if (operatorNumber == 1) { // if it is succedent <=
                 myRegistry.addOperatorToSuccedentReflexiveOperatorSet(operatorNumber);
-                if(myRegistry.checkIfRegistered(operatorNumber)){
+                if (myRegistry.checkIfRegistered(operatorNumber)) {
                     myRegistry.updateClassAttributes(accessor, attb);
-                }else{
+                } else {
                     accessor = myRegistry.registerCluster(operatorNumber);
                     myRegistry.updateClassAttributes(accessor, attb);
                 }

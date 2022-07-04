@@ -17,6 +17,8 @@ import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
+
+import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Queue;
 
@@ -37,6 +39,14 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /**
+     * <p>
+     * This queue contains the arguments for the most immediate operator to be registered.
+     * </p>
+     */
+    protected final Queue<Integer> myArguments;
+
     /**
      * <p>
      * This map contains the mapping between expressions and its associated integer number.
@@ -74,8 +84,9 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      * @param nextLabel
      *            The number to be assigned initially as a label.
      */
-    protected AbstractRegisterSequent(CongruenceClassRegistry<Integer, String, String, String> registry, Map<String, Integer> expLabels,
-            int nextLabel) {
+    protected AbstractRegisterSequent(CongruenceClassRegistry<Integer, String, String, String> registry,
+            Map<String, Integer> expLabels, int nextLabel) {
+        myArguments = new ArrayDeque<>();
         myRegistry = registry;
         myExpLabels = expLabels;
         myNextLabel = nextLabel;
