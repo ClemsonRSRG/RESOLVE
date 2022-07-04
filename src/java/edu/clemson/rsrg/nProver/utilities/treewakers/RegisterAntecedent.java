@@ -73,22 +73,21 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
     public final void postInfixExp(InfixExp exp) {
         super.postInfixExp(exp);
         int operatorNumber = myExpLabels.get(exp.getOperatorAsString());
-        int accessor = 0;
 
         // Logic for handling infix expressions in the antecedent
         if (operatorNumber == OP_EQUALS) { // if it is antecedent equal
-            myRegistry.makeCongruent(myArguments.remove(), myArguments.remove());
+            myRegistry.makeCongruent(myArgumentsCache.remove(exp.getLeft()), myArgumentsCache.remove(exp.getRight()));
         } else {
             // append arguments usable in registering the infix operator
-            for (int i = 0; i < 2; i++) { // should only run twice
-                myRegistry.appendToClusterArgList(myArguments.remove());
-            }
+            myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getLeft()));
+            myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getRight()));
+
             // check if registered, no duplicates allowed
             if (myRegistry.checkIfRegistered(operatorNumber)) {
-                myArguments.add(myRegistry.getAccessorFor(operatorNumber));
+                myArgumentsCache.put(exp, myRegistry.getAccessorFor(operatorNumber));
             } else {
                 // register if new, and make it an argument for the next higher level operator
-                accessor = myRegistry.registerCluster(operatorNumber);
+                int accessor = myRegistry.registerCluster(operatorNumber);
 
                 // if exp is ultimate i.e., at root
                 if (super.getAncestorSize() == 1) {
@@ -98,7 +97,7 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
                     myRegistry.updateClassAttributes(accessor, attb);
                 } else {
                     // only non-ultimate classes can be used as arguments in clusters
-                    myArguments.add(accessor);
+                    myArgumentsCache.put(exp, accessor);
                 }
             }
         }
@@ -116,19 +115,17 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
     public final void postOutfixExp(OutfixExp exp) {
         super.postOutfixExp(exp);
         int operatorNumber = myExpLabels.get(exp.getOperatorAsString());
-        int accessor = 0;
 
         // Logic for handling outfix expressions in the antecedent
-
-        // Has only one argument, it should run only once
-        myRegistry.appendToClusterArgList(myArguments.remove());
+        // has only one argument, should run once
+        myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getArgument()));
 
         // check if registered, no duplicates allowed
-        if (super.getRegistry().checkIfRegistered(operatorNumber)) {
-            myArguments.add(super.getRegistry().getAccessorFor(operatorNumber));
+        if (myRegistry.checkIfRegistered(operatorNumber)) {
+            myArgumentsCache.put(exp, myRegistry.getAccessorFor(operatorNumber));
         } else {
             // register if new, and make it an argument for the next higher level operator
-            accessor = myRegistry.registerCluster(operatorNumber);
+            int accessor = myRegistry.registerCluster(operatorNumber);
 
             // if exp is ultimate i.e., at root
             if (super.getAncestorSize() == 1) {
@@ -138,7 +135,7 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
                 myRegistry.updateClassAttributes(accessor, attb);
             } else {
                 // only non-ultimate classes can be used as arguments in clusters
-                myArguments.add(accessor);
+                myArgumentsCache.put(exp, accessor);
             }
         }
     }

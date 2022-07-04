@@ -201,10 +201,9 @@ public class GeneralPurposeProver {
             Sequent sequent = vc.getSequent();
             if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                 StringBuffer sb = new StringBuffer();
-                sb.append("\n-----------------Proving VC-----------------\n\n");
-                sb.append("VC ");
+                sb.append("\n=============== Proving VC ");
                 sb.append(vc.getName());
-                sb.append("\n\n");
+                sb.append(" ===============\n");
 
                 myCompileEnvironment.getStatusHandler().info(null, sb.toString());
             }
@@ -235,13 +234,22 @@ public class GeneralPurposeProver {
 
             if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                 StringBuffer sb = new StringBuffer();
+                sb.append("Labeling: \n");
                 for (String exp : expLabels.keySet()) {
+                    sb.append("\t");
                     sb.append(exp);
                     sb.append(" -> ");
                     sb.append(expLabels.get(exp));
                     sb.append("\n");
                 }
-                sb.append("\n---------------Done Proving VC---------------\n");
+
+                sb.append("\nResult: ");
+                if (registry.checkIfProved()) {
+                    sb.append("Proved");
+                } else {
+                    sb.append("Not Proved");
+                }
+                sb.append("\n\n===============Done Proving VC===============\n");
 
                 myCompileEnvironment.getStatusHandler().info(null, sb.toString());
             }

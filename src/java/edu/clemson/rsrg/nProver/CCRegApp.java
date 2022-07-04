@@ -571,7 +571,7 @@ public class CCRegApp {
         // S
         f = testRegistry.registerCluster(19);
 
-        testRegistry.appendToClusterArgList(a);
+        testRegistry.appendToClusterArgList(f);
 
         // |S|
         d = testRegistry.registerCluster(18);
