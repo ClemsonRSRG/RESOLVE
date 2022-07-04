@@ -75,11 +75,11 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
             attb.set(1); // set the class succedent
             attb.set(2); // set the class ultimate
 
-            if (operatorNumber == 2) { // if it is succedent equal
+            if (operatorNumber == OP_EQUALS) { // if it is succedent equal
                 myRegistry.addOperatorToSuccedentReflexiveOperatorSet(operatorNumber);
                 accessor = myRegistry.registerCluster(operatorNumber);
                 myRegistry.updateClassAttributes(accessor, attb);
-            } else if (operatorNumber == 1) { // if it is succedent <=
+            } else if (operatorNumber == OP_LESS_THAN_OR_EQUALS) { // if it is succedent <=
                 myRegistry.addOperatorToSuccedentReflexiveOperatorSet(operatorNumber);
                 if (myRegistry.checkIfRegistered(operatorNumber)) {
                     myRegistry.updateClassAttributes(accessor, attb);
@@ -88,7 +88,6 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
                     myRegistry.updateClassAttributes(accessor, attb);
                 }
             } else {
-
                 if (myRegistry.checkIfRegistered(operatorNumber)) {
                     myRegistry.updateClassAttributes(myRegistry.getAccessorFor(operatorNumber), attb);
                 } else {
@@ -96,43 +95,17 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
                     accessor = myRegistry.registerCluster(operatorNumber);
                     myRegistry.updateClassAttributes(accessor, attb);
                 }
-
             }
         } else {
             // check if registered, no duplicates allowed
             if (myRegistry.checkIfRegistered(operatorNumber)) {
-                myArguments.add(super.getRegistry().getAccessorFor(operatorNumber));
+                myArguments.add(myRegistry.getAccessorFor(operatorNumber));
             } else {
                 // register if new, and make it an argument for the next higher level operator
                 accessor = myRegistry.registerCluster(operatorNumber);
                 // only non-ultimate classes can be used as arguments in clusters
                 myArguments.add(accessor);
             }
-        }
-
-    }
-
-    /**
-     * <p>
-     * Code that gets executed after visiting a {@link LiteralExp}.
-     * </p>
-     *
-     * @param exp
-     *            A literal expression.
-     */
-    @Override
-    public void postLiteralExp(LiteralExp exp) {
-        super.postLiteralExp(exp);
-        int variableNumber = myExpLabels.get(exp.toString());
-        int accessor = 0;
-
-        // Logic for handling variable expressions in the antecedent
-
-        if (super.getRegistry().checkIfRegistered(variableNumber)) {
-            myArguments.add(myRegistry.getAccessorFor(variableNumber));
-        } else {
-            accessor = myRegistry.registerCluster(variableNumber);
-            myArguments.add(accessor);
         }
     }
 
@@ -173,59 +146,6 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
                 myArguments.add(accessor);
             }
         }
-
-    }
-
-    /**
-     * <p>
-     * Code that gets executed after visiting a {@link VarExp}.
-     * </p>
-     *
-     * @param exp
-     *            A variable expression.
-     */
-    @Override
-    public final void postVarExp(VarExp exp) {
-        super.postVarExp(exp);
-        int variableNumber = myExpLabels.get(exp.toString());
-        int accessor = 0;
-
-        // Logic for handling variable expressions in the antecedent
-
-        if (myRegistry.checkIfRegistered(variableNumber)) {
-            myArguments.add(myRegistry.getAccessorFor(variableNumber));
-        } else {
-            accessor = myRegistry.registerCluster(variableNumber);
-            myArguments.add(accessor);
-        }
-    }
-
-    /**
-     * <p>
-     * This method redefines how a {@link VCVarExp} should be walked.
-     * </p>
-     *
-     * @param exp
-     *            A verification variable expression.
-     *
-     * @return {@code true}
-     */
-    @Override
-    public final boolean walkVCVarExp(VCVarExp exp) {
-        super.walkVCVarExp(exp);
-
-        int variableNumber = myExpLabels.get(exp.toString());
-        int accessor = 0;
-        if (exp.getExp() instanceof VarExp) {
-            if (super.getRegistry().checkIfRegistered(variableNumber)) {
-                myArguments.add(myRegistry.getAccessorFor(variableNumber));
-            } else {
-                accessor = myRegistry.registerCluster(variableNumber);
-                myArguments.add(accessor);
-            }
-        }
-
-        return true;
     }
 
 }

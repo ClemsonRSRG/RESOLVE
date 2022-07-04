@@ -76,8 +76,7 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
         int accessor = 0;
 
         // Logic for handling infix expressions in the antecedent
-
-        if (operatorNumber == 2) { // if it is antecedent equal
+        if (operatorNumber == OP_EQUALS) { // if it is antecedent equal
             myRegistry.makeCongruent(myArguments.remove(), myArguments.remove());
         } else {
             // append arguments usable in registering the infix operator
@@ -102,31 +101,6 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
                     myArguments.add(accessor);
                 }
             }
-        }
-
-    }
-
-    /**
-     * <p>
-     * Code that gets executed after visiting a {@link LiteralExp}.
-     * </p>
-     *
-     * @param exp
-     *            A literal expression.
-     */
-    @Override
-    public final void postLiteralExp(LiteralExp exp) {
-        super.postLiteralExp(exp);
-        int variableNumber = myExpLabels.get(exp.toString());
-        int accessor = 0;
-
-        // Logic for handling variable expressions in the antecedent
-
-        if (super.getRegistry().checkIfRegistered(variableNumber)) {
-            myArguments.add(myRegistry.getAccessorFor(variableNumber));
-        } else {
-            accessor = myRegistry.registerCluster(variableNumber);
-            myArguments.add(accessor);
         }
     }
 
@@ -167,58 +141,6 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
                 myArguments.add(accessor);
             }
         }
-    }
-
-    /**
-     * <p>
-     * Code that gets executed after visiting a {@link VarExp}.
-     * </p>
-     *
-     * @param exp
-     *            An outfix expression.
-     */
-    @Override
-    public final void postVarExp(VarExp exp) {
-        super.postVarExp(exp);
-        int variableNumber = myExpLabels.get(exp.toString());
-        int accessor = 0;
-
-        // Logic for handling variable expressions in the antecedent
-
-        if (myRegistry.checkIfRegistered(variableNumber)) {
-            myArguments.add(myRegistry.getAccessorFor(variableNumber));
-        } else {
-            accessor = myRegistry.registerCluster(variableNumber);
-            myArguments.add(accessor);
-        }
-    }
-
-    /**
-     * <p>
-     * This method redefines how a {@link VCVarExp} should be walked.
-     * </p>
-     *
-     * @param exp
-     *            A verification variable expression.
-     *
-     * @return {@code true}
-     */
-    @Override
-    public final boolean walkVCVarExp(VCVarExp exp) {
-        super.walkVCVarExp(exp);
-
-        int variableNumber = myExpLabels.get(exp.toString());
-        int accessor = 0;
-        if (exp.getExp() instanceof VarExp) {
-            if (super.getRegistry().checkIfRegistered(variableNumber)) {
-                myArguments.add(myRegistry.getAccessorFor(variableNumber));
-            } else {
-                accessor = myRegistry.registerCluster(variableNumber);
-                myArguments.add(accessor);
-            }
-        }
-
-        return true;
     }
 
 }

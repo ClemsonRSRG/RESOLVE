@@ -19,6 +19,7 @@ import edu.clemson.rsrg.init.flag.Flag;
 import edu.clemson.rsrg.init.flag.FlagDependencies;
 import edu.clemson.rsrg.init.output.OutputListener;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.nProver.utilities.treewakers.AbstractRegisterSequent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterAntecedent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSuccedent;
 import edu.clemson.rsrg.treewalk.TreeWalker;
@@ -216,8 +217,8 @@ public class GeneralPurposeProver {
             // NM: 0, 1 are spared for <= (1), = (2), e.t.c., the list can expand with
             // with more reflexive operators
             // preload <=, = into the map
-            expLabels.put("<=", 1);
-            expLabels.put("=", 2);
+            expLabels.put("<=", AbstractRegisterSequent.OP_LESS_THAN_OR_EQUALS);
+            expLabels.put("=", AbstractRegisterSequent.OP_EQUALS);
 
             // Visit antecedents
             RegisterAntecedent regAntecedent = new RegisterAntecedent(registry, expLabels, 3);

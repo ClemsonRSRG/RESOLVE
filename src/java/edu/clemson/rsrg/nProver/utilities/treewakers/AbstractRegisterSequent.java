@@ -17,7 +17,6 @@ import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
-
 import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Queue;
@@ -67,6 +66,24 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      * </p>
      */
     protected final CongruenceClassRegistry<Integer, String, String, String> myRegistry;
+
+    // ===========================================================
+    // Global Operator Labels
+    // ===========================================================
+
+    /**
+     * <p>
+     * A constant representing the {@code =} operator.
+     * </p>
+     */
+    public static final int OP_EQUALS = 2;
+
+    /**
+     * <p>
+     * A constant representing the {@code <=} operator.
+     * </p>
+     */
+    public static final int OP_LESS_THAN_OR_EQUALS = 1;
 
     // ===========================================================
     // Constructors
@@ -132,6 +149,15 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
             myExpLabels.put(exp.toString(), myNextLabel);
             myNextLabel++;
         }
+
+        // Logic for handling literal expressions
+        int variableNumber = myExpLabels.get(exp.toString());
+        if (myRegistry.checkIfRegistered(variableNumber)) {
+            myArguments.add(myRegistry.getAccessorFor(variableNumber));
+        } else {
+            int accessor = myRegistry.registerCluster(variableNumber);
+            myArguments.add(accessor);
+        }
     }
 
     /**
@@ -166,6 +192,15 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
             myExpLabels.put(exp.toString(), myNextLabel);
             myNextLabel++;
         }
+
+        // Logic for handling variable expressions
+        int variableNumber = myExpLabels.get(exp.toString());
+        if (myRegistry.checkIfRegistered(variableNumber)) {
+            myArguments.add(myRegistry.getAccessorFor(variableNumber));
+        } else {
+            int accessor = myRegistry.registerCluster(variableNumber);
+            myArguments.add(accessor);
+        }
     }
 
     /**
@@ -192,6 +227,15 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
                 // the inner expression, we simply store the expression
                 myExpLabels.put(exp.toString(), myNextLabel);
                 myNextLabel++;
+            }
+
+            // Logic for handling VC variable expressions
+            int variableNumber = myExpLabels.get(exp.toString());
+            if (myRegistry.checkIfRegistered(variableNumber)) {
+                myArguments.add(myRegistry.getAccessorFor(variableNumber));
+            } else {
+                int accessor = myRegistry.registerCluster(variableNumber);
+                myArguments.add(accessor);
             }
         }
 
