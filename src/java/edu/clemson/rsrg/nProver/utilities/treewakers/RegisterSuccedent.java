@@ -68,7 +68,6 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
         myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getLeft()));
         myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getRight()));
 
-
         // Handle the root node
         if (super.getAncestorSize() == 1) {
             BitSet attb = new BitSet();
