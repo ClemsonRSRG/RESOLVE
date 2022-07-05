@@ -59,7 +59,7 @@ outputFacilityHeader(facilityName) ::= <<
 /*
  * Template for displaying the VC and the proof details associated with this VC.
  */
-outputVCProofDetails(vcNum, vc, expLabels, proofGenSteps) ::= <<
+outputVCProofDetails(vcNum, vc, expLabels, registryArrays) ::= <<
 =================================== <vcNum> ===================================
 
 <vc>
@@ -70,7 +70,7 @@ _____________________
 
 _____________________
 
-<proofGenSteps; separator = "\n">
+<registryArrays>
 >>
 
 /**
@@ -96,10 +96,20 @@ Given(s):
 >>
 
 /*
- * Template for displaying the details about the proof step applied.
+ * Template for displaying the details about the congruence class registry arrays.
  */
-outputProofGenStep(proofStepName) ::= <<
-Applied <proofStepName>:
+outputCCRegistryArrays(clusterArguments, clusters, plantations, classes) ::= <<
+[Cluster Argument Array]:
+    <clusterArguments : {clusterArgument | <clusterArgument>}; separator = "\n">
+
+[Cluster Array]:
+    <clusters : {cluster | <cluster>}; separator = "\n">
+
+[Plantation Array]:
+    <plantations : {plantation | <plantation>}; separator = "\n">
+
+[Class Array]:
+    <classes : {class | <class>}; separator = "\n">
 
 _____________________
 
