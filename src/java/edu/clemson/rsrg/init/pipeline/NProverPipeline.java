@@ -15,6 +15,7 @@ package edu.clemson.rsrg.init.pipeline;
 import edu.clemson.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.rsrg.init.CompileEnvironment;
 import edu.clemson.rsrg.init.ResolveCompiler;
+import edu.clemson.rsrg.init.output.OutputListener;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.statushandling.StatusHandler;
 import edu.clemson.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -89,6 +90,13 @@ public class NProverPipeline extends AbstractPipeline {
 
         // Invoke the prover on all vcs.
         prover.proveVCs();
+
+        // Output the contents to listener objects
+        for (OutputListener listener : myCompileEnvironment.getOutputListeners()) {
+            listener.nProverResult(myCompileEnvironment.getFile(currentTarget).toString(),
+                    moduleDec.getName().getName(), prover.getTimeout(), prover.getNumTriesBeforeHalting(),
+                    prover.getVCProverResults(), prover.getTotalElapsedTime(), prover.getVerboseModeOutput());
+        }
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             StringBuffer sb = new StringBuffer();
