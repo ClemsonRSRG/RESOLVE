@@ -1,0 +1,25 @@
+/**
+ * The highest level template for storing the all the proof results for all the VCs.
+ */
+outputProofFile(fileName, dateGenerated, timeOut, numTries, vcs, totalTime) ::= <<
+Proofs for <fileName> generated <dateGenerated>
+
+================================= Summary =================================
+
+[Prover Settings]
+    Timeout: <timeOut>
+    Number of Tries Before Halting: <numTries>
+
+[VC Results]
+<vcs; separator = "\n">
+
+Total elapsed time in generating proofs: <totalTime>
+
+>>
+
+/**
+ * Template for storing the proof result for a VC in a human readable format.
+ */
+outputVCProofResult(vcNum, isProved, wasSkipped, timedOut, time) ::= <<
+    VC <vcNum>  .........   <if(wasSkipped)>skipped<elseif(timedOut)>timed out after <time><else><if(!isProved)>not <endif>proved in <time><endif>
+>>

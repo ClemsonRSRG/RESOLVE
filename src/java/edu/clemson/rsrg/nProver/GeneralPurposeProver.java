@@ -12,12 +12,14 @@
  */
 package edu.clemson.rsrg.nProver;
 
+import edu.clemson.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.init.CompileEnvironment;
 import edu.clemson.rsrg.init.ResolveCompiler;
 import edu.clemson.rsrg.init.flag.Flag;
 import edu.clemson.rsrg.init.flag.FlagDependencies;
 import edu.clemson.rsrg.init.output.OutputListener;
+import edu.clemson.rsrg.nProver.output.VCProverResult;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.nProver.utilities.treewakers.AbstractRegisterSequent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterAntecedent;
@@ -29,8 +31,12 @@ import edu.clemson.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.rsrg.vcgeneration.utilities.VerificationCondition;
 import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 import static edu.clemson.rsrg.vcgeneration.VCGenerator.FLAG_VERIFY_VC;
 
 /**
@@ -86,6 +92,13 @@ public class GeneralPurposeProver {
 
     /**
      * <p>
+     * The total number of milliseconds spent proving VCs in this file.
+     * </p>
+     */
+    private long myTotalElapsedTime;
+
+    /**
+     * <p>
      * This is the math type graph that indicates relationship between different math types.
      * </p>
      */
@@ -97,6 +110,31 @@ public class GeneralPurposeProver {
      * </p>
      */
     private final List<VerificationCondition> myVerificationConditions;
+
+    // -----------------------------------------------------------
+    // Output-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>
+     * String template groups for storing all the prover details.
+     * </p>
+     */
+    private final STGroup mySTGroup;
+
+    /**
+     * <p>
+     * String template for the prover details model.
+     * </p>
+     */
+    private final ST myVCProofDetailsModel;
+
+    /**
+     * <p>
+     * A list containing the prover results for each VC.
+     * </p>
+     */
+    private final List<VCProverResult> myVCProverResults;
 
     // ===========================================================
     // Flag Strings
@@ -166,8 +204,12 @@ public class GeneralPurposeProver {
         myCompileEnvironment = compileEnvironment;
         myCurrentModuleScope = moduleScope;
         myOutputListeners = myCompileEnvironment.getOutputListeners();
+        mySTGroup = new STGroupFile("templates/nProverVerboseOutput.stg");
+        myTotalElapsedTime = 0;
         myTypeGraph = compileEnvironment.getTypeGraph();
+        myVCProverResults = new ArrayList<>(vcs.size());
         myVerificationConditions = vcs;
+        myVCProofDetailsModel = mySTGroup.getInstanceOf("outputVCGenDetails");
 
         // Timeout
         if (myCompileEnvironment.flags.isFlagSet(FLAG_TIMEOUT)) {
@@ -188,6 +230,62 @@ public class GeneralPurposeProver {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>
+     * This method returns the prover setting for how many unproved {@code VCs} we allow before halting.
+     * </p>
+     *
+     * @return The number of tries with -1 indicating that we attempt to prove all VCs.
+     */
+    public final int getNumTriesBeforeHalting() {
+        return myNumTriesBeforeHalting;
+    }
+
+    /**
+     * <p>
+     * This method returns the prover setting for the maximum amount of time we can spend proving each {@code VC}.
+     * </p>
+     *
+     * @return The time that can be spent proving each {@code VC} in ms.
+     */
+    public final long getTimeout() {
+        return myTimeout;
+    }
+
+    /**
+     * <p>
+     * This method returns the total elapsed time that we spent proving {@code VCs} in this {@link ModuleDec}.
+     * </p>
+     *
+     * @return The total elapsed time in ms.
+     */
+    public final long getTotalElapsedTime() {
+        return myTotalElapsedTime;
+    }
+
+    /**
+     * <p>
+     * This method returns a list containing the proof details for each {@code VC}.
+     * </p>
+     *
+     * @return A {@link List} of {@link VCProverResult}.
+     */
+    public final List<VCProverResult> getVCProverResults() {
+        return myVCProverResults;
+    }
+
+    /**
+     * <p>
+     * This method returns the verbose mode output with how we attempted to prove each {@code VCs} in this
+     * {@link ModuleDec}.
+     * </p>
+     *
+     * @return A string containing lots of details.
+     */
+    public final String getVerboseModeOutput() {
+        return myVCProofDetailsModel.render();
+    }
 
     /**
      * <p>
