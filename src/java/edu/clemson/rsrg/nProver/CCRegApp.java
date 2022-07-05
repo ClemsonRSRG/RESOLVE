@@ -579,19 +579,23 @@ public class CCRegApp {
         testRegistry.appendToClusterArgList(a);
         testRegistry.appendToClusterArgList(d);
         // 1 <= |S|
-        f = testRegistry.registerCluster(5);
+        m = testRegistry.registerCluster(5);
 
         BitSet attribute_2 = new BitSet();
         attribute_2.set(0); // antecedent
         attribute_2.set(2); // ultimate
-        testRegistry.updateClassAttributes(f, attribute_2);
+        testRegistry.updateClassAttributes(m, attribute_2);
 
         testRegistry.appendToClusterArgList(a);
         testRegistry.appendToClusterArgList(d);
+
+
         testRegistry.addOperatorToSuccedentReflexiveOperatorSet(5);
         BitSet attribute_4 = new BitSet();
         attribute_4.set(1); // succedent
         attribute_4.set(2); // ultimate
+
+        //should have two argument in the argument list
         if (testRegistry.checkIfRegistered(5)) {
             testRegistry.updateClassAttributes(testRegistry.getAccessorFor(5), attribute_4);
         } else {

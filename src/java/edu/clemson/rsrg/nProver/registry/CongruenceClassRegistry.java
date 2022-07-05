@@ -243,6 +243,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
                 // this is within the cluster array
                 int currentClusterIndex = clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()]
                         .getNextWithSameArg();
+                //int currentClusterIndex = clusterArgumentArray[currentClusterArgIndex].getClusterNumber();
                 while (clusterArray[currentClusterIndex].getNextWithSameArg() != 0) {
                     // this is within the cluster array
                     // int currentClusterIndex =
@@ -256,6 +257,17 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
                     if (currentClusterIndex != 0) { // we don't want to index 0 in any of the structures we have
                     } else { // if it is 0 there is nothing more we can do, it is not there.
                         return false;
+                    }
+                }
+
+                if(clusterArray[currentClusterIndex].getNextWithSameArg() == 0){
+                    // this is within the cluster array
+                    // int currentClusterIndex =
+                    // clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()].getNextWithSameArg();
+                    // clusterArgumentArray[currentClusterArgIndex].getClusterNumber()
+                    if (clusterArray[currentClusterIndex].getTreeNodeLabel() == treeNodeLabel
+                            && clusterArray[currentClusterIndex].getIndexToArgList() == currentClusterArgIndex) {
+                        return true;
                     }
                 }
 
