@@ -25,12 +25,20 @@ package edu.clemson.rsrg.nProver.registry;
 
 public class Plantation {
 
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
     private Integer treeNodeLabel;
     private int firstPlantationCluster;
     private int plantationTag;
     private int nextCCPlantation;
     private int nextVrtyPlantation;
     private int prvVrtyPlantation;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
 
     // what goes to plantation tag should be the index in the plantation array, it can act as plantation designator
     public Plantation(Integer treeNodeLabel, int firstPlantationCluster, int plantationTag, int nextCCPlantation,
@@ -42,6 +50,10 @@ public class Plantation {
         this.nextVrtyPlantation = nextVrtyPlantation;
         this.prvVrtyPlantation = prvVrtyPlantation;
     }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     public Integer getTreeNodeLabel() {
         return treeNodeLabel;
@@ -83,4 +95,17 @@ public class Plantation {
         return prvVrtyPlantation;
     }
 
+    /**
+     * <p>
+     * This method returns the plantation in string format.
+     * </p>
+     *
+     * @return A string.
+     */
+    @Override
+    public final String toString() {
+        return "|" + "treeNodeLabel=" + treeNodeLabel + "||firstPlantationCluster=" + firstPlantationCluster
+                + "||plantationTag=" + plantationTag + "||nextCCPlantation=" + nextCCPlantation
+                + "||nextVrtyPlantation=" + nextVrtyPlantation + "||prvVrtyPlantation=" + prvVrtyPlantation + "|";
+    }
 }

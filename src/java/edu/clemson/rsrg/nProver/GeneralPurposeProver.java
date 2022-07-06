@@ -12,10 +12,9 @@
  */
 package edu.clemson.rsrg.nProver;
 
-import edu.clemson.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.rsrg.absyn.declarations.moduledecl.*;
 import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.init.CompileEnvironment;
-import edu.clemson.rsrg.init.ResolveCompiler;
 import edu.clemson.rsrg.init.flag.Flag;
 import edu.clemson.rsrg.init.flag.FlagDependencies;
 import edu.clemson.rsrg.init.output.OutputListener;
@@ -24,6 +23,7 @@ import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.nProver.utilities.treewakers.AbstractRegisterSequent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterAntecedent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSuccedent;
+import edu.clemson.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
@@ -125,10 +125,10 @@ public class GeneralPurposeProver {
 
     /**
      * <p>
-     * String template for the prover details model.
+     * String template for the prover generation details model.
      * </p>
      */
-    private final ST myVCProofDetailsModel;
+    private final ST myProofGenDetailsModel;
 
     /**
      * <p>
@@ -210,7 +210,7 @@ public class GeneralPurposeProver {
         myTypeGraph = compileEnvironment.getTypeGraph();
         myVCProverResults = new ArrayList<>(vcs.size());
         myVerificationConditions = vcs;
-        myVCProofDetailsModel = mySTGroup.getInstanceOf("outputProofGenDetails");
+        myProofGenDetailsModel = mySTGroup.getInstanceOf("outputProofGenDetails");
 
         // Timeout
         if (myCompileEnvironment.flags.isFlagSet(FLAG_TIMEOUT)) {
@@ -226,6 +226,29 @@ public class GeneralPurposeProver {
         } else {
             myNumTriesBeforeHalting = -1;
         }
+
+        // Store verbose output about this module
+        ST header;
+        ModuleDec moduleDec = myCurrentModuleScope.getDefiningElement();
+        if (moduleDec instanceof ConceptModuleDec) {
+            header = mySTGroup.getInstanceOf("outputConceptHeader").add("conceptName", moduleDec.getName().getName());
+        } else if (moduleDec instanceof ConceptRealizModuleDec) {
+            header = mySTGroup.getInstanceOf("outputConceptRealizHeader")
+                    .add("realizName", moduleDec.getName().getName())
+                    .add("conceptName", ((ConceptRealizModuleDec) moduleDec).getConceptName().getName());
+        } else if (moduleDec instanceof EnhancementModuleDec) {
+            header = mySTGroup.getInstanceOf("outputEnhancementHeader")
+                    .add("enhancementName", moduleDec.getName().getName())
+                    .add("conceptName", ((EnhancementModuleDec) moduleDec).getConceptName().getName());
+        } else if (moduleDec instanceof EnhancementRealizModuleDec) {
+            header = mySTGroup.getInstanceOf("outputEnhancementRealizHeader")
+                    .add("realizName", moduleDec.getName().getName())
+                    .add("enhancementName", ((EnhancementRealizModuleDec) moduleDec).getEnhancementName().getName())
+                    .add("conceptName", ((EnhancementRealizModuleDec) moduleDec).getConceptName().getName());
+        } else {
+            header = mySTGroup.getInstanceOf("outputFacilityHeader").add("facilityName", moduleDec.getName().getName());
+        }
+        myProofGenDetailsModel.add("fileHeader", header.render());
     }
 
     // ===========================================================
@@ -285,7 +308,7 @@ public class GeneralPurposeProver {
      * @return A string containing lots of details.
      */
     public final String getVerboseModeOutput() {
-        return myVCProofDetailsModel.render();
+        return myProofGenDetailsModel.render();
     }
 
     /**
@@ -311,8 +334,7 @@ public class GeneralPurposeProver {
                     1000, 1000, 1000);
             Map<String, Integer> expLabels = new LinkedHashMap<>();
 
-            // NM: 0, 1 are spared for <= (1), = (2), e.t.c., the list can expand with
-            // with more reflexive operators
+            // NM: 0, 1 are spared for <= (1), = (2), etc., the list can expand with more reflexive operators
             // preload <=, = into the map
             expLabels.put("<=", AbstractRegisterSequent.OP_LESS_THAN_OR_EQUALS);
             expLabels.put("=", AbstractRegisterSequent.OP_EQUALS);
@@ -338,31 +360,79 @@ public class GeneralPurposeProver {
                     new VCProverResult(vc, TimeUnit.MILLISECONDS.convert(endTime - startTime, TimeUnit.NANOSECONDS),
                             registry.checkIfProved(), false, false));
 
-            if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                StringBuffer sb = new StringBuffer();
-                sb.append("Labeling: \n");
-                for (String exp : expLabels.keySet()) {
-                    sb.append("\t");
-                    sb.append(exp);
-                    sb.append(" -> ");
-                    sb.append(expLabels.get(exp));
-                    sb.append("\n");
-                }
-
-                sb.append("\nResult: ");
-                if (registry.checkIfProved()) {
-                    sb.append("Proved");
-                } else {
-                    sb.append("Not Proved");
-                }
-                sb.append("\n\n===============Done Proving VC===============\n");
-
-                myCompileEnvironment.getStatusHandler().info(null, sb.toString());
-            }
+            // Store the verbose proof detail for this VC
+            String result = registry.checkIfProved() ? "Proved" : "Not Proved";
+            storeVCProofVerboseDetail(vc, result, registry, expLabels);
         }
 
         // Compute the total elapsed time in generating proofs for the VCs in this module
         myTotalElapsedTime = System.currentTimeMillis() - myTotalElapsedTime;
     }
 
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>
+     * An helper method that stores verbose detail about proving this {@code VC}.
+     * </p>
+     *
+     * @param vc
+     *            The {@link VerificationCondition} we have attempted to prove.
+     * @param result
+     *            The prover results.
+     * @param registry
+     *            The congruence class registry used on this {@code VC}.
+     * @param expLabels
+     *            The expression labels assigned to the expressions in this {@code VC}.
+     */
+    private void storeVCProofVerboseDetail(VerificationCondition vc, String result,
+            CongruenceClassRegistry<Integer, String, String, String> registry, Map<String, Integer> expLabels) {
+        // Create a model for adding all the details associated with this VC.
+        LocationDetailModel detailModel = vc.getLocationDetailModel();
+        ST vcModel = mySTGroup.getInstanceOf("outputVC");
+        vcModel.add("vcNum", vc.getName());
+
+        // Add additional detail if this VC has impacting reduction
+        if (vc.getHasImpactingReductionFlag()) {
+            vcModel.add("hasImpactingReduction", true);
+        }
+
+        // Warn the user if are missing the LocationDetailModel
+        if (detailModel != null) {
+            vcModel.add("location", detailModel.getDestinationLoc());
+            vcModel.add("locationDetail", detailModel.getDetailMessage());
+        } else {
+            myCompileEnvironment.getStatusHandler().warning(vc.getLocation(), "[FileOutputListener] VC " + vc.getName()
+                    + " is missing information about how this VC got generated.");
+        }
+
+        // Output the associated sequent
+        Sequent sequent = vc.getSequent();
+        ST sequentModel = mySTGroup.getInstanceOf("outputSequent");
+        sequentModel.add("consequents", sequent.getConcequents());
+        sequentModel.add("antecedents", sequent.getAntecedents());
+
+        // Add this sequent to our vc model
+        vcModel.add("sequent", sequentModel.render());
+
+        // Store the congruence class registry array information
+        ST ccRegistryArraysModel = mySTGroup.getInstanceOf("outputCCRegistryArrays");
+        ccRegistryArraysModel.add("clusterArguments", registry.getClusterArgArray());
+        ccRegistryArraysModel.add("clusters", registry.getClusterArray());
+        ccRegistryArraysModel.add("plantations", registry.getPlantationArray());
+        ccRegistryArraysModel.add("classes", registry.getCongruenceClassArray());
+
+        // Add the VC to the VC proof detail model
+        ST vcProofDetailModel = mySTGroup.getInstanceOf("outputVCProofDetails");
+        vcProofDetailModel.add("vcNum", vc.getName());
+        vcProofDetailModel.add("vc", vcModel.render());
+        vcProofDetailModel.add("result", result);
+        vcProofDetailModel.add("expLabels", expLabels);
+        vcProofDetailModel.add("registryArrays", ccRegistryArraysModel.render());
+
+        // Add VC proof detail model to prover generation details
+        myProofGenDetailsModel.add("vcProofDetails", vcProofDetailModel.render());
+    }
 }

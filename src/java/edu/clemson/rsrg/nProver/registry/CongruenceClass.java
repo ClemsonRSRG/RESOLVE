@@ -25,6 +25,10 @@ import java.util.*;
  */
 public class CongruenceClass {
 
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
     private int firstPlantation;
     private int classTag;
     private BitSet classAttribute;
@@ -33,6 +37,10 @@ public class CongruenceClass {
     private int lastArgStringPosition; // should be the last level it the class shows up in the cluster argument array
                                        // structure
     private int dominantCClass;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
 
     public CongruenceClass(int firstPlantation, int classTag, int lastArgStringPosition, int dominantCClass) {
         this.firstPlantation = firstPlantation; // introduced after review
@@ -43,6 +51,10 @@ public class CongruenceClass {
         this.lastArgStringPosition = lastArgStringPosition;
         this.dominantCClass = dominantCClass;
     }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     public int getFirstPlantation() {
         return firstPlantation;
@@ -90,5 +102,19 @@ public class CongruenceClass {
 
     public void setDominantCClass(int dominantCClass) {
         this.dominantCClass = dominantCClass;
+    }
+
+    /**
+     * <p>
+     * This method returns the congruence class in string format.
+     * </p>
+     *
+     * @return A string.
+     */
+    @Override
+    public final String toString() {
+        return "|" + "firstPlantation=" + firstPlantation + "||classTag=" + classTag + ", classAttribute="
+                + classAttribute + ", argStringOccPos=" + Arrays.toString(argStringOccPos) + "||lastArgStringPosition="
+                + lastArgStringPosition + "||dominantCClass=" + dominantCClass + "|";
     }
 }
