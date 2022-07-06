@@ -77,7 +77,9 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
             if (operatorNumber == OP_EQUALS) { // if it is succedent equal
                 myRegistry.addOperatorToSuccedentReflexiveOperatorSet(operatorNumber);
                 accessor = myRegistry.registerCluster(operatorNumber);
-                myRegistry.updateClassAttributes(accessor, attb);
+                if (!myRegistry.checkIfProved()) {
+                    myRegistry.updateClassAttributes(accessor, attb);
+                }
             } else if (operatorNumber == OP_LESS_THAN_OR_EQUALS) { // if it is succedent <=
                 myRegistry.addOperatorToSuccedentReflexiveOperatorSet(operatorNumber);
 

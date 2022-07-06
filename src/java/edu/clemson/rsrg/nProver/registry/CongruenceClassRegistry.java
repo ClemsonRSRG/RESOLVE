@@ -300,6 +300,10 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
                     if (clusterArgumentArray[nextClusterArgIndex].getAlternativeArg() == 0) { // it didn't have even the
                                                                                               // first class, just
                                                                                               // return false and exit
+
+                        while (clusterArgumentString.size() > 0) {
+                            tempQueue.add(clusterArgumentString.remove());
+                        }
                         // restore the cluster argument list
                         while (tempQueue.size() > 0) {
                             appendToClusterArgList(tempQueue.remove());
@@ -356,6 +360,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
                 }
             }
         }
+
         // restore the cluster argument list
         while (tempQueue.size() > 0) {
             appendToClusterArgList(tempQueue.remove());
