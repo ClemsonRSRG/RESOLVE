@@ -59,10 +59,12 @@ outputFacilityHeader(facilityName) ::= <<
 /*
  * Template for displaying the VC and the proof details associated with this VC.
  */
-outputVCProofDetails(vcNum, vc, expLabels, registryArrays) ::= <<
+outputVCProofDetails(vcNum, vc, result, expLabels, registryArrays) ::= <<
 =================================== <vcNum> ===================================
 
 <vc>
+
+[Prover Result]: <result>
 _____________________
 
 [Label(s)]:

@@ -30,7 +30,11 @@ import java.util.Set;
  * @version v1.0
  */
 public class CongruenceCluster {
-    // member fields
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
     private Integer treeNodeLabel;
     private int indexToArgumentList;
     private int indexToCongruenceClass;
@@ -40,7 +44,10 @@ public class CongruenceCluster {
     private int dominantCluster;
     private int nextWithSameArg;
 
-    // constructor
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
     public CongruenceCluster(Integer treeNodeLabel, int toArgList, int toCC, int toClusterTag,
             int nextPlantationCluster, int previousPlantationCluster, int dominantCluster, int nextWithSameArg) {
         this.treeNodeLabel = treeNodeLabel;
@@ -55,7 +62,9 @@ public class CongruenceCluster {
         this.nextWithSameArg = nextWithSameArg; // points to the next cluster with same arguments
     }
 
-    // public methods
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     public Integer getTreeNodeLabel() {
         return treeNodeLabel;
@@ -117,4 +126,18 @@ public class CongruenceCluster {
         nextWithSameArg = newIndex;
     }
 
+    /**
+     * <p>
+     * This method returns the congruence cluster in string format.
+     * </p>
+     *
+     * @return A string.
+     */
+    @Override
+    public final String toString() {
+        return "|" + "treeNodeLabel=" + treeNodeLabel + "||indexToArgumentList=" + indexToArgumentList
+                + "||indexToCongruenceClass=" + indexToCongruenceClass + "||nextPlantationCluster="
+                + nextPlantationCluster + "||previousPlantationCluster=" + previousPlantationCluster
+                + "||dominantCluster=" + dominantCluster + "||nextWithSameArg=" + nextWithSameArg + "|";
+    }
 }

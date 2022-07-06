@@ -23,6 +23,10 @@ package edu.clemson.rsrg.nProver.registry;
  */
 public class ClusterArgument {
 
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
     private int nextClusterArg;
     private int prevClusterArg;
     private int ccNumber; // these are congruence class designators
@@ -30,6 +34,10 @@ public class ClusterArgument {
                                                // argument string.
     private int clusterNumber; // the first cluster of the chained clusters with same argument
     private int alternativeArg;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
 
     public ClusterArgument(int nextClusterArg, int prevClusterArg, int ccNumber, int clusterNumber,
             int alternativeArg) {
@@ -40,6 +48,10 @@ public class ClusterArgument {
         this.clusterNumber = clusterNumber;
         this.alternativeArg = alternativeArg;
     }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     public int getNextClusterArg() {
         return nextClusterArg;
@@ -89,4 +101,17 @@ public class ClusterArgument {
         this.alternativeArg = alternativeArg;
     }
 
+    /**
+     * <p>
+     * This method returns the cluster argument in string format.
+     * </p>
+     *
+     * @return A string.
+     */
+    @Override
+    public final String toString() {
+        return "|" + "nextClusterArg=" + nextClusterArg + "||prevClusterArg=" + prevClusterArg + "||ccNumber="
+                + ccNumber + "||clusterNumber=" + clusterNumber + "||nexIndexWithSameCCInSameLevel="
+                + nexIndexWithSameCCInSameLevel + "||alternativeArg=" + alternativeArg + "|";
+    }
 }
