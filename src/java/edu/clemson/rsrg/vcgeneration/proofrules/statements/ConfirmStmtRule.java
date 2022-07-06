@@ -219,6 +219,13 @@ public class ConfirmStmtRule extends AbstractProofRuleApplication implements Pro
             }
         }
 
+        // Lastly, if we still don't have one, it must mean it is an explicit conform
+        // statement. We simply generate a location detail model using the first consequent
+        if (model == null) {
+            model = new LocationDetailModel(sequent.getLocation().clone(), sequent.getLocation().clone(),
+                    "Explicit Confirm Statement");
+        }
+
         return model;
     }
 }
