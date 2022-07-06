@@ -36,6 +36,7 @@ import java.util.List;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
+import org.stringtemplate.v4.StringRenderer;
 
 /**
  * <p>
@@ -156,12 +157,15 @@ public class FileOutputListener implements OutputListener {
         StringBuilder sb = new StringBuilder();
 
         // String template to hold the VC generation details
-        STGroup group = new STGroupFile("templates/nProverOutput.stg");
+        STGroup group = new STGroupFile("templates/proverOutput.stg");
+        group.registerRenderer(String.class, new StringRenderer());
         ST model = group.getInstanceOf("outputProofFile").add("fileName", inputFileName)
-                .add("dateGenerated", new Date()).add("timeOut", timeOut).add("numTries", numTries)
-                .add("totalTime", totalTime);
+                .add("dateGenerated", new Date()).add("proverName", "General Purpose Prover").add("timeOut", timeOut)
+                .add("numTries", numTries).add("totalTime", totalTime);
 
         // Store the results for each VC
+        int numProved = 0;
+        int numUnproved = 0;
         for (VCProverResult result : results) {
             // Create a model for adding all the details
             // associated with this VC.
@@ -172,9 +176,20 @@ public class FileOutputListener implements OutputListener {
             vcProofModel.add("timedOut", result.getTimedOutFlag());
             vcProofModel.add("time", result.getProofTime());
 
+            // Increment count
+            if (result.isProved()) {
+                numProved++;
+            } else {
+                numUnproved++;
+            }
+
             // Add the VC to the model
             model.add("vcs", vcProofModel.render());
         }
+
+        // Store the number of proved and unproved VCs
+        model.add("numProved", numProved);
+        model.add("numUnproved", numUnproved);
 
         // Append the VC proof details from the model
         sb.append(model.render());

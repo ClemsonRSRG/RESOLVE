@@ -34,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -209,7 +210,7 @@ public class GeneralPurposeProver {
         myTypeGraph = compileEnvironment.getTypeGraph();
         myVCProverResults = new ArrayList<>(vcs.size());
         myVerificationConditions = vcs;
-        myVCProofDetailsModel = mySTGroup.getInstanceOf("outputVCGenDetails");
+        myVCProofDetailsModel = mySTGroup.getInstanceOf("outputProofGenDetails");
 
         // Timeout
         if (myCompileEnvironment.flags.isFlagSet(FLAG_TIMEOUT)) {
@@ -293,18 +294,17 @@ public class GeneralPurposeProver {
      * </p>
      */
     public void proveVCs() {
+        // Keep track to total elapsed time and number of unproved/timed out VCs
+        myTotalElapsedTime = System.currentTimeMillis();
+        int numUnproved = 0;
+
         // Loop through each of the VCs and attempt to prove them
         for (VerificationCondition vc : myVerificationConditions) {
+            // Store the start time for generating proofs for this VC
+            long startTime = System.nanoTime();
+
             // Obtain the sequent to be proved
             Sequent sequent = vc.getSequent();
-            if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-                StringBuffer sb = new StringBuffer();
-                sb.append("\n=============== Proving VC ");
-                sb.append(vc.getName());
-                sb.append(" ===============\n");
-
-                myCompileEnvironment.getStatusHandler().info(null, sb.toString());
-            }
 
             // Create a registry and label map
             CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000,
@@ -330,6 +330,14 @@ public class GeneralPurposeProver {
                 TreeWalker.visit(regConsequent, exp);
             }
 
+            // Store the end time for generating proofs for this VC
+            long endTime = System.nanoTime();
+
+            // Store the prover results for this VC
+            myVCProverResults.add(
+                    new VCProverResult(vc, TimeUnit.MILLISECONDS.convert(endTime - startTime, TimeUnit.NANOSECONDS),
+                            registry.checkIfProved(), false, false));
+
             if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("Labeling: \n");
@@ -352,6 +360,9 @@ public class GeneralPurposeProver {
                 myCompileEnvironment.getStatusHandler().info(null, sb.toString());
             }
         }
+
+        // Compute the total elapsed time in generating proofs for the VCs in this module
+        myTotalElapsedTime = System.currentTimeMillis() - myTotalElapsedTime;
     }
 
 }
