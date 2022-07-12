@@ -512,6 +512,18 @@ public class AssumeStmtRule extends AbstractProofRuleApplication implements Proo
                 boolean isLeftReplaceable = containsReplaceableExp(equalsExp.getLeft());
                 boolean isRightReplaceable = containsReplaceableExp(equalsExp.getRight());
 
+                // Store the location detail for the EqualsExp to the expression to both sides
+                // if it doesn't exist
+                if (equalsExp.getLocationDetailModel() != null) {
+                    if (equalsExp.getLeft().getLocationDetailModel() == null) {
+                        equalsExp.getLeft().setLocationDetailModel(equalsExp.getLocationDetailModel().clone());
+                    }
+
+                    if (equalsExp.getRight().getLocationDetailModel() == null) {
+                        equalsExp.getRight().setLocationDetailModel(equalsExp.getLocationDetailModel().clone());
+                    }
+                }
+
                 // Check to see if we have P_Val or Cum_Dur
                 if (equalsExp.getLeft().containsVar("P_Val", false)
                         || equalsExp.getLeft().containsVar("Cum_Dur", false)) {
