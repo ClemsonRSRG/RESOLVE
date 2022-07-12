@@ -284,6 +284,10 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
             nextClusterArgIndex = clusterArgumentArray[currentClusterArgIndex].getNextClusterArg();
             if (nextClusterArgIndex == 0) {
                 // restore the cluster argument list
+                while (clusterArgumentString.size() > 0) {
+                    tempQueue.add(clusterArgumentString.remove());
+                }
+                // restore the cluster argument list
                 while (tempQueue.size() > 0) {
                     appendToClusterArgList(tempQueue.remove());
                 }
