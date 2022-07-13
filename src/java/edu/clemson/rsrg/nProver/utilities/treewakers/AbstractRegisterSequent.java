@@ -143,19 +143,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     @Override
     public void postLiteralExp(LiteralExp exp) {
-        // If this is not a variable expression we have seen, then add it to our map
-        if (!myExpLabels.containsKey(exp.toString())) {
-            myExpLabels.put(exp.toString(), myNextLabel);
-            myNextLabel++;
-        }
-
-        // Logic for handling literal expressions
-        int variableNumber = myExpLabels.get(exp.toString());
-        if (myRegistry.checkIfRegistered(variableNumber)) {
-            myArgumentsCache.put(exp, myRegistry.getAccessorFor(variableNumber));
-        } else {
-            myArgumentsCache.put(exp, myRegistry.registerCluster(variableNumber));
-        }
+        storeInArgumentCache(exp);
     }
 
     /**
@@ -185,19 +173,8 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     @Override
     public void postVarExp(VarExp exp) {
-        // If this is not a variable expression we have seen, then add it to our map
-        if (!myExpLabels.containsKey(exp.toString())) {
-            myExpLabels.put(exp.toString(), myNextLabel);
-            myNextLabel++;
-        }
-
         // Logic for handling variable expressions
-        int variableNumber = myExpLabels.get(exp.toString());
-        if (myRegistry.checkIfRegistered(variableNumber)) {
-            myArgumentsCache.put(exp, myRegistry.getAccessorFor(variableNumber));
-        } else {
-            myArgumentsCache.put(exp, myRegistry.registerCluster(variableNumber));
-        }
+        storeInArgumentCache(exp);
     }
 
     /**
@@ -216,23 +193,12 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
         preExp(exp);
         preMathExp(exp);
 
-        // YS: Need special handle VarExp
+        // YS: Need special handle VarExp inside a VCVarExp
         if (exp.getExp() instanceof VarExp) {
-            if (!myExpLabels.containsKey(exp.toString())) {
-                // YS: A VCVarExp is something like: a' or a'''.
-                // We don't want all the variations so rather than walking
-                // the inner expression, we simply store the expression
-                myExpLabels.put(exp.toString(), myNextLabel);
-                myNextLabel++;
-            }
-
-            // Logic for handling VC variable expressions
-            int variableNumber = myExpLabels.get(exp.toString());
-            if (myRegistry.checkIfRegistered(variableNumber)) {
-                myArgumentsCache.put(exp, myRegistry.getAccessorFor(variableNumber));
-            } else {
-                myArgumentsCache.put(exp, myRegistry.registerCluster(variableNumber));
-            }
+            // YS: A VCVarExp is something like: a' or a'''.
+            // We don't want all the variations so rather than walking
+            // the inner expression, we simply store the expression
+            storeInArgumentCache(exp);
         }
 
         postMathExp(exp);
@@ -277,6 +243,35 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     public final CongruenceClassRegistry<Integer, String, String, String> getRegistry() {
         return myRegistry;
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>
+     * An helper method to update the label number if it is the first time we see the expression and put the results
+     * from the registry to our argument cache.
+     * </p>
+     *
+     * @param exp
+     *            Expression that we are currently evaluating.
+     */
+    private void storeInArgumentCache(Exp exp) {
+        if (!myExpLabels.containsKey(exp.toString())) {
+            myExpLabels.put(exp.toString(), myNextLabel);
+            myNextLabel++;
+        }
+
+        // Logic for handling variable, VC variable and literal expressions as
+        // arguments to other functions and operators.
+        int variableNumber = myExpLabels.get(exp.toString());
+        if (myRegistry.checkIfRegistered(variableNumber)) {
+            myArgumentsCache.put(exp, myRegistry.getAccessorFor(variableNumber));
+        } else {
+            myArgumentsCache.put(exp, myRegistry.registerCluster(variableNumber));
+        }
     }
 
 }

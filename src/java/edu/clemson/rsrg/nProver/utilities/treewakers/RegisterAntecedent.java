@@ -140,4 +140,29 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
         }
     }
 
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link VarExp}.
+     * </p>
+     *
+     * @param exp
+     *            A variable expression.
+     */
+    @Override
+    public void postVarExp(VarExp exp) {
+        // YS: If we detect a top-level antecedent that is "false", then we need to special handle it.
+        // Otherwise, we simply just add it to the registry as normal.
+        // From Bill Ogden, "For the implicit and operator in an antecedent, True is an identity element
+        // (i. e., ( F1 and F2 and ... and Fn and True ) = ( F1 and F2 and ... and Fn ) ) and
+        // False is a zero element (i. e., ( F1 and F2 and ... and Fn and False ) = ( False ) ).
+        // Dually, for the implicit or operator in a succedent, False is an identity element
+        // (i. e., ( F1 or F2 or ... or Fn or False ) = ( F1 or F2 or ... or Fn ) ) and
+        // True is a zero element (i. e., ( F1 or F2 or ... or Fn or True ) = ( True ) ).
+        // In the zero element cases, the Boolean constant can be eliminated by expressing
+        // A ==> { True } by A ==> { } and { False } ==> S by { } ==> S."
+        if (super.getAncestorSize() == 1 && !exp.toString().equals("false")) {
+            super.postVarExp(exp);
+        }
+    }
+
 }
