@@ -82,14 +82,12 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
                 }
             } else if (operatorNumber == OP_LESS_THAN_OR_EQUALS) { // if it is succedent <=
                 myRegistry.addOperatorToSuccedentReflexiveOperatorSet(operatorNumber);
-
                 if (myRegistry.checkIfRegistered(operatorNumber)) {
                     myRegistry.updateClassAttributes(myRegistry.getAccessorFor(operatorNumber), attb);
                 } else {
                     accessor = myRegistry.registerCluster(operatorNumber);
                     myRegistry.updateClassAttributes(accessor, attb);
                 }
-
             } else {
                 if (myRegistry.checkIfRegistered(operatorNumber)) {
                     myRegistry.updateClassAttributes(myRegistry.getAccessorFor(operatorNumber), attb);
@@ -147,6 +145,31 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
                 // only non-ultimate classes can be used as arguments in clusters
                 myArgumentsCache.put(exp, accessor);
             }
+        }
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link VarExp}.
+     * </p>
+     *
+     * @param exp
+     *            A variable expression.
+     */
+    @Override
+    public void postVarExp(VarExp exp) {
+        // YS: If we detect a top-level succedent that is "true", then we need to special handle it.
+        // Otherwise, we simply just add it to the registry as normal.
+        // From Bill Ogden, "For the implicit and operator in an antecedent, True is an identity element
+        // (i. e., ( F1 and F2 and ... and Fn and True ) = ( F1 and F2 and ... and Fn ) ) and
+        // False is a zero element (i. e., ( F1 and F2 and ... and Fn and False ) = ( False ) ).
+        // Dually, for the implicit or operator in a succedent, False is an identity element
+        // (i. e., ( F1 or F2 or ... or Fn or False ) = ( F1 or F2 or ... or Fn ) ) and
+        // True is a zero element (i. e., ( F1 or F2 or ... or Fn or True ) = ( True ) ).
+        // In the zero element cases, the Boolean constant can be eliminated by expressing
+        // A ==> { True } by A ==> { } and { False } ==> S by { } ==> S."
+        if (super.getAncestorSize() == 1 && !exp.toString().equals("true")) {
+            super.postVarExp(exp);
         }
     }
 
