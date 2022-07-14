@@ -16,8 +16,10 @@ import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -131,6 +133,47 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
             myNextLabel++;
         }
+    }
+
+    /**
+     * <p>
+     * This method redefines how a {@link FunctionExp} should be walked.
+     * </p>
+     *
+     * @param exp
+     *            A function expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkFunctionExp(FunctionExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preAbstractFunctionExp(exp);
+        preFunctionExp(exp);
+
+        // YS: We walk the arguments first
+        List<Exp> arguments = exp.getArguments();
+        for (Exp e : arguments) {
+            TreeWalker.visit(this, e);
+        }
+
+        // YS: We then walk any carat expressions
+        if (exp.getCaratExp() != null) {
+            TreeWalker.visit(this, exp.getCaratExp());
+        }
+
+        // YS: Lastly, we walk the name of the function
+        TreeWalker.visit(this, exp.getName());
+
+        postFunctionExp(exp);
+        postAbstractFunctionExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
     }
 
     /**

@@ -197,7 +197,7 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
         // True is a zero element (i. e., ( F1 or F2 or ... or Fn or True ) = ( True ) ).
         // In the zero element cases, the Boolean constant can be eliminated by expressing
         // A ==> { True } by A ==> { } and { False } ==> S by { } ==> S."
-        if (super.getAncestorSize() == 1 && !exp.toString().equals("true")) {
+        if (!(super.getAncestorSize() == 1 && exp.toString().equals("true"))) {
             super.postVarExp(exp);
         }
     }
