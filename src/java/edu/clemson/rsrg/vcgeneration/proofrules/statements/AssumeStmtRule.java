@@ -514,13 +514,15 @@ public class AssumeStmtRule extends AbstractProofRuleApplication implements Proo
 
                 // Store the location detail for the EqualsExp to the expression to both sides
                 // if it doesn't exist
+                Exp leftExp = equalsExp.getLeft().clone();
+                Exp rightExp = equalsExp.getRight().clone();
                 if (equalsExp.getLocationDetailModel() != null) {
                     if (equalsExp.getLeft().getLocationDetailModel() == null) {
-                        equalsExp.getLeft().setLocationDetailModel(equalsExp.getLocationDetailModel().clone());
+                        leftExp.setLocationDetailModel(equalsExp.getLocationDetailModel().clone());
                     }
 
                     if (equalsExp.getRight().getLocationDetailModel() == null) {
-                        equalsExp.getRight().setLocationDetailModel(equalsExp.getLocationDetailModel().clone());
+                        rightExp.setLocationDetailModel(equalsExp.getLocationDetailModel().clone());
                     }
                 }
 
@@ -543,7 +545,7 @@ public class AssumeStmtRule extends AbstractProofRuleApplication implements Proo
                     // in the current context, therefore we do the
                     // substitution.
                     if (hasVerificationVar || isConceptualVar) {
-                        substitutions.put(equalsExp.getLeft(), equalsExp.getRight());
+                        substitutions.put(leftExp, rightExp);
                     }
                     // This is a special case where we have two VarExps, but one of them
                     // refers to a Precis' definition. If that is the case, then it is safe
@@ -553,19 +555,19 @@ public class AssumeStmtRule extends AbstractProofRuleApplication implements Proo
                     else {
                         if (equalsExp.getRight() instanceof VarExp
                                 && ((VarExp) equalsExp.getRight()).isIsPrecisDefinitionName()) {
-                            substitutions.put(equalsExp.getLeft(), equalsExp.getRight());
+                            substitutions.put(leftExp, rightExp);
                         }
                     }
                 }
                 // Check if left hand side is replaceable
                 else if (isLeftReplaceable) {
                     // Add to substitutions where left is replaced with the right
-                    substitutions.put(equalsExp.getLeft(), equalsExp.getRight());
+                    substitutions.put(leftExp, rightExp);
                 }
                 // Only right hand side is replaceable
                 else if (isRightReplaceable) {
                     // Add to substitutions where right is replaced with the left
-                    substitutions.put(equalsExp.getRight(), equalsExp.getLeft());
+                    substitutions.put(rightExp, leftExp);
                 }
             }
 
