@@ -126,7 +126,24 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     @Override
     public void postInfixExp(InfixExp exp) {
-        // If this is not a variable expression we have seen, then add it to our map
+        // If this is not an infix operator we have seen, then add it to our map
+        if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
+            myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link FunctionExp}.
+     * </p>
+     *
+     * @param exp
+     *            A function expression.
+     */
+    @Override
+    public void postFunctionExp(FunctionExp exp) {
+        // If this is not a function name we have seen, then add it to our map
         if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
             myNextLabel++;
@@ -148,7 +165,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
 
     /**
      * <p>
-     * Code that gets executed after visiting a {@link OutfixExp}.
+     * Code that gets executed after visiting an {@link OutfixExp}.
      * </p>
      *
      * @param exp
@@ -156,7 +173,24 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     @Override
     public void postOutfixExp(OutfixExp exp) {
-        // If this is not a variable expression we have seen, then add it to our map
+        // If this is not an outfix operator we have seen, then add it to our map
+        if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
+            myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link PrefixExp}.
+     * </p>
+     *
+     * @param exp
+     *            A prefix expression.
+     */
+    @Override
+    public void postPrefixExp(PrefixExp exp) {
+        // If this is not a prefix operator we have seen, then add it to our map
         if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
             myNextLabel++;
@@ -251,7 +285,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
 
     /**
      * <p>
-     * An helper method to update the label number if it is the first time we see the expression and put the results
+     * An helper method that updates the label number if it is the first time we see the expression and put the results
      * from the registry to our argument cache.
      * </p>
      *
