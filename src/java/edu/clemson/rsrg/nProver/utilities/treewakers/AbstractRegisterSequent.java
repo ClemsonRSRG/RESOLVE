@@ -16,8 +16,10 @@ import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -126,7 +128,65 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     @Override
     public void postInfixExp(InfixExp exp) {
-        // If this is not a variable expression we have seen, then add it to our map
+        // If this is not an infix operator we have seen, then add it to our map
+        if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
+            myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
+     * This method redefines how a {@link FunctionExp} should be walked.
+     * </p>
+     *
+     * @param exp
+     *            A function expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkFunctionExp(FunctionExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preAbstractFunctionExp(exp);
+        preFunctionExp(exp);
+
+        // YS: We walk the arguments first
+        List<Exp> arguments = exp.getArguments();
+        for (Exp e : arguments) {
+            TreeWalker.visit(this, e);
+        }
+
+        // YS: We then walk any carat expressions
+        if (exp.getCaratExp() != null) {
+            TreeWalker.visit(this, exp.getCaratExp());
+        }
+
+        // YS: Lastly, we walk the name of the function
+        TreeWalker.visit(this, exp.getName());
+
+        postFunctionExp(exp);
+        postAbstractFunctionExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link FunctionExp}.
+     * </p>
+     *
+     * @param exp
+     *            A function expression.
+     */
+    @Override
+    public void postFunctionExp(FunctionExp exp) {
+        // If this is not a function name we have seen, then add it to our map
         if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
             myNextLabel++;
@@ -148,7 +208,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
 
     /**
      * <p>
-     * Code that gets executed after visiting a {@link OutfixExp}.
+     * Code that gets executed after visiting an {@link OutfixExp}.
      * </p>
      *
      * @param exp
@@ -156,7 +216,24 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     @Override
     public void postOutfixExp(OutfixExp exp) {
-        // If this is not a variable expression we have seen, then add it to our map
+        // If this is not an outfix operator we have seen, then add it to our map
+        if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
+            myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link PrefixExp}.
+     * </p>
+     *
+     * @param exp
+     *            A prefix expression.
+     */
+    @Override
+    public void postPrefixExp(PrefixExp exp) {
+        // If this is not a prefix operator we have seen, then add it to our map
         if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
             myNextLabel++;
@@ -251,7 +328,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
 
     /**
      * <p>
-     * An helper method to update the label number if it is the first time we see the expression and put the results
+     * An helper method that updates the label number if it is the first time we see the expression and put the results
      * from the registry to our argument cache.
      * </p>
      *

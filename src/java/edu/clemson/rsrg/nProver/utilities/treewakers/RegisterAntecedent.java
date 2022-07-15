@@ -82,30 +82,32 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
             myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getLeft()));
             myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getRight()));
 
-            // check if registered, no duplicates allowed
-            if (myRegistry.checkIfRegistered(operatorNumber)) {
-                myArgumentsCache.put(exp, myRegistry.getAccessorFor(operatorNumber));
-            } else {
-                // register if new, and make it an argument for the next higher level operator
-                int accessor = myRegistry.registerCluster(operatorNumber);
-
-                // if exp is ultimate i.e., at root
-                if (super.getAncestorSize() == 1) {
-                    BitSet attb = new BitSet();
-                    attb.set(0);// set the class antecedent
-                    attb.set(2);// set the class ultimate
-                    myRegistry.updateClassAttributes(accessor, attb);
-                } else {
-                    // only non-ultimate classes can be used as arguments in clusters
-                    myArgumentsCache.put(exp, accessor);
-                }
-            }
+            registerFunction(exp, operatorNumber);
         }
     }
 
     /**
      * <p>
-     * Code that gets executed after visiting a {@link OutfixExp}.
+     * Code that gets executed after visiting a {@link FunctionExp}.
+     * </p>
+     *
+     * @param exp
+     *            A function expression.
+     */
+    @Override
+    public final void postFunctionExp(FunctionExp exp) {
+        super.postFunctionExp(exp);
+
+        // Logic for handling function expressions in the antecedent
+        for (Exp argument : exp.getArguments()) {
+            myRegistry.appendToClusterArgList(myArgumentsCache.remove(argument));
+        }
+        registerFunction(exp, myExpLabels.get(exp.getOperatorAsString()));
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting an {@link OutfixExp}.
      * </p>
      *
      * @param exp
@@ -114,30 +116,29 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
     @Override
     public final void postOutfixExp(OutfixExp exp) {
         super.postOutfixExp(exp);
-        int operatorNumber = myExpLabels.get(exp.getOperatorAsString());
 
         // Logic for handling outfix expressions in the antecedent
         // has only one argument, should run once
         myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getArgument()));
+        registerFunction(exp, myExpLabels.get(exp.getOperatorAsString()));
+    }
 
-        // check if registered, no duplicates allowed
-        if (myRegistry.checkIfRegistered(operatorNumber)) {
-            myArgumentsCache.put(exp, myRegistry.getAccessorFor(operatorNumber));
-        } else {
-            // register if new, and make it an argument for the next higher level operator
-            int accessor = myRegistry.registerCluster(operatorNumber);
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link PrefixExp}.
+     * </p>
+     *
+     * @param exp
+     *            A prefix expression.
+     */
+    @Override
+    public final void postPrefixExp(PrefixExp exp) {
+        super.postPrefixExp(exp);
 
-            // if exp is ultimate i.e., at root
-            if (super.getAncestorSize() == 1) {
-                BitSet attb = new BitSet();
-                attb.set(0);// set the class antecedent
-                attb.set(2);// set the class ultimate
-                myRegistry.updateClassAttributes(accessor, attb);
-            } else {
-                // only non-ultimate classes can be used as arguments in clusters
-                myArgumentsCache.put(exp, accessor);
-            }
-        }
+        // Logic for handling prefix expressions in the antecedent
+        // has only one argument, should run once
+        myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getArgument()));
+        registerFunction(exp, myExpLabels.get(exp.getOperatorAsString()));
     }
 
     /**
@@ -160,8 +161,44 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
         // True is a zero element (i. e., ( F1 or F2 or ... or Fn or True ) = ( True ) ).
         // In the zero element cases, the Boolean constant can be eliminated by expressing
         // A ==> { True } by A ==> { } and { False } ==> S by { } ==> S."
-        if (super.getAncestorSize() == 1 && !exp.toString().equals("false")) {
+        if (!(super.getAncestorSize() == 1 && exp.toString().equals("false"))) {
             super.postVarExp(exp);
+        }
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>
+     * An helper method that registers an {@link InfixExp}, {@link FunctionExp}, {@link OutfixExp} or {@link PrefixExp}
+     * to the congruence class registry.
+     * </p>
+     *
+     * @param exp
+     *            Expression that we are currently evaluating.
+     * @param operatorNumber
+     *            The labeling number assigned to the operator.
+     */
+    private void registerFunction(Exp exp, int operatorNumber) {
+        // check if registered, no duplicates allowed
+        if (myRegistry.checkIfRegistered(operatorNumber)) {
+            myArgumentsCache.put(exp, myRegistry.getAccessorFor(operatorNumber));
+        } else {
+            // register if new, and make it an argument for the next higher level operator
+            int accessor = myRegistry.registerCluster(operatorNumber);
+
+            // if exp is ultimate i.e., at root
+            if (super.getAncestorSize() == 1) {
+                BitSet attb = new BitSet();
+                attb.set(0);// set the class antecedent
+                attb.set(2);// set the class ultimate
+                myRegistry.updateClassAttributes(accessor, attb);
+            } else {
+                // only non-ultimate classes can be used as arguments in clusters
+                myArgumentsCache.put(exp, accessor);
+            }
         }
     }
 

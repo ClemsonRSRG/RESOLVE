@@ -15,9 +15,21 @@ package edu.clemson.rsrg.nProver.utilities.treewakers;
 import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
 import java.util.BitSet;
 import java.util.Map;
 
+/**
+ * <p>
+ * This class registers each succedent expression. This visitor logic is implemented as a
+ * {@link TreeWalkerStackVisitor}.
+ * </p>
+ *
+ * @author Yu-Shan Sun
+ * @author Nicodemus Msafiri J. M.
+ *
+ * @version 1.0
+ */
 public class RegisterSuccedent extends AbstractRegisterSequent {
 
     // ===========================================================
@@ -112,7 +124,26 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
 
     /**
      * <p>
-     * Code that gets executed after visiting a {@link OutfixExp}.
+     * Code that gets executed after visiting a {@link FunctionExp}.
+     * </p>
+     *
+     * @param exp
+     *            A function expression.
+     */
+    @Override
+    public void postFunctionExp(FunctionExp exp) {
+        super.postFunctionExp(exp);
+
+        // Logic for handling function expressions in the succedent
+        for (Exp argument : exp.getArguments()) {
+            myRegistry.appendToClusterArgList(myArgumentsCache.remove(argument));
+        }
+        registerFunction(exp, myExpLabels.get(exp.getOperatorAsString()));
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting an {@link OutfixExp}.
      * </p>
      *
      * @param exp
@@ -121,31 +152,29 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
     @Override
     public void postOutfixExp(OutfixExp exp) {
         super.postOutfixExp(exp);
-        int operatorNumber = myExpLabels.get(exp.getOperatorAsString());
-        int accessor = 0;
 
         // Logic for handling outfix expressions in the succedent
         // has only one argument, should run once
         myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getArgument()));
+        registerFunction(exp, myExpLabels.get(exp.getOperatorAsString()));
+    }
 
-        // check if registered, no duplicates allowed
-        if (myRegistry.checkIfRegistered(operatorNumber)) {
-            myArgumentsCache.put(exp, myRegistry.getAccessorFor(operatorNumber));
-        } else {
-            // register if new, and make it an argument for the next higher level operator
-            accessor = myRegistry.registerCluster(operatorNumber);
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link PrefixExp}.
+     * </p>
+     *
+     * @param exp
+     *            A prefix expression.
+     */
+    @Override
+    public final void postPrefixExp(PrefixExp exp) {
+        super.postPrefixExp(exp);
 
-            // if exp is ultimate i.e., at root
-            if (super.getAncestorSize() == 1) {
-                BitSet attb = new BitSet();
-                attb.set(1); // succedent
-                attb.set(2); // ultimate
-                myRegistry.updateClassAttributes(accessor, attb);
-            } else {
-                // only non-ultimate classes can be used as arguments in clusters
-                myArgumentsCache.put(exp, accessor);
-            }
-        }
+        // Logic for handling prefix expressions in the succedent
+        // has only one argument, should run once
+        myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getArgument()));
+        registerFunction(exp, myExpLabels.get(exp.getOperatorAsString()));
     }
 
     /**
@@ -168,8 +197,44 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
         // True is a zero element (i. e., ( F1 or F2 or ... or Fn or True ) = ( True ) ).
         // In the zero element cases, the Boolean constant can be eliminated by expressing
         // A ==> { True } by A ==> { } and { False } ==> S by { } ==> S."
-        if (super.getAncestorSize() == 1 && !exp.toString().equals("true")) {
+        if (!(super.getAncestorSize() == 1 && exp.toString().equals("true"))) {
             super.postVarExp(exp);
+        }
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>
+     * An helper method that registers a {@link FunctionExp}, {@link OutfixExp} or {@link PrefixExp} to the congruence
+     * class registry.
+     * </p>
+     *
+     * @param exp
+     *            Expression that we are currently evaluating.
+     * @param operatorNumber
+     *            The labeling number assigned to the operator.
+     */
+    private void registerFunction(Exp exp, int operatorNumber) {
+        // check if registered, no duplicates allowed
+        if (myRegistry.checkIfRegistered(operatorNumber)) {
+            myArgumentsCache.put(exp, myRegistry.getAccessorFor(operatorNumber));
+        } else {
+            // register if new, and make it an argument for the next higher level operator
+            int accessor = myRegistry.registerCluster(operatorNumber);
+
+            // if exp is ultimate i.e., at root
+            if (super.getAncestorSize() == 1) {
+                BitSet attb = new BitSet();
+                attb.set(1); // succedent
+                attb.set(2); // ultimate
+                myRegistry.updateClassAttributes(accessor, attb);
+            } else {
+                // only non-ultimate classes can be used as arguments in clusters
+                myArgumentsCache.put(exp, accessor);
+            }
         }
     }
 
