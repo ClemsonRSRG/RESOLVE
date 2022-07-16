@@ -149,6 +149,25 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
 
     /**
      * <p>
+     * Code that gets executed after visiting a {@link SetCollectionExp}.
+     * </p>
+     *
+     * @param exp
+     *            A set collection expression.
+     */
+    @Override
+    public final void postSetCollectionExp(SetCollectionExp exp) {
+        super.postSetCollectionExp(exp);
+
+        // Logic for handling set collection expressions in the antecedent
+        for (Exp argument : exp.getVars()) {
+            myRegistry.appendToClusterArgList(myArgumentsCache.remove(argument));
+        }
+        registerFunction(exp, myExpLabels.get("{_}"));
+    }
+
+    /**
+     * <p>
      * Code that gets executed after visiting a {@link VarExp}.
      * </p>
      *

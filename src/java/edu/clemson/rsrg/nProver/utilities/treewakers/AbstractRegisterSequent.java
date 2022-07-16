@@ -21,6 +21,7 @@ import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -137,6 +138,23 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
 
     /**
      * <p>
+     * Code that gets executed after visiting a {@link FunctionExp}.
+     * </p>
+     *
+     * @param exp
+     *            A function expression.
+     */
+    @Override
+    public void postFunctionExp(FunctionExp exp) {
+        // If this is not a function name we have seen, then add it to our map
+        if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
+            myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
      * This method redefines how a {@link FunctionExp} should be walked.
      * </p>
      *
@@ -174,23 +192,6 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
         postAny(exp);
 
         return true;
-    }
-
-    /**
-     * <p>
-     * Code that gets executed after visiting a {@link FunctionExp}.
-     * </p>
-     *
-     * @param exp
-     *            A function expression.
-     */
-    @Override
-    public void postFunctionExp(FunctionExp exp) {
-        // If this is not a function name we have seen, then add it to our map
-        if (!myExpLabels.containsKey(exp.getOperatorAsString())) {
-            myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
-            myNextLabel++;
-        }
     }
 
     /**
@@ -238,6 +239,54 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
             myNextLabel++;
         }
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link SetCollectionExp}.
+     * </p>
+     *
+     * @param exp
+     *            A set collection expression.
+     */
+    @Override
+    public void postSetCollectionExp(SetCollectionExp exp) {
+        // If this is not a prefix operator we have seen, then add it to our map
+        if (!myExpLabels.containsKey("{_}")) {
+            myExpLabels.put("{_}", myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
+     * This method redefines how a {@link SetCollectionExp} should be walked.
+     * </p>
+     *
+     * @param exp
+     *            A set collection expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkSetCollectionExp(SetCollectionExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preSetCollectionExp(exp);
+
+        // YS: Walk each of the expressions inside SetCollectionExp
+        Set<MathExp> vars = exp.getVars();
+        for (MathExp v : vars) {
+            TreeWalker.visit(this, v);
+        }
+
+        postSetCollectionExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
     }
 
     /**
