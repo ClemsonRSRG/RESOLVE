@@ -168,6 +168,25 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
 
     /**
      * <p>
+     * Code that gets executed after visiting a {@link TupleExp}.
+     * </p>
+     *
+     * @param exp
+     *            A tuple expression.
+     */
+    @Override
+    public final void postTupleExp(TupleExp exp) {
+        super.postTupleExp(exp);
+
+        // Logic for handling tuple expressions in the antecedent
+        for (Exp field : exp.getFields()) {
+            myRegistry.appendToClusterArgList(myArgumentsCache.remove(field));
+        }
+        registerFunction(exp, myExpLabels.get("(_)"));
+    }
+
+    /**
+     * <p>
      * Code that gets executed after visiting a {@link VarExp}.
      * </p>
      *
