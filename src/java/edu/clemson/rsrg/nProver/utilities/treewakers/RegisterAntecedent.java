@@ -78,9 +78,7 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
 
         // Logic for handling infix expressions in the antecedent
         if (operatorNumber == OP_EQUALS) { // if it is antecedent equal
-            if(myRegistry.areCongruent(lhsArgument, rhsArgument)) {
-                //NM: do nothing, save resources
-            }else{
+            if(!myRegistry.areCongruent(lhsArgument, rhsArgument)) {
                 myRegistry.makeCongruent(lhsArgument, rhsArgument);
             }
         } else {
