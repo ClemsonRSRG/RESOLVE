@@ -189,11 +189,30 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
     public final void postSetCollectionExp(SetCollectionExp exp) {
         super.postSetCollectionExp(exp);
 
-        // Logic for handling set collection expressions in the antecedent
+        // Logic for handling set collection expressions in the succedent
         for (Exp argument : exp.getVars()) {
             myRegistry.appendToClusterArgList(myArgumentsCache.remove(argument));
         }
         registerFunction(exp, myExpLabels.get("{_}"));
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link TupleExp}.
+     * </p>
+     *
+     * @param exp
+     *            A tuple expression.
+     */
+    @Override
+    public final void postTupleExp(TupleExp exp) {
+        super.postTupleExp(exp);
+
+        // Logic for handling set collection expressions in the succedent
+        for (Exp field : exp.getFields()) {
+            myRegistry.appendToClusterArgList(myArgumentsCache.remove(field));
+        }
+        registerFunction(exp, myExpLabels.get("(_)"));
     }
 
     /**
