@@ -291,6 +291,54 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
 
     /**
      * <p>
+     * Code that gets executed after visiting a {@link TupleExp}.
+     * </p>
+     *
+     * @param exp
+     *            A tuple expression.
+     */
+    @Override
+    public void postTupleExp(TupleExp exp) {
+        // If this is not a prefix operator we have seen, then add it to our map
+        if (!myExpLabels.containsKey("(_)")) {
+            myExpLabels.put("(_)", myNextLabel);
+            myNextLabel++;
+        }
+    }
+
+    /**
+     * <p>
+     * This method redefines how a {@link TupleExp} should be walked.
+     * </p>
+     *
+     * @param exp
+     *            A tuple expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkTupleExp(TupleExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preTupleExp(exp);
+
+        // YS: Walk each of the expressions inside TupleExp
+        List<Exp> fields = exp.getFields();
+        for (Exp field : fields) {
+            TreeWalker.visit(this, field);
+        }
+
+        postTupleExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
+    }
+
+    /**
+     * <p>
      * Code that gets executed after visiting a {@link VarExp}.
      * </p>
      *
