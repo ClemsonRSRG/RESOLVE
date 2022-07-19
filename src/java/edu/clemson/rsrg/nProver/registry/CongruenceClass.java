@@ -113,7 +113,7 @@ public class CongruenceClass {
      */
     @Override
     public final String toString() {
-        return "|" + "firstPlantation=" + firstPlantation + "||classTag=" + classTag + "||lastArgStringPosition="
+        return "|" + "firstStand=" + firstPlantation + "||classTag=" + classTag + "||lastArgStringPosition="
                 + lastArgStringPosition + "||dominantCClass=" + dominantCClass + "|";
     }
 }

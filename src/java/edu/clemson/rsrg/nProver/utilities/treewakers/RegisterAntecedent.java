@@ -73,14 +73,18 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
     public final void postInfixExp(InfixExp exp) {
         super.postInfixExp(exp);
         int operatorNumber = myExpLabels.get(exp.getOperatorAsString());
+        int lhsArgument = myArgumentsCache.remove(exp.getLeft());
+        int rhsArgument = myArgumentsCache.remove(exp.getRight());
 
         // Logic for handling infix expressions in the antecedent
         if (operatorNumber == OP_EQUALS) { // if it is antecedent equal
-            myRegistry.makeCongruent(myArgumentsCache.remove(exp.getLeft()), myArgumentsCache.remove(exp.getRight()));
+            if (!myRegistry.areCongruent(lhsArgument, rhsArgument)) {
+                myRegistry.makeCongruent(lhsArgument, rhsArgument);
+            }
         } else {
             // append arguments usable in registering the infix operator
-            myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getLeft()));
-            myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getRight()));
+            myRegistry.appendToClusterArgList(lhsArgument);
+            myRegistry.appendToClusterArgList(rhsArgument);
 
             registerFunction(exp, operatorNumber);
         }
@@ -189,7 +193,7 @@ public class RegisterAntecedent extends AbstractRegisterSequent {
      */
     @Override
     public void postVarExp(VarExp exp) {
-        // YS: If we detect a top-level antecedent that is "false", then we need to special handle it.
+        // YS: If we detect a top-level antecedent that is "false", then we need to specially handle it.
         // Otherwise, we simply just add it to the registry as normal.
         // From Bill Ogden, "For the implicit and operator in an antecedent, True is an identity element
         // (i. e., ( F1 and F2 and ... and Fn and True ) = ( F1 and F2 and ... and Fn ) ) and
