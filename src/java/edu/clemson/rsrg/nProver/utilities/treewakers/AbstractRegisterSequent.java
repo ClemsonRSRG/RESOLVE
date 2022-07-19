@@ -16,6 +16,8 @@ import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.parsing.data.LocationDetailModel;
+import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
 import java.util.LinkedHashMap;
@@ -54,6 +56,14 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      * </p>
      */
     protected final Map<String, Integer> myExpLabels;
+
+    /**
+     * <p>
+     * A counter to enumerate the number of literals we have encountered. This is used to allow duplicates literal
+     * expressions in our map.
+     * </p>
+     */
+    private int myLiteralCounter;
 
     /**
      * <p>
@@ -108,6 +118,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
         myArgumentsCache = new LinkedHashMap<>();
         myRegistry = registry;
         myExpLabels = expLabels;
+        myLiteralCounter = 0;
         myNextLabel = nextLabel;
     }
 
@@ -134,6 +145,48 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
             myExpLabels.put(exp.getOperatorAsString(), myNextLabel);
             myNextLabel++;
         }
+    }
+
+    /**
+     * <p>
+     * This method redefines how a {@link DotExp} should be walked.
+     * </p>
+     *
+     * @param exp
+     *            A dotted expression.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public final boolean walkDotExp(DotExp exp) {
+        preAny(exp);
+        preExp(exp);
+        preMathExp(exp);
+        preDotExp(exp);
+
+        // YS: We will need to special handle DotExp since it is
+        // really one named expression separated by dots.
+        List<Exp> segments = exp.getSegments();
+        for (Exp e : segments) {
+            if (e instanceof FunctionExp) {
+                // YS: For right now we can handle everything,
+                // but FunctionExp (i.e., Stack.Val_in(...))
+                // since we don't know how to do deal with them yet.
+                throw new SourceErrorException("[nProver] Cannot handle function " + ((FunctionExp) e).getName()
+                        + " in the dot expression " + exp, e.getLocation());
+            }
+        }
+
+        // YS: If we got here, we didn't have any FunctionExps inside our DotExp
+        // Logic for handling dot expressions
+        storeInArgumentCache(exp);
+
+        postDotExp(exp);
+        postMathExp(exp);
+        postExp(exp);
+        postAny(exp);
+
+        return true;
     }
 
     /**
@@ -204,6 +257,12 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     @Override
     public void postLiteralExp(LiteralExp exp) {
+        // YS: LiteralExps are so common, so we need to allow for duplicates my storing a location detail model
+        if (exp.getLocationDetailModel() == null) {
+            myLiteralCounter++;
+            exp.setLocationDetailModel(new LocationDetailModel(exp.getLocation().clone(), exp.getLocation().clone(),
+                    "[Prover] Encountered Literal Exp #" + myLiteralCounter));
+        }
         storeInArgumentCache(exp);
     }
 

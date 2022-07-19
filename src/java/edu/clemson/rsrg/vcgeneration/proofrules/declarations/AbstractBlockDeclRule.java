@@ -304,6 +304,12 @@ public abstract class AbstractBlockDeclRule extends AbstractProofRuleApplication
      */
     protected final Exp createRestoresExpForSharedVars(Location declLoc, VarExp stateVarExp, OldExp oldStateVarExp,
             Exp ensuresExp) {
+        // Update the location detail
+        stateVarExp.setLocationDetailModel(new LocationDetailModel(stateVarExp.getLocation().clone(),
+                stateVarExp.getLocation().clone(), "Outgoing value of " + stateVarExp));
+        oldStateVarExp.setLocationDetailModel(new LocationDetailModel(oldStateVarExp.getLocation().clone(),
+                oldStateVarExp.getLocation().clone(), "Incoming value of " + stateVarExp));
+
         // Construct an expression using the expression and it's
         // old expression equivalent.
         Exp restoresConditionExp = new EqualsExp(declLoc.clone(), stateVarExp.clone(), null, EqualsExp.Operator.EQUAL,
