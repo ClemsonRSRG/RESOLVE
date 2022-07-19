@@ -136,8 +136,8 @@ public class CongruenceCluster {
     @Override
     public final String toString() {
         return "|" + "treeNodeLabel=" + treeNodeLabel + "||indexToArgumentList=" + indexToArgumentList
-                + "||indexToCongruenceClass=" + indexToCongruenceClass + "||nextStandCluster="
-                + nextPlantationCluster + "||previousStandCluster=" + previousPlantationCluster
-                + "||dominantCluster=" + dominantCluster + "||nextWithSameArg=" + nextWithSameArg + "|";
+                + "||indexToCongruenceClass=" + indexToCongruenceClass + "||nextStandCluster=" + nextPlantationCluster
+                + "||previousStandCluster=" + previousPlantationCluster + "||dominantCluster=" + dominantCluster
+                + "||nextWithSameArg=" + nextWithSameArg + "|";
     }
 }

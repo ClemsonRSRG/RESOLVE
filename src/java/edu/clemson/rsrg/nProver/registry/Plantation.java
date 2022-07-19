@@ -104,8 +104,8 @@ public class Plantation {
      */
     @Override
     public final String toString() {
-        return "|" + "treeNodeLabel=" + treeNodeLabel + "||firstStandCluster=" + firstPlantationCluster
-                + "||standTag=" + plantationTag + "||nextCCStand=" + nextCCPlantation
-                + "||nextVrtyStand=" + nextVrtyPlantation + "||prvVrtyStand=" + prvVrtyPlantation + "|";
+        return "|" + "treeNodeLabel=" + treeNodeLabel + "||firstStandCluster=" + firstPlantationCluster + "||standTag="
+                + plantationTag + "||nextCCStand=" + nextCCPlantation + "||nextVrtyStand=" + nextVrtyPlantation
+                + "||prvVrtyStand=" + prvVrtyPlantation + "|";
     }
 }
