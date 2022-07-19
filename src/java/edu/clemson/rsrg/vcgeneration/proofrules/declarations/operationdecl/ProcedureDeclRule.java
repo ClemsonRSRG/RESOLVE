@@ -492,6 +492,14 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule implements ProofRul
                         DotExp oldElementDotExp = new DotExp(restoresLoc.clone(), oldSegments);
                         oldElementDotExp.setMathType(elementExp.getMathType());
 
+                        // Update the location detail
+                        elementDotExp
+                                .setLocationDetailModel(new LocationDetailModel(elementDotExp.getLocation().clone(),
+                                        elementDotExp.getLocation().clone(), "Outgoing value of " + elementDotExp));
+                        oldElementDotExp
+                                .setLocationDetailModel(new LocationDetailModel(oldElementDotExp.getLocation().clone(),
+                                        oldElementDotExp.getLocation().clone(), "Incoming value of " + elementDotExp));
+
                         // Create an equality expression
                         EqualsExp equalsExp = new EqualsExp(restoresLoc.clone(), elementDotExp, null, Operator.EQUAL,
                                 oldElementDotExp);
@@ -506,6 +514,13 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule implements ProofRul
                         }
                     }
                 } else {
+                    // Update the location detail
+                    parameterExp.setLocationDetailModel(new LocationDetailModel(parameterExp.getLocation().clone(),
+                            parameterExp.getLocation().clone(), "Outgoing value of " + parameterExp));
+                    oldParameterExp
+                            .setLocationDetailModel(new LocationDetailModel(oldParameterExp.getLocation().clone(),
+                                    oldParameterExp.getLocation().clone(), "Incoming value of " + parameterExp));
+
                     // Construct an expression using the expression and it's
                     // old expression equivalent.
                     restoresConditionExp = new EqualsExp(restoresLoc.clone(), parameterExp.clone(), null,
@@ -611,7 +626,7 @@ public class ProcedureDeclRule extends AbstractBlockDeclRule implements ProofRul
                 // Convert the math variables to variable expressions
                 VarExp stateVarExp = Utilities.createVarExp(procedureLoc.clone(), null, mathVarDec.getName(),
                         mathVarDec.getMathType(), null);
-                OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp);
+                OldExp oldStateVarExp = new OldExp(procedureLoc.clone(), stateVarExp.clone());
                 oldStateVarExp.setMathType(stateVarExp.getMathType());
 
                 // Add a "restores" mode to any shared variables not being affected
