@@ -16,6 +16,7 @@ import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.treewalk.TreeWalkerStackVisitor;
@@ -55,6 +56,14 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      * </p>
      */
     protected final Map<String, Integer> myExpLabels;
+
+    /**
+     * <p>
+     * A counter to enumerate the number of literals we have encountered. This is used to allow duplicates literal
+     * expressions in our map.
+     * </p>
+     */
+    private int myLiteralCounter;
 
     /**
      * <p>
@@ -109,6 +118,7 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
         myArgumentsCache = new LinkedHashMap<>();
         myRegistry = registry;
         myExpLabels = expLabels;
+        myLiteralCounter = 0;
         myNextLabel = nextLabel;
     }
 
@@ -247,6 +257,12 @@ public abstract class AbstractRegisterSequent extends TreeWalkerStackVisitor {
      */
     @Override
     public void postLiteralExp(LiteralExp exp) {
+        // YS: LiteralExps are so common, so we need to allow for duplicates my storing a location detail model
+        if (exp.getLocationDetailModel() == null) {
+            myLiteralCounter++;
+            exp.setLocationDetailModel(new LocationDetailModel(exp.getLocation().clone(), exp.getLocation().clone(),
+                    "[Prover] Encountered Literal Exp #" + myLiteralCounter));
+        }
         storeInArgumentCache(exp);
     }
 
