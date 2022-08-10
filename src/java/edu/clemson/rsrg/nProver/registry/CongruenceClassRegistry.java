@@ -27,39 +27,121 @@ import java.util.*;
  * @param <T1>
  *            type of tree node label selected
  * @param <T2>
+ *            tree category tag
  * @param <T3>
+ *            default tree category attribute
  * @param <T4>
  */
 
-public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T2 -
+public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
-    // ========================================== UPPER BOUNDS =============================================
     /**
-     *
+     * <p>
+     * Maximum capacity set for congruece class designators
+     * </p>
      */
     private int ccDesignatorCapacity;
+    /**
+     * <p>
+     * Maximum capacity set for cluster designators
+     * </p>
+     */
     private int cClusterDesignatorCapacity;
+
+    /**
+     * <p>
+     * Maximum capacity set for the arguments
+     * </p>
+     */
     private int argumentListCapacity;
+
+    /**
+     * <p>
+     * Maximum capacity set for the registry root labels
+     * </p>
+     */
     private int rootLabelCapacity;
 
-    // =========================================TOP VALUES=========================================================
-    // Top_CC_Dsntr
-    private int topCongruenceClassDesignator;
-    // Top_Cr_Dsntr
-    private int topCongruenceClusterDesignator;
-    // Rt_Lab_Capacity
+    /**
+     * <p>
+     * Maximum capacity set for the registry labels
+     * </p>
+     */
     private int topLabelCapacity;
 
-    // ========================================= REGISTRY STRUCTURES =========================================
+    /**
+     * <p>
+     * Top congruence class designator representing the most recent used integer value to designate a class
+     * </p>
+     */
+    private int topCongruenceClassDesignator;
+
+    /**
+     * <p>
+     * Top congruence cluster designator representing the most recent used integer value to designate a class
+     * </p>
+     */
+    private int topCongruenceClusterDesignator;
+
+    /**
+     * <p>
+     * This array keeps a list of congruence classes containing at least one tree with a root node specified by an index
+     * of this array.
+     * </p>
+     */
     private VarietyList[] varietyArray;
+
+    /**
+     * <p>
+     * This array keeps a list of congruence clusters containing the same root node.
+     * </p>
+     */
     private Plantation[] plantationArray;
+
+    /**
+     * <p>
+     * This array keeps all created congruence clusters in the registry for the target sequent VC to be verified.
+     * </p>
+     */
     private CongruenceCluster[] clusterArray;
+
+    /**
+     * <p>
+     * This array keeps all created congruence classes in the registry for the target sequent VC to be verified.
+     * </p>
+     */
     private CongruenceClass[] congruenceClassArray;
+
+    /**
+     * <p>
+     * This array keeps all the arguments for the created clusters effectively. Arguments used in more than one cluster
+     * are created only once.
+     * </p>
+     */
     private ClusterArgument[] clusterArgumentArray;
+
+    /**
+     * <p>
+     * This Queue store the arguments appended by the client before creating a cluster.
+     * </p>
+     */
     private Queue<Integer> clusterArgumentString;
+
+    /**
+     * <p>
+     * This Queue keeps the list of all classes that are to be merged as a consequence of two current classes
+     * collapsing.
+     * </p>
+     */
     private Queue<Integer> classMergeList;
+
+    /**
+     * <p>
+     * This Set keeps the reflexive operators that appears on the succedent of the sequent VC to be proved. The client
+     * add respective integers for the operators before the operator is registered.
+     * </p>
+     */
     private Set<Integer> succedentReflexiveOperatorsSet;
-    // private CongruenceClassAttribute<T4> classAttributeMap;
 
     // we can take this as plantation designator determines the index in plantation array and index to plantation tag
     private int indexForPlantationArray;
@@ -96,7 +178,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> { // T1 - Tree node label T
         plantationArray = new Plantation[rootLabelCapacity];
         clusterArray = new CongruenceCluster[cClusterDesignatorCapacity];
         congruenceClassArray = new CongruenceClass[ccDesignatorCapacity];
-        clusterArgumentArray = new ClusterArgument[100];
+        clusterArgumentArray = new ClusterArgument[100000];
         clusterArgumentString = new ArrayDeque<>();
         classMergeList = new ArrayDeque<>();
         succedentReflexiveOperatorsSet = new HashSet<>();
