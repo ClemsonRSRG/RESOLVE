@@ -143,24 +143,50 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      */
     private Set<Integer> succedentReflexiveOperatorsSet;
 
-    // we can take this as plantation designator determines the index in plantation array and index to plantation tag
+    /**
+     * <p>
+     * This is plantation designator used as an index in plantation array and plantation tag as the cluster is created
+     * </p>
+     */
     private int indexForPlantationArray;
-    // local available index to use for the cluster array
-    private int topArgStrArrIndex = 2;
-
-    // temp flag, this does not exist in the concept yet but, it will be added as it is necessary
-    private boolean isProved = false;
-    private boolean succedentReflexiveOperatorTest = false;
 
     /**
      * <p>
-     * The constructor for the registry
+     * The most recent used index in the {@link ClusterArgument}
+     * </p>
+     */
+    private int topArgStrArrIndex;
+
+    /**
+     * <p>
+     * Starting index for the arguments, first two indices are reserved.
+     * </p>
+     */
+    private static final int START_ARG_INDEX = 2;
+
+    /**
+     * <p>
+     *  This boolean flag indicates whether the sequent VC is proved or not.
+     * </p>
+     */
+    private boolean isProved;
+
+    /**
+     * <p>
+     *  This boolean flag indicates whether the sequent VC contains the reflexive operators in the succedent.
+     * </p>
+     */
+    private boolean succedentReflexiveOperatorTest;
+
+    /**
+     * <p>
+     * The constructor for the registry that stores the target sequent VC in classes that contain clusters organized in varieties and plantations.
      * </p>
      *
-     * @param ccDesignatorCapacity
-     * @param cClusterDesignatorCapacity
-     * @param argumentListCapacity
-     * @param rootLabelCapacity
+     * @param ccDesignatorCapacity the maximum capacity provided for congruence class designators
+     * @param cClusterDesignatorCapacity the maximum capacity provided for congruence cluster designators
+     * @param argumentListCapacity the maximum capacity provided for arguments
+     * @param rootLabelCapacity the maximum capacity provided for root labels.
      */
     public CongruenceClassRegistry(int ccDesignatorCapacity, int cClusterDesignatorCapacity, int argumentListCapacity,
             int rootLabelCapacity) {
@@ -173,6 +199,9 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         topCongruenceClusterDesignator = 0;
         indexForPlantationArray = 0;
         topLabelCapacity = 0;
+        topArgStrArrIndex = START_ARG_INDEX;
+        isProved = false;
+        succedentReflexiveOperatorTest = false;
 
         varietyArray = new VarietyList[rootLabelCapacity];
         plantationArray = new Plantation[rootLabelCapacity];
@@ -183,17 +212,20 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         classMergeList = new ArrayDeque<>();
         succedentReflexiveOperatorsSet = new HashSet<>();
 
-        // start the index 0 with {0,0,0,0,0,0}
-        // create a cluster object, with 0 index to argument list then update later
+        // start the index 0 with {0,0,0,0,0,0} by creating a cluster object,
+        // with 0 index to argument list then update later
         CongruenceCluster cCluster = new CongruenceCluster(0, 0, 0, 0, 0, 0, 0, 0);
+
         // put the created cluster into the cluster array
         clusterArray[0] = cCluster;
-        // same thing for the argument array
+
+        // start the index 0 with {0,0,0,0,0,0} by creating an argument array
         ClusterArgument cArgument = new ClusterArgument(0, 0, 0, 0, 0);
         clusterArgumentArray[0] = cArgument;
 
-        // same thing for plantation
+        // start the index 0 with {0,0,0,0,0,0} by creating a plantation
         Plantation plantation = new Plantation(0, 0, 0, 0, 0, 0);
+
         // put the initial created plantation into the array
         plantationArray[0] = plantation;
 
@@ -214,7 +246,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      *
      * @return integer value representing accessor for the class created.
      */
-    public int registerCluster(Integer treeNodeLabel) { /* Register_Cluster_Lbld */
+    public int registerCluster(Integer treeNodeLabel) {
         int nextWithSimilarArgString = 0;
         int nextPlantationCluster = 0;
         int prevPlantationCluster = 0;
@@ -299,54 +331,50 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         }
     }
 
-    // check if the cluster is already registered
+    /**
+     * <p>
+     * This operatipon checks if the cluster to be registered already exists in the registry. It involves checking into the cluster argument array if the argument exists
+     * </p>
+     * @param treeNodeLabel the root node for the cluster to be checked
+     * @return true if the cluster exists in the registry, otherwise, it returns false.
+     */
     public boolean checkIfRegistered(Integer treeNodeLabel) { /* Is_Already_Reg_Clstr */
-        // this will need a check into the cluster argument array if the argument exists
         int classDesignator = 0;
         int nextClusterArgIndex = 0;
         int count = 0;
         int argStringLengh = argListLength(clusterArgumentString);
         int currentClusterArgIndex = 1;
         Queue<Integer> tempQueue = new ArrayDeque<>();
-        if (argStringLengh == 0) {// variable or constant
-            if (clusterArgumentArray[currentClusterArgIndex] == null) { // nothing with one argument registered don't
-                                                                        // waste time
+        // if argStringLength is 0, it is variable or constant
+        if (argStringLengh == 0) {
+            if (clusterArgumentArray[currentClusterArgIndex] == null) {
+                // there is nothing in the argument string yet, just return false
                 return false;
-            } else {// here we will check if the label and the argument is the same as one to be registered
-
+            } else {
+                // The condition checks if the label and the argument is the same as one to be registered
                 if (clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()]
                         .getTreeNodeLabel() == treeNodeLabel
                         && clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()]
                                 .getIndexToArgList() == currentClusterArgIndex) {
                     return true;
                 }
-                // let us check all clusters that have one argument by following the next with same argument filed until
-                // the end
-                // this is within the cluster array
+                // The while loop checks clusters in cluster array with one argument by following a pointer next with
+                // same argument filed until we find one or we get to the end.
                 int currentClusterIndex = clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()]
                         .getNextWithSameArg();
-                // int currentClusterIndex = clusterArgumentArray[currentClusterArgIndex].getClusterNumber();
                 while (clusterArray[currentClusterIndex].getNextWithSameArg() != 0) {
-                    // this is within the cluster array
-                    // int currentClusterIndex =
-                    // clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()].getNextWithSameArg();
-                    // clusterArgumentArray[currentClusterArgIndex].getClusterNumber()
                     if (clusterArray[currentClusterIndex].getTreeNodeLabel() == treeNodeLabel
                             && clusterArray[currentClusterIndex].getIndexToArgList() == currentClusterArgIndex) {
                         return true;
                     }
                     currentClusterIndex = clusterArray[currentClusterIndex].getNextWithSameArg();
-                    if (currentClusterIndex != 0) { // we don't want to index 0 in any of the structures we have
-                    } else { // if it is 0 there is nothing more we can do, it is not there.
+                    if (currentClusterIndex == 0) {
+                        // if it is 0 there is nothing more we can do, it is not there.
                         return false;
                     }
                 }
 
                 if (clusterArray[currentClusterIndex].getNextWithSameArg() == 0) {
-                    // this is within the cluster array
-                    // int currentClusterIndex =
-                    // clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()].getNextWithSameArg();
-                    // clusterArgumentArray[currentClusterArgIndex].getClusterNumber()
                     if (clusterArray[currentClusterIndex].getTreeNodeLabel() == treeNodeLabel
                             && clusterArray[currentClusterIndex].getIndexToArgList() == currentClusterArgIndex) {
                         return true;
@@ -356,24 +384,23 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
             }
             return false;
         }
-        // cluster we are checking has arguments and assumed already appended in the argument list
+        //The while loop checks for clusters with arguments, and assumed they are already appended in the argument list
         while (clusterArgumentString.size() > 0) {
             classDesignator = removeFirstArgDesignator();
             tempQueue.add(classDesignator);
-            // this is added to solve the problem that some cluster argument might have disappeared when mearge happens
             classDesignator = getTheUltimateDominantClass(congruenceClassArray[classDesignator].getDominantCClass());
 
             nextClusterArgIndex = clusterArgumentArray[currentClusterArgIndex].getNextClusterArg();
             if (nextClusterArgIndex == 0) {
-                // restore the cluster argument list
+                // This if statement is entered if there is no next level after the argument being checked.
+                // Just restore the argument list and return false.
                 while (clusterArgumentString.size() > 0) {
                     tempQueue.add(clusterArgumentString.remove());
                 }
-                // restore the cluster argument list
                 while (tempQueue.size() > 0) {
                     appendToClusterArgList(tempQueue.remove());
                 }
-                return false; // there is no next level
+                return false;
             } else {
                 // next line is changed to check dominant class for all sides of the equals, initially it had dominant
                 // class on the RHS only
