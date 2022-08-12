@@ -166,27 +166,32 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     *  This boolean flag indicates whether the sequent VC is proved or not.
+     * This boolean flag indicates whether the sequent VC is proved or not.
      * </p>
      */
     private boolean isProved;
 
     /**
      * <p>
-     *  This boolean flag indicates whether the sequent VC contains the reflexive operators in the succedent.
+     * This boolean flag indicates whether the sequent VC contains the reflexive operators in the succedent.
      * </p>
      */
     private boolean succedentReflexiveOperatorTest;
 
     /**
      * <p>
-     * The constructor for the registry that stores the target sequent VC in classes that contain clusters organized in varieties and plantations.
+     * The constructor for the registry that stores the target sequent VC in classes that contain clusters organized in
+     * varieties and plantations.
      * </p>
      *
-     * @param ccDesignatorCapacity the maximum capacity provided for congruence class designators
-     * @param cClusterDesignatorCapacity the maximum capacity provided for congruence cluster designators
-     * @param argumentListCapacity the maximum capacity provided for arguments
-     * @param rootLabelCapacity the maximum capacity provided for root labels.
+     * @param ccDesignatorCapacity
+     *            The maximum capacity provided for congruence class designators
+     * @param cClusterDesignatorCapacity
+     *            The maximum capacity provided for congruence cluster designators
+     * @param argumentListCapacity
+     *            The maximum capacity provided for arguments
+     * @param rootLabelCapacity
+     *            The maximum capacity provided for root labels.
      */
     public CongruenceClassRegistry(int ccDesignatorCapacity, int cClusterDesignatorCapacity, int argumentListCapacity,
             int rootLabelCapacity) {
@@ -231,9 +236,9 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     }
 
-    /*************************************************
+    /****************************************************************************************************************
      * PUBLIC METHODS
-     *******************************************************************/
+     ***************************************************************************************************************/
 
     /**
      * <p>
@@ -242,7 +247,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      * </p>
      *
      * @param treeNodeLabel
-     *            an integer value to represent the tree node being registered.
+     *            An integer value to represent the tree node being registered.
      *
      * @return integer value representing accessor for the class created.
      */
@@ -276,7 +281,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 isProved = true;
             } else {
                 // for efficiency, this will tell the registry there is a reflexive operator in the succedent and the
-                // test should be activated otherwise don't waste any resources
+                // special test should be activated otherwise don't waste any resources
                 succedentReflexiveOperatorTest = true;
             }
         }
@@ -305,10 +310,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
             // put the created class into the congruence class array
             congruenceClassArray[topCongruenceClassDesignator] = cClass;
 
-            // attach the attributes to this class using its cClass designator
-            // classAttributeMap.addAClassAttribute(topCongruenceClassDesignator, classAttribute);
-
-            // create a cluster object, with 0 index to argument list then update later
+            // create a cluster object, with 0 index to argument list then update later once tags are included
             CongruenceCluster cCluster = new CongruenceCluster(treeNodeLabel, 0, topCongruenceClassDesignator,
                     topCongruenceClusterDesignator, nextPlantationCluster, prevPlantationCluster,
                     topCongruenceClusterDesignator, nextWithSimilarArgString);
@@ -318,8 +320,8 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
             // get the index created after putting the argument string for this cluster
             int indexInArgArray = createClusterArgumentArray(treeNodeLabel, clusterArgumentString);
-            // set the index to argument array, initially I created the cluster argument first before creating the
-            // object
+
+            // set the index to argument array,
             clusterArray[topCongruenceClusterDesignator].setIndexToArgumentList(indexInArgArray);
 
             // update variety list array
@@ -333,10 +335,14 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * This operatipon checks if the cluster to be registered already exists in the registry. It involves checking into the cluster argument array if the argument exists
+     * This operatipon checks if the cluster to be registered already exists in the registry. It involves checking into
+     * the cluster argument array if the argument exists
      * </p>
-     * @param treeNodeLabel the root node for the cluster to be checked
-     * @return true if the cluster exists in the registry, otherwise, it returns false.
+     *
+     * @param treeNodeLabel
+     *            The root node for the cluster to be checked
+     *
+     * @return {@code true} if the cluster exists in the registry, otherwise, it returns false.
      */
     public boolean checkIfRegistered(Integer treeNodeLabel) { /* Is_Already_Reg_Clstr */
         int classDesignator = 0;
@@ -384,7 +390,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
             }
             return false;
         }
-        //The while loop checks for clusters with arguments, and assumed they are already appended in the argument list
+        // The while loop checks for clusters with arguments, and assumed they are already appended in the argument list
         while (clusterArgumentString.size() > 0) {
             classDesignator = removeFirstArgDesignator();
             tempQueue.add(classDesignator);
@@ -402,17 +408,14 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 }
                 return false;
             } else {
-                // next line is changed to check dominant class for all sides of the equals, initially it had dominant
-                // class on the RHS only
                 if (getTheUltimateDominantClass(
                         congruenceClassArray[clusterArgumentArray[nextClusterArgIndex].getCcNumber()]
                                 .getDominantCClass()) == classDesignator) {
                     count++;
                     currentClusterArgIndex = nextClusterArgIndex;
                 } else {
-                    if (clusterArgumentArray[nextClusterArgIndex].getAlternativeArg() == 0) { // it didn't have even the
-                                                                                              // first class, just
-                                                                                              // return false and exit
+                    // it didn't have even the first class for the first argument, just return false and exit
+                    if (clusterArgumentArray[nextClusterArgIndex].getAlternativeArg() == 0) {
 
                         while (clusterArgumentString.size() > 0) {
                             tempQueue.add(clusterArgumentString.remove());
@@ -423,29 +426,27 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                         }
                         return false;
                     }
-
-                    while (clusterArgumentArray[nextClusterArgIndex].getAlternativeArg() != 0) { // we have hope it may
-                                                                                                 // be on the
-                                                                                                 // alternative args
+                    // check the alternative args if we can find it
+                    while (clusterArgumentArray[nextClusterArgIndex].getAlternativeArg() != 0) {
 
                         if (getTheUltimateDominantClass(
                                 clusterArgumentArray[clusterArgumentArray[nextClusterArgIndex].getAlternativeArg()]
-                                        .getCcNumber()) == classDesignator) { // we found it, increase count and get out
+                                        .getCcNumber()) == classDesignator) {
+                            // argument found, increase the count and exit
                             count++;
-                            // currentClusterArgIndex = nextClusterArgIndex;
-                            // replaced it was not updated right
                             currentClusterArgIndex = clusterArgumentArray[nextClusterArgIndex].getAlternativeArg();
                             break;
-                        } else {// we did not get it, check the next one
+                        } else {
+                            // argument not found, check the next one
                             nextClusterArgIndex = clusterArgumentArray[nextClusterArgIndex].getAlternativeArg();
                         }
                     }
                 }
 
             }
-            if (argStringLengh == count) { // check if they have same length, then arg string exists. But we still have
-                                           // to check if the cluster exists by checking the label and the arg string
-                // duplicate may need private method
+            // check if we found all arguments
+            if (argStringLengh == count) {
+                // now check if the cluster exists by checking the label and the arg string
                 if (clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()]
                         .getTreeNodeLabel() == treeNodeLabel
                         && clusterArray[clusterArgumentArray[currentClusterArgIndex].getClusterNumber()]
@@ -481,45 +482,47 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         return false;
     }
 
-    // getting back the congruence class accessor for
-    // Assumption the cluster is existing in a class
-    // the argument string is appended with the argument classes for the label passed in the operation
-    public int getAccessorFor(Integer treeNodeLabel) {// Get_Accr_for
+    /**
+     * <p>
+     * This operation is used to get the accessor for the class with the cluster we are about to register.
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            A label for the cluster to be registered
+     *
+     * @return an accessor for the class containing the cluster to be created.
+     */
+    public int getAccessorFor(Integer treeNodeLabel) {/* Get_Accr_for */
         int currentIndexInArgumentString = 1;
         int currentIndexInClusterArray = clusterArgumentArray[currentIndexInArgumentString].getClusterNumber();
         if (clusterArgumentString.size() == 0) {
             // Assuming everything in the list of clusters with same arguments will point to
-            // currentIndexInArgumentString
-            // And we should eventually find one with the tree node label we are looking for
+            // currentIndexInArgumentString, walking the list we should eventually find one with the tree node label
+            // we are looking for
             while (clusterArray[currentIndexInClusterArray].getTreeNodeLabel() != treeNodeLabel) {
                 currentIndexInClusterArray = clusterArray[currentIndexInClusterArray].getNextWithSameArg();
             }
-            // return the class, this case I am returning the dominant class
+            // return the class designator and it should be the dominant one
             return congruenceClassArray[clusterArray[currentIndexInClusterArray].getIndexToCongruenceClass()]
                     .getDominantCClass();
 
-        } else {// the cluster argument string is not empty we have to walk the argument array structure
-                // Assuming the way the were put in the structure is maintained all throughout
+        } else {
+            // The approach assumes the way the args were put in the structure is maintained all throughout
             int finalCountNeeded = clusterArgumentString.size();
-            // int iter = finalCountNeeded;
             int currentClassDesignator = 0;
-            // currentClassDesignator = congruenceClassArray[currentClassDesignator].getDominantCClass();
             int nextClusterArgument = 1;
             int countArgumentsFound = 0;
 
-            // the assumption is that we should find everything in the argument string, so I have written the code with
-            // that assumption, no need to keep the count
+            // The operation is called when we know the cluster exists. Therefore, we should find everything in the
+            // argument string no need to keep the count.
             while (clusterArgumentString.size() > 0) {
                 currentClassDesignator = removeFirstArgDesignator();
                 currentClassDesignator = congruenceClassArray[currentClassDesignator].getDominantCClass();
                 nextClusterArgument = clusterArgumentArray[nextClusterArgument].getNextClusterArg();
 
-                // again next line is changed to check dominant class for all sides of the equals, initially it had
-                // dominant class on the RHS only
                 if (congruenceClassArray[clusterArgumentArray[nextClusterArgument].getCcNumber()]
                         .getDominantCClass() == currentClassDesignator) {
                     countArgumentsFound++;
-                    // break;
                 } else {
                     while (clusterArgumentArray[nextClusterArgument].getAlternativeArg() != 0) {
                         if (getTheUltimateDominantClass(
@@ -539,14 +542,26 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 return congruenceClassArray[clusterArray[clusterArgumentArray[nextClusterArgument].getClusterNumber()]
                         .getIndexToCongruenceClass()].getDominantCClass();
             } else {
-                return 0; // we should not get here if everything is set up correctly
+                // we should not get here if everything is set up correctly
+                // but just for safety return 0
+                return 0;
             }
         }
 
     }
 
-    // return the next class accessor after the current one provided in the variety
-    // this information is kept by one of the field in the congruence class label
+    /**
+     * <p>
+     * This operation allows us to move from one congruence class accessor to another in the variety.
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            The tree node label a class we are looking for should contain in its clusters
+     * @param currentCCAccessor
+     *            The current class accessor
+     *
+     * @return the next congruence class accessor after {@param currentCCAccessor}.
+     */
     public int advanceCClassAccessor(Integer treeNodeLabel, int currentCCAccessor) { // Advance_CC_Accr_for
         int currentPlantationForTreeNodeLabel = 0;
         int nextPlantationInNextClassAccessor = 0;
@@ -565,7 +580,6 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 congruenceClassForCluster = clusterArray[plantationArray[nextPlantationInNextClassAccessor]
                         .getFirstPlantationCluster()].getIndexToCongruenceClass();
                 dominantCongruenceClassForCluster = congruenceClassArray[congruenceClassForCluster].getDominantCClass();
-                // I am returning dominant class here
                 return dominantCongruenceClassForCluster;
             } else {
                 currentPlantationForTreeNodeLabel = plantationArray[currentPlantationForTreeNodeLabel]
@@ -578,11 +592,22 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 }
             }
         }
-        // this is just defensive, we will never get here as the operation is always called when we have next class
+        // this is just defensive, we will never get here as the operation is always called when we have next accessor
         return 0;
     }
 
-    // There are no more classes in the variety to look for
+    /**
+     * <p>
+     * This operation checks if the classes are exhausted in the veriety.
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            The designator for the variety we are checking.
+     * @param currentCCAccessor
+     *            Current congruence class accessor.
+     *
+     * @return {@code true} if we have exhausted all the classes in the variety designated by {@param treeNodeLabel}.
+     */
     public boolean isVarietyMaximal(Integer treeNodeLabel, int currentCCAccessor) { /* Is_Vrty_Maximal_for */
         int currentPlantationForTreeNodeLabel = 0;
         int nextPlantationInNextClassAccessor = 0;
@@ -618,31 +643,71 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         return true;
     }
 
-    // check if the supplied tree node label is among the root node labels
+    /**
+     * <p>
+     * This operation checks if the supplied tree node label is among the root node labels in the registry.
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            Tree node lable to be checked.
+     *
+     * @return {@code true} if the {@param treeNodeLabel} is within the nodes in the registry, returns {@code false}
+     *         otherwise.
+     */
     public boolean isRegistryLabel(Integer treeNodeLabel) { /* Is_Rgry_Lab */
-        if (varietyArray[treeNodeLabel] != null) { // each node at some point is considered a root node label
+        if (varietyArray[treeNodeLabel] != null) {
+            // each node at some point is considered a root node label
             return true;
         }
         return false;
     }
 
-    // return the difference, 0 if we have exhausted congruence class designators
+    /**
+     * <p>
+     * This operation return the remaining capacity for the congruence class designators in the registry.
+     * </p>
+     *
+     * @return the difference between the maximum class capacity and the current used count of class designators.
+     */
     public int remainingCCDesignatorCap() {
         return ccDesignatorCapacity - topCongruenceClassDesignator;
     }
 
+    /**
+     * <p>
+     * This operation return the remaining capacity for the cluster designators in the registry.
+     * </p>
+     *
+     * @return the difference between the maximum cluster capacity and the current used count of cluster designators.
+     */
     public int remainingCClusterDesignatorCap() {
         return cClusterDesignatorCapacity - topCongruenceClusterDesignator;
     }
 
+    /**
+     * <p>
+     * This operation return the remaining label capacity for the labels in the registry.
+     * </p>
+     *
+     * @return the difference between the maximum label capacity and the current used count on the label.
+     */
     public int remainingLabelCap() {
         return rootLabelCapacity - topLabelCapacity;
     }
 
-    // should be next one within the plantation
+    /**
+     * <p>
+     * This operation allows us to move from one cluster to another inside a plantation.
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            The root node label for the plantation.
+     * @param currentClusterAccessor
+     *            The current cluster designator.
+     *
+     * @return the next cluster accessor after {@param currentClusterAccessor}.
+     */
     public int advanceClusterAccessor(Integer treeNodeLabel, int currentClusterAccessor) {
-        // we should have only one cluster designated by currentClusterAccessor,
-        // it might not be the dominant, but definitely only one
         int dominantCluster = currentClusterAccessor;
         while (clusterArray[dominantCluster].getDominantCluster() != currentClusterAccessor) {
             dominantCluster = clusterArray[dominantCluster].getDominantCluster();
@@ -650,7 +715,18 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         return clusterArray[dominantCluster].getNextPlantationCluster();
     }
 
-    // check if there is next cluster for the current plantation
+    /**
+     * <p>
+     * This operation checks if the cluster designators are exhausted inside the plantation.
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            A tree node label that designates the plantation being checked
+     * @param currentClusterAccessor
+     *            A current cluster accessor in the plantation
+     *
+     * @return {@code true} if we have exhausted all the clusters in the plantation, otherwise it returns {@code false}
+     */
     public boolean isPlantationMaximal(Integer treeNodeLabel, int currentClusterAccessor) {
         int dominantCluster = currentClusterAccessor;
         while (clusterArray[dominantCluster].getDominantCluster() != currentClusterAccessor) {
@@ -662,8 +738,18 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         return false;
     }
 
-    // it will check the dominant class, if the same, it is minimal otherwise it is not, and
-    // make sure the tree node label provided is in the registry
+    /**
+     * <p>
+     * This operation checks to see if provided congruence class accessor is minimal.
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            A tree node label designating the variety where class designated by {@param cClassAccessor} resides
+     * @param cClassAccessor
+     *            A congruence class accessor to check if it is minimal
+     *
+     * @return {@code true} iff the {@param cClassAccessor} is minimal, otherwise, return {@code false}
+     */
     public boolean isMinimalVCCDesignator(Integer treeNodeLabel, int cClassAccessor) {
         if (congruenceClassArray[cClassAccessor].getDominantCClass() == cClassAccessor
                 && varietyArray[treeNodeLabel] != null) {
@@ -672,6 +758,20 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         return false;
     }
 
+    /**
+     * <p>
+     * This operation checks if the plantation designator is minimal
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            The tree node label for the clusters in the plantation
+     * @param cClassAccessor
+     *            The accessor for the class the plantation is in
+     * @param clusterAccessor
+     *            The accessor for the cluster in the plantation
+     *
+     * @return {@code true} if the plantation designator is minimal, otherwise, it returns {@code false}
+     */
     public boolean isMinimalPlantationClusterDesignator(Integer treeNodeLabel, int cClassAccessor,
             int clusterAccessor) {
         if (clusterArray[clusterAccessor].getDominantCluster() == clusterAccessor
@@ -681,56 +781,75 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         return false;
     }
 
-    // considering the last one on the right is the one added first
+    /**
+     * <p>
+     * This operation removes the first argument class designator from the registry's argument list
+     * </p>
+     *
+     * @return the accessor for the first argument in the registry's argument list
+     */
     public int removeFirstArgDesignator() {
         return clusterArgumentString.remove();
     }
 
-    // get the current argument list length
+    /**
+     * <p>
+     * This operation gets the length of an argument string in the registry
+     * </p>
+     *
+     * @param clusterArgumentString
+     *            The argument string
+     *
+     * @return the length of an argument string in the registry
+     */
     public int argListLength(Queue<Integer> clusterArgumentString) {
         return clusterArgumentString.size();
     }
 
-    // append at the front, the next one will push earlier one forward
+    /**
+     * <p>
+     * The operation appends the argument passed from the client to the argument list in the registry
+     * </p>
+     *
+     * @param cClassDesignator
+     *            The congruence class accessor for the argument.
+     */
     public void appendToClusterArgList(int cClassDesignator) {
         clusterArgumentString.add(cClassDesignator);
     }
 
-    // The first accessor and second accessor should be provided by user as dominant designators, but we check it
-    // anyways to be sure
-    // assumes firstCCAccessor is smaller than secondCCAccessor always
-    // first accessor = 3, second accessor = 7, just as example
+    /**
+     * <p>
+     * This operation merges two congruence class designated by the accessor passed in the parameters.
+     * </p>
+     *
+     * @param firstCCAccessor
+     *            The first congruence class accessor
+     * @param secondCCAccessor
+     *            The second congruence class accessor
+     */
     public void makeCongruent(int firstCCAccessor, int secondCCAccessor) {
-
+        // The approach takes assumes firstCCAccessor is smaller than secondCCAccessor always.
+        // The example used is for first accessor being 3 and second accessor being 7
+        // The variables are named with 3 and 7 to simplify tracing
         int indexToArgString_3_L1 = 0;
         int indexToArgString_7_L2 = 0;
         int indexToArgString_3_L2 = 0;
         int indexTOArgString_7_L1 = 0;
         int level_2 = 2;
         int level_1 = 1;
-        // make sure they are dominant classes
-        firstCCAccessor = getTheUltimateDominantClass(congruenceClassArray[firstCCAccessor].getDominantCClass()); // on
-                                                                                                                  // assumption
-                                                                                                                  // that
-                                                                                                                  // the
-                                                                                                                  // path
-                                                                                                                  // is
-                                                                                                                  // compressed
-        secondCCAccessor = getTheUltimateDominantClass(congruenceClassArray[secondCCAccessor].getDominantCClass()); // on
-                                                                                                                    // assumption
-                                                                                                                    // that
-                                                                                                                    // the
-                                                                                                                    // path
-                                                                                                                    // is
-                                                                                                                    // compressed
+        BitSet bitSet = new BitSet();
 
-        // addFirst and removeFirst will operate on a FIFO
+        // make sure they are dominant classes
+        firstCCAccessor = getTheUltimateDominantClass(congruenceClassArray[firstCCAccessor].getDominantCClass());
+        secondCCAccessor = getTheUltimateDominantClass(congruenceClassArray[secondCCAccessor].getDominantCClass());
+
+        // addFirst and removeFirst uses FIFO
         classMergeList.add(firstCCAccessor);
         classMergeList.add(secondCCAccessor);
 
-        BitSet bitSet = new BitSet();
-        // if no classes are added during merging process it will only execute once. Otherwise, it will continue until
-        // the list is exhausted
+        // if no classes are added during merging process it will only execute once. Otherwise, the while loop continue
+        // until the class merge list is exhausted
         while (classMergeList.size() != 0) {
             firstCCAccessor = classMergeList.remove();
             secondCCAccessor = classMergeList.remove();
@@ -748,9 +867,8 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 indexToArgString_3_L2 = congruenceClassArray[secondCCAccessor].getIndexInClusterArgArrayFromASOP(2);
                 indexTOArgString_7_L1 = congruenceClassArray[firstCCAccessor].getIndexInClusterArgArrayFromASOP(1);
             }
-
-            if (isSequentVCProvedByAttributes(bitSet)) { // check if it is proved
-                // Do something if it is proved
+            // check if it is proved
+            if (isSequentVCProvedByAttributes(bitSet)) {
                 isProved = true;
             } else if (succedentReflexiveOperatorTest) {
                 if (indexToArgString_7_L2 != 0 && indexToArgString_3_L1 != 0) {
@@ -783,17 +901,43 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         }
     }
 
-    // it works with the dominant classes already, so it takes in any class designator.
+    /**
+     * <p>
+     * This operation checks if the two provided congruence classes are already congruent
+     * </p>
+     *
+     * @param firstAccessor
+     *            The first congruence class accessor
+     * @param secondAccessor
+     *            The second congruence class accessor
+     *
+     * @return {@code true} iff the two classes are congruent. Otherwise, it returns {@code false}
+     */
     public boolean areCongruent(int firstAccessor, int secondAccessor) {
         return areClassesCongruent(firstAccessor, secondAccessor);
     }
 
-    // The following operations are not yet specified in the registry template, but hey are necessary for the congruence
-    // class registry to work
+    /**
+     * <p>
+     * This operation checks to see if the target sequent VC is proved
+     * </p>
+     *
+     * @return {@code true} iff the sequent VC is proved. Otherwise, it returns {@code false}
+     */
     public boolean checkIfProved() {
         return isProved;
     }
 
+    /**
+     * <p>
+     * This operation updates the congruence class attributes
+     * </p>
+     *
+     * @param classAccessor
+     *            The accessor for the class to be updated
+     * @param attributeIn
+     *            The attribute to be attached to the class
+     */
     public void updateClassAttributes(int classAccessor, BitSet attributeIn) {
         BitSet attributeAt = new BitSet();
         attributeAt = congruenceClassArray[classAccessor].getAttribute();
@@ -804,6 +948,15 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         }
     }
 
+    /**
+     * <p>
+     * This operation add the reflexive operators found in the succedent of the target sequent VC to the registry's
+     * reflexive set of operators
+     * </p>
+     *
+     * @param treeNodeLabel
+     *            The label for the reflexive operator
+     */
     public void addOperatorToSuccedentReflexiveOperatorSet(Integer treeNodeLabel) {
         succedentReflexiveOperatorsSet.add(treeNodeLabel);
     }
@@ -831,7 +984,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * {@code areClassesCongruent} checks to see of two classes are congruent
+     * This operation checks to see of two classes are congruent
      * </p>
      *
      * @param firstAccessor
