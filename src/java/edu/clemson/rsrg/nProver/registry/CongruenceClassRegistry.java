@@ -234,10 +234,10 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         // put the initial created plantation into the array
         plantationArray[0] = plantation;
 
-        //start the index 0 with {0,0,0,0,0} with {0,0,0} attribute in the congruence class array.
+        // start the index 0 with {0,0,0,0,0} with {0,0,0} attribute in the congruence class array.
         BitSet attribute = new BitSet();
         attribute.clear();
-        CongruenceClass cClass = new CongruenceClass(0,0,0,0);
+        CongruenceClass cClass = new CongruenceClass(0, 0, 0, 0);
         cClass.setClassAttribute(attribute);
         congruenceClassArray[0] = cClass;
 
@@ -1199,14 +1199,14 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
     private void mergeClasses(int firstCCAccessor, int secondCCAccessor) {
         // update dominant class and perform path compression upward the chain
         if (firstCCAccessor < secondCCAccessor) {
-            //change the dominant class for the larger class designator between the two merge classes
+            // change the dominant class for the larger class designator between the two merge classes
             updateDominantClass(firstCCAccessor, secondCCAccessor);
-            //update the plantation either by joining their clusters or moving the plantation to the smaller class
+            // update the plantation either by joining their clusters or moving the plantation to the smaller class
             updatePlantationInSmallerClass(firstCCAccessor, secondCCAccessor);
         } else {
-            //change the dominant class for the larger class designator
+            // change the dominant class for the larger class designator
             updateDominantClass(secondCCAccessor, firstCCAccessor);
-            //update the plantation either by joining their clusters or moving the plantation to the smaller class
+            // update the plantation either by joining their clusters or moving the plantation to the smaller class
             updatePlantationInSmallerClass(secondCCAccessor, firstCCAccessor);
         }
         int level = 0;
@@ -1254,7 +1254,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      */
     private void updateDominantClass(int firstCCAccessor, int secondCCAccessor) {
         if (congruenceClassArray[firstCCAccessor].getDominantCClass() == firstCCAccessor) {
-            //it is its own dominant class so no compression
+            // it is its own dominant class so no compression
             congruenceClassArray[secondCCAccessor].setDominantCClass(firstCCAccessor);
             // update the attribute at class level, which depends on the smaller firstCCAccessor
             BitSet bitSet_03 = mergeAttribute(firstCCAccessor, secondCCAccessor);
@@ -1290,18 +1290,18 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         int currentPlantationInList = varietyArray[treeNodeLabel].getFirstPlantation();
         int previousPlantationInList = 0;
         int nextPlantationInList = 0;
-        //it is the first one in the variety array list, now it has to be removed
+        // it is the first one in the variety array list, now it has to be removed
         if (currentPlantationInList == plantationDesignatorToRemove) {
-            //get rid of the first one and make the second one in the variety list the first one
+            // get rid of the first one and make the second one in the variety list the first one
             varietyArray[treeNodeLabel].setFirstPlantation(
                     plantationArray[varietyArray[treeNodeLabel].getFirstPlantation()].getNextVrtyPlantation());
             // make the previous pointer 0
             plantationArray[plantationArray[varietyArray[treeNodeLabel].getFirstPlantation()].getNextVrtyPlantation()]
                     .setPrvVrtyPlantation(0);
         } else {
-            //it is not the first one in the variety array list, just remove it
-            //this assumes plantation designator to remove must be in the variety list. If that is the case just
-            //remove it by re-allocating the pointers
+            // it is not the first one in the variety array list, just remove it
+            // this assumes plantation designator to remove must be in the variety list. If that is the case just
+            // remove it by re-allocating the pointers
             previousPlantationInList = plantationArray[plantationDesignatorToRemove].getPrvVrtyPlantation();
             nextPlantationInList = plantationArray[plantationDesignatorToRemove].getNextVrtyPlantation();
 
@@ -1336,7 +1336,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         while (plantationDesignator_2 != 0) {
 
             treeNodeLabel_2 = plantationArray[plantationDesignator_2].getTreeNodeLabel();
-            //get the tree node label for this plantation
+            // get the tree node label for this plantation
             treeNodeLabel_1 = plantationArray[plantationDesignator_1].getTreeNodeLabel();
 
             // things may be changed and re-arranged, keep this record and use it later
@@ -1353,12 +1353,12 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 plantationDesignator_1 = nextPlantationDesignator_1;
 
             } else if (treeNodeLabel_1 < treeNodeLabel_2) {
-                //this means we still need to check if the next in list one is still smaller than treeNodeLabel_2
-                //this is the case we can still find equality
+                // this means we still need to check if the next in list one is still smaller than treeNodeLabel_2
+                // this is the case we can still find equality
                 joinPlantationFrom2ndListToFirstList(plantationDesignator_1, plantationDesignator_2);
-                //start from the plantation added to the first list
+                // start from the plantation added to the first list
                 plantationDesignator_1 = plantationDesignator_2;
-                //start from the next one on the second list
+                // start from the next one on the second list
                 plantationDesignator_2 = nextPlantationDesignator_2;
 
             } else {
@@ -1367,7 +1367,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 // This condition will only happen once, as the rest will be greater than what we just added
                 // from the second list.
                 joinPlantationFrom2ndListToFirstList(plantationDesignator_1, plantationDesignator_2);
-                //start from the plantation added to the first list
+                // start from the plantation added to the first list
                 plantationDesignator_1 = plantationDesignator_2;
 
                 // update the 1st plantation in the first class, this is assuming the idea that this part will only be
@@ -1436,9 +1436,9 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                     .getNextPlantationCluster();
         }
 
-        //This condition will work if the cluster array at index 0 is initialized with zeroes.
+        // This condition will work if the cluster array at index 0 is initialized with zeroes.
         while (clusterArray[currentClusterDesignator_2].getNextPlantationCluster() != currentClusterDesignator_2) {
-            //get all clusters in the larger plantation
+            // get all clusters in the larger plantation
             if (currentClusterDesignator_1 < currentClusterDesignator_2) {
                 tempCurrentClusterDesignator_2 = currentClusterDesignator_2;
 
@@ -1449,12 +1449,12 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 currentClusterDesignator_1 = tempCurrentClusterDesignator_2;
             } else {
                 tempCurrentClusterDesignator_2 = currentClusterDesignator_2;
-                //get what is next from list_2
+                // get what is next from list_2
                 currentClusterDesignator_2 = clusterJoinCase_02(currentClusterDesignator_1, currentClusterDesignator_2);
-                //start from where we added the cluster in list_1
+                // start from where we added the cluster in list_1
                 currentClusterDesignator_1 = tempCurrentClusterDesignator_2;
 
-                //under the assumption this will only be executed once and that will now be our fist cluster in the
+                // under the assumption this will only be executed once and that will now be our fist cluster in the
                 // list_1
                 plantationArray[plantationDesignator_1].setFirstPlantationCluster(currentClusterDesignator_1);
             }
@@ -1531,7 +1531,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
             plantationDesignator_1 = plantationArray[plantationDesignator_1].getNextCCPlantation();
             treeNodeLabel_1 = plantationArray[plantationDesignator_1].getTreeNodeLabel();
         }
-        //the tree nodes for the plantations are the same, join the clusters
+        // the tree nodes for the plantations are the same, join the clusters
         if (treeNodeLabel_2.equals(treeNodeLabel_1)) {
             joinClustersOnSameRootNodePlantation(plantationDesignator_1, plantationDesignator_2);
         } else {
@@ -1610,10 +1610,10 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
         plantationArray[plantationDesignator_2].setNextCCPlantation(plantationDesignator_1);
 
-        //update all clusters in the plantation to belong to the new class by changing their class field
+        // update all clusters in the plantation to belong to the new class by changing their class field
         currentPlantationCluster_2 = plantationArray[plantationDesignator_2].getFirstPlantationCluster();
         currentPlantationCluster_1 = plantationArray[plantationDesignator_1].getFirstPlantationCluster();
-        //assign the dominant class
+        // assign the dominant class
         dominantClassDesignator = getTheUltimateDominantClass(
                 congruenceClassArray[clusterArray[currentPlantationCluster_1].getIndexToCongruenceClass()]
                         .getDominantCClass());
@@ -1621,7 +1621,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
             clusterArray[currentPlantationCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
             currentPlantationCluster_2 = clusterArray[currentPlantationCluster_2].getNextPlantationCluster();
         }
-        //the final update when next plantation cluster is 0
+        // the final update when next plantation cluster is 0
         clusterArray[currentPlantationCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
 
     }
@@ -1664,59 +1664,59 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
             reArrangeArguments(indexToArgString);
 
         } else {
-            //3 is existing in the level and can be anywhere, take this by looking at each father and its children
+            // 3 is existing in the level and can be anywhere, take this by looking at each father and its children
             while (indexToArgString != 0) {
-                //no two 7s will be under same father
+                // no two 7s will be under same father
                 tempIndexToArgString = clusterArgumentArray[indexToArgString].getNxtIndexWithSameCCNumberInLevel();
-                //3 is together with considered 7 under the same father
+                // 3 is together with considered 7 under the same father
                 boolean checkIfUnderSameParent = areClassesUnderSameParentInArgArray(indexToArgString, firstAccessor,
                         level);
                 if (checkIfUnderSameParent) {// 3 and 7 have the same parent
                     if (clusterArgumentArray[indexToArgString].getNextClusterArg() == 0) {// but 3 has no children
-                        //first change the class number in the argument record from 7 to 3
+                        // first change the class number in the argument record from 7 to 3
                         clusterArgumentArray[indexToArgString].setCcNumber(firstAccessor);
 
-                        //now we should go to the FASOP for class 3 and update it as now we have two 3s existing under
-                        //same father
+                        // now we should go to the FASOP for class 3 and update it as now we have two 3s existing under
+                        // same father
                         updateClassFASOP(firstAccessor, level, indexToArgString);
 
-                        //make 7 which is now 3 dormant by skipping it
+                        // make 7 which is now 3 dormant by skipping it
                         int nextIndexToFollow = clusterArgumentArray[clusterArgumentArray[indexToArgString]
                                 .getPrevClusterArg()].getNextClusterArg();
                         int prevIndexToFollow = 0;
-                        //The if statement around while loop is a change after debugging
+                        // The if statement around while loop is a change after debugging
                         if (nextIndexToFollow != 0) {
-                            //if it is zero it means it is the only argument, and alternative argument is 0
+                            // if it is zero it means it is the only argument, and alternative argument is 0
                             while (nextIndexToFollow != indexToArgString) {
                                 prevIndexToFollow = nextIndexToFollow;
                                 nextIndexToFollow = clusterArgumentArray[nextIndexToFollow].getAlternativeArg();
                             }
                         }
                         if (prevIndexToFollow == 0) {
-                            //it is the first one in the children make the second child first
+                            // it is the first one in the children make the second child first
                             clusterArgumentArray[clusterArgumentArray[indexToArgString].getPrevClusterArg()]
                                     .setNextClusterArg(clusterArgumentArray[indexToArgString].getAlternativeArg());
                         } else {
-                            //it is in between children, just deal with next alternative arguments
+                            // it is in between children, just deal with next alternative arguments
                             clusterArgumentArray[prevIndexToFollow]
                                     .setAlternativeArg(clusterArgumentArray[indexToArgString].getAlternativeArg());
                         }
-                        //update the clusters by merging the two lists
+                        // update the clusters by merging the two lists
                         mergeClusters(indexToArgString, indexToArgString_3);
 
                     } else {
-                        //move what is under 7 to what is under 3
+                        // move what is under 7 to what is under 3
                         mergeSuffixTo(indexToArgString, indexToArgString_3);
 
-                        //update the clusters by merging the two lists
+                        // update the clusters by merging the two lists
                         mergeClusters(indexToArgString, indexToArgString_3);
                     }
 
                 } else {
-                    //3 is not under the same father for the considered 7
-                    //first change the class number in the argument record from 7 to 3
+                    // 3 is not under the same father for the considered 7
+                    // first change the class number in the argument record from 7 to 3
                     clusterArgumentArray[indexToArgString].setCcNumber(firstAccessor);
-                    //now we should go to the FASOP for class 3 and update it as now 3 exists in the level
+                    // now we should go to the FASOP for class 3 and update it as now 3 exists in the level
                     updateClassFASOP(firstAccessor, level, indexToArgString);
                     reArrangeArguments(indexToArgString);
                 }
@@ -1773,50 +1773,50 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                     classDesignator_3 = clusterArgumentArray[nextLargestArgumentInList_3].getCcNumber();
                 }
                 if (classDesignator_3 == classDesignator_7) {
-                    //cut to the chase, these two will be under same parent, second one adopted
-                    //call merge suffix again on the two new arguments
+                    // cut to the chase, these two will be under same parent, second one adopted
+                    // call merge suffix again on the two new arguments
                     mergeSuffixTo(currentArgumentToMove, nextLargestArgumentInList_3);
 
-                    //update the clusters by merging the two lists
+                    // update the clusters by merging the two lists
                     mergeClusters(currentArgumentToMove, nextLargestArgumentInList_3);
 
-                    //get the next one under 3
+                    // get the next one under 3
                     currentLargestArgumentInList_3 = clusterArgumentArray[currentLargestArgumentInList_3]
                             .getAlternativeArg();
                 } else {
-                    //update things on 3 side
+                    // update things on 3 side
                     clusterArgumentArray[previousLargestArgumentInList_3].setAlternativeArg(currentArgumentToMove);
                     clusterArgumentArray[currentArgumentToMove].setPrevClusterArg(indexToArgString_3);
                     clusterArgumentArray[currentArgumentToMove].setAlternativeArg(nextLargestArgumentInList_3);
 
-                    //reset what to deal with on the next iteration
+                    // reset what to deal with on the next iteration
                     currentLargestArgumentInList_3 = currentArgumentToMove;
 
                 }
             } else {
-                //classDesignator_7 == classDesignator_3
+                // classDesignator_7 == classDesignator_3
                 mergeSuffixTo(currentArgumentToMove, currentLargestArgumentInList_3);
 
-                //update the clusters by merging the two lists
+                // update the clusters by merging the two lists
                 mergeClusters(currentArgumentToMove, currentLargestArgumentInList_3);
 
-                //get the next one under 3
+                // get the next one under 3
                 currentLargestArgumentInList_3 = clusterArgumentArray[currentLargestArgumentInList_3]
                         .getAlternativeArg();
             }
             // reallocate pointers in 7
             clusterArgumentArray[indexToArgString].setNextClusterArg(nextArgumentToMove);
 
-            //reset what to deal with on the next iteration
-            //currentLargestArgumentInList_3 = currentArgumentToMove;
+            // reset what to deal with on the next iteration
+            // currentLargestArgumentInList_3 = currentArgumentToMove;
             currentArgumentToMove = clusterArgumentArray[indexToArgString].getNextClusterArg();
             nextArgumentToMove = clusterArgumentArray[currentArgumentToMove].getAlternativeArg();
 
-            //might be common for all cases move down
+            // might be common for all cases move down
             classDesignator_7 = clusterArgumentArray[currentArgumentToMove].getCcNumber();
             classDesignator_3 = clusterArgumentArray[currentLargestArgumentInList_3].getCcNumber();
         }
-        //forget about 7 which is now 3 and after all its children are moved to the 3
+        // forget about 7 which is now 3 and after all its children are moved to the 3
         int indexToParentOfArg_7 = clusterArgumentArray[indexToArgString].getPrevClusterArg();
         int nextAfter7 = clusterArgumentArray[indexToArgString].getAlternativeArg();
         clusterArgumentArray[indexToParentOfArg_7].setNextClusterArg(nextAfter7);
@@ -1948,7 +1948,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
                 int nextIndexToArgString = clusterArgumentArray[currentIndexToArgString].getAlternativeArg();
                 int previousIndexToArgString = currentIndexToArgString;
 
-                //walk the list of children until we get to the changed child
+                // walk the list of children until we get to the changed child
                 while (nextIndexToArgString != argIndexWithChangedClass) {
                     previousIndexToArgString = nextIndexToArgString;
                     nextIndexToArgString = clusterArgumentArray[nextIndexToArgString].getAlternativeArg();

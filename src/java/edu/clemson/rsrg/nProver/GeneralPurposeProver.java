@@ -321,7 +321,6 @@ public class GeneralPurposeProver {
         myTotalElapsedTime = System.currentTimeMillis();
         int numUnproved = 0;
 
-
         // Loop through each of the VCs and attempt to prove them
         for (VerificationCondition vc : myVerificationConditions) {
             // Store the start time for generating proofs for this VC
