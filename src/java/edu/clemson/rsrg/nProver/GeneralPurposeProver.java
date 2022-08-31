@@ -325,10 +325,8 @@ public class GeneralPurposeProver {
         for (VerificationCondition vc : myVerificationConditions) {
             // Store the start time for generating proofs for this VC
             long startTime = System.nanoTime();
-
             // Obtain the sequent to be proved
             Sequent sequent = vc.getSequent();
-
             // Create a registry and label map
             CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000,
                     1000, 1000, 1000);
