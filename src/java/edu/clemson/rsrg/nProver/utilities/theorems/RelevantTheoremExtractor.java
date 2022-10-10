@@ -38,7 +38,7 @@ public class RelevantTheoremExtractor {
 
         Set<ModuleIdentifier> sett = new HashSet<>();
 
-        for (TheoremEntry theoremEntry: te){
+        for (TheoremEntry theoremEntry : te) {
             sett.add(theoremEntry.getSourceModuleIdentifier());
         }
         System.out.println(sett);
