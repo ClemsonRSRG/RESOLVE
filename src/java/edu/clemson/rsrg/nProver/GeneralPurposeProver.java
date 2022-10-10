@@ -20,11 +20,13 @@ import edu.clemson.rsrg.init.flag.FlagDependencies;
 import edu.clemson.rsrg.init.output.OutputListener;
 import edu.clemson.rsrg.nProver.output.VCProverResult;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
+import edu.clemson.rsrg.nProver.utilities.theorems.RelevantTheoremExtractor;
 import edu.clemson.rsrg.nProver.utilities.treewakers.AbstractRegisterSequent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterAntecedent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSuccedent;
 import edu.clemson.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.rsrg.treewalk.TreeWalker;
+import edu.clemson.rsrg.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.vcgeneration.VCGenerator;
@@ -365,6 +367,15 @@ public class GeneralPurposeProver {
 
         // Compute the total elapsed time in generating proofs for the VCs in this module
         myTotalElapsedTime = System.currentTimeMillis() - myTotalElapsedTime;
+
+        // applying theorems
+
+        RelevantTheoremExtractor theorems = new RelevantTheoremExtractor(myCurrentModuleScope);
+
+        for (TheoremEntry te : theorems.theoremEntryQuery()) {
+            System.out.println(te.getAssertion());
+        }
+
     }
 
     // ===========================================================
