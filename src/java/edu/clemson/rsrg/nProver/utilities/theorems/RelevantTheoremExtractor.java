@@ -16,8 +16,11 @@ import edu.clemson.rsrg.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.rsrg.typeandpopulate.symboltables.ModuleScope;
+import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RelevantTheoremExtractor {
 
@@ -32,6 +35,13 @@ public class RelevantTheoremExtractor {
         te = myCurrentModuleScope.query(new EntryTypeQuery<TheoremEntry>(TheoremEntry.class,
                 MathSymbolTable.ImportStrategy.IMPORT_NAMED, MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
         System.err.println(te.size());
+
+        Set<ModuleIdentifier> sett = new HashSet<>();
+
+        for (TheoremEntry theoremEntry : te) {
+            sett.add(theoremEntry.getSourceModuleIdentifier());
+        }
+        System.out.println(sett);
         return te;
     }
 }
