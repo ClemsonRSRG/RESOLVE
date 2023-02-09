@@ -1,7 +1,7 @@
 /*
  * ProcedureEntry.java
  * ---------------------------------
- * Copyright (c) 2022
+ * Copyright (c) 2023
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
