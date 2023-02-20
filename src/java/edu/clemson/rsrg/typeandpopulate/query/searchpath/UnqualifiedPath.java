@@ -263,8 +263,9 @@ public class UnqualifiedPath implements ScopeSearchPath {
         }
 
         // Finally, if requested, we search imports
+        // YS: we need to make sure that we don't search any more if the cascading import strategy is import none.
         if ((results.isEmpty() || !myLocalPriorityFlag) && source instanceof SyntacticScope
-                && myImportStrategy != ImportStrategy.IMPORT_NONE) {
+                && myImportStrategy != ImportStrategy.IMPORT_NONE && importStrategy != ImportStrategy.IMPORT_NONE) {
 
             SyntacticScope sourceAsSyntacticScope = (SyntacticScope) source;
 
