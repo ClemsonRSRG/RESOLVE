@@ -19,6 +19,7 @@ import edu.clemson.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
 import edu.clemson.rsrg.absyn.declarations.typedecl.FacilityTypeRepresentationDec;
 import edu.clemson.rsrg.absyn.declarations.typedecl.TypeFamilyDec;
 import edu.clemson.rsrg.absyn.declarations.typedecl.TypeRepresentationDec;
+import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.parsing.data.PosSymbol;
 import edu.clemson.rsrg.typeandpopulate.entry.*;
 import edu.clemson.rsrg.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -33,6 +34,7 @@ import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -582,6 +584,8 @@ public class ScopeBuilder extends SyntacticScope {
      *            The unqualified name of the symbol.
      * @param definingElement
      *            The AST Node that introduced the symbol.
+     * @param operators
+     *            The operators associated with this entry.
      *
      * @return A new {@link TheoremEntry}.
      *
@@ -593,11 +597,11 @@ public class ScopeBuilder extends SyntacticScope {
      *             Arguments do not meet the entry creation criteria. Most likely, we have passed <code>null</code>
      *             objects.
      */
-    public final TheoremEntry addTheorem(String name, MathAssertionDec definingElement)
+    public final TheoremEntry addTheorem(String name, MathAssertionDec definingElement, Set<Exp> operators)
             throws DuplicateSymbolException, IllegalArgumentException {
         sanityCheckBindArguments(name, definingElement, "");
 
-        TheoremEntry entry = new TheoremEntry(myTypeGraph, name, definingElement, myRootModule);
+        TheoremEntry entry = new TheoremEntry(myTypeGraph, name, definingElement, operators, myRootModule);
 
         myBindings.put(name, entry);
 

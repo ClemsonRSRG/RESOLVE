@@ -202,6 +202,17 @@ public class Populator extends TreeWalkerVisitor {
     private Location myRecursiveCallLocation;
 
     // -----------------------------------------------------------
+    // Math Assertion Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>
+     * A set of operators for the current mathematical assertion declaration that we are walking.
+     * </p>
+     */
+    private Set<Exp> myMathAssertionOps;
+
+    // -----------------------------------------------------------
     // Type Declaration-Related
     // -----------------------------------------------------------
 
@@ -917,6 +928,19 @@ public class Populator extends TreeWalkerVisitor {
 
     /**
      * <p>
+     * Code that gets executed before visiting a {@link MathAssertionDec}.
+     * </p>
+     *
+     * @param dec
+     *            A mathematical assertion declaration.
+     */
+    @Override
+    public final void preMathAssertionDec(MathAssertionDec dec) {
+        myMathAssertionOps = new LinkedHashSet<>();
+    }
+
+    /**
+     * <p>
      * Code that gets executed after visiting a {@link MathAssertionDec}.
      * </p>
      *
@@ -929,13 +953,13 @@ public class Populator extends TreeWalkerVisitor {
 
         String name = dec.getName().getName();
         try {
-
-            myBuilder.getInnermostActiveScope().addTheorem(name, dec);
+            myBuilder.getInnermostActiveScope().addTheorem(name, dec, myMathAssertionOps);
         } catch (DuplicateSymbolException dse) {
             duplicateSymbol(name, dec.getName().getLocation());
         }
 
         myDefinitionSchematicTypes.clear();
+        myMathAssertionOps = null;
 
         emitDebug(dec.getLocation(), "\t\tNew theorem: " + name);
     }

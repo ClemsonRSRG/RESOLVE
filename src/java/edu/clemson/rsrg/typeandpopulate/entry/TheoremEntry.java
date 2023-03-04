@@ -21,6 +21,7 @@ import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * <p>
@@ -49,6 +50,15 @@ public class TheoremEntry extends SymbolTableEntry {
      */
     private final MathSymbolEntry myMathSymbolAlterEgo;
 
+    private final Set<Exp> myOperators;
+
+    /**
+     * <p>
+     * The subtype associated with this mathematical assertion declaration.
+     * </p>
+     */
+    private final MathAssertionDec.TheoremSubtype myTheoremSubtype;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -64,13 +74,17 @@ public class TheoremEntry extends SymbolTableEntry {
      *            Name associated with this entry.
      * @param definingElement
      *            The element that created this entry.
+     * @param operators
+     *            The operators associated with this entry.
      * @param sourceModule
      *            The module where this entry was created from.
      */
-    public TheoremEntry(TypeGraph g, String name, MathAssertionDec definingElement, ModuleIdentifier sourceModule) {
+    public TheoremEntry(TypeGraph g, String name, MathAssertionDec definingElement, Set<Exp> operators,
+            ModuleIdentifier sourceModule) {
         super(name, definingElement, sourceModule);
         myAssertionExp = definingElement.getAssertion();
-
+        myTheoremSubtype = definingElement.getTheoremSubtype();
+        myOperators = operators;
         myMathSymbolAlterEgo = new MathSymbolEntry(g, name, Quantification.NONE, definingElement, g.BOOLEAN, null, null,
                 null, sourceModule);
     }
@@ -95,7 +109,11 @@ public class TheoremEntry extends SymbolTableEntry {
 
         if (!Objects.equals(myAssertionExp, that.myAssertionExp))
             return false;
-        return Objects.equals(myMathSymbolAlterEgo, that.myMathSymbolAlterEgo);
+        if (!Objects.equals(myMathSymbolAlterEgo, that.myMathSymbolAlterEgo))
+            return false;
+        if (!Objects.equals(myOperators, that.myOperators))
+            return false;
+        return myTheoremSubtype == that.myTheoremSubtype;
     }
 
     /**
@@ -123,6 +141,28 @@ public class TheoremEntry extends SymbolTableEntry {
     }
 
     /**
+     * <p>
+     * This method returns a set of operators in this entry.
+     * </p>
+     *
+     * @return A {@link Set} of operator expressions.
+     */
+    public final Set<Exp> getOperators() {
+        return myOperators;
+    }
+
+    /**
+     * <p>
+     * This method returns a theorem subtype associated with this entry.
+     * </p>
+     *
+     * @return A {@link MathAssertionDec.TheoremSubtype} representation object.
+     */
+    public final MathAssertionDec.TheoremSubtype getTheoremSubtype() {
+        return myTheoremSubtype;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -130,6 +170,8 @@ public class TheoremEntry extends SymbolTableEntry {
         int result = super.hashCode();
         result = 31 * result + (myAssertionExp != null ? myAssertionExp.hashCode() : 0);
         result = 31 * result + (myMathSymbolAlterEgo != null ? myMathSymbolAlterEgo.hashCode() : 0);
+        result = 31 * result + (myOperators != null ? myOperators.hashCode() : 0);
+        result = 31 * result + (myTheoremSubtype != null ? myTheoremSubtype.hashCode() : 0);
         return result;
     }
 
