@@ -23,6 +23,7 @@ import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -101,6 +102,27 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        TypeFamilyEntry that = (TypeFamilyEntry) o;
+
+        if (!Objects.equals(myExemplar, that.myExemplar))
+            return false;
+        if (!Objects.equals(myConstraint, that.myConstraint))
+            return false;
+        return Objects.equals(myDefVarList, that.myDefVarList);
+    }
+
+    /**
      * <p>
      * Since this is used by multiple objects, we really don't want to be returning a reference, therefore this method
      * returns a deep copy of the constraint expression.
@@ -150,6 +172,18 @@ public class TypeFamilyEntry extends ProgramTypeEntry {
     @Override
     public final PTFamily getProgramType() {
         return (PTFamily) super.getProgramType();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myExemplar != null ? myExemplar.hashCode() : 0);
+        result = 31 * result + (myConstraint != null ? myConstraint.hashCode() : 0);
+        result = 31 * result + (myDefVarList != null ? myDefVarList.hashCode() : 0);
+        return result;
     }
 
     /**

@@ -20,6 +20,7 @@ import edu.clemson.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -79,6 +80,25 @@ public class TheoremEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        TheoremEntry that = (TheoremEntry) o;
+
+        if (!Objects.equals(myAssertionExp, that.myAssertionExp))
+            return false;
+        return Objects.equals(myMathSymbolAlterEgo, that.myMathSymbolAlterEgo);
+    }
+
+    /**
      * <p>
      * Since this is used by multiple objects, we really don't want to be returning a reference, therefore this method
      * returns a deep copy of the assertion expression.
@@ -100,6 +120,17 @@ public class TheoremEntry extends SymbolTableEntry {
     @Override
     public final String getEntryTypeDescription() {
         return "a theorem";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myAssertionExp != null ? myAssertionExp.hashCode() : 0);
+        result = 31 * result + (myMathSymbolAlterEgo != null ? myMathSymbolAlterEgo.hashCode() : 0);
+        return result;
     }
 
     /**

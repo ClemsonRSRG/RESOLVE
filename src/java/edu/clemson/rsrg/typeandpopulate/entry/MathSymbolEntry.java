@@ -239,6 +239,31 @@ public class MathSymbolEntry extends SymbolTableEntry {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        MathSymbolEntry that = (MathSymbolEntry) o;
+
+        if (!Objects.equals(myType, that.myType))
+            return false;
+        if (!Objects.equals(myTypeValue, that.myTypeValue))
+            return false;
+        if (myQuantification != that.myQuantification)
+            return false;
+        if (!mySchematicTypes.equals(that.mySchematicTypes))
+            return false;
+        return myGenericsInDefiningContext.equals(that.myGenericsInDefiningContext);
+    }
+
+    /**
      * <p>
      * This method returns a description associated with this entry.
      * </p>
@@ -317,6 +342,20 @@ public class MathSymbolEntry extends SymbolTableEntry {
         }
 
         return myTypeValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myType != null ? myType.hashCode() : 0);
+        result = 31 * result + (myTypeValue != null ? myTypeValue.hashCode() : 0);
+        result = 31 * result + (myQuantification != null ? myQuantification.hashCode() : 0);
+        result = 31 * result + mySchematicTypes.hashCode();
+        result = 31 * result + myGenericsInDefiningContext.hashCode();
+        return result;
     }
 
     /**

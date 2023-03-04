@@ -18,6 +18,7 @@ import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -81,6 +82,25 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        ProgramVariableEntry that = (ProgramVariableEntry) o;
+
+        if (!Objects.equals(myType, that.myType))
+            return false;
+        return Objects.equals(myMathSymbolAlterEgo, that.myMathSymbolAlterEgo);
+    }
+
+    /**
      * <p>
      * This method returns a description associated with this entry.
      * </p>
@@ -101,6 +121,17 @@ public class ProgramVariableEntry extends SymbolTableEntry {
      */
     public final PTType getProgramType() {
         return myType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myType != null ? myType.hashCode() : 0);
+        result = 31 * result + (myMathSymbolAlterEgo != null ? myMathSymbolAlterEgo.hashCode() : 0);
+        return result;
     }
 
     /**

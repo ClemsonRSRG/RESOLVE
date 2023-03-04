@@ -21,6 +21,7 @@ import edu.clemson.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -166,6 +167,32 @@ public abstract class SymbolTableEntry {
 
     /**
      * <p>
+     * This method overrides the default {@code equals} method implementation.
+     * </p>
+     *
+     * @param o
+     *            Object to be compared.
+     *
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        SymbolTableEntry that = (SymbolTableEntry) o;
+
+        if (!Objects.equals(myName, that.myName))
+            return false;
+        if (!Objects.equals(myDefiningElement, that.myDefiningElement))
+            return false;
+        return Objects.equals(mySourceModuleIdentifier, that.mySourceModuleIdentifier);
+    }
+
+    /**
+     * <p>
      * This method returns the RESOLVE AST node that instantiated this entry.
      * </p>
      *
@@ -204,6 +231,21 @@ public abstract class SymbolTableEntry {
      */
     public final ModuleIdentifier getSourceModuleIdentifier() {
         return mySourceModuleIdentifier;
+    }
+
+    /**
+     * <p>
+     * This method overrides the default {@code hashCode} method implementation.
+     * </p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public int hashCode() {
+        int result = myName != null ? myName.hashCode() : 0;
+        result = 31 * result + (myDefiningElement != null ? myDefiningElement.hashCode() : 0);
+        result = 31 * result + (mySourceModuleIdentifier != null ? mySourceModuleIdentifier.hashCode() : 0);
+        return result;
     }
 
     /**

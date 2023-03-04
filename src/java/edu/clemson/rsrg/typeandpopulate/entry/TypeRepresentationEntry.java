@@ -19,6 +19,7 @@ import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -100,6 +101,29 @@ public class TypeRepresentationEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        TypeRepresentationEntry that = (TypeRepresentationEntry) o;
+
+        if (!Objects.equals(myDefinition, that.myDefinition))
+            return false;
+        if (!Objects.equals(myRepresentation, that.myRepresentation))
+            return false;
+        if (!Objects.equals(myConvention, that.myConvention))
+            return false;
+        return Objects.equals(myCorrespondence, that.myCorrespondence);
+    }
+
+    /**
      * <p>
      * Since this is used by multiple objects, we really don't want to be returning a reference, therefore this method
      * returns a deep copy of the convention expression.
@@ -155,6 +179,19 @@ public class TypeRepresentationEntry extends SymbolTableEntry {
      */
     public final PTType getRepresentationType() {
         return myRepresentation;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myDefinition != null ? myDefinition.hashCode() : 0);
+        result = 31 * result + (myRepresentation != null ? myRepresentation.hashCode() : 0);
+        result = 31 * result + (myConvention != null ? myConvention.hashCode() : 0);
+        result = 31 * result + (myCorrespondence != null ? myCorrespondence.hashCode() : 0);
+        return result;
     }
 
     /**
