@@ -202,6 +202,17 @@ public class Populator extends TreeWalkerVisitor {
     private Location myRecursiveCallLocation;
 
     // -----------------------------------------------------------
+    // Math Assertion Declaration-Related
+    // -----------------------------------------------------------
+
+    /**
+     * <p>
+     * A set of operators for the current mathematical assertion declaration that we are walking.
+     * </p>
+     */
+    private Set<Exp> myMathAssertionOps;
+
+    // -----------------------------------------------------------
     // Type Declaration-Related
     // -----------------------------------------------------------
 
@@ -917,6 +928,19 @@ public class Populator extends TreeWalkerVisitor {
 
     /**
      * <p>
+     * Code that gets executed before visiting a {@link MathAssertionDec}.
+     * </p>
+     *
+     * @param dec
+     *            A mathematical assertion declaration.
+     */
+    @Override
+    public final void preMathAssertionDec(MathAssertionDec dec) {
+        myMathAssertionOps = new LinkedHashSet<>();
+    }
+
+    /**
+     * <p>
      * Code that gets executed after visiting a {@link MathAssertionDec}.
      * </p>
      *
@@ -929,13 +953,13 @@ public class Populator extends TreeWalkerVisitor {
 
         String name = dec.getName().getName();
         try {
-
-            myBuilder.getInnermostActiveScope().addTheorem(name, dec);
+            myBuilder.getInnermostActiveScope().addTheorem(name, dec, myMathAssertionOps);
         } catch (DuplicateSymbolException dse) {
             duplicateSymbol(name, dec.getName().getLocation());
         }
 
         myDefinitionSchematicTypes.clear();
+        myMathAssertionOps = null;
 
         emitDebug(dec.getLocation(), "\t\tNew theorem: " + name);
     }
@@ -2449,6 +2473,11 @@ public class Populator extends TreeWalkerVisitor {
         VarExp name = exp.getName();
         name.setMathType(new MTNamed(myTypeGraph, name.getName().getName()));
 
+        // Add it to our list of operators if we are in a theorem
+        if (myMathAssertionOps != null) {
+            myMathAssertionOps.add(name.clone());
+        }
+
         emitDebug(exp.getLocation(), "\tExiting walkFunctionExp.");
         postFunctionExp(exp);
         postAbstractFunctionExp(exp);
@@ -2502,6 +2531,24 @@ public class Populator extends TreeWalkerVisitor {
 
         exp.setMathType(finalType);
         exp.setMathTypeValue(finalTypeValue);
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting an {@link InfixExp}.
+     * </p>
+     *
+     * @param exp
+     *            An infix expression.
+     */
+    @Override
+    public final void postInfixExp(InfixExp exp) {
+        // Add it to our list of operators if we are in a theorem
+        if (myMathAssertionOps != null) {
+            PosSymbol qual = exp.getQualifier() != null ? exp.getQualifier().clone() : null;
+            myMathAssertionOps.add(new VarExp(exp.getOperatorAsPosSymbol().getLocation().clone(), qual,
+                    exp.getOperatorAsPosSymbol().clone()));
+        }
     }
 
     /**
@@ -2589,6 +2636,42 @@ public class Populator extends TreeWalkerVisitor {
     public final void postOldExp(OldExp exp) {
         exp.setMathType(exp.getExp().getMathType());
         exp.setMathTypeValue(exp.getExp().getMathTypeValue());
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting an {@link OutfixExp}.
+     * </p>
+     *
+     * @param exp
+     *            An outfix expression.
+     */
+    @Override
+    public final void postOutfixExp(OutfixExp exp) {
+        // Add it to our list of operators if we are in a theorem
+        if (myMathAssertionOps != null) {
+            PosSymbol qual = exp.getQualifier() != null ? exp.getQualifier().clone() : null;
+            myMathAssertionOps.add(new VarExp(exp.getOperatorAsPosSymbol().getLocation().clone(), qual,
+                    exp.getOperatorAsPosSymbol().clone()));
+        }
+    }
+
+    /**
+     * <p>
+     * Code that gets executed after visiting a {@link PrefixExp}.
+     * </p>
+     *
+     * @param exp
+     *            A prefix expression.
+     */
+    @Override
+    public final void postPrefixExp(PrefixExp exp) {
+        // Add it to our list of operators if we are in a theorem
+        if (myMathAssertionOps != null) {
+            PosSymbol qual = exp.getQualifier() != null ? exp.getQualifier().clone() : null;
+            myMathAssertionOps.add(new VarExp(exp.getOperatorAsPosSymbol().getLocation().clone(), qual,
+                    exp.getOperatorAsPosSymbol().clone()));
+        }
     }
 
     /**
@@ -2711,6 +2794,12 @@ public class Populator extends TreeWalkerVisitor {
         MTType setType = myTypeGraph.SSET;
         MTType setTypeValue;
 
+        // Add it to our list of operators if we are in a theorem
+        if (myMathAssertionOps != null) {
+            myMathAssertionOps
+                    .add(new VarExp(exp.getLocation().clone(), null, new PosSymbol(exp.getLocation().clone(), "{_}")));
+        }
+
         // Check to see if have any elements in the set. If we don't, it is
         // simply the empty set!
         if (exp.getVars().isEmpty()) {
@@ -2787,6 +2876,12 @@ public class Populator extends TreeWalkerVisitor {
      */
     @Override
     public final void postTupleExp(TupleExp exp) {
+        // Add it to our list of operators if we are in a theorem
+        if (myMathAssertionOps != null) {
+            myMathAssertionOps
+                    .add(new VarExp(exp.getLocation().clone(), null, new PosSymbol(exp.getLocation().clone(), "(_)")));
+        }
+
         // See the note in TupleExp on why TupleExp isn't an AbstractFunctionExp
         List<Exp> fields = exp.getFields();
         List<MTCartesian.Element> fieldTypes = new LinkedList<>();

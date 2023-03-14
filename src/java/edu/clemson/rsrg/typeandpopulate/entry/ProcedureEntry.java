@@ -18,6 +18,7 @@ import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -69,6 +70,23 @@ public class ProcedureEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        ProcedureEntry that = (ProcedureEntry) o;
+
+        return Objects.equals(myCorrespondingOperation, that.myCorrespondingOperation);
+    }
+
+    /**
      * <p>
      * This method returns the operation entry associated with this entry.
      * </p>
@@ -89,6 +107,16 @@ public class ProcedureEntry extends SymbolTableEntry {
     @Override
     public final String getEntryTypeDescription() {
         return "a procedure";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myCorrespondingOperation != null ? myCorrespondingOperation.hashCode() : 0);
+        return result;
     }
 
     /**

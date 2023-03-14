@@ -21,6 +21,7 @@ import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.typeandpopulate.typevisitor.VariableReplacingVisitor;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -97,6 +98,27 @@ public class ProgramTypeEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        ProgramTypeEntry that = (ProgramTypeEntry) o;
+
+        if (!Objects.equals(myModelType, that.myModelType))
+            return false;
+        if (!Objects.equals(myProgramType, that.myProgramType))
+            return false;
+        return Objects.equals(myMathTypeAlterEgo, that.myMathTypeAlterEgo);
+    }
+
+    /**
      * <p>
      * This method returns a description associated with this entry.
      * </p>
@@ -128,6 +150,18 @@ public class ProgramTypeEntry extends SymbolTableEntry {
      */
     public PTType getProgramType() {
         return myProgramType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myModelType != null ? myModelType.hashCode() : 0);
+        result = 31 * result + (myProgramType != null ? myProgramType.hashCode() : 0);
+        result = 31 * result + (myMathTypeAlterEgo != null ? myMathTypeAlterEgo.hashCode() : 0);
+        return result;
     }
 
     /**

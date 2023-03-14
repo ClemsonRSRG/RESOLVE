@@ -17,6 +17,7 @@ import edu.clemson.rsrg.parsing.data.Location;
 import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.rsrg.typeandpopulate.programtypes.PTType;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -64,6 +65,23 @@ public class ShortFacilityEntry extends ModuleEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        ShortFacilityEntry that = (ShortFacilityEntry) o;
+
+        return Objects.equals(myEnclosedFacility, that.myEnclosedFacility);
+    }
+
+    /**
      * <p>
      * A short facility module contains exactly one facility declaration. This method returns the entry corresponding to
      * that declaration.
@@ -85,6 +103,16 @@ public class ShortFacilityEntry extends ModuleEntry {
     @Override
     public final String getEntryTypeDescription() {
         return "a short facility module";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myEnclosedFacility != null ? myEnclosedFacility.hashCode() : 0);
+        return result;
     }
 
     /**

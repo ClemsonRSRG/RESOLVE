@@ -20,6 +20,8 @@ import edu.clemson.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * <p>
@@ -48,6 +50,20 @@ public class TheoremEntry extends SymbolTableEntry {
      */
     private final MathSymbolEntry myMathSymbolAlterEgo;
 
+    /**
+     * <p>
+     * The set of mathematical operators in the assertion associated with this entry.
+     * </p>
+     */
+    private final Set<Exp> myOperators;
+
+    /**
+     * <p>
+     * The subtype associated with this mathematical assertion declaration.
+     * </p>
+     */
+    private final MathAssertionDec.TheoremSubtype myTheoremSubtype;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -63,13 +79,17 @@ public class TheoremEntry extends SymbolTableEntry {
      *            Name associated with this entry.
      * @param definingElement
      *            The element that created this entry.
+     * @param operators
+     *            The operators associated with this entry.
      * @param sourceModule
      *            The module where this entry was created from.
      */
-    public TheoremEntry(TypeGraph g, String name, MathAssertionDec definingElement, ModuleIdentifier sourceModule) {
+    public TheoremEntry(TypeGraph g, String name, MathAssertionDec definingElement, Set<Exp> operators,
+            ModuleIdentifier sourceModule) {
         super(name, definingElement, sourceModule);
         myAssertionExp = definingElement.getAssertion();
-
+        myTheoremSubtype = definingElement.getTheoremSubtype();
+        myOperators = operators;
         myMathSymbolAlterEgo = new MathSymbolEntry(g, name, Quantification.NONE, definingElement, g.BOOLEAN, null, null,
                 null, sourceModule);
     }
@@ -77,6 +97,29 @@ public class TheoremEntry extends SymbolTableEntry {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        TheoremEntry that = (TheoremEntry) o;
+
+        if (!Objects.equals(myAssertionExp, that.myAssertionExp))
+            return false;
+        if (!Objects.equals(myMathSymbolAlterEgo, that.myMathSymbolAlterEgo))
+            return false;
+        if (!Objects.equals(myOperators, that.myOperators))
+            return false;
+        return myTheoremSubtype == that.myTheoremSubtype;
+    }
 
     /**
      * <p>
@@ -100,6 +143,41 @@ public class TheoremEntry extends SymbolTableEntry {
     @Override
     public final String getEntryTypeDescription() {
         return "a theorem";
+    }
+
+    /**
+     * <p>
+     * This method returns a set of operators in this entry.
+     * </p>
+     *
+     * @return A {@link Set} of operator expressions.
+     */
+    public final Set<Exp> getOperators() {
+        return myOperators;
+    }
+
+    /**
+     * <p>
+     * This method returns a theorem subtype associated with this entry.
+     * </p>
+     *
+     * @return A {@link MathAssertionDec.TheoremSubtype} representation object.
+     */
+    public final MathAssertionDec.TheoremSubtype getTheoremSubtype() {
+        return myTheoremSubtype;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myAssertionExp != null ? myAssertionExp.hashCode() : 0);
+        result = 31 * result + (myMathSymbolAlterEgo != null ? myMathSymbolAlterEgo.hashCode() : 0);
+        result = 31 * result + (myOperators != null ? myOperators.hashCode() : 0);
+        result = 31 * result + (myTheoremSubtype != null ? myTheoremSubtype.hashCode() : 0);
+        return result;
     }
 
     /**

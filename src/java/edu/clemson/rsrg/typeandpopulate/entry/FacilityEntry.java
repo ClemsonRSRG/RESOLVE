@@ -138,6 +138,31 @@ public class FacilityEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        FacilityEntry that = (FacilityEntry) o;
+
+        if (myIsSharingConceptInstantiation != that.myIsSharingConceptInstantiation)
+            return false;
+        if (!Objects.equals(myType, that.myType))
+            return false;
+        if (!myEnhancements.equals(that.myEnhancements))
+            return false;
+        if (!Objects.equals(mySourceRepository, that.mySourceRepository))
+            return false;
+        return myEnhancementRealizations.equals(that.myEnhancementRealizations);
+    }
+
+    /**
      * <p>
      * This method returns all the enhancements declared in this facility entry.
      * </p>
@@ -206,6 +231,20 @@ public class FacilityEntry extends SymbolTableEntry {
      */
     public final SpecRealizationPairing getFacility() {
         return myType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myIsSharingConceptInstantiation ? 1 : 0);
+        result = 31 * result + (myType != null ? myType.hashCode() : 0);
+        result = 31 * result + myEnhancements.hashCode();
+        result = 31 * result + (mySourceRepository != null ? mySourceRepository.hashCode() : 0);
+        result = 31 * result + myEnhancementRealizations.hashCode();
+        return result;
     }
 
     /**

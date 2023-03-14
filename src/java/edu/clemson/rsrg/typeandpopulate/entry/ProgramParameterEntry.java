@@ -23,6 +23,7 @@ import edu.clemson.rsrg.typeandpopulate.programtypes.PTType;
 import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -296,6 +297,31 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        ProgramParameterEntry that = (ProgramParameterEntry) o;
+
+        if (!Objects.equals(myDeclaredType, that.myDeclaredType))
+            return false;
+        if (myPassingMode != that.myPassingMode)
+            return false;
+        if (!Objects.equals(myTypeGraph, that.myTypeGraph))
+            return false;
+        if (!Objects.equals(myMathSymbolAlterEgo, that.myMathSymbolAlterEgo))
+            return false;
+        return Objects.equals(myProgramVariableAlterEgo, that.myProgramVariableAlterEgo);
+    }
+
+    /**
      * <p>
      * This method returns the program type associated with this entry.
      * </p>
@@ -327,6 +353,20 @@ public class ProgramParameterEntry extends SymbolTableEntry {
      */
     public final ParameterMode getParameterMode() {
         return myPassingMode;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (myDeclaredType != null ? myDeclaredType.hashCode() : 0);
+        result = 31 * result + (myPassingMode != null ? myPassingMode.hashCode() : 0);
+        result = 31 * result + (myTypeGraph != null ? myTypeGraph.hashCode() : 0);
+        result = 31 * result + (myMathSymbolAlterEgo != null ? myMathSymbolAlterEgo.hashCode() : 0);
+        result = 31 * result + (myProgramVariableAlterEgo != null ? myProgramVariableAlterEgo.hashCode() : 0);
+        return result;
     }
 
     /**
