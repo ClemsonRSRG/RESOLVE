@@ -50,6 +50,11 @@ public class TheoremEntry extends SymbolTableEntry {
      */
     private final MathSymbolEntry myMathSymbolAlterEgo;
 
+    /**
+     * <p>
+     * The set of mathematical operators in the assertion associated with this entry.
+     * </p>
+     */
     private final Set<Exp> myOperators;
 
     /**
