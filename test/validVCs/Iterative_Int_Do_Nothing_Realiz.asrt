@@ -1,0 +1,1290 @@
+VCs for Iterative_Int_Do_Nothing_Realiz.rb generated Mon Oct 07 15:38:12 EDT 2024
+
+================================= VC(s): =================================
+
+VC 0_1:
+Base Case of the Invariant of While Statement at Iterative_Int_Do_Nothing_Realiz.rb(12:15)
+
+Goal:
+(I = I)
+
+Given(s):
+1. ((I + 1) <= max_int)
+2. (1 <= max_int)
+
+VC 0_2:
+Requires Clause for Increment at Iterative_Int_Do_Nothing_Realiz.rb(15:3)
+
+Goal:
+((1 + I) <= max_int)
+
+Given(s):
+1. ((1 + 0) <= J'')
+2. (1 <= max_int)
+3. ((I + 1) <= max_int)
+
+VC 0_3:
+Requires Clause for Decrement at Iterative_Int_Do_Nothing_Realiz.rb(16:3)
+
+Goal:
+(min_int <= ((1 + I) - 1))
+
+Given(s):
+1. ((1 + 0) <= J'')
+2. (min_int <= 0)
+3. ((I + 1) <= max_int)
+4. (1 <= max_int)
+
+VC 0_4:
+Requires Clause for Decrement at Iterative_Int_Do_Nothing_Realiz.rb(17:3)
+
+Goal:
+(min_int <= (J'' - 1))
+
+Given(s):
+1. ((1 + 0) <= J'')
+2. (min_int <= 0)
+
+VC 0_5:
+Inductive Case of Invariant of While Statement at Iterative_Int_Do_Nothing_Realiz.rb(12:15)
+
+Goal:
+(((1 + I) - 1) = I)
+
+Given(s):
+1. ((1 + 0) <= J'')
+2. ((I + 1) <= max_int)
+3. (1 <= max_int)
+
+VC 0_6:
+Termination of While Statement at Iterative_Int_Do_Nothing_Realiz.rb(13:3)
+
+Goal:
+((1 + (J'' - 1)) <= J'')
+
+Given(s):
+1. ((1 + 0) <= J'')
+
+VC 1_1:
+Base Case of the Invariant of While Statement at Iterative_Int_Do_Nothing_Realiz.rb(12:15)
+
+Goal:
+(I = I)
+
+Given(s):
+1. ((I + 1) <= max_int)
+2. (1 <= max_int)
+
+VC 1_2:
+Ensures Clause of Do_Nothing (Condition from "RESTORES" parameter mode) [After Logical Reduction(s)] at Iterative_Int_Do_Nothing_Realiz.rb(3:31)
+
+Goal:
+(I = I) or 
+((1 + 0) <= J')
+
+Given(s):
+1. ((I + 1) <= max_int)
+2. (1 <= max_int)
+
+========================= VC Generation Details  =========================
+
+    Enhancement Realization Name:   Iterative_Int_Do_Nothing_Realiz
+    Enhancement Name:               Int_Do_Nothing_Capability
+    Concept Name:                   Integer_Template
+
+==========================================================================
+
+========================= Do_Nothing =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Iterative_Int_Do_Nothing_Realiz.rb(10:9) is true. [Exp: ((1 + K) <= J)]
+---------------------
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+    J : Z
+    K : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+
+    While ( Greater(J, K) )
+        changing I, J;
+        maintaining (I = #I);
+        decreasing J;
+    do
+        Increment(I);
+        Decrement(I);
+        Decrement(J);
+    end;
+
+    _Finalize(J : Integer);
+    Confirm (I = #I);
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+
+    While ( Greater(J, K) )
+        changing I, J;
+        maintaining (I = #I);
+        decreasing J;
+    do
+        Increment(I);
+        Decrement(I);
+        Decrement(J);
+    end;
+
+    _Finalize(J : Integer);
+
+VC(s):
+     |- (I = #I)
+
+_____________________
+
+Applied Variable Finalization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    K : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+
+    While ( Greater(J, K) )
+        changing I, J;
+        maintaining (I = #I);
+        decreasing J;
+    do
+        Increment(I);
+        Decrement(I);
+        Decrement(J);
+    end;
+
+    Assume true;
+
+VC(s):
+     |- (I = #I)
+
+_____________________
+
+Applied Assume Rule and Simplified: 
+
+Free Variables:
+    J : Z
+    K : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+
+    While ( Greater(J, K) )
+        changing I, J;
+        maintaining (I = #I);
+        decreasing J;
+    do
+        Increment(I);
+        Decrement(I);
+        Decrement(J);
+    end;
+
+
+VC(s):
+     |- (I = #I)
+
+_____________________
+
+Applied While Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+
+    If ( Greater(J, K) ) then
+        Increment(I);
+        Decrement(I);
+        Decrement(J);
+        Confirm ((I = #I) and ((1 + J) <= P_Val'));
+    Else
+        VC_Confirm
+             |- (I = #I)
+
+    end;
+
+
+VC(s):
+
+_____________________
+
+Applied If-Part Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Increment(I);
+    Decrement(I);
+    Decrement(J);
+    Confirm ((I = #I) and ((1 + J) <= P_Val'));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Increment(I);
+    Decrement(I);
+    Decrement(J);
+
+VC(s):
+     |- (I = #I)
+
+     |- ((1 + J) <= P_Val')
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((I = #I) and ((1 + J) <= P_Val'))" shape="box" ];
+      2 [ label=" |- (I = #I)" shape="box" color="red" ];
+      3 [ label=" |- ((1 + J) <= P_Val')" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Increment(I);
+    Decrement(I);
+    Confirm (min_int <= (J - 1));
+    Assume (J' = (J - 1));
+
+VC(s):
+     |- (I = #I)
+
+     |- ((1 + J') <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Increment(I);
+    Decrement(I);
+    Confirm (min_int <= (J - 1));
+
+VC(s):
+     |- (I = #I)
+
+     |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Increment(I);
+    Decrement(I);
+
+VC(s):
+     |- (min_int <= (J - 1))
+
+     |- (I = #I)
+
+     |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Increment(I);
+    Confirm (min_int <= (I - 1));
+    Assume (I' = (I - 1));
+
+VC(s):
+     |- (min_int <= (J - 1))
+
+     |- (I' = #I)
+
+     |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Increment(I);
+    Confirm (min_int <= (I - 1));
+
+VC(s):
+     |- (min_int <= (J - 1))
+
+     |- ((I - 1) = #I)
+
+     |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Increment(I);
+
+VC(s):
+     |- (min_int <= (I - 1))
+
+     |- (min_int <= (J - 1))
+
+     |- ((I - 1) = #I)
+
+     |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Confirm ((1 + I) <= max_int);
+    Assume (I'' = (1 + I));
+
+VC(s):
+     |- (min_int <= (I'' - 1))
+
+     |- (min_int <= (J - 1))
+
+     |- ((I'' - 1) = #I)
+
+     |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+    Confirm ((1 + I) <= max_int);
+
+VC(s):
+     |- (min_int <= ((1 + I) - 1))
+
+     |- (min_int <= (J - 1))
+
+     |- (((1 + I) - 1) = #I)
+
+     |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate ((1 + K) <= J);
+
+VC(s):
+     |- ((1 + I) <= max_int)
+
+     |- (min_int <= ((1 + I) - 1))
+
+     |- (min_int <= (J - 1))
+
+     |- (((1 + I) - 1) = #I)
+
+     |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+
+VC(s):
+    ((1 + K) <= J) |- ((1 + I) <= max_int)
+
+    ((1 + K) <= J) |- (min_int <= ((1 + I) - 1))
+
+    ((1 + K) <= J) |- (min_int <= (J - 1))
+
+    ((1 + K) <= J) |- (((1 + I) - 1) = #I)
+
+    ((1 + K) <= J) |- ((1 + (J - 1)) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+
+VC(s):
+    ((1 + K) <= J) |- ((1 + #I) <= max_int)
+
+    ((1 + K) <= J) |- (min_int <= ((1 + #I) - 1))
+
+    ((1 + K) <= J) |- (min_int <= (J - 1))
+
+    ((1 + K) <= J) |- (((1 + #I) - 1) = #I)
+
+    ((1 + K) <= J) |- ((1 + (J - 1)) <= J)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((I = #I) and (P_Val' = J)) |- " shape="box" ];
+      2 [ label="(I = #I), (P_Val' = J) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+
+VC(s):
+    ((1 + K) <= J'') |- ((1 + #I) <= max_int)
+
+    ((1 + K) <= J'') |- (min_int <= ((1 + #I) - 1))
+
+    ((1 + K) <= J'') |- (min_int <= (J'' - 1))
+
+    ((1 + K) <= J'') |- (((1 + #I) - 1) = #I)
+
+    ((1 + K) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+
+VC(s):
+     |- (I = #I)
+
+    ((1 + K) <= J'') |- ((1 + #I) <= max_int)
+
+    ((1 + K) <= J'') |- (min_int <= ((1 + #I) - 1))
+
+    ((1 + K) <= J'') |- (min_int <= (J'' - 1))
+
+    ((1 + K) <= J'') |- (((1 + #I) - 1) = #I)
+
+    ((1 + K) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+_____________________
+
+Applied Function Assignment Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+
+VC(s):
+     |- (I = #I)
+
+    ((1 + K) <= J'') |- ((1 + #I) <= max_int)
+
+    ((1 + K) <= J'') |- (min_int <= ((1 + #I) - 1))
+
+    ((1 + K) <= J'') |- (min_int <= (J'' - 1))
+
+    ((1 + K) <= J'') |- (((1 + #I) - 1) = #I)
+
+    ((1 + K) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    Assume (K = 0);
+
+VC(s):
+     |- (I = #I)
+
+    ((1 + K) <= J'') |- ((1 + #I) <= max_int)
+
+    ((1 + K) <= J'') |- (min_int <= ((1 + #I) - 1))
+
+    ((1 + K) <= J'') |- (min_int <= (J'' - 1))
+
+    ((1 + K) <= J'') |- (((1 + #I) - 1) = #I)
+
+    ((1 + K) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+
+VC(s):
+     |- (I = #I)
+
+    ((1 + 0) <= J'') |- ((1 + #I) <= max_int)
+
+    ((1 + 0) <= J'') |- (min_int <= ((1 + #I) - 1))
+
+    ((1 + 0) <= J'') |- (min_int <= (J'' - 1))
+
+    ((1 + 0) <= J'') |- (((1 + #I) - 1) = #I)
+
+    ((1 + 0) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Assume (J = 0);
+
+VC(s):
+     |- (I = #I)
+
+    ((1 + 0) <= J'') |- ((1 + #I) <= max_int)
+
+    ((1 + 0) <= J'') |- (min_int <= ((1 + #I) - 1))
+
+    ((1 + 0) <= J'') |- (min_int <= (J'' - 1))
+
+    ((1 + 0) <= J'') |- (((1 + #I) - 1) = #I)
+
+    ((1 + 0) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+
+VC(s):
+     |- (I = #I)
+
+    ((1 + 0) <= J'') |- ((1 + #I) <= max_int)
+
+    ((1 + 0) <= J'') |- (min_int <= ((1 + #I) - 1))
+
+    ((1 + 0) <= J'') |- (min_int <= (J'' - 1))
+
+    ((1 + 0) <= J'') |- (((1 + #I) - 1) = #I)
+
+    ((1 + 0) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+
+VC(s):
+     |- (I = I)
+
+    ((1 + 0) <= J'') |- ((1 + I) <= max_int)
+
+    ((1 + 0) <= J'') |- (min_int <= ((1 + I) - 1))
+
+    ((1 + 0) <= J'') |- (min_int <= (J'' - 1))
+
+    ((1 + 0) <= J'') |- (((1 + I) - 1) = I)
+
+    ((1 + 0) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    J' : Z
+    I' : Z
+    I'' : Z
+    I''' : Z
+    J'' : Z
+
+Statements:
+
+VC(s):
+    ((I + 1) <= max_int), (1 <= max_int) |- (I = I)
+
+    ((1 + 0) <= J''), (1 <= max_int), ((I + 1) <= max_int) |- ((1 + I) <= max_int)
+
+    ((1 + 0) <= J''), (min_int <= 0), ((I + 1) <= max_int), (1 <= max_int) |- (min_int <= ((1 + I) - 1))
+
+    ((1 + 0) <= J''), (min_int <= 0) |- (min_int <= (J'' - 1))
+
+    ((1 + 0) <= J''), ((I + 1) <= max_int), (1 <= max_int) |- (((1 + I) - 1) = I)
+
+    ((1 + 0) <= J'') |- ((1 + (J'' - 1)) <= J'')
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int)) |- " shape="box" ];
+      2 [ label="(min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), ((I + 1) <= max_int) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Do_Nothing =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Iterative_Int_Do_Nothing_Realiz.rb(10:9) is false. [Exp: not(((1 + K) <= J))]
+---------------------
+
+Applied Else-Part Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate not(((1 + K) <= J));
+    VC_Confirm
+         |- (I = #I)
+
+
+VC(s):
+
+_____________________
+
+Applied VCConfirm Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+    Stipulate not(((1 + K) <= J));
+
+VC(s):
+     |- (I = #I)
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+    Assume ((I = #I) and (P_Val' = J));
+
+VC(s):
+     |- (I = #I), ((1 + K) <= J)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="not(((1 + K) <= J)) |- (I = #I)" shape="box" ];
+      2 [ label=" |- (I = #I), ((1 + K) <= J)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+    Change I, J;
+
+VC(s):
+     |- (#I = #I), ((1 + K) <= J)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((I = #I) and (P_Val' = J)) |- " shape="box" ];
+      2 [ label="(I = #I), (P_Val' = J) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+    Confirm (I = #I);
+
+VC(s):
+     |- (#I = #I), ((1 + K) <= J')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+    J := Replica(I);
+
+VC(s):
+     |- (I = #I)
+
+     |- (#I = #I), ((1 + K) <= J')
+
+_____________________
+
+Applied Function Assignment Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(K : Integer);
+
+VC(s):
+     |- (I = #I)
+
+     |- (#I = #I), ((1 + K) <= J')
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    Assume (K = 0);
+
+VC(s):
+     |- (I = #I)
+
+     |- (#I = #I), ((1 + K) <= J')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+
+VC(s):
+     |- (I = #I)
+
+     |- (#I = #I), ((1 + 0) <= J')
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Assume (J = 0);
+
+VC(s):
+     |- (I = #I)
+
+     |- (#I = #I), ((1 + 0) <= J')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+
+VC(s):
+     |- (I = #I)
+
+     |- (#I = #I), ((1 + 0) <= J')
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+
+VC(s):
+     |- (I = I)
+
+     |- (I = I), ((1 + 0) <= J')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    K : Z
+    P_Val' : N
+    I' : Z
+    J' : Z
+
+Statements:
+
+VC(s):
+    ((I + 1) <= max_int), (1 <= max_int) |- (I = I)
+
+    ((I + 1) <= max_int), (1 <= max_int) |- (I = I), ((1 + 0) <= J')
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int)) |- " shape="box" ];
+      2 [ label="(min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), ((I + 1) <= max_int) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+

@@ -1,0 +1,5221 @@
+VCs for Obvious_CC_Realiz.rb generated Mon Oct 07 15:37:36 EDT 2024
+
+================================= VC(s): =================================
+
+VC 0_1:
+Base Case of the Invariant of While Statement at Obvious_CC_Realiz.rb(14:15)
+
+Goal:
+(S_Orig = (Reverse(Empty_String) o S_Orig))
+
+Given(s):
+
+VC 0_2:
+Requires Clause for Pop at Obvious_CC_Realiz.rb(17:3)
+
+Goal:
+(1 <= |S_Orig''''|)
+
+Given(s):
+1. (1 <= |S_Orig''''|)
+2. (S_Orig = (Reverse(S_Reversed'''') o S_Orig''''))
+
+VC 0_3:
+Requires Clause for Push at Obvious_CC_Realiz.rb(18:3)
+
+Goal:
+((1 + |S_Reversed''''|) <= Max_Depth)
+
+Given(s):
+1. (1 <= |S_Orig''''|)
+2. (S_Orig = (Reverse(S_Reversed'''') o S_Orig''''))
+3. (1 <= Max_Depth)
+
+VC 0_4:
+Inductive Case of Invariant of While Statement at Obvious_CC_Realiz.rb(14:15)
+
+Goal:
+(S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+Given(s):
+1. (S_Orig'''' = (<Next_Entry'''''> o S_Orig'''))
+2. (1 <= |S_Orig''''|)
+3. (S_Orig = (Reverse(S_Reversed'''') o S_Orig''''))
+
+VC 0_5:
+Termination of While Statement at Obvious_CC_Realiz.rb(15:3)
+
+Goal:
+((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+Given(s):
+1. (S_Orig'''' = (<Next_Entry'''''> o S_Orig'''))
+2. (1 <= |S_Orig''''|)
+3. (S_Orig = (Reverse(S_Reversed'''') o S_Orig''''))
+
+VC 1_1:
+Base Case of the Invariant of While Statement at Obvious_CC_Realiz.rb(14:15)
+
+Goal:
+(S_Orig = (Reverse(Empty_String) o S_Orig))
+
+Given(s):
+
+VC 1_2:
+Base Case of the Invariant of While Statement [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(25:15)
+
+Goal:
+(Empty_String = S_Orig''') or 
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 1_3:
+Base Case of the Invariant of While Statement [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(25:15)
+
+Goal:
+(S_Orig = (Reverse(S_Reversed''') o S_Orig''')) or 
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 1_4:
+Requires Clause for Pop [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(29:3)
+
+Goal:
+(1 <= |S_Reversed''|) or 
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (1 <= |S_Reversed''|)
+2. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+3. (S_Copy'' = S_Orig'')
+4. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 1_5:
+Requires Clause for Push [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(31:3)
+
+Goal:
+((1 + |S_Orig''|) <= Max_Depth) or 
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (1 <= |S_Reversed''|)
+2. (S_Copy'' = S_Orig'')
+3. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+4. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+5. (1 <= Max_Depth)
+
+VC 1_6:
+Requires Clause for Push [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(32:3)
+
+Goal:
+((1 + |S_Copy''|) <= Max_Depth) or 
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (1 <= |S_Reversed''|)
+2. (S_Copy'' = S_Orig'')
+3. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+4. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+5. (1 <= Max_Depth)
+
+VC 1_7:
+Inductive Case of Invariant of While Statement [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(25:15)
+
+Goal:
+((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')) or 
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (Entry_Copy'' = Next_Entry'')
+2. (S_Reversed'' = (<Next_Entry''> o S_Reversed'))
+3. (1 <= |S_Reversed''|)
+4. (S_Copy'' = S_Orig'')
+5. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+6. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 1_8:
+Inductive Case of Invariant of While Statement [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(25:15)
+
+Goal:
+(S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))) or 
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (Entry_Copy'' = Next_Entry'')
+2. (S_Reversed'' = (<Next_Entry''> o S_Reversed'))
+3. (1 <= |S_Reversed''|)
+4. (S_Copy'' = S_Orig'')
+5. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+6. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 1_9:
+Termination of While Statement [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(27:3)
+
+Goal:
+((1 + |S_Reversed'|) <= |S_Reversed''|) or 
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (S_Reversed'' = (<Next_Entry''> o S_Reversed'))
+2. (1 <= |S_Reversed''|)
+3. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+4. (S_Copy'' = S_Orig'')
+5. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 2_1:
+Base Case of the Invariant of While Statement at Obvious_CC_Realiz.rb(14:15)
+
+Goal:
+(S_Orig = (Reverse(Empty_String) o S_Orig))
+
+Given(s):
+
+VC 2_2:
+Requires Clause for Pop at Obvious_CC_Realiz.rb(17:3)
+
+Goal:
+(1 <= |S_Orig'''|)
+
+Given(s):
+1. (1 <= |S_Orig'''|)
+2. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 2_3:
+Requires Clause for Push at Obvious_CC_Realiz.rb(18:3)
+
+Goal:
+((1 + |S_Reversed'''|) <= Max_Depth)
+
+Given(s):
+1. (1 <= |S_Orig'''|)
+2. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+3. (1 <= Max_Depth)
+
+VC 2_4:
+Inductive Case of Invariant of While Statement at Obvious_CC_Realiz.rb(14:15)
+
+Goal:
+(S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+Given(s):
+1. (S_Orig''' = (<Next_Entry'''> o S_Orig''))
+2. (1 <= |S_Orig'''|)
+3. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 2_5:
+Termination of While Statement at Obvious_CC_Realiz.rb(15:3)
+
+Goal:
+((1 + |S_Orig''|) <= |S_Orig'''|)
+
+Given(s):
+1. (S_Orig''' = (<Next_Entry'''> o S_Orig''))
+2. (1 <= |S_Orig'''|)
+3. (S_Orig = (Reverse(S_Reversed''') o S_Orig'''))
+
+VC 3_1:
+Base Case of the Invariant of While Statement at Obvious_CC_Realiz.rb(14:15)
+
+Goal:
+(S_Orig = (Reverse(Empty_String) o S_Orig))
+
+Given(s):
+
+VC 3_2:
+Base Case of the Invariant of While Statement [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(25:15)
+
+Goal:
+(Empty_String = S_Orig'') or 
+(1 <= |S_Orig''|)
+
+Given(s):
+1. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+
+VC 3_3:
+Base Case of the Invariant of While Statement [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(25:15)
+
+Goal:
+(S_Orig = (Reverse(S_Reversed'') o S_Orig'')) or 
+(1 <= |S_Orig''|)
+
+Given(s):
+1. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+
+VC 3_4:
+Ensures Clause of Copy_Stack [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(8:11)
+
+Goal:
+(S_Copy' = S_Orig') or 
+(1 <= |S_Reversed'|) or 
+(1 <= |S_Orig''|)
+
+Given(s):
+1. (S_Copy' = S_Orig')
+2. (S_Orig = (Reverse(S_Reversed') o S_Orig'))
+3. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+
+VC 3_5:
+Ensures Clause of Copy_Stack (Condition from "RESTORES" parameter mode) [After Logical Reduction(s)] at Obvious_CC_Realiz.rb(8:55)
+
+Goal:
+(S_Orig' = S_Orig) or 
+(1 <= |S_Reversed'|) or 
+(1 <= |S_Orig''|)
+
+Given(s):
+1. (S_Copy' = S_Orig')
+2. (S_Orig = (Reverse(S_Reversed') o S_Orig'))
+3. (S_Orig = (Reverse(S_Reversed'') o S_Orig''))
+
+========================= VC Generation Details  =========================
+
+    Enhancement Realization Name:   Obvious_CC_Realiz
+    Enhancement Name:               Copying_Capability
+    Concept Name:                   Stack_Template
+
+==========================================================================
+
+========================= Copy_Stack =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Obvious_CC_Realiz.rb(12:10) is true. [Exp: (1 <= |S_Orig|)]
+2. Expression at Obvious_CC_Realiz.rb(23:10) is true. [Exp: (1 <= |S_Reversed|)]
+---------------------
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+
+    While ( Less_Or_Equal(1, Depth(S_Reversed)) )
+        changing Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+        maintaining ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+        decreasing |S_Reversed|;
+    do
+        Pop(Next_Entry, S_Reversed);
+        Copy_Entry(Entry_Copy, Next_Entry);
+        Push(Next_Entry, S_Orig);
+        Push(Entry_Copy, S_Copy);
+    end;
+
+    _Finalize(S_Reversed : Stack);
+    Confirm ((S_Copy = S_Orig) and (S_Orig = #S_Orig));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+
+    While ( Less_Or_Equal(1, Depth(S_Reversed)) )
+        changing Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+        maintaining ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+        decreasing |S_Reversed|;
+    do
+        Pop(Next_Entry, S_Reversed);
+        Copy_Entry(Entry_Copy, Next_Entry);
+        Push(Next_Entry, S_Orig);
+        Push(Entry_Copy, S_Copy);
+    end;
+
+    _Finalize(S_Reversed : Stack);
+
+VC(s):
+     |- (S_Copy = S_Orig)
+
+     |- (S_Orig = #S_Orig)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((S_Copy = S_Orig) and (S_Orig = #S_Orig))" shape="box" ];
+      2 [ label=" |- (S_Copy = S_Orig)" shape="box" color="red" ];
+      3 [ label=" |- (S_Orig = #S_Orig)" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Variable Finalization Rule (Known Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+
+    While ( Less_Or_Equal(1, Depth(S_Reversed)) )
+        changing Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+        maintaining ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+        decreasing |S_Reversed|;
+    do
+        Pop(Next_Entry, S_Reversed);
+        Copy_Entry(Entry_Copy, Next_Entry);
+        Push(Next_Entry, S_Orig);
+        Push(Entry_Copy, S_Copy);
+    end;
+
+    Assume true;
+
+VC(s):
+     |- (S_Copy = S_Orig)
+
+     |- (S_Orig = #S_Orig)
+
+_____________________
+
+Applied Assume Rule and Simplified: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+
+    While ( Less_Or_Equal(1, Depth(S_Reversed)) )
+        changing Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+        maintaining ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+        decreasing |S_Reversed|;
+    do
+        Pop(Next_Entry, S_Reversed);
+        Copy_Entry(Entry_Copy, Next_Entry);
+        Push(Next_Entry, S_Orig);
+        Push(Entry_Copy, S_Copy);
+    end;
+
+
+VC(s):
+     |- (S_Copy = S_Orig)
+
+     |- (S_Orig = #S_Orig)
+
+_____________________
+
+Applied While Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+
+    If ( Less_Or_Equal(1, Depth(S_Reversed)) ) then
+        Pop(Next_Entry, S_Reversed);
+        Copy_Entry(Entry_Copy, Next_Entry);
+        Push(Next_Entry, S_Orig);
+        Push(Entry_Copy, S_Copy);
+        Confirm (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and ((1 + |S_Reversed|) <= P_Val'));
+    Else
+        VC_Confirm
+             |- (S_Copy = S_Orig)
+
+             |- (S_Orig = #S_Orig)
+
+    end;
+
+
+VC(s):
+
+_____________________
+
+Applied If-Part Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Copy_Entry(Entry_Copy, Next_Entry);
+    Push(Next_Entry, S_Orig);
+    Push(Entry_Copy, S_Copy);
+    Confirm (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and ((1 + |S_Reversed|) <= P_Val'));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Copy_Entry(Entry_Copy, Next_Entry);
+    Push(Next_Entry, S_Orig);
+    Push(Entry_Copy, S_Copy);
+
+VC(s):
+     |- (S_Copy = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and ((1 + |S_Reversed|) <= P_Val'))" shape="box" ];
+      2 [ label=" |- ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)))" shape="box" ];
+      3 [ label=" |- ((1 + |S_Reversed|) <= P_Val')" shape="box" color="red" ];
+      4 [ label=" |- (S_Copy = S_Orig)" shape="box" color="red" ];
+      5 [ label=" |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+      2 -> 4;
+      2 -> 5;
+    }
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Copy_Entry(Entry_Copy, Next_Entry);
+    Push(Next_Entry, S_Orig);
+    Confirm ((1 + |S_Copy|) <= Max_Depth);
+    Assume (S_Copy' = (<Entry_Copy> o S_Copy));
+
+VC(s):
+     |- (S_Copy' = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Copy_Entry(Entry_Copy, Next_Entry);
+    Push(Next_Entry, S_Orig);
+    Confirm ((1 + |S_Copy|) <= Max_Depth);
+
+VC(s):
+     |- ((<Entry_Copy> o S_Copy) = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Copy_Entry(Entry_Copy, Next_Entry);
+    Push(Next_Entry, S_Orig);
+
+VC(s):
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+     |- ((<Entry_Copy> o S_Copy) = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Copy_Entry(Entry_Copy, Next_Entry);
+    Confirm ((1 + |S_Orig|) <= Max_Depth);
+    Assume (S_Orig' = (<Next_Entry> o S_Orig));
+
+VC(s):
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+     |- ((<Entry_Copy> o S_Copy) = S_Orig')
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig'))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Copy_Entry(Entry_Copy, Next_Entry);
+    Confirm ((1 + |S_Orig|) <= Max_Depth);
+
+VC(s):
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+     |- ((<Entry_Copy> o S_Copy) = (<Next_Entry> o S_Orig))
+
+     |- (#S_Orig = (Reverse(S_Reversed) o (<Next_Entry> o S_Orig)))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Copy_Entry(Entry_Copy, Next_Entry);
+
+VC(s):
+     |- ((1 + |S_Orig|) <= Max_Depth)
+
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+     |- ((<Entry_Copy> o S_Copy) = (<Next_Entry> o S_Orig))
+
+     |- (#S_Orig = (Reverse(S_Reversed) o (<Next_Entry> o S_Orig)))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Confirm true;
+    Assume (Entry_Copy'' = Next_Entry);
+
+VC(s):
+     |- ((1 + |S_Orig|) <= Max_Depth)
+
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+     |- ((<Entry_Copy''> o S_Copy) = (<Next_Entry> o S_Orig))
+
+     |- (#S_Orig = (Reverse(S_Reversed) o (<Next_Entry> o S_Orig)))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+    Confirm true;
+
+VC(s):
+     |- ((1 + |S_Orig|) <= Max_Depth)
+
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry) |- ((<Entry_Copy''> o S_Copy) = (<Next_Entry> o S_Orig))
+
+    (Entry_Copy'' = Next_Entry) |- (#S_Orig = (Reverse(S_Reversed) o (<Next_Entry> o S_Orig)))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Pop(Next_Entry, S_Reversed);
+
+VC(s):
+     |- ((1 + |S_Orig|) <= Max_Depth)
+
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry) |- ((<Entry_Copy''> o S_Copy) = (<Next_Entry> o S_Orig))
+
+    (Entry_Copy'' = Next_Entry) |- (#S_Orig = (Reverse(S_Reversed) o (<Next_Entry> o S_Orig)))
+
+     |- ((1 + |S_Reversed|) <= P_Val')
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Confirm (1 <= |S_Reversed|);
+    Assume (S_Reversed = (<Next_Entry''> o S_Reversed'));
+
+VC(s):
+     |- ((1 + |S_Orig|) <= Max_Depth)
+
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry'') |- ((<Entry_Copy''> o S_Copy) = (<Next_Entry''> o S_Orig))
+
+    (Entry_Copy'' = Next_Entry'') |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig)))
+
+     |- ((1 + |S_Reversed'|) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+    Confirm (1 <= |S_Reversed|);
+
+VC(s):
+     |- ((1 + |S_Orig|) <= Max_Depth)
+
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed = (<Next_Entry''> o S_Reversed')) |- ((<Entry_Copy''> o S_Copy) = (<Next_Entry''> o S_Orig))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed = (<Next_Entry''> o S_Reversed')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig)))
+
+    (S_Reversed = (<Next_Entry''> o S_Reversed')) |- ((1 + |S_Reversed'|) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate (1 <= |S_Reversed|);
+
+VC(s):
+     |- (1 <= |S_Reversed|)
+
+     |- ((1 + |S_Orig|) <= Max_Depth)
+
+     |- ((1 + |S_Copy|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed = (<Next_Entry''> o S_Reversed')) |- ((<Entry_Copy''> o S_Copy) = (<Next_Entry''> o S_Orig))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed = (<Next_Entry''> o S_Reversed')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig)))
+
+    (S_Reversed = (<Next_Entry''> o S_Reversed')) |- ((1 + |S_Reversed'|) <= P_Val')
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+
+VC(s):
+    (1 <= |S_Reversed|) |- (1 <= |S_Reversed|)
+
+    (1 <= |S_Reversed|) |- ((1 + |S_Orig|) <= Max_Depth)
+
+    (1 <= |S_Reversed|) |- ((1 + |S_Copy|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed|) |- ((<Entry_Copy''> o S_Copy) = (<Next_Entry''> o S_Orig))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed|) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig)))
+
+    (S_Reversed = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed|) |- ((1 + |S_Reversed'|) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+
+VC(s):
+    (1 <= |S_Reversed|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (S_Copy = S_Orig) |- (1 <= |S_Reversed|)
+
+    (1 <= |S_Reversed|), (S_Copy = S_Orig), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Orig|) <= Max_Depth)
+
+    (1 <= |S_Reversed|), (S_Copy = S_Orig), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Copy|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed|), (S_Copy = S_Orig), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((<Entry_Copy''> o S_Copy) = (<Next_Entry''> o S_Orig))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed|), (S_Copy = S_Orig), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig)))
+
+    (S_Reversed = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (S_Copy = S_Orig) |- ((1 + |S_Reversed'|) <= |S_Reversed|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|)) |- " shape="box" ];
+      2 [ label="(S_Copy = S_Orig), (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (P_Val' = |S_Reversed|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+
+VC(s):
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+
+VC(s):
+     |- (S_Copy = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)))" shape="box" ];
+      2 [ label=" |- (S_Copy = S_Orig)" shape="box" color="red" ];
+      3 [ label=" |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Confirm true;
+    Assume (S_Copy''' = Empty_String);
+
+VC(s):
+     |- (S_Copy''' = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Confirm true;
+
+VC(s):
+     |- (Empty_String = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|)
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+
+VC(s):
+     |- (Empty_String = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|)
+
+_____________________
+
+Applied While Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+
+    If ( Less_Or_Equal(1, Depth(S_Orig)) ) then
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+        Confirm ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and ((1 + |S_Orig|) <= P_Val''));
+    Else
+        VC_Confirm
+             |- (Empty_String = S_Orig)
+
+             |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+            (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|)
+
+            (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth)
+
+            (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth)
+
+            (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))
+
+            (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))
+
+            (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|)
+
+    end;
+
+
+VC(s):
+
+_____________________
+
+Applied If-Part Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+    Push(Next_Entry, S_Reversed);
+    Confirm ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and ((1 + |S_Orig|) <= P_Val''));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+    Push(Next_Entry, S_Reversed);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+     |- ((1 + |S_Orig|) <= P_Val'')
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and ((1 + |S_Orig|) <= P_Val''))" shape="box" ];
+      2 [ label=" |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))" shape="box" color="red" ];
+      3 [ label=" |- ((1 + |S_Orig|) <= P_Val'')" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+    Confirm ((1 + |S_Reversed|) <= Max_Depth);
+    Assume (S_Reversed''' = (<Next_Entry> o S_Reversed));
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig))
+
+     |- ((1 + |S_Orig|) <= P_Val'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+    Confirm ((1 + |S_Reversed|) <= Max_Depth);
+
+VC(s):
+     |- (#S_Orig = (Reverse((<Next_Entry> o S_Reversed)) o S_Orig))
+
+     |- ((1 + |S_Orig|) <= P_Val'')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+
+VC(s):
+     |- ((1 + |S_Reversed|) <= Max_Depth)
+
+     |- (#S_Orig = (Reverse((<Next_Entry> o S_Reversed)) o S_Orig))
+
+     |- ((1 + |S_Orig|) <= P_Val'')
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Confirm (1 <= |S_Orig|);
+    Assume (S_Orig = (<Next_Entry'''''> o S_Orig'''));
+
+VC(s):
+     |- ((1 + |S_Reversed|) <= Max_Depth)
+
+     |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed)) o S_Orig'''))
+
+     |- ((1 + |S_Orig'''|) <= P_Val'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Confirm (1 <= |S_Orig|);
+
+VC(s):
+     |- ((1 + |S_Reversed|) <= Max_Depth)
+
+    (S_Orig = (<Next_Entry'''''> o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed)) o S_Orig'''))
+
+    (S_Orig = (<Next_Entry'''''> o S_Orig''')) |- ((1 + |S_Orig'''|) <= P_Val'')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+
+VC(s):
+     |- (1 <= |S_Orig|)
+
+     |- ((1 + |S_Reversed|) <= Max_Depth)
+
+    (S_Orig = (<Next_Entry'''''> o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed)) o S_Orig'''))
+
+    (S_Orig = (<Next_Entry'''''> o S_Orig''')) |- ((1 + |S_Orig'''|) <= P_Val'')
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+
+VC(s):
+    (1 <= |S_Orig|) |- (1 <= |S_Orig|)
+
+    (1 <= |S_Orig|) |- ((1 + |S_Reversed|) <= Max_Depth)
+
+    (S_Orig = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig|) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed)) o S_Orig'''))
+
+    (S_Orig = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig|) |- ((1 + |S_Orig'''|) <= P_Val'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+
+VC(s):
+    (1 <= |S_Orig|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (1 <= |S_Orig|)
+
+    (1 <= |S_Orig|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Reversed|) <= Max_Depth)
+
+    (S_Orig = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed)) o S_Orig'''))
+
+    (S_Orig = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Orig'''|) <= |S_Orig|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|)) |- " shape="box" ];
+      2 [ label="(#S_Orig = (Reverse(S_Reversed) o S_Orig)), (P_Val'' = |S_Orig|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+
+VC(s):
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    Assume (S_Reversed = Empty_String);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Assume Entry.Is_Initial(Entry_Copy);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Assume Entry.Is_Initial(Next_Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (#S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (#S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+
+VC(s):
+     |- (S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig''''|), (S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Reversed''' : Str('Entry')
+    Next_Entry''''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    Next_Entry'''''' : 'Entry'
+    S_Orig'''' : Str('Entry')
+    S_Reversed'''' : Str('Entry')
+
+Statements:
+
+VC(s):
+     |- (S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig''''|), (S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (1 <= |S_Orig''''|)
+
+    (1 <= |S_Orig''''|), (S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')), (1 <= Max_Depth) |- ((1 + |S_Reversed''''|) <= Max_Depth)
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- (S_Orig = (Reverse((<Next_Entry'''''> o S_Reversed'''')) o S_Orig'''))
+
+    (S_Orig'''' = (<Next_Entry'''''> o S_Orig''')), (1 <= |S_Orig''''|), (S_Orig = (Reverse(S_Reversed'''') o S_Orig'''')) |- ((1 + |S_Orig'''|) <= |S_Orig''''|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Depth), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Copy_Stack =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Obvious_CC_Realiz.rb(12:10) is false. [Exp: not((1 <= |S_Orig|))]
+2. Expression at Obvious_CC_Realiz.rb(23:10) is true. [Exp: (1 <= |S_Reversed|)]
+---------------------
+
+Applied Else-Part Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate not((1 <= |S_Orig|));
+    VC_Confirm
+         |- (Empty_String = S_Orig)
+
+         |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+        (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|)
+
+        (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth)
+
+        (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth)
+
+        (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))
+
+        (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))
+
+        (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|)
+
+
+VC(s):
+
+_____________________
+
+Applied VCConfirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate not((1 <= |S_Orig|));
+
+VC(s):
+     |- (Empty_String = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|)
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+
+VC(s):
+     |- (Empty_String = S_Orig), (1 <= |S_Orig|)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (1 <= |S_Orig|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|), (1 <= |S_Orig|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="not((1 <= |S_Orig|)) |- (Empty_String = S_Orig)" shape="box" ];
+      2 [ label=" |- (Empty_String = S_Orig), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="not((1 <= |S_Orig|)) |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))" shape="box" ];
+      2 [ label=" |- (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), not((1 <= |S_Orig|)) |- (1 <= |S_Reversed''|)" shape="box" ];
+      2 [ label="(1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- (1 <= |S_Reversed''|), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), not((1 <= |S_Orig|)) |- ((1 + |S_Orig''|) <= Max_Depth)" shape="box" ];
+      2 [ label="(1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), not((1 <= |S_Orig|)) |- ((1 + |S_Copy''|) <= Max_Depth)" shape="box" ];
+      2 [ label="(1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), not((1 <= |S_Orig|)) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig''))" shape="box" ];
+      2 [ label="(Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), not((1 <= |S_Orig|)) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig'')))" shape="box" ];
+      2 [ label="(Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), not((1 <= |S_Orig|)) |- ((1 + |S_Reversed'|) <= |S_Reversed''|)" shape="box" ];
+      2 [ label="(S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig'') |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+
+VC(s):
+    (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (Empty_String = S_Orig), (1 <= |S_Orig|)
+
+    (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (1 <= |S_Orig|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (1 <= |S_Reversed''|), (1 <= |S_Orig|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|)) |- " shape="box" ];
+      2 [ label="(#S_Orig = (Reverse(S_Reversed) o S_Orig)), (P_Val'' = |S_Orig|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+
+VC(s):
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    Assume (S_Reversed = Empty_String);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Assume Entry.Is_Initial(Entry_Copy);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Assume Entry.Is_Initial(Next_Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+
+VC(s):
+     |- (S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    S_Copy' : Str('Entry')
+    Next_Entry' : 'Entry'
+    S_Orig' : Str('Entry')
+    Entry_Copy'' : 'Entry'
+    Next_Entry'' : 'Entry'
+    S_Reversed' : Str('Entry')
+    Entry_Copy''' : 'Entry'
+    Next_Entry''' : 'Entry'
+    S_Copy'' : Str('Entry')
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+    S_Copy''' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+
+VC(s):
+     |- (S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (Empty_String = S_Orig'''), (1 <= |S_Orig'''|)
+
+    (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= Max_Depth) |- ((1 + |S_Orig''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= Max_Depth) |- ((1 + |S_Copy''|) <= Max_Depth), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((<Entry_Copy''> o S_Copy'') = (<Next_Entry''> o S_Orig'')), (1 <= |S_Orig'''|)
+
+    (Entry_Copy'' = Next_Entry''), (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (S_Orig = (Reverse(S_Reversed') o (<Next_Entry''> o S_Orig''))), (1 <= |S_Orig'''|)
+
+    (S_Reversed'' = (<Next_Entry''> o S_Reversed')), (1 <= |S_Reversed''|), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (S_Copy'' = S_Orig''), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'|) <= |S_Reversed''|), (1 <= |S_Orig'''|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Depth), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Copy_Stack =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Obvious_CC_Realiz.rb(12:10) is true. [Exp: (1 <= |S_Orig|)]
+2. Expression at Obvious_CC_Realiz.rb(23:10) is false. [Exp: not((1 <= |S_Reversed|))]
+---------------------
+
+Applied Else-Part Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate not((1 <= |S_Reversed|));
+    VC_Confirm
+         |- (S_Copy = S_Orig)
+
+         |- (S_Orig = #S_Orig)
+
+
+VC(s):
+
+_____________________
+
+Applied VCConfirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+    Stipulate not((1 <= |S_Reversed|));
+
+VC(s):
+     |- (S_Copy = S_Orig)
+
+     |- (S_Orig = #S_Orig)
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+    Assume (((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|));
+
+VC(s):
+     |- (S_Copy = S_Orig), (1 <= |S_Reversed|)
+
+     |- (S_Orig = #S_Orig), (1 <= |S_Reversed|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="not((1 <= |S_Reversed|)) |- (S_Copy = S_Orig)" shape="box" ];
+      2 [ label=" |- (S_Copy = S_Orig), (1 <= |S_Reversed|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="not((1 <= |S_Reversed|)) |- (S_Orig = #S_Orig)" shape="box" ];
+      2 [ label=" |- (S_Orig = #S_Orig), (1 <= |S_Reversed|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+    Change Entry_Copy, Next_Entry, S_Copy, S_Orig, S_Reversed;
+
+VC(s):
+    (S_Copy = S_Orig), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (S_Copy = S_Orig), (1 <= |S_Reversed|)
+
+    (S_Copy = S_Orig), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (S_Orig = #S_Orig), (1 <= |S_Reversed|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig))) and (P_Val' = |S_Reversed|)) |- " shape="box" ];
+      2 [ label="(S_Copy = S_Orig), (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (P_Val' = |S_Reversed|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+    Confirm ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)));
+
+VC(s):
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Clear(S_Copy);
+
+VC(s):
+     |- (S_Copy = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((S_Copy = S_Orig) and (#S_Orig = (Reverse(S_Reversed) o S_Orig)))" shape="box" ];
+      2 [ label=" |- (S_Copy = S_Orig)" shape="box" color="red" ];
+      3 [ label=" |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Confirm true;
+    Assume (S_Copy'' = Empty_String);
+
+VC(s):
+     |- (S_Copy'' = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+    Confirm true;
+
+VC(s):
+     |- (Empty_String = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+    While ( Less_Or_Equal(1, Depth(S_Orig)) )
+        changing Next_Entry, S_Orig, S_Reversed;
+        maintaining (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+        decreasing |S_Orig|;
+    do
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+    end;
+
+
+VC(s):
+     |- (Empty_String = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)
+
+_____________________
+
+Applied While Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+
+    If ( Less_Or_Equal(1, Depth(S_Orig)) ) then
+        Pop(Next_Entry, S_Orig);
+        Push(Next_Entry, S_Reversed);
+        Confirm ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and ((1 + |S_Orig|) <= P_Val''));
+    Else
+        VC_Confirm
+             |- (Empty_String = S_Orig)
+
+             |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+            (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)
+
+            (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)
+
+    end;
+
+
+VC(s):
+
+_____________________
+
+Applied If-Part Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+    Push(Next_Entry, S_Reversed);
+    Confirm ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and ((1 + |S_Orig|) <= P_Val''));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+    Push(Next_Entry, S_Reversed);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+     |- ((1 + |S_Orig|) <= P_Val'')
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and ((1 + |S_Orig|) <= P_Val''))" shape="box" ];
+      2 [ label=" |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))" shape="box" color="red" ];
+      3 [ label=" |- ((1 + |S_Orig|) <= P_Val'')" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+    Confirm ((1 + |S_Reversed|) <= Max_Depth);
+    Assume (S_Reversed'' = (<Next_Entry> o S_Reversed));
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig))
+
+     |- ((1 + |S_Orig|) <= P_Val'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+    Confirm ((1 + |S_Reversed|) <= Max_Depth);
+
+VC(s):
+     |- (#S_Orig = (Reverse((<Next_Entry> o S_Reversed)) o S_Orig))
+
+     |- ((1 + |S_Orig|) <= P_Val'')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Pop(Next_Entry, S_Orig);
+
+VC(s):
+     |- ((1 + |S_Reversed|) <= Max_Depth)
+
+     |- (#S_Orig = (Reverse((<Next_Entry> o S_Reversed)) o S_Orig))
+
+     |- ((1 + |S_Orig|) <= P_Val'')
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Confirm (1 <= |S_Orig|);
+    Assume (S_Orig = (<Next_Entry'''> o S_Orig''));
+
+VC(s):
+     |- ((1 + |S_Reversed|) <= Max_Depth)
+
+     |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed)) o S_Orig''))
+
+     |- ((1 + |S_Orig''|) <= P_Val'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+    Confirm (1 <= |S_Orig|);
+
+VC(s):
+     |- ((1 + |S_Reversed|) <= Max_Depth)
+
+    (S_Orig = (<Next_Entry'''> o S_Orig'')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed)) o S_Orig''))
+
+    (S_Orig = (<Next_Entry'''> o S_Orig'')) |- ((1 + |S_Orig''|) <= P_Val'')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate (1 <= |S_Orig|);
+
+VC(s):
+     |- (1 <= |S_Orig|)
+
+     |- ((1 + |S_Reversed|) <= Max_Depth)
+
+    (S_Orig = (<Next_Entry'''> o S_Orig'')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed)) o S_Orig''))
+
+    (S_Orig = (<Next_Entry'''> o S_Orig'')) |- ((1 + |S_Orig''|) <= P_Val'')
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+
+VC(s):
+    (1 <= |S_Orig|) |- (1 <= |S_Orig|)
+
+    (1 <= |S_Orig|) |- ((1 + |S_Reversed|) <= Max_Depth)
+
+    (S_Orig = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig|) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed)) o S_Orig''))
+
+    (S_Orig = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig|) |- ((1 + |S_Orig''|) <= P_Val'')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+
+VC(s):
+    (1 <= |S_Orig|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (1 <= |S_Orig|)
+
+    (1 <= |S_Orig|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Reversed|) <= Max_Depth)
+
+    (S_Orig = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed)) o S_Orig''))
+
+    (S_Orig = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig|), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- ((1 + |S_Orig''|) <= |S_Orig|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|)) |- " shape="box" ];
+      2 [ label="(#S_Orig = (Reverse(S_Reversed) o S_Orig)), (P_Val'' = |S_Orig|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+
+VC(s):
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    Assume (S_Reversed = Empty_String);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Assume Entry.Is_Initial(Entry_Copy);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Assume Entry.Is_Initial(Next_Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (#S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (#S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+
+VC(s):
+     |- (S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig'''|), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Reversed'' : Str('Entry')
+    Next_Entry''' : 'Entry'
+    S_Orig'' : Str('Entry')
+    Next_Entry'''' : 'Entry'
+    S_Orig''' : Str('Entry')
+    S_Reversed''' : Str('Entry')
+
+Statements:
+
+VC(s):
+     |- (S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (1 <= |S_Orig'''|), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (1 <= |S_Orig'''|)
+
+    (1 <= |S_Orig'''|), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')), (1 <= Max_Depth) |- ((1 + |S_Reversed'''|) <= Max_Depth)
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- (S_Orig = (Reverse((<Next_Entry'''> o S_Reversed''')) o S_Orig''))
+
+    (S_Orig''' = (<Next_Entry'''> o S_Orig'')), (1 <= |S_Orig'''|), (S_Orig = (Reverse(S_Reversed''') o S_Orig''')) |- ((1 + |S_Orig''|) <= |S_Orig'''|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Depth), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Copy_Stack =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Obvious_CC_Realiz.rb(12:10) is false. [Exp: not((1 <= |S_Orig|))]
+2. Expression at Obvious_CC_Realiz.rb(23:10) is false. [Exp: not((1 <= |S_Reversed|))]
+---------------------
+
+Applied Else-Part Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate not((1 <= |S_Orig|));
+    VC_Confirm
+         |- (Empty_String = S_Orig)
+
+         |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+        (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)
+
+        (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)
+
+
+VC(s):
+
+_____________________
+
+Applied VCConfirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+    Stipulate not((1 <= |S_Orig|));
+
+VC(s):
+     |- (Empty_String = S_Orig)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+    Assume ((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|));
+
+VC(s):
+     |- (Empty_String = S_Orig), (1 <= |S_Orig|)
+
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (1 <= |S_Orig|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="not((1 <= |S_Orig|)) |- (Empty_String = S_Orig)" shape="box" ];
+      2 [ label=" |- (Empty_String = S_Orig), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="not((1 <= |S_Orig|)) |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))" shape="box" ];
+      2 [ label=" |- (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), not((1 <= |S_Orig|)) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|)" shape="box" ];
+      2 [ label="(S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), not((1 <= |S_Orig|)) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|)" shape="box" ];
+      2 [ label="(S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+    Change Next_Entry, S_Orig, S_Reversed;
+
+VC(s):
+    (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (Empty_String = S_Orig), (1 <= |S_Orig|)
+
+    (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (#S_Orig = (Reverse(S_Reversed) o S_Orig)), (1 <= |S_Orig|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed) o S_Orig)) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((#S_Orig = (Reverse(S_Reversed) o S_Orig)) and (P_Val'' = |S_Orig|)) |- " shape="box" ];
+      2 [ label="(#S_Orig = (Reverse(S_Reversed) o S_Orig)), (P_Val'' = |S_Orig|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+    Confirm (#S_Orig = (Reverse(S_Reversed) o S_Orig));
+
+VC(s):
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    _Initialize(S_Reversed : Stack);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+    Assume (S_Reversed = Empty_String);
+
+VC(s):
+     |- (#S_Orig = (Reverse(S_Reversed) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    _Initialize(Entry_Copy : Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Assume Entry.Is_Initial(Entry_Copy);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Assume Entry.Is_Initial(Next_Entry);
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+VC(s):
+     |- (#S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (#S_Orig = (Reverse(S_Reversed') o S_Orig')), (#S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = #S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+
+VC(s):
+     |- (S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (S_Orig = (Reverse(S_Reversed') o S_Orig')), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (S_Orig = (Reverse(S_Reversed') o S_Orig')), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Entry_Copy : 'Entry'
+    S_Reversed : Str('Entry')
+    P_Val' : N
+    Entry_Copy' : 'Entry'
+    Next_Entry' : 'Entry'
+    S_Copy' : Str('Entry')
+    S_Orig' : Str('Entry')
+    S_Reversed' : Str('Entry')
+    S_Copy'' : Str('Entry')
+    P_Val'' : N
+    Next_Entry'' : 'Entry'
+    S_Orig'' : Str('Entry')
+    S_Reversed'' : Str('Entry')
+
+Statements:
+
+VC(s):
+     |- (S_Orig = (Reverse(Empty_String) o S_Orig))
+
+    (S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (Empty_String = S_Orig''), (1 <= |S_Orig''|)
+
+    (S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig = (Reverse(S_Reversed'') o S_Orig'')), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (S_Orig = (Reverse(S_Reversed') o S_Orig')), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Copy' = S_Orig'), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+    (S_Copy' = S_Orig'), (S_Orig = (Reverse(S_Reversed') o S_Orig')), (S_Orig = (Reverse(S_Reversed'') o S_Orig'')) |- (S_Orig' = S_Orig), (1 <= |S_Reversed'|), (1 <= |S_Orig''|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Depth), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+

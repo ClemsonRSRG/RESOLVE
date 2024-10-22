@@ -1,0 +1,926 @@
+VCs for Iterative_Append_Realiz.rb generated Mon Oct 07 15:36:06 EDT 2024
+
+================================= VC(s): =================================
+
+VC 0_1:
+Base Case of the Invariant of While Statement at Iterative_Append_Realiz.rb(8:22)
+
+Goal:
+true
+
+Given(s):
+
+VC 0_2:
+Requires Clause for Dequeue at Iterative_Append_Realiz.rb(11:10)
+
+Goal:
+(1 <= |Q''|)
+
+Given(s):
+1. (1 <= |Q''|)
+
+VC 0_3:
+Requires Clause for Enqueue at Iterative_Append_Realiz.rb(12:10)
+
+Goal:
+((1 + |P''|) <= Max_Length)
+
+Given(s):
+1. (1 <= |Q''|)
+2. (1 <= Max_Length)
+3. ((|P| + |Q|) <= Max_Length)
+
+VC 0_4:
+Inductive Case of Invariant of While Statement at Iterative_Append_Realiz.rb(8:22)
+
+Goal:
+true
+
+Given(s):
+1. (1 <= |Q''|)
+
+VC 0_5:
+Termination of While Statement at Iterative_Append_Realiz.rb(9:10)
+
+Goal:
+((1 + |Q'|) <= |Q''|)
+
+Given(s):
+1. (Q'' = (<E''> o Q'))
+2. (1 <= |Q''|)
+
+VC 1_1:
+Base Case of the Invariant of While Statement at Iterative_Append_Realiz.rb(8:22)
+
+Goal:
+true
+
+Given(s):
+
+VC 1_2:
+Ensures Clause of Append [After Logical Reduction(s)] at Iterative_Append_Realiz.rb(3:14)
+
+Goal:
+(P' = (P o Q)) or 
+(1 <= |Q'|)
+
+Given(s):
+1. ((|P| + |Q|) <= Max_Length)
+2. (1 <= Max_Length)
+
+VC 1_3:
+Ensures Clause of Append (Condition from "CLEARS" parameter mode) [After Logical Reduction(s)] at Iterative_Append_Realiz.rb(3:46)
+
+Goal:
+(Q' = Empty_String) or 
+(1 <= |Q'|)
+
+Given(s):
+
+========================= VC Generation Details  =========================
+
+    Enhancement Realization Name:   Iterative_Append_Realiz
+    Enhancement Name:               Append_Capability
+    Concept Name:                   Queue_Template
+
+==========================================================================
+
+========================= Append =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Iterative_Append_Realiz.rb(6:16) is true. [Exp: (1 <= |Q|)]
+---------------------
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+    E : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+
+    While ( Less_Or_Equal(1, Length(Q)) )
+        changing P, Q, E;
+        maintaining true;
+        decreasing |Q|;
+    do
+        Dequeue(E, Q);
+        Enqueue(E, P);
+    end;
+
+    Confirm ((P = (#P o #Q)) and (Q = Empty_String));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    E : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+
+    While ( Less_Or_Equal(1, Length(Q)) )
+        changing P, Q, E;
+        maintaining true;
+        decreasing |Q|;
+    do
+        Dequeue(E, Q);
+        Enqueue(E, P);
+    end;
+
+
+VC(s):
+     |- (P = (#P o #Q))
+
+     |- (Q = Empty_String)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((P = (#P o #Q)) and (Q = Empty_String))" shape="box" ];
+      2 [ label=" |- (P = (#P o #Q))" shape="box" color="red" ];
+      3 [ label=" |- (Q = Empty_String)" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied While Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+
+    If ( Less_Or_Equal(1, Length(Q)) ) then
+        Dequeue(E, Q);
+        Enqueue(E, P);
+        Confirm (true and ((1 + |Q|) <= P_Val'));
+    Else
+        VC_Confirm
+             |- (P = (#P o #Q))
+
+             |- (Q = Empty_String)
+
+    end;
+
+
+VC(s):
+
+_____________________
+
+Applied If-Part Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate (1 <= |Q|);
+    Dequeue(E, Q);
+    Enqueue(E, P);
+    Confirm (true and ((1 + |Q|) <= P_Val'));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate (1 <= |Q|);
+    Dequeue(E, Q);
+    Enqueue(E, P);
+
+VC(s):
+     |- true
+
+     |- ((1 + |Q|) <= P_Val')
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- (true and ((1 + |Q|) <= P_Val'))" shape="box" ];
+      2 [ label=" |- true" shape="box" color="red" ];
+      3 [ label=" |- ((1 + |Q|) <= P_Val')" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate (1 <= |Q|);
+    Dequeue(E, Q);
+    Confirm ((1 + |P|) <= Max_Length);
+    Assume (P' = (P o <E>));
+
+VC(s):
+     |- true
+
+     |- ((1 + |Q|) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate (1 <= |Q|);
+    Dequeue(E, Q);
+    Confirm ((1 + |P|) <= Max_Length);
+
+VC(s):
+     |- true
+
+     |- ((1 + |Q|) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate (1 <= |Q|);
+    Dequeue(E, Q);
+
+VC(s):
+     |- ((1 + |P|) <= Max_Length)
+
+     |- true
+
+     |- ((1 + |Q|) <= P_Val')
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate (1 <= |Q|);
+    Confirm (1 <= |Q|);
+    Assume (Q = (<E''> o Q'));
+
+VC(s):
+     |- ((1 + |P|) <= Max_Length)
+
+     |- true
+
+     |- ((1 + |Q'|) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate (1 <= |Q|);
+    Confirm (1 <= |Q|);
+
+VC(s):
+     |- ((1 + |P|) <= Max_Length)
+
+     |- true
+
+    (Q = (<E''> o Q')) |- ((1 + |Q'|) <= P_Val')
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate (1 <= |Q|);
+
+VC(s):
+     |- (1 <= |Q|)
+
+     |- ((1 + |P|) <= Max_Length)
+
+     |- true
+
+    (Q = (<E''> o Q')) |- ((1 + |Q'|) <= P_Val')
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+
+VC(s):
+    (1 <= |Q|) |- (1 <= |Q|)
+
+    (1 <= |Q|) |- ((1 + |P|) <= Max_Length)
+
+    (1 <= |Q|) |- true
+
+    (Q = (<E''> o Q')), (1 <= |Q|) |- ((1 + |Q'|) <= P_Val')
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+
+VC(s):
+    (1 <= |Q|) |- (1 <= |Q|)
+
+    (1 <= |Q|) |- ((1 + |P|) <= Max_Length)
+
+    (1 <= |Q|) |- true
+
+    (Q = (<E''> o Q')), (1 <= |Q|) |- ((1 + |Q'|) <= |Q|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(true and (P_Val' = |Q|)) |- " shape="box" ];
+      2 [ label="true, (P_Val' = |Q|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+    P'' : Str('Entry')
+    Q'' : Str('Entry')
+    E''' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+
+VC(s):
+    (1 <= |Q''|) |- (1 <= |Q''|)
+
+    (1 <= |Q''|) |- ((1 + |P''|) <= Max_Length)
+
+    (1 <= |Q''|) |- true
+
+    (Q'' = (<E''> o Q')), (1 <= |Q''|) |- ((1 + |Q'|) <= |Q''|)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+    P'' : Str('Entry')
+    Q'' : Str('Entry')
+    E''' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+
+VC(s):
+     |- true
+
+    (1 <= |Q''|) |- (1 <= |Q''|)
+
+    (1 <= |Q''|) |- ((1 + |P''|) <= Max_Length)
+
+    (1 <= |Q''|) |- true
+
+    (Q'' = (<E''> o Q')), (1 <= |Q''|) |- ((1 + |Q'|) <= |Q''|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+    P'' : Str('Entry')
+    Q'' : Str('Entry')
+    E''' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    Assume Entry.Is_Initial(E);
+
+VC(s):
+     |- true
+
+    (1 <= |Q''|) |- (1 <= |Q''|)
+
+    (1 <= |Q''|) |- ((1 + |P''|) <= Max_Length)
+
+    (1 <= |Q''|) |- true
+
+    (Q'' = (<E''> o Q')), (1 <= |Q''|) |- ((1 + |Q'|) <= |Q''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+    P'' : Str('Entry')
+    Q'' : Str('Entry')
+    E''' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+
+VC(s):
+     |- true
+
+    (1 <= |Q''|) |- (1 <= |Q''|)
+
+    (1 <= |Q''|) |- ((1 + |P''|) <= Max_Length)
+
+    (1 <= |Q''|) |- true
+
+    (Q'' = (<E''> o Q')), (1 <= |Q''|) |- ((1 + |Q'|) <= |Q''|)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+    P'' : Str('Entry')
+    Q'' : Str('Entry')
+    E''' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+
+VC(s):
+     |- true
+
+    (1 <= |Q''|) |- (1 <= |Q''|)
+
+    (1 <= |Q''|) |- ((1 + |P''|) <= Max_Length)
+
+    (1 <= |Q''|) |- true
+
+    (Q'' = (<E''> o Q')), (1 <= |Q''|) |- ((1 + |Q'|) <= |Q''|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    E' : 'Entry'
+    P' : Str('Entry')
+    E'' : 'Entry'
+    Q' : Str('Entry')
+    P'' : Str('Entry')
+    Q'' : Str('Entry')
+    E''' : 'Entry'
+
+Statements:
+
+VC(s):
+     |- true
+
+    (1 <= |Q''|) |- (1 <= |Q''|)
+
+    (1 <= |Q''|), (1 <= Max_Length), ((|P| + |Q|) <= Max_Length) |- ((1 + |P''|) <= Max_Length)
+
+    (1 <= |Q''|) |- true
+
+    (Q'' = (<E''> o Q')), (1 <= |Q''|) |- ((1 + |Q'|) <= |Q''|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), ((|P| + |Q|) <= Max_Length) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Append =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Iterative_Append_Realiz.rb(6:16) is false. [Exp: not((1 <= |Q|))]
+---------------------
+
+Applied Else-Part Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate not((1 <= |Q|));
+    VC_Confirm
+         |- (P = (#P o #Q))
+
+         |- (Q = Empty_String)
+
+
+VC(s):
+
+_____________________
+
+Applied VCConfirm Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+    Stipulate not((1 <= |Q|));
+
+VC(s):
+     |- (P = (#P o #Q))
+
+     |- (Q = Empty_String)
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+    Assume (true and (P_Val' = |Q|));
+
+VC(s):
+     |- (P = (#P o #Q)), (1 <= |Q|)
+
+     |- (Q = Empty_String), (1 <= |Q|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="not((1 <= |Q|)) |- (P = (#P o #Q))" shape="box" ];
+      2 [ label=" |- (P = (#P o #Q)), (1 <= |Q|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="not((1 <= |Q|)) |- (Q = Empty_String)" shape="box" ];
+      2 [ label=" |- (Q = Empty_String), (1 <= |Q|)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+    Change P, Q, E;
+
+VC(s):
+     |- (P = (#P o #Q)), (1 <= |Q|)
+
+     |- (Q = Empty_String), (1 <= |Q|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(true and (P_Val' = |Q|)) |- " shape="box" ];
+      2 [ label="true, (P_Val' = |Q|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Change Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    P' : Str('Entry')
+    Q' : Str('Entry')
+    E' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+    Confirm true;
+
+VC(s):
+     |- (P' = (#P o #Q)), (1 <= |Q'|)
+
+     |- (Q' = Empty_String), (1 <= |Q'|)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    P' : Str('Entry')
+    Q' : Str('Entry')
+    E' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    _Initialize(E : Entry);
+
+VC(s):
+     |- true
+
+     |- (P' = (#P o #Q)), (1 <= |Q'|)
+
+     |- (Q' = Empty_String), (1 <= |Q'|)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    P' : Str('Entry')
+    Q' : Str('Entry')
+    E' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+    Assume Entry.Is_Initial(E);
+
+VC(s):
+     |- true
+
+     |- (P' = (#P o #Q)), (1 <= |Q'|)
+
+     |- (Q' = Empty_String), (1 <= |Q'|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    P' : Str('Entry')
+    Q' : Str('Entry')
+    E' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+    Remember;
+
+VC(s):
+     |- true
+
+     |- (P' = (#P o #Q)), (1 <= |Q'|)
+
+     |- (Q' = Empty_String), (1 <= |Q'|)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    P' : Str('Entry')
+    Q' : Str('Entry')
+    E' : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length));
+
+VC(s):
+     |- true
+
+     |- (P' = (P o Q)), (1 <= |Q'|)
+
+     |- (Q' = Empty_String), (1 <= |Q'|)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    E : 'Entry'
+    P_Val' : N
+    P' : Str('Entry')
+    Q' : Str('Entry')
+    E' : 'Entry'
+
+Statements:
+
+VC(s):
+     |- true
+
+    ((|P| + |Q|) <= Max_Length), (1 <= Max_Length) |- (P' = (P o Q)), (1 <= |Q'|)
+
+     |- (Q' = Empty_String), (1 <= |Q'|)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|P| + |Q|) <= Max_Length)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), ((|P| + |Q|) <= Max_Length) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+

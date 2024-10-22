@@ -1,0 +1,310 @@
+VCs for Short_Queue_Reversal_Realiz.rb generated Mon Oct 07 15:36:34 EDT 2024
+
+================================= VC(s): =================================
+
+VC 0_1:
+Requires Clause for Dequeue at Short_Queue_Reversal_Realiz.rb(5:8)
+
+Goal:
+(1 <= |Q|)
+
+Given(s):
+1. (|Q| = 2)
+
+VC 0_2:
+Requires Clause for Enqueue at Short_Queue_Reversal_Realiz.rb(6:8)
+
+Goal:
+((1 + |Q''|) <= Max_Length)
+
+Given(s):
+1. (Q = (<Temp''> o Q''))
+2. (1 <= Max_Length)
+3. (|Q| = 2)
+
+VC 0_3:
+Ensures Clause of SQ_Reverse at Short_Queue_Reversal_Realiz.rb(2:14)
+
+Goal:
+((Q'' o <Temp''>) = Reverse(Q))
+
+Given(s):
+1. (Q = (<Temp''> o Q''))
+2. (|Q| = 2)
+
+========================= VC Generation Details  =========================
+
+    Enhancement Realization Name:   Short_Queue_Reversal_Realiz
+    Enhancement Name:               Short_Queue_Reversal_Capability
+    Concept Name:                   Queue_Template
+
+==========================================================================
+
+========================= SQ_Reverse =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+    Temp : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    _Initialize(Temp : Entry);
+    Dequeue(Temp, Q);
+    Enqueue(Temp, Q);
+    Confirm (Q = Reverse(#Q));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    _Initialize(Temp : Entry);
+    Dequeue(Temp, Q);
+    Enqueue(Temp, Q);
+
+VC(s):
+     |- (Q = Reverse(#Q))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    _Initialize(Temp : Entry);
+    Dequeue(Temp, Q);
+    Confirm ((1 + |Q|) <= Max_Length);
+    Assume (Q' = (Q o <Temp>));
+
+VC(s):
+     |- (Q' = Reverse(#Q))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    _Initialize(Temp : Entry);
+    Dequeue(Temp, Q);
+    Confirm ((1 + |Q|) <= Max_Length);
+
+VC(s):
+     |- ((Q o <Temp>) = Reverse(#Q))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    _Initialize(Temp : Entry);
+    Dequeue(Temp, Q);
+
+VC(s):
+     |- ((1 + |Q|) <= Max_Length)
+
+     |- ((Q o <Temp>) = Reverse(#Q))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+    Temp'' : 'Entry'
+    Q'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    _Initialize(Temp : Entry);
+    Confirm (1 <= |Q|);
+    Assume (Q = (<Temp''> o Q''));
+
+VC(s):
+     |- ((1 + |Q''|) <= Max_Length)
+
+     |- ((Q'' o <Temp''>) = Reverse(#Q))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+    Temp'' : 'Entry'
+    Q'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    _Initialize(Temp : Entry);
+    Confirm (1 <= |Q|);
+
+VC(s):
+    (Q = (<Temp''> o Q'')) |- ((1 + |Q''|) <= Max_Length)
+
+    (Q = (<Temp''> o Q'')) |- ((Q'' o <Temp''>) = Reverse(#Q))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+    Temp'' : 'Entry'
+    Q'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    _Initialize(Temp : Entry);
+
+VC(s):
+     |- (1 <= |Q|)
+
+    (Q = (<Temp''> o Q'')) |- ((1 + |Q''|) <= Max_Length)
+
+    (Q = (<Temp''> o Q'')) |- ((Q'' o <Temp''>) = Reverse(#Q))
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+    Temp'' : 'Entry'
+    Q'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+    Assume Entry.Is_Initial(Temp);
+
+VC(s):
+     |- (1 <= |Q|)
+
+    (Q = (<Temp''> o Q'')) |- ((1 + |Q''|) <= Max_Length)
+
+    (Q = (<Temp''> o Q'')) |- ((Q'' o <Temp''>) = Reverse(#Q))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+    Temp'' : 'Entry'
+    Q'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+    Remember;
+
+VC(s):
+     |- (1 <= |Q|)
+
+    (Q = (<Temp''> o Q'')) |- ((1 + |Q''|) <= Max_Length)
+
+    (Q = (<Temp''> o Q'')) |- ((Q'' o <Temp''>) = Reverse(#Q))
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+    Temp'' : 'Entry'
+    Q'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2));
+
+VC(s):
+     |- (1 <= |Q|)
+
+    (Q = (<Temp''> o Q'')) |- ((1 + |Q''|) <= Max_Length)
+
+    (Q = (<Temp''> o Q'')) |- ((Q'' o <Temp''>) = Reverse(Q))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    Temp' : 'Entry'
+    Q' : Str('Entry')
+    Temp'' : 'Entry'
+    Q'' : Str('Entry')
+
+Statements:
+
+VC(s):
+    (|Q| = 2) |- (1 <= |Q|)
+
+    (Q = (<Temp''> o Q'')), (1 <= Max_Length), (|Q| = 2) |- ((1 + |Q''|) <= Max_Length)
+
+    (Q = (<Temp''> o Q'')), (|Q| = 2) |- ((Q'' o <Temp''>) = Reverse(Q))
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (|Q| = 2)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (|Q| = 2) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+

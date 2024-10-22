@@ -1,0 +1,454 @@
+VCs for Alt_Int_Do_Nothing_Realiz.rb generated Mon Oct 07 15:37:45 EDT 2024
+
+================================= VC(s): =================================
+
+VC 0_1:
+Requires Clause of Product at Alt_Int_Do_Nothing_Realiz.rb(5:14)
+
+Goal:
+(min_int <= (I * I))
+
+Given(s):
+1. (min_int <= 0)
+2. ((I + 1) <= max_int)
+3. (1 <= max_int)
+
+VC 0_2:
+Requires Clause of Product at Alt_Int_Do_Nothing_Realiz.rb(5:14)
+
+Goal:
+((I * I) <= max_int)
+
+Given(s):
+1. (1 <= max_int)
+2. ((I + 1) <= max_int)
+
+VC 0_3:
+Requires Clause of Sum at Alt_Int_Do_Nothing_Realiz.rb(5:7)
+
+Goal:
+(min_int <= (I + (I * I)))
+
+Given(s):
+1. (min_int <= 0)
+2. ((I + 1) <= max_int)
+3. (1 <= max_int)
+
+VC 0_4:
+Requires Clause of Sum at Alt_Int_Do_Nothing_Realiz.rb(5:7)
+
+Goal:
+((I + (I * I)) <= max_int)
+
+Given(s):
+1. (1 <= max_int)
+2. ((I + 1) <= max_int)
+
+VC 0_5:
+Ensures Clause of Do_Nothing (Condition from "RESTORES" parameter mode) at Alt_Int_Do_Nothing_Realiz.rb(3:31)
+
+Goal:
+((I + (I * I)) = I)
+
+Given(s):
+1. ((I + 1) <= max_int)
+2. (1 <= max_int)
+
+========================= VC Generation Details  =========================
+
+    Enhancement Realization Name:   Alt_Int_Do_Nothing_Realiz
+    Enhancement Name:               Int_Do_Nothing_Capability
+    Concept Name:                   Integer_Template
+
+==========================================================================
+
+========================= Do_Nothing =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+    _Initialize(M : Integer);
+    J := Sum(I, Product(I, I));
+    J :=: I;
+    _Finalize(J : Integer);
+    Confirm (I = #I);
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+    _Initialize(M : Integer);
+    J := Sum(I, Product(I, I));
+    J :=: I;
+    _Finalize(J : Integer);
+
+VC(s):
+     |- (I = #I)
+
+_____________________
+
+Applied Variable Finalization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+    _Initialize(M : Integer);
+    J := Sum(I, Product(I, I));
+    J :=: I;
+    Assume true;
+
+VC(s):
+     |- (I = #I)
+
+_____________________
+
+Applied Assume Rule and Simplified: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+    _Initialize(M : Integer);
+    J := Sum(I, Product(I, I));
+    J :=: I;
+
+VC(s):
+     |- (I = #I)
+
+_____________________
+
+Applied Swap Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+    _Initialize(M : Integer);
+    J := Sum(I, Product(I, I));
+
+VC(s):
+     |- (J = #I)
+
+_____________________
+
+Applied Function Assignment Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+    _Initialize(M : Integer);
+    Confirm ((min_int <= (I * I)) and ((I * I) <= max_int) and (min_int <= (I + (I * I))) and ((I + (I * I)) <= max_int));
+
+VC(s):
+     |- ((I + (I * I)) = #I)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+    _Initialize(M : Integer);
+
+VC(s):
+     |- (min_int <= (I * I))
+
+     |- ((I * I) <= max_int)
+
+     |- (min_int <= (I + (I * I)))
+
+     |- ((I + (I * I)) <= max_int)
+
+     |- ((I + (I * I)) = #I)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((min_int <= (I * I)) and ((I * I) <= max_int) and (min_int <= (I + (I * I))) and ((I + (I * I)) <= max_int))" shape="box" ];
+      2 [ label=" |- (min_int <= (I * I)) and ((I * I) <= max_int)" shape="box" ];
+      3 [ label=" |- (min_int <= (I + (I * I))) and ((I + (I * I)) <= max_int)" shape="box" ];
+      4 [ label=" |- (min_int <= (I * I))" shape="box" color="red" ];
+      5 [ label=" |- ((I * I) <= max_int)" shape="box" color="red" ];
+      6 [ label=" |- (min_int <= (I + (I * I)))" shape="box" color="red" ];
+      7 [ label=" |- ((I + (I * I)) <= max_int)" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+      2 -> 4;
+      2 -> 5;
+      3 -> 6;
+      3 -> 7;
+    }
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+    Assume (M = 0);
+
+VC(s):
+     |- (min_int <= (I * I))
+
+     |- ((I * I) <= max_int)
+
+     |- (min_int <= (I + (I * I)))
+
+     |- ((I + (I * I)) <= max_int)
+
+     |- ((I + (I * I)) = #I)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    _Initialize(L : Integer);
+
+VC(s):
+     |- (min_int <= (I * I))
+
+     |- ((I * I) <= max_int)
+
+     |- (min_int <= (I + (I * I)))
+
+     |- ((I + (I * I)) <= max_int)
+
+     |- ((I + (I * I)) = #I)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+    Assume (L = 0);
+
+VC(s):
+     |- (min_int <= (I * I))
+
+     |- ((I * I) <= max_int)
+
+     |- (min_int <= (I + (I * I)))
+
+     |- ((I + (I * I)) <= max_int)
+
+     |- ((I + (I * I)) = #I)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    _Initialize(J : Integer);
+
+VC(s):
+     |- (min_int <= (I * I))
+
+     |- ((I * I) <= max_int)
+
+     |- (min_int <= (I + (I * I)))
+
+     |- ((I + (I * I)) <= max_int)
+
+     |- ((I + (I * I)) = #I)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Assume (J = 0);
+
+VC(s):
+     |- (min_int <= (I * I))
+
+     |- ((I * I) <= max_int)
+
+     |- (min_int <= (I + (I * I)))
+
+     |- ((I + (I * I)) <= max_int)
+
+     |- ((I + (I * I)) = #I)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+
+VC(s):
+     |- (min_int <= (I * I))
+
+     |- ((I * I) <= max_int)
+
+     |- (min_int <= (I + (I * I)))
+
+     |- ((I + (I * I)) <= max_int)
+
+     |- ((I + (I * I)) = #I)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+
+VC(s):
+     |- (min_int <= (I * I))
+
+     |- ((I * I) <= max_int)
+
+     |- (min_int <= (I + (I * I)))
+
+     |- ((I + (I * I)) <= max_int)
+
+     |- ((I + (I * I)) = I)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    J : Z
+    L : Z
+    M : Z
+
+Statements:
+
+VC(s):
+    (min_int <= 0), ((I + 1) <= max_int), (1 <= max_int) |- (min_int <= (I * I))
+
+    (1 <= max_int), ((I + 1) <= max_int) |- ((I * I) <= max_int)
+
+    (min_int <= 0), ((I + 1) <= max_int), (1 <= max_int) |- (min_int <= (I + (I * I)))
+
+    (1 <= max_int), ((I + 1) <= max_int) |- ((I + (I * I)) <= max_int)
+
+    ((I + 1) <= max_int), (1 <= max_int) |- ((I + (I * I)) = I)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int)) |- " shape="box" ];
+      2 [ label="(min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), ((I + 1) <= max_int) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+

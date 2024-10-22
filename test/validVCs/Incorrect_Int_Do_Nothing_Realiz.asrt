@@ -1,0 +1,235 @@
+VCs for Incorrect_Int_Do_Nothing_Realiz.rb generated Mon Oct 07 15:37:56 EDT 2024
+
+================================= VC(s): =================================
+
+VC 0_1:
+Requires Clause for Decrement at Incorrect_Int_Do_Nothing_Realiz.rb(5:2)
+
+Goal:
+(min_int <= (I - 1))
+
+Given(s):
+1. (min_int <= 0)
+2. ((I + 1) <= max_int)
+3. (1 <= max_int)
+
+VC 0_2:
+Requires Clause for Increment at Incorrect_Int_Do_Nothing_Realiz.rb(6:2)
+
+Goal:
+((1 + (I - 1)) <= max_int)
+
+Given(s):
+1. (1 <= max_int)
+2. ((I + 1) <= max_int)
+
+VC 0_3:
+Ensures Clause of Do_Nothing (Condition from "RESTORES" parameter mode) at Incorrect_Int_Do_Nothing_Realiz.rb(4:31)
+
+Goal:
+((1 + (I - 1)) = I)
+
+Given(s):
+1. ((I + 1) <= max_int)
+2. (1 <= max_int)
+
+========================= VC Generation Details  =========================
+
+    Enhancement Realization Name:   Incorrect_Int_Do_Nothing_Realiz
+    Enhancement Name:               Int_Do_Nothing_Capability
+    Concept Name:                   Integer_Template
+
+==========================================================================
+
+========================= Do_Nothing =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Decrement(I);
+    Increment(I);
+    Confirm (I = #I);
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Decrement(I);
+    Increment(I);
+
+VC(s):
+     |- (I = #I)
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    I' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Decrement(I);
+    Confirm ((1 + I) <= max_int);
+    Assume (I' = (1 + I));
+
+VC(s):
+     |- (I' = #I)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    I' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Decrement(I);
+    Confirm ((1 + I) <= max_int);
+
+VC(s):
+     |- ((1 + I) = #I)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    I' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Decrement(I);
+
+VC(s):
+     |- ((1 + I) <= max_int)
+
+     |- ((1 + I) = #I)
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Confirm (min_int <= (I - 1));
+    Assume (I'' = (I - 1));
+
+VC(s):
+     |- ((1 + I'') <= max_int)
+
+     |- ((1 + I'') = #I)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+    Confirm (min_int <= (I - 1));
+
+VC(s):
+     |- ((1 + (I - 1)) <= max_int)
+
+     |- ((1 + (I - 1)) = #I)
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+    Remember;
+
+VC(s):
+     |- (min_int <= (I - 1))
+
+     |- ((1 + (I - 1)) <= max_int)
+
+     |- ((1 + (I - 1)) = #I)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    I' : Z
+    I'' : Z
+
+Statements:
+    Assume (((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int));
+
+VC(s):
+     |- (min_int <= (I - 1))
+
+     |- ((1 + (I - 1)) <= max_int)
+
+     |- ((1 + (I - 1)) = I)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    I' : Z
+    I'' : Z
+
+Statements:
+
+VC(s):
+    (min_int <= 0), ((I + 1) <= max_int), (1 <= max_int) |- (min_int <= (I - 1))
+
+    (1 <= max_int), ((I + 1) <= max_int) |- ((1 + (I - 1)) <= max_int)
+
+    ((I + 1) <= max_int), (1 <= max_int) |- ((1 + (I - 1)) = I)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((min_int <= 0) and (1 <= max_int)) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((I + 1) <= max_int)) |- " shape="box" ];
+      2 [ label="(min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), ((I + 1) <= max_int) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+

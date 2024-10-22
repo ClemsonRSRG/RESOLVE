@@ -1,0 +1,466 @@
+VCs for Def_Pop_Realiz.rb generated Mon Oct 07 15:37:13 EDT 2024
+
+================================= VC(s): =================================
+
+VC 0_1:
+Ensures Clause of Def_Pop at Def_Pop_Realiz.rb(3:14)
+
+Goal:
+(true = (|S| = 0))
+
+Given(s):
+1. (|S| = 0)
+
+VC 0_2:
+Ensures Clause of Def_Pop [After Logical Reduction(s)] at Def_Pop_Realiz.rb(3:14)
+
+Goal:
+(S = Empty_String)
+
+Given(s):
+1. (|S| = 0)
+2. (|S| = 0)
+
+VC 0_3:
+Ensures Clause of Def_Pop [After Logical Reduction(s)] at Def_Pop_Realiz.rb(3:14)
+
+Goal:
+(S = (<R> o S))
+
+Given(s):
+1. (|S| /= 0)
+2. (|S| = 0)
+
+VC 1_1:
+Requires Clause for Pop [After Logical Reduction(s)] at Def_Pop_Realiz.rb(8:12)
+
+Goal:
+(1 <= |S|) or 
+(|S| = 0)
+
+Given(s):
+
+VC 1_2:
+Ensures Clause of Def_Pop [After Logical Reduction(s)] at Def_Pop_Realiz.rb(3:14)
+
+Goal:
+(false = (|S| = 0)) or 
+(|S| = 0)
+
+Given(s):
+
+VC 1_3:
+Ensures Clause of Def_Pop [After Logical Reduction(s)] at Def_Pop_Realiz.rb(3:14)
+
+Goal:
+(S' = Empty_String) or 
+(|S| = 0)
+
+Given(s):
+1. (|S| = 0)
+2. (S = (<R'> o S'))
+
+VC 1_4:
+Ensures Clause of Def_Pop [After Logical Reduction(s)] at Def_Pop_Realiz.rb(3:14)
+
+Goal:
+(S = (<R'> o S')) or 
+(|S| = 0)
+
+Given(s):
+1. (|S| /= 0)
+2. (S = (<R'> o S'))
+
+========================= VC Generation Details  =========================
+
+    Enhancement Realization Name:   Def_Pop_Realiz
+    Enhancement Name:               Def_Pop_Capability
+    Concept Name:                   Stack_Template
+
+==========================================================================
+
+========================= Def_Pop =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Def_Pop_Realiz.rb(4:13) is true. [Exp: (|S| = 0)]
+---------------------
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+    If ( Are_Equal(Depth(S), 0) ) then
+        empty := True();
+    Else
+        empty := False();
+        Pop(R, S);
+    end;
+
+    Confirm (((empty = (|#S| = 0)) and ((|#S| = 0) implies (S = Empty_String))) and ((|#S| /= 0) implies (#S = (<R> o S))));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+    If ( Are_Equal(Depth(S), 0) ) then
+        empty := True();
+    Else
+        empty := False();
+        Pop(R, S);
+    end;
+
+
+VC(s):
+     |- (empty = (|#S| = 0))
+
+    (|#S| = 0) |- (S = Empty_String)
+
+    (|#S| /= 0) |- (#S = (<R> o S))
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- (((empty = (|#S| = 0)) and ((|#S| = 0) implies (S = Empty_String))) and ((|#S| /= 0) implies (#S = (<R> o S))))" shape="box" ];
+      2 [ label=" |- ((empty = (|#S| = 0)) and ((|#S| = 0) implies (S = Empty_String)))" shape="box" ];
+      3 [ label=" |- ((|#S| /= 0) implies (#S = (<R> o S)))" shape="box" ];
+      4 [ label=" |- (empty = (|#S| = 0))" shape="box" color="red" ];
+      5 [ label=" |- ((|#S| = 0) implies (S = Empty_String))" shape="box" ];
+      6 [ label="(|#S| = 0) |- (S = Empty_String)" shape="box" color="red" ];
+      7 [ label="(|#S| /= 0) |- (#S = (<R> o S))" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+      2 -> 4;
+      2 -> 5;
+      5 -> 6;
+      3 -> 7;
+    }
+
+_____________________
+
+Applied If-Part Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Stipulate (|S| = 0);
+    empty := True();
+
+VC(s):
+     |- (empty = (|#S| = 0))
+
+    (|#S| = 0) |- (S = Empty_String)
+
+    (|#S| /= 0) |- (#S = (<R> o S))
+
+_____________________
+
+Applied Function Assignment Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Stipulate (|S| = 0);
+
+VC(s):
+     |- (true = (|#S| = 0))
+
+    (|#S| = 0) |- (S = Empty_String)
+
+    (|#S| /= 0) |- (#S = (<R> o S))
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+VC(s):
+    (|S| = 0) |- (true = (|#S| = 0))
+
+    (|#S| = 0), (|S| = 0) |- (S = Empty_String)
+
+    (|#S| /= 0), (|S| = 0) |- (#S = (<R> o S))
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+
+VC(s):
+    (|S| = 0) |- (true = (|S| = 0))
+
+    (|S| = 0), (|S| = 0) |- (S = Empty_String)
+
+    (|S| /= 0), (|S| = 0) |- (S = (<R> o S))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+
+VC(s):
+    (|S| = 0) |- (true = (|S| = 0))
+
+    (|S| = 0), (|S| = 0) |- (S = Empty_String)
+
+    (|S| /= 0), (|S| = 0) |- (S = (<R> o S))
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Depth), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Def_Pop =========================
+
+---------------------
+Branching Conditions
+---------------------
+1. Expression at Def_Pop_Realiz.rb(4:13) is false. [Exp: not((|S| = 0))]
+---------------------
+
+Applied Else-Part Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Stipulate not((|S| = 0));
+    empty := False();
+    Pop(R, S);
+
+VC(s):
+     |- (empty = (|#S| = 0))
+
+    (|#S| = 0) |- (S = Empty_String)
+
+    (|#S| /= 0) |- (#S = (<R> o S))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Stipulate not((|S| = 0));
+    empty := False();
+    Confirm (1 <= |S|);
+    Assume (S = (<R'> o S'));
+
+VC(s):
+     |- (empty = (|#S| = 0))
+
+    (|#S| = 0) |- (S' = Empty_String)
+
+    (|#S| /= 0) |- (#S = (<R'> o S'))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Stipulate not((|S| = 0));
+    empty := False();
+    Confirm (1 <= |S|);
+
+VC(s):
+     |- (empty = (|#S| = 0))
+
+    (|#S| = 0), (S = (<R'> o S')) |- (S' = Empty_String)
+
+    (|#S| /= 0), (S = (<R'> o S')) |- (#S = (<R'> o S'))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Stipulate not((|S| = 0));
+    empty := False();
+
+VC(s):
+     |- (1 <= |S|)
+
+     |- (empty = (|#S| = 0))
+
+    (|#S| = 0), (S = (<R'> o S')) |- (S' = Empty_String)
+
+    (|#S| /= 0), (S = (<R'> o S')) |- (#S = (<R'> o S'))
+
+_____________________
+
+Applied Function Assignment Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+    Stipulate not((|S| = 0));
+
+VC(s):
+     |- (1 <= |S|)
+
+     |- (false = (|#S| = 0))
+
+    (|#S| = 0), (S = (<R'> o S')) |- (S' = Empty_String)
+
+    (|#S| /= 0), (S = (<R'> o S')) |- (#S = (<R'> o S'))
+
+_____________________
+
+Applied Stipulate Assume Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Remember;
+
+VC(s):
+     |- (1 <= |S|), (|S| = 0)
+
+     |- (false = (|#S| = 0)), (|S| = 0)
+
+    (|#S| = 0), (S = (<R'> o S')) |- (S' = Empty_String), (|S| = 0)
+
+    (|#S| /= 0), (S = (<R'> o S')) |- (#S = (<R'> o S')), (|S| = 0)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="not((|S| = 0)) |- (1 <= |S|)" shape="box" ];
+      2 [ label=" |- (1 <= |S|), (|S| = 0)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="not((|S| = 0)) |- (false = (|#S| = 0))" shape="box" ];
+      2 [ label=" |- (false = (|#S| = 0)), (|S| = 0)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(|#S| = 0), (S = (<R'> o S')), not((|S| = 0)) |- (S' = Empty_String)" shape="box" ];
+      2 [ label="(|#S| = 0), (S = (<R'> o S')) |- (S' = Empty_String), (|S| = 0)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+    strict digraph G {
+      1 [ label="(|#S| /= 0), (S = (<R'> o S')), not((|S| = 0)) |- (#S = (<R'> o S'))" shape="box" ];
+      2 [ label="(|#S| /= 0), (S = (<R'> o S')) |- (#S = (<R'> o S')), (|S| = 0)" shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume ((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+
+VC(s):
+     |- (1 <= |S|), (|S| = 0)
+
+     |- (false = (|S| = 0)), (|S| = 0)
+
+    (|S| = 0), (S = (<R'> o S')) |- (S' = Empty_String), (|S| = 0)
+
+    (|S| /= 0), (S = (<R'> o S')) |- (S = (<R'> o S')), (|S| = 0)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+
+VC(s):
+     |- (1 <= |S|), (|S| = 0)
+
+     |- (false = (|S| = 0)), (|S| = 0)
+
+    (|S| = 0), (S = (<R'> o S')) |- (S' = Empty_String), (|S| = 0)
+
+    (|S| /= 0), (S = (<R'> o S')) |- (S = (<R'> o S')), (|S| = 0)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Depth), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+

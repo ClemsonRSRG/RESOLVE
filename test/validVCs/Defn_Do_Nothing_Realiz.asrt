@@ -1,0 +1,315 @@
+VCs for Defn_Do_Nothing_Realiz.rb generated Mon Oct 07 15:37:08 EDT 2024
+
+================================= VC(s): =================================
+
+VC 0_1:
+Requires Clause for Pop at Defn_Do_Nothing_Realiz.rb(5:2)
+
+Goal:
+(1 <= |S|)
+
+Given(s):
+1. (|S| <= Max_Depth)
+2. (1 <= |S|)
+3. (1 <= Max_Depth)
+
+VC 0_2:
+Requires Clause for Push at Defn_Do_Nothing_Realiz.rb(6:2)
+
+Goal:
+((1 + |S''|) <= Max_Depth)
+
+Given(s):
+1. (S = (<Next_Entry''> o S''))
+2. (1 <= Max_Depth)
+3. (|S| <= Max_Depth)
+4. (1 <= |S|)
+
+VC 0_3:
+Ensures Clause of Do_Nothing at Defn_Do_Nothing_Realiz.rb(2:11)
+
+Goal:
+((<Next_Entry''> o S'') = No_Def(S))
+
+Given(s):
+1. (S = (<Next_Entry''> o S''))
+2. (|S| <= Max_Depth)
+3. (1 <= |S|)
+4. (1 <= Max_Depth)
+
+========================= VC Generation Details  =========================
+
+    Enhancement Realization Name:   Defn_Do_Nothing_Realiz
+    Enhancement Name:               Defn_Do_Nothing_Capability
+    Concept Name:                   Stack_Template
+
+==========================================================================
+
+========================= Do_Nothing =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Pop(Next_Entry, S);
+    Push(Next_Entry, S);
+    Confirm (S = No_Def(#S));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Pop(Next_Entry, S);
+    Push(Next_Entry, S);
+
+VC(s):
+     |- (S = No_Def(#S))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Pop(Next_Entry, S);
+    Confirm ((1 + |S|) <= Max_Depth);
+    Assume (S' = (<Next_Entry> o S));
+
+VC(s):
+     |- (S' = No_Def(#S))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Pop(Next_Entry, S);
+    Confirm ((1 + |S|) <= Max_Depth);
+
+VC(s):
+     |- ((<Next_Entry> o S) = No_Def(#S))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Pop(Next_Entry, S);
+
+VC(s):
+     |- ((1 + |S|) <= Max_Depth)
+
+     |- ((<Next_Entry> o S) = No_Def(#S))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+    Next_Entry'' : 'Entry'
+    S'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Confirm (1 <= |S|);
+    Assume (S = (<Next_Entry''> o S''));
+
+VC(s):
+     |- ((1 + |S''|) <= Max_Depth)
+
+     |- ((<Next_Entry''> o S'') = No_Def(#S))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+    Next_Entry'' : 'Entry'
+    S'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+    Confirm (1 <= |S|);
+
+VC(s):
+    (S = (<Next_Entry''> o S'')) |- ((1 + |S''|) <= Max_Depth)
+
+    (S = (<Next_Entry''> o S'')) |- ((<Next_Entry''> o S'') = No_Def(#S))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+    Next_Entry'' : 'Entry'
+    S'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    _Initialize(Next_Entry : Entry);
+
+VC(s):
+     |- (1 <= |S|)
+
+    (S = (<Next_Entry''> o S'')) |- ((1 + |S''|) <= Max_Depth)
+
+    (S = (<Next_Entry''> o S'')) |- ((<Next_Entry''> o S'') = No_Def(#S))
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+    Next_Entry'' : 'Entry'
+    S'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+    Assume Entry.Is_Initial(Next_Entry);
+
+VC(s):
+     |- (1 <= |S|)
+
+    (S = (<Next_Entry''> o S'')) |- ((1 + |S''|) <= Max_Depth)
+
+    (S = (<Next_Entry''> o S'')) |- ((<Next_Entry''> o S'') = No_Def(#S))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+    Next_Entry'' : 'Entry'
+    S'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+    Remember;
+
+VC(s):
+     |- (1 <= |S|)
+
+    (S = (<Next_Entry''> o S'')) |- ((1 + |S''|) <= Max_Depth)
+
+    (S = (<Next_Entry''> o S'')) |- ((<Next_Entry''> o S'') = No_Def(#S))
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+    Next_Entry'' : 'Entry'
+    S'' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|)));
+
+VC(s):
+     |- (1 <= |S|)
+
+    (S = (<Next_Entry''> o S'')) |- ((1 + |S''|) <= Max_Depth)
+
+    (S = (<Next_Entry''> o S'')) |- ((<Next_Entry''> o S'') = No_Def(S))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Next_Entry : 'Entry'
+    Next_Entry' : 'Entry'
+    S' : Str('Entry')
+    Next_Entry'' : 'Entry'
+    S'' : Str('Entry')
+
+Statements:
+
+VC(s):
+    (|S| <= Max_Depth), (1 <= |S|), (1 <= Max_Depth) |- (1 <= |S|)
+
+    (S = (<Next_Entry''> o S'')), (1 <= Max_Depth), (|S| <= Max_Depth), (1 <= |S|) |- ((1 + |S''|) <= Max_Depth)
+
+    (S = (<Next_Entry''> o S'')), (|S| <= Max_Depth), (1 <= |S|), (1 <= Max_Depth) |- ((<Next_Entry''> o S'') = No_Def(S))
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Depth) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and ((|S| <= Max_Depth) and (1 <= |S|))) |- " shape="box" ];
+      2 [ label="(1 <= Max_Depth), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (|S| <= Max_Depth), (1 <= |S|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
