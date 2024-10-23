@@ -23,4 +23,7 @@ public class ParameterModeChecker extends TreeWalkerVisitor {
      */
     public static final Flag FLAG_CHECK_PARAMETER_MODES = new Flag(FLAG_SECTION_NAME, "PMC", FLAG_DESC_CHECK_PARAM_MODE);
 
+    public static void setUpFlags() {
+
+    }
 }
