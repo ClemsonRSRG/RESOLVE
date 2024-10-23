@@ -18,7 +18,7 @@ public class ParameterCheckPipeline extends AbstractPipeline{
      * @param ce          The current compilation environment.
      * @param symbolTable The symbol table.
      */
-    protected ParameterCheckPipeline(CompileEnvironment ce, MathSymbolTableBuilder symbolTable) {
+    public ParameterCheckPipeline(CompileEnvironment ce, MathSymbolTableBuilder symbolTable) {
         super(ce, symbolTable);
     }
 

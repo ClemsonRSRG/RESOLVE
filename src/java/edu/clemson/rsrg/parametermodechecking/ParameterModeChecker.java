@@ -21,6 +21,6 @@ public class ParameterModeChecker extends TreeWalkerVisitor {
      * Tells the compiler to check parameter modes.
      * </p>
      */
-    public static final Flag FLAG_CHECK_PARAMETER_MODES = new Flag(FLAG_SECTION_NAME, "VCs", FLAG_DESC_CHECK_PARAM_MODE);
+    public static final Flag FLAG_CHECK_PARAMETER_MODES = new Flag(FLAG_SECTION_NAME, "PMC", FLAG_DESC_CHECK_PARAM_MODE);
 
 }
