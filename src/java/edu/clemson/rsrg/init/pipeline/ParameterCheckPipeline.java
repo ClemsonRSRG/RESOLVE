@@ -3,6 +3,7 @@ package edu.clemson.rsrg.init.pipeline;
 import edu.clemson.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.rsrg.init.CompileEnvironment;
 import edu.clemson.rsrg.init.ResolveCompiler;
+import edu.clemson.rsrg.parametermodechecking.ParameterModeChecker;
 import edu.clemson.rsrg.statushandling.StatusHandler;
 import edu.clemson.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
 import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
@@ -26,6 +27,7 @@ public class ParameterCheckPipeline extends AbstractPipeline{
     public void process(ModuleIdentifier currentTarget) {
         ModuleDec moduleDec = myCompileEnvironment.getModuleAST(currentTarget);
         StatusHandler statusHandler = myCompileEnvironment.getStatusHandler();
+        ParameterModeChecker parameterModeChecker = new ParameterModeChecker();
 
         if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             StringBuffer sb = new StringBuffer();
