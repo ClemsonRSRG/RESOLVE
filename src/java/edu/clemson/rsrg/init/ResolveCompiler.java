@@ -185,8 +185,6 @@ public class ResolveCompiler {
     static final Flag FLAG_WORKSPACE_DIR = new Flag(FLAG_SECTION_GENERAL, "workspaceDir", FLAG_DESC_WORKSPACE_DIR,
             WORKSPACE_DIR_ARG_NAME);
 
-
-
     // ===========================================================
     // Constructors
     // ===========================================================

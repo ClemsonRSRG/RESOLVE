@@ -218,7 +218,8 @@ class Controller {
 
                 if (myCompileEnvironment.flags.isFlagSet(ParameterModeChecker.FLAG_CHECK_PARAMETER_MODES)
                         && m.equals(new ModuleIdentifier(targetModule))) {
-                    ParameterCheckPipeline parameterCheckPipeline = new ParameterCheckPipeline(myCompileEnvironment, mySymbolTable);
+                    ParameterCheckPipeline parameterCheckPipeline = new ParameterCheckPipeline(myCompileEnvironment,
+                            mySymbolTable);
                     parameterCheckPipeline.process(m);
                 }
 

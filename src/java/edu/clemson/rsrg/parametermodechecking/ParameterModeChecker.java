@@ -1,9 +1,23 @@
+/*
+ * ParameterModeChecker.java
+ * ---------------------------------
+ * Copyright (c) 2024
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.rsrg.parametermodechecking;
 
+import edu.clemson.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.rsrg.absyn.declarations.moduledecl.ConceptModuleDec;
 import edu.clemson.rsrg.absyn.declarations.operationdecl.OperationDec;
 import edu.clemson.rsrg.absyn.declarations.variabledecl.ParameterVarDec;
+import edu.clemson.rsrg.absyn.expressions.Exp;
 import edu.clemson.rsrg.init.CompileEnvironment;
 import edu.clemson.rsrg.init.flag.Flag;
 import edu.clemson.rsrg.treewalk.TreeWalkerVisitor;
@@ -47,7 +61,8 @@ public class ParameterModeChecker extends TreeWalkerVisitor {
      * Tells the compiler to check parameter modes.
      * </p>
      */
-    public static final Flag FLAG_CHECK_PARAMETER_MODES = new Flag(FLAG_SECTION_NAME, "PMC", FLAG_DESC_CHECK_PARAM_MODE);
+    public static final Flag FLAG_CHECK_PARAMETER_MODES = new Flag(FLAG_SECTION_NAME, "PMC",
+            FLAG_DESC_CHECK_PARAM_MODE);
 
     public static void setUpFlags() {
 
@@ -58,16 +73,44 @@ public class ParameterModeChecker extends TreeWalkerVisitor {
         myBuilder = builder;
     }
 
+
     @Override
     public boolean walkOperationDec(OperationDec dec) {
-//        System.out.println(dec.asString(0, 0));
+        AssertionClause ensuresClause = dec.getEnsures();
+        Exp assertionExp = ensuresClause.getAssertionExp();
+
         List<ParameterVarDec> parameters = dec.getParameters();
         for (ParameterVarDec parameter : parameters) {
-            System.out.println(parameter.asString(0, 0));
+            switch (parameter.getMode()) {
+                case RESTORES:
+                case PRESERVES:
+                case EVALUATES:
+                case REPLACES:
+                    if (assertionExp.containsVar(parameter.getName().asString(0, 0), true)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Ensures clause at ");
+                        sb.append(assertionExp.getLocation().toString());
+                        sb.append(" contains #");
+                        sb.append(parameter.getName().asString(0, 0));
+                        sb.append(" while having parameter mode ");
+                        sb.append(parameter.getMode().toString());
+                        System.out.println(sb.toString());
+                    }
+                    break;
+                case ALTERS:
+                    if (assertionExp.containsVar(parameter.getName().asString(0, 0), false)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Ensures clause at ");
+                        sb.append(assertionExp.getLocation().toString());
+                        sb.append(" contains ");
+                        sb.append(parameter.getName().asString(0, 0));
+                        sb.append(" while having parameter mode ");
+                        sb.append(parameter.getMode().toString());
+                        System.out.println(sb.toString());
+                    }
+            }
         }
 
-        AssertionClause ensuresClause = dec.getEnsures();
-        System.out.println(ensuresClause.asString(0, 0));
         return true;
     }
 }
