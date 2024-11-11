@@ -56,7 +56,7 @@ jobs:
 
     strategy:
       matrix:
-        java-dist: [ 'corretto', 'liberica', 'microsoft', 'temurin', 'semeru', 'zulu' ]
+        java-dist: [ 'corretto', 'liberica', 'microsoft']
         java: [ '17', '21' ]
         os: [ ubuntu-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
