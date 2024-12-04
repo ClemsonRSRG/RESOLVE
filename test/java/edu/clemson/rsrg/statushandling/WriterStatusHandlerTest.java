@@ -17,5 +17,17 @@ public class WriterStatusHandlerTest {
     public void testRetrieveWarningCount_givenSingleWarning_returnOne() {
         StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
         testHandler.warning(new Location(null, 12 ,12), "test single error");
+        assert(testHandler.retrieveWarningCount() == 1);
+    }
+
+    @Test
+    public void testRetrieveWarningCount_givenMultipleWarnings_returns5() {
+        StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
+        testHandler.warning(new Location(null, 12 ,12), "test single error");
+        testHandler.warning(new Location(null, 12 ,12), "test single error");
+        testHandler.warning(new Location(null, 12 ,12), "test single error");
+        testHandler.warning(new Location(null, 12 ,12), "test single error");
+        testHandler.warning(new Location(null, 12 ,12), "test single error");
+        assert(testHandler.retrieveWarningCount() == 5);
     }
 }
