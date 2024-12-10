@@ -31,6 +31,12 @@ public class WriterStatusHandler implements StatusHandler {
     // ===========================================================
     // Member Fields
     // ===========================================================
+    /**
+     * <p>
+     * Storage for Warning Quantity
+     * </p>
+     */
+    private int warningCount;
 
     /**
      * <p>
@@ -72,6 +78,7 @@ public class WriterStatusHandler implements StatusHandler {
         myOutputWriter = outWriter;
         myErrorWriter = errorWriter;
         stopLogging = false;
+        warningCount = 0;
     }
 
     // ===========================================================
@@ -252,6 +259,7 @@ public class WriterStatusHandler implements StatusHandler {
             } else {
                 throw new RuntimeException("Error handler has been stopped.");
             }
+            warningCount ++;
         } catch (IOException e) {
             System.err.println("Error writing information to the specified output.");
             e.printStackTrace();
@@ -266,6 +274,6 @@ public class WriterStatusHandler implements StatusHandler {
      * The number of captured warnings
      */
     public int retrieveWarningCount() {
-        return 0;
+        return warningCount;
     }
 }
