@@ -58,4 +58,6 @@ public class WriterStatusHandlerTest {
         testHandler.warning(warningLocation, "test single error");
         assert (testHandler.retrieveWarningCount() == 5);
     }
+
+
 }
