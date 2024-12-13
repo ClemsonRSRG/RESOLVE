@@ -20,6 +20,8 @@ import org.junit.Test;
 
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.List;
+
 import static org.mockito.Mockito.*;
 
 public class WriterStatusHandlerTest {
@@ -59,5 +61,11 @@ public class WriterStatusHandlerTest {
         assert (testHandler.retrieveWarningCount() == 5);
     }
 
+    @Test
+    public void testGetWarnings_expectEmptyList_returnEmptyList() {
+        StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
 
+        List<Warning> warnings = testHandler.getWarnings();
+        assert(warnings.isEmpty());
+    }
 }
