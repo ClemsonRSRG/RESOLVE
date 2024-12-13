@@ -75,6 +75,8 @@ public class WarningTest {
 
         StringBuilder sb = new StringBuilder();
         sb.append("\nWarning: ");
+        sb.append(WarningType.GENERIC_WARNING.toString());
+        sb.append("\nat ");
         sb.append("LOCATION_SECTION");
         sb.append("\n");
         sb.append("Basic Warning Message");

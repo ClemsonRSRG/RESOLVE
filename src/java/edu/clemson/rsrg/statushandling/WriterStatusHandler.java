@@ -325,4 +325,20 @@ public class WriterStatusHandler implements StatusHandler {
     public void registerWarning(Warning warning) {
         warnings.add(warning);
     }
+
+    /**
+     * <p>
+     * This method writes and flushes all registered warnings to the output
+     * </p>
+     */
+    public void streamAllWarnings() {
+        for (Warning warning : warnings) {
+            try {
+                myErrorWriter.write(warning.toString());
+                myErrorWriter.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

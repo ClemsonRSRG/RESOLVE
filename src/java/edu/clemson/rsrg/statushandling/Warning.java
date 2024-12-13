@@ -24,4 +24,16 @@ public class Warning {
     public Location getLocation() {
         return location;
     }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nWarning: ");
+        sb.append(type.toString());
+        sb.append("\nat ");
+        sb.append(location.toString());
+        sb.append("\n");
+        sb.append(message);
+        sb.append("\n");
+        return sb.toString();
+    }
 }

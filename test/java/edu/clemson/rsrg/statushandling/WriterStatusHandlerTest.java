@@ -39,8 +39,10 @@ public class WriterStatusHandlerTest {
         when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
 
         Location warningLocation = new Location(rsFile, 12, 12);
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "test single error");
 
-        testHandler.warning(warningLocation, "test single error");
+        testHandler.registerWarning(warning);
+
         assert (testHandler.retrieveWarningCount() == 1);
     }
 
@@ -52,12 +54,11 @@ public class WriterStatusHandlerTest {
         when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
 
         Location warningLocation = new Location(rsFile, 12, 12);
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "test single error");
 
-        testHandler.warning(warningLocation, "test single error");
-        testHandler.warning(warningLocation, "test single error");
-        testHandler.warning(warningLocation, "test single error");
-        testHandler.warning(warningLocation, "test single error");
-        testHandler.warning(warningLocation, "test single error");
+        for (int i = 0;i < 5;i ++) {
+            testHandler.registerWarning(warning);
+        }
         assert (testHandler.retrieveWarningCount() == 5);
     }
 
@@ -128,5 +129,32 @@ public class WriterStatusHandlerTest {
         assert (warnings.get(4).isType(WarningType.INCORRECT_PARAMETER_MODE_USAGE));
         assert (warnings.get(4).getMessage().equals("test incorrect parameter mode warning"));
         assert (warnings.get(4).getLocation() == testLocationB);
+    }
+
+    @Test
+    public void testStreamAllWarnings_givenNoWarnings_expectNothingToBeStreamed() {
+        PrintWriter mockWriter = mock(PrintWriter.class);
+        StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), mockWriter);
+
+        testHandler.streamAllWarnings();
+
+        verify(mockWriter, never()).write(anyString());
+        verify(mockWriter, never()).flush();
+    }
+
+    @Test
+    public void testStreamAllWarnings_givenWarnings_expectWarningsToBeStreamed() {
+        PrintWriter mockWriter = mock(PrintWriter.class);
+        StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), mockWriter);
+
+        ResolveFile mockedFile = mock(ResolveFile.class);
+        when(mockedFile.getModuleType()).thenReturn(ModuleType.THEORY);
+        Location testLocationA = new Location(mockedFile, 1, 1);
+        testHandler.registerWarning(new Warning(WarningType.GENERIC_WARNING, testLocationA, ""));
+
+        testHandler.streamAllWarnings();
+
+        verify(mockWriter, times(1)).write(anyString());
+        verify(mockWriter, times(1)).flush();
     }
 }

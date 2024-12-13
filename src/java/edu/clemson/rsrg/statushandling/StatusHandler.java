@@ -128,4 +128,11 @@ public interface StatusHandler {
      * </p>
      */
     public void registerWarning(Warning warning);
+
+    /**
+     * <p>
+     * This method writes and flushes all registered warnings to the output
+     * </p>
+     */
+    public void streamAllWarnings();
 }
