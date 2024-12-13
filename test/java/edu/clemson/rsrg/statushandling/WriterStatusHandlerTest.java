@@ -91,4 +91,42 @@ public class WriterStatusHandlerTest {
         assert (warnings.get(0).getMessage().equals("test single error"));
         assert (warnings.get(0).getLocation() == testLocation);
     }
+
+    @Test
+    public void testGetAndRegisterWarnings_give5Warnings_assertExpectedValues() {
+        StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
+
+        ResolveFile mockedFile = mock(ResolveFile.class);
+        Location testLocationA = new Location(mockedFile, 1, 1);
+        Location testLocationB = new Location(mockedFile, 2, 2);
+
+        Warning warningA = mock(Warning.class);
+        when(warningA.isType(WarningType.GENERIC_WARNING)).thenReturn(true);
+        when(warningA.getMessage()).thenReturn("test generic warning");
+        when(warningA.getLocation()).thenReturn(testLocationA);
+
+        Warning warningB = mock(Warning.class);
+        when(warningB.isType(WarningType.INCORRECT_PARAMETER_MODE_USAGE)).thenReturn(true);
+        when(warningB.getMessage()).thenReturn("test incorrect parameter mode warning");
+        when(warningB.getLocation()).thenReturn(testLocationB);
+
+        for (int i = 0;i < 4;i ++) {
+            testHandler.registerWarning(warningA);
+        }
+        testHandler.registerWarning(warningB);
+
+        List<Warning> warnings = testHandler.getWarnings();
+
+        assert (testHandler.getWarnings().size() == 5);
+
+        for (int i = 0;i < 4; i ++) {
+            assert (warnings.get(i).isType(WarningType.GENERIC_WARNING));
+            assert (warnings.get(i).getMessage().equals("test generic warning"));
+            assert (warnings.get(i).getLocation() == testLocationA);
+        }
+
+        assert (warnings.get(4).isType(WarningType.INCORRECT_PARAMETER_MODE_USAGE));
+        assert (warnings.get(4).getMessage().equals("test incorrect parameter mode warning"));
+        assert (warnings.get(4).getLocation() == testLocationB);
+    }
 }
