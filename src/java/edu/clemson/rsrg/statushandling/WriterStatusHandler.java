@@ -35,10 +35,10 @@ public class WriterStatusHandler implements StatusHandler {
     // ===========================================================
     /**
      * <p>
-     * Storage for Warning Quantity
+     * Storage for ordered Warnings
      * </p>
      */
-    private int warningCount;
+    private List<Warning> warnings;
 
     /**
      * <p>
@@ -80,7 +80,7 @@ public class WriterStatusHandler implements StatusHandler {
         myOutputWriter = outWriter;
         myErrorWriter = errorWriter;
         stopLogging = false;
-        warningCount = 0;
+        warnings = new ArrayList<>();
     }
 
     // ===========================================================
@@ -261,7 +261,8 @@ public class WriterStatusHandler implements StatusHandler {
             } else {
                 throw new RuntimeException("Error handler has been stopped.");
             }
-            warningCount ++;
+            Warning warning = new Warning(WarningType.GENERIC_WARNING, l, msg);
+            warnings.add(warning);
         } catch (IOException e) {
             System.err.println("Error writing information to the specified output.");
             e.printStackTrace();
@@ -276,7 +277,7 @@ public class WriterStatusHandler implements StatusHandler {
      * The number of captured warnings
      */
     public int retrieveWarningCount() {
-        return warningCount;
+        return warnings.size();
     }
 
     /**
@@ -287,6 +288,15 @@ public class WriterStatusHandler implements StatusHandler {
      * The ordered list of warnings
      */
     public List<Warning> getWarnings() {
-        return new ArrayList<Warning>();
+        return warnings;
+    }
+
+    /**
+     * <p>
+     * This method registers a new inorder warning
+     * </p>
+     */
+    public void registerWarning(Warning warning) {
+        warnings.add(warning);
     }
 }

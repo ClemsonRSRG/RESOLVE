@@ -116,8 +116,6 @@ public interface StatusHandler {
      * <p>
      * This method registers a new inorder warning
      * </p>
-     * @return
-     * The ordered list of warnings
      */
     public void registerWarning(Warning warning);
 }
