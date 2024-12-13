@@ -23,4 +23,12 @@ public class WarningTest {
 
         assert(warning.getMessage().equals("abcd"));
     }
+
+    @Test
+    public void testWarningConstructor_givenGenericTypeAndGenericString_assertCorrectValues() {
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, "generic_string");
+
+        assert(warning.getMessage().equals("generic_string"));
+        assert(warning.isType(WarningType.GENERIC_WARNING));
+    }
 }
