@@ -16,4 +16,11 @@ public class WarningTest {
 
         assert(warning.isType(WarningType.INCORRECT_PARAMETER_MODE_USAGE));
     }
+
+    @Test
+    public void testWarningGetMessage_givenGenericString_returnsGenericString() {
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, "abcd");
+
+        assert(warning.getMessage().equals("abcd"));
+    }
 }
