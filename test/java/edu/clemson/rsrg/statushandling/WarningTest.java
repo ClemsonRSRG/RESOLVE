@@ -1,6 +1,12 @@
 package edu.clemson.rsrg.statushandling;
 
+import edu.clemson.rsrg.init.file.ModuleType;
+import edu.clemson.rsrg.init.file.ResolveFile;
+import edu.clemson.rsrg.parsing.data.Location;
 import org.junit.Test;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class WarningTest {
     @Test
@@ -22,6 +28,18 @@ public class WarningTest {
         Warning warning = new Warning(WarningType.GENERIC_WARNING, "abcd");
 
         assert(warning.getMessage().equals("abcd"));
+    }
+
+    @Test
+    public void testWarningGetLocation_givenGenericLocation_returnsGenericLocation() {
+        ResolveFile rsFile = mock(ResolveFile.class);
+        when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
+
+        Location warningLocation = new Location(rsFile, 12, 12);
+
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "abcd");
+
+        assert(warning.getLocation() == warningLocation);
     }
 
     @Test
