@@ -11,21 +11,33 @@ import static org.mockito.Mockito.when;
 public class WarningTest {
     @Test
     public void testWarningIsType_givenGenericType_returnTrue() {
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, "");
+        ResolveFile rsFile = mock(ResolveFile.class);
+        when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
+
+        Location warningLocation = new Location(rsFile, 12, 12);
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "");
 
         assert(warning.isType(WarningType.GENERIC_WARNING));
     }
 
     @Test
     public void testWarningIsType_givenIncorrectParameterModeUsage_returnTrue() {
-        Warning warning = new Warning(WarningType.INCORRECT_PARAMETER_MODE_USAGE, "");
+        ResolveFile rsFile = mock(ResolveFile.class);
+        when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
+
+        Location warningLocation = new Location(rsFile, 12, 12);
+        Warning warning = new Warning(WarningType.INCORRECT_PARAMETER_MODE_USAGE, warningLocation, "");
 
         assert(warning.isType(WarningType.INCORRECT_PARAMETER_MODE_USAGE));
     }
 
     @Test
     public void testWarningGetMessage_givenGenericString_returnsGenericString() {
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, "abcd");
+        ResolveFile rsFile = mock(ResolveFile.class);
+        when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
+
+        Location warningLocation = new Location(rsFile, 12, 12);
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "abcd");
 
         assert(warning.getMessage().equals("abcd"));
     }
@@ -44,7 +56,11 @@ public class WarningTest {
 
     @Test
     public void testWarningConstructor_givenGenericTypeAndGenericString_assertCorrectValues() {
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, "generic_string");
+        ResolveFile rsFile = mock(ResolveFile.class);
+        when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
+
+        Location warningLocation = new Location(rsFile, 12, 12);
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "generic_string");
 
         assert(warning.getMessage().equals("generic_string"));
         assert(warning.isType(WarningType.GENERIC_WARNING));
