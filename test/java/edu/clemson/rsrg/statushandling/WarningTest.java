@@ -9,4 +9,11 @@ public class WarningTest {
 
         assert(warning.isType(WarningType.GENERIC_WARNING));
     }
+
+    @Test
+    public void testWarningIsType_givenIncorrectParameterModeUsage_returnTrue() {
+        Warning warning = new Warning(WarningType.INCORRECT_PARAMETER_MODE_USAGE);
+
+        assert(warning.isType(WarningType.INCORRECT_PARAMETER_MODE_USAGE));
+    }
 }
