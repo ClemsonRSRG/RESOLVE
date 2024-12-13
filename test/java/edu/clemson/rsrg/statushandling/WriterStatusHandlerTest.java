@@ -68,4 +68,27 @@ public class WriterStatusHandlerTest {
         List<Warning> warnings = testHandler.getWarnings();
         assert(warnings.isEmpty());
     }
+
+    @Test
+    public void testGetWarnings_expectSingletonList_returnSingletonList() {
+        StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
+
+        Warning testWarning = mock(Warning.class);
+        ResolveFile rsFile = mock(ResolveFile.class);
+        Location testLocation = new Location(rsFile, 12, 12);
+
+        when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
+
+        when(testWarning.isType(WarningType.GENERIC_WARNING)).thenReturn(true);
+        when(testWarning.getMessage()).thenReturn("test single error");
+        when(testWarning.getLocation()).thenReturn(testLocation);
+
+        testHandler.registerWarning(testWarning);
+        List<Warning> warnings = testHandler.getWarnings();
+
+        assert (warnings.size() == 1);
+        assert (warnings.get(0).isType(WarningType.GENERIC_WARNING));
+        assert (warnings.get(0).getMessage().equals("test single error"));
+        assert (warnings.get(0).getLocation() == testLocation);
+    }
 }

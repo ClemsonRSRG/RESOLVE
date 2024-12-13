@@ -16,6 +16,8 @@ import edu.clemson.rsrg.parsing.data.Location;
 import edu.clemson.rsrg.statushandling.exception.CompilerException;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -275,5 +277,16 @@ public class WriterStatusHandler implements StatusHandler {
      */
     public int retrieveWarningCount() {
         return warningCount;
+    }
+
+    /**
+     * <p>
+     * This method returns an ordered list of registered warnings on the system
+     * </p>
+     * @return
+     * The ordered list of warnings
+     */
+    public List<Warning> getWarnings() {
+        return new ArrayList<Warning>();
     }
 }

@@ -15,6 +15,9 @@ package edu.clemson.rsrg.statushandling;
 import edu.clemson.rsrg.parsing.data.Location;
 import edu.clemson.rsrg.statushandling.exception.CompilerException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>
  * A common interface that all handlers for debugging, errors and/or other information coming from the compiler must
@@ -99,4 +102,22 @@ public interface StatusHandler {
      * The number of captured warnings
      */
     public int retrieveWarningCount();
+
+    /**
+     * <p>
+     * This method returns an ordered list of registered warnings on the system
+     * </p>
+     * @return
+     * The ordered list of warnings
+     */
+    public List<Warning> getWarnings();
+
+    /**
+     * <p>
+     * This method registers a new inorder warning
+     * </p>
+     * @return
+     * The ordered list of warnings
+     */
+    public void registerWarning(Warning warning);
 }
