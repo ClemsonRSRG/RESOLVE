@@ -65,4 +65,21 @@ public class WarningTest {
         assert(warning.getMessage().equals("generic_string"));
         assert(warning.isType(WarningType.GENERIC_WARNING));
     }
+
+    @Test
+    public void testDisplayString_givenWarning_expectExactResult() {
+        Location testLoc = mock(Location.class);
+        when(testLoc.toString()).thenReturn("LOCATION_SECTION");
+
+        Warning warning = new Warning(WarningType.GENERIC_WARNING, testLoc, "Basic Warning Message");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nWarning: ");
+        sb.append("LOCATION_SECTION");
+        sb.append("\n");
+        sb.append("Basic Warning Message");
+        sb.append("\n");
+
+        assert(warning.toString().contentEquals(sb));
+    }
 }

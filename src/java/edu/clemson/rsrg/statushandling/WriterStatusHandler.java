@@ -269,6 +269,32 @@ public class WriterStatusHandler implements StatusHandler {
         }
     }
 
+
+    /**
+     * <p>
+     * This method registers and displays compiler warning passed in.
+     * </p>
+     *
+     * @param warning
+     *          The warning to be registered and displayed
+     */
+    @Override
+    public void registerAndStreamWarning(Warning warning) {
+        if (hasStopped()) {
+            throw new RuntimeException("Error handler has been stopped.");
+        }
+
+        registerWarning(warning);
+
+        try {
+            myErrorWriter.write(warning.toString());
+            myErrorWriter.flush();
+        } catch (IOException e) {
+            System.err.println("Error writing information to the specified output.");
+            e.printStackTrace();
+        }
+    }
+
     /**
      * <p>
      * This method returns the number of warnings captured by this status handler.
