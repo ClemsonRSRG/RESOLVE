@@ -19,7 +19,7 @@ public class WarningTest {
 
     @Test
     public void testWarningGetMessage_givenGenericString_returnsGenericString() {
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, "abcd");
+        Warning warning = new Warning(WarningType.GENERIC_WARNING);
 
         assert(warning.getMessage().equals("abcd"));
     }
