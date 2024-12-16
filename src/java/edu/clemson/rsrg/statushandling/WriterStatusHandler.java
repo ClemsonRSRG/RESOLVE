@@ -262,8 +262,8 @@ public class WriterStatusHandler implements StatusHandler {
      * <p>
      * This method returns the number of warnings captured by this status handler.
      * </p>
-     * @return
-     * The number of captured warnings
+     *
+     * @return The number of captured warnings
      */
     public int retrieveWarningCount() {
         return 0;
