@@ -49,12 +49,6 @@ public class WriterStatusHandlerTest {
     @Test
     public void testRetrieveWarningCount_givenMultipleWarnings_returns5() {
         StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
-        // testHandler.warning(new Location(null, 12, 12), "test single error");
-        // testHandler.warning(new Location(null, 12, 12), "test single error");
-        // testHandler.warning(new Location(null, 12, 12), "test single error");
-        // testHandler.warning(new Location(null, 12, 12), "test single error");
-        // testHandler.warning(new Location(null, 12, 12), "test single error");
-        // assert (testHandler.retrieveWarningCount() == 5);
 
         ResolveFile rsFile = mock(ResolveFile.class);
         when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);

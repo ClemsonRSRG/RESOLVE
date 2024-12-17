@@ -235,42 +235,6 @@ public class WriterStatusHandler implements StatusHandler {
 
     /**
      * <p>
-     * Outputs a warning message.
-     * </p>
-     *
-     * @param l
-     *            The location where we encountered the error.
-     * @param msg
-     *            Message to be displayed.
-     */
-    @Override
-    public synchronized final void warning(Location l, String msg) {
-        try {
-            if (!hasStopped()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("\nWarning: ");
-                if (l != null) {
-                    sb.append(l.toString());
-                }
-                sb.append("\n");
-                sb.append(msg);
-                sb.append("\n");
-
-                myErrorWriter.write(sb.toString());
-                myErrorWriter.flush();
-            } else {
-                throw new RuntimeException("Error handler has been stopped.");
-            }
-            Warning warning = new Warning(WarningType.GENERIC_WARNING, l, msg);
-            warnings.add(warning);
-        } catch (IOException e) {
-            System.err.println("Error writing information to the specified output.");
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * <p>
      * This method registers and displays compiler warning passed in.
      * </p>
      *

@@ -15,7 +15,6 @@ package edu.clemson.rsrg.statushandling;
 import edu.clemson.rsrg.parsing.data.Location;
 import edu.clemson.rsrg.statushandling.exception.CompilerException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -81,18 +80,6 @@ public interface StatusHandler {
      * </p>
      */
     void stopLogging();
-
-    /**
-     * <p>
-     * This method displays compiler warning passed in.
-     * </p>
-     *
-     * @param l
-     *            The location where we encountered the error.
-     * @param msg
-     *            Message to be displayed.
-     */
-    void warning(Location l, String msg);
 
     /**
      * <p>
