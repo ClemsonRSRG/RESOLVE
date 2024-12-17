@@ -16,6 +16,8 @@ import edu.clemson.rsrg.parsing.data.Location;
 import edu.clemson.rsrg.statushandling.exception.CompilerException;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -31,6 +33,12 @@ public class WriterStatusHandler implements StatusHandler {
     // ===========================================================
     // Member Fields
     // ===========================================================
+    /**
+     * <p>
+     * Storage for ordered Warnings
+     * </p>
+     */
+    private List<Warning> warnings;
 
     /**
      * <p>
@@ -72,6 +80,7 @@ public class WriterStatusHandler implements StatusHandler {
         myOutputWriter = outWriter;
         myErrorWriter = errorWriter;
         stopLogging = false;
+        warnings = new ArrayList<>();
     }
 
     // ===========================================================
@@ -252,6 +261,33 @@ public class WriterStatusHandler implements StatusHandler {
             } else {
                 throw new RuntimeException("Error handler has been stopped.");
             }
+            Warning warning = new Warning(WarningType.GENERIC_WARNING, l, msg);
+            warnings.add(warning);
+        } catch (IOException e) {
+            System.err.println("Error writing information to the specified output.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * <p>
+     * This method registers and displays compiler warning passed in.
+     * </p>
+     *
+     * @param warning
+     *            The warning to be registered and displayed
+     */
+    @Override
+    public void registerAndStreamWarning(Warning warning) {
+        if (hasStopped()) {
+            throw new RuntimeException("Error handler has been stopped.");
+        }
+
+        registerWarning(warning);
+
+        try {
+            myErrorWriter.write(warning.toString());
+            myErrorWriter.flush();
         } catch (IOException e) {
             System.err.println("Error writing information to the specified output.");
             e.printStackTrace();
@@ -266,6 +302,42 @@ public class WriterStatusHandler implements StatusHandler {
      * @return The number of captured warnings
      */
     public int retrieveWarningCount() {
-        return 0;
+        return warnings.size();
+    }
+
+    /**
+     * <p>
+     * This method returns an ordered list of registered warnings on the system
+     * </p>
+     *
+     * @return The ordered list of warnings
+     */
+    public List<Warning> getWarnings() {
+        return warnings;
+    }
+
+    /**
+     * <p>
+     * This method registers a new inorder warning
+     * </p>
+     */
+    public void registerWarning(Warning warning) {
+        warnings.add(warning);
+    }
+
+    /**
+     * <p>
+     * This method writes and flushes all registered warnings to the output
+     * </p>
+     */
+    public void streamAllWarnings() {
+        for (Warning warning : warnings) {
+            try {
+                myErrorWriter.write(warning.toString());
+                myErrorWriter.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
