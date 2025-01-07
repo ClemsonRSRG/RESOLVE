@@ -13,7 +13,8 @@
 package edu.clemson.rsrg.statushandling;
 
 public enum WarningType {
-    GENERIC_WARNING("Generic Warning"), INCORRECT_PARAMETER_MODE_USAGE("Incorrect Parameter Mode"),;
+    GENERIC_WARNING("Generic Warning"), INCORRECT_PARAMETER_MODE_USAGE("Incorrect Parameter Mode"),
+    MISSING_INFO_VC_GEN("Missing Information About VC Generation");
 
     private final String plainName;
 

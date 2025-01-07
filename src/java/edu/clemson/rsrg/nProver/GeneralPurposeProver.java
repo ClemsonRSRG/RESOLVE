@@ -415,7 +415,7 @@ public class GeneralPurposeProver {
             vcModel.add("location", detailModel.getDestinationLoc());
             vcModel.add("locationDetail", detailModel.getDetailMessage());
         } else {
-            Warning vcGenMissingInfo = new Warning(WarningType.GENERIC_WARNING, vc.getLocation(),
+            Warning vcGenMissingInfo = new Warning(WarningType.MISSING_INFO_VC_GEN, vc.getLocation(),
                     "[FileOutputListener] VC " + vc.getName() + " is missing information about " +
                             "how this VC got generated.");
             myCompileEnvironment.getStatusHandler().registerAndStreamWarning(vcGenMissingInfo);
