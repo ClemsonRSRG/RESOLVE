@@ -287,6 +287,17 @@ public class WriterStatusHandler implements StatusHandler {
      */
     public void registerWarning(Fault fault) {
         faults.add(fault);
+
+        if (fault.isCritical()) {
+            try {
+                myErrorWriter.write("CRITICAL FAULT: FLUSHING ALL FAULTS");
+                myErrorWriter.flush();
+                streamAllWarnings();
+                throw new RuntimeException("CRITICAL FAULT: ALL FAULTS FLUSHED TO ERROR STREAM");
+            } catch (IOException e) {
+                throw new RuntimeException("Error writing information to the specified output.");
+            }
+        }
     }
 
     /**
