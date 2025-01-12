@@ -46,7 +46,7 @@ public class Fault {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (critical) {
-            sb.append("\nCRITICAL Fault:");
+            sb.append("\nCRITICAL Fault: ");
         } else {
             sb.append("\nFault: ");
         }

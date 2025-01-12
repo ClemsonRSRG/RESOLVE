@@ -112,4 +112,24 @@ public class FaultTest {
         Fault fault = new Fault(FaultType.GENERIC_FAULT, testLoc, "Basic Warning Message", true);
         assert fault.isCritical();
     }
+
+    @org.junit.Test
+    public void testDisplayString_givenCriticalFault_expectExactResult() {
+        Location testLoc = mock(Location.class);
+        when(testLoc.toString()).thenReturn("LOCATION_SECTION");
+
+        Fault fault = new Fault(FaultType.GENERIC_FAULT, testLoc, "Basic Warning Message", true);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nCRITICAL Fault: ");
+        sb.append(FaultType.GENERIC_FAULT.toString());
+        sb.append("\nat ");
+        sb.append("LOCATION_SECTION");
+        sb.append("\n");
+        sb.append("Basic Warning Message");
+        sb.append("\n");
+
+        assert (fault.toString().contentEquals(sb));
+    }
+
 }
