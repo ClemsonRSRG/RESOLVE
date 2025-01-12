@@ -15,6 +15,7 @@ package edu.clemson.rsrg.statushandling;
 import edu.clemson.rsrg.init.file.ModuleType;
 import edu.clemson.rsrg.init.file.ResolveFile;
 import edu.clemson.rsrg.parsing.data.Location;
+import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -94,5 +95,13 @@ public class FaultTest {
         sb.append("\n");
 
         assert (fault.toString().contentEquals(sb));
+    }
+
+    @Test
+    public void testIsCritical_notCritical_returnsFalse() {
+        Location testLoc = mock(Location.class);
+        when(testLoc.toString()).thenReturn("LOCATION_SECTION");
+        Fault fault = new Fault(FaultType.GENERIC_FAULT, testLoc, "Basic Warning Message", false);
+        assert !fault.isCritical();
     }
 }

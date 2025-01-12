@@ -15,10 +15,10 @@ package edu.clemson.rsrg.statushandling;
 import edu.clemson.rsrg.parsing.data.Location;
 
 public class Fault {
-    FaultType type;
-    String message;
-    Location location;
-    boolean critical;
+    private final FaultType type;
+    private final String message;
+    private final Location location;
+    private final boolean critical;
 
     public Fault(FaultType typ, Location loc, String msg, boolean critical) {
         type = typ;
