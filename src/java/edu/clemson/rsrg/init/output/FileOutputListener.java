@@ -336,7 +336,7 @@ public class FileOutputListener implements OutputListener {
             writer.write(outputString);
             writer.close();
         } catch (IOException ioe) {
-            myStatusHandler.error(null, "[FileOutputListener] Error while writing to file: " + outputFileName);
+            throw new RuntimeException("[FileOutputListener] Error while writing to file: " + outputFileName);
         }
     }
 }
