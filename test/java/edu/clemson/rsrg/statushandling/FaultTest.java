@@ -104,4 +104,12 @@ public class FaultTest {
         Fault fault = new Fault(FaultType.GENERIC_FAULT, testLoc, "Basic Warning Message", false);
         assert !fault.isCritical();
     }
+
+    @Test
+    public void testIsCritical_critical_returnsTrue() {
+        Location testLoc = mock(Location.class);
+        when(testLoc.toString()).thenReturn("LOCATION_SECTION");
+        Fault fault = new Fault(FaultType.GENERIC_FAULT, testLoc, "Basic Warning Message", true);
+        assert fault.isCritical();
+    }
 }
