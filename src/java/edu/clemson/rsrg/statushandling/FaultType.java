@@ -1,5 +1,5 @@
 /*
- * WarningType.java
+ * FaultType.java
  * ---------------------------------
  * Copyright (c) 2024
  * RESOLVE Software Research Group
@@ -12,13 +12,13 @@
  */
 package edu.clemson.rsrg.statushandling;
 
-public enum WarningType {
-    GENERIC_WARNING("Generic Warning"), INCORRECT_PARAMETER_MODE_USAGE("Incorrect Parameter Mode"),
+public enum FaultType {
+    GENERIC_FAULT("Generic Warning"), INCORRECT_PARAMETER_MODE_USAGE("Incorrect Parameter Mode"),
     MISSING_INFO_VC_GEN("Missing Information About VC Generation");
 
     private final String plainName;
 
-    private WarningType(String plainName) {
+    private FaultType(String plainName) {
         this.plainName = plainName;
     }
 

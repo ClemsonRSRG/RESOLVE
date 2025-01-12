@@ -38,7 +38,7 @@ public class WriterStatusHandler implements StatusHandler {
      * Storage for ordered Warnings
      * </p>
      */
-    private List<Warning> warnings;
+    private List<Fault> faults;
 
     /**
      * <p>
@@ -80,7 +80,7 @@ public class WriterStatusHandler implements StatusHandler {
         myOutputWriter = outWriter;
         myErrorWriter = errorWriter;
         stopLogging = false;
-        warnings = new ArrayList<>();
+        faults = new ArrayList<>();
     }
 
     // ===========================================================
@@ -238,19 +238,19 @@ public class WriterStatusHandler implements StatusHandler {
      * This method registers and displays compiler warning passed in.
      * </p>
      *
-     * @param warning
+     * @param fault
      *            The warning to be registered and displayed
      */
     @Override
-    public void registerAndStreamWarning(Warning warning) {
+    public void registerAndStreamWarning(Fault fault) {
         if (hasStopped()) {
             throw new RuntimeException("Error handler has been stopped.");
         }
 
-        registerWarning(warning);
+        registerWarning(fault);
 
         try {
-            myErrorWriter.write(warning.toString());
+            myErrorWriter.write(fault.toString());
             myErrorWriter.flush();
         } catch (IOException e) {
             System.err.println("Error writing information to the specified output.");
@@ -266,7 +266,7 @@ public class WriterStatusHandler implements StatusHandler {
      * @return The number of captured warnings
      */
     public int retrieveWarningCount() {
-        return warnings.size();
+        return faults.size();
     }
 
     /**
@@ -276,8 +276,8 @@ public class WriterStatusHandler implements StatusHandler {
      *
      * @return The ordered list of warnings
      */
-    public List<Warning> getWarnings() {
-        return warnings;
+    public List<Fault> getWarnings() {
+        return faults;
     }
 
     /**
@@ -285,8 +285,8 @@ public class WriterStatusHandler implements StatusHandler {
      * This method registers a new inorder warning
      * </p>
      */
-    public void registerWarning(Warning warning) {
-        warnings.add(warning);
+    public void registerWarning(Fault fault) {
+        faults.add(fault);
     }
 
     /**
@@ -295,9 +295,9 @@ public class WriterStatusHandler implements StatusHandler {
      * </p>
      */
     public void streamAllWarnings() {
-        for (Warning warning : warnings) {
+        for (Fault fault : faults) {
             try {
-                myErrorWriter.write(warning.toString());
+                myErrorWriter.write(fault.toString());
                 myErrorWriter.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);

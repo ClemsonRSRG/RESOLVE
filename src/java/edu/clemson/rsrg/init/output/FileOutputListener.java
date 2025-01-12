@@ -20,8 +20,8 @@ import edu.clemson.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.rsrg.prover.output.Metrics;
 import edu.clemson.rsrg.prover.output.PerVCProverModel;
 import edu.clemson.rsrg.statushandling.StatusHandler;
-import edu.clemson.rsrg.statushandling.Warning;
-import edu.clemson.rsrg.statushandling.WarningType;
+import edu.clemson.rsrg.statushandling.Fault;
+import edu.clemson.rsrg.statushandling.FaultType;
 import edu.clemson.rsrg.translation.targets.CTranslator;
 import edu.clemson.rsrg.translation.targets.JavaTranslator;
 import edu.clemson.rsrg.vcgeneration.VCGenerator;
@@ -264,9 +264,10 @@ public class FileOutputListener implements OutputListener {
                     vcModel.add("location", detailModel.getDestinationLoc());
                     vcModel.add("locationDetail", detailModel.getDetailMessage());
                 } else {
-                    Warning vcGenMissingInfo = new Warning(WarningType.MISSING_INFO_VC_GEN, vc.getLocation(),
-                            "[FileOutputListener] VC " + vc.getName() + " is missing information about " +
-                                    "how this VC got generated.");
+                    Fault vcGenMissingInfo = new Fault(FaultType.MISSING_INFO_VC_GEN, vc.getLocation(),
+                            "[FileOutputListener] VC " + vc.getName() + " is missing information about "
+                                    + "how this VC got generated.",
+                            false);
                     myStatusHandler.registerAndStreamWarning(vcGenMissingInfo);
                 }
 

@@ -15,85 +15,84 @@ package edu.clemson.rsrg.statushandling;
 import edu.clemson.rsrg.init.file.ModuleType;
 import edu.clemson.rsrg.init.file.ResolveFile;
 import edu.clemson.rsrg.parsing.data.Location;
-import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class WarningTest {
-    @Test
-    public void testWarningIsType_givenGenericType_returnTrue() {
+public class FaultTest {
+    @org.junit.Test
+    public void testFaultIsType_givenGenericType_returnTrue() {
         ResolveFile rsFile = mock(ResolveFile.class);
         when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
 
         Location warningLocation = new Location(rsFile, 12, 12);
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "");
+        Fault fault = new Fault(FaultType.GENERIC_FAULT, warningLocation, "", false);
 
-        assert (warning.isType(WarningType.GENERIC_WARNING));
+        assert (fault.isType(FaultType.GENERIC_FAULT));
     }
 
-    @Test
-    public void testWarningIsType_givenIncorrectParameterModeUsage_returnTrue() {
+    @org.junit.Test
+    public void testFaultIsType_givenIncorrectParameterModeUsage_returnTrue() {
         ResolveFile rsFile = mock(ResolveFile.class);
         when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
 
         Location warningLocation = new Location(rsFile, 12, 12);
-        Warning warning = new Warning(WarningType.INCORRECT_PARAMETER_MODE_USAGE, warningLocation, "");
+        Fault fault = new Fault(FaultType.INCORRECT_PARAMETER_MODE_USAGE, warningLocation, "", false);
 
-        assert (warning.isType(WarningType.INCORRECT_PARAMETER_MODE_USAGE));
+        assert (fault.isType(FaultType.INCORRECT_PARAMETER_MODE_USAGE));
     }
 
-    @Test
-    public void testWarningGetMessage_givenGenericString_returnsGenericString() {
+    @org.junit.Test
+    public void testFaultGetMessage_givenGenericString_returnsGenericString() {
         ResolveFile rsFile = mock(ResolveFile.class);
         when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
 
         Location warningLocation = new Location(rsFile, 12, 12);
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "abcd");
+        Fault fault = new Fault(FaultType.GENERIC_FAULT, warningLocation, "abcd", false);
 
-        assert (warning.getMessage().equals("abcd"));
+        assert (fault.getMessage().equals("abcd"));
     }
 
-    @Test
-    public void testWarningGetLocation_givenGenericLocation_returnsGenericLocation() {
+    @org.junit.Test
+    public void testFaultGetLocation_givenGenericLocation_returnsGenericLocation() {
         ResolveFile rsFile = mock(ResolveFile.class);
         when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
 
         Location warningLocation = new Location(rsFile, 12, 12);
 
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "abcd");
+        Fault fault = new Fault(FaultType.GENERIC_FAULT, warningLocation, "abcd", false);
 
-        assert (warning.getLocation() == warningLocation);
+        assert (fault.getLocation() == warningLocation);
     }
 
-    @Test
-    public void testWarningConstructor_givenGenericTypeAndGenericString_assertCorrectValues() {
+    @org.junit.Test
+    public void testFaultConstructor_givenGenericTypeAndGenericString_assertCorrectValues() {
         ResolveFile rsFile = mock(ResolveFile.class);
         when(rsFile.getModuleType()).thenReturn(ModuleType.THEORY);
 
         Location warningLocation = new Location(rsFile, 12, 12);
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, warningLocation, "generic_string");
+        Fault fault = new Fault(FaultType.GENERIC_FAULT, warningLocation, "generic_string", false);
 
-        assert (warning.getMessage().equals("generic_string"));
-        assert (warning.isType(WarningType.GENERIC_WARNING));
+        assert (fault.getMessage().equals("generic_string"));
+        assert (fault.isType(FaultType.GENERIC_FAULT));
     }
 
-    @Test
-    public void testDisplayString_givenWarning_expectExactResult() {
+    @org.junit.Test
+    public void testDisplayString_givenFault_expectExactResult() {
         Location testLoc = mock(Location.class);
         when(testLoc.toString()).thenReturn("LOCATION_SECTION");
 
-        Warning warning = new Warning(WarningType.GENERIC_WARNING, testLoc, "Basic Warning Message");
+        Fault fault = new Fault(FaultType.GENERIC_FAULT, testLoc, "Basic Warning Message", false);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("\nWarning: ");
-        sb.append(WarningType.GENERIC_WARNING.toString());
+        sb.append("\nFault: ");
+        sb.append(FaultType.GENERIC_FAULT.toString());
         sb.append("\nat ");
         sb.append("LOCATION_SECTION");
         sb.append("\n");
         sb.append("Basic Warning Message");
         sb.append("\n");
 
-        assert (warning.toString().contentEquals(sb));
+        assert (fault.toString().contentEquals(sb));
     }
 }

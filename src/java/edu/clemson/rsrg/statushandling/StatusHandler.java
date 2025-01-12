@@ -86,10 +86,10 @@ public interface StatusHandler {
      * This method registers and displays compiler warning passed in.
      * </p>
      *
-     * @param warning
+     * @param fault
      *            The warning to be registered and displayed
      */
-    void registerAndStreamWarning(Warning warning);
+    void registerAndStreamWarning(Fault fault);
 
     /**
      * <p>
@@ -107,14 +107,14 @@ public interface StatusHandler {
      *
      * @return The ordered list of warnings
      */
-    public List<Warning> getWarnings();
+    public List<Fault> getWarnings();
 
     /**
      * <p>
      * This method registers a new inorder warning
      * </p>
      */
-    public void registerWarning(Warning warning);
+    public void registerWarning(Fault fault);
 
     /**
      * <p>

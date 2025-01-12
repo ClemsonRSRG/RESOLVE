@@ -1,5 +1,5 @@
 /*
- * Warning.java
+ * Fault.java
  * ---------------------------------
  * Copyright (c) 2024
  * RESOLVE Software Research Group
@@ -14,19 +14,25 @@ package edu.clemson.rsrg.statushandling;
 
 import edu.clemson.rsrg.parsing.data.Location;
 
-public class Warning {
-    WarningType type;
+public class Fault {
+    FaultType type;
     String message;
     Location location;
+    boolean critical;
 
-    public Warning(WarningType typ, Location loc, String msg) {
+    public Fault(FaultType typ, Location loc, String msg, boolean critical) {
         type = typ;
         message = msg;
         location = loc;
+        this.critical = critical;
     }
 
-    public boolean isType(WarningType type) {
+    public boolean isType(FaultType type) {
         return this.type == type;
+    }
+
+    public boolean isCritical() {
+        return this.critical;
     }
 
     public String getMessage() {
@@ -39,7 +45,11 @@ public class Warning {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\nWarning: ");
+        if (critical) {
+            sb.append("\nCRITICAL Fault:");
+        } else {
+            sb.append("\nFault: ");
+        }
         sb.append(type.toString());
         sb.append("\nat ");
         sb.append(location.toString());

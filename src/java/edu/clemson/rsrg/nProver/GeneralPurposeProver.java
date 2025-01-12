@@ -25,8 +25,8 @@ import edu.clemson.rsrg.nProver.utilities.treewakers.AbstractRegisterSequent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterAntecedent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSuccedent;
 import edu.clemson.rsrg.parsing.data.LocationDetailModel;
-import edu.clemson.rsrg.statushandling.Warning;
-import edu.clemson.rsrg.statushandling.WarningType;
+import edu.clemson.rsrg.statushandling.Fault;
+import edu.clemson.rsrg.statushandling.FaultType;
 import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.rsrg.typeandpopulate.symboltables.ModuleScope;
@@ -415,9 +415,10 @@ public class GeneralPurposeProver {
             vcModel.add("location", detailModel.getDestinationLoc());
             vcModel.add("locationDetail", detailModel.getDetailMessage());
         } else {
-            Warning vcGenMissingInfo = new Warning(WarningType.MISSING_INFO_VC_GEN, vc.getLocation(),
-                    "[FileOutputListener] VC " + vc.getName() + " is missing information about " +
-                            "how this VC got generated.");
+            Fault vcGenMissingInfo = new Fault(FaultType.MISSING_INFO_VC_GEN, vc.getLocation(),
+                    "[FileOutputListener] VC " + vc.getName() + " is missing information about "
+                            + "how this VC got generated.",
+                    false);
             myCompileEnvironment.getStatusHandler().registerAndStreamWarning(vcGenMissingInfo);
         }
 
