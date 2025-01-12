@@ -31,18 +31,6 @@ public interface StatusHandler {
 
     /**
      * <p>
-     * This method displays the error message passed in.
-     * </p>
-     *
-     * @param l
-     *            The location where we encountered the error.
-     * @param msg
-     *            Message to be displayed.
-     */
-    void error(Location l, String msg);
-
-    /**
-     * <p>
      * Checks to see if we are still logging information.
      * </p>
      *

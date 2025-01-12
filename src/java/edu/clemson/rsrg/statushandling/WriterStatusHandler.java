@@ -87,39 +87,6 @@ public class WriterStatusHandler implements StatusHandler {
     // Public Methods
     // ===========================================================
 
-    /**
-     * <p>
-     * Outputs a critical error message.
-     * </p>
-     *
-     * @param l
-     *            The location where we encountered the error.
-     * @param msg
-     *            Message to be displayed.
-     */
-    @Override
-    public synchronized final void error(Location l, String msg) {
-        try {
-            if (!hasStopped()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("\nError: ");
-                if (l != null) {
-                    sb.append(l.toString());
-                }
-                sb.append("\n\n");
-                sb.append(msg);
-                sb.append("\n\n");
-
-                myErrorWriter.write(sb.toString());
-                myErrorWriter.flush();
-            } else {
-                throw new RuntimeException("Error handler has been stopped.");
-            }
-        } catch (IOException e) {
-            System.err.println("Error writing information to the specified output.");
-            e.printStackTrace();
-        }
-    }
 
     /**
      * <p>
