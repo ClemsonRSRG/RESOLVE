@@ -87,7 +87,6 @@ public class WriterStatusHandler implements StatusHandler {
     // Public Methods
     // ===========================================================
 
-
     /**
      * <p>
      * Checks to see if we are still logging information.

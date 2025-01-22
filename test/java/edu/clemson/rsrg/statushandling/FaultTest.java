@@ -1,5 +1,5 @@
 /*
- * WarningTest.java
+ * FaultTest.java
  * ---------------------------------
  * Copyright (c) 2024
  * RESOLVE Software Research Group
