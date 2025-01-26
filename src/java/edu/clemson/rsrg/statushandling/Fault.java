@@ -51,8 +51,10 @@ public class Fault {
             sb.append("\nFault: ");
         }
         sb.append(type.toString());
-        sb.append("\nat ");
-        sb.append(location.toString());
+        if (location != null) {
+            sb.append("\nat ");
+            sb.append(location.toString());
+        }
         sb.append("\n");
         sb.append(message);
         sb.append("\n");
