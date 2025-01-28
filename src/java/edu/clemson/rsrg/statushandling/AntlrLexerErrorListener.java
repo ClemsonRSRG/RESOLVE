@@ -87,13 +87,13 @@ public class AntlrLexerErrorListener extends BaseErrorListener {
             ResolveTokenFactory tokenFactory = (ResolveTokenFactory) recognizer.getTokenFactory();
             Fault fault = new Fault(FaultType.TOKEN_FAULT,
                     new Location(tokenFactory.getFile(), line, charPositionInLine), msg, false);
-            myStatusHandler.registerAndStreamWarning(fault);
+            myStatusHandler.registerAndStreamFault(fault);
         }
         // Otherwise simply return the raw string.
         else {
             Fault fault = new Fault(FaultType.TOKEN_FAULT, null, "Line " + line + ":" + charPositionInLine + " " + msg,
                     false);
-            myStatusHandler.registerAndStreamWarning(fault);
+            myStatusHandler.registerAndStreamFault(fault);
         }
     }
 

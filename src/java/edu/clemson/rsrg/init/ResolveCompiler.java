@@ -230,7 +230,7 @@ public class ResolveCompiler {
             // YS - The status handler object might have changed.
             statusHandler = compileEnvironment.getStatusHandler();
             Fault fault = new Fault(FaultType.COMPILER_EXCEPTION, null, e.getMessage(), false);
-            statusHandler.registerAndStreamWarning(fault);
+            statusHandler.registerAndStreamFault(fault);
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
                 statusHandler.printStackTrace(e);
             }
@@ -270,7 +270,7 @@ public class ResolveCompiler {
             // YS - The status handler object might have changed.
             statusHandler = compileEnvironment.getStatusHandler();
             Fault fault = new Fault(FaultType.COMPILER_EXCEPTION, null, e.getMessage(), false);
-            statusHandler.registerAndStreamWarning(fault);
+            statusHandler.registerAndStreamFault(fault);
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
                 statusHandler.printStackTrace(e);
             }
@@ -435,7 +435,7 @@ public class ResolveCompiler {
             if (compileEnvironment != null && compileEnvironment.getStatusHandler() != null) {
                 statusHandler = compileEnvironment.getStatusHandler();
                 Fault fault = new Fault(FaultType.FLAG_DEPENDENCY_EXCEPTION, null, fde.getMessage(), false);
-                statusHandler.registerAndStreamWarning(fault);
+                statusHandler.registerAndStreamFault(fault);
                 if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
                     statusHandler.printStackTrace(fde);
                 }

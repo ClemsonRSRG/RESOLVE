@@ -71,43 +71,43 @@ public interface StatusHandler {
 
     /**
      * <p>
-     * This method registers and displays compiler warning passed in.
+     * This method registers and displays compiler fault passed in.
      * </p>
      *
      * @param fault
-     *            The warning to be registered and displayed
+     *            The fault to be registered and displayed
      */
-    void registerAndStreamWarning(Fault fault);
+    void registerAndStreamFault(Fault fault);
 
     /**
      * <p>
-     * This method returns the number of warnings captured by this status handler.
+     * This method returns the number of faults captured by this status handler.
      * </p>
      *
-     * @return The number of captured warnings
+     * @return The number of captured faults
      */
-    public int retrieveWarningCount();
+    public int retrieveFaultCount();
 
     /**
      * <p>
-     * This method returns an ordered list of registered warnings on the system
+     * This method returns an ordered list of registered faults on the system
      * </p>
      *
-     * @return The ordered list of warnings
+     * @return The ordered list of faults
      */
-    public List<Fault> getWarnings();
+    public List<Fault> getFaults();
 
     /**
      * <p>
-     * This method registers a new inorder warning
+     * This method registers a new inorder fault
      * </p>
      */
-    public void registerWarning(Fault fault);
+    public void registerFault(Fault fault);
 
     /**
      * <p>
-     * This method writes and flushes all registered warnings to the output
+     * This method writes and flushes all registered faults to the output
      * </p>
      */
-    public void streamAllWarnings();
+    public void streamAllFaults();
 }

@@ -234,7 +234,7 @@ class Controller {
             } else {
                 CompilerException see = (CompilerException) cause;
                 Fault fault = new Fault(FaultType.COMPILER_EXCEPTION, see.getErrorLocation(), see.getMessage(), false);
-                myStatusHandler.registerAndStreamWarning(fault);
+                myStatusHandler.registerAndStreamFault(fault);
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)) {
                     myStatusHandler.printStackTrace(see);
                 }

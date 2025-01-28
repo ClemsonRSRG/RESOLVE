@@ -26,11 +26,11 @@ public class WriterStatusHandlerTest {
     @Test
     public void testRetrieveFaultCount_givenNoFaults_returnZero() {
         StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
-        assert (testHandler.retrieveWarningCount() == 0);
+        assert (testHandler.retrieveFaultCount() == 0);
     }
 
     @Test
-    public void testRetrieveWarningCount_givenSingleFault_returnOne() {
+    public void testRetrieveFaultCount_givenSingleFault_returnOne() {
         StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
 
         ResolveFile rsFile = mock(ResolveFile.class);
@@ -39,9 +39,9 @@ public class WriterStatusHandlerTest {
         Location warningLocation = new Location(rsFile, 12, 12);
         Fault fault = new Fault(FaultType.GENERIC_FAULT, warningLocation, "test single error", false);
 
-        testHandler.registerWarning(fault);
+        testHandler.registerFault(fault);
 
-        assert (testHandler.retrieveWarningCount() == 1);
+        assert (testHandler.retrieveFaultCount() == 1);
     }
 
     @Test
@@ -55,16 +55,16 @@ public class WriterStatusHandlerTest {
         Fault fault = new Fault(FaultType.GENERIC_FAULT, warningLocation, "test single error", false);
 
         for (int i = 0; i < 5; i++) {
-            testHandler.registerWarning(fault);
+            testHandler.registerFault(fault);
         }
-        assert (testHandler.retrieveWarningCount() == 5);
+        assert (testHandler.retrieveFaultCount() == 5);
     }
 
     @Test
     public void testGetFaults_expectEmptyList_returnEmptyList() {
         StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
 
-        List<Fault> faults = testHandler.getWarnings();
+        List<Fault> faults = testHandler.getFaults();
         assert (faults.isEmpty());
     }
 
@@ -82,8 +82,8 @@ public class WriterStatusHandlerTest {
         when(testFault.getMessage()).thenReturn("test single error");
         when(testFault.getLocation()).thenReturn(testLocation);
 
-        testHandler.registerWarning(testFault);
-        List<Fault> faults = testHandler.getWarnings();
+        testHandler.registerFault(testFault);
+        List<Fault> faults = testHandler.getFaults();
 
         assert (faults.size() == 1);
         assert (faults.get(0).isType(FaultType.GENERIC_FAULT));
@@ -92,7 +92,7 @@ public class WriterStatusHandlerTest {
     }
 
     @Test
-    public void testGetAndRegisterFaults_give5Faults_assertExpectedValues() {
+    public void testGetAndRegisterFaults_give5Fault_assertExpectedValues() {
         StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), new PrintWriter(System.err));
 
         ResolveFile mockedFile = mock(ResolveFile.class);
@@ -110,13 +110,13 @@ public class WriterStatusHandlerTest {
         when(faultB.getLocation()).thenReturn(testLocationB);
 
         for (int i = 0; i < 4; i++) {
-            testHandler.registerWarning(faultA);
+            testHandler.registerFault(faultA);
         }
-        testHandler.registerWarning(faultB);
+        testHandler.registerFault(faultB);
 
-        List<Fault> faults = testHandler.getWarnings();
+        List<Fault> faults = testHandler.getFaults();
 
-        assert (testHandler.getWarnings().size() == 5);
+        assert (testHandler.getFaults().size() == 5);
 
         for (int i = 0; i < 4; i++) {
             assert (faults.get(i).isType(FaultType.GENERIC_FAULT));
@@ -134,7 +134,7 @@ public class WriterStatusHandlerTest {
         PrintWriter mockWriter = mock(PrintWriter.class);
         StatusHandler testHandler = new WriterStatusHandler(new PrintWriter(System.out), mockWriter);
 
-        testHandler.streamAllWarnings();
+        testHandler.streamAllFaults();
 
         verify(mockWriter, never()).write(anyString());
         verify(mockWriter, never()).flush();
@@ -148,9 +148,9 @@ public class WriterStatusHandlerTest {
         ResolveFile mockedFile = mock(ResolveFile.class);
         when(mockedFile.getModuleType()).thenReturn(ModuleType.THEORY);
         Location testLocationA = new Location(mockedFile, 1, 1);
-        testHandler.registerWarning(new Fault(FaultType.GENERIC_FAULT, testLocationA, "", false));
+        testHandler.registerFault(new Fault(FaultType.GENERIC_FAULT, testLocationA, "", false));
 
-        testHandler.streamAllWarnings();
+        testHandler.streamAllFaults();
 
         verify(mockWriter, times(1)).write(anyString());
         verify(mockWriter, times(1)).flush();

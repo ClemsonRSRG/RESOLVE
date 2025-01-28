@@ -100,7 +100,7 @@ public class AntlrParserErrorListener extends BaseErrorListener {
         String errorMsg = buildErrorMsg(charPositionInLine, errorLine, msg);
 
         Fault fault = new Fault(FaultType.ANTLR_FAULT, location, errorMsg, false);
-        myStatusHandler.registerAndStreamWarning(fault);
+        myStatusHandler.registerAndStreamFault(fault);
     }
 
     // ===========================================================

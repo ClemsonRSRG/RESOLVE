@@ -268,7 +268,7 @@ public class FileOutputListener implements OutputListener {
                             "[FileOutputListener] VC " + vc.getName() + " is missing information about "
                                     + "how this VC got generated.",
                             false);
-                    myStatusHandler.registerAndStreamWarning(vcGenMissingInfo);
+                    myStatusHandler.registerAndStreamFault(vcGenMissingInfo);
                 }
 
                 // Output the associated sequent

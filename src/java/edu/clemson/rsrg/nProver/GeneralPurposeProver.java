@@ -419,7 +419,7 @@ public class GeneralPurposeProver {
                     "[FileOutputListener] VC " + vc.getName() + " is missing information about "
                             + "how this VC got generated.",
                     false);
-            myCompileEnvironment.getStatusHandler().registerAndStreamWarning(vcGenMissingInfo);
+            myCompileEnvironment.getStatusHandler().registerAndStreamFault(vcGenMissingInfo);
         }
 
         // Output the associated sequent

@@ -208,12 +208,12 @@ public class WriterStatusHandler implements StatusHandler {
      *            The warning to be registered and displayed
      */
     @Override
-    public void registerAndStreamWarning(Fault fault) {
+    public void registerAndStreamFault(Fault fault) {
         if (hasStopped()) {
             throw new RuntimeException("Error handler has been stopped.");
         }
 
-        registerWarning(fault);
+        registerFault(fault);
 
         try {
             myErrorWriter.write(fault.toString());
@@ -231,7 +231,7 @@ public class WriterStatusHandler implements StatusHandler {
      *
      * @return The number of captured warnings
      */
-    public int retrieveWarningCount() {
+    public int retrieveFaultCount() {
         return faults.size();
     }
 
@@ -242,7 +242,7 @@ public class WriterStatusHandler implements StatusHandler {
      *
      * @return The ordered list of warnings
      */
-    public List<Fault> getWarnings() {
+    public List<Fault> getFaults() {
         return faults;
     }
 
@@ -251,14 +251,14 @@ public class WriterStatusHandler implements StatusHandler {
      * This method registers a new inorder warning
      * </p>
      */
-    public void registerWarning(Fault fault) {
+    public void registerFault(Fault fault) {
         faults.add(fault);
 
         if (fault.isCritical()) {
             try {
                 myErrorWriter.write("CRITICAL FAULT: FLUSHING ALL FAULTS");
                 myErrorWriter.flush();
-                streamAllWarnings();
+                streamAllFaults();
                 throw new RuntimeException("CRITICAL FAULT: ALL FAULTS FLUSHED TO ERROR STREAM");
             } catch (IOException e) {
                 throw new RuntimeException("Error writing information to the specified output.");
@@ -271,7 +271,7 @@ public class WriterStatusHandler implements StatusHandler {
      * This method writes and flushes all registered warnings to the output
      * </p>
      */
-    public void streamAllWarnings() {
+    public void streamAllFaults() {
         for (Fault fault : faults) {
             try {
                 myErrorWriter.write(fault.toString());
