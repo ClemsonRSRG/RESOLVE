@@ -25,9 +25,7 @@ import edu.clemson.rsrg.parsing.ResolveParser;
 import edu.clemson.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.rsrg.parsing.data.ResolveTokenFactory;
 import edu.clemson.rsrg.prover.CongruenceClassProver;
-import edu.clemson.rsrg.statushandling.AntlrLexerErrorListener;
-import edu.clemson.rsrg.statushandling.AntlrParserErrorListener;
-import edu.clemson.rsrg.statushandling.StatusHandler;
+import edu.clemson.rsrg.statushandling.*;
 import edu.clemson.rsrg.statushandling.exception.*;
 import edu.clemson.rsrg.translation.AbstractTranslator;
 import edu.clemson.rsrg.typeandpopulate.symboltables.MathSymbolTableBuilder;
@@ -235,7 +233,8 @@ class Controller {
                 throw new MiscErrorException("Unknown Exception", e);
             } else {
                 CompilerException see = (CompilerException) cause;
-                myStatusHandler.error(see.getErrorLocation(), see.getMessage());
+                Fault fault = new Fault(FaultType.COMPILER_EXCEPTION, see.getErrorLocation(), see.getMessage(), false);
+                myStatusHandler.registerAndStreamFault(fault);
                 if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_STACK_TRACE)) {
                     myStatusHandler.printStackTrace(see);
                 }

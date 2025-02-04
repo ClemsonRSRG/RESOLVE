@@ -85,11 +85,15 @@ public class AntlrLexerErrorListener extends BaseErrorListener {
         if (recognizer.getTokenFactory() != null && recognizer.getTokenFactory() instanceof ResolveTokenFactory) {
             // Build a location
             ResolveTokenFactory tokenFactory = (ResolveTokenFactory) recognizer.getTokenFactory();
-            myStatusHandler.error(new Location(tokenFactory.getFile(), line, charPositionInLine), msg);
+            Fault fault = new Fault(FaultType.TOKEN_FAULT,
+                    new Location(tokenFactory.getFile(), line, charPositionInLine), msg, false);
+            myStatusHandler.registerAndStreamFault(fault);
         }
         // Otherwise simply return the raw string.
         else {
-            myStatusHandler.error(null, "Line " + line + ":" + charPositionInLine + " " + msg);
+            Fault fault = new Fault(FaultType.TOKEN_FAULT, null, "Line " + line + ":" + charPositionInLine + " " + msg,
+                    false);
+            myStatusHandler.registerAndStreamFault(fault);
         }
     }
 

@@ -98,7 +98,9 @@ public class AntlrParserErrorListener extends BaseErrorListener {
         }
 
         String errorMsg = buildErrorMsg(charPositionInLine, errorLine, msg);
-        myStatusHandler.error(location, errorMsg);
+
+        Fault fault = new Fault(FaultType.ANTLR_FAULT, location, errorMsg, false);
+        myStatusHandler.registerAndStreamFault(fault);
     }
 
     // ===========================================================

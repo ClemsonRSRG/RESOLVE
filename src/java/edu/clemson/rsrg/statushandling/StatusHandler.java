@@ -15,6 +15,8 @@ package edu.clemson.rsrg.statushandling;
 import edu.clemson.rsrg.parsing.data.Location;
 import edu.clemson.rsrg.statushandling.exception.CompilerException;
 
+import java.util.List;
+
 /**
  * <p>
  * A common interface that all handlers for debugging, errors and/or other information coming from the compiler must
@@ -26,18 +28,6 @@ import edu.clemson.rsrg.statushandling.exception.CompilerException;
  * @version 1.0
  */
 public interface StatusHandler {
-
-    /**
-     * <p>
-     * This method displays the error message passed in.
-     * </p>
-     *
-     * @param l
-     *            The location where we encountered the error.
-     * @param msg
-     *            Message to be displayed.
-     */
-    void error(Location l, String msg);
 
     /**
      * <p>
@@ -81,14 +71,43 @@ public interface StatusHandler {
 
     /**
      * <p>
-     * This method displays compiler warning passed in.
+     * This method registers and displays compiler fault passed in.
      * </p>
      *
-     * @param l
-     *            The location where we encountered the error.
-     * @param msg
-     *            Message to be displayed.
+     * @param fault
+     *            The fault to be registered and displayed
      */
-    void warning(Location l, String msg);
+    void registerAndStreamFault(Fault fault);
 
+    /**
+     * <p>
+     * This method returns the number of faults captured by this status handler.
+     * </p>
+     *
+     * @return The number of captured faults
+     */
+    public int retrieveFaultCount();
+
+    /**
+     * <p>
+     * This method returns an ordered list of registered faults on the system
+     * </p>
+     *
+     * @return The ordered list of faults
+     */
+    public List<Fault> getFaults();
+
+    /**
+     * <p>
+     * This method registers a new inorder fault
+     * </p>
+     */
+    public void registerFault(Fault fault);
+
+    /**
+     * <p>
+     * This method writes and flushes all registered faults to the output
+     * </p>
+     */
+    public void streamAllFaults();
 }

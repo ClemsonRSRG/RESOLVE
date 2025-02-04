@@ -21,6 +21,8 @@ import edu.clemson.rsrg.init.output.OutputListener;
 import edu.clemson.rsrg.misc.Utilities;
 import edu.clemson.rsrg.nProver.GeneralPurposeProver;
 import edu.clemson.rsrg.prover.CongruenceClassProver;
+import edu.clemson.rsrg.statushandling.Fault;
+import edu.clemson.rsrg.statushandling.FaultType;
 import edu.clemson.rsrg.statushandling.SystemStdHandler;
 import edu.clemson.rsrg.statushandling.StatusHandler;
 import edu.clemson.rsrg.statushandling.exception.CompilerException;
@@ -227,7 +229,8 @@ public class ResolveCompiler {
         } catch (CompilerException e) {
             // YS - The status handler object might have changed.
             statusHandler = compileEnvironment.getStatusHandler();
-            statusHandler.error(null, e.getMessage());
+            Fault fault = new Fault(FaultType.COMPILER_EXCEPTION, null, e.getMessage(), false);
+            statusHandler.registerAndStreamFault(fault);
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
                 statusHandler.printStackTrace(e);
             }
@@ -266,7 +269,8 @@ public class ResolveCompiler {
         } catch (CompilerException e) {
             // YS - The status handler object might have changed.
             statusHandler = compileEnvironment.getStatusHandler();
-            statusHandler.error(null, e.getMessage());
+            Fault fault = new Fault(FaultType.COMPILER_EXCEPTION, null, e.getMessage(), false);
+            statusHandler.registerAndStreamFault(fault);
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
                 statusHandler.printStackTrace(e);
             }
@@ -430,7 +434,8 @@ public class ResolveCompiler {
             // YS - Check to see if we have a status handler.
             if (compileEnvironment != null && compileEnvironment.getStatusHandler() != null) {
                 statusHandler = compileEnvironment.getStatusHandler();
-                statusHandler.error(null, fde.getMessage());
+                Fault fault = new Fault(FaultType.FLAG_DEPENDENCY_EXCEPTION, null, fde.getMessage(), false);
+                statusHandler.registerAndStreamFault(fault);
                 if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
                     statusHandler.printStackTrace(fde);
                 }

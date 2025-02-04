@@ -16,6 +16,8 @@ import edu.clemson.rsrg.parsing.data.Location;
 import edu.clemson.rsrg.statushandling.exception.CompilerException;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -31,6 +33,12 @@ public class WriterStatusHandler implements StatusHandler {
     // ===========================================================
     // Member Fields
     // ===========================================================
+    /**
+     * <p>
+     * Storage for ordered Warnings
+     * </p>
+     */
+    private List<Fault> faults;
 
     /**
      * <p>
@@ -72,45 +80,12 @@ public class WriterStatusHandler implements StatusHandler {
         myOutputWriter = outWriter;
         myErrorWriter = errorWriter;
         stopLogging = false;
+        faults = new ArrayList<>();
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-
-    /**
-     * <p>
-     * Outputs a critical error message.
-     * </p>
-     *
-     * @param l
-     *            The location where we encountered the error.
-     * @param msg
-     *            Message to be displayed.
-     */
-    @Override
-    public synchronized final void error(Location l, String msg) {
-        try {
-            if (!hasStopped()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("\nError: ");
-                if (l != null) {
-                    sb.append(l.toString());
-                }
-                sb.append("\n\n");
-                sb.append(msg);
-                sb.append("\n\n");
-
-                myErrorWriter.write(sb.toString());
-                myErrorWriter.flush();
-            } else {
-                throw new RuntimeException("Error handler has been stopped.");
-            }
-        } catch (IOException e) {
-            System.err.println("Error writing information to the specified output.");
-            e.printStackTrace();
-        }
-    }
 
     /**
      * <p>
@@ -226,36 +201,84 @@ public class WriterStatusHandler implements StatusHandler {
 
     /**
      * <p>
-     * Outputs a warning message.
+     * This method registers and displays compiler warning passed in.
      * </p>
      *
-     * @param l
-     *            The location where we encountered the error.
-     * @param msg
-     *            Message to be displayed.
+     * @param fault
+     *            The warning to be registered and displayed
      */
     @Override
-    public synchronized final void warning(Location l, String msg) {
-        try {
-            if (!hasStopped()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("\nWarning: ");
-                if (l != null) {
-                    sb.append(l.toString());
-                }
-                sb.append("\n");
-                sb.append(msg);
-                sb.append("\n");
+    public void registerAndStreamFault(Fault fault) {
+        if (hasStopped()) {
+            throw new RuntimeException("Error handler has been stopped.");
+        }
 
-                myErrorWriter.write(sb.toString());
-                myErrorWriter.flush();
-            } else {
-                throw new RuntimeException("Error handler has been stopped.");
-            }
+        registerFault(fault);
+
+        try {
+            myErrorWriter.write(fault.toString());
+            myErrorWriter.flush();
         } catch (IOException e) {
             System.err.println("Error writing information to the specified output.");
             e.printStackTrace();
         }
     }
 
+    /**
+     * <p>
+     * This method returns the number of warnings captured by this status handler.
+     * </p>
+     *
+     * @return The number of captured warnings
+     */
+    public int retrieveFaultCount() {
+        return faults.size();
+    }
+
+    /**
+     * <p>
+     * This method returns an ordered list of registered warnings on the system
+     * </p>
+     *
+     * @return The ordered list of warnings
+     */
+    public List<Fault> getFaults() {
+        return faults;
+    }
+
+    /**
+     * <p>
+     * This method registers a new inorder warning
+     * </p>
+     */
+    public void registerFault(Fault fault) {
+        faults.add(fault);
+
+        if (fault.isCritical()) {
+            try {
+                myErrorWriter.write("CRITICAL FAULT: FLUSHING ALL FAULTS");
+                myErrorWriter.flush();
+                streamAllFaults();
+                throw new RuntimeException("CRITICAL FAULT: ALL FAULTS FLUSHED TO ERROR STREAM");
+            } catch (IOException e) {
+                throw new RuntimeException("Error writing information to the specified output.");
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * This method writes and flushes all registered warnings to the output
+     * </p>
+     */
+    public void streamAllFaults() {
+        for (Fault fault : faults) {
+            try {
+                myErrorWriter.write(fault.toString());
+                myErrorWriter.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }
