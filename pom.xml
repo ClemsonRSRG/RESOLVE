@@ -206,6 +206,8 @@
                                 <exclude>src/antlr4/**</exclude>
                                 <exclude>src/resources/**</exclude>
                                 <exclude>test/resources/**</exclude>
+                                <exclude>RESOLVE-Workspace/**</exclude>
+                                <exclude>RESOLVE-Workspace/Main/Concepts/**/**</exclude>
                             </excludes>
                         </licenseSet>
                     </licenseSets>

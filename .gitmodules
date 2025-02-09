@@ -1,0 +1,3 @@
+[submodule "RESOLVE-Workspace"]
+	path = RESOLVE-Workspace
+	url = https://github.com/rhit-csse-projects/RESOLVE-Workspace.git

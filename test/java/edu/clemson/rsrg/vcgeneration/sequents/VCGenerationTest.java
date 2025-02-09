@@ -33,9 +33,9 @@ public class VCGenerationTest {
     Collection<DynamicTest> testVCGeneration() {
         String relativeResolveWorkspacePath = "/RESOLVE-Workspace/RESOLVE/Main/";
         File projectDir = new File(System.getProperty("user.dir"));
-        File parentDirFile = projectDir.getParentFile();
+        // File parentDirFile = projectDir.getParentFile();
 
-        File fullResolveWorkspacePath = new File(parentDirFile.getAbsolutePath(), relativeResolveWorkspacePath);
+        File fullResolveWorkspacePath = new File(projectDir, relativeResolveWorkspacePath);
         System.out.println(fullResolveWorkspacePath.getAbsolutePath());
 
         ArrayList<String> testFiles = new ArrayList<>();
