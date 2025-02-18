@@ -1,6 +1,6 @@
 What is RESOLVE?
 ==============
-[![RESOLVE (Custom Java CI with Maven)](https://github.com/ClemsonRSRG/RESOLVE/actions/workflows/maven.yml/badge.svg)](https://github.com/ClemsonRSRG/RESOLVE/actions/workflows/maven.yml)
+[![RESOLVE (Custom Java CI with Maven)](https://github.com/rhit-csse-projects/RESOLVE/actions/workflows/maven.yml/badge.svg)](https://github.com/rhit-csse-projects/RESOLVE/actions/workflows/maven.yml)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/ClemsonRSRG/RESOLVE/master/LICENSE.txt)
 <img align="right" src="src/resources/images/resolve_logo.png" width="200"/>
 

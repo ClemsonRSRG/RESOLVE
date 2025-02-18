@@ -31,7 +31,7 @@ public class VCGenerationTest {
 
     @TestFactory
     Collection<DynamicTest> testVCGeneration() {
-        String relativeResolveWorkspacePath = "/RESOLVE-Workspace/RESOLVE/Main/";
+        String relativeResolveWorkspacePath = "/RESOLVE-Workspace/Main/";
         File projectDir = new File(System.getProperty("user.dir"));
         // File parentDirFile = projectDir.getParentFile();
 

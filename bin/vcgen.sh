@@ -27,7 +27,6 @@ echo "$EXECUTABLE"
 git submodule update --init --recursive
 
 cd RESOLVE-Workspace
-cd RESOLVE
 cd Main
 
 RETURN_PATH=$PWD
