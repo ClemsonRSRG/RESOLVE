@@ -2851,7 +2851,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         for (ResolveParser.StmtContext stmtContext : whileStmtContext) {
             whileStmts.add((Statement) myNodes.removeFrom(stmtContext));
         }
-
         myNodes.put(ctx, new WhileStmt(createLocation(ctx), conditionExp,
                 new LoopVerificationItem(createLocation(ctx), changingVars, maintainingClause, decreasingClause, null),
                 whileStmts));

@@ -34,8 +34,12 @@ import edu.clemson.rsrg.absyn.expressions.mathexpr.DotExp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.MathExp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.OldExp;
 import edu.clemson.rsrg.absyn.expressions.mathexpr.VarExp;
+import edu.clemson.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.rsrg.absyn.expressions.programexpr.ProgramFunctionExp;
+import edu.clemson.rsrg.absyn.expressions.programexpr.ProgramVariableExp;
 import edu.clemson.rsrg.absyn.items.programitems.AbstractInitFinalItem;
 import edu.clemson.rsrg.absyn.items.programitems.EnhancementSpecRealizItem;
+import edu.clemson.rsrg.absyn.items.programitems.IfConditionItem;
 import edu.clemson.rsrg.absyn.items.programitems.RealizInitFinalItem;
 import edu.clemson.rsrg.absyn.rawtypes.NameTy;
 import edu.clemson.rsrg.absyn.rawtypes.RecordTy;
@@ -49,6 +53,8 @@ import edu.clemson.rsrg.parsing.data.LocationDetailModel;
 import edu.clemson.rsrg.parsing.data.PosSymbol;
 import edu.clemson.rsrg.prover.immutableadts.ImmutableList;
 import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
+import edu.clemson.rsrg.statushandling.Fault;
+import edu.clemson.rsrg.statushandling.FaultType;
 import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.treewalk.TreeWalkerVisitor;
 import edu.clemson.rsrg.typeandpopulate.entry.*;
@@ -304,6 +310,11 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
     // Visitor Methods
     // ===========================================================
+
+    @Override
+    public void postWhileStmt(WhileStmt e) {
+
+    }
 
     // -----------------------------------------------------------
     // Module Declarations
@@ -1618,6 +1629,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         myCurrentVerificationContext, mySTGroup, blockModel);
             } else if (statement instanceof WhileStmt) {
                 // Generate a new while rule application
+                handleWhileCheck(((WhileStmt) statement).getStatements(),
+                        ((WhileStmt) statement).getLoopVerificationBlock().getChangingVars());
                 ruleApplication = new WhileStmtRule((WhileStmt) statement, myCurrentModuleScope, myTypeGraph,
                         assertiveCodeBlock, myCurrentVerificationContext, mySTGroup, blockModel);
             } else {
@@ -1656,6 +1669,73 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         myAssertiveCodeBlockModels.put(assertiveCodeBlock, blockModel);
+    }
+
+    public void handleWhileCheck(List<Statement> stmts, List<ProgramVariableExp> changingVars) {
+        for (ResolveConceptualElement subElement : stmts) {
+            Statement subStatement = (Statement) subElement;
+            if (subStatement instanceof WhileStmt) {
+                // Check for changing clause from both outer and inner loop - not a huge fan of this
+                changingVars.addAll(((WhileStmt) subStatement).getLoopVerificationBlock().getChangingVars());
+                handleWhileCheck(((WhileStmt) subStatement).getStatements(), changingVars);
+            } else if (subStatement instanceof IfStmt) {
+                List<Statement> new_stmts = new ArrayList<>();
+                new_stmts.addAll(((IfStmt) subStatement).getIfClause().getStatements());
+                List<IfConditionItem> elseIfs = ((IfStmt) subStatement).getElseifpairs();
+                for (IfConditionItem elseif : elseIfs) {
+                    new_stmts.addAll(elseif.getStatements());
+                }
+                new_stmts.addAll(((IfStmt) subStatement).getElseclause());
+                handleWhileCheck(new_stmts, changingVars);
+            } else if (subStatement instanceof SwapStmt) {
+                if (!changingVars.contains(((SwapStmt) subStatement).getLeft())) {
+                    myCompileEnvironment.getStatusHandler()
+                            .registerAndStreamFault(
+                                    new Fault(FaultType.COMPILER_EXCEPTION, subStatement.getLocation(),
+                                            "Error: left variable " + ((SwapStmt) subStatement).getLeft().asString(0, 0)
+                                                    + " appears in a swap statement but not the changing clause",
+                                            true));
+                }
+                if (!changingVars.contains(((SwapStmt) subStatement).getRight())) {
+                    myCompileEnvironment.getStatusHandler()
+                            .registerAndStreamFault(new Fault(FaultType.COMPILER_EXCEPTION, subStatement.getLocation(),
+                                    "Error: right variable " + ((SwapStmt) subStatement).getRight().asString(0, 0)
+                                            + " appears in a swap statement but not the changing clause",
+                                    true));
+                }
+            } else if (subStatement instanceof FuncAssignStmt) {
+                if (!changingVars.contains(((FuncAssignStmt) subStatement).getVariableExp())) {
+                    myCompileEnvironment.getStatusHandler()
+                            .registerAndStreamFault(new Fault(FaultType.COMPILER_EXCEPTION, subStatement.getLocation(),
+                                    "Error: variable " + ((FuncAssignStmt) subStatement).getVariableExp().asString(0, 0)
+                                            + " appears in an assign statement but not the changing clause",
+                                    true));
+                }
+            } else if (subStatement instanceof CallStmt) {
+                List<ProgramExp> args = ((CallStmt) subStatement).getFunctionExp().getArguments();
+
+                ProgramFunctionExp functionExp = ((CallStmt) subStatement).getFunctionExp();
+
+                // Call a method to locate the operation entry for this call
+                OperationEntry operationEntry = Utilities.getOperationEntry(functionExp, myCurrentModuleScope);
+                ImmutableList<ProgramParameterEntry> params = operationEntry.getParameters();
+                for (int i = 0; i < params.size(); i++) {
+                    ProgramParameterEntry param = params.get(i);
+                    ProgramVariableExp arg = (ProgramVariableExp) args.get(i);
+                    if (!changingVars.contains(arg) && (param.getParameterMode().name().equals("ALTERS")
+                            || param.getParameterMode().name().equals("UPDATES")
+                            || param.getParameterMode().name().equals("CLEARS")
+                            || param.getParameterMode().name().equals("REPLACES"))) {
+                        myCompileEnvironment.getStatusHandler()
+                                .registerAndStreamFault(
+                                        new Fault(FaultType.COMPILER_EXCEPTION, subStatement.getLocation(),
+                                                "Error: variable " + arg.asString(0, 0)
+                                                        + " appears in a call statement but not the changing clause",
+                                                true));
+                    }
+                }
+            }
+        }
     }
 
     /**

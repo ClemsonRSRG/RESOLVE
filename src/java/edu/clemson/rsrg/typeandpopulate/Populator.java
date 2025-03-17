@@ -34,6 +34,7 @@ import edu.clemson.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.rsrg.absyn.rawtypes.*;
 import edu.clemson.rsrg.absyn.statements.FuncAssignStmt;
 import edu.clemson.rsrg.absyn.statements.SwapStmt;
+import edu.clemson.rsrg.absyn.statements.WhileStmt;
 import edu.clemson.rsrg.init.CompileEnvironment;
 import edu.clemson.rsrg.init.ResolveCompiler;
 import edu.clemson.rsrg.init.flag.Flag;
