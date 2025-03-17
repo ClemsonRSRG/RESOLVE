@@ -80,7 +80,7 @@ public class RegisterSuccedent extends AbstractRegisterSequent {
         myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getLeft()));
         myRegistry.appendToClusterArgList(myArgumentsCache.remove(exp.getRight()));
 
-        // Handle the root node
+        // Handle the root node, we want to check this first as if we proved the sequent no need to continue
         if (super.getAncestorSize() == 1) {
             BitSet attb = new BitSet();
             attb.set(1); // set the class succedent
