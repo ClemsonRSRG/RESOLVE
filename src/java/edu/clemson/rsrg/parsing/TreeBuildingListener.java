@@ -57,12 +57,17 @@ import edu.clemson.rsrg.parsing.sanitychecking.ValidFunctionOpDeclChecker;
 import edu.clemson.rsrg.parsing.sanitychecking.ValidSharedStateChecker;
 import edu.clemson.rsrg.parsing.sanitychecking.ValidTypeFamilyChecker;
 import edu.clemson.rsrg.parsing.utilities.SyntacticSugarConverter;
+import edu.clemson.rsrg.statushandling.Fault;
+import edu.clemson.rsrg.statushandling.FaultType;
+import edu.clemson.rsrg.statushandling.StatusHandler;
 import edu.clemson.rsrg.statushandling.exception.SourceErrorException;
 import edu.clemson.rsrg.treewalk.TreeWalker;
 import edu.clemson.rsrg.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.rsrg.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
+
 import java.util.*;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -180,6 +185,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private final TypeGraph myTypeGraph;
 
+    /**
+     * <p>
+     * This is the math type graph that indicates relationship between different math types.
+     * </p>
+     */
+    private final StatusHandler myStatusHandler;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -195,8 +207,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param typeGraph
      *            Type graph that indicates relationship between different mathematical types.
      */
-    public TreeBuildingListener(ResolveFile file, TypeGraph typeGraph) {
+    public TreeBuildingListener(ResolveFile file, TypeGraph typeGraph, StatusHandler statusHandler) {
         myTypeGraph = typeGraph;
+        myStatusHandler = statusHandler;
         myFile = file;
         myFinalModule = null;
         myNodes = new ParseTreeProperty<>();
@@ -250,13 +263,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterPrecisModule(ResolveParser.PrecisModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            throw new SourceErrorException("Precis name does not match filename.", createPosSymbol(ctx.name),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "Precis name does not match filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
+        // if (!myFile.getName().equals(ctx.name.getText())) {
+        // Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "Precis name does not match filename.",
+        // true);
+        // myStatusHandler.registerAndStreamFault(f);
+        // }
+
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            throw new SourceErrorException("End name does not match the filename.", createPosSymbol(ctx.closename),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "End name does not match the filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 
@@ -318,13 +339,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterFacilityModule(ResolveParser.FacilityModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            throw new SourceErrorException("Facility name does not match filename.", createPosSymbol(ctx.name),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Facility name does not match filename.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            throw new SourceErrorException("End name does not match the filename.", createPosSymbol(ctx.closename),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "End name does not match the filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         // Create a helper class to keep track of new module level declarations
@@ -439,13 +462,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterConceptModule(ResolveParser.ConceptModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            throw new SourceErrorException("Concept name does not match filename.", createPosSymbol(ctx.name),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "Concept name does not match filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            throw new SourceErrorException("End name does not match the filename.", createPosSymbol(ctx.closename),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "End name does not match the filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 
@@ -500,14 +525,13 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         boolean isSharingConcept = false;
         boolean hasSharingConstructs = hasSharingConstructs(decls);
         if (ctx.SHARED() != null) {
-            // Throw an error if we can't find any sharing constructs
+            // Construct a fault if we can't find any sharing constructs
             if (!hasSharingConstructs) {
-                throw new SourceErrorException("This sharing concept does not have any sharing constructs declared!",
-                        createPosSymbol(ctx.name), new IllegalArgumentException());
+                Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                        "This sharing concept does not have any sharing constructs declared!", true);
+                myStatusHandler.registerAndStreamFault(f);
             }
 
-            // YS: Right now we only allow 1 shared state declaration.
-            // Throw an error if we found more than 1.
             int numSharedStateDecs = 0;
             for (Dec dec : decls) {
                 if (dec instanceof SharedStateDec) {
@@ -515,19 +539,22 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 }
             }
 
+            // YS: Right now we only allow 1 shared state declaration.
+            // Construct a fault if we found more than 1.
             if (numSharedStateDecs > 1) {
-                throw new SourceErrorException("A sharing concept can only have one shared variable block declared!",
-                        createPosSymbol(ctx.name), new IllegalArgumentException());
+                Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                        "A sharing concept can only have one shared variable block declared!", true);
+                myStatusHandler.registerAndStreamFault(f);
             }
 
             isSharingConcept = true;
         } else {
-            // Throw an error if we found sharing constructs, but the concept wasn't
+            // Construct a fault if we found sharing constructs, but the concept wasn't
             // declared as shared.
             if (hasSharingConstructs) {
-                throw new SourceErrorException(
-                        "The concept has sharing constructs declared, but isn't declared as shared!",
-                        createPosSymbol(ctx.name), new IllegalArgumentException());
+                Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                        "The concept has sharing constructs declared, but isn't declared as shared!", true);
+                myStatusHandler.registerAndStreamFault(f);
             }
         }
 
@@ -571,13 +598,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterConceptImplModule(ResolveParser.ConceptImplModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            throw new SourceErrorException("Concept realization name does not match filename.",
-                    createPosSymbol(ctx.name), new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Concept realization name does not match filename.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            throw new SourceErrorException("End name does not match the filename.", createPosSymbol(ctx.closename),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "End name does not match the filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         // Create a helper class to keep track of new module level declarations
@@ -650,10 +679,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             }
 
             // YS: Right now we only allow 1 shared state realization.
-            // Throw an error if we found more than 1.
+            // Construct a fault if we found more than 1.
             if (numSharedStateRealizDecs > 1) {
-                throw new SourceErrorException("Found more than one shared variable realization block!",
-                        createPosSymbol(ctx.name), new IllegalArgumentException());
+                Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                        "Found more than one shared variable realization block!", true);
+                myStatusHandler.registerAndStreamFault(f);
             }
         }
 
@@ -698,13 +728,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterEnhancementModule(ResolveParser.EnhancementModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            throw new SourceErrorException("Enhancement name does not match filename.", createPosSymbol(ctx.name),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Enhancement name does not match filename.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            throw new SourceErrorException("End name does not match the filename.", createPosSymbol(ctx.closename),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "End name does not match the filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 
@@ -788,13 +820,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterEnhancementImplModule(ResolveParser.EnhancementImplModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            throw new SourceErrorException("Enhancement realization name does not match filename.",
-                    createPosSymbol(ctx.name), new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Enhancement realization name does not match filename.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            throw new SourceErrorException("End name does not match the filename.", createPosSymbol(ctx.closename),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "End name does not match the filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 
@@ -884,13 +918,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterConceptPerformanceModule(ResolveParser.ConceptPerformanceModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            throw new SourceErrorException("Concept profile name does not match filename.", createPosSymbol(ctx.name),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Concept profile name does not match filename.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            throw new SourceErrorException("End name does not match the filename.", createPosSymbol(ctx.closename),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "End name does not match the filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 
@@ -969,13 +1005,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterEnhancementPerformanceModule(ResolveParser.EnhancementPerformanceModuleContext ctx) {
         if (!myFile.getName().equals(ctx.name.getText())) {
-            throw new SourceErrorException("Concept profile name does not match filename.", createPosSymbol(ctx.name),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Concept profile name does not match filename.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         if (!myFile.getName().equals(ctx.closename.getText())) {
-            throw new SourceErrorException("End name does not match the filename.", createPosSymbol(ctx.closename),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx), "End name does not match the filename.",
+                    true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 
@@ -1157,8 +1195,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterConstantParameterDecl(ResolveParser.ConstantParameterDeclContext ctx) {
         if (ctx.variableDeclGroup().programArrayType() != null) {
-            throw new SourceErrorException("Array types cannot be used as a type for the parameter variables",
-                    createPosSymbol(ctx.variableDeclGroup().programArrayType().start), new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Array types cannot be used as a type for the parameter variables", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 
@@ -1230,8 +1269,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterParameterDecl(ResolveParser.ParameterDeclContext ctx) {
         if (ctx.variableDeclGroup().programArrayType() != null) {
-            throw new SourceErrorException("Array types cannot be used as a type for the parameter variables",
-                    createPosSymbol(ctx.variableDeclGroup().programArrayType().start), new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Array types cannot be used as a type for the parameter variables", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 
@@ -1317,8 +1357,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // The reason being it's math type (MTCartesian) doesn't make sense
         // when it is a single element. - YS
         if (fields.size() < 2) {
-            throw new SourceErrorException("A record type must have 2 or more fields.", createLocation(ctx),
-                    new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "A record type must have 2 or more fields.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         myNodes.put(ctx, new RecordTy(createLocation(ctx), fields));
@@ -1444,10 +1485,11 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
             AssertionClause.ClauseType clauseType = correspondence.getClauseType();
             if (correspondence.getInvolvedSharedVars().size() > 0
                     && clauseType.equals(AssertionClause.ClauseType.CORRESPONDENCE)) {
-                throw new SourceErrorException(
+                Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
                         "A type realization's correspondence must be declared as independent "
                                 + "or dependent when it involves shared variables.",
-                        correspondence.getLocation(), new IllegalArgumentException());
+                        true);
+                myStatusHandler.registerAndStreamFault(f);
             }
         } else {
             correspondence = createTrueAssertionClause(createLocation(ctx), AssertionClause.ClauseType.CORRESPONDENCE);
@@ -1704,9 +1746,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 } else {
                     message = " " + correspondence.getClauseType().toString();
                 }
-
-                throw new SourceErrorException("A Shared Variable realization cannot have a" + message,
-                        correspondence.getLocation(), new IllegalArgumentException());
+                Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                        "A Shared Variable realization cannot have a" + message, true);
+                myStatusHandler.registerAndStreamFault(f);
             }
         } else {
             correspondence = createTrueAssertionClause(createLocation(ctx), AssertionClause.ClauseType.CORRESPONDENCE);
@@ -1722,9 +1764,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         // YS: We should only have shared variable realization dec
         if (!myCopySSRList.isEmpty()) {
-            throw new SourceErrorException(
-                    "A concept realization can only have one Shared Variables realization block.",
-                    createPosSymbol(ctx.start).getLocation(), new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "A concept realization can only have one Shared Variables realization block.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
 
         SharedStateRealizationDec realizationDec = new SharedStateRealizationDec(createPosSymbol(ctx.start),
@@ -2066,6 +2108,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void enterProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
         // Create a new container
         myArrayFacilityDecContainerStack.push(new ArrayFacilityDecContainer(ctx));
+        ResolveParser.OperationParameterListContext parameterList = ctx.operationParameterList();
     }
 
     /**
@@ -2278,8 +2321,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      *            Operation declaration node in ANTLR4 AST.
      */
     @Override
-    public void exitOperationDecl(ResolveParser.OperationDeclContext ctx) {
-        // Parameters
+    public void exitOperationDecl(ResolveParser.OperationDeclContext ctx) {// Parameters
         List<ParameterVarDec> varDecs = getParameterDecls(ctx.operationParameterList().parameterDecl());
 
         // Return type (if any)
@@ -2318,6 +2360,30 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         if (dec.getReturnTy() != null) {
             ValidFunctionOpDeclChecker declChecker = new ValidFunctionOpDeclChecker(dec);
             declChecker.checkFunctionOpDecl();
+        }
+
+        Exp assertionExp = dec.getEnsures().getAssertionExp();
+        for (ParameterVarDec pvd : dec.getParameters()) {
+            switch (pvd.getMode()) {
+            case RESTORES:
+            case PRESERVES:
+            case EVALUATES:
+            case REPLACES:
+                if (assertionExp.containsVar(pvd.getName().asString(0, 0), true)) {
+                    String str = "Ensures clause at " + assertionExp.getLocation().toString() + " contains #"
+                            + pvd.getName().asString(0, 0) + " while having parameter mode " + pvd.getMode().toString();
+                    myStatusHandler.registerAndStreamFault(
+                            new Fault(FaultType.INCORRECT_PARAMETER_MODE_USAGE, pvd.getLocation(), str, false));
+                }
+                break;
+            case ALTERS:
+                if (assertionExp.containsVar(pvd.getName().asString(0, 0), false)) {
+                    String str = "Ensures clause at " + assertionExp.getLocation().toString() + " contains "
+                            + pvd.getName().asString(0, 0) + " while having parameter mode " + pvd.getMode().toString();
+                    myStatusHandler.registerAndStreamFault(
+                            new Fault(FaultType.INCORRECT_PARAMETER_MODE_USAGE, pvd.getLocation(), str, false));
+                }
+            }
         }
 
         myNodes.put(ctx, dec);
@@ -4669,8 +4735,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterProgVarArrayExp(ResolveParser.ProgVarArrayExpContext ctx) {
         if (myIsProcessingModuleArgument) {
-            throw new SourceErrorException("Variable array expressions cannot be passed as module arguments.",
-                    createPosSymbol(ctx.start), new IllegalArgumentException());
+            Fault f = new Fault(FaultType.PARSE_EXCEPTION, createLocation(ctx),
+                    "Variable array expressions cannot be passed as module arguments.", true);
+            myStatusHandler.registerAndStreamFault(f);
         }
     }
 

@@ -15,7 +15,8 @@ package edu.clemson.rsrg.statushandling;
 public enum FaultType {
     GENERIC_FAULT("Generic Warning"), INCORRECT_PARAMETER_MODE_USAGE("Incorrect Parameter Mode"),
     MISSING_INFO_VC_GEN("Missing Information About VC Generation"), COMPILER_EXCEPTION("Compiler Exception"),
-    FLAG_DEPENDENCY_EXCEPTION("Flag Dependency Exception"), TOKEN_FAULT("Token Fault"), ANTLR_FAULT("Antlr Fault");
+    FLAG_DEPENDENCY_EXCEPTION("Flag Dependency Exception"), TOKEN_FAULT("Token Fault"), ANTLR_FAULT("Antlr Fault"),
+    PARSE_EXCEPTION("Parse Exceptoin");
 
     private final String plainName;
 

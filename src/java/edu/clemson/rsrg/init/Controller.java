@@ -346,7 +346,8 @@ class Controller {
         }
 
         // Build the intermediate representation
-        TreeBuildingListener v = new TreeBuildingListener(file, myCompileEnvironment.getTypeGraph());
+        TreeBuildingListener v = new TreeBuildingListener(file, myCompileEnvironment.getTypeGraph(),
+                myCompileEnvironment.getStatusHandler());
         ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
 
         return v.getModule();
