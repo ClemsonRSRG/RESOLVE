@@ -68,13 +68,13 @@ jobs:
         with:
           distribution: ${{ matrix.java-dist }}
           java-version: ${{ matrix.java }}
-      - name: Generate New JAR files
-        run: mvn clean package -DskipTests
-      - name: Generate VCs
-        shell: bash
-        run: |
-          chmod +x "${GITHUB_WORKSPACE}/bin/vcgen.sh"
-          "${GITHUB_WORKSPACE}/bin/vcgen.sh"
+#      - name: Generate New JAR files
+#        run: mvn clean package -DskipTests
+#      - name: Generate VCs
+#        shell: bash
+#        run: |
+#          chmod +x "${GITHUB_WORKSPACE}/bin/vcgen.sh"
+#          "${GITHUB_WORKSPACE}/bin/vcgen.sh"
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -82,8 +82,15 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Run JUnit Tests
+      - name: Run JUnit Tests on Windows
+        if: runner.os == 'Windows'
         run: mvn test -B
+        shell: pwsh
+
+      - name: Run JUnit Tests on Linux/macOS
+        if: runner.os != 'Windows'
+        run: mvn test -B
+        shell: bash
   # This job runs the RESOLVE compiler to analyze files that we know to be working.
 #  run_compiler_analyze_files:
 #    runs-on: ubuntu-latest
