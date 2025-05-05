@@ -12,17 +12,10 @@
  */
 package edu.clemson.rsrg.nProver.registry;
 
-import edu.clemson.rsrg.nProver.registry.CongruenceClass;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * <p>
  * This class is for every cluster that is created and belonging to one of the {@link CongruenceClass} all clusters are
- * also belong to one of the {@link Plantation}
+ * also belong to one of the {@link Stand}
  * </p>
  *
  * @author Nicodemus Msafiri J. M.
@@ -39,8 +32,8 @@ public class CongruenceCluster {
     private int indexToArgumentList;
     private int indexToCongruenceClass;
     private int tag;
-    private int nextPlantationCluster;
-    private int previousPlantationCluster;
+    private int nextStandCluster;
+    private int previousStandCluster;
     private int dominantCluster;
     private int nextWithSameArg;
 
@@ -48,15 +41,15 @@ public class CongruenceCluster {
     // Constructors
     // ===========================================================
 
-    public CongruenceCluster(Integer treeNodeLabel, int toArgList, int toCC, int toClusterTag,
-            int nextPlantationCluster, int previousPlantationCluster, int dominantCluster, int nextWithSameArg) {
+    public CongruenceCluster(Integer treeNodeLabel, int toArgList, int toCC, int toClusterTag, int nextStandCluster,
+            int previousStandCluster, int dominantCluster, int nextWithSameArg) {
         this.treeNodeLabel = treeNodeLabel;
         indexToArgumentList = toArgList;
         indexToCongruenceClass = toCC;
         tag = toClusterTag; // to a structure that keeps the tags
-        this.nextPlantationCluster = nextPlantationCluster; // next cluster in the plantation in same class, having same
-                                                            // root node label
-        this.previousPlantationCluster = previousPlantationCluster; // previous cluster
+        this.nextStandCluster = nextStandCluster; // next cluster in the stand in same class, having same
+                                                  // root node label
+        this.previousStandCluster = previousStandCluster; // previous cluster
         this.dominantCluster = dominantCluster; // will point to itself initially, and gets the smaller dominant when it
                                                 // is merged to other cluster
         this.nextWithSameArg = nextWithSameArg; // points to the next cluster with same arguments
@@ -94,20 +87,20 @@ public class CongruenceCluster {
         tag = newIndex;
     }
 
-    public int getNextPlantationCluster() {
-        return nextPlantationCluster;
+    public int getNextStandCluster() {
+        return nextStandCluster;
     }
 
-    public void setNextPlantationCluster(int newIndex) {
-        nextPlantationCluster = newIndex;
+    public void setNextStandCluster(int newIndex) {
+        nextStandCluster = newIndex;
     }
 
-    public int getPreviousPlantationCluster() {
-        return previousPlantationCluster;
+    public int getPreviousStandCluster() {
+        return previousStandCluster;
     }
 
-    public void setPreviousPlantationCluster(int newIndex) {
-        previousPlantationCluster = newIndex;
+    public void setPreviousStandCluster(int newIndex) {
+        previousStandCluster = newIndex;
     }
 
     public int getDominantCluster() {
@@ -136,8 +129,8 @@ public class CongruenceCluster {
     @Override
     public final String toString() {
         return "|" + "treeNodeLabel=" + treeNodeLabel + "||indexToArgumentList=" + indexToArgumentList
-                + "||indexToCongruenceClass=" + indexToCongruenceClass + "||nextStandCluster=" + nextPlantationCluster
-                + "||previousStandCluster=" + previousPlantationCluster + "||dominantCluster=" + dominantCluster
+                + "||indexToCongruenceClass=" + indexToCongruenceClass + "||nextStandCluster=" + nextStandCluster
+                + "||previousStandCluster=" + previousStandCluster + "||dominantCluster=" + dominantCluster
                 + "||nextWithSameArg=" + nextWithSameArg + "|";
     }
 }

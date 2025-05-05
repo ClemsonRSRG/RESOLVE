@@ -29,7 +29,7 @@ public class CongruenceClass {
     // Member Fields
     // ===========================================================
 
-    private int firstPlantation;
+    private int firstStand;
     private int classTag;
     private BitSet classAttribute;
     private int[] argStringOccPos;// it is going to be an array of levels the class happen to be in the argument string
@@ -42,8 +42,8 @@ public class CongruenceClass {
     // Constructors
     // ===========================================================
 
-    public CongruenceClass(int firstPlantation, int classTag, int lastArgStringPosition, int dominantCClass) {
-        this.firstPlantation = firstPlantation; // introduced after review
+    public CongruenceClass(int firstStand, int classTag, int lastArgStringPosition, int dominantCClass) {
+        this.firstStand = firstStand; // introduced after review
         this.classTag = classTag; // to a structure that keeps the class tags
         this.classAttribute = new BitSet(); // initially every bit is false;
         this.argStringOccPos = new int[10];
@@ -56,12 +56,12 @@ public class CongruenceClass {
     // Public Methods
     // ===========================================================
 
-    public int getFirstPlantation() {
-        return firstPlantation;
+    public int getFirstStand() {
+        return firstStand;
     }
 
-    public void setFirstPlantation(int firstPlantation) {
-        this.firstPlantation = firstPlantation;
+    public void setFirstStand(int firstStand) {
+        this.firstStand = firstStand;
     }
 
     public int getClassTag() {
@@ -113,7 +113,7 @@ public class CongruenceClass {
      */
     @Override
     public final String toString() {
-        return "|" + "firstStand=" + firstPlantation + "||classTag=" + classTag + "||lastArgStringPosition="
+        return "|" + "firstStand=" + firstStand + "||classTag=" + classTag + "||lastArgStringPosition="
                 + lastArgStringPosition + "||dominantCClass=" + dominantCClass + "|";
     }
 }

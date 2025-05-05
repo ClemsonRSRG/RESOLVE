@@ -96,7 +96,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      * This array keeps a list of congruence clusters containing the same root node.
      * </p>
      */
-    private Plantation[] plantationArray;
+    private Stand[] standArray;
 
     /**
      * <p>
@@ -145,10 +145,10 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * This is plantation designator used as an index in plantation array and plantation tag as the cluster is created
+     * This is stand designator used as an index in stand array and stand tag as the cluster is created
      * </p>
      */
-    private int indexForPlantationArray;
+    private int indexForStandArray;
 
     /**
      * <p>
@@ -181,7 +181,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
     /**
      * <p>
      * The constructor for the registry that stores the target sequent VC in classes that contain clusters organized in
-     * varieties and plantations.
+     * varieties and stands.
      * </p>
      *
      * @param ccDesignatorCapacity
@@ -202,14 +202,14 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
         topCongruenceClassDesignator = 0;
         topCongruenceClusterDesignator = 0;
-        indexForPlantationArray = 0;
+        indexForStandArray = 0;
         topLabelCapacity = 0;
         topArgStrArrIndex = START_ARG_INDEX;
         isProved = false;
         succedentReflexiveOperatorTest = false;
 
         varietyArray = new VarietyList[rootLabelCapacity];
-        plantationArray = new Plantation[rootLabelCapacity];
+        standArray = new Stand[rootLabelCapacity];
         clusterArray = new CongruenceCluster[cClusterDesignatorCapacity];
         congruenceClassArray = new CongruenceClass[ccDesignatorCapacity];
         clusterArgumentArray = new ClusterArgument[100000];
@@ -228,11 +228,11 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         ClusterArgument cArgument = new ClusterArgument(0, 0, 0, 0, 0);
         clusterArgumentArray[0] = cArgument;
 
-        // start the index 0 with {0,0,0,0,0,0} by creating a plantation
-        Plantation plantation = new Plantation(0, 0, 0, 0, 0, 0);
+        // start the index 0 with {0,0,0,0,0,0} by creating a stand
+        Stand stand = new Stand(0, 0, 0, 0, 0, 0);
 
-        // put the initial created plantation into the array
-        plantationArray[0] = plantation;
+        // put the initial created stand into the array
+        standArray[0] = stand;
 
         // start the index 0 with {0,0,0,0,0} with {0,0,0} attribute in the congruence class array.
         BitSet attribute = new BitSet();
@@ -260,11 +260,11 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      */
     public int registerCluster(Integer treeNodeLabel) {
         int nextWithSimilarArgString = 0;
-        int nextPlantationCluster = 0;
-        int prevPlantationCluster = 0;
-        int nextCCPlantation = 0;
-        int nextVrtyPlantation = 0;
-        int prvVrtyPlantation = 0;
+        int nextStandCluster = 0;
+        int prevStandCluster = 0;
+        int nextCCStand = 0;
+        int nextVrtyStand = 0;
+        int prvVrtyStand = 0;
 
         // special Bingo check for reflexive operators in the succedent before we continue normally if the VC is not
         // proved
@@ -297,21 +297,21 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
             topCongruenceClassDesignator++;
             topCongruenceClusterDesignator++;
-            indexForPlantationArray++;
+            indexForStandArray++;
             topLabelCapacity++;
 
             // this is the last position in the argument string array in terms of depth from the empty arg string
             int lastArgStringPos = 0;
-            // create a plantation class object
-            Plantation plantation = new Plantation(treeNodeLabel, indexForPlantationArray, indexForPlantationArray,
-                    nextCCPlantation, nextVrtyPlantation, prvVrtyPlantation);
-            // put the created plantation into the plantation array
-            plantationArray[indexForPlantationArray] = plantation;
+            // create a stand class object
+            Stand stand = new Stand(treeNodeLabel, indexForStandArray, indexForStandArray, nextCCStand, nextVrtyStand,
+                    prvVrtyStand);
+            // put the created stand into the stand array
+            standArray[indexForStandArray] = stand;
 
             // create a congruence class object
             // indexInArgArray is the Arg string occurrence position, an index for the created arg string for this
             // cluster
-            CongruenceClass cClass = new CongruenceClass(indexForPlantationArray, topCongruenceClassDesignator,
+            CongruenceClass cClass = new CongruenceClass(indexForStandArray, topCongruenceClassDesignator,
                     lastArgStringPos, topCongruenceClassDesignator);
 
             // put the created class into the congruence class array
@@ -319,8 +319,8 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
             // create a cluster object, with 0 index to argument list then update later once tags are included
             CongruenceCluster cCluster = new CongruenceCluster(treeNodeLabel, 0, topCongruenceClassDesignator,
-                    topCongruenceClusterDesignator, nextPlantationCluster, prevPlantationCluster,
-                    topCongruenceClusterDesignator, nextWithSimilarArgString);
+                    topCongruenceClusterDesignator, nextStandCluster, prevStandCluster, topCongruenceClusterDesignator,
+                    nextWithSimilarArgString);
 
             // put the created cluster into the cluster array
             clusterArray[topCongruenceClusterDesignator] = cCluster;
@@ -332,7 +332,7 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
             clusterArray[topCongruenceClusterDesignator].setIndexToArgumentList(indexInArgArray);
 
             // update variety list array
-            addInVarietyListArray(treeNodeLabel, indexForPlantationArray, indexForPlantationArray);
+            addInVarietyListArray(treeNodeLabel, indexForStandArray, indexForStandArray);
 
             return topCongruenceClassDesignator;
         } else {
@@ -568,30 +568,28 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      * @return the next congruence class accessor after {@param currentCCAccessor}.
      */
     public int advanceCClassAccessor(Integer treeNodeLabel, int currentCCAccessor) { // Advance_CC_Accr_for
-        int currentPlantationForTreeNodeLabel = 0;
-        int nextPlantationInNextClassAccessor = 0;
+        int currentStandForTreeNodeLabel = 0;
+        int nextStandInNextClassAccessor = 0;
 
-        currentPlantationForTreeNodeLabel = varietyArray[treeNodeLabel].getFirstPlantation();
+        currentStandForTreeNodeLabel = varietyArray[treeNodeLabel].getFirstStand();
 
-        int congruenceClassForCluster = clusterArray[plantationArray[currentPlantationForTreeNodeLabel]
-                .getFirstPlantationCluster()].getIndexToCongruenceClass();
+        int congruenceClassForCluster = clusterArray[standArray[currentStandForTreeNodeLabel].getFirstStandCluster()]
+                .getIndexToCongruenceClass();
         int dominantCongruenceClassForCluster = congruenceClassArray[congruenceClassForCluster].getDominantCClass();
 
-        while (currentPlantationForTreeNodeLabel != 0) {
+        while (currentStandForTreeNodeLabel != 0) {
             if (congruenceClassForCluster == currentCCAccessor
                     || dominantCongruenceClassForCluster == currentCCAccessor) {
-                nextPlantationInNextClassAccessor = plantationArray[currentPlantationForTreeNodeLabel]
-                        .getNextVrtyPlantation();
-                congruenceClassForCluster = clusterArray[plantationArray[nextPlantationInNextClassAccessor]
-                        .getFirstPlantationCluster()].getIndexToCongruenceClass();
+                nextStandInNextClassAccessor = standArray[currentStandForTreeNodeLabel].getNextVrtyStand();
+                congruenceClassForCluster = clusterArray[standArray[nextStandInNextClassAccessor]
+                        .getFirstStandCluster()].getIndexToCongruenceClass();
                 dominantCongruenceClassForCluster = congruenceClassArray[congruenceClassForCluster].getDominantCClass();
                 return dominantCongruenceClassForCluster;
             } else {
-                currentPlantationForTreeNodeLabel = plantationArray[currentPlantationForTreeNodeLabel]
-                        .getNextVrtyPlantation();
-                if (currentPlantationForTreeNodeLabel != 0) {
-                    congruenceClassForCluster = clusterArray[plantationArray[currentPlantationForTreeNodeLabel]
-                            .getFirstPlantationCluster()].getIndexToCongruenceClass();
+                currentStandForTreeNodeLabel = standArray[currentStandForTreeNodeLabel].getNextVrtyStand();
+                if (currentStandForTreeNodeLabel != 0) {
+                    congruenceClassForCluster = clusterArray[standArray[currentStandForTreeNodeLabel]
+                            .getFirstStandCluster()].getIndexToCongruenceClass();
                     dominantCongruenceClassForCluster = congruenceClassArray[congruenceClassForCluster]
                             .getDominantCClass();
                 }
@@ -614,31 +612,29 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      * @return {@code true} if we have exhausted all the classes in the variety designated by {@param treeNodeLabel}.
      */
     public boolean isVarietyMaximal(Integer treeNodeLabel, int currentCCAccessor) { /* Is_Vrty_Maximal_for */
-        int currentPlantationForTreeNodeLabel = 0;
-        int nextPlantationInNextClassAccessor = 0;
+        int currentStandForTreeNodeLabel = 0;
+        int nextStandInNextClassAccessor = 0;
 
-        currentPlantationForTreeNodeLabel = varietyArray[treeNodeLabel].getFirstPlantation();
+        currentStandForTreeNodeLabel = varietyArray[treeNodeLabel].getFirstStand();
 
-        int congruenceClassForCluster = clusterArray[plantationArray[currentPlantationForTreeNodeLabel]
-                .getFirstPlantationCluster()].getIndexToCongruenceClass();
+        int congruenceClassForCluster = clusterArray[standArray[currentStandForTreeNodeLabel].getFirstStandCluster()]
+                .getIndexToCongruenceClass();
         int dominantCongruenceClassForCluster = congruenceClassArray[congruenceClassForCluster].getDominantCClass();
 
-        while (currentPlantationForTreeNodeLabel != 0) {
+        while (currentStandForTreeNodeLabel != 0) {
             if (congruenceClassForCluster == currentCCAccessor
                     || dominantCongruenceClassForCluster == currentCCAccessor) {
-                nextPlantationInNextClassAccessor = plantationArray[currentPlantationForTreeNodeLabel]
-                        .getNextVrtyPlantation();
-                if (nextPlantationInNextClassAccessor == 0) {
+                nextStandInNextClassAccessor = standArray[currentStandForTreeNodeLabel].getNextVrtyStand();
+                if (nextStandInNextClassAccessor == 0) {
                     return true;
                 } else {
                     return false;
                 }
             } else {
-                currentPlantationForTreeNodeLabel = plantationArray[currentPlantationForTreeNodeLabel]
-                        .getNextVrtyPlantation();
-                if (currentPlantationForTreeNodeLabel != 0) {
-                    congruenceClassForCluster = clusterArray[plantationArray[currentPlantationForTreeNodeLabel]
-                            .getFirstPlantationCluster()].getIndexToCongruenceClass();
+                currentStandForTreeNodeLabel = standArray[currentStandForTreeNodeLabel].getNextVrtyStand();
+                if (currentStandForTreeNodeLabel != 0) {
+                    congruenceClassForCluster = clusterArray[standArray[currentStandForTreeNodeLabel]
+                            .getFirstStandCluster()].getIndexToCongruenceClass();
                     dominantCongruenceClassForCluster = congruenceClassArray[congruenceClassForCluster]
                             .getDominantCClass();
                 }
@@ -702,11 +698,11 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * This operation allows us to move from one cluster to another inside a plantation.
+     * This operation allows us to move from one cluster to another inside a stand.
      * </p>
      *
      * @param treeNodeLabel
-     *            The root node label for the plantation.
+     *            The root node label for the stand.
      * @param currentClusterAccessor
      *            The current cluster designator.
      *
@@ -717,27 +713,27 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         while (clusterArray[dominantCluster].getDominantCluster() != currentClusterAccessor) {
             dominantCluster = clusterArray[dominantCluster].getDominantCluster();
         }
-        return clusterArray[dominantCluster].getNextPlantationCluster();
+        return clusterArray[dominantCluster].getNextStandCluster();
     }
 
     /**
      * <p>
-     * This operation checks if the cluster designators are exhausted inside the plantation.
+     * This operation checks if the cluster designators are exhausted inside the stand.
      * </p>
      *
      * @param treeNodeLabel
-     *            A tree node label that designates the plantation being checked
+     *            A tree node label that designates the stand being checked
      * @param currentClusterAccessor
-     *            A current cluster accessor in the plantation
+     *            A current cluster accessor in the stand
      *
-     * @return {@code true} if we have exhausted all the clusters in the plantation, otherwise it returns {@code false}
+     * @return {@code true} if we have exhausted all the clusters in the stand, otherwise it returns {@code false}
      */
-    public boolean isPlantationMaximal(Integer treeNodeLabel, int currentClusterAccessor) {
+    public boolean isStandMaximal(Integer treeNodeLabel, int currentClusterAccessor) {
         int dominantCluster = currentClusterAccessor;
         while (clusterArray[dominantCluster].getDominantCluster() != currentClusterAccessor) {
             dominantCluster = clusterArray[dominantCluster].getDominantCluster();
         }
-        if (clusterArray[dominantCluster].getNextPlantationCluster() == 0) {
+        if (clusterArray[dominantCluster].getNextStandCluster() == 0) {
             return true;
         }
         return false;
@@ -765,20 +761,19 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * This operation checks if the plantation designator is minimal
+     * This operation checks if the stand designator is minimal
      * </p>
      *
      * @param treeNodeLabel
-     *            The tree node label for the clusters in the plantation
+     *            The tree node label for the clusters in the stand
      * @param cClassAccessor
-     *            The accessor for the class the plantation is in
+     *            The accessor for the class the stand is in
      * @param clusterAccessor
-     *            The accessor for the cluster in the plantation
+     *            The accessor for the cluster in the stand
      *
-     * @return {@code true} if the plantation designator is minimal, otherwise, it returns {@code false}
+     * @return {@code true} if the stand designator is minimal, otherwise, it returns {@code false}
      */
-    public boolean isMinimalPlantationClusterDesignator(Integer treeNodeLabel, int cClassAccessor,
-            int clusterAccessor) {
+    public boolean isMinimalStandClusterDesignator(Integer treeNodeLabel, int cClassAccessor, int clusterAccessor) {
         if (clusterArray[clusterAccessor].getDominantCluster() == clusterAccessor
                 && isMinimalVCCDesignator(treeNodeLabel, cClassAccessor)) {
             return true;
@@ -1143,41 +1138,40 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * The operation adds a new plantation to the variety list designated by {@param treeNodeLabel}. It starts a new
-     * list when the list is not existing or join to the existing list. The plantations are kept in ascending order
-     * according to their indices in plantation array.
+     * The operation adds a new stand to the variety list designated by {@param treeNodeLabel}. It starts a new list
+     * when the list is not existing or join to the existing list. The stands are kept in ascending order according to
+     * their indices in stand array.
      * </p>
      *
      * @param treeNodeLabel
      *            a designator for the variety
-     * @param newPlantation
-     *            a new plantation to be included into the variety list for the {@param treeNodeLabel}
-     * @param plantationTag
-     *            a plantation tag for the {@param newPlantation}
+     * @param newStand
+     *            a new stand to be included into the variety list for the {@param treeNodeLabel}
+     * @param standTag
+     *            a stand tag for the {@param newStand}
      */
-    private void addInVarietyListArray(Integer treeNodeLabel, int newPlantation, int plantationTag) {
-        int currentPlantationInVarietyList = 0;
+    private void addInVarietyListArray(Integer treeNodeLabel, int newStand, int standTag) {
+        int currentStandInVarietyList = 0;
         if (varietyArray[treeNodeLabel] == null) {
-            VarietyList varietyList = new VarietyList(newPlantation, plantationTag);
+            VarietyList varietyList = new VarietyList(newStand, standTag);
             varietyArray[treeNodeLabel] = varietyList;
         } else {
-            currentPlantationInVarietyList = varietyArray[treeNodeLabel].getFirstPlantation();
-            if (newPlantation < currentPlantationInVarietyList) {
+            currentStandInVarietyList = varietyArray[treeNodeLabel].getFirstStand();
+            if (newStand < currentStandInVarietyList) {
                 // put it at the front
-                // set the next plantation on the new plantation
-                plantationArray[newPlantation].setNextVrtyPlantation(currentPlantationInVarietyList);
-                plantationArray[currentPlantationInVarietyList].setPrvVrtyPlantation(newPlantation);
-                // update the fist plantation in the variety list in array
-                varietyArray[treeNodeLabel].setFirstPlantation(newPlantation);
+                // set the next stand on the new stand
+                standArray[newStand].setNextVrtyStand(currentStandInVarietyList);
+                standArray[currentStandInVarietyList].setPrvVrtyStand(newStand);
+                // update the fist stand in the variety list in array
+                varietyArray[treeNodeLabel].setFirstStand(newStand);
             } else {
                 // put it at the end of the list or somewhere suitable according to the order
-                while (newPlantation > currentPlantationInVarietyList
-                        && plantationArray[currentPlantationInVarietyList].getNextVrtyPlantation() != 0) {
-                    currentPlantationInVarietyList = plantationArray[currentPlantationInVarietyList]
-                            .getNextVrtyPlantation();
+                while (newStand > currentStandInVarietyList
+                        && standArray[currentStandInVarietyList].getNextVrtyStand() != 0) {
+                    currentStandInVarietyList = standArray[currentStandInVarietyList].getNextVrtyStand();
                 }
-                plantationArray[currentPlantationInVarietyList].setNextVrtyPlantation(newPlantation);
-                plantationArray[newPlantation].setPrvVrtyPlantation(currentPlantationInVarietyList);
+                standArray[currentStandInVarietyList].setNextVrtyStand(newStand);
+                standArray[newStand].setPrvVrtyStand(currentStandInVarietyList);
             }
 
         }
@@ -1201,13 +1195,13 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         if (firstCCAccessor < secondCCAccessor) {
             // change the dominant class for the larger class designator between the two merge classes
             updateDominantClass(firstCCAccessor, secondCCAccessor);
-            // update the plantation either by joining their clusters or moving the plantation to the smaller class
-            updatePlantationInSmallerClass(firstCCAccessor, secondCCAccessor);
+            // update the stand either by joining their clusters or moving the stand to the smaller class
+            updateStandInSmallerClass(firstCCAccessor, secondCCAccessor);
         } else {
             // change the dominant class for the larger class designator
             updateDominantClass(secondCCAccessor, firstCCAccessor);
-            // update the plantation either by joining their clusters or moving the plantation to the smaller class
-            updatePlantationInSmallerClass(secondCCAccessor, firstCCAccessor);
+            // update the stand either by joining their clusters or moving the stand to the smaller class
+            updateStandInSmallerClass(secondCCAccessor, firstCCAccessor);
         }
         int level = 0;
         // take the second accessor and find where we should start looking in the arg string, get the level and index in
@@ -1277,45 +1271,44 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * The operation removes the class in the variety list after the plantation that stood in that class for a root
-     * label is merged to another class
+     * The operation removes the class in the variety list after the stand that stood in that class for a root label is
+     * merged to another class
      * </p>
      *
      * @param treeNodeLabel
-     *            the tree node label designating the plantation
-     * @param plantationDesignatorToRemove
-     *            index to the plantation that is to be removed
+     *            the tree node label designating the stand
+     * @param standDesignatorToRemove
+     *            index to the stand that is to be removed
      */
-    private void removeClassFromVarietyList(Integer treeNodeLabel, int plantationDesignatorToRemove) {
-        int currentPlantationInList = varietyArray[treeNodeLabel].getFirstPlantation();
-        int previousPlantationInList = 0;
-        int nextPlantationInList = 0;
+    private void removeClassFromVarietyList(Integer treeNodeLabel, int standDesignatorToRemove) {
+        int currentStandInList = varietyArray[treeNodeLabel].getFirstStand();
+        int previousStandInList = 0;
+        int nextStandInList = 0;
         // it is the first one in the variety array list, now it has to be removed
-        if (currentPlantationInList == plantationDesignatorToRemove) {
+        if (currentStandInList == standDesignatorToRemove) {
             // get rid of the first one and make the second one in the variety list the first one
-            varietyArray[treeNodeLabel].setFirstPlantation(
-                    plantationArray[varietyArray[treeNodeLabel].getFirstPlantation()].getNextVrtyPlantation());
+            varietyArray[treeNodeLabel]
+                    .setFirstStand(standArray[varietyArray[treeNodeLabel].getFirstStand()].getNextVrtyStand());
             // make the previous pointer 0
-            plantationArray[plantationArray[varietyArray[treeNodeLabel].getFirstPlantation()].getNextVrtyPlantation()]
-                    .setPrvVrtyPlantation(0);
+            standArray[standArray[varietyArray[treeNodeLabel].getFirstStand()].getNextVrtyStand()].setPrvVrtyStand(0);
         } else {
             // it is not the first one in the variety array list, just remove it
-            // this assumes plantation designator to remove must be in the variety list. If that is the case just
+            // this assumes stand designator to remove must be in the variety list. If that is the case just
             // remove it by re-allocating the pointers
-            previousPlantationInList = plantationArray[plantationDesignatorToRemove].getPrvVrtyPlantation();
-            nextPlantationInList = plantationArray[plantationDesignatorToRemove].getNextVrtyPlantation();
+            previousStandInList = standArray[standDesignatorToRemove].getPrvVrtyStand();
+            nextStandInList = standArray[standDesignatorToRemove].getNextVrtyStand();
 
-            plantationArray[previousPlantationInList].setNextVrtyPlantation(nextPlantationInList);
-            if (nextPlantationInList != 0) {
-                // note we have P0 as the initial plantation in
-                plantationArray[nextPlantationInList].setPrvVrtyPlantation(previousPlantationInList);
+            standArray[previousStandInList].setNextVrtyStand(nextStandInList);
+            if (nextStandInList != 0) {
+                // note we have P0 as the initial stand in
+                standArray[nextStandInList].setPrvVrtyStand(previousStandInList);
             }
         }
     }
 
     /**
      * <p>
-     * The operation update the plantations in the smaller class after the two classes are merged
+     * The operation update the stands in the smaller class after the two classes are merged
      * </p>
      *
      * @param firstCCAccessor
@@ -1323,58 +1316,58 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      * @param secondCCAccessor
      *            the larger class designator
      */
-    private void updatePlantationInSmallerClass(int firstCCAccessor, int secondCCAccessor) {
+    private void updateStandInSmallerClass(int firstCCAccessor, int secondCCAccessor) {
         int currentFirstAccessor = firstCCAccessor;
         int currentSecondAccessor = secondCCAccessor;
 
-        int plantationDesignator_1 = congruenceClassArray[currentFirstAccessor].getFirstPlantation();
-        int plantationDesignator_2 = congruenceClassArray[currentSecondAccessor].getFirstPlantation();
+        int standDesignator_1 = congruenceClassArray[currentFirstAccessor].getFirstStand();
+        int standDesignator_2 = congruenceClassArray[currentSecondAccessor].getFirstStand();
 
         Integer treeNodeLabel_2, treeNodeLabel_1;
-        // tree node label 2 is the one for the plantation being moved
-        int nextPlantationDesignator_1, nextPlantationDesignator_2;
-        while (plantationDesignator_2 != 0) {
+        // tree node label 2 is the one for the stand being moved
+        int nextStandDesignator_1, nextStandDesignator_2;
+        while (standDesignator_2 != 0) {
 
-            treeNodeLabel_2 = plantationArray[plantationDesignator_2].getTreeNodeLabel();
-            // get the tree node label for this plantation
-            treeNodeLabel_1 = plantationArray[plantationDesignator_1].getTreeNodeLabel();
+            treeNodeLabel_2 = standArray[standDesignator_2].getTreeNodeLabel();
+            // get the tree node label for this stand
+            treeNodeLabel_1 = standArray[standDesignator_1].getTreeNodeLabel();
 
             // things may be changed and re-arranged, keep this record and use it later
-            nextPlantationDesignator_1 = plantationArray[plantationDesignator_1].getNextCCPlantation();
-            nextPlantationDesignator_2 = plantationArray[plantationDesignator_2].getNextCCPlantation();
+            nextStandDesignator_1 = standArray[standDesignator_1].getNextCCStand();
+            nextStandDesignator_2 = standArray[standDesignator_2].getNextCCStand();
 
             // compare the tree node labels and do what is necessary
             if (treeNodeLabel_2.equals(treeNodeLabel_1)) {
-                // the tree nodes for the plantations are the same, join the clusters
-                joinClustersOnSameRootNodePlantation(plantationDesignator_1, plantationDesignator_2);
+                // the tree nodes for the stands are the same, join the clusters
+                joinClustersOnSameRootNodeStand(standDesignator_1, standDesignator_2);
                 // update the variety list in the variety array
-                removeClassFromVarietyList(treeNodeLabel_2, plantationDesignator_2);
-                plantationDesignator_2 = nextPlantationDesignator_2;
-                plantationDesignator_1 = nextPlantationDesignator_1;
+                removeClassFromVarietyList(treeNodeLabel_2, standDesignator_2);
+                standDesignator_2 = nextStandDesignator_2;
+                standDesignator_1 = nextStandDesignator_1;
 
             } else if (treeNodeLabel_1 < treeNodeLabel_2) {
                 // this means we still need to check if the next in list one is still smaller than treeNodeLabel_2
                 // this is the case we can still find equality
-                joinPlantationFrom2ndListToFirstList(plantationDesignator_1, plantationDesignator_2);
-                // start from the plantation added to the first list
-                plantationDesignator_1 = plantationDesignator_2;
+                joinStandFrom2ndListToFirstList(standDesignator_1, standDesignator_2);
+                // start from the stand added to the first list
+                standDesignator_1 = standDesignator_2;
                 // start from the next one on the second list
-                plantationDesignator_2 = nextPlantationDesignator_2;
+                standDesignator_2 = nextStandDesignator_2;
 
             } else {
                 // this case, treeNodeLabel_1 > treeNodeLabel_2 so it is definitely not on the list,
-                // just merge the plantations.
+                // just merge the stands.
                 // This condition will only happen once, as the rest will be greater than what we just added
                 // from the second list.
-                joinPlantationFrom2ndListToFirstList(plantationDesignator_1, plantationDesignator_2);
-                // start from the plantation added to the first list
-                plantationDesignator_1 = plantationDesignator_2;
+                joinStandFrom2ndListToFirstList(standDesignator_1, standDesignator_2);
+                // start from the stand added to the first list
+                standDesignator_1 = standDesignator_2;
 
-                // update the 1st plantation in the first class, this is assuming the idea that this part will only be
+                // update the 1st stand in the first class, this is assuming the idea that this part will only be
                 // executed once.
-                congruenceClassArray[firstCCAccessor].setFirstPlantation(plantationDesignator_2);
+                congruenceClassArray[firstCCAccessor].setFirstStand(standDesignator_2);
                 // start from the next one on the second list
-                plantationDesignator_2 = nextPlantationDesignator_2;
+                standDesignator_2 = nextStandDesignator_2;
             }
 
         }
@@ -1382,63 +1375,61 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * The operation move a plantation from the larger class to the smaller class where it will be merged to the new
-     * list according to their root node label. In this case, the operation covers the merger when the root nodes are
-     * either greater than or less than than each other
+     * The operation move a stand from the larger class to the smaller class where it will be merged to the new list
+     * according to their root node label. In this case, the operation covers the merger when the root nodes are either
+     * greater than or less than than each other
      * </p>
      *
-     * @param plantationDesignator_1
-     *            index to the first plantation in the first class
-     * @param plantationDesignator_2
-     *            index to the second plantation in the second class
+     * @param standDesignator_1
+     *            index to the first stand in the first class
+     * @param standDesignator_2
+     *            index to the second stand in the second class
      *
      */
-    private void joinPlantationFrom2ndListToFirstList(int plantationDesignator_1, int plantationDesignator_2) {
-        Integer treeNodeLabel_1 = plantationArray[plantationDesignator_1].getTreeNodeLabel();
-        Integer treeNodeLabel_2 = plantationArray[plantationDesignator_2].getTreeNodeLabel();
+    private void joinStandFrom2ndListToFirstList(int standDesignator_1, int standDesignator_2) {
+        Integer treeNodeLabel_1 = standArray[standDesignator_1].getTreeNodeLabel();
+        Integer treeNodeLabel_2 = standArray[standDesignator_2].getTreeNodeLabel();
 
         if (treeNodeLabel_1 < treeNodeLabel_2) {
-            plantationJoinCase_01(plantationDesignator_1, plantationDesignator_2);
+            standJoinCase_01(standDesignator_1, standDesignator_2);
         } else {
-            plantationJoinCase_02(plantationDesignator_1, plantationDesignator_2);
+            standJoinCase_02(standDesignator_1, standDesignator_2);
         }
     }
 
     /**
      * <p>
-     * The operation join clusters in plantations that have the same root node label by moving the clusters from the
-     * larger plantation to the smaller plantation
+     * The operation join clusters in stands that have the same root node label by moving the clusters from the larger
+     * stand to the smaller stand
      * </p>
      *
-     * @param plantationDesignator_1
-     *            index to the smaller plantation
-     * @param plantationDesignator_2
-     *            index to the larger plantation
+     * @param standDesignator_1
+     *            index to the smaller stand
+     * @param standDesignator_2
+     *            index to the larger stand
      */
-    private void joinClustersOnSameRootNodePlantation(int plantationDesignator_1, int plantationDesignator_2) {
-        int currentClusterDesignator_1 = plantationArray[plantationDesignator_1].getFirstPlantationCluster();
-        int currentClusterDesignator_2 = plantationArray[plantationDesignator_2].getFirstPlantationCluster();
+    private void joinClustersOnSameRootNodeStand(int standDesignator_1, int standDesignator_2) {
+        int currentClusterDesignator_1 = standArray[standDesignator_1].getFirstStandCluster();
+        int currentClusterDesignator_2 = standArray[standDesignator_2].getFirstStandCluster();
 
-        int reserveCurrentPlantationCluster_1 = currentClusterDesignator_1;
-        int reserveCurrentPlantationCluster_2 = currentClusterDesignator_2;
+        int reserveCurrentStandCluster_1 = currentClusterDesignator_1;
+        int reserveCurrentStandCluster_2 = currentClusterDesignator_2;
         int tempCurrentClusterDesignator_2 = 0;
 
-        // update all clusters in the plantation to belong to the new class by changing their class field
+        // update all clusters in the stand to belong to the new class by changing their class field
         // we are using the dominant class, and we do this before the merging of clusters
         int dominantClassDesignator = getTheUltimateDominantClass(
-                congruenceClassArray[clusterArray[reserveCurrentPlantationCluster_1].getIndexToCongruenceClass()]
+                congruenceClassArray[clusterArray[reserveCurrentStandCluster_1].getIndexToCongruenceClass()]
                         .getDominantCClass());
         // This condition should work if the cluster at index 0 has all 0's. This is done in line 66
-        while (clusterArray[reserveCurrentPlantationCluster_2]
-                .getNextPlantationCluster() != reserveCurrentPlantationCluster_2) {
-            clusterArray[reserveCurrentPlantationCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
-            reserveCurrentPlantationCluster_2 = clusterArray[reserveCurrentPlantationCluster_2]
-                    .getNextPlantationCluster();
+        while (clusterArray[reserveCurrentStandCluster_2].getNextStandCluster() != reserveCurrentStandCluster_2) {
+            clusterArray[reserveCurrentStandCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
+            reserveCurrentStandCluster_2 = clusterArray[reserveCurrentStandCluster_2].getNextStandCluster();
         }
 
         // This condition will work if the cluster array at index 0 is initialized with zeroes.
-        while (clusterArray[currentClusterDesignator_2].getNextPlantationCluster() != currentClusterDesignator_2) {
-            // get all clusters in the larger plantation
+        while (clusterArray[currentClusterDesignator_2].getNextStandCluster() != currentClusterDesignator_2) {
+            // get all clusters in the larger stand
             if (currentClusterDesignator_1 < currentClusterDesignator_2) {
                 tempCurrentClusterDesignator_2 = currentClusterDesignator_2;
 
@@ -1456,47 +1447,47 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
                 // under the assumption this will only be executed once and that will now be our fist cluster in the
                 // list_1
-                plantationArray[plantationDesignator_1].setFirstPlantationCluster(currentClusterDesignator_1);
+                standArray[standDesignator_1].setFirstStandCluster(currentClusterDesignator_1);
             }
         }
     }
 
     /**
      * <p>
-     * This operation mergers two clusters one for the smaller plantation and one from the larger plantation, in this
-     * case, the cluster on the smaller plantation is less than the cluster on the larger plantation
+     * This operation mergers two clusters one for the smaller stand and one from the larger stand, in this case, the
+     * cluster on the smaller stand is less than the cluster on the larger stand
      * </p>
      *
      * @param currentClusterDesignator_1
-     *            is the class designator for the first cluster in smaller plantation
+     *            is the class designator for the first cluster in smaller stand
      * @param currentClusterDesignator_2
-     *            is the class designator for the second cluster in a larger plantation
+     *            is the class designator for the second cluster in a larger stand
      *
-     * @return a cluster designator for the cluster just moved to the smaller plantation
+     * @return a cluster designator for the cluster just moved to the smaller stand
      */
     private int clusterJoinCase_01(int currentClusterDesignator_1, int currentClusterDesignator_2) {
         int next_1, next_2, prev_2;
 
         while (currentClusterDesignator_1 < currentClusterDesignator_2
-                && clusterArray[currentClusterDesignator_1].getNextPlantationCluster() != 0
-                && clusterArray[currentClusterDesignator_1].getNextPlantationCluster() < currentClusterDesignator_2) {
-            currentClusterDesignator_1 = clusterArray[currentClusterDesignator_1].getNextPlantationCluster();
+                && clusterArray[currentClusterDesignator_1].getNextStandCluster() != 0
+                && clusterArray[currentClusterDesignator_1].getNextStandCluster() < currentClusterDesignator_2) {
+            currentClusterDesignator_1 = clusterArray[currentClusterDesignator_1].getNextStandCluster();
         }
 
         // keep records of all pointers
-        next_1 = clusterArray[currentClusterDesignator_1].getNextPlantationCluster();
-        next_2 = clusterArray[currentClusterDesignator_2].getNextPlantationCluster();
-        prev_2 = clusterArray[currentClusterDesignator_2].getPreviousPlantationCluster();
+        next_1 = clusterArray[currentClusterDesignator_1].getNextStandCluster();
+        next_2 = clusterArray[currentClusterDesignator_2].getNextStandCluster();
+        prev_2 = clusterArray[currentClusterDesignator_2].getPreviousStandCluster();
 
         // completely restore everything, every prev and next to something that can be worked on from scratch, I guess
         // it will solve the problem in a more general way
-        clusterArray[currentClusterDesignator_1].setNextPlantationCluster(currentClusterDesignator_2);
+        clusterArray[currentClusterDesignator_1].setNextStandCluster(currentClusterDesignator_2);
 
-        clusterArray[currentClusterDesignator_2].setPreviousPlantationCluster(currentClusterDesignator_1);
-        clusterArray[currentClusterDesignator_2].setNextPlantationCluster(next_1);
-        clusterArray[next_1].setPreviousPlantationCluster(currentClusterDesignator_2);
+        clusterArray[currentClusterDesignator_2].setPreviousStandCluster(currentClusterDesignator_1);
+        clusterArray[currentClusterDesignator_2].setNextStandCluster(next_1);
+        clusterArray[next_1].setPreviousStandCluster(currentClusterDesignator_2);
 
-        clusterArray[next_2].setPreviousPlantationCluster(prev_2);
+        clusterArray[next_2].setPreviousStandCluster(prev_2);
 
         // update the class designator field in the cluster to pointer to the new class they belong
         clusterArray[currentClusterDesignator_2]
@@ -1508,84 +1499,83 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
     /**
      *
      * <p>
-     * The operation join two plantations where the tree node designating the first one is less than the tree node
+     * The operation join two stands where the tree node designating the first one is less than the tree node
      * designating the second one
      * </p>
      *
-     * @param plantationDesignator_1
-     *            index to plantation array for the first plantation
-     * @param plantationDesignator_2
-     *            index to plantation orray for the second plantation
+     * @param standDesignator_1
+     *            index to stand array for the first stand
+     * @param standDesignator_2
+     *            index to stand orray for the second stand
      */
-    private void plantationJoinCase_01(int plantationDesignator_1, int plantationDesignator_2) {
-        int next_1, currentPlantationCluster_2, currentPlantationCluster_1, dominantClassDesignator;
+    private void standJoinCase_01(int standDesignator_1, int standDesignator_2) {
+        int next_1, currentStandCluster_2, currentStandCluster_1, dominantClassDesignator;
 
         // sort them using tree node labels
         Integer treeNodeLabel_1, treeNodeLabel_2;
-        treeNodeLabel_1 = plantationArray[plantationDesignator_1].getTreeNodeLabel();
-        treeNodeLabel_2 = plantationArray[plantationDesignator_2].getTreeNodeLabel();
+        treeNodeLabel_1 = standArray[standDesignator_1].getTreeNodeLabel();
+        treeNodeLabel_2 = standArray[standDesignator_2].getTreeNodeLabel();
 
-        while (treeNodeLabel_1 < treeNodeLabel_2 && plantationArray[plantationDesignator_1].getNextCCPlantation() != 0
-                && plantationArray[plantationArray[plantationDesignator_1].getNextCCPlantation()]
-                        .getTreeNodeLabel() < treeNodeLabel_2) {
-            plantationDesignator_1 = plantationArray[plantationDesignator_1].getNextCCPlantation();
-            treeNodeLabel_1 = plantationArray[plantationDesignator_1].getTreeNodeLabel();
+        while (treeNodeLabel_1 < treeNodeLabel_2 && standArray[standDesignator_1].getNextCCStand() != 0
+                && standArray[standArray[standDesignator_1].getNextCCStand()].getTreeNodeLabel() < treeNodeLabel_2) {
+            standDesignator_1 = standArray[standDesignator_1].getNextCCStand();
+            treeNodeLabel_1 = standArray[standDesignator_1].getTreeNodeLabel();
         }
-        // the tree nodes for the plantations are the same, join the clusters
+        // the tree nodes for the stands are the same, join the clusters
         if (treeNodeLabel_2.equals(treeNodeLabel_1)) {
-            joinClustersOnSameRootNodePlantation(plantationDesignator_1, plantationDesignator_2);
+            joinClustersOnSameRootNodeStand(standDesignator_1, standDesignator_2);
         } else {
             // keep records of all pointers
-            next_1 = plantationArray[plantationDesignator_1].getNextCCPlantation();
+            next_1 = standArray[standDesignator_1].getNextCCStand();
 
-            plantationArray[plantationDesignator_1].setNextCCPlantation(plantationDesignator_2);
-            plantationArray[plantationDesignator_2].setNextCCPlantation(next_1);
+            standArray[standDesignator_1].setNextCCStand(standDesignator_2);
+            standArray[standDesignator_2].setNextCCStand(next_1);
 
-            // update all clusters in the plantation to belong to the new class by changing their class field
-            currentPlantationCluster_2 = plantationArray[plantationDesignator_2].getFirstPlantationCluster();
-            currentPlantationCluster_1 = plantationArray[plantationDesignator_1].getFirstPlantationCluster();
+            // update all clusters in the stand to belong to the new class by changing their class field
+            currentStandCluster_2 = standArray[standDesignator_2].getFirstStandCluster();
+            currentStandCluster_1 = standArray[standDesignator_1].getFirstStandCluster();
             // we are using the dominant class
             dominantClassDesignator = getTheUltimateDominantClass(
-                    congruenceClassArray[clusterArray[currentPlantationCluster_1].getIndexToCongruenceClass()]
+                    congruenceClassArray[clusterArray[currentStandCluster_1].getIndexToCongruenceClass()]
                             .getDominantCClass());
             // This condition should work if the cluster at index 0 has all 0's. This is done in line 66
-            while (clusterArray[currentPlantationCluster_2].getNextPlantationCluster() != currentPlantationCluster_2) {
-                clusterArray[currentPlantationCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
-                currentPlantationCluster_2 = clusterArray[currentPlantationCluster_2].getNextPlantationCluster();
+            while (clusterArray[currentStandCluster_2].getNextStandCluster() != currentStandCluster_2) {
+                clusterArray[currentStandCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
+                currentStandCluster_2 = clusterArray[currentStandCluster_2].getNextStandCluster();
             }
         }
     }
 
     /**
      * <p>
-     * This operation mergers two clusters one for the smaller plantation and one from the larger plantation, in this
-     * case, the cluster on the smaller plantation is greater than the cluster on the larger plantation
+     * This operation mergers two clusters one for the smaller stand and one from the larger stand, in this case, the
+     * cluster on the smaller stand is greater than the cluster on the larger stand
      * </p>
      *
      * @param currentClusterDesignator_1
-     *            is the class designator for the first cluster in smaller plantation
+     *            is the class designator for the first cluster in smaller stand
      * @param currentClusterDesignator_2
-     *            is the class designator for the second cluster in a larger plantation
+     *            is the class designator for the second cluster in a larger stand
      *
-     * @return a cluster designator for the cluster moved to the smaller plantation
+     * @return a cluster designator for the cluster moved to the smaller stand
      */
     private int clusterJoinCase_02(int currentClusterDesignator_1, int currentClusterDesignator_2) {
         int next_2, prev_2;
 
         // this loop will possibly not be executed, think more if so delete it
         while (currentClusterDesignator_1 > currentClusterDesignator_2
-                && clusterArray[currentClusterDesignator_1].getPreviousPlantationCluster() != 0) {
-            currentClusterDesignator_1 = clusterArray[currentClusterDesignator_1].getPreviousPlantationCluster();
+                && clusterArray[currentClusterDesignator_1].getPreviousStandCluster() != 0) {
+            currentClusterDesignator_1 = clusterArray[currentClusterDesignator_1].getPreviousStandCluster();
         }
 
         // keep records of pointers
-        next_2 = clusterArray[currentClusterDesignator_2].getNextPlantationCluster();
-        prev_2 = clusterArray[currentClusterDesignator_2].getPreviousPlantationCluster();
+        next_2 = clusterArray[currentClusterDesignator_2].getNextStandCluster();
+        prev_2 = clusterArray[currentClusterDesignator_2].getPreviousStandCluster();
 
-        clusterArray[currentClusterDesignator_1].setPreviousPlantationCluster(currentClusterDesignator_2);
-        clusterArray[currentClusterDesignator_2].setNextPlantationCluster(currentClusterDesignator_1);
+        clusterArray[currentClusterDesignator_1].setPreviousStandCluster(currentClusterDesignator_2);
+        clusterArray[currentClusterDesignator_2].setNextStandCluster(currentClusterDesignator_1);
 
-        clusterArray[next_2].setPreviousPlantationCluster(prev_2);
+        clusterArray[next_2].setPreviousStandCluster(prev_2);
 
         // update the class designator field in the cluster to pointer to the new class they belong
         clusterArray[currentClusterDesignator_2]
@@ -1596,33 +1586,33 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     /**
      * <p>
-     * The operation join two plantations where the tree node designating the first one is greater than the tree node
+     * The operation join two stands where the tree node designating the first one is greater than the tree node
      * designating the second one
      * </p>
      *
-     * @param plantationDesignator_1
-     *            index to plantation array for the first plantation
-     * @param plantationDesignator_2
-     *            index to plantation orray for the second plantation
+     * @param standDesignator_1
+     *            index to stand array for the first stand
+     * @param standDesignator_2
+     *            index to stand orray for the second stand
      */
-    private void plantationJoinCase_02(int plantationDesignator_1, int plantationDesignator_2) {
-        int currentPlantationCluster_2, currentPlantationCluster_1, dominantClassDesignator;
+    private void standJoinCase_02(int standDesignator_1, int standDesignator_2) {
+        int currentStandCluster_2, currentStandCluster_1, dominantClassDesignator;
 
-        plantationArray[plantationDesignator_2].setNextCCPlantation(plantationDesignator_1);
+        standArray[standDesignator_2].setNextCCStand(standDesignator_1);
 
-        // update all clusters in the plantation to belong to the new class by changing their class field
-        currentPlantationCluster_2 = plantationArray[plantationDesignator_2].getFirstPlantationCluster();
-        currentPlantationCluster_1 = plantationArray[plantationDesignator_1].getFirstPlantationCluster();
+        // update all clusters in the stand to belong to the new class by changing their class field
+        currentStandCluster_2 = standArray[standDesignator_2].getFirstStandCluster();
+        currentStandCluster_1 = standArray[standDesignator_1].getFirstStandCluster();
         // assign the dominant class
         dominantClassDesignator = getTheUltimateDominantClass(
-                congruenceClassArray[clusterArray[currentPlantationCluster_1].getIndexToCongruenceClass()]
+                congruenceClassArray[clusterArray[currentStandCluster_1].getIndexToCongruenceClass()]
                         .getDominantCClass());
-        while (clusterArray[currentPlantationCluster_2].getNextPlantationCluster() != 0) {
-            clusterArray[currentPlantationCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
-            currentPlantationCluster_2 = clusterArray[currentPlantationCluster_2].getNextPlantationCluster();
+        while (clusterArray[currentStandCluster_2].getNextStandCluster() != 0) {
+            clusterArray[currentStandCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
+            currentStandCluster_2 = clusterArray[currentStandCluster_2].getNextStandCluster();
         }
-        // the final update when next plantation cluster is 0
-        clusterArray[currentPlantationCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
+        // the final update when next stand cluster is 0
+        clusterArray[currentStandCluster_2].setIndexToCongruenceClass(dominantClassDesignator);
 
     }
 
@@ -2311,8 +2301,8 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         return clusterArray;
     }
 
-    public Plantation[] getPlantationArray() {
-        return plantationArray;
+    public Stand[] getStandArray() {
+        return standArray;
     }
 
     public CongruenceClass[] getCongruenceClassArray() {

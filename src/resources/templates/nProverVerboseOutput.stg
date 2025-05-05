@@ -108,7 +108,7 @@ outputCCRegistryArrays(clusterArguments, clusters, plantations, classes) ::= <<
     <clusters : {cluster | <cluster>}; separator = "\n">
 
 [Plantation Array]:
-    <plantations : {plantation | <plantation>}; separator = "\n">
+    <plantations : {stand | <stand>}; separator = "\n">
 
 [Class Array]:
     <classes : {class | <class>}; separator = "\n">

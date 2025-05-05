@@ -14,7 +14,7 @@ package edu.clemson.rsrg.nProver.registry;
 
 /**
  * <p>
- * This class is a start of the variety list starting from the first plantation designated by the tree node label. Each
+ * This class is a start of the variety list starting from the first stand designated by the tree node label. Each
  * variety list created will be stored in the variety array
  * </p>
  *
@@ -24,23 +24,23 @@ package edu.clemson.rsrg.nProver.registry;
  */
 public class VarietyList {
 
-    private int firstPlantation;
+    private int firstStand;
     private int varietyTagIndex;
 
-    public VarietyList(int firstPlantation, int indexToVarietyTag) {
-        this.firstPlantation = firstPlantation;
+    public VarietyList(int firstStand, int indexToVarietyTag) {
+        this.firstStand = firstStand;
         varietyTagIndex = indexToVarietyTag;
     }
 
-    public int getFirstPlantation() {
-        return firstPlantation;
+    public int getFirstStand() {
+        return firstStand;
     }
 
     public int getVarietyTagIndex() {
         return varietyTagIndex;
     }
 
-    public void setFirstPlantation(int newFirstPlantation) {
-        firstPlantation = newFirstPlantation;
+    public void setFirstStand(int newFirstStand) {
+        firstStand = newFirstStand;
     }
 }
