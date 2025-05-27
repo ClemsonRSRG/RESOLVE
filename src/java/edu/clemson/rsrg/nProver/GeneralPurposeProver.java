@@ -467,7 +467,7 @@ public class GeneralPurposeProver {
         ST ccRegistryArraysModel = mySTGroup.getInstanceOf("outputCCRegistryArrays");
         ccRegistryArraysModel.add("clusterArguments", registry.getClusterArgArray());
         ccRegistryArraysModel.add("clusters", registry.getClusterArray());
-        ccRegistryArraysModel.add("stands", registry.getStandArray());
+        ccRegistryArraysModel.add("plantations", registry.getStandArray()); // plantations are now stands
         ccRegistryArraysModel.add("classes", registry.getCongruenceClassArray());
 
         // Add the VC to the VC proof detail model
