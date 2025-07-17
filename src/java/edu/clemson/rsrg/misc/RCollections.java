@@ -31,7 +31,6 @@ public class RCollections {
      * Returns a new list that is the result of processing each element of the original list with the given mapping, in
      * order, and adding it to the final list.
      * </p>
-     *
      * <p>
      * This method will return an <code>ArrayList</code> if given one, and a <code>LinkedList</code> if given one, but
      * otherwise the specific subclass of list returned is undefined.

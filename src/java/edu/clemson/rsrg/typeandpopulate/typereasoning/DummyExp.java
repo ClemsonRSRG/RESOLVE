@@ -28,7 +28,6 @@ import java.util.Map;
  * inhabits (i.e., a {@code DummyExp} of type {@code N} is acceptable for a quantified variable of type {@code Z},) but
  * nothing will bind to it.
  * </p>
- *
  * <p>
  * Mostly useful for representing "a unique variable of type X" without having to worry if its name is truly unique.
  * </p>

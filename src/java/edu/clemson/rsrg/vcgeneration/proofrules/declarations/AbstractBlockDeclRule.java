@@ -334,7 +334,6 @@ public abstract class AbstractBlockDeclRule extends AbstractProofRuleApplication
      * This method processes all non-affected {@code Shared Variables} and/or {@code Def Vars} and generate the proper
      * {@code ensures} clause.
      * </p>
-     *
      * <p>
      * Note that this method should only be called by {@link TypeRepresentationInitRule} and
      * {@link TypeRepresentationFinalRule} due to the fact that it does substitutions for conceptual variables.

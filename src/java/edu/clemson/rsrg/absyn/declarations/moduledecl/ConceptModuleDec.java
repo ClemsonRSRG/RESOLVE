@@ -45,7 +45,6 @@ public class ConceptModuleDec extends ModuleDec {
      * <p>
      * The list of concept level constraints.
      * </p>
-     *
      * <p>
      * Note that placing this down here means it is processed last by the treewalker, and so we will have access to any
      * definitions in the body of the concept.

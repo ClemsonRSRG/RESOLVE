@@ -71,7 +71,6 @@ public class CCRegWithTheoremTest {
      * <p>
      * Sequent: {@code {} => {x + y = y + x}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -162,7 +161,6 @@ public class CCRegWithTheoremTest {
      * <p>
      * Sequent: {@code {} => {x + (y + z) = (x + y) + z}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -290,7 +288,6 @@ public class CCRegWithTheoremTest {
      * <p>
      * Sequent: {@code {} => {x + (y + z) = (y + x) + z}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>

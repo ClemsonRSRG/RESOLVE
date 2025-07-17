@@ -91,11 +91,9 @@ public class OperationProfileSearcher implements TableSearcher<OperationProfileE
      * Adds any symbol table entries from <code>entries</code> that match this search to <code>matches</code>. The order
      * that they are added is determined by the concrete base-class.
      * </p>
-     *
      * <p>
      * If no matches exist, the method will simply leave <code>matches</code> unmodified.
      * </p>
-     *
      * <p>
      * The semantics of the incoming accumulator are only that it is the appropriate place to add new matches, not that
      * it will necessarily contain all matches so far. This allows intermediate accumulators to be created and passed

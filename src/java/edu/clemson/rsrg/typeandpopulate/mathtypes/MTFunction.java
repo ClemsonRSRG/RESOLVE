@@ -434,22 +434,22 @@ public class MTFunction extends MTAbstract<MTFunction> {
         MTType result;
 
         switch (paramTypes.size()) {
-        case 0:
-            result = g.VOID;
-            break;
-        case 1:
-            result = paramTypes.get(0);
-            break;
-        default:
-            List<MTCartesian.Element> elements = new LinkedList<>();
+            case 0:
+                result = g.VOID;
+                break;
+            case 1:
+                result = paramTypes.get(0);
+                break;
+            default:
+                List<MTCartesian.Element> elements = new LinkedList<>();
 
-            Iterator<String> namesIter = paramNames.iterator();
-            Iterator<MTType> typesIter = paramTypes.iterator();
-            while (namesIter.hasNext()) {
-                elements.add(new MTCartesian.Element(namesIter.next(), typesIter.next()));
-            }
+                Iterator<String> namesIter = paramNames.iterator();
+                Iterator<MTType> typesIter = paramTypes.iterator();
+                while (namesIter.hasNext()) {
+                    elements.add(new MTCartesian.Element(namesIter.next(), typesIter.next()));
+                }
 
-            result = new MTCartesian(g, elements);
+                result = new MTCartesian(g, elements);
         }
 
         return result;
@@ -461,7 +461,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
      * type with the same number of parameters as this one, but any unbound type variables that appear as top level
      * parameters "filled in".
      * </p>
-     *
      * <p>
      * So, for example, if this function type were {@code (T : MType, S : Str(R : MType), t : T) -> (T * S)} and you
      * were to provide the parameters {@code (Z, {true, false, false}, false)}, this method would return the function
@@ -474,7 +473,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
      * a problem in the normal type checking algorithm, but being certain not to abuse this is the client's
      * responsibility.
      * </p>
-     *
      * <p>
      * If the parameters cannot be applied to this function type, either because of an inappropriate number of
      * parameters, or a parameter value offered that is not within the bounds of a type parameter, this function will
@@ -625,7 +623,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
      * Applies the given type comparison function to each of the expressions in <code>parameters</code>, returning
      * <code>true</code> <strong>iff</strong> the comparison returns true for each parameter.
      * </p>
-     *
      * <p>
      * The comparison is guaranteed to be applied to the parameters in the order returned by <code>parameters</code>'
      * iterator, and thus the comparison may accumulate data about, for example, parameterized types as it goes.
@@ -754,14 +751,14 @@ public class MTFunction extends MTAbstract<MTFunction> {
         MTType newRange = myRange;
 
         switch (index) {
-        case 0:
-            newDomain = newType;
-            break;
-        case 1:
-            newRange = newType;
-            break;
-        default:
-            throw new IndexOutOfBoundsException();
+            case 0:
+                newDomain = newType;
+                break;
+            case 1:
+                newRange = newType;
+                break;
+            default:
+                throw new IndexOutOfBoundsException();
         }
 
         return new MTFunction(getTypeGraph(), myRestrictionFlag, newRange, newDomain);

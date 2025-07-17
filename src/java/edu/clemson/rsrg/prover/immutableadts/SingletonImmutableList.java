@@ -102,14 +102,14 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
         ImmutableList<E> retval;
 
         switch (length) {
-        case 0:
-            retval = EMPTY;
-            break;
-        case 1:
-            retval = this;
-            break;
-        default:
-            throw new IndexOutOfBoundsException();
+            case 0:
+                retval = EMPTY;
+                break;
+            case 1:
+                retval = this;
+                break;
+            default:
+                throw new IndexOutOfBoundsException();
         }
 
         return retval;
@@ -150,14 +150,14 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
         ImmutableList<E> retval;
 
         switch (startIndex) {
-        case 0:
-            retval = this;
-            break;
-        case 1:
-            retval = EMPTY;
-            break;
-        default:
-            throw new IndexOutOfBoundsException();
+            case 0:
+                retval = this;
+                break;
+            case 1:
+                retval = EMPTY;
+                break;
+            default:
+                throw new IndexOutOfBoundsException();
         }
 
         return retval;

@@ -24,18 +24,15 @@ import java.util.Map;
  * Although the grammar allows user to type in programming array expressions, in reality these are just syntactic sugar
  * for different operation/function calls in {@code Static_Array_Template}.
  * </p>
- *
  * <p>
  * When the {@link TreeBuildingListener} walks either to the exit function of a
  * {@code ResolveParser.ProgVarDotArrayExpContext} node or a {@code ResolveParser.ProgVarArrayExpContext} node, we
  * create an instance of this class to satisfy the requirements of building something of type {@link ProgramExp}.
  * </p>
- *
  * <p>
  * Before a {@link ProgramExp} is added to a statement, we check to see if it contains any instances of this class. For
  * all instances of this class, we convert it to the corresponding operation/function calls.
  * </p>
- *
  * <p>
  * When we are done building the RESOLVE AST, there should not be any instances of this class left.
  * </p>

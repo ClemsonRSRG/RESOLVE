@@ -31,7 +31,6 @@ public interface SymbolQuery<E extends SymbolTableEntry> {
      * is drawn, searches them appropriately, returning a list of matching {@link SymbolTableEntry}s that are subtypes
      * of <code>E</code>.
      * </p>
-     *
      * <p>
      * If there are no matches, returns an empty list. If more than one match is found where no more than one was
      * expected, throws a {@link DuplicateSymbolException}.

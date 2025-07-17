@@ -178,7 +178,6 @@ public class FacilityEntry extends SymbolTableEntry {
      * Do not assume that each enhancement is realized by a corresponding, individual realization. Some enhancements may
      * be realized by the base concept, in which case this method will return that module.
      * </p>
-     *
      * <p>
      * For example, <code>Stack_Template</code> might have an enhancement <code>Get_Nth_Ability</code>, which replicates
      * and returns the <em>n</em>th element from the top of the stack. There may be an
@@ -195,7 +194,6 @@ public class FacilityEntry extends SymbolTableEntry {
      * Facility Indexible_Stack is Stack_Template enhanced with Get_Nth_Ability
      *     realized by Array_Based_Realization;
      * </pre>
-     *
      * <p>
      * And, calling this method to ask the realization for <code>Get_Nth_Ability</code> would return
      * <code>Array_Based_Realization</code>.

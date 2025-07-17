@@ -1028,7 +1028,6 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      * @return {@code true} iff the previous class from {@param indexToArgInSecondLevel} is
      *         {@param classAccessorInFirstLevel}, and the root node of the cluster is in the set of reflexive
      *         operators. Otherwise return {@code false}.
-     *
      */
     private boolean subReflexiveBingoTest(int indexToArgInSecondLevel, int classAccessorInFirstLevel) {
 
@@ -1391,7 +1390,6 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      *            index to the first plantation in the first class
      * @param plantationDesignator_2
      *            index to the second plantation in the second class
-     *
      */
     private void joinPlantationFrom2ndListToFirstList(int plantationDesignator_1, int plantationDesignator_2) {
         Integer treeNodeLabel_1 = plantationArray[plantationDesignator_1].getTreeNodeLabel();
@@ -1506,7 +1504,6 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
     }
 
     /**
-     *
      * <p>
      * The operation join two plantations where the tree node designating the first one is less than the tree node
      * designating the second one
