@@ -28,7 +28,6 @@ import java.util.List;
  * The main purpose of this class is to assist the {@link SyntacticSugarConverter} in building the various different
  * calls to operations in {@code Static_Array_Template}.
  * </p>
- *
  * <p>
  * It also provides various helper methods to identify and transform {@link ProgramVariableArrayExp}s.
  * </p>

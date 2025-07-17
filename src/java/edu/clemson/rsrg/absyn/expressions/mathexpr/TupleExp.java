@@ -25,7 +25,6 @@ import java.util.List;
  * This is the class for all the mathematical tuple expression objects that the compiler builds using the ANTLR4 AST
  * nodes.
  * </p>
- *
  * <p>
  * Making {@code TupleExp} extend from {@link AbstractFunctionExp} was considered and explicitly decided against during
  * the great math-type-overhaul of 2012. If we chose to admit the presence of some function that builds tuples for us,

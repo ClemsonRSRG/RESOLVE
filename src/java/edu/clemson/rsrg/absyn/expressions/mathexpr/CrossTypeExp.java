@@ -23,7 +23,6 @@ import java.util.*;
  * This is the class for all the mathematical cross type expression objects that the compiler builds using the ANTLR4
  * AST nodes.
  * </p>
- *
  * <p>
  * The value of a type that looks like:
  * </p>

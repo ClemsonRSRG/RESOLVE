@@ -37,7 +37,6 @@ import java.util.*;
  * <p>
  * This class represents the root of the prover abstract syntax tree (AST) hierarchy.
  * </p>
- *
  * <p>
  * {@code PExp} is the root of the prover abstract syntax tree hierarchy. Unlike {@link Exp Exp}s, {@code PExp}s are
  * immutable and exist without the complications introduced by control structures. {@code PExp}s exist to represent
@@ -583,7 +582,6 @@ public abstract class PExp {
      * <p>
      * This method returns the current expression in string format with proper indentation and offset.
      * </p>
-     *
      * <p>
      * Note that this method is only used for debugging purposes.
      * </p>
@@ -810,7 +808,6 @@ public abstract class PExp {
      * expression would be marked internally as a "for all" variable and the expression <code>x = y</code> would be
      * returned.)
      * </p>
-     *
      * <p>
      * Quantified expressions with "where" clauses will be normalized to remove the where clause. In the case of "for
      * all" statements, the where clause will be added as the antecedent to an implication, so that
@@ -840,18 +837,19 @@ public abstract class PExp {
             // the body using logical connectives
             if (eAsQuantifier.getWhere() != null) {
                 switch (eAsQuantifier.getQuantification()) {
-                case UNIVERSAL:
-                    eAsQuantifier = new QuantExp(eAsQuantifier.getLocation(), eAsQuantifier.getQuantification(),
-                            eAsQuantifier.getVars(), null, MathExp.formImplies(eAsQuantifier.getLocation().clone(),
-                                    eAsQuantifier.getWhere(), eAsQuantifier.getBody()));
-                    break;
-                case EXISTENTIAL:
-                    eAsQuantifier = new QuantExp(eAsQuantifier.getLocation(), eAsQuantifier.getQuantification(),
-                            eAsQuantifier.getVars(), null, MathExp.formConjunct(eAsQuantifier.getLocation().clone(),
-                                    eAsQuantifier.getWhere(), eAsQuantifier.getBody()));
-                    break;
-                default:
-                    throw new RuntimeException("Don't know how to normalize " + "this kind of quantified expression.");
+                    case UNIVERSAL:
+                        eAsQuantifier = new QuantExp(eAsQuantifier.getLocation(), eAsQuantifier.getQuantification(),
+                                eAsQuantifier.getVars(), null, MathExp.formImplies(eAsQuantifier.getLocation().clone(),
+                                        eAsQuantifier.getWhere(), eAsQuantifier.getBody()));
+                        break;
+                    case EXISTENTIAL:
+                        eAsQuantifier = new QuantExp(eAsQuantifier.getLocation(), eAsQuantifier.getQuantification(),
+                                eAsQuantifier.getVars(), null, MathExp.formConjunct(eAsQuantifier.getLocation().clone(),
+                                        eAsQuantifier.getWhere(), eAsQuantifier.getBody()));
+                        break;
+                    default:
+                        throw new RuntimeException(
+                                "Don't know how to normalize " + "this kind of quantified expression.");
                 }
             }
 
@@ -915,17 +913,17 @@ public abstract class PExp {
         PSymbol.Quantification retval;
 
         switch (q) {
-        case EXISTENTIAL:
-            retval = PSymbol.Quantification.THERE_EXISTS;
-            break;
-        case UNIVERSAL:
-            retval = PSymbol.Quantification.FOR_ALL;
-            break;
-        case NONE:
-            retval = PSymbol.Quantification.NONE;
-            break;
-        default:
-            throw new RuntimeException("Unrecognized quantification");
+            case EXISTENTIAL:
+                retval = PSymbol.Quantification.THERE_EXISTS;
+                break;
+            case UNIVERSAL:
+                retval = PSymbol.Quantification.FOR_ALL;
+                break;
+            case NONE:
+                retval = PSymbol.Quantification.NONE;
+                break;
+            default:
+                throw new RuntimeException("Unrecognized quantification");
         }
 
         return retval;

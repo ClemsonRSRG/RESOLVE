@@ -44,7 +44,6 @@ public class TreeWalker {
      * Visits the node {@code e} by calling pre visitor methods, recursively visiting child nodes, and calling
      * appropriate post methods.
      * </p>
-     *
      * <p>
      * If the {@link TreeWalkerVisitor} happens to encounter a method named {@code walk[className]}, that returns true,
      * the children are skipped.

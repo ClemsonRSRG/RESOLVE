@@ -70,7 +70,6 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
      * <p>
      * A search path for searching entries that could potentially be qualified.
      * </p>
-     *
      * <p>
      * <em>Note:</em> This search path uses {@code IMPORT_NONE} and {@code FACILITY_IGNORE} strategies and local entries
      * do not have priority.
@@ -92,7 +91,6 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
      * Applies the given {@link TableSearcher} to the appropriate {@link Scope}s, given a source scope and a
      * {@link ScopeRepository} containing any imports, returning a list of matching {@link SymbolTableEntry}s.
      * </p>
-     *
      * <p>
      * If there are no matches, returns an empty list. If more than one match is found and <code>searcher</code> expects
      * no more than one match, throws a {@link DuplicateSymbolException}.

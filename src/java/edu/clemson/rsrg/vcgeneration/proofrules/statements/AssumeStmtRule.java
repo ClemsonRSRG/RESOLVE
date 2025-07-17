@@ -204,12 +204,10 @@ public class AssumeStmtRule extends AbstractProofRuleApplication implements Proo
      * {@code seq}. This is done by finding the intersection between the set of symbols in the assume expression and the
      * set of symbols in {@code seq}.
      * </p>
-     *
      * <p>
      * For a stipulate assume statement, we keep the remaining then we keep all the remaining assume expressions no
      * matter what.
      * </p>
-     *
      * <p>
      * For a regular assume statement, we loop though keep looping through the remaining assume expressions until we
      * stop adding more expression to our antecedent.

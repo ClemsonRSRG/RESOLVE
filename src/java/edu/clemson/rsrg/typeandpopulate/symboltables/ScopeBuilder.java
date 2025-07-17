@@ -40,7 +40,6 @@ import java.util.Set;
  * <p>
  * A <code>ScopeBuilder</code> is a working, mutable realization of {@link Scope}.
  * </p>
- *
  * <p>
  * Note that <code>ScopeBuilder</code> has no public constructor. <code>ScopeBuilders</code>s are acquired through calls
  * to some of the methods of {@link MathSymbolTableBuilder}.

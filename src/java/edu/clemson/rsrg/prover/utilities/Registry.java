@@ -333,7 +333,6 @@ public class Registry {
      * <p>
      * This method gets the set of children symbol names.
      * </p>
-     *
      * <p>
      * <em>Note:</em> Use sparingly, call with a parent symbol. Assumes parent array is compressed.
      * </p>

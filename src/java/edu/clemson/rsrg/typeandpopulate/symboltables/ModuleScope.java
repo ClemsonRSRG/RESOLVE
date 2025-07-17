@@ -21,7 +21,6 @@ import java.util.List;
  * A <code>ModuleScope</code> refines {@link Scope} to provide methods specific to those scopes introduced by a RESOLVE
  * module.
  * </p>
- *
  * <p>
  * As with <code>Scope</code>, <code>ModuleScope</code> defines no mutator methods, but specific concrete subclasses may
  * be mutable.

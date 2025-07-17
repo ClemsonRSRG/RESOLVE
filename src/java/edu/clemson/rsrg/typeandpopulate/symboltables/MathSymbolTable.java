@@ -30,14 +30,12 @@ import java.util.Map;
  * A <code>MathSymbolTable</code> represents an immutable mapping from those nodes in the AST that define a scope to
  * {@link FinalizedScope} objects representing those scopes and containing the symbols defined therein.
  * </p>
- *
  * <p>
  * <code>Scope</code>s that were introduced at the module-level (e.g., the scope defined by a {@link PrecisModuleDec})
  * will have an associated <code>Scope</code> that is further refined into an instance of {@link FinalizedModuleScope}.
  * As a convenience, such module scopes may be retrieved in a type-safe way with a call to
  * {@link #getModuleScope(ModuleIdentifier)}.
  * </p>
- *
  * <p>
  * Note that there are no public constructors for <code>MathSymbolTable</code>. New instances should be acquired from a
  * call to {@link MathSymbolTableBuilder#seal()}.
@@ -55,12 +53,10 @@ public class MathSymbolTable extends ScopeRepository {
      * <p>
      * When starting a search from a particular scope, specifies how any available facilities should be searched.
      * </p>
-     *
      * <p>
      * Available facilities are those facilities defined in a module searched by the search's
      * <code>ImportStrategy</code> (which necessarily always includes the source module).
      * </p>
-     *
      * <p>
      * Note that facilities cannot be recursively searched. Imports and facilities appearing in available facilities
      * will not be searched.
@@ -99,7 +95,6 @@ public class MathSymbolTable extends ScopeRepository {
      * When starting a search from a particular scope, specifies which additional modules should be searched, based on
      * any imported modules.
      * </p>
-     *
      * <p>
      * Imported modules are those listed in the <em>uses</em> clause of the source module scope in which the scope is
      * introduced. For searches originating directly in a module scope, the source module scope is the scope itself. In

@@ -326,18 +326,15 @@ public class TypeGraph {
      * to be of type <code>destination</code> assuming the proof obligations set forth in <code>bindingCondition</code>
      * are satisfied.
      * </p>
-     *
      * <p>
      * <code>bindingExpression</code> must have a mathematical type set on it. I.e., it must be the case that
      * <code>bindingExpression.getMathType() != null</code>.
      * </p>
-     *
      * <p>
      * Any <code>VarExp</code>s, <code>AbstractFunctionExp</code>s, and <code>MTNamed</code> that appear in
      * <code>bindingExpression</code>, its associated mathematical type, or <code>destination</code> must be bound under
      * the given environment.
      * </p>
-     *
      * <p>
      * Conversely, any universally bound variables in the given environment must appear in one of
      * <code>bindingExpression</code>, its associated mathematical type, or <code>destination</code>. This gives the
@@ -481,7 +478,6 @@ public class TypeGraph {
      * Returns <code>true</code> <strong>iff</strong> <code>value</code> is known to definitely be a member of
      * <code>expected</code>.
      * </p>
-     *
      * <p>
      * I.e., this is the same as asking if <code>getValidTypeConditions(value, expected)</code> 1) doesn't throw an
      * exception and 2) returns a value for which <code>isLiteralTrue()</code> returns <code>true</code>.
@@ -512,7 +508,6 @@ public class TypeGraph {
      * Returns <code>true</code> <strong>iff</strong> <code>value</code>, which is known to identify a
      * <strong>MType</strong>, is known to definitely be a member of <code>expected</code>.
      * </p>
-     *
      * <p>
      * I.e., this is the same as asking if <code>getValidTypeConditions(value, expected)</code> 1) doesn't throw an
      * exception and 2) returns a value for which <code>isLiteralTrue()</code> returns <code>true</code>.
@@ -882,13 +877,11 @@ public class TypeGraph {
      * Returns the conditions under which <code>value</code> could be demonstrated to be a member of
      * <code>expected</code>, given that <code>value</code> is known to be in <strong>MType</strong>.
      * </p>
-     *
      * <p>
      * The result is a series of disjuncts expressing possible situations under which the <code>value</code> would be
      * known to be in <code>expected</code>. One or more of these disjuncts may be <code>false</code>, but if one or
      * more would have been <code>true</code>, this method will simplify the result to simply <code>true</code>.
      * </p>
-     *
      * <p>
      * If there is no known set of circumstances under which <code>value</code> could be demonstrated a member of
      * <code>expected</code> (i.e., if the return value would simply be <code>false</code>), this method throws a
@@ -966,13 +959,11 @@ public class TypeGraph {
      * Returns the conditions under which <code>value</code> could be demonstrated to be a member of
      * <code>expected</code>.
      * </p>
-     *
      * <p>
      * The result is a series of disjuncts expressing possible situations under which the <code>value</code> would be
      * known to be in <code>expected</code>. One or more of these disjuncts may be <code>false</code>, but if one or
      * more would have been <code>true</code>, this method will simplify the result to simply <code>true</code>.
      * </p>
-     *
      * <p>
      * If there is no known set of circumstances under which <code>value</code> could be demonstrated a member of
      * <code>expected</code> (i.e., if the return value would simply be <code>false</code>), this method throws a
@@ -1019,13 +1010,11 @@ public class TypeGraph {
      * <code>pathStrategy</code> (which lets us forget about what the java type of <code>foundValue</code> is&mdash;only
      * that it's a type <code>pathStrategy</code> can handle.)
      * </p>
-     *
      * <p>
      * The result is a series of disjuncts expressing possible situations under which the <code>value</code> would be
      * known to be in <code>expected</code>. One or more of these disjuncts may be <code>false</code>, but if one or
      * more would have been <code>true</code>, this method will simplify the result to simply <code>true</code>.
      * </p>
-     *
      * <p>
      * If there is no known set of circumstances under which <code>value</code> could be demonstrated a member of
      * <code>expected</code> (i.e., if the return value would simply be <code>false</code>), this method throws a

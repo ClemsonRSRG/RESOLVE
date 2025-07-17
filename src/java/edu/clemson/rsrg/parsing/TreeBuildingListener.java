@@ -306,7 +306,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>
      * Checks to see if the {@link ResolveFile} name matches the open and close names given in the file.
      * </p>
-     *
      * <p>
      * If everything checks out, we create a new object to store all the elements that can be created by the syntatic
      * sugar conversions.
@@ -559,7 +558,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>
      * Checks to see if the {@link ResolveFile} name matches the open and close names given in the file.
      * </p>
-     *
      * <p>
      * If everything checks out, we create a new object to store all the new array facilities that can be created by the
      * syntactic sugar conversions.
@@ -776,7 +774,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>
      * Checks to see if the {@link ResolveFile} name matches the open and close names given in the file.
      * </p>
-     *
      * <p>
      * If everything checks out, we create a new object to store all the new array facilities that can be created by the
      * syntactic sugar conversions.
@@ -927,8 +924,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         }
 
         // Decs (if any)
-        List<Dec> decls = Utilities.collect(Dec.class, ctx.conceptPerformanceItems() != null
-                ? ctx.conceptPerformanceItems().conceptPerformanceItem() : new ArrayList<ParseTree>(), myNodes);
+        List<Dec> decls = Utilities.collect(Dec.class,
+                ctx.conceptPerformanceItems() != null ? ctx.conceptPerformanceItems().conceptPerformanceItem()
+                        : new ArrayList<ParseTree>(),
+                myNodes);
 
         // Add concept as a module dependency
         addNewModuleDependency(ctx.concept.getText(), ctx.concept.getText(), false);
@@ -1015,7 +1014,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Decs (if any)
         List<Dec> decls = Utilities.collect(Dec.class,
                 ctx.enhancementPerformanceItems() != null
-                        ? ctx.enhancementPerformanceItems().enhancementPerformanceItem() : new ArrayList<ParseTree>(),
+                        ? ctx.enhancementPerformanceItems().enhancementPerformanceItem()
+                        : new ArrayList<ParseTree>(),
                 myNodes);
 
         // Add concept/concept profile/enhancement as module dependencies
@@ -2839,36 +2839,36 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
 
         Exp mathExp = (Exp) myNodes.removeFrom(ctx.mathExp());
         switch (ctx.assertionType.getType()) {
-        case ResolveLexer.THEOREM:
-        case ResolveLexer.THEOREM_ASSOCIATIVE:
-        case ResolveLexer.THEOREM_COMMUTATIVE:
-            MathAssertionDec.TheoremSubtype theoremSubtype;
-            if (ctx.assertionType.getType() == ResolveLexer.THEOREM_ASSOCIATIVE) {
-                theoremSubtype = MathAssertionDec.TheoremSubtype.ASSOCIATIVITY;
-            } else if (ctx.assertionType.getType() == ResolveLexer.THEOREM_COMMUTATIVE) {
-                theoremSubtype = MathAssertionDec.TheoremSubtype.COMMUTATIVITY;
-            } else {
-                theoremSubtype = MathAssertionDec.TheoremSubtype.NONE;
-            }
+            case ResolveLexer.THEOREM:
+            case ResolveLexer.THEOREM_ASSOCIATIVE:
+            case ResolveLexer.THEOREM_COMMUTATIVE:
+                MathAssertionDec.TheoremSubtype theoremSubtype;
+                if (ctx.assertionType.getType() == ResolveLexer.THEOREM_ASSOCIATIVE) {
+                    theoremSubtype = MathAssertionDec.TheoremSubtype.ASSOCIATIVITY;
+                } else if (ctx.assertionType.getType() == ResolveLexer.THEOREM_COMMUTATIVE) {
+                    theoremSubtype = MathAssertionDec.TheoremSubtype.COMMUTATIVITY;
+                } else {
+                    theoremSubtype = MathAssertionDec.TheoremSubtype.NONE;
+                }
 
-            newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()), theoremSubtype, mathExp);
-            break;
-        case ResolveLexer.AXIOM:
-            newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
-                    MathAssertionDec.AssertionType.AXIOM, mathExp);
-            break;
-        case ResolveLexer.COROLLARY:
-            newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
-                    MathAssertionDec.AssertionType.COROLLARY, mathExp);
-            break;
-        case ResolveLexer.LEMMA:
-            newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
-                    MathAssertionDec.AssertionType.LEMMA, mathExp);
-            break;
-        default:
-            newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
-                    MathAssertionDec.AssertionType.PROPERTY, mathExp);
-            break;
+                newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()), theoremSubtype, mathExp);
+                break;
+            case ResolveLexer.AXIOM:
+                newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                        MathAssertionDec.AssertionType.AXIOM, mathExp);
+                break;
+            case ResolveLexer.COROLLARY:
+                newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                        MathAssertionDec.AssertionType.COROLLARY, mathExp);
+                break;
+            case ResolveLexer.LEMMA:
+                newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                        MathAssertionDec.AssertionType.LEMMA, mathExp);
+                break;
+            default:
+                newElement = new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                        MathAssertionDec.AssertionType.PROPERTY, mathExp);
+                break;
         }
 
         myNodes.put(ctx, newElement);
@@ -3385,21 +3385,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitMathIteratedExp(ResolveParser.MathIteratedExpContext ctx) {
         IterativeExp.Operator operator;
         switch (ctx.op.getType()) {
-        case ResolveLexer.BIG_CONCAT:
-            operator = IterativeExp.Operator.CONCATENATION;
-            break;
-        case ResolveLexer.BIG_INTERSECT:
-            operator = IterativeExp.Operator.INTERSECTION;
-            break;
-        case ResolveLexer.BIG_PRODUCT:
-            operator = IterativeExp.Operator.PRODUCT;
-            break;
-        case ResolveLexer.BIG_SUM:
-            operator = IterativeExp.Operator.SUM;
-            break;
-        default:
-            operator = IterativeExp.Operator.UNION;
-            break;
+            case ResolveLexer.BIG_CONCAT:
+                operator = IterativeExp.Operator.CONCATENATION;
+                break;
+            case ResolveLexer.BIG_INTERSECT:
+                operator = IterativeExp.Operator.INTERSECTION;
+                break;
+            case ResolveLexer.BIG_PRODUCT:
+                operator = IterativeExp.Operator.PRODUCT;
+                break;
+            case ResolveLexer.BIG_SUM:
+                operator = IterativeExp.Operator.SUM;
+                break;
+            default:
+                operator = IterativeExp.Operator.UNION;
+                break;
         }
 
         MathVarDec varDecl = (MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl());
@@ -3431,19 +3431,21 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         } else {
             SymbolTableEntry.Quantification quantification;
             switch (ctx.getStart().getType()) {
-            case ResolveLexer.FORALL:
-                quantification = SymbolTableEntry.Quantification.UNIVERSAL;
-                break;
-            case ResolveLexer.EXISTS:
-                quantification = SymbolTableEntry.Quantification.EXISTENTIAL;
-                break;
-            default:
-                quantification = SymbolTableEntry.Quantification.UNIQUE;
-                break;
+                case ResolveLexer.FORALL:
+                    quantification = SymbolTableEntry.Quantification.UNIVERSAL;
+                    break;
+                case ResolveLexer.EXISTS:
+                    quantification = SymbolTableEntry.Quantification.EXISTENTIAL;
+                    break;
+                default:
+                    quantification = SymbolTableEntry.Quantification.UNIQUE;
+                    break;
             }
 
-            List<MathVarDec> mathVarDecls = Utilities.collect(MathVarDec.class, ctx.mathVariableDeclGroup() != null
-                    ? ctx.mathVariableDeclGroup().IDENTIFIER() : new ArrayList<ParseTree>(), myNodes);
+            List<MathVarDec> mathVarDecls = Utilities.collect(MathVarDec.class,
+                    ctx.mathVariableDeclGroup() != null ? ctx.mathVariableDeclGroup().IDENTIFIER()
+                            : new ArrayList<ParseTree>(),
+                    myNodes);
             Exp whereExp = (Exp) myNodes.removeFrom(ctx.mathWhereExp());
             Exp bodyExp = (Exp) myNodes.removeFrom(ctx.mathQuantifiedExp());
 
@@ -3571,20 +3573,20 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                 Exp exp2 = (Exp) myNodes.removeFrom(ctx.mathInfixExp(1));
 
                 switch (ctx.op.getType()) {
-                case ResolveLexer.EQL:
-                case ResolveLexer.NOT_EQL:
-                    EqualsExp.Operator op;
-                    if (ctx.op.getType() == ResolveLexer.EQL) {
-                        op = EqualsExp.Operator.EQUAL;
-                    } else {
-                        op = EqualsExp.Operator.NOT_EQUAL;
-                    }
+                    case ResolveLexer.EQL:
+                    case ResolveLexer.NOT_EQL:
+                        EqualsExp.Operator op;
+                        if (ctx.op.getType() == ResolveLexer.EQL) {
+                            op = EqualsExp.Operator.EQUAL;
+                        } else {
+                            op = EqualsExp.Operator.NOT_EQUAL;
+                        }
 
-                    newElement = new EqualsExp(createLocation(ctx), exp1, null, op, exp2);
-                    break;
-                default:
-                    newElement = new InfixExp(createLocation(ctx), exp1, null, createPosSymbol(ctx.op), exp2);
-                    break;
+                        newElement = new EqualsExp(createLocation(ctx), exp1, null, op, exp2);
+                        break;
+                    default:
+                        newElement = new InfixExp(createLocation(ctx), exp1, null, createPosSymbol(ctx.op), exp2);
+                        break;
                 }
             } else {
                 newElement = myNodes.removeFrom(ctx.mathInfixExp(0));
@@ -4327,51 +4329,51 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         Location functionNameLoc = createLocation(ctx.op);
         PosSymbol functionName;
         switch (ctx.op.getType()) {
-        case ResolveLexer.AND:
-            functionName = new PosSymbol(functionNameLoc, "And");
-            break;
-        case ResolveLexer.OR:
-            functionName = new PosSymbol(functionNameLoc, "Or");
-            break;
-        case ResolveLexer.EQL:
-            functionName = new PosSymbol(functionNameLoc, "Are_Equal");
-            break;
-        case ResolveLexer.NOT_EQL:
-            functionName = new PosSymbol(functionNameLoc, "Are_Not_Equal");
-            break;
-        case ResolveLexer.LT:
-            functionName = new PosSymbol(functionNameLoc, "Less");
-            break;
-        case ResolveLexer.LT_EQL:
-            functionName = new PosSymbol(functionNameLoc, "Less_Or_Equal");
-            break;
-        case ResolveLexer.GT:
-            functionName = new PosSymbol(functionNameLoc, "Greater");
-            break;
-        case ResolveLexer.GT_EQL:
-            functionName = new PosSymbol(functionNameLoc, "Greater_Or_Equal");
-            break;
-        case ResolveLexer.PLUS:
-            functionName = new PosSymbol(functionNameLoc, "Sum");
-            break;
-        case ResolveLexer.MINUS:
-            functionName = new PosSymbol(functionNameLoc, "Difference");
-            break;
-        case ResolveLexer.MULTIPLY:
-            functionName = new PosSymbol(functionNameLoc, "Product");
-            break;
-        case ResolveLexer.DIVIDE:
-            functionName = new PosSymbol(functionNameLoc, "Divide");
-            break;
-        case ResolveLexer.MOD:
-            functionName = new PosSymbol(functionNameLoc, "Mod");
-            break;
-        case ResolveLexer.REM:
-            functionName = new PosSymbol(functionNameLoc, "Rem");
-            break;
-        default:
-            functionName = new PosSymbol(functionNameLoc, "Div");
-            break;
+            case ResolveLexer.AND:
+                functionName = new PosSymbol(functionNameLoc, "And");
+                break;
+            case ResolveLexer.OR:
+                functionName = new PosSymbol(functionNameLoc, "Or");
+                break;
+            case ResolveLexer.EQL:
+                functionName = new PosSymbol(functionNameLoc, "Are_Equal");
+                break;
+            case ResolveLexer.NOT_EQL:
+                functionName = new PosSymbol(functionNameLoc, "Are_Not_Equal");
+                break;
+            case ResolveLexer.LT:
+                functionName = new PosSymbol(functionNameLoc, "Less");
+                break;
+            case ResolveLexer.LT_EQL:
+                functionName = new PosSymbol(functionNameLoc, "Less_Or_Equal");
+                break;
+            case ResolveLexer.GT:
+                functionName = new PosSymbol(functionNameLoc, "Greater");
+                break;
+            case ResolveLexer.GT_EQL:
+                functionName = new PosSymbol(functionNameLoc, "Greater_Or_Equal");
+                break;
+            case ResolveLexer.PLUS:
+                functionName = new PosSymbol(functionNameLoc, "Sum");
+                break;
+            case ResolveLexer.MINUS:
+                functionName = new PosSymbol(functionNameLoc, "Difference");
+                break;
+            case ResolveLexer.MULTIPLY:
+                functionName = new PosSymbol(functionNameLoc, "Product");
+                break;
+            case ResolveLexer.DIVIDE:
+                functionName = new PosSymbol(functionNameLoc, "Divide");
+                break;
+            case ResolveLexer.MOD:
+                functionName = new PosSymbol(functionNameLoc, "Mod");
+                break;
+            case ResolveLexer.REM:
+                functionName = new PosSymbol(functionNameLoc, "Rem");
+                break;
+            default:
+                functionName = new PosSymbol(functionNameLoc, "Div");
+                break;
         }
 
         List<ProgramExp> args = new ArrayList<>();
@@ -4440,14 +4442,14 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         PosSymbol functionName;
         List<ProgramExp> args = new ArrayList<>();
         switch (ctx.op.getType()) {
-        case ResolveLexer.NOT:
-            functionName = new PosSymbol(functionNameLoc, "Not");
-            args.add((ProgramExp) myNodes.removeFrom(ctx.progExp()));
-            break;
-        default:
-            functionName = new PosSymbol(functionNameLoc, "Negate");
-            args.add((ProgramExp) myNodes.removeFrom(ctx.progExp()));
-            break;
+            case ResolveLexer.NOT:
+                functionName = new PosSymbol(functionNameLoc, "Not");
+                args.add((ProgramExp) myNodes.removeFrom(ctx.progExp()));
+                break;
+            default:
+                functionName = new PosSymbol(functionNameLoc, "Negate");
+                args.add((ProgramExp) myNodes.removeFrom(ctx.progExp()));
+                break;
         }
 
         myNodes.put(ctx, new ProgramFunctionExp(createLocation(ctx), null, functionName, args));
@@ -5110,27 +5112,27 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     private ProgramParameterEntry.ParameterMode getMode(ResolveParser.ParameterModeContext ctx) {
         ProgramParameterEntry.ParameterMode mode;
         switch (ctx.getStart().getType()) {
-        case ResolveLexer.ALTERS:
-            mode = ProgramParameterEntry.ParameterMode.ALTERS;
-            break;
-        case ResolveLexer.UPDATES:
-            mode = ProgramParameterEntry.ParameterMode.UPDATES;
-            break;
-        case ResolveLexer.CLEARS:
-            mode = ProgramParameterEntry.ParameterMode.CLEARS;
-            break;
-        case ResolveLexer.RESTORES:
-            mode = ProgramParameterEntry.ParameterMode.RESTORES;
-            break;
-        case ResolveLexer.PRESERVES:
-            mode = ProgramParameterEntry.ParameterMode.PRESERVES;
-            break;
-        case ResolveLexer.REPLACES:
-            mode = ProgramParameterEntry.ParameterMode.REPLACES;
-            break;
-        default:
-            mode = ProgramParameterEntry.ParameterMode.EVALUATES;
-            break;
+            case ResolveLexer.ALTERS:
+                mode = ProgramParameterEntry.ParameterMode.ALTERS;
+                break;
+            case ResolveLexer.UPDATES:
+                mode = ProgramParameterEntry.ParameterMode.UPDATES;
+                break;
+            case ResolveLexer.CLEARS:
+                mode = ProgramParameterEntry.ParameterMode.CLEARS;
+                break;
+            case ResolveLexer.RESTORES:
+                mode = ProgramParameterEntry.ParameterMode.RESTORES;
+                break;
+            case ResolveLexer.PRESERVES:
+                mode = ProgramParameterEntry.ParameterMode.PRESERVES;
+                break;
+            case ResolveLexer.REPLACES:
+                mode = ProgramParameterEntry.ParameterMode.REPLACES;
+                break;
+            default:
+                mode = ProgramParameterEntry.ParameterMode.EVALUATES;
+                break;
         }
 
         return mode;
@@ -5344,7 +5346,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
          * <p>
          * List of new facility declaration objects.
          * </p>
-         *
          * <p>
          * <strong>Note:</strong> The only facilities generated at the moment are new {@code Static_Array_Template}
          * facilities.
@@ -5376,7 +5377,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * When building a {@link ModuleDec}, we would like the new array facility declarations to appear immediately before
      * the different type/shared state representations that created it.
      * </p>
-     *
      * <p>
      * This class allow us to keep track to this, so that when we add the different declarations to the
      * {@link ModuleDec}, we add these array facilities in the right spot.

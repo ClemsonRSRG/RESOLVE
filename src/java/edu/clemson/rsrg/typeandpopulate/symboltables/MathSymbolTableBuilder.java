@@ -32,7 +32,6 @@ import java.util.Map;
  * It's behavior directly mirrors <code>MathSymbolTable</code>, so that it can be used as a working symbol table while
  * it is built.
  * </p>
- *
  * <p>
  * Once the building process is complete, {@link #seal()} should be called to return a <code>MathSymbolTable</code> that
  * is equivalent to the working symbol table represented by this <code>MathSymbolTableBuilder</code>.
@@ -313,7 +312,6 @@ public class MathSymbolTableBuilder extends ScopeRepository {
      * <p>
      * This method returns the object in string format.
      * </p>
-     *
      * <p>
      * <strong>Note:</strong> The {@code toString} method is intended for printing debugging messages. Do not use its
      * value to perform compiler actions.

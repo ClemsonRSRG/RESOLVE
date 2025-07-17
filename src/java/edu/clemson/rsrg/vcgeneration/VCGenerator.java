@@ -1664,7 +1664,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * sources (see below for complete list) and builds the appropriate {@code assume} clause that goes at the beginning
      * an {@link AssertiveCodeBlock}.
      * </p>
-     *
      * <p>
      * List of different places where clauses can originate from:
      * </p>
@@ -1680,7 +1679,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <li>Type {@code correspondence} clause (if we are in a {@link TypeRepresentationDec}).</li>
      * <li>Any {@code which_entails} expressions that originated from any of the clauses above.</li>
      * </ul>
-     *
      * <p>
      * See the {@code Shared Variable Initialization}, {@code Type Initialization} and {@code Type Finalization} rule
      * for more detail.
@@ -1727,7 +1725,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * sources (see below for complete list) and builds the appropriate {@code assume} clause that goes at the beginning
      * an {@link AssertiveCodeBlock}.
      * </p>
-     *
      * <p>
      * List of different places where clauses can originate from:
      * </p>
@@ -1749,7 +1746,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * </li>
      * <li>Any {@code which_entails} expressions that originated from any of the clauses above.</li>
      * </ul>
-     *
      * <p>
      * See the {@code Procedure} declaration rule for more detail.
      * </p>
