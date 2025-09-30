@@ -31,7 +31,6 @@ import java.util.*;
  * Defines the search path used when a symbol is referenced in an unqualified way, along with some parameters for
  * tweaking how the search is accomplished. In general, the path is as follows:
  * </p>
- *
  * <ol>
  * <li>Search the local scope.</li>
  * <li>Search any facilities declared in the local scope.</li>
@@ -41,14 +40,11 @@ import java.util.*;
  * <li>For each searched import, search any facilities declared inside.</li>
  * </ul>
  * </li>
- *
  * </ol>
- *
  * <p>
  * Instance of this class can be parameterized to search only direct imports or to exclude all imports, as well as to
  * exclude searching facilities, or change how generics are handled when searching facilities.
  * </p>
- *
  * <p>
  * Additionally, by setting the <code>localPriority</code> flag, the search can be made to stop without considering
  * imports (regardless of the import strategy) if at least one local match is found. Note that any local facilities will
@@ -115,7 +111,6 @@ public class UnqualifiedPath implements ScopeSearchPath {
      * Applies the given {@link TableSearcher} to the appropriate {@link Scope}s, given a source scope and a
      * {@link ScopeRepository} containing any imports, returning a list of matching {@link SymbolTableEntry}s.
      * </p>
-     *
      * <p>
      * If there are no matches, returns an empty list. If more than one match is found and <code>searcher</code> expects
      * no more than one match, throws a {@link DuplicateSymbolException}.
@@ -152,7 +147,6 @@ public class UnqualifiedPath implements ScopeSearchPath {
      * This method searches all the instantiated {@code Facilities} in scope and attempts to find all entries that match
      * and store those in the {@code result} list.
      * </p>
-     *
      * <p>
      * If more than one match is found and <code>searcher</code> expects no more than one match, throws a
      * {@link DuplicateSymbolException}.
@@ -218,7 +212,6 @@ public class UnqualifiedPath implements ScopeSearchPath {
      * This method searches all the {@code Modules} in scope and attempts to find all entries that match and store those
      * in the {@code result} list.
      * </p>
-     *
      * <p>
      * If more than one match is found and <code>searcher</code> expects no more than one match, throws a
      * {@link DuplicateSymbolException}.

@@ -19,7 +19,6 @@ import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
  * <p>
  * A <code>FinalizedScope</code> is an immutable realization of {@link Scope}.
  * </p>
- *
  * <p>
  * Note that <code>FinalizedScope</code> has no public constructor. <code>FinalizedScope</code>s are acquired through
  * calls to some of the methods of {@link MathSymbolTable}.

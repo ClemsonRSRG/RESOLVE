@@ -43,7 +43,6 @@ public class FlagManager {
      *
      * @throws FlagDependencyException
      *             If the set flags are not acceptable for some reason.
-     *
      * @throws IllegalStateException
      *             If <code>FlagDependencies</code> has not yet been sealed with a call to
      *             {@link FlagDependencies#seal() seal()}.

@@ -27,11 +27,9 @@ import java.util.Objects;
  * <p>
  * This abstract class serves as the parent class of all symbol table entries.
  * </p>
- *
  * <p>
  * Checklist for subclassing <code>SymbolTableEntry</code>:
  * </p>
- *
  * <ul>
  * <li>Create subclass.</li>
  * <li>Add "toXXX()" method in this parent class.</li>

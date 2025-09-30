@@ -33,13 +33,11 @@ import java.util.List;
  * <p>
  * Defines the search path when a symbol is fully qualified. Namely:
  * </p>
- *
  * <ul>
  * <li>If the qualifier matches a facility defined in the same module as the source scope, open the corresponding module
  * and search for the symbol there.</li>
  * <li>Otherwise, look for a module with that name and search there.</li>
  * </ul>
- *
  * <p>
  * Instances of this class can be parameterized to determine how generics are handled if the qualifier refers to a
  * facility.
@@ -75,7 +73,6 @@ public class QualifiedPath implements ScopeSearchPath {
      * <p>
      * A search path for searching entries that are qualified.
      * </p>
-     *
      * <p>
      * <em>Note:</em> The {@code FACILITY_IGNORE} strategy is not permitted.
      * </p>
@@ -107,7 +104,6 @@ public class QualifiedPath implements ScopeSearchPath {
      * Applies the given {@link TableSearcher} to the appropriate {@link Scope}s, given a source scope and a
      * {@link ScopeRepository} containing any imports, returning a list of matching {@link SymbolTableEntry}s.
      * </p>
-     *
      * <p>
      * If there are no matches, returns an empty list. If more than one match is found and <code>searcher</code> expects
      * no more than one match, throws a {@link DuplicateSymbolException}.

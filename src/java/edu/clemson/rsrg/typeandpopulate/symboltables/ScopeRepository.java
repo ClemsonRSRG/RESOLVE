@@ -22,11 +22,9 @@ import edu.clemson.rsrg.typeandpopulate.utilities.ModuleIdentifier;
  * A <code>ScopeRepository</code> maps {@link ResolveConceptualElement}s and {@link ModuleIdentifier}s to the
  * {@link Scope}s they introduce.
  * </p>
- *
  * <p>
  * Each <code>ScopeRepository</code> has a {@link TypeGraph} that relates the types found in the symbol table.
  * </p>
- *
  * <p>
  * While this base class defines no methods for mutating the symbol table, concrete subclasses may provide mutation
  * methods. It is particularly important that clients be aware the symbol table may be "under construction" even as they

@@ -1136,7 +1136,6 @@ public class JavaTranslator extends AbstractTranslator {
      * EnhancementRealizModuleDecs}. It is used to construct and add a 'dummy method' that simply uses 'con' to call the
      * actual method.
      * </p>
-     *
      * <p>
      * For example, given {@code type} = null, {@code name} = 'Pop', and {@code parameters} = [R, S]; is method returns
      * :

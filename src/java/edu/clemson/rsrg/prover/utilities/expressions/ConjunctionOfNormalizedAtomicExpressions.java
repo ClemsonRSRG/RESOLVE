@@ -122,29 +122,29 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
         String name = expression.getTopLevelOperation();
         switch (name) {
-        case "=B":
-            int lhs = addFormula(expression.getSubExpressions().get(0));
-            int rhs = addFormula(expression.getSubExpressions().get(1));
+            case "=B":
+                int lhs = addFormula(expression.getSubExpressions().get(0));
+                int rhs = addFormula(expression.getSubExpressions().get(1));
 
-            return mergeOperators(lhs, rhs);
-        case "andB":
-            String r = "";
-            r += addExpression(expression.getSubExpressions().get(0));
-            r += addExpression(expression.getSubExpressions().get(1));
+                return mergeOperators(lhs, rhs);
+            case "andB":
+                String r = "";
+                r += addExpression(expression.getSubExpressions().get(0));
+                r += addExpression(expression.getSubExpressions().get(1));
 
-            return r;
-        default:
-            MTType type = expression.getMathType();
-            int root = addFormula(expression);
-            if (myEvaluatesToFalseFlag) {
-                return "";
-            }
+                return r;
+            default:
+                MTType type = expression.getMathType();
+                int root = addFormula(expression);
+                if (myEvaluatesToFalseFlag) {
+                    return "";
+                }
 
-            if (type.isBoolean()) {
-                return mergeOperators(myRegistry.getIndexForSymbol("true"), root);
-            }
+                if (type.isBoolean()) {
+                    return mergeOperators(myRegistry.getIndexForSymbol("true"), root);
+                }
 
-            break;
+                break;
         }
 
         return "";
@@ -757,7 +757,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      * <p>
      * An method that helps us choose literals over variables for theorem matching purposes.
      * </p>
-     *
      * <p>
      * <em>i.e.</em> The theorem expression should keep the literals.
      * </p>
@@ -952,7 +951,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      * <p>
      * An helper method that returns a list of modified predicates by their position. Only these can cause new merges.
      * </p>
-     *
      * <p>
      * <em>e.g.</em> {@code b} is replaced by {@code a}
      * </p>

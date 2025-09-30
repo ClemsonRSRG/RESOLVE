@@ -122,14 +122,14 @@ public class MTPowerclassApplication extends MTFunctionApplication {
         MTType result;
 
         switch (index) {
-        case 0:
-            result = new MTFunctionApplication(getTypeGraph(), (MTFunction) newType, getArguments());
-            break;
-        case 1:
-            result = new MTPowerclassApplication(getTypeGraph(), newType);
-            break;
-        default:
-            throw new IndexOutOfBoundsException("" + index);
+            case 0:
+                result = new MTFunctionApplication(getTypeGraph(), (MTFunction) newType, getArguments());
+                break;
+            case 1:
+                result = new MTPowerclassApplication(getTypeGraph(), newType);
+                break;
+            default:
+                throw new IndexOutOfBoundsException("" + index);
         }
 
         return result;
