@@ -133,22 +133,12 @@ public abstract class AbstractFunctionExp extends MathExp {
      * </p>
      */
     /*
-     * public Exp getSoleParameter(TypeGraph g) { return buildSoleParameter(g, getLocation(), getParameters()); }
-     *
-     * public static final Exp buildSoleParameter(TypeGraph g, Location l, List<Exp> params) {
-     *
-     * Exp result;
-     *
-     * switch (params.size()) { case 0: result = g.getNothingExp(); break; case 1: result = params.get(0); break;
-     * default: List<MTType> componentTypes = new LinkedList<>(); TupleExp tuple = new TupleExp(l, params); for (Exp
-     * param : params) { componentTypes.add(param.getMathType()); } MTType tupleType = MTFunction.buildParameterType(g,
-     * componentTypes);
-     *
-     * propogateTypes(tuple, tupleType);
-     *
-     * result = tuple; }
-     *
-     * return result; }
+     * public Exp getSoleParameter(TypeGraph g) { return buildSoleParameter(g, getLocation(), getParameters()); } public
+     * static final Exp buildSoleParameter(TypeGraph g, Location l, List<Exp> params) { Exp result; switch
+     * (params.size()) { case 0: result = g.getNothingExp(); break; case 1: result = params.get(0); break; default:
+     * List<MTType> componentTypes = new LinkedList<>(); TupleExp tuple = new TupleExp(l, params); for (Exp param :
+     * params) { componentTypes.add(param.getMathType()); } MTType tupleType = MTFunction.buildParameterType(g,
+     * componentTypes); propogateTypes(tuple, tupleType); result = tuple; } return result; }
      */
 
     /**
@@ -255,13 +245,10 @@ public abstract class AbstractFunctionExp extends MathExp {
      *            The new mathematical type.
      */
     /*
-     * private static final void propogateTypes(Exp e, MTType t) { e.setMathType(t);
-     *
-     * Iterator<Exp> subExpressions = e.getSubExpressions().iterator(); Iterator<MTType> subTypes =
-     * t.getComponentTypes().iterator();
-     *
-     * //Note that e and t must have the same structure while (subExpressions.hasNext()) {
-     * propogateTypes(subExpressions.next(), subTypes.next()); } }
+     * private static final void propogateTypes(Exp e, MTType t) { e.setMathType(t); Iterator<Exp> subExpressions =
+     * e.getSubExpressions().iterator(); Iterator<MTType> subTypes = t.getComponentTypes().iterator(); //Note that e and
+     * t must have the same structure while (subExpressions.hasNext()) { propogateTypes(subExpressions.next(),
+     * subTypes.next()); } }
      */
 
 }

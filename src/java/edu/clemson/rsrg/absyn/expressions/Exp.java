@@ -42,7 +42,6 @@ public abstract class Exp extends ResolveConceptualElement {
      * An object that contains additional information on where this expression came from. This should be added by the
      * {@code VCGenerator} when applying the various different {@code proof rules}.
      * </p>
-     *
      * <p>
      * Note: We were trying to hard to make things immutable. There are things that simply can't be immutable until we
      * are done creating objects. This is probably the best compromise given the design decision of the {@code Exp}
@@ -149,7 +148,6 @@ public abstract class Exp extends ResolveConceptualElement {
      * invoked by a mathematical expression, but since we could have either mathematical or programming expressions, the
      * default behavior is to return {@code false}.
      * </p>
-     *
      * <p>
      * Any inherited mathematical expressions must override this method to make this method work.
      * </p>
@@ -371,7 +369,6 @@ public abstract class Exp extends ResolveConceptualElement {
      * Returns a DEEP COPY of this expression, with all instances of {@link Exp}s that occur as keys in
      * {@code substitutions} replaced with their corresponding values.
      * </p>
-     *
      * <p>
      * In general, a key {@link Exp} "occurs" in this {@link Exp} if either this {@link Exp} or some sub-expression is
      * {@link Exp#equivalent(Exp)}. However, if the key is a {@link VarExp} function names are additionally matched,

@@ -41,7 +41,6 @@ import java.util.*;
  * This class extracts ensures clauses (with the appropriate substitutions) from walking potentially nested
  * {@link ProgramFunctionExp}. This visitor logic is implemented as a {@link TreeWalkerVisitor}.
  * </p>
- *
  * <p>
  * <strong>Note:</strong> We don't have to worry about any shared variables being affected. By definition a function
  * operation can't have side effects, therefore modifying a shared variables would count as a side-effect.
@@ -125,7 +124,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * This creates a {@link TreeWalkerVisitor} that visits and generates {@code requires} and {@code ensures} clauses
      * for potentially nested function calls.
      * </p>
-     *
      * <p>
      * Note that this constructor is used by non-recursive declarations, where there isn't a {@code decreasing} clause.
      * </p>
@@ -299,7 +297,6 @@ public class ProgramFunctionExpWalker extends TreeWalkerVisitor {
      * This method returns the final modified ensures clause after all the necessary replacement/substitutions have been
      * made.
      * </p>
-     *
      * <p>
      * Note that the return value is removed from the class and subsequent calls to this method with the same
      * {@code exp} will result in an exception.

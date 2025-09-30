@@ -28,7 +28,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTType}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -43,7 +42,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTType}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -58,7 +56,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTAbstract}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -73,7 +70,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTAbstract}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -88,7 +84,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTBigUnion}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -103,7 +98,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTBigUnion}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -118,7 +112,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTCartesian}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -133,7 +126,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTCartesian}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -148,7 +140,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTFunction}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -163,7 +154,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTFunction}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -178,7 +168,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTFunctionApplication}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -193,7 +182,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTFunctionApplication}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -208,7 +196,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTIntersect}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -223,7 +210,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTIntersect}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -238,7 +224,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTPowerclassApplication}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -253,7 +238,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTPowerclassApplication}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -268,7 +252,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTPowersetApplication}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -283,7 +266,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTPowersetApplication}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -298,7 +280,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTProper}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -313,7 +294,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTProper}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -328,7 +308,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTSetRestriction}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -343,7 +322,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTSetRestriction}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -358,7 +336,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTUnion}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -373,7 +350,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTUnion}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -388,7 +364,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTNamed}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -403,7 +378,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTNamed}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -418,7 +392,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit a {@link MTGeneric}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -433,7 +406,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit a {@link MTGeneric}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -448,7 +420,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic before we visit the children of a {@link MTType}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>
@@ -463,7 +434,6 @@ public abstract class TypeVisitor {
      * <p>
      * This method adds additional logic after we visit the children of a {@link MTType}.
      * </p>
-     *
      * <p>
      * The default implementation does nothing.
      * </p>

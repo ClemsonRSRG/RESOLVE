@@ -71,7 +71,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {} => {true}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -108,7 +107,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {} => {false}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -149,7 +147,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {} => {x = x}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -202,7 +199,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {} => {x + y = x + y}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -297,7 +293,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {1 <= |S|} => {1 <= |S|}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -404,7 +399,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {x = y} => {x = y}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -477,7 +471,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {x = y} => {y = x}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -550,7 +543,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {(S = (<Next_Entry''> o S'')), (1 <= |S|)} => {(<Next_Entry''> o S'') = S}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -726,7 +718,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {a + b <= 9 * a, a + b = 8} => {8 <= 9 * a}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -909,7 +900,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {a + b <= 9 * a, a + b = d + c} => {d + c <= 9 * a}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -1129,7 +1119,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {a + b <= 9 * a, a + b = d * c} => {d * c <= 9 * a}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -1349,7 +1338,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {a + b <= 9 * a, a + b = d * c, d * c = 8} => {8 <= 9 * a}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -1589,7 +1577,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {a + b <= m, m = 9 * a, a + b = 8 * c + 9 * d, 8 * c + 9 * d = 8} => {8 <= 9 * a}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>
@@ -1921,7 +1908,6 @@ public class CCRegNoTheoremTest {
      * <p>
      * Sequent: {@code {a + b <= 9 * a, a + b = d * c, d * c = 8} => {8 <= 9 * a}}
      * </p>
-     *
      * <p>
      * The node labels are as follows:
      * <ul>

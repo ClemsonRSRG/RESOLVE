@@ -753,33 +753,33 @@ public class GenerateGraphvizModel extends TreeWalkerStackVisitor {
         StringBuilder sb = new StringBuilder();
         for (char c : stringArray) {
             switch (c) {
-            case '<':
-                sb.append("&lt;");
-                break;
-            case '>':
-                sb.append("&gt;");
-                break;
-            case '{':
-                sb.append("&#123;");
-                break;
-            case '}':
-                sb.append("&#125;");
-                break;
-            case '[':
-                sb.append("&#91;");
-                break;
-            case ']':
-                sb.append("&#93;");
-                break;
-            case '_':
-                sb.append("&#95;");
-                break;
-            case '|':
-                sb.append("&#124;");
-                break;
-            default:
-                sb.append(c);
-                break;
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                case '{':
+                    sb.append("&#123;");
+                    break;
+                case '}':
+                    sb.append("&#125;");
+                    break;
+                case '[':
+                    sb.append("&#91;");
+                    break;
+                case ']':
+                    sb.append("&#93;");
+                    break;
+                case '_':
+                    sb.append("&#95;");
+                    break;
+                case '|':
+                    sb.append("&#124;");
+                    break;
+                default:
+                    sb.append(c);
+                    break;
             }
         }
 

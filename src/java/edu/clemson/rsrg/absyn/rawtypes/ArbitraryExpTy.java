@@ -18,7 +18,6 @@ import edu.clemson.rsrg.absyn.expressions.Exp;
  * <p>
  * This is the class for all the raw arbitrary type objects that the compiler builds using the ANTLR4 AST nodes.
  * </p>
- *
  * <p>
  * A syntactic type based on an arbitrary mathematical {@link Exp}. All math expressions should have this {@link Ty}.
  * Ultimately their interfaces should be changed to reflect this fact, or this class should be unwrapped and math types

@@ -119,7 +119,6 @@ public final class LazyMappingIterator<I, O> implements Iterator<O> {
      *
      * @throws UnsupportedOperationException
      *             if the {@code remove} operation is not supported by this iterator
-     *
      * @throws IllegalStateException
      *             if the {@code next} method has not yet been called, or the {@code remove} method has already been
      *             called after the last call to the {@code next} method

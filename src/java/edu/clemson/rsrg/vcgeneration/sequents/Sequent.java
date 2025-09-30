@@ -26,7 +26,6 @@ import java.util.List;
  * <p>
  * This class stores {@code antecedent} and {@code consequent} expressions for a given conditional assertion.
  * </p>
- *
  * <p>
  * All {@code antecedents} are joined by the {@code and} operator and the {@code consequents} are joined by the
  * {@code or} operator. This means that if all the conditions in the {@code antecedent} are {@code true}, then one of

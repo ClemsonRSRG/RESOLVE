@@ -329,15 +329,15 @@ public class SequentReduction {
                 // Use the operator to determine which rule to call.
                 String operator = ((InfixExp) exp).getOperatorAsString();
                 switch (operator) {
-                case "and":
-                    ruleApplication = new LeftAndRule(sequent, exp);
-                    break;
-                case "or":
-                    ruleApplication = new LeftOrRule(sequent, exp);
-                    break;
-                case "implies":
-                    ruleApplication = new LeftImpliesRule(sequent, exp);
-                    break;
+                    case "and":
+                        ruleApplication = new LeftAndRule(sequent, exp);
+                        break;
+                    case "or":
+                        ruleApplication = new LeftOrRule(sequent, exp);
+                        break;
+                    case "implies":
+                        ruleApplication = new LeftImpliesRule(sequent, exp);
+                        break;
                 }
             }
             // Only call the not reduction rule if the operator is "not"
@@ -397,15 +397,15 @@ public class SequentReduction {
                 // Use the operator to determine which rule to call.
                 String operator = ((InfixExp) exp).getOperatorAsString();
                 switch (operator) {
-                case "and":
-                    ruleApplication = new RightAndRule(sequent, exp);
-                    break;
-                case "or":
-                    ruleApplication = new RightOrRule(sequent, exp);
-                    break;
-                case "implies":
-                    ruleApplication = new RightImpliesRule(sequent, exp);
-                    break;
+                    case "and":
+                        ruleApplication = new RightAndRule(sequent, exp);
+                        break;
+                    case "or":
+                        ruleApplication = new RightOrRule(sequent, exp);
+                        break;
+                    case "implies":
+                        ruleApplication = new RightImpliesRule(sequent, exp);
+                        break;
                 }
             }
             // Only call the not reduction rule if the operator is "not"

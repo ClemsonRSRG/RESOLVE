@@ -175,7 +175,6 @@ public abstract class AbstractProofRuleApplication implements ProofRuleApplicati
      * An helper method for creating the modified {@code ensures} clause that modifies the shared variables
      * appropriately.
      * </p>
-     *
      * <p>
      * Note that this helper method also does all the appropriate substitutions to the {@code VCs} in the assertive code
      * block.

@@ -153,7 +153,6 @@ public class MathSymbolEntry extends SymbolTableEntry {
      * parameters of this function: the types of arguments corresponding to non-schematized formal parameters may not
      * match even if a call to this method succeeds.
      * </p>
-     *
      * <p>
      * If the provided arguments will not deschematize against the formal parameter types, this method will throw a
      * {@link NoSolutionException}. This may occur because the argument count is not correct, because an actual argument

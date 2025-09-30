@@ -546,21 +546,14 @@ public class ImmutableVC {
          * (PAlternatives) rhs; ArrayList<PExp> conditions = new ArrayList<PExp>(); for (PAlternatives.Alternative pa :
          * asPa.myAlternatives) { conditions.add(pa.condition); ArrayList<PExp> args = new ArrayList<PExp>();
          * args.add(lhs); args.add(pa.result); PSymbol ant = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-         *
          * args.clear(); args.add(pa.condition); args.add(ant); PSymbol pc = new PSymbol(m_typegraph.BOOLEAN, null,
-         * "implies", args); converted.add(pc); m_conditions.add(pa.condition); }
-         *
-         * // do otherwise clause if (conditions.size() > 1) { // make conjunction } else { ArrayList<PExp> args = new
-         * ArrayList<PExp>(); args.add(conditions.get(0)); PExp neg = new PSymbol(m_typegraph.BOOLEAN, null, "not",
-         * args); args.clear();
-         *
+         * "implies", args); converted.add(pc); m_conditions.add(pa.condition); } // do otherwise clause if
+         * (conditions.size() > 1) { // make conjunction } else { ArrayList<PExp> args = new ArrayList<PExp>();
+         * args.add(conditions.get(0)); PExp neg = new PSymbol(m_typegraph.BOOLEAN, null, "not", args); args.clear();
          * args.add(lhs); args.add(asPa.myOtherwiseClauseResult); PExp eq = new PSymbol(m_typegraph.BOOLEAN, null, "=",
          * args); args.clear(); args.add(neg); args.add(eq); converted.add(new PSymbol(m_typegraph.BOOLEAN, null,
-         * "implies", args)); //m_conditions.add(neg); }
-         *
-         * } // No PAlt else { converted.add(p); } }
-         *
-         * } m_liftedLambdaPredicates = converted; }
+         * "implies", args)); //m_conditions.add(neg); } } // No PAlt else { converted.add(p); } } }
+         * m_liftedLambdaPredicates = converted; }
          */
 
         /**

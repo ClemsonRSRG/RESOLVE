@@ -28,7 +28,6 @@ import java.util.Set;
  * This class extracts unique symbols from an {@link Exp}. This visitor logic is implemented as a
  * {@link TreeWalkerVisitor}.
  * </p>
- *
  * <p>
  * Note that this class was designed to be an helper class for the {@link AssumeStmtRule}. Any modifications to this
  * class might break the rule!

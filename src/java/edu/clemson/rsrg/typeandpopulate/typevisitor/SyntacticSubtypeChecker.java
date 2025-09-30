@@ -26,7 +26,6 @@ import java.util.NoSuchElementException;
  * using only syntactic information. Specifically, without recourse to type theorems. The syntactic subtype relationship
  * thus completely captures all hard-coded type relationship information.
  * </p>
- *
  * <p>
  * This class implements a check for a syntactic subtype relationship as a symmetric visitor. To check if
  * <code>t1</code> is a syntactic subtype of <code>t2</code>, use code like this:
@@ -42,23 +41,19 @@ import java.util.NoSuchElementException;
  *     // Stuff to do if t1 is NOT a syntactic subtype of t2
  * }
  * </pre>
- *
  * <p>
  * As shown, the <code>visit()</code> method of a <code>SyntacticSubtypeChecker</code> will exit normally if two types
  * have a syntactic subtype relationship, or throw an <code>IllegalArgumentException</code> if they do not. The
  * <code>IllegalArgumentException</code> will wrap a <code>TypeMismatchException</code> describing the specific problem.
  * </p>
- *
  * <p>
  * As the checker descends the type trees in parallel, it keeps a record of actual component types from <code>t1</code>
  * that were matched with some quantified type-variable from <code>t2</code>. After a successful check, this record can
  * be accessed via <code>getBindings()</code>.
  * </p>
- *
  * <p>
  * At this time, the following syntactic relationships are recognized as forming a syntactic subtype relationship:
  * </p>
- *
  * <ul>
  * <li>Any type is a syntactic subtype of both <strong>MType</strong> and <strong>Entity</strong> (which is a superset
  * of <strong>MType</strong>).</li>
@@ -92,7 +87,6 @@ import java.util.NoSuchElementException;
  * subset such that <code>r_type_valued_expression</code> becomes alpha-equivalent to
  * <code>t_type_valued_expression</code>.</li>
  * </ul>
- *
  * <p>
  * <strong>Note:</strong> Currently we do not deal correctly with types where the same quantified variable appears
  * multiple times in the template, e.g., "<code>BigUnion{t : MType}{t union t}</code>". This is coded defensively and
@@ -184,7 +178,6 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
      * This method adds additional logic before we visit two {@link MTFunctionApplication} by attempting to checking if
      * <code>t1's</code> function name is equal to <code>t2's</code> name.
      * </p>
-     *
      * <p>
      * If it is not the same, then we have a mismatch error.
      * </p>
@@ -279,7 +272,6 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
      * <p>
      * This method adds additional logic before we visit two {@link MTSetRestriction}.
      * </p>
-     *
      * <p>
      * Currently this feature is not implemented and will always throw an exception.
      * </p>
@@ -304,7 +296,6 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
      * This method adds additional logic before we visit two {@link MTProper} by checking if <code>t1</code> can be
      * established to be a subtype of <code>t2</code>.
      * </p>
-     *
      * <p>
      * If we cannot establish a relationship, then we have a mismatch error.
      * </p>
