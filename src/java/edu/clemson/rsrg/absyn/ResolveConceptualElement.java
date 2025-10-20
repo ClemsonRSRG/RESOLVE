@@ -37,7 +37,6 @@ public abstract class ResolveConceptualElement implements BasicCapabilities, Clo
      * <p>
      * Refers to the starting position of this {@code ResolveConceptualElement} in the source file.
      * </p>
-     *
      * <p>
      * Note that this is <em>not</em> the starting position of the name or anything like that -- but the actual start of
      * the construct itself.
@@ -207,7 +206,6 @@ public abstract class ResolveConceptualElement implements BasicCapabilities, Clo
      * <p>
      * This method returns the object in string format.
      * </p>
-     *
      * <p>
      * <strong>Note:</strong> The {@code toString} method is intended for printing debugging messages. Do not use its
      * value to perform compiler actions.

@@ -278,7 +278,6 @@ public class VerificationContext implements BasicCapabilities, Cloneable {
      * below for complete list) and builds the appropriate {@code assume} clause that goes at the beginning an
      * {@link AssertiveCodeBlock}.
      * </p>
-     *
      * <p>
      * List of different places where clauses can originate from:
      * </p>

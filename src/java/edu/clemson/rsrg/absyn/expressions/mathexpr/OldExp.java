@@ -22,7 +22,6 @@ import java.util.*;
  * This is the class for all the "old" mathematical expression objects that the compiler builds using the ANTLR4 AST
  * nodes.
  * </p>
- *
  * <p>
  * An "old" expression is an expression that refers to the incoming value of the expression.
  * </p>

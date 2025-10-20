@@ -155,7 +155,6 @@ public class Populator extends TreeWalkerVisitor {
      * While walking a procedure, this is set to the entry for the operation or {@link OperationProcedureDec} that the
      * procedure is attempting to implement.
      * </p>
-     *
      * <p>
      * <strong>INVARIANT:</strong> <code>myCorrespondingOperation != null</code> <em>implies</em>
      * <code>myCurrentParameters != null</code>.
@@ -169,7 +168,6 @@ public class Populator extends TreeWalkerVisitor {
      * all formal parameters encountered so far, otherwise it will be null. Since none of these structures can be be
      * nested, there's no need for a stack.
      * </p>
-     *
      * <p>
      * If you need to distinguish if you're in the middle of an operation/{@link OperationProcedureDec} or a procedure,
      * check {@code myCorrespondingOperation}.
@@ -247,7 +245,6 @@ public class Populator extends TreeWalkerVisitor {
      * {@link QuantExp}). In this case, {@link QuantExp} should <em>not</em> remove its layer, but rather change it to
      * MathSymbolTableEntry.None.
      * </p>
-     *
      * <p>
      * This stack is never empty, but rather the bottom layer is always MathSymbolTableEntry.None.
      * </p>

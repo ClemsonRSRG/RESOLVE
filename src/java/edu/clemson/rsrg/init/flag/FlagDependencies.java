@@ -116,7 +116,6 @@ public class FlagDependencies {
      *
      * @throws NoSuchElementException
      *             If no flag with the given name exists.
-     *
      * @throws IllegalArgumentException
      *             If <code>name</code> doesn't look like an invocation (i.e., doesn't start with a hyphen).
      */
@@ -412,7 +411,6 @@ public class FlagDependencies {
          * A set of <strong>requires</strong> relationships. The semantic of this map is as follows: if this flag is on
          * then for each Set of Flags in <code>requires</code>, at least one Flag in that Set is on.
          * </p>
-         *
          * <p>
          * That is, this is a set of "at least one on" sets.
          * </p>

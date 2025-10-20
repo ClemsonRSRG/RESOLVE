@@ -25,13 +25,11 @@ import java.util.Map;
  * what the flag will be called from the command line (for instance a <code>Flag</code> named "myflag" will be turned on
  * by adding "-myflag" as an option from the command line.)
  * </p>
- *
  * <p>
  * Each flag also has a <em>section</em> and a <em>description</em>, which are used to display information about flags
  * to the user. All flags with the same section string will be grouped together under that heading. Each flag's
  * description will be displayed to explain what it does.
  * </p>
- *
  * <p>
  * Some flags take parameters. An example would be a flag that lets the user specify the output directory.
  * Hypothetically let's name that flag "outdir." We expect that after giving this flag, the user will provide a
@@ -42,7 +40,6 @@ import java.util.Map;
  * always set, even if the user doesn't turn it on directly. However, if the user chooses to turn on the flag from the
  * command line, his provided values will be used for the parameters, otherwise the defaults will be used.
  * </p>
- *
  * <p>
  * If the help screen displayed all available flags, there would be very many indeed. Some flags shouldn't be shown to
  * the user, either because they are intended for developers, or because they are intended for advanced users.
@@ -50,7 +47,6 @@ import java.util.Map;
  * displayed when the user requests the extended help page. A flag may be hidden by using one of the constructors that
  * takes a <code>Flag.Type</code> and giving it the type <code>HIDDEN</code>.
  * </p>
- *
  * <p>
  * Occasionally, it is useful to have certain flags that only the compiler can set. For instance, several flags might
  * put the compiler into a certain "mode" and we'd like to check if that mode is on without checking each of those flags
@@ -146,10 +142,8 @@ public class Flag {
      *
      * @throws NullPointerException
      *             If any argument is <code>null</code>.
-     *
      * @throws IllegalStateException
      *             If <code>FlagDependencies.seal()</code> has already been called.
-     *
      * @throws DuplicateEntryException
      *             If a flag with this name already exists.
      */
@@ -176,10 +170,8 @@ public class Flag {
      *
      * @throws NullPointerException
      *             If any argument is <code>null</code>.
-     *
      * @throws MiscErrorException
      *             If <code>FlagDependencies.seal()</code> has already been called.
-     *
      * @throws DuplicateEntryException
      *             If a flag with this name already exists.
      */
@@ -211,13 +203,10 @@ public class Flag {
      * @throws IllegalArgumentException
      *             If <code>parameterNames.length() !=
      *              defaultArguments.length()</code>.
-     *
      * @throws NullPointerException
      *             If any argument is <code>null</code>.
-     *
      * @throws IllegalStateException
      *             If <code>FlagDependencies.seal()</code> has already been called.
-     *
      * @throws DuplicateEntryException
      *             If a flag with this name already exists.
      */
@@ -249,13 +238,10 @@ public class Flag {
      * @throws IllegalArgumentException
      *             If <code>parameterNames.length() !=
      *              defaultArguments.length()</code>.
-     *
      * @throws NullPointerException
      *             If any argument is <code>null</code>.
-     *
      * @throws IllegalStateException
      *             If <code>FlagDependencies.seal()</code> has already been called.
-     *
      * @throws DuplicateEntryException
      *             If a flag with this name already exists.
      */
@@ -282,10 +268,8 @@ public class Flag {
      *
      * @throws NullPointerException
      *             If any argument is <code>null</code>.
-     *
      * @throws IllegalStateException
      *             If <code>FlagDependencies.seal()</code> has already been called.
-     *
      * @throws DuplicateEntryException
      *             If a flag with this name already exists.
      */
@@ -309,10 +293,8 @@ public class Flag {
      *
      * @throws NullPointerException
      *             If any argument is <code>null</code>.
-     *
      * @throws IllegalStateException
      *             If <code>FlagDependencies.seal()</code> has already been called.
-     *
      * @throws DuplicateEntryException
      *             If a flag with this name already exists.
      */

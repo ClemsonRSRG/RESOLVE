@@ -22,7 +22,6 @@ import java.util.Map;
  * <p>
  * This is the class represents a named {@code Receptacle} that the compiler builds using the ANTLR4 AST nodes.
  * </p>
- *
  * <p>
  * As an example a receptacle: {@code recp.S} indicate that it is the {@code Receptacle} for the variable {@code S}.
  * </p>
@@ -49,7 +48,6 @@ public class RecpExp extends MathExp {
     // ===========================================================
 
     /**
-     *
      * @param l
      *            A {@link Location} representation object.
      * @param exp

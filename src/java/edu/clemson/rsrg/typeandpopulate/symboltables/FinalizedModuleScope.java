@@ -22,7 +22,6 @@ import java.util.List;
  * <p>
  * A <code>FinalizedModuleScope</code> is an immutable realization of {@link ModuleScope}.
  * </p>
- *
  * <p>
  * Note that <code>FinalizedModuleScope</code> has no public constructor. <code>FinalizedModuleScope</code>s are
  * acquired through calls to some of the methods of {@link MathSymbolTable}.

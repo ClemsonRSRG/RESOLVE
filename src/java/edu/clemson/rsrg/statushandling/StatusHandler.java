@@ -62,9 +62,8 @@ public interface StatusHandler {
 
     /**
      * <p>
-     * Stop logging anymore information.
-     *
-     * (Note: Should only be called when the compile process is over or has been aborted due to an error.)
+     * Stop logging anymore information. (Note: Should only be called when the compile process is over or has been
+     * aborted due to an error.)
      * </p>
      */
     void stopLogging();

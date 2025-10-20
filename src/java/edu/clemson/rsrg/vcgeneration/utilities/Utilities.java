@@ -80,7 +80,6 @@ public class Utilities {
      * <p>
      * This method to check if an equivalent expression is in the specified collection.
      * </p>
-     *
      * <p>
      * <em>Note:</em> We can't use {@link Collection#contains(Object)} because it will use the strict
      * {@link Exp#equals(Object)} method rather than {@link Exp#equivalent(Exp)}.

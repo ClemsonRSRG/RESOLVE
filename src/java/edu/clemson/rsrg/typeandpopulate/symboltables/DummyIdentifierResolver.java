@@ -56,11 +56,9 @@ class DummyIdentifierResolver extends AbstractScope {
      * results, any generics will be instantiated appropriately according to <code>genericInstantiations</code>, but
      * this scope will not be permanently modified.
      * </p>
-     *
      * <p>
      * The search will continue upward toward the top-level global scope until one of the following happens:
      * </p>
-     *
      * <ul>
      * <li>The top-level scope is searched.</li>
      * <li>A scope is reached that is already in <code>searchedScopes</code>.</li>
@@ -68,16 +66,13 @@ class DummyIdentifierResolver extends AbstractScope {
      * <code>true</code>, indicating the list is complete.</li>
      * <li>The <code>addMatches()</code> method throws a {@link DuplicateSymbolException}.</li>
      * </ul>
-     *
      * <p>
      * In the first three cases, the method returns normally, with any matches added to <code>matches</code>. If no
      * matches are found, <code>matches</code> will simply be left unchanged.
      * </p>
-     *
      * <p>
      * In the last case, this method will throw a <code>DuplicateSymbolException</code>.
      * </p>
-     *
      * <p>
      * Regardless of how this method terminates, any searched scopes will be added to <code>searchedScopes</code>.
      * </p>
@@ -113,7 +108,6 @@ class DummyIdentifierResolver extends AbstractScope {
      * Returns a list of {@link ProgramParameterEntry}s contained directly in this scope. These correspond to the formal
      * parameters defined by the syntactic element that introduced the scope.
      * </p>
-     *
      * <p>
      * If there are no parameters, or the syntactic element is not of the sort that can define parameters, returns an
      * empty list.

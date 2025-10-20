@@ -164,7 +164,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * The top of this {@link Stack} maintains a reference to the template actively being built or added to, and the
      * bottom refers to {@code shell} - the outermost enclosing template for all currently supported target languages.
      * </p>
-     *
      * <p>
      * Proper usage should generally involve: Pushing in <tt>pre</tt>, modifying top arbitrarily with <tt>pre</tt>'s
      * children, popping in the corresponding <tt>post</tt>, then adding the popped template to the appropriate
@@ -1380,7 +1379,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>
      * An helper method that throws the appropriate unsupported shared variable translation message.
      * </p>
-     *
      * <p>
      * Note: Remove this once we figure out how to translate shared variables to Java/C.
      * </p>

@@ -121,7 +121,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
      * Once we are done walking an element that could have a syntactic sugar conversion, we add that element into the
      * top-most collector.
      * </p>
-     *
      * <p>
      * When we are done walking a {@link ResolveConceptualElement} that can contain a list of {@link Statement}s, we
      * build a new instance of the object using the elements in the collector.
@@ -1538,7 +1537,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
          * <p>
          * A stack of new statements that needs to be inserted before the code that contains a program array expression.
          * </p>
-         *
          * <p>
          * <strong>Note:</strong> The only statements generated at the moment are either new function assignment
          * statements from indexes in program array expressions or call statements to swap elements in the array(s).
@@ -1550,7 +1548,6 @@ public class SyntacticSugarConverter extends TreeWalkerVisitor {
          * <p>
          * A queue of new statements that needs to be inserted after the code that contains a program array expression.
          * </p>
-         *
          * <p>
          * <strong>Note:</strong> The only statements generated at the moment are call statements to swap elements in
          * the array(s).

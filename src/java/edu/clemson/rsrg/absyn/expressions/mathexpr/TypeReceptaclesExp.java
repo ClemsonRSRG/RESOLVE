@@ -23,7 +23,6 @@ import java.util.Map;
  * This is the class represents a programming type {@code Receptacles} as an expression that the compiler builds using
  * the ANTLR4 AST nodes.
  * </p>
- *
  * <p>
  * As an example a programming type: {@code Stack}'s {@code Receptacles} ({@code Stack.Receptacles} indicate the named
  * and unnamed {@code Stack}s declared in the current execution context.
@@ -51,7 +50,6 @@ public class TypeReceptaclesExp extends MathExp {
     // ===========================================================
 
     /**
-     *
      * @param l
      *            A {@link Location} representation object.
      * @param typeNameExp

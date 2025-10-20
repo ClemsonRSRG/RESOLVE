@@ -252,12 +252,12 @@ public class HardCoded {
 
         if (lastExp.getMathTypeValue() != null) {
             switch (currentExpName) {
-            case "Is_Initial":
-                result = new MTFunction(g, g.BOOLEAN, lastExp.getMathTypeValue());
-                break;
-            case "Val_in":
-                result = new MTFunction(g, lastExp.getMathTypeValue(), g.RECEPTACLES);
-                break;
+                case "Is_Initial":
+                    result = new MTFunction(g, g.BOOLEAN, lastExp.getMathTypeValue());
+                    break;
+                case "Val_in":
+                    result = new MTFunction(g, lastExp.getMathTypeValue(), g.RECEPTACLES);
+                    break;
             }
         }
 

@@ -21,7 +21,6 @@ import java.util.Map;
  * <p>
  * A <code>PTNamed</code> represents a {@link PTFamily} that has been instantiated via a facility.
  * </p>
- *
  * <p>
  * Note that, while an instantiated type must have all parameters "filled in", it's possible that some have been filled
  * in with constant parameters or type parameters from the facility's source module.

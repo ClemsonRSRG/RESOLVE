@@ -42,7 +42,6 @@ public class ValidOperationDeclChecker {
      * While walking a procedure, this is set to the entry for the operation or {@link OperationProcedureDec} that the
      * procedure is attempting to implement.
      * </p>
-     *
      * <p>
      * <strong>INVARIANT:</strong> <code>myCorrespondingOperation != null</code> <em>implies</em>
      * <code>myCurrentParameters != null</code>.
@@ -56,7 +55,6 @@ public class ValidOperationDeclChecker {
      * all formal parameters encountered so far, otherwise it will be null. Since none of these structures can be be
      * nested, there's no need for a stack.
      * </p>
-     *
      * <p>
      * If you need to distinguish if you're in the middle of an operation/{@link OperationProcedureDec} or a procedure,
      * check {@code myCorrespondingOperation}.

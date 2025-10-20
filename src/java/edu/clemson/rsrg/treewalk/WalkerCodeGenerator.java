@@ -63,7 +63,6 @@ public class WalkerCodeGenerator {
      * <p>
      * Generates a tree walker.
      * </p>
-     *
      * <p>
      * Two optional arguments in the array:
      * </p>
@@ -83,22 +82,22 @@ public class WalkerCodeGenerator {
         String inputPackageDir;
         String outputPackageDir;
         switch (args.length) {
-        case 0:
-            walkerName = "TreeWalkerVisitor";
-            stackWalkerName = "TreeWalkerStackVisitor";
-            inputPackageDir = "edu/clemson/cs/rsrg/absyn";
-            outputPackageDir = "edu/clemson/cs/rsrg/treewalk";
-            break;
-        case 4:
-            walkerName = args[0];
-            stackWalkerName = args[1];
-            inputPackageDir = args[2];
-            outputPackageDir = args[3];
-            break;
-        default:
-            throw new IllegalArgumentException("usage:\n"
-                    + "\tSupply the following args: [walker name, stack walker name, input directory, output directory]\n"
-                    + "\tor use the built-in default args.\n");
+            case 0:
+                walkerName = "TreeWalkerVisitor";
+                stackWalkerName = "TreeWalkerStackVisitor";
+                inputPackageDir = "edu/clemson/cs/rsrg/absyn";
+                outputPackageDir = "edu/clemson/cs/rsrg/treewalk";
+                break;
+            case 4:
+                walkerName = args[0];
+                stackWalkerName = args[1];
+                inputPackageDir = args[2];
+                outputPackageDir = args[3];
+                break;
+            default:
+                throw new IllegalArgumentException("usage:\n"
+                        + "\tSupply the following args: [walker name, stack walker name, input directory, output directory]\n"
+                        + "\tor use the built-in default args.\n");
         }
 
         ST visitor = createDefaultVisitor(walkerName, inputPackageDir, outputPackageDir);
