@@ -23,6 +23,7 @@ import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
 import edu.clemson.rsrg.nProver.utilities.theorems.ElaborationRule;
 import edu.clemson.rsrg.nProver.utilities.theorems.ElaborationRules;
 import edu.clemson.rsrg.nProver.utilities.theorems.RelevantTheoremExtractor;
+import edu.clemson.rsrg.nProver.utilities.theorems.TheoremStore;
 import edu.clemson.rsrg.nProver.utilities.treewakers.AbstractRegisterSequent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterAntecedent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSuccedent;
@@ -331,6 +332,9 @@ public class GeneralPurposeProver {
         // query the collection of theorems once referring to the uses statement.
         theorems.theoremEntryQuery();
 
+                // Use the new TheoremStore to preload theorems for fast lookup.
+                TheoremStore theoremStore = new TheoremStore(myCurrentModuleScope);
+
         // Loop through each of the VCs and attempt to prove them
         for (VerificationCondition vc : myVerificationConditions) {
             // Store the start time for generating proofs for this VC
@@ -341,7 +345,7 @@ public class GeneralPurposeProver {
             CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000,
                     1000, 1000, 1000);
             Map<String, Integer> expLabels = new LinkedHashMap<>();
-            List<TheoremEntry> relevantTheorems = new ArrayList<>();
+            List<TheoremEntry> relevantTheorems;
 
             // NM: 0, 1 are spared for <= (1), = (2), etc., the list can expand with more reflexive operators
             // preload <=, = into the map
@@ -379,10 +383,29 @@ public class GeneralPurposeProver {
                 System.out.println(operators);
             }
             System.out.println("============ Relevant Theorem===============");
-
+            System.out.println("Old: Using RelevantTheoremExtractor");
             relevantTheorems = theorems.getSequentVCTheorems(expLabels);
 
             ElaborationRules rules = new ElaborationRules(relevantTheorems);
+
+            for (TheoremEntry te : relevantTheorems) {
+                System.out.println(te.getAssertion());
+                // System.out.println("==========sub-expressions=============");
+                // System.out.println(te.getAssertion().getSubExpressions());
+                /*
+                 * System.out.println("==========SubSubExpressions========"); for(Exp
+                 * e:te.getAssertion().getSubExpressions()){ System.out.println(e.getSubExpressions()); for(Exp
+                 * e2:e.getSubExpressions()){ System.out.println(e2.getClass().getSimpleName()); } }
+                 *
+                 */
+
+            }
+            rules.createElaborationRules();
+            // Find all preloaded theorems whose operator sets are subsets of the sequent operators
+            System.out.println("New: Using TheoremStore");
+            relevantTheorems = theoremStore.findRelevantTheorems(expLabels.keySet());
+
+            rules = new ElaborationRules(relevantTheorems);
 
             for (TheoremEntry te : relevantTheorems) {
                 System.out.println(te.getAssertion());
