@@ -45,6 +45,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import static edu.clemson.rsrg.vcgeneration.VCGenerator.FLAG_VERIFY_VC;
+import edu.clemson.rsrg.nProver.utilities.theorems.TheoremStore;
 
 /**
  * <p>
@@ -327,9 +328,8 @@ public class GeneralPurposeProver {
         myTotalElapsedTime = System.currentTimeMillis();
         int numUnproved = 0;
 
-        RelevantTheoremExtractor theorems = new RelevantTheoremExtractor(myCurrentModuleScope);
-        // query the collection of theorems once referring to the uses statement.
-        theorems.theoremEntryQuery();
+        // Build a preloaded theorem store once for the module scope
+        TheoremStore theoremStore = new TheoremStore(myCurrentModuleScope);
 
         // Loop through each of the VCs and attempt to prove them
         for (VerificationCondition vc : myVerificationConditions) {
@@ -380,7 +380,10 @@ public class GeneralPurposeProver {
             }
             System.out.println("============ Relevant Theorem===============");
 
-            relevantTheorems = theorems.getSequentVCTheorems(expLabels);
+            // Use preloaded store: get all theorems whose operators are a subset of the VC operators
+            relevantTheorems = theoremStore.findRelevantTheorems(expLabels.keySet());
+            System.out.print("Number of relevant theorems: ");
+            System.out.println(relevantTheorems.size());
 
             ElaborationRules rules = new ElaborationRules(relevantTheorems);
 
@@ -482,3 +485,4 @@ public class GeneralPurposeProver {
         myProofGenDetailsModel.add("vcProofDetails", vcProofDetailModel.render());
     }
 }
+

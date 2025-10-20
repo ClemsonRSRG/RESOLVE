@@ -225,6 +225,7 @@ public class ResolveCompiler {
 
         // Compile files/directories listed in the argument list
         try {
+            //step in here
             compileRealFiles(myArgumentFileList, compileEnvironment);
         } catch (CompilerException e) {
             // YS - The status handler object might have changed.

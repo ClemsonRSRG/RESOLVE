@@ -1,0 +1,38 @@
+// {
+//     "configurations": [
+//         {
+//             "type": "java",
+//             "name": "Main",
+//             "request": "launch",
+//             "mainClass": "edu.clemson.rsrg.Main",
+//             "projectName": "RESOLVE"
+//         }
+//     ]
+// } 
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+  "type": "java",
+  "name": "Debug RESOLVE Main",
+  "request": "launch",
+  "mainClass": "edu.clemson.rsrg.Main",
+  // Program arguments (edit as needed)
+  "args": "-VCs Do_Nothing_Realiz.rb",
+  // Classpath argfile (update path if regenerated)
+  "vmArgs": "@C:\\Users\\briza\\AppData\\Local\\Temp\\cp_chao0vlzgo9u44gr9ot8pjamg.argfile",
+  // Working directory
+  "cwd": "${fileDirname}"
+    }
+    ,{
+      "type": "java",
+      "name": "Debug RESOLVE Main (AutoClasspath, StopOnEntry)",
+      "request": "launch",
+      "mainClass": "edu.clemson.rsrg.Main",
+      "args": "-VCs Do_Nothing_Realiz.rb",
+      "stopOnEntry": true,
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

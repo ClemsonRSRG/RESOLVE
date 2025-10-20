@@ -1,0 +1,32 @@
+====
+    stderr.txt
+    ---------------------------------
+    Copyright (c) 2024
+    RESOLVE Software Research Group
+    School of Computing
+    Clemson University
+    All rights reserved.
+    ---------------------------------
+    This file is subject to the terms and conditions defined in
+    file 'LICENSE.txt', which is part of this source code package.
+====
+
+
+Fault: Incorrect Parameter Mode
+at Static_Array_Template.co(16:78)
+Ensures clause at Static_Array_Template.co(18:16) contains #i while having parameter mode EVALUATES
+
+Fault: Incorrect Parameter Mode
+at Static_Array_Template.co(22:66)
+Ensures clause at Static_Array_Template.co(25:16) contains #i while having parameter mode EVALUATES
+
+Fault: Incorrect Parameter Mode
+at Static_Array_Template.co(22:69)
+Ensures clause at Static_Array_Template.co(25:16) contains #j while having parameter mode EVALUATES
+
+Fault: Compiler Exception
+No function applicable for domain: (Z * Z)	[Shifting_Realiz.rb(12:14)]
+
+Candidates:
+	[Integer_Theory.mt(22:21)]	- : (Z -> Z)
+
