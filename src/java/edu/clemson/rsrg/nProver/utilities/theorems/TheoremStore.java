@@ -20,8 +20,7 @@ public final class TheoremStore {
         Objects.requireNonNull(scope, "scope");
         // Query all theorems once
         List<TheoremEntry> programTheorems = scope.query(new EntryTypeQuery<>(TheoremEntry.class,
-                MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+                MathSymbolTable.ImportStrategy.IMPORT_NAMED, MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
         this.allTheorems = Collections.unmodifiableList(new ArrayList<>(programTheorems));
         this.theoremToOps = new LinkedHashMap<>(programTheorems.size());
@@ -59,7 +58,9 @@ public final class TheoremStore {
     /**
      * Find all theorems whose operator set is a subset of the provided sequent operators.
      *
-     * @param sequentOperators A set of operator strings extracted from the target sequent.
+     * @param sequentOperators
+     *            A set of operator strings extracted from the target sequent.
+     *
      * @return A list of relevant {@link TheoremEntry} objects.
      */
     public List<TheoremEntry> findRelevantTheorems(Set<String> sequentOperators) {
@@ -70,8 +71,7 @@ public final class TheoremStore {
 
         // Fast path: if sequent has no operators, only theorems with no operators can match (rare)
         if (ops.isEmpty()) {
-            return allTheorems.stream()
-                    .filter(te -> theoremToOps.getOrDefault(te, Collections.emptySet()).isEmpty())
+            return allTheorems.stream().filter(te -> theoremToOps.getOrDefault(te, Collections.emptySet()).isEmpty())
                     .collect(Collectors.toList());
         }
 
@@ -110,6 +110,5 @@ public final class TheoremStore {
     public List<TheoremEntry> getAllTheorems() {
         return allTheorems;
     }
-
 
 }

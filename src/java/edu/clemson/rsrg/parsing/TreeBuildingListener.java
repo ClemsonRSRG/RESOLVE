@@ -2365,24 +2365,26 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         Exp assertionExp = dec.getEnsures().getAssertionExp();
         for (ParameterVarDec pvd : dec.getParameters()) {
             switch (pvd.getMode()) {
-            case RESTORES:
-            case PRESERVES:
-            case EVALUATES:
-            case REPLACES:
-                if (assertionExp.containsVar(pvd.getName().asString(0, 0), true)) {
-                    String str = "Ensures clause at " + assertionExp.getLocation().toString() + " contains #"
-                            + pvd.getName().asString(0, 0) + " while having parameter mode " + pvd.getMode().toString();
-                    myStatusHandler.registerAndStreamFault(
-                            new Fault(FaultType.INCORRECT_PARAMETER_MODE_USAGE, pvd.getLocation(), str, false));
-                }
-                break;
-            case ALTERS:
-                if (assertionExp.containsVar(pvd.getName().asString(0, 0), false)) {
-                    String str = "Ensures clause at " + assertionExp.getLocation().toString() + " contains "
-                            + pvd.getName().asString(0, 0) + " while having parameter mode " + pvd.getMode().toString();
-                    myStatusHandler.registerAndStreamFault(
-                            new Fault(FaultType.INCORRECT_PARAMETER_MODE_USAGE, pvd.getLocation(), str, false));
-                }
+                case RESTORES:
+                case PRESERVES:
+                case EVALUATES:
+                case REPLACES:
+                    if (assertionExp.containsVar(pvd.getName().asString(0, 0), true)) {
+                        String str = "Ensures clause at " + assertionExp.getLocation().toString() + " contains #"
+                                + pvd.getName().asString(0, 0) + " while having parameter mode "
+                                + pvd.getMode().toString();
+                        myStatusHandler.registerAndStreamFault(
+                                new Fault(FaultType.INCORRECT_PARAMETER_MODE_USAGE, pvd.getLocation(), str, false));
+                    }
+                    break;
+                case ALTERS:
+                    if (assertionExp.containsVar(pvd.getName().asString(0, 0), false)) {
+                        String str = "Ensures clause at " + assertionExp.getLocation().toString() + " contains "
+                                + pvd.getName().asString(0, 0) + " while having parameter mode "
+                                + pvd.getMode().toString();
+                        myStatusHandler.registerAndStreamFault(
+                                new Fault(FaultType.INCORRECT_PARAMETER_MODE_USAGE, pvd.getLocation(), str, false));
+                    }
             }
         }
 
