@@ -194,6 +194,7 @@
                         <licenseSet>
                             <header>${license.url}</header>
                             <excludes>
+                                <exclude>.dir-locals.el</exclude>
                                 <exclude>.gitattributes</exclude>
                                 <exclude>.gitignore</exclude>
                                 <exclude>*.md</exclude>
