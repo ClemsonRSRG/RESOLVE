@@ -130,7 +130,11 @@ public final class TheoremStore {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         for (TheoremEntry theoremEntry : allTheorems) {
+            sb.append("Name: ");
+            sb.append(theoremEntry.getName());
+            sb.append("\n");
             sb.append(theoremEntry.toString());
+            sb.append("\n");
         }
         return sb.toString();
     }
