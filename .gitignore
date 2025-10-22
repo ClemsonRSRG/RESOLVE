@@ -64,3 +64,7 @@ developer.properties
 Icon?
 ehthumbs.db
 Thumbs.db
+
+/stderr.txt
+/stdout.txt
+/.vscode/
