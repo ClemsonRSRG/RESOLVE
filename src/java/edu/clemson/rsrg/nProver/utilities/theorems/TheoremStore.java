@@ -123,4 +123,15 @@ public final class TheoremStore {
         return allTheorems;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        for (TheoremEntry theoremEntry : allTheorems) {
+            sb.append(theoremEntry.toString());
+        }
+        return sb.toString();
+    }
 }

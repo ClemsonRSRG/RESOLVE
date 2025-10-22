@@ -229,4 +229,16 @@ public class TheoremEntry extends SymbolTableEntry {
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(myAssertionExp.toString());
+        sb.append(myMathSymbolAlterEgo);
+        sb.append(myOperators.toString());
+        sb.append(myTheoremSubtype.toString());
+        return sb.toString();
+    }
 }

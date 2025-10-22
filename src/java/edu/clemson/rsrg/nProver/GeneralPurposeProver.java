@@ -407,6 +407,7 @@ public class GeneralPurposeProver {
             // operators
             System.out.println("New: Using TheoremStore");
             relevantTheorems = theoremStore.findRelevantTheorems(expLabels.keySet());
+            System.out.println(theoremStore.toString());
 
             rules = new ElaborationRules(relevantTheorems);
 
