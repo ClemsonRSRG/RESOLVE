@@ -17,7 +17,9 @@ import edu.clemson.rsrg.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.rsrg.typeandpopulate.symboltables.ModuleScope;
+import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
 
+import java.beans.Expression;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -121,6 +123,25 @@ public final class TheoremStore {
     /** Expose all theorems if needed for diagnostics. */
     public List<TheoremEntry> getAllTheorems() {
         return allTheorems;
+    }
+
+    private List<String> getAllExpStrings(Exp exp) {
+        List<String> expStrings = new ArrayList<>();
+        expStrings.add(exp.toString());
+        for(Exp subExp : exp.getSubExpressions()) {
+            expStrings.addAll(getAllExpStrings(subExp));
+        }
+        return expStrings;
+    }
+
+    public List<Sequent> applyTheoremsToSequent(Sequent sequent) {
+        List<Sequent> results = new ArrayList<>();
+        List<String> antStrings = new ArrayList<>();
+        for (Exp ant : sequent.getAntecedents()) {
+            antStrings.addAll(getAllExpStrings(ant));
+        }
+        System.out.println("Sequents: " + antStrings);
+        return null;
     }
 
     /**

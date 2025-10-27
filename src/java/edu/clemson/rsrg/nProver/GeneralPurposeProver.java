@@ -342,6 +342,9 @@ public class GeneralPurposeProver {
             long startTime = System.nanoTime();
             // Obtain the sequent to be proved
             Sequent sequent = vc.getSequent();
+
+            theoremStore.applyTheoremsToSequent(sequent);
+
             // Create a registry and label map
             CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000,
                     1000, 1000, 1000);
@@ -407,6 +410,7 @@ public class GeneralPurposeProver {
             // operators
             System.out.println("New: Using TheoremStore");
             relevantTheorems = theoremStore.findRelevantTheorems(expLabels.keySet());
+            System.out.println("========= TheoremStore Contents =========");
             System.out.println(theoremStore.toString());
 
             rules = new ElaborationRules(relevantTheorems);
