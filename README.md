@@ -12,12 +12,8 @@ All phases of the verification process spanning verification condition (VC) gene
 
 ## Authors and major contributors
 
-The creation and continual evolution of the RESOLVE language is owed to an ongoing joint effort between Clemson University, The Ohio State University, and countless educators and researchers from a variety of [other](https://www.cs.clemson.edu/resolve/about.html) institutions.
-
-Developers of this particular test/working-iteration of the `RESOLVE Compiler` include:
-
-* [RESOLVE Software Research Group (RSRG)](https://www.cs.clemson.edu/resolve/) - School of Computing, Clemson University
+This iteration of the RESOLVE compiler is being developed as a student capstone project at Rose-Hulman Institute of Technology, advised by [Dr. Joseph Hollingsworth](mailto:hollings@rose-hulman.edu). This work is based on the [Clemson Univerity RESOLVE compiler](https://github.com/ClemsonRSRG/RESOLVE).
 
 ## Copyright and license
 
-Copyright © 2024, [RESOLVE Software Research Group (RSRG)](https://www.cs.clemson.edu/resolve/). All rights reserved. The use and distribution terms for this software are covered by the BSD 3-clause license which can be found in the file `LICENSE.txt` at the root of this repository. By using this software in any fashion, you are agreeing to be bound by the terms of this license. You must not remove this notice, or any other, from this software.
+Copyright © 2025, Rose-Hulman Institute of Technology and [RESOLVE Software Research Group (RSRG)](https://www.cs.clemson.edu/resolve/). All rights reserved. The use and distribution terms for this software are covered by the BSD 3-clause license which can be found in the file `LICENSE.txt` at the root of this repository. By using this software in any fashion, you are agreeing to be bound by the terms of this license. You must not remove this notice, or any other, from this software.
