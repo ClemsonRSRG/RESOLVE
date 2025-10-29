@@ -18,8 +18,6 @@ import edu.clemson.rsrg.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.rsrg.typeandpopulate.symboltables.MathSymbolTable;
 import edu.clemson.rsrg.typeandpopulate.symboltables.ModuleScope;
 import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
-
-import java.beans.Expression;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,8 +31,9 @@ public final class TheoremStore {
     public TheoremStore(ModuleScope scope) {
         Objects.requireNonNull(scope, "scope");
         // Query all theorems once
-        List<TheoremEntry> programTheorems = scope.query(new EntryTypeQuery<>(TheoremEntry.class,
-                MathSymbolTable.ImportStrategy.IMPORT_NAMED, MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+        List<TheoremEntry> programTheorems = scope
+                .query(new EntryTypeQuery<>(TheoremEntry.class, MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE));
 
         this.allTheorems = Collections.unmodifiableList(new ArrayList<>(programTheorems));
         this.theoremToOps = new LinkedHashMap<>(programTheorems.size());
@@ -128,7 +127,7 @@ public final class TheoremStore {
     private List<String> getAllExpStrings(Exp exp) {
         List<String> expStrings = new ArrayList<>();
         expStrings.add(exp.toString());
-        for(Exp subExp : exp.getSubExpressions()) {
+        for (Exp subExp : exp.getSubExpressions()) {
             expStrings.addAll(getAllExpStrings(subExp));
         }
         return expStrings;
