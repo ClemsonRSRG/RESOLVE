@@ -20,7 +20,6 @@ import edu.clemson.rsrg.init.flag.FlagDependencies;
 import edu.clemson.rsrg.init.output.OutputListener;
 import edu.clemson.rsrg.nProver.output.VCProverResult;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
-import edu.clemson.rsrg.nProver.utilities.theorems.ElaborationRule;
 import edu.clemson.rsrg.nProver.utilities.theorems.ElaborationRules;
 import edu.clemson.rsrg.nProver.utilities.theorems.RelevantTheoremExtractor;
 import edu.clemson.rsrg.nProver.utilities.theorems.TheoremStore;
@@ -37,10 +36,8 @@ import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.rsrg.vcgeneration.utilities.VerificationCondition;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.print.event.PrintJobAdapter;
@@ -345,6 +342,9 @@ public class GeneralPurposeProver {
             long startTime = System.nanoTime();
             // Obtain the sequent to be proved
             Sequent sequent = vc.getSequent();
+
+            theoremStore.applyTheoremsToSequent(sequent);
+
             // Create a registry and label map
             CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000,
                     1000, 1000, 1000);
@@ -394,7 +394,6 @@ public class GeneralPurposeProver {
             System.out.println("============ Relevant Theorem===============");
             System.out.println("Old: Using RelevantTheoremExtractor");
             relevantTheorems = theorems.getSequentVCTheorems(expLabels);
-
             ElaborationRules rules = new ElaborationRules(relevantTheorems);
 
             for (TheoremEntry te : relevantTheorems) {
@@ -413,6 +412,8 @@ public class GeneralPurposeProver {
             // operators
             System.out.println("New: Using TheoremStore");
             relevantTheorems = theoremStore.findRelevantTheorems(expLabels.keySet());
+            System.out.println("From new TheoremStore relevant theorems: " + relevantTheorems.size());
+            System.out.println("========= TheoremStore Contents =========");
             System.out.println(theoremStore.toString());
 
             rules = new ElaborationRules(relevantTheorems);

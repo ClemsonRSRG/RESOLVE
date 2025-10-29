@@ -1,0 +1,234 @@
+@startuml
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
+
+package "edu.clemson.rsrg" {
+
+    package "absyn" {
+        class ResolveConceptualElement
+    }
+
+    package "init" {
+        class AbstractPipeline
+        class AbstractTranslator
+        class AnalysisPipeline
+        class AntlrLexerErrorListener
+        class AntlrParserErrorListener
+        class CompileEnvironment
+        class Controller
+        class FileOutputListener
+        class Flag
+        class FlagDependencies
+        class FlagManager
+        class GraphicalASTOutputPipeline
+        class MathSymbolTableBuilder
+        class NProverPipeline
+        class ProverPipeline
+        class RawASTOutputPipeline
+        class ResolveCompiler
+        class ResolveParser
+        class SystemStdHandler
+        class TranslatorPipeline
+        class VCGenPipeline
+        class WriterStatusHandler
+    }
+
+    package "nProver" {
+        class GeneralPurposeProver
+
+        package "output" {
+            class VCProverResult
+        }
+
+        package "registry" {
+            class ClusterArgument
+            class CongruenceClass
+            class CongruenceClassRegistry
+            class CongruenceCluster
+            class Stand
+            class VarietyList
+        }
+
+        package "utilities" {
+            package "theorems" {
+                class ElaborationRule
+                class ElaborationRules
+                class RelevantTheoremExtractor
+            }
+
+            package "treewakers" {
+                abstract class AbstractRegisterSequent
+                class RegisterAntecedent
+                class RegisterSuccedent
+            }
+        }
+    }
+
+    package "treewalk" {
+        abstract class TreeWalkerVisitor
+        abstract class TreeWalkerStackVisitor
+        class TreeWalker
+    }
+
+    package "vcgeneration" {
+        class VCGenerator
+
+        package "proofrules" {
+            interface ProofRuleApplication
+            abstract class AbstractProofRuleApplication
+
+            package "declarations" {
+                abstract class AbstractBlockDeclRule
+
+                package "facilitydecl" {
+                    class FacilityDeclRule
+                }
+
+                package "operationdecl" {
+                    class ProcedureDeclRule
+                }
+
+                package "sharedstatedecl" {
+                    class SharedStateCorrRule
+                    class SharedStateRepresentationInitRule
+                }
+
+                package "typedecl" {
+                    class TypeRepresentationCorrRule
+                    class TypeRepresentationFinalRule
+                    class TypeRepresentationInitRule
+                }
+            }
+        }
+
+        package "sequents" {
+            class Sequent
+        }
+
+        package "utilities" {
+            class AssertiveCodeBlock
+            class VerificationCondition
+            class VerificationContext
+        }
+    }
+
+    ' Relationships
+    init.AbstractPipeline <|-- init.AnalysisPipeline
+    init.AbstractPipeline <|-- init.GraphicalASTOutputPipeline
+    init.AbstractPipeline <|-- init.NProverPipeline
+    init.AbstractPipeline <|-- init.ProverPipeline
+    init.AbstractPipeline <|-- init.RawASTOutputPipeline
+    init.AbstractPipeline <|-- init.TranslatorPipeline
+    init.AbstractPipeline <|-- init.VCGenPipeline
+
+    init.AnalysisPipeline ..> init.CompileEnvironment
+    init.AnalysisPipeline ..> init.FlagManager
+    init.AnalysisPipeline ..> treewalk.TreeWalker
+
+    init.Controller ..> init.AnalysisPipeline
+    init.Controller o-- "1" init.AntlrLexerErrorListener
+    init.Controller o-- "1" init.AntlrParserErrorListener
+    init.Controller o-- "1" init.CompileEnvironment
+    init.Controller ..> init.GraphicalASTOutputPipeline
+    init.Controller o-- "1" init.MathSymbolTableBuilder
+    init.Controller ..> init.NProverPipeline
+    init.Controller ..> init.ProverPipeline
+    init.Controller ..> init.RawASTOutputPipeline
+    init.Controller ..> init.TranslatorPipeline
+    init.Controller ..> init.VCGenPipeline
+
+    init.FlagDependencies ..> init.Flag
+    init.Flag ..> init.FlagManager
+
+    init.GraphicalASTOutputPipeline ..> init.CompileEnvironment
+    init.GraphicalASTOutputPipeline ..> init.FileOutputListener
+    init.GraphicalASTOutputPipeline ..> init.FlagManager
+    init.GraphicalASTOutputPipeline ..> treewalk.TreeWalker
+
+    init.NProverPipeline ..> nProver.GeneralPurposeProver
+    init.NProverPipeline ..> init.MathSymbolTableBuilder
+    init.NProverPipeline *-- "0..*" vcgeneration.utilities.VerificationCondition : myVerificationConditions
+
+    init.ProverPipeline ..> init.CompileEnvironment
+    init.ProverPipeline ..> init.MathSymbolTableBuilder
+
+    init.RawASTOutputPipeline ..> init.CompileEnvironment
+    init.RawASTOutputPipeline ..> absyn.ResolveConceptualElement
+    init.RawASTOutputPipeline ..> init.SystemStdHandler
+    init.RawASTOutputPipeline ..> init.WriterStatusHandler
+
+    init.ResolveCompiler ..> init.CompileEnvironment
+    init.ResolveCompiler ..> init.Controller
+    init.ResolveCompiler ..> init.FlagDependencies
+
+    init.TranslatorPipeline ..> init.AbstractTranslator
+    init.TranslatorPipeline ..> treewalk.TreeWalker
+
+    init.VCGenPipeline ..> treewalk.TreeWalker
+    init.VCGenPipeline *-- "0..*" vcgeneration.utilities.VerificationCondition : myVerificationConditions
+    init.VCGenPipeline ..> vcgeneration.VCGenerator
+
+    init.FileOutputListener ..> vcgeneration.utilities.AssertiveCodeBlock
+    init.FileOutputListener ..> nProver.output.VCProverResult
+
+    nProver.GeneralPurposeProver o-- init.CompileEnvironment
+    nProver.GeneralPurposeProver o-- "0..*" vcgeneration.utilities.VerificationCondition
+    nProver.GeneralPurposeProver ..> treewalk.TreeWalker
+    nProver.GeneralPurposeProver ..> nProver.output.VCProverResult
+    nProver.GeneralPurposeProver ..> nProver.registry.CongruenceClassRegistry
+    nProver.GeneralPurposeProver ..> vcgeneration.sequents.Sequent
+    nProver.GeneralPurposeProver ..> nProver.utilities.theorems.RelevantTheoremExtractor
+    nProver.GeneralPurposeProver ..> nProver.utilities.theorems.ElaborationRules
+    nProver.GeneralPurposeProver ..> nProver.utilities.treewakers.RegisterAntecedent
+    nProver.GeneralPurposeProver ..> nProver.utilities.treewakers.RegisterSuccedent
+
+    nProver.output.VCProverResult o-- vcgeneration.utilities.VerificationCondition
+
+    nProver.registry.CongruenceClassRegistry *-- "0..*" nProver.registry.VarietyList
+    nProver.registry.CongruenceClassRegistry *-- "0..*" nProver.registry.Stand
+    nProver.registry.CongruenceClassRegistry *-- "0..*" nProver.registry.CongruenceCluster
+    nProver.registry.CongruenceClassRegistry *-- "0..*" nProver.registry.CongruenceClass
+    nProver.registry.CongruenceClassRegistry *-- "0..*" nProver.registry.ClusterArgument
+
+    nProver.registry.CongruenceClass o-- nProver.registry.Stand
+    nProver.registry.CongruenceCluster o-- nProver.registry.CongruenceClass
+    nProver.registry.Stand o-- nProver.registry.CongruenceCluster
+    nProver.registry.VarietyList o-- nProver.registry.Stand
+
+    nProver.utilities.theorems.ElaborationRules *-- "0..*" nProver.utilities.theorems.ElaborationRule
+
+    nProver.utilities.treewakers.AbstractRegisterSequent o-- nProver.registry.CongruenceClassRegistry
+    nProver.utilities.treewakers.AbstractRegisterSequent <|-- nProver.utilities.treewakers.RegisterAntecedent
+    nProver.utilities.treewakers.AbstractRegisterSequent <|-- nProver.utilities.treewakers.RegisterSuccedent
+
+    treewalk.TreeWalker ..> absyn.ResolveConceptualElement
+    treewalk.TreeWalker o-- treewalk.TreeWalkerVisitor
+
+    treewalk.TreeWalkerVisitor <|-- treewalk.TreeWalkerStackVisitor
+    treewalk.TreeWalkerStackVisitor <|-- nProver.utilities.treewakers.AbstractRegisterSequent
+    treewalk.TreeWalkerVisitor <|-- vcgeneration.VCGenerator
+
+    vcgeneration.VCGenerator o-- init.MathSymbolTableBuilder
+    vcgeneration.VCGenerator o-- init.CompileEnvironment
+    vcgeneration.VCGenerator o-- vcgeneration.utilities.VerificationContext
+    vcgeneration.VCGenerator o-- vcgeneration.utilities.AssertiveCodeBlock
+    vcgeneration.VCGenerator o-- init.Flag
+
+    vcgeneration.proofrules.ProofRuleApplication <|.. vcgeneration.proofrules.AbstractProofRuleApplication
+    vcgeneration.proofrules.AbstractProofRuleApplication o-- vcgeneration.utilities.AssertiveCodeBlock
+    vcgeneration.proofrules.AbstractProofRuleApplication o-- vcgeneration.utilities.VerificationContext
+
+    vcgeneration.proofrules.declarations.AbstractBlockDeclRule <|-- vcgeneration.proofrules.declarations.typedecl.TypeRepresentationInitRule
+    vcgeneration.proofrules.declarations.AbstractBlockDeclRule <|-- vcgeneration.proofrules.declarations.typedecl.TypeRepresentationFinalRule
+    vcgeneration.proofrules.declarations.AbstractBlockDeclRule <|-- vcgeneration.proofrules.declarations.operationdecl.ProcedureDeclRule
+    vcgeneration.proofrules.declarations.AbstractBlockDeclRule <|-- vcgeneration.proofrules.declarations.sharedstatedecl.SharedStateRepresentationInitRule
+
+    vcgeneration.proofrules.AbstractProofRuleApplication <|-- vcgeneration.proofrules.declarations.AbstractBlockDeclRule
+    vcgeneration.proofrules.AbstractProofRuleApplication <|-- vcgeneration.proofrules.declarations.typedecl.TypeRepresentationCorrRule
+    vcgeneration.proofrules.AbstractProofRuleApplication <|-- vcgeneration.proofrules.declarations.facilitydecl.FacilityDeclRule
+    vcgeneration.proofrules.AbstractProofRuleApplication <|-- vcgeneration.proofrules.declarations.sharedstatedecl.SharedStateCorrRule
+
+    vcgeneration.utilities.VerificationCondition o-- vcgeneration.sequents.Sequent
+}
+
+@enduml
