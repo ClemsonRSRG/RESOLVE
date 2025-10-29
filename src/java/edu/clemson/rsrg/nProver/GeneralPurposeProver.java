@@ -42,6 +42,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import javax.print.event.PrintJobAdapter;
+
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -378,6 +381,9 @@ public class GeneralPurposeProver {
             // Store the verbose proof detail for this VC
             String result = registry.checkIfProved() ? "Proved" : "Not Proved";
             storeVCProofVerboseDetail(vc, result, registry, expLabels);
+
+            System.out.println("============ CongruenceClassRegistry ===============");
+            System.out.println(registry.toString());
 
             System.out.println("============ Operators in VC ===============");
             // trying to check the stored operators on the sequent VC's no need for
