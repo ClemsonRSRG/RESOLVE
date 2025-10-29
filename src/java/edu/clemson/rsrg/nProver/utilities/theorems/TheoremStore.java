@@ -128,7 +128,7 @@ public final class TheoremStore {
     private List<String> getAllExpStrings(Exp exp) {
         List<String> expStrings = new ArrayList<>();
         expStrings.add(exp.toString());
-        for(Exp subExp : exp.getSubExpressions()) {
+        for (Exp subExp : exp.getSubExpressions()) {
             expStrings.addAll(getAllExpStrings(subExp));
         }
         return expStrings;
