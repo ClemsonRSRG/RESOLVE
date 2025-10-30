@@ -1,0 +1,1788 @@
+VCs for Stack_Based_Realiz.rb generated Thu Oct 30 18:16:43 EDT 2025
+
+================================= VC(s): =================================
+
+VC 0_1:
+Requires Clause for Stack_Template in Facility Instantiation Rule at Stack_Based_Realiz.rb(4:16)
+
+Goal:
+(1 <= Max_Length)
+
+Given(s):
+1. (1 <= Max_Length)
+
+VC 1_1:
+Well Defined Correspondence for Queue at Stack_Based_Realiz.rb(9:6)
+
+Goal:
+(|Q.Contents| <= Max_Length)
+
+Given(s):
+1. (1 <= Max_Length)
+
+VC 2_1:
+Initialization Ensures Clause of Queue at Queue_Template.co(8:17)
+
+Goal:
+(Empty_String = Empty_String)
+
+Given(s):
+
+VC 3_1:
+Requires Clause for Push at Stack_Based_Realiz.rb(19:2)
+
+Goal:
+((1 + |Reverse(Q.Contents)|) <= Max_Length)
+
+Given(s):
+1. (1 <= Max_Length)
+2. ((1 + |Q.Contents|) <= Max_Length)
+
+VC 3_2:
+Ensures Clause of Enqueue at Stack_Based_Realiz.rb(17:11)
+
+Goal:
+(Reverse((<E> o Reverse(Q.Contents))) = (Q.Contents o <E>))
+
+Given(s):
+1. ((1 + |Q.Contents|) <= Max_Length)
+2. (1 <= Max_Length)
+
+VC 4_1:
+Requires Clause for Pop at Stack_Based_Realiz.rb(24:2)
+
+Goal:
+(1 <= |Q.Contents|)
+
+Given(s):
+1. (1 <= |Q.Contents|)
+
+VC 4_2:
+Ensures Clause of Dequeue at Stack_Based_Realiz.rb(23:11)
+
+Goal:
+(Q.Contents = (<R'> o Q.Contents'))
+
+Given(s):
+1. (Q.Contents = (<R'> o Q.Contents'))
+2. (1 <= |Q.Contents|)
+
+VC 5_1:
+Requires Clause for Pop at Stack_Based_Realiz.rb(30:2)
+
+Goal:
+(1 <= |Q.Contents|)
+
+Given(s):
+1. (1 <= |Q.Contents|)
+
+VC 5_2:
+Requires Clause for Push at Stack_Based_Realiz.rb(31:2)
+
+Goal:
+((1 + |Q.Contents''|) <= Max_Length)
+
+Given(s):
+1. (Q.Contents = (<Temp'> o Q.Contents''))
+2. (1 <= Max_Length)
+3. (1 <= |Q.Contents|)
+
+VC 5_3:
+Ensures Clause of Swap_First_Entry at Stack_Based_Realiz.rb(27:11)
+
+Goal:
+(Temp' = DeString(Prt_Btwn(0, 1, Q.Contents)))
+
+Given(s):
+1. (Q.Contents = (<Temp'> o Q.Contents''))
+2. (1 <= |Q.Contents|)
+
+VC 5_4:
+Ensures Clause of Swap_First_Entry at Stack_Based_Realiz.rb(27:11)
+
+Goal:
+((<E> o Q.Contents'') = (<E> o Prt_Btwn(1, |Q.Contents|, Q.Contents)))
+
+Given(s):
+1. (Q.Contents = (<Temp'> o Q.Contents''))
+2. (1 <= |Q.Contents|)
+
+VC 6_1:
+Ensures Clause of Length at Stack_Based_Realiz.rb(35:11)
+
+Goal:
+(|Q.Contents| = |Q.Contents|)
+
+Given(s):
+
+VC 6_2:
+Ensures Clause of Length (Condition from "RESTORES" parameter mode) at Stack_Based_Realiz.rb(35:27)
+
+Goal:
+(Q.Contents = Q.Contents)
+
+Given(s):
+
+VC 7_1:
+Ensures Clause of Rem_Capacity at Stack_Based_Realiz.rb(39:11)
+
+Goal:
+((Max_Length - |Q.Contents|) = (Max_Length - |Q.Contents|))
+
+Given(s):
+1. (1 <= Max_Length)
+
+VC 7_2:
+Ensures Clause of Rem_Capacity (Condition from "RESTORES" parameter mode) at Stack_Based_Realiz.rb(39:33)
+
+Goal:
+(Q.Contents = Q.Contents)
+
+Given(s):
+
+VC 8_1:
+Ensures Clause of Clear (Condition from "CLEARS" parameter mode) at Stack_Based_Realiz.rb(43:24)
+
+Goal:
+(Empty_String = Empty_String)
+
+Given(s):
+
+========================= VC Generation Details  =========================
+
+    Concept Realization Name:   Stack_Based_Realiz
+    Concept Name:               Queue_Template
+
+==========================================================================
+
+========================= SF =========================
+
+Applied Facility Instantiation Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Confirm (1 <= Max_Length);
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+
+VC(s):
+     |- (1 <= Max_Length)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+
+VC(s):
+    (1 <= Max_Length) |- (1 <= Max_Length)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Queue =========================
+
+Applied Well Defined Correspondence Rule (Concept Type Realization): 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Assume (Conc.Q = Q.Contents);
+    Confirm (|Conc.Q| <= Max_Length);
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+    Assume (Conc.Q = Q.Contents);
+
+VC(s):
+     |- (|Conc.Q| <= Max_Length)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len));
+
+VC(s):
+     |- (|Q.Contents| <= Max_Length)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+
+VC(s):
+    (1 <= Max_Length) |- (|Q.Contents| <= Max_Length)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Initialization of Queue =========================
+
+Applied Initialization of Queue (Setup): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Initialize(Q : Queue);
+
+VC(s):
+
+_____________________
+
+Applied Initialization Rule (Concept Type Realization): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Initialize(Q : Queue);
+    Confirm true;
+    Assume (true and (Conc.Q = Q.Contents));
+    Confirm (Conc.Q = Empty_String);
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Initialize(Q : Queue);
+    Confirm true;
+    Assume (true and (Conc.Q = Q.Contents));
+
+VC(s):
+     |- (Conc.Q = Empty_String)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Initialize(Q : Queue);
+    Confirm true;
+
+VC(s):
+     |- (Q.Contents = Empty_String)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(true and (Conc.Q = Q.Contents)) |- " shape="box" ];
+      2 [ label="true, (Conc.Q = Q.Contents) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Initialize(Q : Queue);
+
+VC(s):
+     |- (Q.Contents = Empty_String)
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Known Program Type): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Assume ((Q.Contents = Empty_String) and (Q.Len = 0));
+
+VC(s):
+     |- (Q.Contents = Empty_String)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+     |- (Empty_String = Empty_String)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((Q.Contents = Empty_String) and (Q.Len = 0)) |- " shape="box" ];
+      2 [ label="(Q.Contents = Empty_String), (Q.Len = 0) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+
+VC(s):
+     |- (Empty_String = Empty_String)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+
+VC(s):
+     |- (Empty_String = Empty_String)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (Conc.Q = Q.Contents) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Finalization of Queue =========================
+
+Applied Finalization of Queue (Setup): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Finalization Rule (Concept Type Realization): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Finalize(Q : Queue);
+    Confirm true;
+    Assume (true and (Conc.Q = Q.Contents));
+    Confirm true;
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Finalize(Q : Queue);
+    Confirm true;
+    Assume (true and (Conc.Q = Q.Contents));
+
+VC(s):
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Finalize(Q : Queue);
+    Confirm true;
+
+VC(s):
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(true and (Conc.Q = Q.Contents)) |- " shape="box" ];
+      2 [ label="true, (Conc.Q = Q.Contents) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    _Finalize(Q : Queue);
+
+VC(s):
+
+_____________________
+
+Applied Variable Finalization Rule (Known Program Type): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Assume true;
+
+VC(s):
+
+_____________________
+
+Applied Assume Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+
+VC(s):
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+
+VC(s):
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (Conc.Q = Q.Contents) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Enqueue =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Push(E, Q.Contents);
+    Flip(Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+    Confirm (Conc.Q = (#Conc.Q o <#E>));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Push(E, Q.Contents);
+    Flip(Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+
+VC(s):
+     |- (Conc.Q = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Push(E, Q.Contents);
+    Flip(Q.Contents);
+    Confirm true;
+
+VC(s):
+     |- (Q.Contents = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Push(E, Q.Contents);
+    Flip(Q.Contents);
+
+VC(s):
+     |- (Q.Contents = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Push(E, Q.Contents);
+    Confirm true;
+    Assume (Q.Contents' = Reverse(Q.Contents));
+
+VC(s):
+     |- (Q.Contents' = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Push(E, Q.Contents);
+    Confirm true;
+
+VC(s):
+     |- (Reverse(Q.Contents) = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Push(E, Q.Contents);
+
+VC(s):
+     |- (Reverse(Q.Contents) = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+    E' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Confirm ((1 + |Q.Contents|) <= Max_Length);
+    Assume (Q.Contents'' = (<E> o Q.Contents));
+
+VC(s):
+     |- (Reverse(Q.Contents'') = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+    E' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+    Confirm ((1 + |Q.Contents|) <= Max_Length);
+
+VC(s):
+     |- (Reverse((<E> o Q.Contents)) = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+    E' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Flip(Q.Contents);
+
+VC(s):
+     |- ((1 + |Q.Contents|) <= Max_Length)
+
+     |- (Reverse((<E> o Q.Contents)) = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+    E' : 'Entry'
+    Q.Contents'' : Str('Entry')
+    Q.Contents''' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Confirm true;
+    Assume (Q.Contents''' = Reverse(Q.Contents));
+
+VC(s):
+     |- ((1 + |Q.Contents'''|) <= Max_Length)
+
+     |- (Reverse((<E> o Q.Contents''')) = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+    E' : 'Entry'
+    Q.Contents'' : Str('Entry')
+    Q.Contents''' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+    Confirm true;
+
+VC(s):
+     |- ((1 + |Reverse(Q.Contents)|) <= Max_Length)
+
+     |- (Reverse((<E> o Reverse(Q.Contents))) = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+    E' : 'Entry'
+    Q.Contents'' : Str('Entry')
+    Q.Contents''' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+    Remember;
+
+VC(s):
+     |- ((1 + |Reverse(Q.Contents)|) <= Max_Length)
+
+     |- (Reverse((<E> o Reverse(Q.Contents))) = (#Conc.Q o <#E>))
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+    E' : 'Entry'
+    Q.Contents'' : Str('Entry')
+    Q.Contents''' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length));
+
+VC(s):
+     |- ((1 + |Reverse(Q.Contents)|) <= Max_Length)
+
+     |- (Reverse((<E> o Reverse(Q.Contents))) = (Conc.Q o <E>))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+    E' : 'Entry'
+    Q.Contents'' : Str('Entry')
+    Q.Contents''' : Str('Entry')
+
+Statements:
+
+VC(s):
+    (1 <= Max_Length), ((1 + |Q.Contents|) <= Max_Length) |- ((1 + |Reverse(Q.Contents)|) <= Max_Length)
+
+    ((1 + |Q.Contents|) <= Max_Length), (1 <= Max_Length) |- (Reverse((<E> o Reverse(Q.Contents))) = (Q.Contents o <E>))
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and ((1 + |Conc.Q|) <= Max_Length)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (Conc.Q = Q.Contents), ((1 + |Conc.Q|) <= Max_Length) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Dequeue =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    Pop(R, Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+    Confirm (#Conc.Q = (<R> o Conc.Q));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    Pop(R, Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+
+VC(s):
+     |- (#Conc.Q = (<R> o Conc.Q))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    Pop(R, Q.Contents);
+    Confirm true;
+
+VC(s):
+     |- (#Conc.Q = (<R> o Q.Contents))
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    Pop(R, Q.Contents);
+
+VC(s):
+     |- (#Conc.Q = (<R> o Q.Contents))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    Confirm (1 <= |Q.Contents|);
+    Assume (Q.Contents = (<R'> o Q.Contents'));
+
+VC(s):
+     |- (#Conc.Q = (<R'> o Q.Contents'))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    Confirm (1 <= |Q.Contents|);
+
+VC(s):
+    (Q.Contents = (<R'> o Q.Contents')) |- (#Conc.Q = (<R'> o Q.Contents'))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+
+VC(s):
+     |- (1 <= |Q.Contents|)
+
+    (Q.Contents = (<R'> o Q.Contents')) |- (#Conc.Q = (<R'> o Q.Contents'))
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+
+VC(s):
+     |- (1 <= |Q.Contents|)
+
+    (Q.Contents = (<R'> o Q.Contents')) |- (Conc.Q = (<R'> o Q.Contents'))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    R' : 'Entry'
+    Q.Contents' : Str('Entry')
+
+Statements:
+
+VC(s):
+    (1 <= |Q.Contents|) |- (1 <= |Q.Contents|)
+
+    (Q.Contents = (<R'> o Q.Contents')), (1 <= |Q.Contents|) |- (Q.Contents = (<R'> o Q.Contents'))
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (Conc.Q = Q.Contents), (1 <= |Conc.Q|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Swap_First_Entry =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+    Temp : 'Entry'
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Pop(Temp, Q.Contents);
+    Push(E, Q.Contents);
+    E :=: Temp;
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+    Confirm ((E = DeString(Prt_Btwn(0, 1, #Conc.Q))) and (Conc.Q = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q))));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Pop(Temp, Q.Contents);
+    Push(E, Q.Contents);
+    E :=: Temp;
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+
+VC(s):
+     |- (E = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+     |- (Conc.Q = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((E = DeString(Prt_Btwn(0, 1, #Conc.Q))) and (Conc.Q = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q))))" shape="box" ];
+      2 [ label=" |- (E = DeString(Prt_Btwn(0, 1, #Conc.Q)))" shape="box" color="red" ];
+      3 [ label=" |- (Conc.Q = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Pop(Temp, Q.Contents);
+    Push(E, Q.Contents);
+    E :=: Temp;
+    Confirm true;
+
+VC(s):
+     |- (E = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+     |- (Q.Contents = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+    Temp : 'Entry'
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Pop(Temp, Q.Contents);
+    Push(E, Q.Contents);
+    E :=: Temp;
+
+VC(s):
+     |- (E = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+     |- (Q.Contents = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Swap Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Pop(Temp, Q.Contents);
+    Push(E, Q.Contents);
+
+VC(s):
+     |- (Temp = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+     |- (Q.Contents = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Pop(Temp, Q.Contents);
+    Confirm ((1 + |Q.Contents|) <= Max_Length);
+    Assume (Q.Contents' = (<E> o Q.Contents));
+
+VC(s):
+     |- (Temp = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+     |- (Q.Contents' = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Pop(Temp, Q.Contents);
+    Confirm ((1 + |Q.Contents|) <= Max_Length);
+
+VC(s):
+     |- (Temp = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+     |- ((<E> o Q.Contents) = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Pop(Temp, Q.Contents);
+
+VC(s):
+     |- ((1 + |Q.Contents|) <= Max_Length)
+
+     |- (Temp = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+     |- ((<E> o Q.Contents) = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+    Temp' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Confirm (1 <= |Q.Contents|);
+    Assume (Q.Contents = (<Temp'> o Q.Contents''));
+
+VC(s):
+     |- ((1 + |Q.Contents''|) <= Max_Length)
+
+     |- (Temp' = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+     |- ((<E> o Q.Contents'') = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+    Temp' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+    Confirm (1 <= |Q.Contents|);
+
+VC(s):
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((1 + |Q.Contents''|) <= Max_Length)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- (Temp' = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((<E> o Q.Contents'') = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+    Temp' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    _Initialize(Temp : Entry);
+
+VC(s):
+     |- (1 <= |Q.Contents|)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((1 + |Q.Contents''|) <= Max_Length)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- (Temp' = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((<E> o Q.Contents'') = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Variable Declaration/Initialization Rule (Generic Program Type): 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+    Temp' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+    Assume Entry.Is_Initial(Temp);
+
+VC(s):
+     |- (1 <= |Q.Contents|)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((1 + |Q.Contents''|) <= Max_Length)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- (Temp' = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((<E> o Q.Contents'') = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+    Temp' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+    Remember;
+
+VC(s):
+     |- (1 <= |Q.Contents|)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((1 + |Q.Contents''|) <= Max_Length)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- (Temp' = DeString(Prt_Btwn(0, 1, #Conc.Q)))
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((<E> o Q.Contents'') = (<#E> o Prt_Btwn(1, |#Conc.Q|, #Conc.Q)))
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+    Temp' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+    Assume ((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|));
+
+VC(s):
+     |- (1 <= |Q.Contents|)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((1 + |Q.Contents''|) <= Max_Length)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- (Temp' = DeString(Prt_Btwn(0, 1, Conc.Q)))
+
+    (Q.Contents = (<Temp'> o Q.Contents'')) |- ((<E> o Q.Contents'') = (<E> o Prt_Btwn(1, |Conc.Q|, Conc.Q)))
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Temp : 'Entry'
+    E' : 'Entry'
+    Q.Contents' : Str('Entry')
+    Temp' : 'Entry'
+    Q.Contents'' : Str('Entry')
+
+Statements:
+
+VC(s):
+    (1 <= |Q.Contents|) |- (1 <= |Q.Contents|)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')), (1 <= Max_Length), (1 <= |Q.Contents|) |- ((1 + |Q.Contents''|) <= Max_Length)
+
+    (Q.Contents = (<Temp'> o Q.Contents'')), (1 <= |Q.Contents|) |- (Temp' = DeString(Prt_Btwn(0, 1, Q.Contents)))
+
+    (Q.Contents = (<Temp'> o Q.Contents'')), (1 <= |Q.Contents|) |- ((<E> o Q.Contents'') = (<E> o Prt_Btwn(1, |Q.Contents|, Q.Contents)))
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="((((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) and (1 <= |Conc.Q|)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (Conc.Q = Q.Contents), (1 <= |Conc.Q|) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Length =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Length := Depth(Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+    Confirm ((Length = |Conc.Q|) and (Conc.Q = #Conc.Q));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Length := Depth(Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+
+VC(s):
+     |- (Length = |Conc.Q|)
+
+     |- (Conc.Q = #Conc.Q)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((Length = |Conc.Q|) and (Conc.Q = #Conc.Q))" shape="box" ];
+      2 [ label=" |- (Length = |Conc.Q|)" shape="box" color="red" ];
+      3 [ label=" |- (Conc.Q = #Conc.Q)" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Length := Depth(Q.Contents);
+    Confirm true;
+
+VC(s):
+     |- (Length = |Q.Contents|)
+
+     |- (Q.Contents = #Conc.Q)
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Length := Depth(Q.Contents);
+
+VC(s):
+     |- (Length = |Q.Contents|)
+
+     |- (Q.Contents = #Conc.Q)
+
+_____________________
+
+Applied Function Assignment Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+     |- (|Q.Contents| = |Q.Contents|)
+
+     |- (Q.Contents = #Conc.Q)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+
+VC(s):
+     |- (|Q.Contents| = |Q.Contents|)
+
+     |- (Q.Contents = Conc.Q)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+
+VC(s):
+     |- (|Q.Contents| = |Q.Contents|)
+
+     |- (Q.Contents = Q.Contents)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (Conc.Q = Q.Contents) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Rem_Capacity =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Rem_Capacity := Rem_Capacity(Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+    Confirm ((Rem_Capacity = (Max_Length - |Conc.Q|)) and (Conc.Q = #Conc.Q));
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Rem_Capacity := Rem_Capacity(Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+
+VC(s):
+     |- (Rem_Capacity = (Max_Length - |Conc.Q|))
+
+     |- (Conc.Q = #Conc.Q)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label=" |- ((Rem_Capacity = (Max_Length - |Conc.Q|)) and (Conc.Q = #Conc.Q))" shape="box" ];
+      2 [ label=" |- (Rem_Capacity = (Max_Length - |Conc.Q|))" shape="box" color="red" ];
+      3 [ label=" |- (Conc.Q = #Conc.Q)" shape="box" color="red" ];
+      1 -> 2;
+      1 -> 3;
+    }
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Rem_Capacity := Rem_Capacity(Q.Contents);
+    Confirm true;
+
+VC(s):
+     |- (Rem_Capacity = (Max_Length - |Q.Contents|))
+
+     |- (Q.Contents = #Conc.Q)
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Rem_Capacity := Rem_Capacity(Q.Contents);
+
+VC(s):
+     |- (Rem_Capacity = (Max_Length - |Q.Contents|))
+
+     |- (Q.Contents = #Conc.Q)
+
+_____________________
+
+Applied Function Assignment Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+     |- ((Max_Length - |Q.Contents|) = (Max_Length - |Q.Contents|))
+
+     |- (Q.Contents = #Conc.Q)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+
+VC(s):
+     |- ((Max_Length - |Q.Contents|) = (Max_Length - |Q.Contents|))
+
+     |- (Q.Contents = Conc.Q)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+
+VC(s):
+    (1 <= Max_Length) |- ((Max_Length - |Q.Contents|) = (Max_Length - |Q.Contents|))
+
+     |- (Q.Contents = Q.Contents)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (Conc.Q = Q.Contents) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+
+========================= Clear =========================
+
+Applied Procedure Declaration Rule (Part 1): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+
+_____________________
+
+Applied Procedure Declaration Rule (Part 2): 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    SF::Clear(Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+    Confirm (Conc.Q = Empty_String);
+
+VC(s):
+
+_____________________
+
+Applied Confirm Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    SF::Clear(Q.Contents);
+    Confirm true;
+    Assume (Conc.Q = Q.Contents);
+
+VC(s):
+     |- (Conc.Q = Empty_String)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    SF::Clear(Q.Contents);
+    Confirm true;
+
+VC(s):
+     |- (Q.Contents = Empty_String)
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    SF::Clear(Q.Contents);
+
+VC(s):
+     |- (Q.Contents = Empty_String)
+
+_____________________
+
+Applied Call Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Confirm true;
+    Assume (Q.Contents' = Empty_String);
+
+VC(s):
+     |- (Q.Contents' = Empty_String)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+    Confirm true;
+
+VC(s):
+     |- (Empty_String = Empty_String)
+
+_____________________
+
+Applied Confirm Rule and Simplified: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+    Remember;
+
+VC(s):
+     |- (Empty_String = Empty_String)
+
+_____________________
+
+Applied Remember Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+
+Statements:
+    Assume (((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents));
+
+VC(s):
+     |- (Empty_String = Empty_String)
+
+_____________________
+
+Applied Assume Rule: 
+
+Free Variables:
+    Q.Contents' : Str('Entry')
+
+Statements:
+
+VC(s):
+     |- (Empty_String = Empty_String)
+
+Reduction Tree(s):
+    strict digraph G {
+      1 [ label="(((((1 <= Max_Length) and ((min_int <= 0) and (1 <= max_int))) and (1 <= Last_Char_Num)) and (1 <= Max_Char_Str_Len)) and (Conc.Q = Q.Contents)) |- " shape="box" ];
+      2 [ label="(1 <= Max_Length), (min_int <= 0), (1 <= max_int), (1 <= Last_Char_Num), (1 <= Max_Char_Str_Len), (Conc.Q = Q.Contents) |- " shape="box" color="red" ];
+      1 -> 2;
+    }
+
+_____________________
+

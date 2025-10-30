@@ -63,8 +63,7 @@ public class Utilities {
         }
 
         if (!jarFileExists) {
-            System.out.println("Jar file not found. Exiting...");
-            System.exit(1);
+            throw new Error("Jar file not found. Exiting...");
         }
 
         return jarFileName;
