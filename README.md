@@ -10,6 +10,10 @@ The RESOLVE language is designed from the ground up to facilitate *mathematical 
 
 All phases of the verification process spanning verification condition (VC) generation to proving are performed in-house, while RESOLVE programs are translated to Java and run on the JVM.
 
+## Project Goal
+This project's goal is to implement a new proving architecture as detailed in the following diagram.
+![goal](https://github.com/user-attachments/assets/55136166-625d-429c-90d2-b8f2822bdac0)
+
 ## Authors and major contributors
 
 This iteration of the RESOLVE compiler is being developed as a student capstone project at Rose-Hulman Institute of Technology, advised by [Dr. Joseph Hollingsworth](mailto:hollings@rose-hulman.edu). This work is based on the [Clemson Univerity RESOLVE compiler](https://github.com/ClemsonRSRG/RESOLVE).
