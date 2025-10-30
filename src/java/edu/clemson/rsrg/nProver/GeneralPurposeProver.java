@@ -20,9 +20,9 @@ import edu.clemson.rsrg.init.flag.FlagDependencies;
 import edu.clemson.rsrg.init.output.OutputListener;
 import edu.clemson.rsrg.nProver.output.VCProverResult;
 import edu.clemson.rsrg.nProver.registry.CongruenceClassRegistry;
-import edu.clemson.rsrg.nProver.utilities.theorems.ElaborationRule;
 import edu.clemson.rsrg.nProver.utilities.theorems.ElaborationRules;
 import edu.clemson.rsrg.nProver.utilities.theorems.RelevantTheoremExtractor;
+import edu.clemson.rsrg.nProver.utilities.theorems.TheoremStore;
 import edu.clemson.rsrg.nProver.utilities.treewakers.AbstractRegisterSequent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterAntecedent;
 import edu.clemson.rsrg.nProver.utilities.treewakers.RegisterSuccedent;
@@ -36,11 +36,12 @@ import edu.clemson.rsrg.typeandpopulate.typereasoning.TypeGraph;
 import edu.clemson.rsrg.vcgeneration.VCGenerator;
 import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
 import edu.clemson.rsrg.vcgeneration.utilities.VerificationCondition;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import javax.print.event.PrintJobAdapter;
+
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -161,7 +162,8 @@ public class GeneralPurposeProver {
     /**
      * Tells the compiler to prove the sequent VCs
      */
-    public static final Flag FLAG_PROVE = new Flag(FLAG_SECTION_NAME, "sprove", FLAG_DESC_GP_PROVER); // sequent prove
+    public static final Flag FLAG_PROVE = new Flag(FLAG_SECTION_NAME, "sprove", FLAG_DESC_GP_PROVER); // sequent
+    // prove
 
     /**
      * <p>
@@ -333,17 +335,24 @@ public class GeneralPurposeProver {
 
         // Loop through each of the VCs and attempt to prove them
         for (VerificationCondition vc : myVerificationConditions) {
+            // Use the new TheoremStore to preload theorems for fast lookup.
+            TheoremStore theoremStore = new TheoremStore(myCurrentModuleScope);
+
             // Store the start time for generating proofs for this VC
             long startTime = System.nanoTime();
             // Obtain the sequent to be proved
             Sequent sequent = vc.getSequent();
+
+            theoremStore.applyTheoremsToSequent(sequent);
+
             // Create a registry and label map
             CongruenceClassRegistry<Integer, String, String, String> registry = new CongruenceClassRegistry<>(1000,
                     1000, 1000, 1000);
             Map<String, Integer> expLabels = new LinkedHashMap<>();
-            List<TheoremEntry> relevantTheorems = new ArrayList<>();
+            List<TheoremEntry> relevantTheorems;
 
-            // NM: 0, 1 are spared for <= (1), = (2), etc., the list can expand with more reflexive operators
+            // NM: 0, 1 are spared for <= (1), = (2), etc., the list can expand with more
+            // reflexive operators
             // preload <=, = into the map
             expLabels.put("<=", AbstractRegisterSequent.OP_LESS_THAN_OR_EQUALS);
             expLabels.put("=", AbstractRegisterSequent.OP_EQUALS);
@@ -373,15 +382,18 @@ public class GeneralPurposeProver {
             String result = registry.checkIfProved() ? "Proved" : "Not Proved";
             storeVCProofVerboseDetail(vc, result, registry, expLabels);
 
+            System.out.println("============ CongruenceClassRegistry ===============");
+            System.out.println(registry.toString());
+
             System.out.println("============ Operators in VC ===============");
-            // trying to check the stored operators on the sequent VC's no need for extraction
+            // trying to check the stored operators on the sequent VC's no need for
+            // extraction
             for (String operators : expLabels.keySet()) {
                 System.out.println(operators);
             }
             System.out.println("============ Relevant Theorem===============");
-
+            System.out.println("Old: Using RelevantTheoremExtractor");
             relevantTheorems = theorems.getSequentVCTheorems(expLabels);
-
             ElaborationRules rules = new ElaborationRules(relevantTheorems);
 
             for (TheoremEntry te : relevantTheorems) {
@@ -392,7 +404,28 @@ public class GeneralPurposeProver {
                  * System.out.println("==========SubSubExpressions========"); for(Exp
                  * e:te.getAssertion().getSubExpressions()){ System.out.println(e.getSubExpressions()); for(Exp
                  * e2:e.getSubExpressions()){ System.out.println(e2.getClass().getSimpleName()); } }
-                 *
+                 */
+
+            }
+            rules.createElaborationRules();
+            // Find all preloaded theorems whose operator sets are subsets of the sequent
+            // operators
+            System.out.println("New: Using TheoremStore");
+            relevantTheorems = theoremStore.findRelevantTheorems(expLabels.keySet());
+            System.out.println("From new TheoremStore relevant theorems: " + relevantTheorems.size());
+            System.out.println("========= TheoremStore Contents =========");
+            System.out.println(theoremStore.toString());
+
+            rules = new ElaborationRules(relevantTheorems);
+
+            for (TheoremEntry te : relevantTheorems) {
+                System.out.println(te.getAssertion());
+                // System.out.println("==========sub-expressions=============");
+                // System.out.println(te.getAssertion().getSubExpressions());
+                /*
+                 * System.out.println("==========SubSubExpressions========"); for(Exp
+                 * e:te.getAssertion().getSubExpressions()){ System.out.println(e.getSubExpressions()); for(Exp
+                 * e2:e.getSubExpressions()){ System.out.println(e2.getClass().getSimpleName()); } }
                  */
 
             }
@@ -400,14 +433,12 @@ public class GeneralPurposeProver {
             // System.out.println(rules.getMyElaborationRules().size());
             /*
              * for(ElaborationRule eR : rules.getMyElaborationRules()){ System.out.println("Precursors" +
-             * eR.getPrecursorClauses()); System.out.println("==>" + eR.getResultantClause());
-             *
-             * }
-             *
+             * eR.getPrecursorClauses()); System.out.println("==>" + eR.getResultantClause()); }
              */
         }
 
-        // Compute the total elapsed time in generating proofs for the VCs in this module
+        // Compute the total elapsed time in generating proofs for the VCs in this
+        // module
         myTotalElapsedTime = System.currentTimeMillis() - myTotalElapsedTime;
 
     }

@@ -150,21 +150,19 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.1</version>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <argLine>-Xmx2G</argLine>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.4</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.1</version>
                 <configuration>
-                    <excludes>
-                        <exclude>**/CCReg*.java</exclude>
-                    </excludes>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
             </plugin>
             <!-- Plugin for ANTLR 4 grammar. -->
@@ -194,6 +192,7 @@
                         <licenseSet>
                             <header>${license.url}</header>
                             <excludes>
+                                <exclude>.dir-locals.el</exclude>
                                 <exclude>.gitattributes</exclude>
                                 <exclude>.gitignore</exclude>
                                 <exclude>*.md</exclude>

@@ -34,8 +34,9 @@ public class ElaborationRules {
         myRelevantTheorems = relevantTheorems;
     }
 
-    // create elaboration rules out of the list of relevant theorem
-    // TODO when a theorem has only one expression, this should be treated as a special case
+    /**
+     * Creates a list of elaboration rules out of a list of relevant theorems
+     */
     public List<ElaborationRule> createElaborationRules() {
         List<Exp> myTheoremExpressions;
         // list of sub sub expressions for theorems with one clause
@@ -45,7 +46,8 @@ public class ElaborationRules {
             // get the sub expressions out of t
             myTheoremExpressions = t.getAssertion().getSubExpressions();
 
-            // System.out.println("The size of the clause is: " + myTheoremExpressions.size());
+            // System.out.println("The size of the clause is: " +
+            // myTheoremExpressions.size());
             // for one expression theorem, things will be different
             if (myTheoremExpressions.size() == 1) {
                 // break down the expression further it is assumed it will be at index 0
@@ -53,19 +55,23 @@ public class ElaborationRules {
 
                 for (Exp exp : myTheoremSubExpressions) {
                     List<Exp> copyOfMyTheoremSubExpressions = myTheoremExpressions.get(0).getSubExpressions();
-                    // x1*x2 = x2 * x1 will create two rules with each sub exp becoming the precursor
+                    // x1*x2 = x2 * x1 will create two rules with each sub exp becoming the
+                    // precursor
                     if (isDeterministic(copyOfMyTheoremSubExpressions, exp)) {
-                        // exp here has to be the whole theorem assertion and not only part of the expression
+                        // exp here has to be the whole theorem assertion and not only part of
+                        // the expression
                         ElaborationRule rule = new ElaborationRule(copyOfMyTheoremSubExpressions, t.getAssertion());
                         myElaborationRules.add(rule);
                     }
                 }
 
             } else {
-                // build the elaboration rule out of each expression by making it a resultant and the reset precursors
+                // build the elaboration rule out of each expression by making it a resultant
+                // and the reset precursors
                 for (Exp te : myTheoremExpressions) {
                     List<Exp> copyOfTheoremExpressions = t.getAssertion().getSubExpressions();
-                    // check if the rule will be deterministic, and for the moment, if not deterministic ignore it
+                    // check if the rule will be deterministic, and for the moment, if not
+                    // deterministic ignore it
                     if (isDeterministic(copyOfTheoremExpressions, te)) {
                         // System.out.println("It was determinant");
                         ElaborationRule rule = new ElaborationRule(copyOfTheoremExpressions, te);
@@ -77,7 +83,17 @@ public class ElaborationRules {
         return myElaborationRules;
     }
 
-    // all the variables in the resultant clause can be found in the precursor clauses, then it is deterministic
+    /**
+     * <p>
+     * If all variables in the resultant clause can be found in the precursor clauses, then they are deterministic
+     * </p>
+     * {@return} true, if the inputs are deterministic
+     *
+     * @param theoremExpressionList
+     *            The precursor clauses.
+     * @param resultantExpression
+     *            The resultant clause.
+     */
     public boolean isDeterministic(List<Exp> theoremExpressionList, Exp resultantExpression) {
         // remove the resultant expression from the precursor expressions
         theoremExpressionList.remove(resultantExpression);
@@ -85,7 +101,8 @@ public class ElaborationRules {
         List<Exp> resultantSubExpressions = resultantExpression.getSubExpressions();
         // Declare the set that will collect all variables in the precursor expressions
         Set<Exp> collectionOfPrecursorVars;
-        // a flag to indicate if all variables in the resultant expression are in the precursor expressions
+        // a flag to indicate if all variables in the resultant expression are in the
+        // precursor expressions
         Boolean fullyContained = false;
 
         // collect all the variables in the precursor expressions
@@ -108,12 +125,30 @@ public class ElaborationRules {
 
     }
 
-    // get all the elaboration rules created
-    // This is not right work on this
+    /**
+     * <p>
+     * Gets all the elaboration rules created.
+     * </p>
+     *
+     * @return a {@link List} of {@link ElaborationRule}
+     */
     public List<ElaborationRule> getMyElaborationRules() {
+        if (myElaborationRules == null) {
+            createElaborationRules();
+        }
         return myElaborationRules;
     }
 
+    /**
+     * <p>
+     * Returns the set of all variables in the precursor expressions
+     * </p>
+     *
+     * @return a {@link Set} of {@link Exp}
+     *
+     * @param precursorExpList
+     *            The list of precursor expressions
+     */
     public Set<Exp> collectVariables(List<Exp> precursorExpList) {
         Set<Exp> setOfPrecursorVars = new HashSet<>();
         for (Exp e : precursorExpList) {

@@ -1023,7 +1023,6 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      * @return {@code true} iff the previous class from {@param indexToArgInSecondLevel} is
      *         {@param classAccessorInFirstLevel}, and the root node of the cluster is in the set of reflexive
      *         operators. Otherwise return {@code false}.
-     *
      */
     private boolean subReflexiveBingoTest(int indexToArgInSecondLevel, int classAccessorInFirstLevel) {
 
@@ -1384,7 +1383,6 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
      *            index to the first stand in the first class
      * @param standDesignator_2
      *            index to the second stand in the second class
-     *
      */
     private void joinStandFrom2ndListToFirstList(int standDesignator_1, int standDesignator_2) {
         Integer treeNodeLabel_1 = standArray[standDesignator_1].getTreeNodeLabel();
@@ -1497,7 +1495,6 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
     }
 
     /**
-     *
      * <p>
      * The operation join two stands where the tree node designating the first one is less than the tree node
      * designating the second one
@@ -2307,5 +2304,41 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
 
     public CongruenceClass[] getCongruenceClassArray() {
         return congruenceClassArray;
+    }
+
+    /**
+     * <p>
+     * Converts the given array, arr, to a String
+     * </p>
+     * {@return} a String
+     */
+    private String arrToString(Object[] arr, String prefix) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(prefix);
+        sb.append(": [ ");
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] != null) {
+                sb.append(arr[i].toString());
+            } else {
+                sb.append("null");
+            }
+            if (i != arr.length - 1)
+                sb.append(", ");
+        }
+        sb.append(" ]\n");
+        return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(arrToString(clusterArgumentArray, "ClusterArguments"));
+        sb.append(arrToString(clusterArray, "Clusters"));
+        sb.append(arrToString(standArray, "Stands"));
+        sb.append(arrToString(congruenceClassArray, "CongruenceClasses"));
+        return sb.toString();
     }
 }
