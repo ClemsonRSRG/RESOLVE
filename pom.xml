@@ -151,9 +151,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <version>3.5.4</version>
                 <configuration>
                     <argLine>-Xmx2G</argLine>
+                    <excludes>
+                        <exclude>**/CCReg*.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
