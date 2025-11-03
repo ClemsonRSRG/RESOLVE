@@ -21,7 +21,7 @@ import edu.clemson.rsrg.vcgeneration.sequents.Sequent;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class TheoremStore {
+public final class TheoremStore implements TheoremManager {
 
     private final List<TheoremEntry> allTheorems;
     private final Map<TheoremEntry, Set<String>> theoremToOps;
@@ -157,5 +157,10 @@ public final class TheoremStore {
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public Set<TheoremEntry> getRelevantTheorems(Set<Exp> expressions) {
+        return Set.of();
     }
 }
