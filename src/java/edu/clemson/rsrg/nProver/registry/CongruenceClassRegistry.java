@@ -2307,38 +2307,20 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
     }
 
     /**
-     * <p>
-     * Converts the given array, arr, to a String
-     * </p>
-     * {@return} a String
-     */
-    private String arrToString(Object[] arr, String prefix) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(prefix);
-        sb.append(": [ ");
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] != null) {
-                sb.append(arr[i].toString());
-            } else {
-                sb.append("null");
-            }
-            if (i != arr.length - 1)
-                sb.append(", ");
-        }
-        sb.append(" ]\n");
-        return sb.toString();
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(arrToString(clusterArgumentArray, "ClusterArguments"));
-        sb.append(arrToString(clusterArray, "Clusters"));
-        sb.append(arrToString(standArray, "Stands"));
-        sb.append(arrToString(congruenceClassArray, "CongruenceClasses"));
+        sb.append("ClusterArguments: ");
+        sb.append(Arrays.toString(clusterArgumentArray));
+        sb.append("\nClusters: ");
+        sb.append(Arrays.toString(clusterArray));
+        sb.append("\nStands: ");
+        sb.append(Arrays.toString(standArray));
+        sb.append("\nCongruenceClasses: ");
+        sb.append(Arrays.toString(congruenceClassArray));
+        sb.append("\n");
         return sb.toString();
     }
 }
