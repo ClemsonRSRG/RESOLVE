@@ -1,9 +1,0 @@
-Concepts/Globally_Bounded_Queue_Template/Remove_Last_Realiz.rb
-Concepts/Globally_Bounded_Stack_Template/Obvious_CC_Realiz.rb
-Concepts/Globally_Bounded_Stack_Template/Obvious_Flipping_Realiz.rb
-Concepts/Queue_Template/Recursive_Append_Realiz.rb
-Concepts/Stack_Template/Do_Nothing_Realiz.rb
-Concepts/Stack_Template/Obvious_CC_Realiz.rb
-Concepts/Stack_Template/Obvious_Flipping_Realiz.rb
-Concepts/Standard/Integer_Template/Iterative_Add_to_Realiz.rb
-Concepts/Standard/Integer_Template/Recursive_Add_to_Realiz.rb
