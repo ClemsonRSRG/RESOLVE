@@ -2289,6 +2289,59 @@ public class CongruenceClassRegistry<T1, T2, T3, T4> {
         }
     }
 
+    public boolean isClassDesignator(int label) {
+        return label <= topCongruenceClassDesignator;
+    }
+
+    public void displayCongruence(List<String> symbolMapping, int classIndex) {
+        StringBuilder sb = new StringBuilder();
+
+        CongruenceClass congruenceClass = congruenceClassArray[classIndex];
+        if (congruenceClass.getClassTag() != congruenceClass.getDominantCClass()) {
+            congruenceClass = congruenceClassArray[congruenceClass.getDominantCClass()];
+        }
+        Stand stand = standArray[congruenceClass.getFirstStand()];
+
+        sb.append("CC" + classIndex + " -> ");
+
+        while (stand.getStandTag() != 0) {
+            CongruenceCluster congruenceCluster = clusterArray[stand.getFirstStandCluster()];
+
+            do {
+                displayCluster(symbolMapping, congruenceCluster, sb);
+                if (congruenceCluster.getNextStandCluster() != 0
+                        && congruenceCluster.getIndexToTag() != congruenceCluster.getNextStandCluster()) {
+                    sb.append(" | ");
+                }
+
+                congruenceCluster = clusterArray[congruenceCluster.getNextStandCluster()];
+            } while (congruenceCluster.getIndexToTag() != 0
+                    && congruenceCluster.getIndexToTag() != congruenceCluster.getNextStandCluster());
+
+            if (stand.getNextCCStand() != 0) {
+                sb.append(" | ");
+            }
+            stand = standArray[stand.getNextCCStand()];
+        }
+
+        System.out.println(sb);
+    }
+
+    private void displayCluster(List<String> symbolMapping, CongruenceCluster cluster, StringBuilder sb) {
+        String operator = symbolMapping.get(cluster.getTreeNodeLabel());
+        ClusterArgument argument = clusterArgumentArray[cluster.getIndexToArgList()];
+
+        sb.append(operator + " ");
+
+        while (argument.getPrevClusterArg() != 0) {
+            sb.append("CC" + argument.getCcNumber());
+
+            argument = clusterArgumentArray[argument.getPrevClusterArg()];
+            if (argument.getPrevClusterArg() != 0)
+                sb.append(", ");
+        }
+    }
+
     // public methods to help me visualize the arrays for testing: TO BE DELETED
     public ClusterArgument[] getClusterArgArray() {
         return clusterArgumentArray;
