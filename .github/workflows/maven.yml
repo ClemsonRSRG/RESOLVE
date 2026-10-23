@@ -3,7 +3,7 @@
 
 name: RESOLVE (Custom Java CI with Maven)
 
-on:
+on: 
   push:
     branches: [ main ]
   pull_request:
