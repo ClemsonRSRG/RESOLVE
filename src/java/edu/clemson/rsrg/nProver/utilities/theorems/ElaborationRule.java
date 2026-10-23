@@ -22,7 +22,7 @@ public class ElaborationRule {
     private final String mySourceTheoremName;
     private final String mySourceModuleName;
     private final String mySourceTheoremOperator;
-
+ 
     public ElaborationRule(List<Exp> precursorClauses, Exp resultantClause, String sourceTheoremName,
             String sourceModuleName, String sourceTheoremOperator) {
         myPrecursorClauses = precursorClauses;
