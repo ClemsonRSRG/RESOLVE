@@ -27,7 +27,7 @@ public class coveringDispenser {
     public void addNextBlocker(int blocker) {
         blockerSet.put(blocker, sourceSet);
         this.blocker = blocker;
-        this.sourceSet = new HashSet<>();
+        this.sources = new HashSet<>();
     }
 
     public Set<Set<Integer>> formCoveringSet() {
