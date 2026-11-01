@@ -3,17 +3,10 @@ package edu.clemson.rsrg.nProver.utilities.theorems;
 import java.util.*;
 
 public class coveringDispenser {
-    HashMap<Integer, Set<Integer>> blockerSet;
-    Set<Integer> sourceSet;
-    int blocker;
-    Set<Integer> sources;
-
-    public coveringDispenser() {
-        blockerSet = new HashMap<>();
-        sourceSet = new HashSet<>();
-        blocker = -1;
-        sources = new HashSet<>();
-    }
+    HashMap<Integer, Set<Integer>> blockerSet = new HashMap<>();
+    Set<Integer> sourceSet =  new HashSet<>();
+    int blocker = -1;
+    Set<Integer> sources = new HashSet<>();
 
     public void peremptoryAddSourceDesignator(int source) {
         sourceSet.add(source);
@@ -42,6 +35,7 @@ public class coveringDispenser {
 
     private Cover coverSetHelper(Set<Integer> blockers) {
         Cover cover = new Cover();
+
         for(Integer b: blockers) {
             Set<Integer> blockerSubset = new HashSet<>(blockers);
             blockerSubset.remove(b);
@@ -65,8 +59,8 @@ public class coveringDispenser {
     }
 
     static class Cover {
-        protected boolean covered = false;
-        protected HashSet<Integer> uncoveredSources;
-        protected Set<Set<Integer>> coveredSet;
+        private boolean covered = false;
+        private HashSet<Integer> uncoveredSources;
+        private Set<Set<Integer>> coveredSet;
     }
 }
