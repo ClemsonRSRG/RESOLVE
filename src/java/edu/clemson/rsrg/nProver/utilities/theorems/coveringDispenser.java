@@ -24,14 +24,14 @@ public class coveringDispenser {
         return 0;
     }
 
-    public void addNextBlocker(int blocker) {
-        blockerSet.put(blocker, sourceSet);
-        this.blocker = blocker;
+    public void addNextBlocker() {
+        blockerSet.put(blocker, sources);
+        this.blocker = -1;
         this.sources = new HashSet<>();
     }
 
     public Set<Set<Integer>> formCoveringSet() {
-        return coverSetHelper(blockerSet.keySet()).coveredSet;
+        return coverSetHelper(blockerSet.keySet()).coveredSets;
     }
 
     private Cover coverSetHelper(Set<Integer> blockers) {
@@ -41,27 +41,36 @@ public class coveringDispenser {
             Set<Integer> blockerSubset = new HashSet<>(blockers);
             blockerSubset.remove(b);
 
+            if(blockerSubset.isEmpty()) {
+                cover.coveredSources.addAll(blockerSet.get(b));
+                return cover;
+            }
+
             Cover subcover = coverSetHelper(blockerSubset);
-            if(subcover.covered) {
-                cover.coveredSet.addAll(subcover.coveredSet);
-                cover.coveredSet.add(blockers);
-                cover.covered = true;
+            if(cover.covered){
+                cover.coveredSets.addAll(subcover.coveredSets);
             } else {
-                cover.uncoveredSources = new HashSet<>(subcover.uncoveredSources);
-                cover.uncoveredSources.removeAll(blockerSet.get(b));
-                if(cover.uncoveredSources.isEmpty()) {
-                    cover.coveredSet.add(blockers);
+                if(subcover.covered) {
                     cover.covered = true;
+                    cover.coveredSets.addAll(subcover.coveredSets);
+                } else {
+                    cover.coveredSources.addAll(subcover.coveredSources);
+                    if(cover.coveredSources.size() == sourceSet.size()) {
+                        cover.covered = true;
+                    }
                 }
             }
         }
+
+        if(cover.covered)
+            cover.coveredSets.add(blockers);
 
         return cover;
     }
 
     static class Cover {
         private boolean covered = false;
-        private HashSet<Integer> uncoveredSources;
-        private Set<Set<Integer>> coveredSet;
+        private final Set<Integer> coveredSources = new HashSet<>();
+        private final Set<Set<Integer>> coveredSets =  new HashSet<>();
     }
 }
