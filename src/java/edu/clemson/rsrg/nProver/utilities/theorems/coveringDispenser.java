@@ -43,6 +43,10 @@ public class coveringDispenser {
 
             if (blockerSubset.isEmpty()) {
                 cover.coveredSources.addAll(blockerSet.get(b));
+                if (cover.coveredSources.size() == sourceSet.size()) {
+                    cover.covered = true;
+                    cover.coveredSets.add(Set.of(b));
+                }
                 return cover;
             }
 
